@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_preparation_record_check_unsealed",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "artifacts_sha256": {
+    "scripts/check_preparation_records.py": "a163e578add99c6949825e53c0c69542d1ff1d554887c2e79e6eac12693b3d46",
+    "tests/test_check_preparation_records.py": "0f3ba609f5d60b202db4c760455adc2ec8c5a759c957812dcb5ba0b1502f31e4"
+  },
+  "fixture": {
+    "kind": "invented two-run S/T subset of a candidate schedule",
+    "preexisting_records": 2,
+    "fixed_records_and_consistent_mapping": "accepted as local structural bindings",
+    "fixed_records_with_swapped_opaque_and_blind_links": "record_binding_mismatch",
+    "changed_record_byte": "record_digest_mismatch",
+    "wrong_terminal_attempt_after_rehash": "record_binding_mismatch",
+    "missing_record": "missing_record",
+    "extra_record": "extra_record",
+    "duplicate_record_pointer": "duplicate_record_pointer",
+    "source_or_test_only_in_blind_trace_after_rehash": "record_schema_invalid",
+    "source_or_test_in_both_blind_outputs_after_rehash": "accepted as declared recipe",
+    "fifo_record": "record_file_invalid without blocking",
+    "fifo_input": "input_unavailable without blocking",
+    "extra_inserted_during_read": "extra_record",
+    "swapped_mapping_and_rehashed_forged_records": "accepted; explicit custody limitation"
+  },
+  "public_output": {
+    "success": "aggregate counts and fixed limitations only",
+    "failure": "fixed error code only",
+    "run_to_opaque_mapping_emitted": false,
+    "criterion_4": "not_assessed"
+  },
+  "gates": {
+    "uv run pytest -q tests/test_check_preparation_records.py": "15 passed",
+    "uv run pytest -q": "540 passed",
+    "uv run ruff check .": "All checks passed!",
+    "git diff --check": "passed",
+    "independent_read_only_review": "three reproduced defects repaired; positive and negative recipe controls rechecked; no remaining material finding in scoped review"
+  },
+  "limits": [
+    "The actas, map, receipts, source and test hashes, recipe and dates in the tests are invented declarations.",
+    "The checker does not open terminal, blind, source, test or transformer bytes or execute the recipe.",
+    "The checker does not open ratings or authenticate score locking, independent custody, chronology, evaluator identity or provider events.",
+    "A changed map with forged and rehashed records can pass; directory mutation after the final scan can escape this local check.",
+    "No reserved matrix was executed and no real acta was verified; GOAL criterion 4 remains not demonstrated."
+  ],
+  "criterion_4": "not_assessed"
+}
