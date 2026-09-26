@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_rated_q_assembly_unsealed",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "ab0e6fc86017ce1c7a9d270c29f81f31d8bc742c0493e5728e1c8b7a110b7510",
+  "artifacts": {
+    "scripts/assemble_rated_q.py": "cde353ba445581b259d01f7321e10b57b0e7bbf772eb2940d096695c31e99ee9",
+    "tests/test_assemble_rated_q.py": "1a5de3d36f7207d108bff8d382a306c3ef47c3ca687aa225b4204c41c86e401d",
+    "scripts/audit_blind_ratings.py": "947f87fd9c18083fd8c2359ca538d850362ea9c38376924d343f9e3b4540d7af"
+  },
+  "scope": {
+    "matrix_tests_collected": 257,
+    "assembly_tests": 31,
+    "confirmatory_provider_calls": 0,
+    "reserved_case_bytes": 0,
+    "real_human_ratings": 0,
+    "verified_preparation_record_bytes": 0,
+    "criterion_4": "not_assessed"
+  },
+  "gates": [
+    {"command": "uv run pytest -q", "result": "397 passed in 11.77s"},
+    {"command": "uv run ruff check scripts/assemble_rated_q.py tests/test_assemble_rated_q.py scripts/audit_blind_ratings.py", "result": "All checks passed!"},
+    {"command": "git diff --check", "result": "exit 0"}
+  ],
+  "adversarial_findings_resolved": [
+    "A self-consistent blind rubric different from the scheduled rubric no longer yields a Q row.",
+    "A mapped rating dated before its terminal receipt end is rejected as internally inconsistent.",
+    "Legacy equal-digest mapping rejects ambiguous assignment between runs with identical terminal artifact and trace digests.",
+    "Unmapped duplicate terminal pairs remain missing rather than blocking an unrelated unique mapped score.",
+    "Schema 2 separates terminal artifact and trace digests from blind package and trace digests, and keeps the terminal artifact digest in reconciler-compatible Q rows.",
+    "Schema 2 permits identical terminal bytes across runs with distinct declared preparation records, flags external verification, and rejects a reused preparation pointer."
+  ],
+  "not_performed": [
+    "No actual custodian preparation act, byte-level verification, external seal, or proven score lock and later unblinding.",
+    "No provider-authenticated matrix receipts, reserved artifact, real evaluator, or human rating.",
+    "No complete secondary metric analysis for E, traceability, recovery, wall time, token/cost, or ablations.",
+    "No field site, approved value equivalence, observed consumption, or causal impact estimate."
+  ]
+}
