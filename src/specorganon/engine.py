@@ -311,6 +311,32 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) ->
         issues.append(f"{assessment['id']} has an invalid preregistered threshold")
     if effect.get("metric") != criterion["data"].get("metric") or baseline["data"].get("metric") != effect.get("metric"):
         issues.append(f"{assessment['id']} metric differs between baseline, result and criterion")
+    effect_unit = effect.get("unit")
+    if not isinstance(effect_unit, str) or not effect_unit.strip():
+        issues.append(f"{assessment['id']} success lacks a measured effect unit")
+    for owner, declaration in (("criterion", criterion["data"]), ("threshold", threshold)):
+        if "unit" not in declaration:
+            continue
+        declared_unit = declaration["unit"]
+        if not isinstance(declared_unit, str) or not declared_unit.strip():
+            issues.append(f"{assessment['id']} {owner} declares an invalid unit")
+        elif declared_unit != effect_unit:
+            issues.append(f"{assessment['id']} {owner} unit differs from measured effect")
+    linked_indicators = [items[key] for key in _ancestors(items, criterion["id"])
+                         if items[key]["kind"] == "indicator"
+                         and items[key]["data"].get("metric") == criterion["data"].get("metric")]
+    linked_units = [indicator["data"].get("unit") for indicator in linked_indicators]
+    if not linked_units or any(not isinstance(unit, str) or not unit.strip() for unit in linked_units):
+        issues.append(f"{assessment['id']} success lacks a declared linked indicator unit")
+    elif any(unit != linked_units[0] for unit in linked_units[1:]):
+        issues.append(f"{assessment['id']} success has ambiguous linked indicator units")
+    elif effect_unit != linked_units[0]:
+        issues.append(f"{assessment['id']} effect unit differs from linked indicator")
+    baseline_unit = baseline["data"].get("unit")
+    if not isinstance(baseline_unit, str) or not baseline_unit.strip():
+        issues.append(f"{assessment['id']} success lacks a declared baseline unit")
+    elif baseline_unit != effect_unit:
+        issues.append(f"{assessment['id']} baseline unit differs from measured effect")
     if _numeric(baseline["data"].get("value")) is None or estimate is None:
         issues.append(f"{assessment['id']} lacks numeric baseline or effect estimate")
     if not isinstance(interval, list) or len(interval) != 2 or any(_numeric(value) is None for value in interval):

@@ -657,14 +657,153 @@ def test_structured_field_claim_checks_prior_threshold_mechanically(tmp_path):
     _complete_synthetic_case(path)
     _put(path, "crit1", "criterion", ["req1", "i1"], {"metric": "count", "threshold": {"operator": ">=", "value": 0.1, "statistic": "lower_ci"}, "reject": "lower CI below 0.1"})
     _put(path, "t1", "test", ["impl1", "crit1"], {"passed": True, "command": "synthetic fixture; no external command run"})
-    _put(path, "base1", "baseline", ["crit1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "metric": "count", "value": 0.2})
-    _put(path, "res1", "result", ["base1", "crit1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4], "design": "randomized fixture", "comparator": "synthetic control", "sample_size": 12, "unit": "fraction"}})
+    _put(path, "base1", "baseline", ["crit1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "metric": "count", "value": 0.2, "unit": "count"})
+    _put(path, "res1", "result", ["base1", "crit1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4], "design": "randomized fixture", "comparator": "synthetic control", "sample_size": 12, "unit": "count"}})
     _put(path, "ass1", "assessment", ["res1", "r1"], {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval", "adverse_effects": "invented fixture", "cost": "invented fixture"})
     _accept(path, "specify")
     _accept(path, "build")
     _accept(path, "validate")
-    _put(path, "res1", "result", ["base1", "crit1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "effect": {"metric": "count", "estimate": 0.3, "interval": [0.05, 0.4], "design": "randomized fixture", "comparator": "synthetic control", "sample_size": 12, "unit": "fraction"}})
+    _put(path, "res1", "result", ["base1", "crit1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "effect": {"metric": "count", "estimate": 0.3, "interval": [0.05, 0.4], "design": "randomized fixture", "comparator": "synthetic control", "sample_size": 12, "unit": "count"}})
     _put(path, "ass1", "assessment", ["res1", "r1"], {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval", "adverse_effects": "invented fixture", "cost": "invented fixture"})
     blockers = engine.gate(path, "validate")["blockers"]
     assert any("does not meet the prior threshold" in item for item in blockers)
     assert not engine.gate(path, "validate")["accepted"]
+
+
+def test_success_requires_effect_and_declared_baseline_units_to_match_indicator(tmp_path):
+    # The numbers and the field label are synthetic; this checks gate mechanics only.
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _put(path, "crit1", "criterion", ["req1", "i1"],
+         {"metric": "count", "threshold": {"operator": ">=", "value": 0.1, "statistic": "lower_ci"},
+          "reject": "lower CI below 0.1"})
+    _put(path, "t1", "test", ["impl1", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
+    baseline = {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+                "metric": "count", "value": 0.2, "unit": "count"}
+    effect = {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
+              "design": "randomized fixture", "comparator": "synthetic control",
+              "sample_size": 12, "unit": "fraction"}
+    assessment = {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
+                  "adverse_effects": "invented fixture", "cost": "invented fixture"}
+
+    def record_result():
+        _put(path, "res1", "result", ["base1", "crit1"],
+             {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+              "effect": effect.copy()})
+        _put(path, "ass1", "assessment", ["res1", "r1"], assessment.copy())
+
+    _put(path, "base1", "baseline", ["crit1"], baseline.copy())
+    record_result()
+    _accept(path, "specify")
+    _accept(path, "build")
+    assert "ass1 effect unit differs from linked indicator" in engine.gate(path, "validate")["blockers"]
+    assert not engine.gate(path, "validate")["ready"]
+
+    assessment["verdict"] = "no_demostrado"
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment.copy())
+    _accept(path, "validate")
+
+    assessment["verdict"] = "cumplido"
+    effect["unit"] = "count"
+    record_result()
+    _accept(path, "validate")
+
+    effect["unit"] = ""
+    record_result()
+    assert "ass1 success lacks a measured effect unit" in engine.gate(path, "validate")["blockers"]
+
+    effect["unit"] = "count"
+    baseline.pop("unit")
+    _put(path, "base1", "baseline", ["crit1"], baseline.copy())
+    record_result()
+    missing_unit = engine.gate(path, "validate")
+    assert "ass1 success lacks a declared baseline unit" in missing_unit["blockers"]
+    assert not missing_unit["ready"] and not missing_unit["accepted"]
+
+    baseline["unit"] = " "
+    _put(path, "base1", "baseline", ["crit1"], baseline.copy())
+    record_result()
+    assert "ass1 success lacks a declared baseline unit" in engine.gate(path, "validate")["blockers"]
+
+    baseline["unit"] = "fraction"
+    _put(path, "base1", "baseline", ["crit1"], baseline.copy())
+    record_result()
+    assert "ass1 baseline unit differs from measured effect" in engine.gate(path, "validate")["blockers"]
+
+
+def test_success_checks_explicit_criterion_and_threshold_units(tmp_path):
+    # Synthetic numbers isolate the unit gate from any claim of field impact.
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+
+    def record_claim(criterion_unit, threshold_unit):
+        criterion = {"metric": "count", "unit": criterion_unit,
+                     "threshold": {"operator": ">=", "value": 0.1,
+                                   "statistic": "lower_ci", "unit": threshold_unit},
+                     "reject": "lower CI below 0.1"}
+        _put(path, "crit1", "criterion", ["req1", "i1"], criterion)
+        _put(path, "t1", "test", ["impl1", "crit1"],
+             {"passed": True, "command": "synthetic fixture; no external command run"})
+        _put(path, "base1", "baseline", ["crit1"],
+             {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+              "metric": "count", "value": 0.2, "unit": "count"})
+        _put(path, "res1", "result", ["base1", "crit1"],
+             {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+              "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
+                         "design": "randomized fixture", "comparator": "synthetic control",
+                         "sample_size": 12, "unit": "count"}})
+        _put(path, "ass1", "assessment", ["res1", "r1"],
+             {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
+              "adverse_effects": "invented fixture", "cost": "invented fixture"})
+        _accept(path, "specify")
+        _accept(path, "build")
+        return engine.gate(path, "validate")
+
+    for criterion_unit, threshold_unit, expected in (
+        ("count", "fraction", "threshold unit differs from measured effect"),
+        ("fraction", "count", "criterion unit differs from measured effect"),
+        ("count", None, "threshold declares an invalid unit"),
+        ("", "count", "criterion declares an invalid unit"),
+    ):
+        status = record_claim(criterion_unit, threshold_unit)
+        assert f"ass1 {expected}" in status["blockers"]
+        assert not status["ready"] and not status["accepted"]
+
+    assert record_claim("count", "count")["ready"]
+    _accept(path, "validate")
+
+
+def test_success_rejects_missing_or_ambiguous_linked_indicator_units(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _put(path, "crit1", "criterion", ["req1", "i1"],
+         {"metric": "count", "threshold": {"operator": ">=", "value": 0.1, "statistic": "lower_ci"},
+          "reject": "lower CI below 0.1"})
+    _put(path, "base1", "baseline", ["crit1"],
+         {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+          "metric": "count", "value": 0.2, "unit": "count"})
+    _put(path, "res1", "result", ["base1", "crit1"],
+         {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+          "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
+                     "design": "randomized fixture", "comparator": "synthetic control",
+                     "sample_size": 12, "unit": "count"}})
+    _put(path, "ass1", "assessment", ["res1", "r1"],
+         {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
+          "adverse_effects": "invented fixture", "cost": "invented fixture"})
+
+    # Exercise the success guard directly for malformed graph states that an
+    # earlier study gate would already reject.
+    items = engine._project(path)["items"]
+    items["i1"]["data"]["unit"] = ""
+    assert "ass1 success lacks a declared linked indicator unit" in \
+        engine._success_claim_issues(items, items["ass1"])
+
+    items = engine._project(path)["items"]
+    extra = {**items["i1"], "id": "i_extra", "data": {**items["i1"]["data"]}}
+    items["i_extra"] = extra
+    items["crit1"]["deps"]["i_extra"] = 1
+    assert not engine._success_claim_issues(items, items["ass1"])
+    extra["data"]["unit"] = "fraction"
+    assert "ass1 success has ambiguous linked indicator units" in \
+        engine._success_claim_issues(items, items["ass1"])
