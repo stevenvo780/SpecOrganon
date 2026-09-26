@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_criterion_indicator_lineage_regression",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "baseline_commit": "2e88aefaa4c16967f0913ac09e7fc552780252c1",
+  "baseline_sha256": {
+    "src/specorganon/engine.py": "c654c52b4767d377516c8ff18291c452685db63c7353a7dfbc9a7ba458c043e0"
+  },
+  "current_sha256": {
+    "src/specorganon/engine.py": "73e31cb17867911993a3ea043449688b7fdb37030eb4775e550331cbc166ce3a",
+    "tests/test_method.py": "7b0130fe2f13975b6d9bdba51be4d76967f4b98597b4964fb7acda141b04dfb1"
+  },
+  "reproduction": {
+    "fixture": "Invented complete case in tests/test_method.py with two separate problems P1 and P2, each with norm and protocol-grounded evidence.",
+    "baseline_false_green": "Criterion crit1 depended on requirement req1 for P1 and indicator i2 for P2; both indicator and criterion declared metric count, and baseline specify, build and validate could be accepted.",
+    "current_negative_control": "specify reports 'crit1 needs a same-problem link from req1 to a same-metric indicator'; specify, build and validate are neither ready nor accepted.",
+    "current_positive_control": "The P1 indicator i1 remains valid when requirement evidence e1 measures a different property, provided its own supporting evidence matches the indicator metric and unit."
+  },
+  "checks": {
+    "method_tests": "uv run pytest -q tests/test_method.py: 41 passed",
+    "full_pytest": "uv run pytest -q: 577 passed",
+    "ruff": "uv run ruff check .: passed"
+  },
+  "limits": [
+    "The gate compares declared graph lineage and explicit metric/unit metadata; it does not establish that the evidence content supports the requirement or indicator.",
+    "Evidence missing measurement metadata still needs independent semantic review.",
+    "All fixtures and approvals are synthetic; human authority and source authenticity remain external."
+  ],
+  "criterion_2": "not_demonstrated"
+}

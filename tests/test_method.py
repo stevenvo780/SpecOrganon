@@ -28,17 +28,24 @@ def _accept(path, phase):
 def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1"),
                              e0_refs=("pr1",), e0_origin="simulated", e0_metric_key=None, e0_unit=None,
                              e1_refs=("pr1",), e1_origin="simulated",
+                             e1_metric_key="count", e1_unit="count",
                              inf_refs=("e1", "h1"), sibling_protocol=False, sibling_problem="p1",
                              indicator_protocol_ref=None, indicator_extra_metric=None, indicator_extra_unit=None,
                              indicator_extra_via_inference=False,
+                             disjoint_indicator=False, criterion_indicator="i1",
                              stop_before_observe=False, stop_before_specify=False):
+    assert not disjoint_indicator or (study_problem == "p1" and not sibling_protocol)
     engine.create_case(path, "Synthetic control", "test", "human:fixture", approval_policy="fixture")
     _put(path, "p1", "problem")
+    if disjoint_indicator:
+        _put(path, "p2", "problem")
     if study_problem != "p1":
         _put(path, study_problem, "problem")
     if sibling_protocol and sibling_problem not in {"p1", study_problem}:
         _put(path, sibling_problem, "problem")
     _put(path, "a1", "actor", ["p1"])
+    if disjoint_indicator:
+        _put(path, "a2", "actor", ["p2"])
     _put(path, "b1", "boundary", ["p1"])
     _accept(path, "frame")
 
@@ -47,8 +54,12 @@ def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1")
     _put(path, "f1", "frame_option", ["p1"], text="one framing")
     _put(path, "f2", "frame_option", ["p1"], text="another framing")
     _put(path, "n1", "norm", norm_refs)
+    if disjoint_indicator:
+        _put(path, "n2", "norm", ["p2", "a2"])
     assert not engine.gate(path, "critique")["ready"]
     engine.approve(path, "n1", "synthetic human attestation for mechanics test", "human:fixture")
+    if disjoint_indicator:
+        engine.approve(path, "n2", "synthetic human attestation for mechanics test", "human:fixture")
     _accept(path, "critique")
 
     _put(path, "q1", "question", [study_problem])
@@ -58,6 +69,12 @@ def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1")
         _put(path, "q2", "question", [sibling_problem])
         _put(path, "h2", "hypothesis", ["q2"])
         _put(path, "pr2", "protocol", ["q2", "h2"], {"population": "synthetic", "method": "enumeration", "comparison": "baseline", "uncertainty": "none in fixture"})
+    if disjoint_indicator:
+        _put(path, "q2", "question", ["p2"])
+        _put(path, "h2", "hypothesis", ["q2"])
+        _put(path, "pr2", "protocol", ["q2", "h2"], {"population": "synthetic", "method": "enumeration", "comparison": "baseline", "uncertainty": "none in fixture"})
+        _put(path, "e2", "evidence", ["pr2"], {"origin": "simulated", "source": "synthetic fixture", "date": "2026-09-26", "locator": "second problem", "metric_key": "count", "scope": "second problem", "unit": "count", "value": 10})
+        _put(path, "i2", "indicator", ["p2", "n2", "e2"], {"metric": "count", "unit": "count"})
     e0_data = {"origin": e0_origin, "source": "synthetic fixture", "date": "2026-09-26",
                "locator": "predeclared context"}
     if e0_metric_key is not None:
@@ -82,7 +99,7 @@ def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1")
     _put(path, "i1", "indicator", indicator_refs, {"metric": "count", "unit": "count"})
     _accept(path, "study")
 
-    _put(path, "e1", "evidence", e1_refs, {"origin": e1_origin, "source": "synthetic fixture", "date": "2026-09-26", "locator": "test_method.py", "metric_key": "count", "scope": "fixture", "unit": "count", "value": 10})
+    _put(path, "e1", "evidence", e1_refs, {"origin": e1_origin, "source": "synthetic fixture", "date": "2026-09-26", "locator": "test_method.py", "metric_key": e1_metric_key, "scope": "fixture", "unit": e1_unit, "value": 10})
     _put(path, "inf1", "inference", inf_refs)
     if stop_before_observe:
         return
@@ -100,7 +117,8 @@ def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1")
 
     _put(path, "d1", "decision", ["cmp1", "n1", "e1"])
     _put(path, "req1", "requirement", ["d1"])
-    _put(path, "crit1", "criterion", ["req1", "i1"], {"metric": "count", "threshold": 0, "reject": "negative count"})
+    _put(path, "crit1", "criterion", ["req1", criterion_indicator],
+         {"metric": "count", "threshold": 0, "reject": "negative count"})
     if stop_before_specify:
         return
     assert not engine.gate(path, "specify")["ready"]
@@ -565,6 +583,46 @@ def test_criterion_metric_must_match_linked_indicator(tmp_path):
     _put(path, "crit1", "criterion", ["req1", "i1"], {"metric": "revenue", "threshold": 0, "reject": "negative revenue"})
     assert any("same success metric" in blocker for blocker in engine.gate(path, "specify")["blockers"])
     assert not engine.gate(path, "specify")["accepted"]
+
+
+def test_criterion_cannot_borrow_same_metric_indicator_from_another_problem(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, disjoint_indicator=True, criterion_indicator="i2",
+                             stop_before_specify=True)
+    engine.approve(path, "d1", "synthetic human attestation for mechanics test", "human:fixture")
+    assert all(engine.gate(path, phase)["accepted"] for phase in
+               ("frame", "critique", "study", "observe", "explain", "compare"))
+    assert engine.get_state(path)["items"]["i2"]["data"]["metric"] == "count"
+
+    _put(path, "impl1", "implementation", ["req1"])
+    _put(path, "t1", "test", ["impl1", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
+    _put(path, "base1", "baseline", ["crit1"],
+         {"origin": "simulation", "source": "synthetic fixture", "date": "2026-09-26"})
+    _put(path, "res1", "result", ["base1", "crit1"],
+         {"origin": "simulation", "source": "synthetic fixture", "date": "2026-09-26"})
+    _put(path, "ass1", "assessment", ["res1", "r1"],
+         {"verdict": "no_demostrado", "claim_scope": "field", "uncertainty": "synthetic only",
+          "adverse_effects": "not measured", "cost": "not measured"})
+    assert "crit1 needs a same-problem link from req1 to a same-metric indicator" in \
+        engine.gate(path, "specify")["blockers"]
+    for phase in ("specify", "build", "validate"):
+        status = engine.gate(path, phase)
+        assert not status["ready"] and not status["accepted"]
+        with pytest.raises(engine.MethodError, match="phase cannot be accepted"):
+            engine.review_phase(path, phase, "accept", "invalid linkage", "agent:reviewer")
+
+
+def test_same_problem_indicator_accepts_requirement_evidence_with_another_metric(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, disjoint_indicator=True,
+                             e0_metric_key="count", e0_unit="count",
+                             e1_metric_key="other", e1_unit="other-unit")
+    items = engine.get_state(path)["items"]
+    assert items["e1"]["data"]["metric_key"] == "other"
+    assert items["i1"]["data"]["metric"] == items["i2"]["data"]["metric"] == "count"
+    assert set(items["crit1"]["deps"]) == {"req1", "i1"}
+    assert all(engine.gate(path, phase.id)["accepted"] for phase in PHASES)
 
 
 def test_final_validation_requires_independent_review(tmp_path):

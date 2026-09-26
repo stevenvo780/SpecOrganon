@@ -461,11 +461,18 @@ def _normative_problems(items: dict[str, dict], item_id: str) -> set[str]:
     return problems
 
 
+def _normative_evidence_problems(items: dict[str, dict], flags: dict[str, dict], item_id: str,
+                                 metric: Any | None = None, unit: Any | None = None) -> set[str]:
+    """Problem lineages shared by normative and relevant protocol-grounded evidence."""
+    return (_normative_problems(items, item_id)
+            & _evidence_based_problems(items, flags, item_id, metric, unit))
+
+
 def _shares_normative_evidence_problem(items: dict[str, dict], flags: dict[str, dict], item_id: str) -> bool:
     item = items[item_id]
     metric = item["data"].get("metric") if item["kind"] == "indicator" else None
     unit = item["data"].get("unit") if item["kind"] == "indicator" else None
-    return bool(_normative_problems(items, item_id) & _evidence_based_problems(items, flags, item_id, metric, unit))
+    return bool(_normative_evidence_problems(items, flags, item_id, metric, unit))
 
 
 def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: bool, flags: dict[str, dict]) -> list[str]:
@@ -557,9 +564,31 @@ def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: boo
                 if not _shares_normative_evidence_problem(items, flags, item["id"]):
                     blockers.append(f"{item['id']} lacks a shared problem between norm and protocol-grounded evidence")
             if item["kind"] == "criterion":
-                indicators = [items[ref] for ref in _ancestors(items, item["id"]) if items[ref]["kind"] == "indicator"]
-                if not any(indicator["data"].get("metric") == item["data"].get("metric") for indicator in indicators):
+                ancestors = _ancestors(items, item["id"])
+                metric = item["data"].get("metric")
+                indicators = [items[ref] for ref in ancestors
+                              if items[ref]["kind"] == "indicator" and items[ref]["data"].get("metric") == metric]
+                requirements = [items[ref] for ref in ancestors if items[ref]["kind"] == "requirement"]
+                if not indicators:
                     blockers.append(f"{item['id']} needs a linked indicator with the same success metric")
+                if not requirements:
+                    blockers.append(f"{item['id']} needs a linked requirement")
+                for requirement in requirements:
+                    # A requirement may be justified by evidence measuring a different
+                    # property; the success indicator must support its own metric/unit.
+                    requirement_problems = _normative_evidence_problems(
+                        items, flags, requirement["id"]
+                    )
+                    if not any(
+                        requirement_problems & _normative_evidence_problems(
+                            items, flags, indicator["id"], metric, indicator["data"].get("unit")
+                        )
+                        for indicator in indicators
+                    ):
+                        blockers.append(
+                            f"{item['id']} needs a same-problem link from {requirement['id']} "
+                            "to a same-metric indicator"
+                        )
     elif phase_id == "build":
         for item in in_phase:
             if item["kind"] == "implementation" and not refs_of(item, {"requirement"}):
