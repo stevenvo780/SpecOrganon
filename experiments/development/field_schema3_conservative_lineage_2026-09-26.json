@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_declared_conservative_mass_lineage",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "source_sha256": {
+    "scripts/audit_field_flows.py": "390c96ccbd1132ba8c7210590b6c4499f0a146e5ee1f021f17dc2cd67cd47f20",
+    "tests/test_audit_field_flows.py": "efcaa7845ac2c38a4de41b2e0d3ed1c184a523619572d3958d1236ed999771b0",
+    "docs/caso_alimentos_fuentes_candidatas.md": "f79f439b30e6f31ffba952d137cc7ad5bfd3832e390cbf10a14042733c55b3c0"
+  },
+  "prior_counterexample": "experiments/development/field_mixing_limit_2026-09-26.json",
+  "contract": {
+    "input_schema": 3,
+    "scope_status": "declared_conservative_mass_lineage_per_consumed_flow",
+    "allocations": "Every lot declares positive, unique local input-output rows with load-bound sources; every incident flow is covered and allocation nominal sums equal flow nominal mass exactly in rational kg.",
+    "bound": "Intersect declared flow mass intervals with incident allocation sums, tighten each allocation by its flow and complementary rows, then propagate conservative lower bounds for all 12 minimum stage requirements through the lot DAG.",
+    "acceptance": "Every declared human-consumption flow has a positive lower bound from external feed at production through storage, transport and two transformations.",
+    "legacy": "Schema 1 and 2 retain their report shape without lineage_bounds; schema 2 operational witnesses remain contextual in schema 3.",
+    "criterion_3": "not_assessed"
+  },
+  "synthetic_controls": {
+    "baseline": "Four of four consumed flows pass with guaranteed_stage_mass_kg = 70 in the exact-allocation fixture.",
+    "terminal_mix": "With 70 kg of late ingredient and 70 kg to compost, schema 2 accepts both interpretations. Schema 3 rejects zero long-path allocation to the consumed output and accepts a declared 20 kg long-path allocation, reporting a 20 kg lower bound.",
+    "serial_mix": "If 1 kg from the long path enters a 70 kg intermediate flow, a later 69/1 kg split can divert all of it: schema 3 rejects. A 2 kg input in the same setup leaves a positive lower bound and passes. Schema 2 accepts both.",
+    "ambiguous_uncertainty": "A nominal 20 kg long-path allocation with 20 kg uncertainty on each of four mixing rows can be physically zero under the declared intervals and is rejected.",
+    "exact_complement": "A nominal 20 plus-or-minus 20 kg row is tightened to exactly 20 kg when its 70 kg input and 50 kg complementary row are fixed, and passes.",
+    "uncertain_feed": "A feed flow with nominal 100 plus-or-minus 100 kg passes when its incident allocation rows fix 95 plus 5 kg; the initial false rejection was repaired.",
+    "convergent_branches": "A 40/40/20 kg split reunites, then 60 kg traverses all stages common to the branches; the minimum-requirement bound is 60 kg. The earlier exact-state computation falsely rejected it.",
+    "input_controls": "Duplicate pairs, incomplete nominal sums and mismatched source load IDs are rejected; 95000 g and 0.095 t are accepted as 95 kg. A CLI invocation returns schema 3 bounds without changing the input bytes."
+  },
+  "verification": {
+    "targeted": "uv run pytest -q tests/test_audit_field_flows.py: 96 passed",
+    "full": "uv run pytest -q: 589 passed",
+    "lint": "uv run ruff check .: All checks passed",
+    "independent_review": "Read-only adversarial review found and prompted repairs of three false rejections. Its final bounded review found no false green under the declared disjoint-allocation model."
+  },
+  "limits": [
+    "All loads, masses, stages, timestamps, allocations and sources in these controls are invented declarations, not authenticated field observations.",
+    "The lower bounds depend on physical allocations being disjoint and uncertainty fields acting as valid absolute bounds; the tool cannot verify those assumptions.",
+    "Conservative bounds may be lower than the strongest bound implied by every declaration; a rejection is not proof that real material lacks the stages.",
+    "Undeclared branches or households, equivalence approval, safety, nutrition, causal assignment, effects and V/G are not established. Criterion 3 remains not assessed."
+  ]
+}
