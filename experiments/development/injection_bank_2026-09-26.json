@@ -1,0 +1,592 @@
+{
+  "classification": "synthetic development regression; not sealed confirmatory or independent evaluation",
+  "command": "uv run python tests/test_injection_bank.py --report experiments/development/injection_bank_2026-09-26.json",
+  "counts": {
+    "assumption_change": 6,
+    "contradiction": 6,
+    "fail": 0,
+    "insufficient_evidence": 6,
+    "pass": 21,
+    "total": 21,
+    "unapproved_norm": 3
+  },
+  "fixture_runtime_capability": "ORGANON_ALLOW_FIXTURES=1 scoped to each synthetic case and restored afterward",
+  "generated_at_utc": "2026-09-26T11:17:13.059193+00:00",
+  "inputs_sha256": {
+    "GOAL.md": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+    "docs/protocolo_experimental.md": "894f82b64f63cffec409dcca653042d77d16a94ebbc0e69818f4d744069f8cc0",
+    "src/specorganon/engine.py": "57fea34ce31b77ec949b5b664d7561d2fc3cd70a3d97f200fb4181d24f2a177c",
+    "src/specorganon/ledger.py": "f4467234b04dd7c4f4ec46d41cbf0240b7f1cbfa7ba61833a9050e6b87b17d38",
+    "src/specorganon/workflow.py": "3f3980119743962a210beffdc2b0f8d845d53bb25a0cc3eace3eacaa347ad5f2",
+    "tests/test_injection_bank.py": "2be3c99905900fdad961da894454c89185346690190e2b591d36ac856d03a8b8"
+  },
+  "kind": "development_behavioral_injection_bank",
+  "results": [
+    {
+      "evidence": {
+        "accepted": false,
+        "affected_items": [
+          "e1",
+          "e2"
+        ],
+        "blockers": [
+          "e1 has an unresolved contradiction",
+          "e1: conflicting metric count in synthetic population: e1 vs e2",
+          "e2 has an unresolved contradiction",
+          "e2: conflicting metric count in synthetic population: e1 vs e2",
+          "inf1 has an unresolved contradiction",
+          "needs 1 valid inference; has 0"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "4727c8c5963a693a205aa23e654ae0363f3df6c3dd58c790d5412baadc556d3f",
+        "phase": "observe"
+      },
+      "group": "contradiction",
+      "id": "C01",
+      "scenario": "Two same-scope numeric sources disagree",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "e1: reported calculation 10.0 differs from recomputed 12.0",
+          "inf1 depends on an older revision",
+          "needs 1 valid inference; has 0"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "3d479ae2307f59cf9ba58aa23166e2200b88defd1e8745f7ba40a116c3387a9e",
+        "phase": "observe",
+        "stale_items": [
+          "inf1"
+        ]
+      },
+      "group": "contradiction",
+      "id": "C02",
+      "scenario": "Reported product disagrees with operands",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "a1 has an unresolved contradiction",
+          "b1 has an unresolved contradiction",
+          "needs 1 valid actor; has 0",
+          "needs 1 valid boundary; has 0",
+          "needs 1 valid problem; has 0",
+          "p1 has an unresolved contradiction"
+        ],
+        "contested_items": [
+          "p1",
+          "req1"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "0a515792c7be06476f6da671a549b8cd484bb94e4731615e61ac2cc8f07ea4c3",
+        "phase": "frame"
+      },
+      "group": "contradiction",
+      "id": "C03",
+      "scenario": "Actor disputes an accepted frame",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "affected_items": [
+          "e1",
+          "e2"
+        ],
+        "blockers": [
+          "e1 has an unresolved contradiction",
+          "e1: conflicting metric count in synthetic population: e1 vs e2",
+          "e2 has an unresolved contradiction",
+          "e2: conflicting metric count in synthetic population: e1 vs e2",
+          "inf1 has an unresolved contradiction",
+          "needs 1 valid inference; has 0"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "abb55cd9f93a8ce754f4e3126a60201d27394376c04482bdf71cad19e8885a53",
+        "phase": "observe"
+      },
+      "group": "contradiction",
+      "id": "C04",
+      "scenario": "Numeric disagreement exceeds declared tolerance",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "needs 1 valid assumption; has 0",
+          "s1 has an unresolved contradiction"
+        ],
+        "contested_items": [
+          "s1",
+          "e1",
+          "req1"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "fd484485dc6022df8a262707124e14d71d82c6e4a1706970c62a483f029c3096",
+        "phase": "critique"
+      },
+      "group": "contradiction",
+      "id": "C05",
+      "scenario": "Observation contests a working assumption",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "e0 has an unresolved contradiction",
+          "e1 has an unresolved contradiction",
+          "inf1 has an unresolved contradiction",
+          "needs 1 valid evidence; has 0",
+          "needs 1 valid inference; has 0",
+          "previous phase is not currently accepted"
+        ],
+        "contested_items": [
+          "i1",
+          "e1"
+        ],
+        "ledger_events": 54,
+        "ledger_head_hash": "59375bb030820c06c82ea31ab51ccc57ab23fb02dccd01491df4355e59269b74",
+        "phase": "observe",
+        "reopened_challenge_seq": 50
+      },
+      "group": "contradiction",
+      "id": "C06",
+      "scenario": "Reviewed resolution loses validity after revision",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "e1: evidence lacks source",
+          "inf1 depends on an older revision",
+          "needs 1 valid inference; has 0"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "16b52e5d05bf11e7daa9c2d860a5029468b30589040b06a483712d8a6c0329c7",
+        "phase": "observe",
+        "stale_items": [
+          "inf1",
+          "req1"
+        ]
+      },
+      "group": "insufficient_evidence",
+      "id": "E01",
+      "scenario": "Evidence has no source",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "e1: evidence lacks date",
+          "inf1 depends on an older revision",
+          "needs 1 valid inference; has 0"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "2e44fcf469c0305333ccbd24e6767a09620551f2382c762431c942be9adcc50a",
+        "phase": "observe",
+        "stale_items": [
+          "inf1",
+          "req1"
+        ]
+      },
+      "group": "insufficient_evidence",
+      "id": "E02",
+      "scenario": "Evidence has no date",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "e1: evidence lacks locator",
+          "inf1 depends on an older revision",
+          "needs 1 valid inference; has 0"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "a790d0f84099e027dc65a1dc15522b0ccfb6a2e55bb7375232135305418caa49",
+        "phase": "observe",
+        "stale_items": [
+          "inf1",
+          "req1"
+        ]
+      },
+      "group": "insufficient_evidence",
+      "id": "E03",
+      "scenario": "Evidence has no locator",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "e1: observed evidence lacks collection method",
+          "inf1 depends on an older revision",
+          "needs 1 valid inference; has 0"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "db8726219320496f9bed4f9b3ad85fea84507c9e445cb7e6bb6c4cc7d695edcc",
+        "phase": "observe",
+        "stale_items": [
+          "inf1",
+          "req1"
+        ]
+      },
+      "group": "insufficient_evidence",
+      "id": "E04",
+      "scenario": "Observed evidence lacks collection method",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "i1 depends on an older revision",
+          "needs 1 valid indicator; has 0",
+          "needs 1 valid protocol; has 0",
+          "pr1: protocol lacks comparison"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "ae743b2f114a9d9999f930cc26dd6e4844a45cd222a83a6decd3a0baa982eb27",
+        "phase": "study",
+        "stale_items": [
+          "e1",
+          "i1"
+        ]
+      },
+      "group": "insufficient_evidence",
+      "id": "E05",
+      "scenario": "Protocol lacks a comparison",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "crit1 depends on an older revision",
+          "i1 lacks a path to evidence before specification",
+          "needs 1 valid criterion; has 0",
+          "previous phase is not currently accepted"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "1381296340af72d10ccf6a9b719867ef1e22b23753ee5c4ffa16fc1db277cb9b",
+        "negative_finding": "indicator has no evidence path while study gate remains ready",
+        "phase": "specify",
+        "stale_items": [
+          "crit1"
+        ]
+      },
+      "group": "insufficient_evidence",
+      "id": "E06",
+      "scenario": "Success indicator has no evidence path",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "h1 depends on an older revision",
+          "i1 depends on an older revision",
+          "needs 1 valid hypothesis; has 0",
+          "needs 1 valid indicator; has 0",
+          "needs 1 valid protocol; has 0",
+          "needs 1 valid question; has 0",
+          "pr1 depends on an older revision",
+          "previous phase is not currently accepted",
+          "q1 depends on an older revision"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "21bf82961da09dfc4f11793522f234e7b2fd2845a050a71d9083a07db965a8d4",
+        "phase": "study",
+        "revised_assumption": "s1",
+        "stale_items": [
+          "ass1",
+          "base1",
+          "cmp1",
+          "crit1",
+          "d1",
+          "e0",
+          "e1",
+          "h1",
+          "i1",
+          "impl1",
+          "inf1",
+          "o1",
+          "o2",
+          "pr1",
+          "q1",
+          "r1",
+          "req1",
+          "res1",
+          "syn1",
+          "t1",
+          "u1"
+        ],
+        "unaffected_item": "f1"
+      },
+      "group": "assumption_change",
+      "id": "A01",
+      "scenario": "Revised assumption invalidates question branch",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "i1 depends on an older revision",
+          "needs 1 valid indicator; has 0",
+          "needs 1 valid protocol; has 0",
+          "pr1 depends on an older revision",
+          "previous phase is not currently accepted"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "1ea323d3d198d82d4df1f5d9a716ba04d98b1d53b2c8b53797e844ff7bb6508b",
+        "phase": "study",
+        "revised_assumption": "s1",
+        "stale_items": [
+          "ass1",
+          "base1",
+          "cmp1",
+          "crit1",
+          "d1",
+          "e0",
+          "e1",
+          "i1",
+          "impl1",
+          "inf1",
+          "o1",
+          "o2",
+          "pr1",
+          "r1",
+          "req1",
+          "res1",
+          "syn1",
+          "t1",
+          "u1"
+        ],
+        "unaffected_item": "q1"
+      },
+      "group": "assumption_change",
+      "id": "A02",
+      "scenario": "Revised assumption invalidates protocol branch",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "e1 depends on an older revision",
+          "inf1 depends on an older revision",
+          "needs 1 valid inference; has 0",
+          "previous phase is not currently accepted"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "7460f28c9a06782cc5b6f44e640145b39f30d495daf32fc3e03a8ef7b1311b93",
+        "phase": "observe",
+        "revised_assumption": "s1",
+        "stale_items": [
+          "ass1",
+          "base1",
+          "cmp1",
+          "crit1",
+          "d1",
+          "e1",
+          "impl1",
+          "inf1",
+          "o1",
+          "o2",
+          "r1",
+          "req1",
+          "res1",
+          "syn1",
+          "t1",
+          "u1"
+        ],
+        "unaffected_item": "e0"
+      },
+      "group": "assumption_change",
+      "id": "A03",
+      "scenario": "Revised assumption invalidates observation branch",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "needs 1 valid synthesis; has 0",
+          "needs 1 valid uncertainty; has 0",
+          "previous phase is not currently accepted",
+          "syn1 depends on an older revision",
+          "u1 depends on an older revision"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "82b5a92a79c6690093a9f914f0015dc025564a401d47d72a0cea9324a871c42b",
+        "phase": "explain",
+        "revised_assumption": "s1",
+        "stale_items": [
+          "ass1",
+          "base1",
+          "cmp1",
+          "crit1",
+          "d1",
+          "impl1",
+          "o1",
+          "o2",
+          "r1",
+          "req1",
+          "res1",
+          "syn1",
+          "t1",
+          "u1"
+        ],
+        "unaffected_item": "e1"
+      },
+      "group": "assumption_change",
+      "id": "A04",
+      "scenario": "Revised assumption invalidates synthesis branch",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "cmp1 depends on an older revision",
+          "needs 1 valid comparison; has 0",
+          "needs 1 valid risk; has 0",
+          "needs 2 valid option; has 1",
+          "o1 depends on an older revision",
+          "previous phase is not currently accepted",
+          "r1 depends on an older revision"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "8b90f5b1ea88c7e38efb0e035b2261b0bacec9fb85edac4f816daf2046f395d6",
+        "phase": "compare",
+        "revised_assumption": "s1",
+        "stale_items": [
+          "ass1",
+          "base1",
+          "cmp1",
+          "crit1",
+          "d1",
+          "impl1",
+          "o1",
+          "r1",
+          "req1",
+          "res1",
+          "t1"
+        ],
+        "unaffected_item": "o2"
+      },
+      "group": "assumption_change",
+      "id": "A05",
+      "scenario": "Revised assumption invalidates one intervention option",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "crit1 depends on an older revision",
+          "d1 depends on an older revision",
+          "needs 1 valid criterion; has 0",
+          "needs 1 valid decision; has 0",
+          "needs 1 valid requirement; has 0",
+          "previous phase is not currently accepted",
+          "req1 depends on an older revision"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "87d8a8dcba68d519a5d38e7c1a1077a23ba9f2d4829c965c48a583761f1ffe89",
+        "phase": "specify",
+        "revised_assumption": "s1",
+        "stale_items": [
+          "ass1",
+          "base1",
+          "crit1",
+          "d1",
+          "impl1",
+          "req1",
+          "res1",
+          "t1"
+        ],
+        "unaffected_item": "cmp1"
+      },
+      "group": "assumption_change",
+      "id": "A06",
+      "scenario": "Revised assumption invalidates decision branch",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "n1 requires a fixture approval"
+        ],
+        "fixture_approval_status": "fixture",
+        "ledger_events": 10,
+        "ledger_head_hash": "ee9e436a57c611a05dd0c072cfadf5cce2656605c09ba0c69fff2684f5b87532",
+        "phase": "critique",
+        "rejected_actors": [
+          "agent:fixture-author",
+          "human:fictional-fixture"
+        ],
+        "replay_without_runtime_flag": "approval unverified; gate blocked; no new event",
+        "unapproved_item": "n1"
+      },
+      "group": "unapproved_norm",
+      "id": "N01",
+      "scenario": "Norm has no human approval",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "n1 requires a fixture approval"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "4fd54439d5f825af668a9f5035e44fc8bfa93f1fab25379605c3da417f660175",
+        "phase": "critique",
+        "stale_items": [
+          "d1",
+          "req1"
+        ],
+        "unapproved_item": "n1"
+      },
+      "group": "unapproved_norm",
+      "id": "N02",
+      "scenario": "Revised norm loses its former approval",
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "accepted": false,
+        "blockers": [
+          "crit1 depends on an older revision",
+          "d1 requires a fixture approval",
+          "needs 1 valid criterion; has 0",
+          "needs 1 valid requirement; has 0",
+          "req1 depends on an older revision"
+        ],
+        "ledger_events": 50,
+        "ledger_head_hash": "f3c5c747a40e0b1f94c51df2f2333af5ef0a059bc22d61ac35d284b99ace796a",
+        "phase": "specify",
+        "stale_items": [
+          "req1",
+          "impl1"
+        ],
+        "unapproved_item": "d1"
+      },
+      "group": "unapproved_norm",
+      "id": "N03",
+      "scenario": "Revised decision loses its former approval",
+      "status": "pass"
+    }
+  ]
+}
