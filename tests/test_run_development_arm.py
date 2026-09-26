@@ -76,12 +76,49 @@ else:
     print(json.dumps({"event": "init", "conversation_id": "local-conversation-id",
                       "init": {"model": model, "cwd": str(Path.cwd())}}))
     for state in ("ACTIVE", "DONE"):
+        tool_index = "2" if scenario == "agy_tool_index_string" and state == "DONE" else 2
+        tool_state = 123 if scenario == "agy_tool_state_malformed" and state == "DONE" else state
         print(json.dumps({"event": "step_update", "step_update": {
-            "step_index": 2, "step_type": "tool", "tool_name": "write_to_file",
-            "state": state, "tool_info": {"parameters": {"TargetFile": "private-name"}}}}))
+            "step_index": tool_index, "step_type": "tool", "tool_name": "write_to_file",
+            "state": tool_state, "tool_info": {"parameters": {"TargetFile": "private-name"}}}}))
+    step_usages = [
+        {"input_tokens": 10, "output_tokens": 4, "thinking_tokens": 1,
+         "cache_read_tokens": 0, "total_tokens": 14},
+        {"input_tokens": 20, "output_tokens": 5, "thinking_tokens": 2,
+         "cache_read_tokens": 1, "total_tokens": 25},
+    ]
+    if scenario == "agy_bad_both_arithmetic":
+        step_usages = [{"input_tokens": 10, "output_tokens": 5,
+                        "thinking_tokens": 2, "cache_read_tokens": 0, "total_tokens": 99}]
+        agent_pairs = [(1, step_usages[0])]
+    else:
+        agent_pairs = [(1, step_usages[0]),
+                       (2 if scenario == "agy_index_collision" else 3, step_usages[1])]
+    for index, step_usage in agent_pairs:
+        print(json.dumps({"event": "step_update", "step_update": {
+            "step_index": index, "step_type": "agent_response", "state": "DONE",
+            "text_delta": "private response text", "usage": step_usage}}))
+    if scenario == "agy_active_agent":
+        print(json.dumps({"event": "step_update", "step_update": {
+            "step_index": 4, "step_type": "agent_response", "state": "ACTIVE"}}))
+    if scenario in {"agy_duplicate_step", "agy_conflicting_step"}:
+        duplicate = dict(step_usages[1])
+        if scenario == "agy_conflicting_step":
+            duplicate["output_tokens"] += 1
+            duplicate["total_tokens"] += 1
+        print(json.dumps({"event": "step_update", "step_update": {
+            "step_index": 3, "step_type": "agent_response", "state": "DONE",
+            "usage": duplicate}}))
     usage = None if scenario == "missing_usage" else {
         "input_tokens": 30, "output_tokens": 9, "thinking_tokens": 3,
         "cache_read_tokens": 1, "total_tokens": 39}
+    if scenario == "agy_final_usage_mismatch":
+        usage["input_tokens"] = 31
+        usage["total_tokens"] = 40
+    elif scenario == "agy_bad_both_arithmetic":
+        usage = dict(step_usages[0])
+    elif scenario == "agy_bad_final_arithmetic":
+        usage["total_tokens"] = 99
     print(json.dumps({"event": "result", "result": {
         "status": "FAILURE" if scenario == "agy_final_failure" else "SUCCESS",
         "usage": usage, "conversation_id": "local-conversation-id",
@@ -140,10 +177,81 @@ def test_run_copies_only_assigned_packet_preserves_streams_and_replays(
     if provider == "agy":
         assert summary["cli_usage"]["observed_completed_tool_steps"] == 1
         assert summary["cli_usage"]["observed_unfinished_tool_steps"] == 0
+        assert summary["cli_usage"]["preterminal_step_usage"]["unique_steps_with_valid_usage"] == 2
+        assert summary["cli_usage"]["preterminal_step_usage"]["observed_unique_step_sum"] == (
+            summary["cli_usage"]["final_usage"])
+        assert summary["cli_usage"]["preterminal_step_usage"]["reconciles_with_final"] is True
         assert "local-conversation-id" not in (run_dir / "run.json").read_text(encoding="utf-8")
+        assert "private response text" not in (run_dir / "run.json").read_text(encoding="utf-8")
     else:
         assert "workspace-write" in argv
+        assert summary["cli_usage"]["preterminal_step_usage"] is None
         assert "local-thread-id" not in (run_dir / "run.json").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("scenario,duplicate_count,conflict_count,reconciles,complete", [
+    ("agy_duplicate_step", 1, 0, True, True),
+    ("agy_conflicting_step", 0, 1, None, False),
+    ("agy_final_usage_mismatch", 0, 0, False, False),
+])
+def test_agy_preterminal_usage_deduplicates_and_reconciles(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+    scenario: str, duplicate_count: int, conflict_count: int,
+    reconciles: bool | None, complete: bool,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", scenario)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    usage = summary["cli_usage"]
+    steps = usage["preterminal_step_usage"]
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert summary["controlled_comparison_eligible"] is False
+    assert usage["terminal_success"] is True
+    assert usage["complete"] is complete
+    assert steps["unique_steps_with_valid_usage"] == 2
+    assert steps["duplicate_identical_events_deduplicated"] == duplicate_count
+    assert steps["contradictory_duplicate_events"] == conflict_count
+    assert steps["reconciles_with_final"] is reconciles
+    assert steps["observed_unique_step_sum"] == {
+        "input_tokens": 30, "output_tokens": 9, "thinking_tokens": 3,
+        "cache_read_tokens": 1, "total_tokens": 39,
+    }
+    assert "step_index" not in (run_dir / "run.json").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("scenario,error_fragment,summary_field", [
+    ("agy_active_agent", "agent_response steps without DONE", "unfinished_agent_response_steps"),
+    ("agy_bad_both_arithmetic", "total_tokens differs", "final_arithmetic_valid"),
+    ("agy_bad_final_arithmetic", "total_tokens differs", "final_arithmetic_valid"),
+    ("agy_index_collision", "step_index collisions", "cross_type_index_collisions"),
+    ("agy_tool_index_string", "malformed step_update", "malformed_step_update_events"),
+    ("agy_tool_state_malformed", "malformed step_update", "malformed_step_update_events"),
+])
+def test_agy_step_stream_anomalies_invalidate_telemetry_only(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+    scenario: str, error_fragment: str, summary_field: str,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", scenario)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    usage = summary["cli_usage"]
+    steps = usage["preterminal_step_usage"]
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert summary["controlled_comparison_eligible"] is False
+    assert usage["terminal_success"] is True
+    assert usage["complete"] is False
+    assert steps["step_usage_complete"] is False or steps["final_arithmetic_valid"] is False
+    assert steps["reconciles_with_final"] is None
+    assert any(error_fragment in error for error in usage["errors"])
+    if summary_field == "final_arithmetic_valid":
+        assert steps[summary_field] is False
+    else:
+        assert steps[summary_field] >= 1
+    assert "private response text" not in (run_dir / "run.json").read_text(encoding="utf-8")
 
 
 def test_missing_usage_remains_missing_and_never_becomes_controlled(

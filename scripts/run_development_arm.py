@@ -169,6 +169,16 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
     observed_tool_steps: set[int] = set()
     failed_codex_items = 0
     failed_agy_steps: set[int] = set()
+    agy_step_types: dict[int, str] = {}
+    agy_colliding_indices: set[int] = set()
+    agy_malformed_step_events = 0
+    agy_agent_observed_steps: set[int] = set()
+    agy_agent_done_steps: set[int] = set()
+    agy_agent_usage: dict[int, dict[str, int]] = {}
+    agy_agent_done_events = 0
+    agy_agent_duplicate_events = 0
+    agy_agent_invalid_events = 0
+    agy_agent_conflicting_events = 0
     with stdout_path.open("r", encoding="utf-8", errors="replace") as stream:
         for line_number, line in enumerate(stream, start=1):
             if not line.strip():
@@ -206,14 +216,51 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
                     init_models.append(initialization["model"])
             elif provider == "agy" and kind == "step_update":
                 update = event.get("step_update")
-                if type(update) is dict and update.get("step_type") == "tool":
-                    index = update.get("step_index")
-                    if type(index) is int and index >= 0:
-                        observed_tool_steps.add(index)
-                        if update.get("state") == "DONE":
-                            completed_tool_steps.add(index)
-                        elif update.get("state") in {"FAILED", "ERROR"}:
-                            failed_agy_steps.add(index)
+                if type(update) is not dict:
+                    agy_malformed_step_events += 1
+                    continue
+                index = update.get("step_index")
+                step_type = update.get("step_type")
+                state = update.get("state")
+                if (type(index) is not int or index < 0 or type(step_type) is not str
+                        or type(state) is not str
+                        or state not in {"ACTIVE", "DONE", "FAILED", "ERROR", "PENDING", "CANCELLED"}):
+                    agy_malformed_step_events += 1
+                    continue
+                prior_type = agy_step_types.get(index)
+                if prior_type is None:
+                    agy_step_types[index] = step_type
+                elif prior_type != step_type:
+                    agy_colliding_indices.add(index)
+                if step_type == "tool":
+                    observed_tool_steps.add(index)
+                    if state == "DONE":
+                        completed_tool_steps.add(index)
+                    elif state in {"FAILED", "ERROR"}:
+                        failed_agy_steps.add(index)
+                elif step_type == "agent_response":
+                    agy_agent_observed_steps.add(index)
+                    if state != "DONE":
+                        continue
+                    agy_agent_done_steps.add(index)
+                    agy_agent_done_events += 1
+                    raw_step_usage = update.get("usage")
+                    if (type(raw_step_usage) is not dict
+                            or any(type(raw_step_usage.get(field)) is not int
+                                   or raw_step_usage[field] < 0 for field in USAGE_FIELDS["agy"])):
+                        agy_agent_invalid_events += 1
+                        continue
+                    parsed = {field: raw_step_usage[field] for field in USAGE_FIELDS["agy"]}
+                    if parsed["total_tokens"] != parsed["input_tokens"] + parsed["output_tokens"]:
+                        agy_agent_invalid_events += 1
+                        continue
+                    prior = agy_agent_usage.get(index)
+                    if prior is None:
+                        agy_agent_usage[index] = parsed
+                    elif prior == parsed:
+                        agy_agent_duplicate_events += 1
+                    else:
+                        agy_agent_conflicting_events += 1
     expected_type = "turn.completed" if provider == "codex" else "result"
     if len(final_events) != 1:
         terminal_errors.append(f"expected exactly one {expected_type}; found {len(final_events)}")
@@ -257,6 +304,57 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
                     values[field] = value
                 else:
                     usage_errors.append(f"final usage.{field} missing or invalid")
+    preterminal: dict[str, Any] | None = None
+    if provider == "agy":
+        unfinished_tools = len(observed_tool_steps - completed_tool_steps)
+        unfinished_agents = len(agy_agent_observed_steps - agy_agent_done_steps)
+        if agy_malformed_step_events:
+            usage_errors.append(f"agy has {agy_malformed_step_events} malformed step_update events")
+        if agy_colliding_indices:
+            usage_errors.append(f"agy has {len(agy_colliding_indices)} step_index collisions across step types")
+        if unfinished_tools:
+            usage_errors.append(f"agy has {unfinished_tools} tool steps without DONE")
+        if unfinished_agents:
+            usage_errors.append(f"agy has {unfinished_agents} agent_response steps without DONE")
+        final_arithmetic_valid: bool | None = None
+        if all(value is not None for value in values.values()):
+            final_arithmetic_valid = (
+                values["total_tokens"] == values["input_tokens"] + values["output_tokens"])
+            if not final_arithmetic_valid:
+                usage_errors.append("agy final total_tokens differs from input_tokens + output_tokens")
+        step_sum = ({field: sum(step[field] for step in agy_agent_usage.values())
+                     for field in USAGE_FIELDS["agy"]} if agy_agent_usage else None)
+        step_complete = (bool(agy_agent_usage) and agy_agent_invalid_events == 0
+                         and agy_agent_conflicting_events == 0 and agy_malformed_step_events == 0
+                         and not agy_colliding_indices and unfinished_tools == 0
+                         and unfinished_agents == 0)
+        reconciles: bool | None = None
+        if not agy_agent_usage:
+            usage_errors.append("agy preterminal agent_response usage unavailable")
+        if agy_agent_invalid_events:
+            usage_errors.append(f"agy has {agy_agent_invalid_events} invalid agent_response usage events")
+        if agy_agent_conflicting_events:
+            usage_errors.append(
+                f"agy has {agy_agent_conflicting_events} contradictory duplicate agent_response usage events")
+        if step_complete and final_arithmetic_valid:
+            reconciles = step_sum == values
+            if not reconciles:
+                usage_errors.append("agy preterminal step usage differs from final usage")
+        preterminal = {
+            "origin": "local_cli_agent_response_done_steps_not_authenticated_provider_receipts",
+            "done_events": agy_agent_done_events,
+            "unique_steps_with_valid_usage": len(agy_agent_usage),
+            "duplicate_identical_events_deduplicated": agy_agent_duplicate_events,
+            "invalid_events": agy_agent_invalid_events,
+            "contradictory_duplicate_events": agy_agent_conflicting_events,
+            "malformed_step_update_events": agy_malformed_step_events,
+            "cross_type_index_collisions": len(agy_colliding_indices),
+            "unfinished_agent_response_steps": unfinished_agents,
+            "final_arithmetic_valid": final_arithmetic_valid,
+            "observed_unique_step_sum": step_sum,
+            "step_usage_complete": step_complete,
+            "reconciles_with_final": reconciles,
+        }
     return {
         "origin": "local_cli_jsonl_not_authenticated_provider_receipt",
         "observed_model": init_models[0] if provider == "agy" and len(init_models) == 1 else None,
@@ -269,6 +367,7 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
         "observed_failed_agy_steps": len(failed_agy_steps) if provider == "agy" else None,
         "observed_failed_codex_items_partial": failed_codex_items if provider == "codex" else None,
         "final_usage": values,
+        "preterminal_step_usage": preterminal,
         "terminal_success": not terminal_errors,
         "terminal_errors": terminal_errors,
         "complete": not terminal_errors and not usage_errors
