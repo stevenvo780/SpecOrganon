@@ -563,6 +563,58 @@ def test_same_incident_id_in_two_runs_counts_two_observations(
     }
 
 
+def test_schema_two_duplicate_preparation_record_is_rejected(
+    bundle: tuple[dict[str, Any], ...],
+) -> None:
+    schedule, receipts, assembly, secondary = copy.deepcopy(bundle)
+    assembly["mapping_schema"] = 2
+    for detail in assembly["details"]:
+        detail["preparation_record_sha256"] = _hash("preparation-" + detail["run_id"])
+    assembly["details"][1]["preparation_record_sha256"] = \
+        assembly["details"][0]["preparation_record_sha256"]
+    secondary["assembly_sha256"] = _digest(assembly)
+    with pytest.raises(SecondaryError, match="duplicate preparation_record_sha256"):
+        analyze_secondary_metrics(schedule, receipts, assembly, secondary)
+
+
+@pytest.mark.parametrize("mapping_schema", [1, 2])
+def test_duplicate_terminal_pair_requires_schema_two_warning(
+    bundle: tuple[dict[str, Any], ...], mapping_schema: int,
+) -> None:
+    schedule, receipts, assembly, secondary = copy.deepcopy(bundle)
+    assembly["mapping_schema"] = mapping_schema
+    if mapping_schema == 2:
+        for detail in assembly["details"]:
+            detail["preparation_record_sha256"] = _hash("preparation-" + detail["run_id"])
+    first, second = receipts["attempts"][:2]
+    second["artifact_sha256"] = first["artifact_sha256"]
+    second["trace_sha256"] = first["trace_sha256"]
+    assembly["details"][1]["terminal_artifact_sha256"] = first["artifact_sha256"]
+    assembly["details"][1]["terminal_trace_sha256"] = first["trace_sha256"]
+    if mapping_schema == 1:
+        assembly["details"][1]["blind_package_sha256"] = first["artifact_sha256"]
+        assembly["details"][1]["blind_trace_sha256"] = first["trace_sha256"]
+    assembly["evaluations"]["runs"][1]["artifact_sha256"] = first["artifact_sha256"]
+    assembly["receipts_sha256"] = _digest(receipts)
+    secondary["receipts_sha256"] = _digest(receipts)
+    secondary["assembly_sha256"] = _digest(assembly)
+    with pytest.raises(SecondaryError, match=(
+        "ambiguous terminal artifact/trace pair" if mapping_schema == 1
+        else "duplicate terminal pair warnings differ"
+    )):
+        analyze_secondary_metrics(schedule, receipts, assembly, secondary)
+    if mapping_schema == 2:
+        assembly["duplicate_terminal_pairs_requiring_external_preparation_verification"] = [{
+            "terminal_artifact_sha256": first["artifact_sha256"],
+            "terminal_trace_sha256": first["trace_sha256"],
+            "terminal_run_ids": sorted((first["run_id"], second["run_id"])),
+            "mapped_run_ids": sorted((first["run_id"], second["run_id"])),
+        }]
+        secondary["assembly_sha256"] = _digest(assembly)
+        result = analyze_secondary_metrics(schedule, receipts, assembly, secondary)
+        assert result["counts"]["assembly_E_available_runs"] == len(schedule["runs"])
+
+
 def test_retry_tokens_and_wall_gaps(bundle: tuple[dict[str, Any], ...]) -> None:
     schedule, receipts, assembly, secondary = copy.deepcopy(bundle)
     run = schedule["runs"][0]

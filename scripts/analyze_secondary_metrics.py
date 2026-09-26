@@ -337,8 +337,10 @@ def _validate_assembly(
             raise SecondaryError(f"assembly.{key} digest mismatch")
     for key in ("manifest_sha256", "ratings_sha256", "mapping_sha256"):
         _sha256(assembly[key], f"assembly.{key}")
-    _rows(assembly["duplicate_terminal_pairs_requiring_external_preparation_verification"],
-          "assembly.duplicate_terminal_pairs_requiring_external_preparation_verification")
+    declared_duplicate_pairs = _rows(
+        assembly["duplicate_terminal_pairs_requiring_external_preparation_verification"],
+        "assembly.duplicate_terminal_pairs_requiring_external_preparation_verification",
+    )
     criterion = _exact(assembly["criterion_4"], "assembly.criterion_4",
                        frozenset({"status", "reason"}))
     if criterion["status"] != "not_assessed":
@@ -364,6 +366,7 @@ def _validate_assembly(
     e_by_run: dict[str, int] = {}
     incidents_by_run: dict[str, dict[str, str]] = {}
     opaque_ids: set[str] = set()
+    preparation_records: set[str] = set()
     adjudicated = 0
     for index, detail in enumerate(details):
         run_id, e, has_trigger, incidents = _validate_detail(
@@ -373,10 +376,43 @@ def _validate_assembly(
             raise SecondaryError(f"duplicate assembly detail run_id: {run_id}")
         if detail["opaque_id"] in opaque_ids:
             raise SecondaryError(f"duplicate assembly detail opaque_id: {detail['opaque_id']}")
+        if mapping_schema == 2:
+            preparation_record = detail["preparation_record_sha256"]
+            if preparation_record in preparation_records:
+                raise SecondaryError(
+                    f"duplicate preparation_record_sha256 in assembly details: {preparation_record}"
+                )
+            preparation_records.add(preparation_record)
         opaque_ids.add(detail["opaque_id"])
         e_by_run[run_id] = e
         incidents_by_run[run_id] = incidents
         adjudicated += has_trigger
+    terminal_pairs: dict[tuple[str, str], list[str]] = {}
+    for run_id, receipt in receipt_by_run.items():
+        if receipt["outcome"] not in ("completed", "truncated") or not receipt["attempts"]:
+            continue
+        terminal = receipt["attempts"][-1]
+        if terminal["artifact_sha256"] is None:
+            continue
+        pair = (terminal["artifact_sha256"], terminal["trace_sha256"])
+        terminal_pairs.setdefault(pair, []).append(run_id)
+    if mapping_schema == 1 and any(
+        len(run_ids) > 1 and set(run_ids) & e_by_run.keys()
+        for run_ids in terminal_pairs.values()
+    ):
+        raise SecondaryError("schema-1 assembly has an ambiguous terminal artifact/trace pair")
+    expected_duplicate_pairs = [
+        {
+            "terminal_artifact_sha256": pair[0],
+            "terminal_trace_sha256": pair[1],
+            "terminal_run_ids": sorted(run_ids),
+            "mapped_run_ids": sorted(set(run_ids) & e_by_run.keys()),
+        }
+        for pair, run_ids in sorted(terminal_pairs.items())
+        if mapping_schema == 2 and len(run_ids) > 1 and set(run_ids) & e_by_run.keys()
+    ]
+    if declared_duplicate_pairs != expected_duplicate_pairs:
+        raise SecondaryError("assembly duplicate terminal pair warnings differ from receipts and details")
     scored_ids = {run_id for run_id, row in evaluations.items() if "q" in row}
     if set(e_by_run) != scored_ids:
         raise SecondaryError("assembly details must cover every Q-scored run exactly once")
