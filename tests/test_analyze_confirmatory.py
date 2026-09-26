@@ -309,6 +309,39 @@ def test_each_arm_must_use_each_position_once_across_replicas() -> None:
         analyze(schedule, _evaluations(schedule), development_resamples=10)
 
 
+def test_balanced_but_wrong_seeded_arm_order_is_rejected() -> None:
+    schedule = _schedule()
+    first = schedule["runs"][0]
+    stratum = (first["model_id"], first["effort"], first["agents"], first["case_id"])
+    siblings = [
+        run for run in schedule["runs"]
+        if (run["model_id"], run["effort"], run["agents"], run["case_id"]) == stratum
+    ]
+    for replica in (1, 2, 3):
+        block = {run["arm"]: run for run in siblings if run["replica"] == replica}
+        block["N"]["order_position"], block["S"]["order_position"] = (
+            block["S"]["order_position"], block["N"]["order_position"]
+        )
+        assert {run["order_position"] for run in block.values()} == {1, 2, 3}
+    assert {
+        arm: {run["order_position"] for run in siblings if run["arm"] == arm}
+        for arm in ("N", "S", "T")
+    } == {arm: {1, 2, 3} for arm in ("N", "S", "T")}
+    _reseal_schedule(schedule, runs=True)
+
+    with pytest.raises(AnalysisError, match="differs from deterministic planner output"):
+        analyze(schedule, _evaluations(schedule), development_resamples=10)
+
+
+def test_rehashed_planner_limit_change_is_rejected() -> None:
+    schedule = _schedule()
+    schedule["per_run_limits"]["measured_tokens"] += 1
+    _reseal_schedule(schedule, runs=False)
+
+    with pytest.raises(AnalysisError, match="differs from deterministic planner output"):
+        analyze(schedule, _evaluations(schedule), development_resamples=10)
+
+
 def test_cli_outputs_json_and_does_not_write_files(tmp_path: Path) -> None:
     schedule = _schedule()
     evaluations = _evaluations(schedule)

@@ -35,6 +35,11 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+if __package__:
+    from .plan_confirmatory import ManifestError, compile_schedule
+else:
+    from plan_confirmatory import ManifestError, compile_schedule
+
 
 ARMS = ("N", "S", "T")
 CASES = ("R-F", "R-M", "R-S")
@@ -287,6 +292,14 @@ def _validate_schedule(raw: Any) -> tuple[dict[str, Any], dict[tuple[Any, ...], 
         raise AnalysisError("schedule release_block_order differs from planner order")
     if type(schedule.get("block_count")) is not int or schedule["block_count"] != len(triplets):
         raise AnalysisError("schedule.block_count does not match the full panel")
+    # Exact reproduction checks the seed-derived arm order and all planner
+    # metadata beyond the detailed invariants above.
+    try:
+        reproduced = compile_schedule(manifest)
+    except ManifestError as exc:
+        raise AnalysisError(f"schedule manifest cannot be reproduced: {exc}") from exc
+    if reproduced != schedule or reproduced["schedule_sha256"] != scheduled_digest:
+        raise AnalysisError("schedule differs from deterministic planner output")
     return schedule, triplets, {model_id: len(efforts) for model_id, efforts in efforts_by_model.items()}
 
 
