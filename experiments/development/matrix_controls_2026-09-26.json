@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_matrix_controls_unsealed",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "9922e3a322e277403435038cce4c423e522f5682f19ad2d44118303bd7a7ad30",
+  "protocol_amendment": {
+    "previous_sha256": "3637ea6fde78933f5c6582238e83f6981fce627410bfdf1adb37b3711021c9e2",
+    "reason": "Clarified terminal arm order and independently custodied release events before any reserved execution."
+  },
+  "artifacts": {
+    "scripts/analyze_confirmatory.py": "65dc011e42f42046ded0ee3dcc5d5648f9f2325c78d64a0a98483fbf41851447",
+    "tests/test_analyze_confirmatory.py": "240bb9e917d930c6133b8ad6bf1179b86213d7539f9b9a7cb53f7d032dcf0bab",
+    "scripts/check_study_signature.py": "f79c032f2d44e1334d0bace7b67de9dbb1849fa314d98e42a2490892ab417356",
+    "tests/test_check_study_signature.py": "1db139d4581561520c9ecf25774caea4abaa36ff91dbc39d56e50e705039f2d9",
+    "scripts/audit_run_receipts.py": "c61d4b51a98f46eabc1a88221ca7181b44210076ac07ddfbad4f3cd846f41508",
+    "tests/test_audit_run_receipts.py": "5104da5c667e916550757bbf88078058dccfa992447541086b39ec296a638c64"
+  },
+  "scope": {
+    "scheduled_models_and_cases": "synthetic fixtures only",
+    "signature_keys": "ephemeral in-memory test keys only",
+    "receipt_source": "synthetic declared attempts only",
+    "provider_calls": 0,
+    "reserved_case_bytes": 0,
+    "independent_custodian_events": 0,
+    "human_ratings": 0,
+    "criterion_4": "not_assessed"
+  },
+  "gates": [
+    {
+      "command": "uv run pytest -q tests/test_plan_confirmatory.py tests/test_analyze_confirmatory.py",
+      "result": "70 passed"
+    },
+    {
+      "command": "uv run pytest -q tests/test_check_study_signature.py",
+      "result": "26 passed"
+    },
+    {
+      "command": "uv run pytest -q tests/test_audit_run_receipts.py",
+      "result": "36 passed"
+    },
+    {
+      "command": "uv run pytest -q",
+      "result": "253 passed in 10.44s"
+    },
+    {
+      "command": "uv run ruff check scripts/plan_confirmatory.py scripts/analyze_confirmatory.py scripts/preflight_assets.py scripts/check_study_signature.py scripts/audit_run_receipts.py tests/test_plan_confirmatory.py tests/test_analyze_confirmatory.py tests/test_preflight_assets.py tests/test_check_study_signature.py tests/test_audit_run_receipts.py",
+      "result": "All checks passed!"
+    },
+    {
+      "command": "git diff --check",
+      "result": "exit 0"
+    }
+  ],
+  "negative_controls": [
+    "Rehashed and still balanced arm positions that differ from the planner seed are rejected.",
+    "Rehashed changes to planner limits are rejected.",
+    "Altered assets, purpose, challenge message, trust key, or signature are rejected by the study-signature checks.",
+    "A later arm started before the prior arm's retry is terminal is reported as a receipt violation.",
+    "A prior arm with only an unresolved external failure cannot authorize the next arm.",
+    "Completed calls with zero declared active time and inverted starts are reported as receipt violations."
+  ],
+  "not_performed": [
+    "No genuine study signature or independently custodied preregistration and release-event chain.",
+    "No reserved matrix, provider executions, authenticated telemetry, original trace-byte audit, or invoice reconciliation.",
+    "No independent double-blind quality ratings, human approval of value decisions, authorized resource budget, or field impact observation."
+  ]
+}
