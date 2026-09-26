@@ -1,0 +1,25 @@
+# Plan de trabajo y criterio de cierre
+
+Este plan aplica íntegramente [GOAL.md](../GOAL.md). La metodología operativa es el producto; los casos son ensayos, no redefiniciones del alcance. El hash SHA-256 inicial de GOAL.md es `e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36`.
+
+## Secuencia con retornos permitidos
+
+1. Investigar antecedentes, el caso alimentario y límites de datos. Registrar afirmaciones, fuentes, fecha y grado de apoyo.
+2. Establecer antes de ensayar una matriz de aceptación y un protocolo con casos de desarrollo y casos reservados, métricas, umbrales, presupuesto y regla de parada. No mover umbrales después de observar resultados.
+3. Construir prototipos ejecutables de arquitecturas distintas. Ejecutar escenarios iguales, conservar fallos y decidir con evidencia. Si no hay diferencia concluyente, combinar con justificación o seguir explorando dentro del presupuesto.
+4. Implementar un toolkit instalable con CLI, workflows, comandos para agentes y servidor MCP que compartan el mismo motor de estado y de compuertas. Cada fase tendrá entrada, resultado, revisión, avance, detención y retorno. Registrar dependencias versionadas e invalidación por evidencia posterior.
+5. Ejecutar pruebas de instalación limpia, CLI, MCP con cliente real, workflows, agentes reales, entradas inválidas, fallos, interrupción y reanudación; inspeccionar artefactos persistidos.
+6. Usar el caso alimentario delimitado para probar la metodología, con investigación empírica y distinción estricta entre dato publicado, supuesto, simulación y observación local. Diseñar una intervención y una comparación causal con línea base fijada de antemano.
+7. Aplicar el toolkit a un segundo problema real de otro dominio. Ensayar comparaciones controladas dentro de varios modelos y esfuerzos, configuraciones de agentes y ablaciones, con evaluador independiente. Registrar ejecuciones, tiempo, tokens, coste y variabilidad.
+8. Auditar uno por uno todos los criterios de GOAL.md. Emitir `cumplido`, `incumplido` o `no demostrado` por criterio y separar software, rigor, ventaja metodológica e impacto de campo. Solo cerrar el objetivo si la evidencia actual prueba cada requisito.
+
+## Decisiones de seguridad y honestidad
+
+- Los juicios normativos importantes requieren aprobación humana registrada; una respuesta de un agente no equivale a aprobación.
+- Un efecto simulado no acredita impacto real. Sin acceso al campo, el criterio de resolución efectiva queda `no demostrado`.
+- Las pruebas de software no sustituyen investigación empírica; la bibliografía delimita el problema y no reemplaza mediciones locales cuando estas sean necesarias.
+- Los experimentos se ejecutarán con tareas e información comparables y un evaluador distinto del ejecutor. Los casos reservados no se usarán para seleccionar la arquitectura.
+
+## Estado de esta iteración
+
+Repositorio de partida: solo GOAL.md. Rama de trabajo: `work/toolkit-foundation`. Investigación, tres prototipos y protocolo prospectivo están documentados; la elección provisional del grafo está en [decisiones.md](decisiones.md). El motor, runner, CLI y MCP ya recorren una fixture completa desde un wheel instalado; las pruebas de casos reales siguen parciales. Citi Bike junio de 2026 pasó a desarrollo al abrirse su expediente, así que ya no puede servir como reserva ciega. Las comparaciones confirmatorias y el impacto de campo siguen pendientes; no se presupone éxito.
