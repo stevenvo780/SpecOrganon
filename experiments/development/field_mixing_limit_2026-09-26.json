@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_declared_within_lot_lineage_limit",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "source_sha256": {
+    "scripts/audit_field_flows.py": "92810b9ffe0fccda93aa28b5d8c11e10cd056b49d6865d9a36b79ed1f4e795c1",
+    "tests/test_audit_field_flows.py": "225ebc2e79153620c4f50da7a97551da75e1ae3c39d58090d66660a00a4b028b"
+  },
+  "reproduction": {
+    "fixture": "field_data_with_stage_witnesses() from tests/test_audit_field_flows.py",
+    "mutation": "In lot control-post-finish, add an external ingredient input of 70 kg and a terminal compost residue output of 70 kg; append both flow/load IDs to the lot, then bind terminal sources with _as_schema2.",
+    "balance": "The lot now has 140 kg input and 140 kg output: its original 70 kg long-path input plus 70 kg late ingredient, and 70 kg consumed product plus 70 kg compost residue.",
+    "observed": {
+      "schema": 2,
+      "valid": true,
+      "consumed_flows": 4,
+      "control_post_consumption_witness_lots": [
+        "control-post-wash",
+        "control-post-logistics-a",
+        "control-post-logistics-b",
+        "control-post-process",
+        "control-post-finish"
+      ],
+      "criterion_3": "not_assessed"
+    },
+    "counterinterpretation": "The declarations are also compatible with all 70 kg from the long path going to compost and all 70 kg of late ingredient going to human consumption. The lot-level witness cannot distinguish these allocations."
+  },
+  "candidate_not_implemented": {
+    "schema": 3,
+    "proposal": "Opt-in per-lot rows assigning positive declared mass from each input flow to each output flow, with local references, unique pairs and input/output marginal sums checked against measured mass uncertainty. A flow-level witness would traverse only positive allocations and report flow IDs as well as lot IDs.",
+    "required_negative_control": "Long-path input allocated entirely to compost and late ingredient entirely to consumed product must have no complete consumption witness.",
+    "required_positive_control": "A valid mixed lot with a declared positive long-path contribution to the consumed output may have a witness, while schemas 1 and 2 retain their existing contracts.",
+    "limit": "Even a complete allocation table would remain a declaration; a small positive allocation or a forged table does not establish physical composition, field impact, V or G."
+  },
+  "limits": [
+    "This is an invented fixture and an adversarial interpretation, not a measured food chain.",
+    "Schema 2 promises operational paths, not within-lot material attribution; valid:true is consistent with its documented limited contract.",
+    "No schema-3 code or field observation was introduced by this report."
+  ],
+  "criterion_3": "not_assessed"
+}
