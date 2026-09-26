@@ -1,0 +1,61 @@
+{
+  "case_id": "cold_chain_fixture",
+  "domain": "food_distribution",
+  "note": "Synthetic workflow fixture; statuses are supplied claims, not field observations.",
+  "nodes": [
+    {
+      "id": "P",
+      "kind": "problem",
+      "phase": "philosophy",
+      "status": "supported",
+      "claim": "Reduce avoidable loss of edible and nutritional value across a bounded producer-to-consumer chain while preserving safety and accounting for effects on each actor.",
+      "risk": {"impact": 5, "uncertainty": 2, "effort": 3},
+      "depends_on": []
+    },
+    {
+      "id": "A",
+      "kind": "assumption",
+      "phase": "philosophy",
+      "status": "supported",
+      "claim": "The proposed chilled segment can maintain safe temperatures without shifting unacceptable burden to operators or households; this needs empirical testing.",
+      "risk": {"impact": 4, "uncertainty": 4, "effort": 2},
+      "depends_on": ["P"]
+    },
+    {
+      "id": "N",
+      "kind": "normative",
+      "phase": "philosophy",
+      "status": "pending",
+      "claim": "Human decision: prioritize food safety and equitable access when comparing interventions, subject to explicit trade-off review.",
+      "risk": {"impact": 5, "uncertainty": 5, "effort": 1},
+      "depends_on": ["P"]
+    },
+    {
+      "id": "E",
+      "kind": "evidence",
+      "phase": "science",
+      "status": "supported",
+      "claim": "Scenario-supplied evidence claims chilled handling preserves edible value and meets safety limits; provenance and measurements are intentionally absent from this fixture.",
+      "risk": {"impact": 5, "uncertainty": 4, "effort": 3},
+      "depends_on": ["A"]
+    },
+    {
+      "id": "R",
+      "kind": "requirement",
+      "phase": "engineering",
+      "status": "supported",
+      "claim": "Specify temperature logging, handling limits and an actor-level burden measure for any chilled handling intervention.",
+      "risk": {"impact": 4, "uncertainty": 3, "effort": 2},
+      "depends_on": ["N", "E"]
+    },
+    {
+      "id": "V",
+      "kind": "test_result",
+      "phase": "validation",
+      "status": "supported",
+      "claim": "Scenario-supplied simulated check says the requirement was met; this is not measured impact in a real chain.",
+      "risk": {"impact": 5, "uncertainty": 3, "effort": 4},
+      "depends_on": ["R"]
+    }
+  ]
+}

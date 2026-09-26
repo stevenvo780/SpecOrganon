@@ -1,0 +1,9 @@
+{
+  "case_id": "invalid_dependency",
+  "nodes": [
+    {"id": "P", "kind": "problem", "phase": "philosophy", "status": "supported", "claim": "Fixture", "depends_on": ["MISSING"]},
+    {"id": "E", "kind": "evidence", "phase": "science", "status": "supported", "claim": "Fixture", "depends_on": ["P"]},
+    {"id": "R", "kind": "requirement", "phase": "engineering", "status": "supported", "claim": "Fixture", "depends_on": ["E"]},
+    {"id": "V", "kind": "test_result", "phase": "validation", "status": "supported", "claim": "Fixture", "depends_on": ["R"]}
+  ]
+}

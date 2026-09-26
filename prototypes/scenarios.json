@@ -1,0 +1,116 @@
+[
+  {
+    "id": "nominal",
+    "case": "cold_chain.json",
+    "actions": [
+      {"op": "approve", "id": "N"},
+      {"op": "advance", "phase": "philosophy"},
+      {"op": "advance", "phase": "science"},
+      {"op": "advance", "phase": "engineering"},
+      {"op": "advance", "phase": "validation"}
+    ]
+  },
+  {
+    "id": "missing_approval",
+    "case": "cold_chain.json",
+    "actions": [
+      {"op": "advance", "phase": "philosophy"}
+    ]
+  },
+  {
+    "id": "early_science_exploration",
+    "case": "cold_chain.json",
+    "actions": [
+      {"op": "advance", "phase": "science"},
+      {"op": "advance", "phase": "engineering"}
+    ]
+  },
+  {
+    "id": "insufficient_evidence",
+    "case": "cold_chain.json",
+    "actions": [
+      {"op": "approve", "id": "N"},
+      {"op": "advance", "phase": "philosophy"},
+      {"op": "revise", "id": "E", "status": "pending", "reason": "Supporting measurements unavailable"},
+      {"op": "advance", "phase": "science"}
+    ]
+  },
+  {
+    "id": "late_contradiction",
+    "case": "cold_chain.json",
+    "actions": [
+      {"op": "approve", "id": "N"},
+      {"op": "advance", "phase": "philosophy"},
+      {"op": "advance", "phase": "science"},
+      {"op": "advance", "phase": "engineering"},
+      {"op": "advance", "phase": "validation"},
+      {"op": "revise", "id": "E", "status": "contradicted", "reason": "New observation conflicts with fixture claim"}
+    ]
+  },
+  {
+    "id": "evidence_reestimated",
+    "case": "cold_chain.json",
+    "actions": [
+      {"op": "approve", "id": "N"},
+      {"op": "advance", "phase": "philosophy"},
+      {"op": "advance", "phase": "science"},
+      {"op": "advance", "phase": "engineering"},
+      {"op": "advance", "phase": "validation"},
+      {"op": "revise", "id": "E", "status": "supported", "reason": "New sample changes estimate while retaining qualitative support"}
+    ]
+  },
+  {
+    "id": "assumption_shift",
+    "case": "cold_chain.json",
+    "actions": [
+      {"op": "approve", "id": "N"},
+      {"op": "advance", "phase": "philosophy"},
+      {"op": "advance", "phase": "science"},
+      {"op": "advance", "phase": "engineering"},
+      {"op": "advance", "phase": "validation"},
+      {"op": "revise", "id": "A", "status": "contradicted", "reason": "Energy or burden assumption no longer holds"}
+    ]
+  },
+  {
+    "id": "problem_reframed",
+    "case": "cold_chain.json",
+    "actions": [
+      {"op": "approve", "id": "N"},
+      {"op": "advance", "phase": "philosophy"},
+      {"op": "advance", "phase": "science"},
+      {"op": "advance", "phase": "engineering"},
+      {"op": "advance", "phase": "validation"},
+      {"op": "revise", "id": "P", "status": "contradicted", "reason": "Problem boundary and actor set changed"}
+    ]
+  },
+  {
+    "id": "resume_after_process_exit",
+    "case": "cold_chain.json",
+    "actions": [
+      {"op": "approve", "id": "N"},
+      {"op": "advance", "phase": "philosophy"},
+      {"op": "advance", "phase": "science"},
+      {"op": "status"},
+      {"op": "advance", "phase": "engineering"},
+      {"op": "advance", "phase": "validation"}
+    ]
+  },
+  {
+    "id": "recovery_after_correction",
+    "case": "cold_chain.json",
+    "actions": [
+      {"op": "approve", "id": "N"},
+      {"op": "advance", "phase": "philosophy"},
+      {"op": "advance", "phase": "science"},
+      {"op": "advance", "phase": "engineering"},
+      {"op": "advance", "phase": "validation"},
+      {"op": "revise", "id": "E", "status": "contradicted", "reason": "New observation conflicts with fixture claim"}
+    ],
+    "repair": true
+  },
+  {
+    "id": "invalid_dependency",
+    "case": "invalid_dependency.json",
+    "actions": []
+  }
+]
