@@ -43,13 +43,19 @@ uv run python scripts/case_package.py extract /ruta-privada/D-E.zip /ruta-privad
 
 [`scripts/tool_policy.py`](../scripts/tool_policy.py) acepta una política JSON estricta de esquema 1 con clasificación `common_tool_policy_development_unenforced`, digest de imagen de ejecución, red `disabled`, lectura `[/case]`, escritura `[/work]`, lista de herramientas genéricas con versión y digest de ejecutable, y límites `measured_tokens`, `active_seconds` y `tool_calls`. La inspección exige que esos límites coincidan con los de una entrega o con límites esperados suministrados por separado. Su salida indica expresamente que **no aplica** aislamiento, red, acceso a herramientas ni topes: un JSON coherente no configura por sí solo el proceso del proveedor. La imagen y los ejecutables declarados tampoco se cotejan con un entorno activo.
 
-[`scripts/inspect_released_payload.py`](../scripts/inspect_released_payload.py) integra estos dos controles para una entrega ya creada. Requiere el calendario candidato por una ruta independiente, coteja la entrega al inicio y al final, compara el `case_id` del ZIP con la corrida, verifica límites y SHA-256 de la política y exige textos UTF-8 no vacíos, sin NUL, para contrato y prompts del brazo; S incluye su guía. En T solo coteja el hash externo de `toolkit`, sin validar su formato. El reporte es `development_released_payload_inspection_unsealed` y siempre deja `execution_ready: false`:
+[`scripts/inspect_toolkit_wheel.py`](../scripts/inspect_toolkit_wheel.py) acepta los bytes T como un wheel puro de SpecOrganon, aunque la entrega nombre el archivo simplemente `toolkit`. Inspecciona ZIP acotado, rutas, CRC, `RECORD` con SHA-256 y tamaños de todos los miembros, metadatos, módulos principales y puntos de entrada `organon`/`organon-mcp`. No importa ni instala el wheel, y sus dos dependencias de runtime (`cryptography` y `mcp`) no están incluidas. Su resultado indica `install_checked: false` y `execution_ready: false`. El wheel local puede inspeccionarse con:
+
+```sh
+uv run python scripts/inspect_toolkit_wheel.py dist/specorganon-0.1.0-py3-none-any.whl
+```
+
+[`scripts/inspect_released_payload.py`](../scripts/inspect_released_payload.py) integra los tres controles para una entrega ya creada. Requiere el calendario candidato por una ruta independiente, coteja la entrega al inicio y al final, compara el `case_id` del ZIP con la corrida, verifica límites y SHA-256 de la política y exige textos UTF-8 no vacíos, sin NUL, para contrato y prompts del brazo; S incluye su guía. En T además exige wheel estáticamente íntegro y digest igual al del calendario. El reporte es `development_released_payload_inspection_unsealed` y siempre deja `execution_ready: false`:
 
 ```sh
 uv run python scripts/inspect_released_payload.py calendario-candidato.json /ruta-privada/entrega-nueva
 ```
 
-El planificador sigue tratando los tres activos como digests suministrados; los controles de contenido solo los comprueban al inspeccionar una entrega. `toolkit` aún no tiene un formato de instalación comparable. No existe un ejecutor genérico que monte `/case` y `/work`, aplique la política y los límites, instale T y obtenga recibos autenticados del proveedor. Tampoco hay pruebas de que un proveedor aceptó versión y esfuerzo. Un paquete con hash correcto no equivale a una corrida ejecutable. `release_block_order` es una coordenada, no una barrera efectiva: la secuencia de liberación requiere eventos de cierre y custodia independientes.
+El planificador sigue tratando los tres activos como digests suministrados; los controles de contenido solo los comprueban al inspeccionar una entrega. El wheel T no trae un wheelhouse de dependencias: el instalador offline del piloto D-E depende de una caché `uv` previa y no demuestra instalación limpia desde el único archivo liberado. Tampoco existe un ejecutor genérico que monte `/case` y `/work`, aplique la política y los límites, instale T desde activos autocontenidos y obtenga recibos autenticados del proveedor. No hay pruebas de que un proveedor aceptó versión y esfuerzo. Un paquete con hash correcto no equivale a una corrida ejecutable. `release_block_order` es una coordenada, no una barrera efectiva: la secuencia de liberación requiere eventos de cierre y custodia independientes.
 
 ## Firma offline del diseño candidato
 

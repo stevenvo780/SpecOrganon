@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "classification": "development_toolkit_wheel_static_inspection_unsealed",
+  "date_utc": "2026-09-26",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "scope": "static inspection of the T toolkit wheel and released-run integration",
+  "local_wheel": {
+    "path": "dist/specorganon-0.1.0-py3-none-any.whl",
+    "sha256": "b06599f47ba8913e046ebd38c4ee14cea41ab28167c610d8fc4e8442bbc5085a",
+    "bytes": 35437,
+    "version": "0.1.0",
+    "zip_members": 13,
+    "declared_runtime_dependencies": [
+      "cryptography<51,>=41",
+      "mcp<3,>=2.2"
+    ],
+    "static_format_checked": true,
+    "installation_from_release_checked": false
+  },
+  "checks": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_inspect_toolkit_wheel.py tests/test_inspect_released_payload.py",
+      "result": "44 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "845 passed in 28.02s"
+    },
+    {
+      "command": "ruff check .",
+      "result": "All checks passed"
+    },
+    {
+      "command": "ruff format --check scripts/inspect_toolkit_wheel.py scripts/inspect_released_payload.py tests/test_inspect_toolkit_wheel.py tests/test_inspect_released_payload.py tests/toolkit_wheel_fixture.py",
+      "result": "5 files already formatted"
+    },
+    {
+      "command": "uv build --wheel",
+      "result": "Successfully built dist/specorganon-0.1.0-py3-none-any.whl; SHA-256 unchanged"
+    }
+  ],
+  "adversarial_review": {
+    "ancestor_rename_during_read": "false success reproduced, then rejected by full path identity recheck",
+    "wheel_file_directory_collision": "false success reproduced, then rejected by path prefix check",
+    "trailing_slash_file_path": "rejected with regression",
+    "post_fix_verdict": "no new actionable findings within the declared static contract",
+    "reviewer": "native development agent, not an accredited independent human judge"
+  },
+  "limitations": [
+    "the wheel is local development output, not signed or externally authenticated",
+    "static ZIP, RECORD and metadata checks do not prove the code behaves as declared",
+    "the single released wheel does not include its runtime dependency wheels",
+    "the D-E pilot's offline uv installation relies on a pre-existing cache",
+    "no clean offline installation, CLI/MCP smoke from a released run, OS isolation, enforced caps, provider receipt, sealed custody or blind scoring was performed",
+    "a same-UID actor can race a point-in-time path check after it returns"
+  ],
+  "criterion_4": "not_assessed"
+}
