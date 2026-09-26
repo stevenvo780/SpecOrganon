@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_secondary_uncertainty_unsealed",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "artifacts": {
+    "scripts/analyze_secondary_metrics.py": "91fef848c9b7ecf3b99434d6da230448e3b73dc5027fa39bed3a7949dad5d14f",
+    "tests/test_analyze_secondary_metrics.py": "a54ad12eb871058becad8f3b2952006ab2918bc126d52dab1822c2db8bca6509"
+  },
+  "scope": {
+    "secondary_tests_collected": 42,
+    "full_tests_passed": 439,
+    "confirmatory_provider_calls": 0,
+    "reserved_case_bytes": 0,
+    "real_human_ratings": 0,
+    "verified_cost_or_field_observations": 0,
+    "criterion_4": "not_assessed"
+  },
+  "gates": [
+    {"command": "uv run pytest -q", "result": "439 passed in 16.48s"},
+    {"command": "uv run ruff check scripts/analyze_secondary_metrics.py tests/test_analyze_secondary_metrics.py", "result": "All checks passed!"},
+    {"command": "python3 -m py_compile scripts/analyze_secondary_metrics.py tests/test_analyze_secondary_metrics.py", "result": "exit 0"},
+    {"command": "git diff --check", "result": "exit 0"}
+  ],
+  "method": {
+    "bootstrap_resamples_default": 10000,
+    "seed_source": "validated schedule",
+    "unit": "whole N/S/T replica triplet within model-effort-agents-case stratum",
+    "shared_draws": ["E", "T", "R", "W", "P"],
+    "interval": "marginal 95% percentile, linear interpolation",
+    "zero_S_bootstrap_draw": "counted; ratio interval undefined without dropping the draw",
+    "cost_arithmetic": "Decimal for validation, model medians, ratios and percentiles"
+  },
+  "adversarial_findings_resolved": [
+    "A cost bootstrap and percentile calculation previously rounded away a tiny amount at large decimal scale; precision now covers integer magnitude plus fractional scale.",
+    "The previous point cost median could lose a tiny amount when combined with a large model median; the point context now covers both scales.",
+    "Cost component validation previously accepted a declared total that omitted a tiny component alongside a large integer; a regression reproduces and rejects it."
+  ],
+  "independent_read_only_review": {
+    "scope": "paired bootstrap, model weights, missingness, zero S draws, Decimal exactness and tests",
+    "result": "no remaining reproducible material finding in the reviewed diff"
+  },
+  "not_performed": [
+    "No authentication of provider telemetry, judge files, reference, injection, human events, invoices or rate cards.",
+    "No actual reserved N/SDD/toolkit comparison, ablation, field site, approved equivalence or measured impact.",
+    "No simultaneous multiple-comparison interval or inference beyond the fixed cases and models.",
+    "No criterion 4 or field efficacy verdict from the unsealed arithmetic."
+  ]
+}
