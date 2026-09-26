@@ -48,6 +48,8 @@ approved_by_actor_ids, verified_by, record_sha256, source}`` and ``rows`` with
 group-period; IDs exactly cover observed human-consumption flows. The
 equivalence approval is only declared, never authenticated. Denominator and
 upper-bound errors are rejected, but this tool never calculates V or G.
+Tolerance evidence and the declared equivalence approval record must predate
+the first assignment; the latter cannot predate its declared approval.
 
 This is a structural audit of supplied JSON. It cannot authenticate sources,
 load identity, weighing calibration, safety tests, approval signatures,
@@ -285,9 +287,14 @@ def _validate_service(service: Any, groups: dict[str, dict[str, Any]], periods: 
     digest = _text(eq["record_sha256"], "service.equivalence.record_sha256")
     if SHA256.fullmatch(digest) is None:
         raise FieldFlowError("service.equivalence.record_sha256 must be lowercase SHA-256")
-    _evidence(eq["source"], "service.equivalence.source")
-    if any(approved_at >= group["assigned_at"] for group in groups.values()):
+    equivalence_source_at = _evidence(eq["source"], "service.equivalence.source")
+    first_assignment_at = min(group["assigned_at"] for group in groups.values())
+    if approved_at >= first_assignment_at:
         raise FieldFlowError("service equivalence approval must predate every group assignment")
+    if equivalence_source_at < approved_at:
+        raise FieldFlowError("service.equivalence.source predates its declared approval")
+    if equivalence_source_at >= first_assignment_at:
+        raise FieldFlowError("service.equivalence.source must predate first group assignment")
     seen: set[tuple[str, str]] = set()
     for index, raw in enumerate(_array(row["rows"], "service.rows")):
         label = f"service.rows[{index}]"
@@ -335,7 +342,7 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
         raise FieldFlowError("schema must be integer 1")
     study_id = _text(root["study_id"], "study_id")
     tolerance = Fraction(_number(root["balance_tolerance_kg"], "balance_tolerance_kg"))
-    _evidence(root["tolerance_source"], "tolerance_source")
+    tolerance_source_at = _evidence(root["tolerance_source"], "tolerance_source")
     _text(root["currency"], "currency")
     ids: set[str] = {study_id}
     actors: set[str] = set()
@@ -358,6 +365,8 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
         assignment_evidence_at = _evidence(item["source"], f"{label}.source")
         groups[group_id] = {"arm": item["arm"], "actor_ids": set(actor_ids),
                             "assigned_at": assigned_at, "assignment_evidence_at": assignment_evidence_at}
+    if tolerance_source_at >= min(group["assigned_at"] for group in groups.values()):
+        raise FieldFlowError("tolerance_source must predate first group assignment")
     periods: set[str] = set()
     period_times: dict[str, tuple[datetime, datetime]] = {}
     for index, raw in enumerate(_array(root["periods"], "periods")):

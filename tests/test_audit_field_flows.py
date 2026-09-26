@@ -325,6 +325,35 @@ def test_assignment_source_cannot_be_historical() -> None:
         audit_field_flows(data)
 
 
+@pytest.mark.parametrize("source_name", ["tolerance_source", "service.equivalence.source"])
+@pytest.mark.parametrize("observed_at", ["2026-02-01T00:00:00Z", "2026-02-01T06:00:00Z"])
+def test_prospective_sources_must_precede_first_assignment(source_name: str, observed_at: str) -> None:
+    data = field_data(with_service=source_name != "tolerance_source")
+    data["groups"][1]["assigned_at_utc"] = "2026-02-01T12:00:00Z"
+    source = (data["tolerance_source"] if source_name == "tolerance_source"
+              else data["service"]["equivalence"]["source"])
+    source["observed_at_utc"] = observed_at
+    with pytest.raises(FieldFlowError, match="must predate first group assignment") as error:
+        audit_field_flows(data)
+    assert source_name in str(error.value)
+
+
+def test_equivalence_record_cannot_predate_declared_approval() -> None:
+    data = field_data()
+    data["service"]["equivalence"]["source"]["observed_at_utc"] = "2025-11-30T23:59:59Z"
+    with pytest.raises(FieldFlowError, match="service.equivalence.source predates its declared approval"):
+        audit_field_flows(data)
+
+
+def test_equivalence_record_may_be_observed_at_declared_approval() -> None:
+    data = field_data()
+    equivalence = data["service"]["equivalence"]
+    equivalence["source"]["observed_at_utc"] = equivalence["approved_at_utc"]
+    report = audit_field_flows(data)
+    assert report["service_status"] == "declared_service_inputs_bounded_approval_unverified"
+    assert report["criterion_3"]["status"] == "not_assessed"
+
+
 def test_service_observation_must_follow_covered_consumption() -> None:
     data = field_data()
     row = next(item for item in data["service"]["rows"]
