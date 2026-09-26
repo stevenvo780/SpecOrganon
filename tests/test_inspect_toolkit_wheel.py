@@ -81,6 +81,17 @@ def test_valid_copied_wheel_and_cli(tmp_path: Path) -> None:
     assert json.loads(cli.stdout) == result
 
 
+def test_bytes_entrypoint_matches_path_without_writing(tmp_path: Path) -> None:
+    path = _candidate(tmp_path)
+    before = path.read_bytes()
+    assert inspector.inspect_toolkit_wheel_bytes(
+        before
+    ) == inspector.inspect_toolkit_wheel(path)
+    assert path.read_bytes() == before
+    with pytest.raises(inspector.ToolkitWheelError, match="size bounds"):
+        inspector.inspect_toolkit_wheel_bytes(b"invalid")
+
+
 def test_existing_dist_wheel_if_present() -> None:
     path = SCRIPTS.parent / "dist" / "specorganon-0.1.0-py3-none-any.whl"
     if not path.is_file():

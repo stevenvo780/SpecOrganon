@@ -605,9 +605,10 @@ def _record(data: bytes, entries: dict[str, bytes], record_path: str) -> None:
         raise ToolkitWheelError("RECORD does not list every wheel member exactly once")
 
 
-def inspect_toolkit_wheel(path: Path | str) -> dict[str, Any]:
-    """Validate the candidate's bounded ZIP and wheel metadata without execution."""
-    data = _read_regular_path(path)
+def inspect_toolkit_wheel_bytes(data: bytes) -> dict[str, Any]:
+    """Validate bounded wheel bytes and metadata without writing or execution."""
+    if type(data) is not bytes or not END_RECORD.size <= len(data) <= MAX_WHEEL_BYTES:
+        raise ToolkitWheelError("toolkit exceeds wheel size bounds")
     members, central_offset = _parse_central(data)
     members = _parse_locals(data, members, central_offset)
     names = {member.name for member in members}
@@ -666,6 +667,11 @@ def inspect_toolkit_wheel(path: Path | str) -> dict[str, Any]:
         "install_checked": False,
         "execution_ready": False,
     }
+
+
+def inspect_toolkit_wheel(path: Path | str) -> dict[str, Any]:
+    """Read a wheel securely, then inspect the captured bytes."""
+    return inspect_toolkit_wheel_bytes(_read_regular_path(path))
 
 
 def main(argv: list[str] | None = None) -> int:
