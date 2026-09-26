@@ -12,6 +12,7 @@ import base64
 import hashlib
 import json
 import os
+import signal
 import subprocess
 import sys
 import tempfile
@@ -313,6 +314,145 @@ def main() -> None:
                 assert not reopened_gate["ready"] and not reopened_gate["accepted"]
                 assert any("approval" in blocker for blocker in reopened_gate["blockers"])
                 assert (signed_dir / "organon.json").read_bytes() == approved_ledger
+
+                # Kill an installed CLI runner after a durable checkpoint, then resume that manifest via MCP.
+                interrupted_case = Path(directory) / "interrupted-case"
+                interrupted_path = str(interrupted_case)
+                command("init", interrupted_path, "--title", "Synthetic interrupted runner", "--domain", "fixture",
+                        "--actor", "human:fixture", "--approval-policy", "fixture")
+                interrupted_steps = [
+                    {"op": "put", "id": "p1", "kind": "problem", "text": "Synthetic problem", "refs": [], "data": {}},
+                    {"op": "put", "id": "b1", "kind": "boundary", "text": "Synthetic boundary", "refs": ["p1"], "data": {}},
+                ]
+                interrupted_steps.extend(
+                    {"op": "put", "id": f"a{index}", "kind": "actor", "text": f"Synthetic actor {index}",
+                     "refs": ["p1"], "data": {}}
+                    for index in range(160)
+                )
+                interrupted_manifest = {"schema": 1, "steps": interrupted_steps}
+                interrupted_file = Path(directory) / "interrupted-manifest.json"
+                interrupted_file.write_text(json.dumps(interrupted_manifest), encoding="utf-8")
+                interrupted_ledger = interrupted_case / "organon.json"
+                interrupted_process = await asyncio.create_subprocess_exec(
+                    str(cli), "run", interrupted_path, "--manifest", str(interrupted_file), "--actor", "agent:runner",
+                    stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, env=smoke_env,
+                )
+                try:
+                    deadline = asyncio.get_running_loop().time() + 10
+                    observed = 0
+                    while asyncio.get_running_loop().time() < deadline:
+                        observed = len(json.loads(interrupted_ledger.read_text(encoding="utf-8"))["events"])
+                        if observed >= 3:
+                            assert interrupted_process.returncode is None, "CLI runner finished before SIGKILL"
+                            break
+                        if interrupted_process.returncode is not None:
+                            stdout, stderr = await interrupted_process.communicate()
+                            raise AssertionError(f"CLI runner exited before checkpoint: {stdout!r} {stderr!r}")
+                        await asyncio.sleep(0.002)
+                    else:
+                        raise AssertionError("installed CLI runner did not persist a checkpoint within 10 seconds")
+                    interrupted_process.send_signal(signal.SIGKILL)
+                    stdout, stderr = await asyncio.wait_for(interrupted_process.communicate(), timeout=10)
+                    assert interrupted_process.returncode == -signal.SIGKILL, (stdout, stderr)
+                finally:
+                    if interrupted_process.returncode is None:
+                        interrupted_process.kill()
+                        await asyncio.wait_for(interrupted_process.communicate(), timeout=10)
+
+                checkpoint_events = json.loads(interrupted_ledger.read_text(encoding="utf-8"))["events"]
+                checkpoint = len(checkpoint_events)
+                assert 3 <= observed <= checkpoint < len(interrupted_steps)
+                resumed = data(await call_tool("run", {
+                    "path": interrupted_path, "manifest": interrupted_manifest, "actor": "agent:runner",
+                }))
+                assert resumed["applied"] == len(interrupted_steps) - checkpoint
+                assert resumed["skipped"] == checkpoint
+                assert resumed["cursor"] == resumed["total_steps"] == len(interrupted_steps)
+                assert resumed["status"] == "waiting"
+                interrupted_events = json.loads(interrupted_ledger.read_text(encoding="utf-8"))["events"]
+                interrupted_ids = [event["payload"]["id"] for event in interrupted_events]
+                planned_ids = {step["id"] for step in interrupted_steps}
+                assert len(interrupted_events) == len(interrupted_steps)
+                assert interrupted_events[:checkpoint] == checkpoint_events
+                assert all(event["kind"] == "item_put" for event in interrupted_events)
+                assert [event["seq"] for event in interrupted_events] == list(range(1, len(interrupted_steps) + 1))
+                assert len({event["hash"] for event in interrupted_events}) == len(interrupted_events)
+                assert len(interrupted_ids) == len(set(interrupted_ids)) and set(interrupted_ids) == planned_ids
+                interrupted_status = command("status", interrupted_path)
+                assert interrupted_status == data(await call_tool("status", {"path": interrupted_path}))
+                assert interrupted_status["revision"] == len(interrupted_steps)
+                assert set(interrupted_status["items"]) == planned_ids
+                assert all(item["version"] == 1 and not item["issues"] and not item["stale"]
+                           for item in interrupted_status["items"].values())
+                before_replay = interrupted_ledger.read_bytes()
+                replay = data(await call_tool("run", {
+                    "path": interrupted_path, "manifest": interrupted_manifest, "actor": "agent:runner",
+                }))
+                assert replay["applied"] == 0 and replay["skipped"] == len(interrupted_steps)
+                assert replay["cursor"] == len(interrupted_steps) and replay["status"] == resumed["status"]
+                assert interrupted_ledger.read_bytes() == before_replay
+
+                # Release two installed CLI writers together; neither caller retries a failed put.
+                # This checks preservation of both writes, not that their ledger reads collided.
+                concurrent_case = Path(directory) / "concurrent-case"
+                concurrent_path = str(concurrent_case)
+                command("init", concurrent_path, "--title", "Synthetic concurrent writers", "--domain", "fixture",
+                        "--actor", "human:fixture", "--approval-policy", "fixture")
+                command("put", concurrent_path, "p1", "--kind", "problem", "--text", "Stable synthetic reference",
+                        "--actor", "agent:writer", "--expected-version", "0")
+                barrier = 'printf "READY\\n"; IFS= read -r start || exit 97; exec "$@"'
+                writers = []
+                try:
+                    for item_id, kind, writer_actor in (
+                        ("a1", "actor", "agent:writer_a"),
+                        ("b1", "boundary", "agent:writer_b"),
+                    ):
+                        writer = await asyncio.create_subprocess_exec(
+                            "/bin/sh", "-c", barrier, "organon-ready", str(cli), "put", concurrent_path, item_id,
+                            "--kind", kind, "--text", f"Synthetic concurrent {kind}", "--ref", "p1",
+                            "--actor", writer_actor, "--expected-version", "0", "--expected-deps", '{"p1":1}',
+                            stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
+                            stderr=asyncio.subprocess.PIPE, env=smoke_env,
+                        )
+                        writers.append(writer)
+                    ready = await asyncio.wait_for(
+                        asyncio.gather(*(writer.stdout.readline() for writer in writers)), timeout=10,
+                    )
+                    assert ready == [b"READY\n", b"READY\n"]
+                    assert all(writer.returncode is None for writer in writers)
+                    for writer in writers:
+                        writer.stdin.write(b"go\n")
+                    await asyncio.wait_for(asyncio.gather(*(writer.stdin.drain() for writer in writers)), timeout=5)
+                    outputs = await asyncio.wait_for(
+                        asyncio.gather(*(writer.communicate() for writer in writers)), timeout=15,
+                    )
+                    assert all(writer.returncode == 0 for writer in writers), outputs
+                    written = [json.loads(stdout) for stdout, _ in outputs]
+                    assert {item["id"] for item in written} == {"a1", "b1"}
+                    assert {item["seq"] for item in written} == {2, 3}
+                finally:
+                    for writer in writers:
+                        if writer.returncode is None:
+                            writer.kill()
+                    await asyncio.wait_for(asyncio.gather(*(writer.wait() for writer in writers)), timeout=10)
+
+                concurrent_events = json.loads((concurrent_case / "organon.json").read_text(encoding="utf-8"))["events"]
+                assert [event["seq"] for event in concurrent_events] == [1, 2, 3]
+                assert len({event["hash"] for event in concurrent_events}) == 3
+                assert {event["payload"]["id"] for event in concurrent_events} == {"p1", "a1", "b1"}
+                assert all(event["kind"] == "item_put" for event in concurrent_events)
+                assert {(event["payload"]["id"], event["actor"]) for event in concurrent_events[1:]} == {
+                    ("a1", "agent:writer_a"), ("b1", "agent:writer_b"),
+                }
+                assert all(concurrent_events[item["seq"] - 1]["payload"]["id"] == item["id"] for item in written)
+                concurrent_status = command("status", concurrent_path)
+                assert concurrent_status == data(await call_tool("status", {"path": concurrent_path}))
+                assert concurrent_status["revision"] == 3 and set(concurrent_status["items"]) == {"p1", "a1", "b1"}
+                assert concurrent_status["items"]["p1"]["version"] == 1
+                assert all(concurrent_status["items"][item_id]["version"] == 1
+                           and concurrent_status["items"][item_id]["deps"] == {"p1": 1}
+                           and not concurrent_status["items"][item_id]["issues"]
+                           for item_id in ("a1", "b1"))
                 assert cli_commands_seen == expected_cli_commands
                 assert mcp_tools_seen == expected_mcp_tools
                 return {"phases_accepted": len(status["phases"]), "items": len(status["items"]),
@@ -320,6 +460,8 @@ def main() -> None:
                         "idempotent_replay": True, "cli_commands_exercised": len(cli_commands_seen),
                         "mcp_tools_exercised": len(mcp_tools_seen),
                         "guarded_put": True,
+                        "sigkill_mcp_resume": True, "sigkill_checkpoint_events": checkpoint,
+                        "paired_cli_writers_preserved_items": True,
                         "signed_approval_verified": True, "invalid_signatures_rejected": True,
                         "trust_removal_reopened": True}
 

@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_clean_wheel_recovery_and_writers",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "artifacts": {
+    "scripts/clean_smoke.py": "c242bc3d17fb742d62dcc09145b21ddbcaa0908a70dc937eddc3510d75d2628b",
+    "dist/specorganon-0.1.0-py3-none-any.whl": "2a43ab9c539e76b276efe47c91dded30b4a76d73d84d85349aa45fa72eac9ebc"
+  },
+  "gates": [
+    {"command": "uv run pytest -q", "result": "478 passed in 18.51s"},
+    {"command": "uv run ruff check .", "result": "All checks passed!"},
+    {"command": "uv build --wheel", "result": "Successfully built specorganon-0.1.0-py3-none-any.whl"},
+    {"command": "python3 -m py_compile scripts/clean_smoke.py", "result": "exit 0"},
+    {"command": "git diff --check", "result": "exit 0"}
+  ],
+  "fresh_wheel_runs": [
+    {
+      "python": "3.11.15",
+      "install": "new temporary virtual environment; exit 0",
+      "smoke_exit_code": 0,
+      "cli_commands_exercised": 14,
+      "mcp_tools_exercised": 14,
+      "phases_accepted": 9,
+      "items": 29,
+      "revision": 49,
+      "sigkill_checkpoint_events": 3,
+      "sigkill_mcp_resume": true,
+      "paired_cli_writers_preserved_items": true,
+      "idempotent_replay": true
+    },
+    {
+      "python": "3.12.3",
+      "install": "new temporary virtual environment; exit 0",
+      "smoke_exit_code": 0,
+      "cli_commands_exercised": 14,
+      "mcp_tools_exercised": 14,
+      "phases_accepted": 9,
+      "items": 29,
+      "revision": 49,
+      "sigkill_checkpoint_events": 4,
+      "sigkill_mcp_resume": true,
+      "paired_cli_writers_preserved_items": true,
+      "idempotent_replay": true
+    }
+  ],
+  "checks": {
+    "interruption": "An installed CLI run was killed with SIGKILL after a published checkpoint. The same manifest resumed through installed MCP; applied and skipped counts matched the checkpoint, item IDs and event sequences remained unique, CLI and MCP status agreed, and a second replay left ledger bytes unchanged.",
+    "paired_writers": "Two installed CLI put processes with distinct declared actor IDs, target expected_version=0 and direct dependency p1=1 were released from a shell barrier. Both exited successfully without caller retries; three event sequences, actor attribution, dependency versions and CLI/MCP status were checked."
+  },
+  "limits": [
+    "The shell barrier does not prove the two CLI processes read the same ledger revision or exercised an internal retry. A separate development unit test forces that collision, but this wheel smoke does not.",
+    "The SIGKILL followed a durable checkpoint; it does not exercise interruption inside an atomic replacement or host power loss.",
+    "Distinct actor labels on local CLI processes do not prove two model agents worked concurrently.",
+    "The wheel is a local uncommitted build artifact. All case contents and signatures are synthetic. No human normative approval, field effect, or controlled model comparison is shown."
+  ]
+}
