@@ -118,6 +118,49 @@ def test_equal_model_weight_when_one_model_lacks_effort() -> None:
     assert result["bootstrap"]["default_resamples"] == 10_000
 
 
+def test_aggregate_advantage_does_not_hide_a_case_deterioration() -> None:
+    schedule = _schedule(one_single_effort=True)
+    evaluations = _evaluations(schedule, lambda run: (
+        20 if run["arm"] == "N" else
+        50 if run["arm"] == "S" else
+        30 if run["case_id"] == "R-F" else 100
+    ))
+
+    result = analyze(schedule, evaluations, development_resamples=30)
+    effect = result["primary_effects"]["T_minus_S"]
+    assert effect["mean"] == pytest.approx(80 / 3)
+    assert effect["ci95_percentile"] == pytest.approx([80 / 3, 80 / 3])
+    assert effect["by_case"] == pytest.approx({"R-F": -20, "R-M": 50, "R-S": 50})
+    assert effect["by_agents"] == pytest.approx({"solo": 80 / 3, "trio": 80 / 3})
+    assert effect["by_family"] == pytest.approx({"family-a": 80 / 3, "family-b": 80 / 3})
+    assert effect["by_model_effort"]["family-a/lower"]["default"] == pytest.approx(80 / 3)
+    assert all(row["mean"] == -20 for row in effect["by_stratum"] if row["case_id"] == "R-F")
+    cell = next(row for row in result["q_cells"] if row["model_id"] == "family-a/lower"
+                and row["effort"] == "default" and row["agents"] == "solo" and row["case_id"] == "R-F")
+    assert cell["arms"]["T"]["q_by_replica"] == [30, 30, 30]
+    assert cell["arms"]["T"]["median"] == 30
+    assert cell["arms"]["T"]["range"] == [30, 30]
+    assert cell["paired_effects"]["T_minus_S"]["by_replica"] == [-20, -20, -20]
+    assert cell["critical_failures"] is None
+    assert result["criterion_4"]["status"] == "not_assessed"
+
+
+def test_effort_effect_is_reported_within_each_model() -> None:
+    schedule = _schedule()
+    evaluations = _evaluations(schedule, lambda run: (
+        20 if run["arm"] == "N" else
+        50 if run["arm"] == "S" else
+        40 if run["effort"] == "low" else 70
+    ))
+    result = analyze(schedule, evaluations, development_resamples=20)
+    effect = result["primary_effects"]["T_minus_S"]
+    assert effect["mean"] == pytest.approx(5)
+    assert effect["by_model_effort"] == {
+        model["model_id"]: {"high": pytest.approx(20), "low": pytest.approx(-10)}
+        for model in schedule["models"]
+    }
+
+
 def test_reduced_run_without_work_identity_is_rejected() -> None:
     schedule = _schedule(one_single_effort=True)
     fields = ("run_id", "model_id", "effort", "agents", "case_id", "replica",
@@ -196,6 +239,12 @@ def test_incomplete_triplet_retains_available_pair_but_has_no_primary_effect() -
     assert result["descriptive_available_pairs"]["T_minus_N"]["count"] == 143
     assert result["incomplete_triplets"][0]["arms"]["N"]["status"] == "truncated"
     assert result["incomplete_triplets"][0]["T_minus_S"] == 20
+    cell = next(item for item in result["q_cells"] if all(item[key] == target[key]
+                for key in ("model_id", "effort", "agents", "case_id")))
+    assert cell["arms"]["N"]["q_by_replica"][target["replica"] - 1] is None
+    assert cell["arms"]["N"]["unscored"] == 1
+    assert cell["arms"]["N"]["truncated"] == 1
+    assert cell["paired_effects"]["T_minus_N"]["complete_pairs"] == 2
     assert result["criterion_4"]["status"] == "not_assessed"
     assert "matrix is also incomplete" in result["criterion_4"]["reason"]
 

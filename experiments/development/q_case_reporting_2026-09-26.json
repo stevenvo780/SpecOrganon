@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_q_case_reporting_unsealed",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "baseline_commit": "81ab589191e04014f8e27b2a372aef08e940a4ba",
+  "artifacts": {
+    "baseline_scripts/analyze_confirmatory.py_sha256": "dde49334c736634551901bbabd21d39bac15e0c547518b7a299d5d1784cdb6d3",
+    "scripts/analyze_confirmatory.py_sha256": "6ab008ffa13395531c4aa266de1d8c5ccd152751db42be38afa5eaf940d20e6c",
+    "tests/test_analyze_confirmatory.py_sha256": "5a18cc57d3b2c9254ea32b16ef9cdc87b318056f0ce484710ec8e9452d93f25a"
+  },
+  "scenario": {
+    "input": "Synthetic, fully scored single-effort four-model N/S/T schedule; for every model, agent configuration and replica, N=20, S=50, T=30 on R-F and T=100 on R-M and R-S.",
+    "baseline_T_minus_S_mean": 26.666666666666668,
+    "baseline_T_minus_S_keys": ["by_model", "ci95_percentile", "mean"],
+    "current_T_minus_S_by_case": {"R-F": -20, "R-M": 50, "R-S": 50},
+    "current_q_cells": 42,
+    "unchanged": ["T_minus_S mean", "T_minus_N mean", "both percentile intervals", "both by_model summaries", "criterion_4 not_assessed"]
+  },
+  "checks": {
+    "focused_pytest": "uv run pytest -q tests/test_analyze_confirmatory.py: 38 passed",
+    "focused_ruff": "uv run ruff check scripts/analyze_confirmatory.py tests/test_analyze_confirmatory.py: all checks passed",
+    "baseline_replay": "git show baseline_commit:scripts/analyze_confirmatory.py loaded as a separate module against the same synthetic schedule and evaluations"
+  },
+  "limits": [
+    "Every score in the scenario is invented; no provider or judge ran.",
+    "Cell medians and ranges use available Q values; an incomplete matrix still has null primary_effects.",
+    "critical_failures is null because Q scores alone do not contain independent incident review.",
+    "No artifact custody, blind rating, external authentication or confirmatory criterion 4 result is established."
+  ],
+  "criterion_4": "not_assessed"
+}

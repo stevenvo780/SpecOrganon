@@ -366,41 +366,103 @@ def _percentile(sorted_values: list[float], proportion: float) -> float:
     return sorted_values[low] + (sorted_values[high] - sorted_values[low]) * (position - low)
 
 
+def _q_cells(records: list[dict[str, Any]], family_by_model: dict[str, str]) -> list[dict[str, Any]]:
+    """Keep the three observations and their missing/truncated status in each cell."""
+    cells: dict[tuple[str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
+    for record in records:
+        key = (record["model_id"], record["effort"], record["agents"], record["case_id"])
+        cells[key].append(record)
+    summaries = []
+    for (model, effort, agents, case_id), rows in sorted(cells.items()):
+        rows.sort(key=lambda row: row["replica"])
+        if [row["replica"] for row in rows] != list(REPLICAS):
+            raise AnalysisError("Q cell must contain exactly three distinct replicas")
+        arms = {}
+        for arm in ARMS:
+            values = [row["arms"][arm].get("q") for row in rows]
+            statuses = [row["arms"][arm]["status"] for row in rows]
+            available = sorted(value for value in values if value is not None)
+            arms[arm] = {
+                "q_by_replica": values,
+                "status_by_replica": statuses,
+                "median": _percentile(available, 0.5) if available else None,
+                "range": [available[0], available[-1]] if available else None,
+                "unscored": sum(value is None for value in values),
+                "truncated": statuses.count("truncated"),
+            }
+        paired = {}
+        for label in ("T_minus_S", "T_minus_N"):
+            values = [row[label] for row in rows]
+            available = sorted(value for value in values if value is not None)
+            paired[label] = {
+                "by_replica": values,
+                "median": _percentile(available, 0.5) if available else None,
+                "range": [available[0], available[-1]] if available else None,
+                "complete_pairs": len(available),
+            }
+        summaries.append({
+            "model_id": model, "family": family_by_model[model], "effort": effort,
+            "agents": agents, "case_id": case_id, "arms": arms, "paired_effects": paired,
+            "critical_failures": None,
+        })
+    return summaries
+
+
 def _primary_effects(
     complete: dict[tuple[Any, ...], tuple[float, float]],
     effort_counts: dict[str, int],
+    family_by_model: dict[str, str],
     resamples: int,
     seed: int,
 ) -> dict[str, Any]:
     strata: dict[tuple[str, str, str, str], list[tuple[float, float]]] = defaultdict(list)
     for (model, effort, agents, case_id, replica), pair in sorted(complete.items()):
         strata[(model, effort, agents, case_id)].append(pair)
-    weighted: list[tuple[str, float, list[tuple[float, float]]]] = []
-    for (model, _effort, _agents, _case_id), pairs in sorted(strata.items()):
+    weighted: list[tuple[tuple[str, str, str, str], float, list[tuple[float, float]]]] = []
+    for key, pairs in sorted(strata.items()):
+        model = key[0]
         if len(pairs) != 3:
             raise AnalysisError("primary effects require all three complete paired replicas per stratum")
         weight = 1 / (4 * effort_counts[model] * len(AGENTS) * len(CASES))
-        weighted.append((model, weight, pairs))
+        weighted.append((key, weight, pairs))
     if not math.isclose(math.fsum(item[1] for item in weighted), 1.0, abs_tol=1e-12):
         raise AnalysisError("primary weights do not sum to one")
 
+    def conditional_mean(rows: list[tuple[tuple[str, str, str, str], float, list[tuple[float, float]]]],
+                         comparison: int) -> float:
+        denominator = math.fsum(weight for _key, weight, _pairs in rows)
+        return math.fsum(weight * math.fsum(pair[comparison] for pair in pairs) / 3
+                         for _key, weight, pairs in rows) / denominator
+
+    def grouped_means(coordinate: int | None) -> dict[str, list[float]]:
+        groups: dict[str, list[tuple[tuple[str, str, str, str], float, list[tuple[float, float]]]]] = defaultdict(list)
+        for row in weighted:
+            key = family_by_model[row[0][0]] if coordinate is None else row[0][coordinate]
+            groups[key].append(row)
+        return {key: [conditional_mean(rows, k) for k in (0, 1)] for key, rows in sorted(groups.items())}
+
     observed = [
-        math.fsum(weight * math.fsum(pair[k] for pair in pairs) / 3 for _model, weight, pairs in weighted)
+        math.fsum(weight * math.fsum(pair[k] for pair in pairs) / 3 for _key, weight, pairs in weighted)
         for k in (0, 1)
     ]
-    by_model = {
-        model: [
-            math.fsum(4 * weight * math.fsum(pair[k] for pair in pairs) / 3
-                      for row_model, weight, pairs in weighted if row_model == model)
-            for k in (0, 1)
-        ]
-        for model in sorted(effort_counts)
+    by_model = grouped_means(0)
+    by_family = grouped_means(None)
+    by_agents = grouped_means(2)
+    by_case = grouped_means(3)
+    model_effort: dict[str, dict[str, list[tuple[tuple[str, str, str, str], float,
+                                                 list[tuple[float, float]]]]]] = defaultdict(lambda: defaultdict(list))
+    for row in weighted:
+        model_effort[row[0][0]][row[0][1]].append(row)
+    by_model_effort = {
+        model: {effort: [conditional_mean(rows, k) for k in (0, 1)]
+                for effort, rows in sorted(efforts.items())}
+        for model, efforts in sorted(model_effort.items())
     }
     rng = random.Random(seed)
     bootstrap: tuple[list[float], list[float]] = ([], [])
     for _ in range(resamples):
         contributions: tuple[list[float], list[float]] = ([], [])
-        for _model, weight, pairs in weighted:
+        for _key, weight, pairs in weighted:
             drawn = [pairs[rng.randrange(3)] for _ in REPLICAS]
             contributions[0].append(weight * math.fsum(pair[0] for pair in drawn) / 3)
             contributions[1].append(weight * math.fsum(pair[1] for pair in drawn) / 3)
@@ -413,6 +475,18 @@ def _primary_effects(
             "mean": observed[k],
             "ci95_percentile": [_percentile(bootstrap[k], 0.025), _percentile(bootstrap[k], 0.975)],
             "by_model": {model: values[k] for model, values in by_model.items()},
+            "by_family": {family: values[k] for family, values in by_family.items()},
+            "by_agents": {agents: values[k] for agents, values in by_agents.items()},
+            "by_case": {case_id: values[k] for case_id, values in by_case.items()},
+            "by_model_effort": {
+                model: {effort: values[k] for effort, values in efforts.items()}
+                for model, efforts in by_model_effort.items()
+            },
+            "by_stratum": [
+                {"model_id": key[0], "family": family_by_model[key[0]], "effort": key[1],
+                 "agents": key[2], "case_id": key[3], "mean": math.fsum(pair[k] for pair in pairs) / 3}
+                for key, _weight, pairs in weighted
+            ],
         }
         for k, label in enumerate(("T_minus_S", "T_minus_N"))
     }
@@ -427,6 +501,7 @@ def analyze(
 ) -> dict[str, Any]:
     """Validate all scheduled records and compute paired Q summaries only."""
     schedule, triplets, effort_counts = _validate_schedule(raw_schedule)
+    family_by_model = {model["model_id"]: model["family"] for model in schedule["models"]}
     scheduled_ids = {run["run_id"] for runs in triplets.values() for run in runs.values()}
     scores = _validate_evaluations(raw_evaluations, schedule["schedule_sha256"], scheduled_ids)
     if development_resamples is None:
@@ -499,8 +574,9 @@ def analyze(
         "counts": counts,
         "bootstrap": {"seed": bootstrap_seed, "resamples": resamples if matrix_complete else 0,
                       "default_resamples": DEFAULT_RESAMPLES},
-        "primary_effects": _primary_effects(paired, effort_counts, resamples, bootstrap_seed)
+        "primary_effects": _primary_effects(paired, effort_counts, family_by_model, resamples, bootstrap_seed)
         if matrix_complete else None,
+        "q_cells": _q_cells(records, family_by_model),
         "descriptive_available_pairs": descriptive,
         "triplets": records,
         "incomplete_triplets": incomplete,
