@@ -32,6 +32,8 @@ Para un estudio prospectivo harían falta estaciones y franjas fijadas antes de 
 
 El supuesto `s_proxy` versión 1 dejaba **por comprobar** si el SLA agregado de flota podía servir como aproximación del acceso por estación. Tras confrontarlo con la definición de SLA 9 y GBFS, la versión 2 registra que no puede hacerlo. La edición en el evento 31 dejó 12 descendientes obsoletos, incluidos el protocolo `pr_panel`, la decisión candidata `d_candidate` y el requisito candidato `req_archive`; la [salida generada de verificación](../cases/citibike/revision_check.json) enumera los IDs y compuertas **tal como estaban inmediatamente después del evento 31**, antes de la revisión de `frame`. No se revalidaron esos borradores contra el supuesto corregido. Así queda observable la propagación hasta un requisito sin fingir que se aceptó la fase `specify`.
 
+Una [regresión ejecutable sin red](../experiments/development/citibike_transfer_replay_2026-09-26.json) siembra los 30 ítems en un directorio temporal, reproduce por la CLI instalada el `item_put` exacto del evento 31 y comprueba que `req_archive` traza hasta `s_proxy` v2. Verifica los 12 obsoletos, la revisión independiente y avance de `frame`, el bloqueo de `critique` y `specify`, y el rechazo sin mutación de una aprobación carente de firma bajo política `signed`. La prueba conserva los bytes del ledger fuente. `revision_check.json` es una fotografía histórica: las frases de sus bloqueadores de aprobación difieren de las del motor actual y las comprobaciones actuales añaden bloqueadores de traza. La regresión compara IDs, obsolescencia y estados de compuertas, no esas frases literales.
+
 Comprobaciones ejecutadas con la CLI:
 
 ```sh
