@@ -16,6 +16,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from cryptography.hazmat.primitives import serialization
@@ -35,6 +36,7 @@ def main() -> None:
     smoke_env["ORGANON_ALLOW_FIXTURES"] = "1"
     cli_commands_seen: set[str] = set()
     mcp_tools_seen: set[str] = set()
+    parity_operations_seen: set[str] = set()
     expected_cli_commands = {
         "init", "put", "status", "review", "approve", "approval-challenge", "challenge",
         "resolve-challenge", "gate", "review-phase", "advance", "trace", "next-task", "run",
@@ -271,6 +273,7 @@ def main() -> None:
                 }))
                 assert mcp_challenge == cli_challenge
                 assert (signed_dir / "organon.json").read_bytes() == before_challenge
+                parity_operations_seen.add("approval_challenge")
                 message = base64.b64decode(cli_challenge["message_base64"], validate=True)
                 assert cli_challenge["algorithm"] == "Ed25519"
                 assert hashlib.sha256(message).hexdigest() == cli_challenge["message_sha256"]
@@ -296,6 +299,20 @@ def main() -> None:
                 assert signed_status == data(await call_tool("status", {"path": signed_case}))
                 assert signed_status["items"]["n1"]["approved"]
                 assert signed_status["items"]["n1"]["approval_status"] == "signed_verified"
+                command("put", signed_case, "n2", "--kind", "norm", "--text", "Second synthetic commitment",
+                        "--ref", "p1", "--ref", "a1", "--actor", "agent:writer")
+                cli_signed_reason = "Synthetic CLI signature for a second exact commitment"
+                cli_signed_challenge = command("approval-challenge", signed_case, "n2", "--reason",
+                                               cli_signed_reason, "--actor", signed_actor)
+                cli_signed_message = base64.b64decode(cli_signed_challenge["message_base64"], validate=True)
+                cli_signed_signature = base64.b64encode(signer.sign(cli_signed_message)).decode("ascii")
+                cli_approval = command("approve", signed_case, "n2", "--reason", cli_signed_reason,
+                                       "--actor", signed_actor, "--signature", cli_signed_signature)
+                assert cli_approval == json.loads((signed_dir / "organon.json").read_text(encoding="utf-8"))["events"][-1]
+                signed_status = command("status", signed_case)
+                assert signed_status == data(await call_tool("status", {"path": signed_case}))
+                assert signed_status["items"]["n2"]["approved"]
+                assert signed_status["items"]["n2"]["approval_status"] == "signed_verified"
                 signed_gate = command("gate", signed_case, "critique")
                 assert signed_gate == data(await call_tool("gate", {"path": signed_case, "phase": "critique"}))
                 assert signed_gate["ready"] and not signed_gate["accepted"]
@@ -309,6 +326,7 @@ def main() -> None:
                 assert reopened == command("status", signed_case)
                 assert reopened["approval_trust"] == "unavailable"
                 assert not reopened["items"]["n1"]["approved"]
+                assert not reopened["items"]["n2"]["approved"]
                 reopened_gate = data(await call_tool("gate", {"path": signed_case, "phase": "critique"}))
                 assert reopened_gate == command("gate", signed_case, "critique")
                 assert not reopened_gate["ready"] and not reopened_gate["accepted"]
@@ -453,6 +471,210 @@ def main() -> None:
                            and concurrent_status["items"][item_id]["deps"] == {"p1": 1}
                            and not concurrent_status["items"][item_id]["issues"]
                            for item_id in ("a1", "b1"))
+
+                # Follow the same synthetic decisions through both installed transports.
+                # Distinct projects have distinct UUIDs, creation times and event hashes;
+                # keep phase snapshots and every other semantic field in the comparison.
+                parity_cli_path = str(Path(directory) / "parity-cli-case")
+                parity_mcp_path = str(Path(directory) / "parity-mcp-case")
+                parity_paths = (parity_cli_path, parity_mcp_path)
+
+                def parity_ledger(path: str) -> dict:
+                    return json.loads((Path(path) / "organon.json").read_text(encoding="utf-8"))
+
+                def comparable_state(value: dict) -> dict:
+                    normalized = json.loads(json.dumps(value))
+                    assert normalized["project"]["case_id"]
+                    assert normalized["project"]["created_at"]
+                    assert normalized["project_sha256"]
+                    del normalized["project"]["case_id"]
+                    del normalized["project"]["created_at"]
+                    del normalized["project_sha256"]
+                    return normalized
+
+                def comparable_event(event: dict) -> dict:
+                    return {key: event[key] for key in ("seq", "actor", "kind", "payload")}
+
+                def assert_event_time(event: dict, started: datetime, finished: datetime) -> None:
+                    recorded = datetime.fromisoformat(event["at"])
+                    assert recorded.utcoffset() == timedelta(0)
+                    assert started - timedelta(seconds=1) <= recorded <= finished + timedelta(seconds=1)
+
+                def assert_parity_state() -> None:
+                    cli_doc, mcp_doc = (parity_ledger(path) for path in parity_paths)
+                    assert cli_doc["schema"] == mcp_doc["schema"] == 1
+                    assert comparable_state(command("status", parity_cli_path)) == comparable_state(
+                        command("status", parity_mcp_path)
+                    )
+                    assert [comparable_event(event) for event in cli_doc["events"]] == [
+                        comparable_event(event) for event in mcp_doc["events"]
+                    ]
+
+                async def paired_read(cli_name: str, cli_tail: tuple[str, ...] = (),
+                                      mcp_args: dict | None = None) -> dict:
+                    values = []
+                    for path in parity_paths:
+                        ledger_file = Path(path) / "organon.json"
+                        before_read = ledger_file.read_bytes()
+                        cli_value = command(cli_name, path, *cli_tail)
+                        mcp_value = data(await call_tool(
+                            cli_name.replace("-", "_"), {"path": path, **(mcp_args or {})},
+                        ))
+                        assert cli_value == mcp_value, cli_name
+                        assert ledger_file.read_bytes() == before_read, cli_name
+                        values.append(cli_value)
+                    comparable = comparable_state if cli_name == "status" else lambda value: value
+                    assert comparable(values[0]) == comparable(values[1]), cli_name
+                    parity_operations_seen.add(cli_name.replace("-", "_"))
+                    return values[0]
+
+                async def paired_write(cli_name: str, cli_tail: tuple[str, ...], mcp_args: dict,
+                                       *, raw_event: bool = False) -> dict:
+                    before_counts = [len(parity_ledger(path)["events"]) for path in parity_paths]
+                    started = datetime.now(timezone.utc)
+                    cli_value = command(cli_name, parity_cli_path, *cli_tail)
+                    mcp_value = data(await call_tool(
+                        cli_name.replace("-", "_"), {"path": parity_mcp_path, **mcp_args},
+                    ))
+                    finished = datetime.now(timezone.utc)
+                    cli_events, mcp_events = (parity_ledger(path)["events"] for path in parity_paths)
+                    assert [len(cli_events), len(mcp_events)] == [count + 1 for count in before_counts], cli_name
+                    assert_event_time(cli_events[-1], started, finished)
+                    assert_event_time(mcp_events[-1], started, finished)
+                    if raw_event:
+                        assert cli_value == cli_events[-1], cli_name
+                        assert mcp_value == mcp_events[-1], cli_name
+                        assert comparable_event(cli_value) == comparable_event(mcp_value), cli_name
+                    else:
+                        assert cli_name == "put"
+                        assert cli_value == mcp_value, cli_name
+                        for value, event in ((cli_value, cli_events[-1]), (mcp_value, mcp_events[-1])):
+                            assert value == {**event["payload"], "seq": event["seq"], "author": event["actor"]}
+                    assert_parity_state()
+                    parity_operations_seen.add(cli_name.replace("-", "_"))
+                    return cli_value
+
+                init_tail = ("--title", "Synthetic transport parity", "--domain", "fixture",
+                             "--actor", "human:fixture", "--approval-policy", "fixture")
+                cli_initial = command("init", parity_cli_path, *init_tail)
+                mcp_initial = data(await call_tool("init", {
+                    "path": parity_mcp_path, "title": "Synthetic transport parity", "domain": "fixture",
+                    "actor": "human:fixture", "approval_policy": "fixture",
+                }))
+                assert comparable_state(cli_initial) == comparable_state(mcp_initial)
+                assert all(parity_ledger(path)["events"] == [] for path in parity_paths)
+                assert_parity_state()
+                parity_operations_seen.add("init")
+
+                assert (await paired_read("status"))["revision"] == 0
+                assert not (await paired_read("gate", ("frame",), {"phase": "frame"}))["ready"]
+                roles = {"analyst": "agent:synthetic-analyst", "reviewer": "agent:synthetic-reviewer"}
+                task = await paired_read("next-task", ("--roles", json.dumps(roles)), {"roles": roles})
+                assert task["action"] == "create_artifacts" and task["actor"] == roles["analyst"]
+
+                parity_manifest = {"schema": 1, "steps": [{
+                    "op": "put", "id": "p1", "kind": "problem", "text": "Synthetic parity problem",
+                    "refs": [], "data": {},
+                }]}
+                parity_manifest_file = Path(directory) / "parity-manifest.json"
+                parity_manifest_file.write_text(json.dumps(parity_manifest), encoding="utf-8")
+                run_tail = ("--manifest", str(parity_manifest_file), "--actor", "agent:runner")
+                run_args = {"manifest": parity_manifest, "actor": "agent:runner"}
+                run_started = datetime.now(timezone.utc)
+                cli_run = command("run", parity_cli_path, *run_tail)
+                mcp_run = data(await call_tool("run", {"path": parity_mcp_path, **run_args}))
+                run_finished = datetime.now(timezone.utc)
+                assert cli_run == mcp_run
+                assert cli_run["applied"] == 1 and cli_run["skipped"] == 0
+                assert [len(parity_ledger(path)["events"]) for path in parity_paths] == [1, 1]
+                for path in parity_paths:
+                    assert_event_time(parity_ledger(path)["events"][-1], run_started, run_finished)
+                assert_parity_state()
+                before_replays = [(Path(path) / "organon.json").read_bytes() for path in parity_paths]
+                cli_replay = command("run", parity_cli_path, *run_tail)
+                mcp_replay = data(await call_tool("run", {"path": parity_mcp_path, **run_args}))
+                assert cli_replay == mcp_replay
+                assert cli_replay["applied"] == 0 and cli_replay["skipped"] == 1
+                assert [(Path(path) / "organon.json").read_bytes() for path in parity_paths] == before_replays
+                parity_operations_seen.add("run")
+
+                for item_id, kind, description, refs, deps in (
+                    ("a1", "actor", "Synthetic parity actor", ["p1"], {"p1": 1}),
+                    ("b1", "boundary", "Synthetic parity boundary", ["p1"], {"p1": 1}),
+                    ("n1", "norm", "Synthetic parity commitment", ["p1", "a1"], {"p1": 1, "a1": 1}),
+                ):
+                    ref_args = tuple(arg for ref in refs for arg in ("--ref", ref))
+                    await paired_write("put", (item_id, "--kind", kind, "--text", description, *ref_args,
+                                               "--actor", "agent:writer", "--expected-version", "0",
+                                               "--expected-deps", json.dumps(deps)), {
+                        "id": item_id, "kind": kind, "text": description, "refs": refs, "data": {},
+                        "actor": "agent:writer", "expected_version": 0, "expected_deps": deps,
+                    })
+                await paired_write("review", ("p1", "--verdict", "accept", "--reason", "Synthetic item review",
+                                              "--actor", "agent:reviewer"), {
+                    "id": "p1", "verdict": "accept", "reason": "Synthetic item review", "actor": "agent:reviewer",
+                }, raw_event=True)
+                await paired_write("approve", ("n1", "--reason", "Synthetic fixture approval",
+                                               "--actor", "human:fixture"), {
+                    "id": "n1", "reason": "Synthetic fixture approval", "actor": "human:fixture",
+                }, raw_event=True)
+                approved_state = await paired_read("status")
+                assert approved_state["items"]["n1"]["approved"]
+                assert approved_state["items"]["n1"]["approval_status"] == "fixture"
+
+                ready_gate = await paired_read("gate", ("frame",), {"phase": "frame"})
+                assert ready_gate["ready"] and not ready_gate["accepted"]
+                review_event = await paired_write("review-phase", (
+                    "frame", "--verdict", "accept", "--reason", "Synthetic frame review",
+                    "--actor", "agent:reviewer",
+                ), {
+                    "phase": "frame", "verdict": "accept", "reason": "Synthetic frame review",
+                    "actor": "agent:reviewer",
+                }, raw_event=True)
+                assert review_event["payload"]["snapshot"] == ready_gate["snapshot"]
+                assert review_event["payload"]["independent"]
+                advance_event = await paired_write("advance", ("frame", "--actor", "agent:runner"), {
+                    "phase": "frame", "actor": "agent:runner",
+                }, raw_event=True)
+                assert advance_event["payload"]["review_seq"] == review_event["seq"]
+                assert (await paired_read("gate", ("frame",), {"phase": "frame"}))["accepted"]
+
+                challenge_event = await paired_write("challenge", (
+                    "p1", "a1", "--reason", "Synthetic parity dispute", "--actor", "agent:reviewer",
+                ), {
+                    "left": "p1", "right": "a1", "reason": "Synthetic parity dispute", "actor": "agent:reviewer",
+                }, raw_event=True)
+                contested_state = await paired_read("status")
+                assert [entry["seq"] for entry in contested_state["open_challenges"]] == [challenge_event["seq"]]
+                assert not contested_state["phases"]["frame"]["accepted"]
+                await paired_write("put", (
+                    "syn1", "--kind", "synthesis", "--text", "Synthetic parity reconciliation",
+                    "--ref", "p1", "--ref", "a1", "--actor", "agent:writer",
+                    "--expected-version", "0", "--expected-deps", '{"p1":1,"a1":1}',
+                ), {
+                    "id": "syn1", "kind": "synthesis", "text": "Synthetic parity reconciliation",
+                    "refs": ["p1", "a1"], "data": {}, "actor": "agent:writer",
+                    "expected_version": 0, "expected_deps": {"p1": 1, "a1": 1},
+                })
+                resolution_review = await paired_write("review", (
+                    "syn1", "--verdict", "accept", "--reason", "Synthetic reconciliation review",
+                    "--actor", "agent:reviewer",
+                ), {
+                    "id": "syn1", "verdict": "accept", "reason": "Synthetic reconciliation review",
+                    "actor": "agent:reviewer",
+                }, raw_event=True)
+                resolved_event = await paired_write("resolve-challenge", (
+                    str(challenge_event["seq"]), "syn1", "--actor", "agent:writer",
+                ), {
+                    "challenge_seq": challenge_event["seq"], "resolution_item": "syn1", "actor": "agent:writer",
+                }, raw_event=True)
+                assert resolved_event["payload"]["review_seq"] == resolution_review["seq"]
+                assert (await paired_read("status"))["open_challenges"] == []
+                trace = await paired_read("trace", ("syn1",), {"id": "syn1"})
+                assert trace["item"]["id"] == "syn1"
+                assert {item["id"] for item in trace["ancestors"]} == {"p1", "a1"}
+                assert (await paired_read("next-task", ("--roles", json.dumps(roles)), {"roles": roles}))["phase"] == "frame"
+                assert parity_operations_seen == expected_mcp_tools
                 assert cli_commands_seen == expected_cli_commands
                 assert mcp_tools_seen == expected_mcp_tools
                 return {"phases_accepted": len(status["phases"]), "items": len(status["items"]),
@@ -463,7 +685,12 @@ def main() -> None:
                         "sigkill_mcp_resume": True, "sigkill_checkpoint_events": checkpoint,
                         "paired_cli_writers_preserved_items": True,
                         "signed_approval_verified": True, "invalid_signatures_rejected": True,
-                        "trust_removal_reopened": True}
+                        "signed_cli_approval_verified": True,
+                        "trust_removal_reopened": True,
+                        "transport_parity_operations": len(parity_operations_seen),
+                        "twin_case_parity_operations": len(parity_operations_seen - {"approval_challenge"}),
+                        "same_case_signed_challenge_parity": True,
+                        "twin_case_replay_preserved_ledgers": True}
 
     print(json.dumps(asyncio.run(exercise()), sort_keys=True))
 

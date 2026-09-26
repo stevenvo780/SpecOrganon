@@ -24,6 +24,8 @@ uv pip install --python /tmp/organon-check/bin/python dist/specorganon-0.1.0-py3
 
 El script crea explícitamente un caso con `--approval-policy fixture` y habilita `ORGANON_ALLOW_FIXTURES=1` solo para la prueba. Sus aprobaciones y resultados son **inventados para pruebas**. Tampoco la firma sintética representa consentimiento humano. No prueban decisiones humanas reales ni eficacia de una intervención. El entorno de producción debe omitir esa variable.
 
+El smoke compara el resultado observable de las 14 operaciones compartidas CLI/MCP: 13 sobre casos gemelos con entradas iguales y `approval-challenge` sobre el mismo caso firmado. También verifica por separado una firma válida aceptada mediante `approve --signature` y otra mediante MCP. Los tiempos y hashes de eventos de casos distintos no son iguales; cada evento se coteja con su propio ledger y se verifica que su tiempo UTC corresponda a la operación.
+
 ## Trabajar en un caso
 
 ```sh

@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_clean_wheel_transport_parity",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "artifacts": {
+    "scripts/clean_smoke.py": "841cf9925b849af4d1c0e1501eca209682e1bd75a973be3a2327de71b85affe9",
+    "dist/specorganon-0.1.0-py3-none-any.whl": "30318e4c8efbd77c9ca10953d018bad9e0d207ff4bafe8bc0369e599b2bfa8f4"
+  },
+  "gates": [
+    {"command": "uv run ruff check .", "result": "All checks passed!"},
+    {"command": "python3 -m py_compile scripts/clean_smoke.py", "result": "exit 0"},
+    {"command": "git diff --check", "result": "exit 0"},
+    {"command": "uv build --wheel", "result": "Successfully built specorganon-0.1.0-py3-none-any.whl"}
+  ],
+  "shared_operations_compared": [
+    "init", "put", "status", "review", "approve", "approval_challenge", "challenge",
+    "resolve_challenge", "gate", "review_phase", "advance", "trace", "next_task", "run"
+  ],
+  "comparison": {
+    "twin_case_operations": 13,
+    "same_case_signed_challenge_operations": 1,
+    "twin_init_status_normalization": ["project.case_id", "project.created_at", "project_sha256"],
+    "twin_event_projection": ["seq", "actor", "kind", "payload"],
+    "event_time_check": "Each newly written twin event has UTC offset zero and a timestamp within the corresponding call window plus or minus one second.",
+    "write_effects": "Every paired write adds one event per case. Returned write data agrees with each case's own ledger; status and projected event streams agree across cases.",
+    "read_effects": "For status, gate, next_task and trace, CLI and MCP outputs agree exactly on each case and ledger bytes do not change. Twin case states agree after narrow project-field normalization.",
+    "run_replay": "The same manifest applies one item on each case; CLI and MCP summaries agree. A second run skips that item and leaves both ledger byte streams unchanged.",
+    "signed_approvals": "The same signed synthetic case accepts one valid Ed25519 signature through MCP and a second valid signature through installed CLI --signature. Status reports both as signed_verified; removal of trust invalidates both. This is not a same-challenge twin-case equality assertion."
+  },
+  "fresh_wheel_runs": [
+    {
+      "python": "3.11.15",
+      "install": "new temporary virtual environment; exit 0",
+      "smoke_exit_code": 0,
+      "cli_commands_exercised": 14,
+      "mcp_tools_exercised": 14,
+      "transport_parity_operations": 14,
+      "twin_case_parity_operations": 13,
+      "same_case_signed_challenge_parity": true,
+      "signed_cli_approval_verified": true,
+      "sigkill_checkpoint_events": 3,
+      "sigkill_mcp_resume": true,
+      "paired_cli_writers_preserved_items": true,
+      "phases_accepted": 9,
+      "items": 29,
+      "revision": 49
+    },
+    {
+      "python": "3.12.3",
+      "install": "new temporary virtual environment; exit 0",
+      "smoke_exit_code": 0,
+      "cli_commands_exercised": 14,
+      "mcp_tools_exercised": 14,
+      "transport_parity_operations": 14,
+      "twin_case_parity_operations": 13,
+      "same_case_signed_challenge_parity": true,
+      "signed_cli_approval_verified": true,
+      "sigkill_checkpoint_events": 3,
+      "sigkill_mcp_resume": true,
+      "paired_cli_writers_preserved_items": true,
+      "phases_accepted": 9,
+      "items": 29,
+      "revision": 49
+    }
+  ],
+  "limits": [
+    "The assertions cover these operation paths and states, not all possible inputs, errors or states.",
+    "Audit timestamps and hashes differ naturally between twin cases; UTC timing is checked per call, not exact timestamp equality.",
+    "The signed approvals use a synthetic in-memory key and do not represent consent, identity or authority of a real human.",
+    "The SIGKILL follows a published checkpoint and the paired CLI writer barrier does not prove a ledger-read collision or model-agent concurrency.",
+    "The wheel is a local build artifact and is not committed. No field intervention or controlled model comparison is shown."
+  ]
+}
