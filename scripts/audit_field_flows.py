@@ -1,7 +1,7 @@
-"""Read-only, schema-1 preflight for declared food-chain field observations.
+"""Read-only preflight for declared food-chain field observations.
 
 Usage: ``python scripts/audit_field_flows.py field.json`` (``-`` reads stdin).
-The JSON object has ``schema: 1``, ``study_id``, ``balance_tolerance_kg``,
+The JSON object has ``schema: 1`` or ``schema: 2``, ``study_id``, ``balance_tolerance_kg``,
 ``tolerance_source``, ``currency``, and arrays ``actors``, ``groups``,
 ``periods``, ``lots``, ``flows``, ``burdens``. ``service`` is optional.
 
@@ -17,7 +17,21 @@ nonzero; these are parser bounds, not scientific acceptance thresholds.
 
 Each lot is one observed operation: ``id``, ``group_id``, ``period``, ``stage``,
 ``source``, ``input_flow_ids``, ``output_flow_ids``,
-``observed_input_load_ids`` and ``observed_output_load_ids``. Each flow has
+``observed_input_load_ids`` and ``observed_output_load_ids``. Schema 2 also
+requires ``stage_role``: production, storage, transport, transformation or
+other. For every group-period, it requires one continuous declared path from
+an externally fed production lot to a human-consumption flow that visits
+storage, transport and at least two transformation lots. Their relative order
+is not fixed; the two transformations occur in series along the same path,
+possibly with other operations between them.
+Every declared human-consumption flow must be reachable from production.
+``scope_status`` distinguishes this schema-2 witness check from schema 1's
+unchecked stage coverage; ``stage_witnesses`` lists one lot path and terminal
+consumption flow per group-period for schema 2, or is empty for schema 1.
+The witness is a path of linked operations: a lot with multiple inputs and
+outputs does not identify which input material became a given output. These
+declarations do not certify every branch or household. Schema 1 remains
+accepted without this stage coverage check. Each flow has
 ``id``, globally unique physical ``load_id``, ``group_id``, ``period``,
 ``from_lot_id`` and ``to_lot_id`` (one may be null), ``kind``, ``mass``,
 ``source``, ``destination`` and ``outcome``. External inputs use kind feed,
@@ -60,9 +74,9 @@ the first assignment; the latter cannot predate its declared approval.
 This is a structural audit of supplied JSON. It cannot authenticate sources,
 load identity, weighing calibration, safety tests, approval signatures,
 representativeness, causal assignment, actor coverage, equivalence content,
-or field impact. ``stage`` is free text: a passing graph may omit production,
-storage, transport or successive transformations. Full production-to-consumption
-scope and observed household coverage require an external audit. Its worst-case
+or field impact. ``stage`` is free text; schema-2 ``stage_role`` is also only a
+declaration. Full production-to-consumption scope and observed household
+coverage require an external audit. Its worst-case
 balance allowance sums declared measurement uncertainties and a declared
 tolerance; that is not a confidence interval. Even a passing preflight leaves
 criterion 3 unassessed. FAO's distinct tracked loads and stage percentages
@@ -85,9 +99,11 @@ from typing import Any
 
 CLASSIFICATION = "field_flow_preflight_declared_only"
 NOTICE = (
-    "Valid means only that the declared graph is internally consistent; required "
-    "stages and full production-to-consumption scope are not checked. Declared "
-    "JSON only: physical identity, source truth, calibration, safety, "
+    "Valid means only that the declared graph is internally consistent. Schema 2 "
+    "checks a declared stage-role witness path per group-period; schema 1 does "
+    "not check stage coverage. Neither checks full population, branch coverage "
+    "or within-lot input-output lineage. "
+    "Declared JSON only: physical identity, stage truth, source truth, calibration, safety, "
     "nutrition, independent approval, causal design and observed impact are not "
     "authenticated. No V or G is calculated; criterion 3 is not assessed."
 )
@@ -97,6 +113,7 @@ MIN_ABS_NONZERO = Decimal("1e-18")
 MAX_DECIMAL_DIGITS = 80
 INPUT_KINDS = {"feed", "ingredient", "water_addition"}
 OUTPUT_KINDS = {"product", "coproduct", "residue", "moisture"}
+STAGE_ROLES = {"production", "storage", "transport", "transformation", "other"}
 NONHUMAN_DESTINATIONS = {
     "animal_feed", "compost", "fuel", "landfill", "wastewater",
     "evaporation", "industrial_use",
@@ -358,14 +375,95 @@ def _validate_service(service: Any, groups: dict[str, dict[str, Any]], periods: 
     return "declared_service_inputs_bounded_approval_unverified"
 
 
+def _stage_witness_paths(lots: dict[str, dict[str, Any]], flows: dict[str, dict[str, Any]],
+                         consumed: dict[tuple[str, str], set[str]], adjacency: dict[str, set[str]],
+                         group_periods: set[tuple[str, str]]) -> list[dict[str, Any]]:
+    """Find a single uninterrupted stage sequence per group-period in schema 2."""
+    def advance(lot_id: str, stored: bool, transported: bool,
+                transformations: int) -> tuple[str, bool, bool, int]:
+        role = lots[lot_id]["stage_role"]
+        stored = stored or role == "storage"
+        transported = transported or role == "transport"
+        if role == "transformation":
+            transformations = min(2, transformations + 1)
+        return lot_id, stored, transported, transformations
+
+    production_roots: dict[tuple[str, str], set[str]] = defaultdict(set)
+    for flow in flows.values():
+        target = flow["to"]
+        if flow["from"] is None and flow["kind"] == "feed" and target is not None:
+            if lots[target]["stage_role"] == "production":
+                production_roots[(flow["group_id"], flow["period"])].add(target)
+
+    witnesses: list[dict[str, Any]] = []
+    for key in sorted(group_periods):
+        roots = production_roots[key]
+        consumed_by_lot: dict[str, list[str]] = defaultdict(list)
+        for flow_id in sorted(consumed[key]):
+            source = flows[flow_id]["from"]
+            if source is not None:
+                consumed_by_lot[source].append(flow_id)
+
+        # A separate valid branch must not hide an untraced consumed output.
+        reachable = set(roots)
+        queue = deque(sorted(roots))
+        while queue:
+            for child in sorted(adjacency[queue.popleft()]):
+                if child not in reachable:
+                    reachable.add(child)
+                    queue.append(child)
+        untraced = [flow_id for lot_id, flow_ids in consumed_by_lot.items()
+                    if lot_id not in reachable for flow_id in flow_ids]
+        if untraced:
+            raise FieldFlowError(
+                f"group-period {key} has human-consumption flows not reachable from "
+                f"externally fed production: {sorted(untraced)}"
+            )
+
+        # The search state follows one path. Summing roles over all reachable
+        # nodes would falsely join stages on disjoint branches or coproducts.
+        start_states = [advance(root, False, False, 0) for root in sorted(roots)]
+        candidates = deque(start_states)
+        parents: dict[tuple[str, bool, bool, int], tuple[str, bool, bool, int] | None] = {
+            state: None for state in start_states
+        }
+        witness: dict[str, Any] | None = None
+        while candidates:
+            state = candidates.popleft()
+            lot_id, stored, transported, transformations = state
+            if stored and transported and transformations == 2 and consumed_by_lot[lot_id]:
+                path = []
+                cursor: tuple[str, bool, bool, int] | None = state
+                while cursor is not None:
+                    path.append(cursor[0])
+                    cursor = parents[cursor]
+                witness = {"group_id": key[0], "period": key[1], "lot_ids": path[::-1],
+                           "consumption_flow_id": consumed_by_lot[lot_id][0]}
+                break
+            for child in sorted(adjacency[lot_id]):
+                child_state = advance(child, stored, transported, transformations)
+                if child_state not in parents:
+                    parents[child_state] = state
+                    candidates.append(child_state)
+        if witness is None:
+            raise FieldFlowError(
+                f"group-period {key} lacks a continuous declared path from externally fed "
+                "production to human consumption visiting storage, transport, and two "
+                "transformations in series (no fixed stage order)"
+            )
+        witnesses.append(witness)
+    return witnesses
+
+
 def audit_field_flows(data: Any) -> dict[str, Any]:
     """Validate declarations and return a structural report, never an impact estimate."""
     root = _object(data, "field data", {
         "schema", "study_id", "balance_tolerance_kg", "tolerance_source", "currency",
         "actors", "groups", "periods", "lots", "flows", "burdens",
     }, {"service"})
-    if type(root["schema"]) is not int or root["schema"] != 1:
-        raise FieldFlowError("schema must be integer 1")
+    if type(root["schema"]) is not int or root["schema"] not in {1, 2}:
+        raise FieldFlowError("schema must be integer 1 or 2")
+    schema = root["schema"]
     study_id = _text(root["study_id"], "study_id")
     tolerance = Fraction(_number(root["balance_tolerance_kg"], "balance_tolerance_kg"))
     tolerance_source_at = _evidence(root["tolerance_source"], "tolerance_source")
@@ -421,13 +519,15 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
         item = _object(raw, label, {
             "id", "group_id", "period", "stage", "source", "input_flow_ids",
             "output_flow_ids", "observed_input_load_ids", "observed_output_load_ids",
-        })
+        } | ({"stage_role"} if schema == 2 else set()))
         lot_id = _unique_id(item["id"], f"{label}.id", ids)
         group_id = _text(item["group_id"], f"{label}.group_id")
         period = _text(item["period"], f"{label}.period")
         if group_id not in groups or period not in periods:
             raise FieldFlowError(f"{label} references unknown group or period")
         _text(item["stage"], f"{label}.stage")
+        stage_role = (_choice(item["stage_role"], f"{label}.stage_role", STAGE_ROLES)
+                      if schema == 2 else None)
         lot_at = _period_evidence(item["source"], f"{label}.source", period_times[period])
         inputs = _ids(item["input_flow_ids"], f"{label}.input_flow_ids")
         outputs = _ids(item["output_flow_ids"], f"{label}.output_flow_ids")
@@ -437,7 +537,7 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
             "group_id": group_id, "period": period, "inputs": set(inputs), "outputs": set(outputs),
             "input_loads": set(_ids(item["observed_input_load_ids"], f"{label}.observed_input_load_ids")),
             "output_loads": set(_ids(item["observed_output_load_ids"], f"{label}.observed_output_load_ids")),
-            "observed_at": lot_at,
+            "observed_at": lot_at, "stage_role": stage_role,
         }
     flows: dict[str, dict[str, Any]] = {}
     load_ids: set[str] = set()
@@ -547,6 +647,8 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
     actual_gp = {(lot["group_id"], lot["period"]) for lot in lots.values()}
     if actual_gp != expected_gp or any(not roots[key] or not terminals[key] for key in expected_gp):
         raise FieldFlowError("every group-period needs a complete observed path from external input to terminal destination")
+    stage_witnesses = (_stage_witness_paths(lots, flows, consumed, adjacency, expected_gp)
+                       if schema == 2 else [])
     burden_keys: set[tuple[str, str, str]] = set()
     for index, raw in enumerate(_array(root["burdens"], "burdens")):
         label = f"burdens[{index}]"
@@ -575,13 +677,15 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
     service_status = _validate_service(root.get("service"), groups, periods, actors, consumed,
                                        period_times, consumed_outcome_at)
     return {
-        "schema": 1, "classification": CLASSIFICATION, "valid": True,
+        "schema": schema, "classification": CLASSIFICATION, "valid": True,
         "study_id": study_id, "notice": NOTICE,
         "counts": {"groups": len(groups), "lots": len(lots), "flows": len(flows),
                    "terminal_flows": sum(terminals.values()),
                    "consumed_flows": sum(map(len, consumed.values())), "burden_rows": len(burden_keys)},
         "balances": sorted(balances, key=lambda item: item["lot_id"]),
-        "scope_status": "declared_graph_only_full_chain_not_checked",
+        "scope_status": ("declared_stage_witness_per_group_period_only" if schema == 2
+                         else "declared_graph_only_full_chain_not_checked"),
+        "stage_witnesses": stage_witnesses,
         "service_status": service_status,
         "criterion_3": {"status": "not_assessed", "reason": NOTICE},
     }
@@ -602,7 +706,7 @@ def _invalid_constant(value: str) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("field_data", help="schema-1 field observation JSON path, or - for stdin")
+    parser.add_argument("field_data", help="schema-1 or schema-2 field observation JSON path, or - for stdin")
     args = parser.parse_args(argv)
     try:
         source = sys.stdin.read() if args.field_data == "-" else Path(args.field_data).read_text(encoding="utf-8")

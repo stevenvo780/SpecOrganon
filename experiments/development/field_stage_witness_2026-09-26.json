@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_declared_field_scope_control",
+  "baseline_commit": "ce41d6c1f93ed9c4a7cfcf2b284b417624edbbad",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "baseline_sha256": {
+    "scripts/audit_field_flows.py": "99359c65b48633e1f64165dae2f9f6ca4d5bd53322a9cf4746b19836118e04e8",
+    "tests/test_audit_field_flows.py": "ecbf155f52b6c6450da6d157eac42bafeff577f0171fa73771dcd6248d2b2006"
+  },
+  "current_sha256": {
+    "scripts/audit_field_flows.py": "9ba5f644768ab45958bd379cf926e6164353074a66e15d33390609af67f53e78",
+    "tests/test_audit_field_flows.py": "b895873521d48c6de199e15bc426d01f6bd104c45031424f6aa9ce704af2df12"
+  },
+  "gap": {
+    "baseline_behavior": "A synthetic feed-to-one-lot-to-human-consumption graph passed valid:true because lot.stage was free text.",
+    "baseline_scope_status": "declared_graph_only_full_chain_not_checked",
+    "baseline_criterion_3": "not_assessed",
+    "risk": "A reader could mistake internal graph validity for structural coverage of production, storage, transport and successive transformations."
+  },
+  "contract": {
+    "schema_1": "Acceptance rules unchanged; stage coverage is not checked, scope_status remains declared_graph_only_full_chain_not_checked, and the response gains stage_witnesses: [].",
+    "schema_2": "Each lot requires a declared stage_role. Every group-period requires one witness path of linked operations from an external feed into production to human consumption, visiting storage, transport and two transformations in series with no fixed stage order. All declared consumption outputs must be reachable from externally fed production.",
+    "stage_roles": ["production", "storage", "transport", "transformation", "other"],
+    "scope_status": "declared_stage_witness_per_group_period_only",
+    "witness_output": "stage_witnesses records lot IDs and a terminal consumption flow ID for each group-period.",
+    "criterion_3": "not_assessed"
+  },
+  "negative_controls": [
+    "Schema 2 rejects a short graph despite balanced masses and valid declared consumption outcomes.",
+    "Schema 2 rejects a missing or invalid role and a path with only one transformation.",
+    "Schema 2 rejects coproduct branches that split storage from transport so no single path contains both.",
+    "Schema 2 rejects a declared consumed branch with no externally fed production ancestor."
+  ],
+  "positive_controls": [
+    "A synthetic schema-2 graph with one stage witness per group-period passes and reports four witnesses.",
+    "Transport before storage passes when both are on the same path, and one transformation may precede both logistics stages.",
+    "The schema-1 short graph still passes only with its explicit full-chain-not-checked status.",
+    "The schema-2 CLI path passes without mutating its input."
+  ],
+  "gates": {
+    "uv run pytest -q tests/test_audit_field_flows.py": "68 passed",
+    "uv run pytest -q": "519 passed",
+    "uv run ruff check .": "All checks passed!",
+    "git diff --check": "passed"
+  },
+  "limits": [
+    "All test observations and source declarations are synthetic. A stage_role label is not an authenticated physical stage.",
+    "A witness links operations; when an operation mixes inputs and outputs it does not identify which material entered a given output.",
+    "One witness per group-period does not certify all branches, households or population coverage.",
+    "The preflight does not calculate V or G or establish causal impact, source authenticity, assignment integrity or independent approval."
+  ],
+  "criterion_3": "not_assessed"
+}
