@@ -1,0 +1,1858 @@
+{
+  "comparison_scope": "synthetic workflow mechanics only",
+  "python": "3.12.3",
+  "scenarios": 8,
+  "results": [
+    {
+      "scenario": "nominal",
+      "mode": "sequential",
+      "commands": 7,
+      "repair_commands": 0,
+      "failed_commands": [],
+      "wall_ms": 145.618,
+      "state_bytes": 2980,
+      "status": {
+        "accepted_phases": [
+          "philosophy",
+          "science",
+          "engineering",
+          "validation"
+        ],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 6,
+        "mode": "sequential",
+        "ok": true,
+        "phase_status": {
+          "engineering": "accepted",
+          "philosophy": "accepted",
+          "science": "accepted",
+          "validation": "accepted"
+        },
+        "stale_nodes": [],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 35.548,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 18.751,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.698,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.362,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.791,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 19.107,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 17.361,
+          "response": {
+            "accepted_phases": [
+              "philosophy",
+              "science",
+              "engineering",
+              "validation"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 6,
+            "mode": "sequential",
+            "ok": true,
+            "phase_status": {
+              "engineering": "accepted",
+              "philosophy": "accepted",
+              "science": "accepted",
+              "validation": "accepted"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "nominal",
+      "mode": "graph",
+      "commands": 7,
+      "repair_commands": 0,
+      "failed_commands": [],
+      "wall_ms": 122.842,
+      "state_bytes": 2975,
+      "status": {
+        "accepted_phases": [
+          "philosophy",
+          "science",
+          "engineering",
+          "validation"
+        ],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 6,
+        "mode": "graph",
+        "ok": true,
+        "phase_status": {
+          "engineering": "accepted",
+          "philosophy": "accepted",
+          "science": "accepted",
+          "validation": "accepted"
+        },
+        "stale_nodes": [],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 17.725,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 17.276,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 16.933,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.652,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.877,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.643,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 16.736,
+          "response": {
+            "accepted_phases": [
+              "philosophy",
+              "science",
+              "engineering",
+              "validation"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 6,
+            "mode": "graph",
+            "ok": true,
+            "phase_status": {
+              "engineering": "accepted",
+              "philosophy": "accepted",
+              "science": "accepted",
+              "validation": "accepted"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "missing_approval",
+      "mode": "sequential",
+      "commands": 3,
+      "repair_commands": 0,
+      "failed_commands": [
+        {
+          "command": "advance",
+          "error": "blocked nodes in philosophy: N"
+        }
+      ],
+      "wall_ms": 52.634,
+      "state_bytes": 2563,
+      "status": {
+        "accepted_phases": [],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 1,
+        "mode": "sequential",
+        "ok": true,
+        "phase_status": {
+          "engineering": "not_started",
+          "philosophy": "not_started",
+          "science": "not_started",
+          "validation": "not_started"
+        },
+        "stale_nodes": [],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 18.033,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 2,
+          "elapsed_ms": 16.967,
+          "response": {
+            "error": "blocked nodes in philosophy: N",
+            "ok": false
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 17.634,
+          "response": {
+            "accepted_phases": [],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 1,
+            "mode": "sequential",
+            "ok": true,
+            "phase_status": {
+              "engineering": "not_started",
+              "philosophy": "not_started",
+              "science": "not_started",
+              "validation": "not_started"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "missing_approval",
+      "mode": "graph",
+      "commands": 3,
+      "repair_commands": 0,
+      "failed_commands": [
+        {
+          "command": "advance",
+          "error": "blocked nodes in philosophy: N"
+        }
+      ],
+      "wall_ms": 53.771,
+      "state_bytes": 2558,
+      "status": {
+        "accepted_phases": [],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 1,
+        "mode": "graph",
+        "ok": true,
+        "phase_status": {
+          "engineering": "not_started",
+          "philosophy": "not_started",
+          "science": "not_started",
+          "validation": "not_started"
+        },
+        "stale_nodes": [],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 18.122,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 2,
+          "elapsed_ms": 17.764,
+          "response": {
+            "error": "blocked nodes in philosophy: N",
+            "ok": false
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 17.885,
+          "response": {
+            "accepted_phases": [],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 1,
+            "mode": "graph",
+            "ok": true,
+            "phase_status": {
+              "engineering": "not_started",
+              "philosophy": "not_started",
+              "science": "not_started",
+              "validation": "not_started"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "insufficient_evidence",
+      "mode": "sequential",
+      "commands": 6,
+      "repair_commands": 0,
+      "failed_commands": [
+        {
+          "command": "advance",
+          "error": "blocked nodes in science: E"
+        }
+      ],
+      "wall_ms": 109.603,
+      "state_bytes": 2933,
+      "status": {
+        "accepted_phases": [
+          "philosophy"
+        ],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 4,
+        "mode": "sequential",
+        "ok": true,
+        "phase_status": {
+          "engineering": "not_started",
+          "philosophy": "accepted",
+          "science": "not_started",
+          "validation": "not_started"
+        },
+        "stale_nodes": [],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 18.531,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 18.466,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.387,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "revise",
+          "exit_code": 0,
+          "elapsed_ms": 18.969,
+          "response": {
+            "action": "revise",
+            "affected": [
+              "E"
+            ],
+            "id": "E",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 2,
+          "elapsed_ms": 17.87,
+          "response": {
+            "error": "blocked nodes in science: E",
+            "ok": false
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 17.38,
+          "response": {
+            "accepted_phases": [
+              "philosophy"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 4,
+            "mode": "sequential",
+            "ok": true,
+            "phase_status": {
+              "engineering": "not_started",
+              "philosophy": "accepted",
+              "science": "not_started",
+              "validation": "not_started"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "insufficient_evidence",
+      "mode": "graph",
+      "commands": 6,
+      "repair_commands": 0,
+      "failed_commands": [
+        {
+          "command": "advance",
+          "error": "blocked nodes in science: E"
+        }
+      ],
+      "wall_ms": 106.011,
+      "state_bytes": 2952,
+      "status": {
+        "accepted_phases": [
+          "philosophy"
+        ],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 4,
+        "mode": "graph",
+        "ok": true,
+        "phase_status": {
+          "engineering": "not_started",
+          "philosophy": "accepted",
+          "science": "not_started",
+          "validation": "not_started"
+        },
+        "stale_nodes": [
+          "R",
+          "V"
+        ],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 18.086,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 17.133,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.792,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "revise",
+          "exit_code": 0,
+          "elapsed_ms": 18.536,
+          "response": {
+            "action": "revise",
+            "affected": [
+              "E",
+              "R",
+              "V"
+            ],
+            "id": "E",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 2,
+          "elapsed_ms": 17.616,
+          "response": {
+            "error": "blocked nodes in science: E",
+            "ok": false
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 16.848,
+          "response": {
+            "accepted_phases": [
+              "philosophy"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 4,
+            "mode": "graph",
+            "ok": true,
+            "phase_status": {
+              "engineering": "not_started",
+              "philosophy": "accepted",
+              "science": "not_started",
+              "validation": "not_started"
+            },
+            "stale_nodes": [
+              "R",
+              "V"
+            ],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "late_contradiction",
+      "mode": "sequential",
+      "commands": 8,
+      "repair_commands": 0,
+      "failed_commands": [],
+      "wall_ms": 143.208,
+      "state_bytes": 3197,
+      "status": {
+        "accepted_phases": [
+          "philosophy",
+          "engineering",
+          "validation"
+        ],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 7,
+        "mode": "sequential",
+        "ok": true,
+        "phase_status": {
+          "engineering": "accepted",
+          "philosophy": "accepted",
+          "science": "needs_review",
+          "validation": "accepted"
+        },
+        "stale_nodes": [],
+        "unsafe_accepted_phases": [
+          "engineering",
+          "validation"
+        ]
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 16.921,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 17.229,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.704,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.84,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.764,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.67,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "revise",
+          "exit_code": 0,
+          "elapsed_ms": 17.923,
+          "response": {
+            "action": "revise",
+            "affected": [
+              "E"
+            ],
+            "id": "E",
+            "ok": true
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 17.157,
+          "response": {
+            "accepted_phases": [
+              "philosophy",
+              "engineering",
+              "validation"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 7,
+            "mode": "sequential",
+            "ok": true,
+            "phase_status": {
+              "engineering": "accepted",
+              "philosophy": "accepted",
+              "science": "needs_review",
+              "validation": "accepted"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": [
+              "engineering",
+              "validation"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "late_contradiction",
+      "mode": "graph",
+      "commands": 8,
+      "repair_commands": 0,
+      "failed_commands": [],
+      "wall_ms": 142.264,
+      "state_bytes": 3224,
+      "status": {
+        "accepted_phases": [
+          "philosophy"
+        ],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 7,
+        "mode": "graph",
+        "ok": true,
+        "phase_status": {
+          "engineering": "needs_review",
+          "philosophy": "accepted",
+          "science": "needs_review",
+          "validation": "needs_review"
+        },
+        "stale_nodes": [
+          "R",
+          "V"
+        ],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 18.194,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 18.409,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.004,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.61,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.368,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.328,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "revise",
+          "exit_code": 0,
+          "elapsed_ms": 18.07,
+          "response": {
+            "action": "revise",
+            "affected": [
+              "E",
+              "R",
+              "V"
+            ],
+            "id": "E",
+            "ok": true
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 17.281,
+          "response": {
+            "accepted_phases": [
+              "philosophy"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 7,
+            "mode": "graph",
+            "ok": true,
+            "phase_status": {
+              "engineering": "needs_review",
+              "philosophy": "accepted",
+              "science": "needs_review",
+              "validation": "needs_review"
+            },
+            "stale_nodes": [
+              "R",
+              "V"
+            ],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "assumption_shift",
+      "mode": "sequential",
+      "commands": 8,
+      "repair_commands": 0,
+      "failed_commands": [],
+      "wall_ms": 149.203,
+      "state_bytes": 3196,
+      "status": {
+        "accepted_phases": [
+          "science",
+          "engineering",
+          "validation"
+        ],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 7,
+        "mode": "sequential",
+        "ok": true,
+        "phase_status": {
+          "engineering": "accepted",
+          "philosophy": "needs_review",
+          "science": "accepted",
+          "validation": "accepted"
+        },
+        "stale_nodes": [],
+        "unsafe_accepted_phases": [
+          "science",
+          "engineering",
+          "validation"
+        ]
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 18.137,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 18.161,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.013,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.519,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.209,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.697,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "revise",
+          "exit_code": 0,
+          "elapsed_ms": 20.044,
+          "response": {
+            "action": "revise",
+            "affected": [
+              "A"
+            ],
+            "id": "A",
+            "ok": true
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 19.423,
+          "response": {
+            "accepted_phases": [
+              "science",
+              "engineering",
+              "validation"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 7,
+            "mode": "sequential",
+            "ok": true,
+            "phase_status": {
+              "engineering": "accepted",
+              "philosophy": "needs_review",
+              "science": "accepted",
+              "validation": "accepted"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": [
+              "science",
+              "engineering",
+              "validation"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "assumption_shift",
+      "mode": "graph",
+      "commands": 8,
+      "repair_commands": 0,
+      "failed_commands": [],
+      "wall_ms": 152.079,
+      "state_bytes": 3239,
+      "status": {
+        "accepted_phases": [],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 7,
+        "mode": "graph",
+        "ok": true,
+        "phase_status": {
+          "engineering": "needs_review",
+          "philosophy": "needs_review",
+          "science": "needs_review",
+          "validation": "needs_review"
+        },
+        "stale_nodes": [
+          "E",
+          "R",
+          "V"
+        ],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 19.233,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 18.993,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.986,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.16,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.06,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.418,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "revise",
+          "exit_code": 0,
+          "elapsed_ms": 22.437,
+          "response": {
+            "action": "revise",
+            "affected": [
+              "A",
+              "E",
+              "R",
+              "V"
+            ],
+            "id": "A",
+            "ok": true
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 18.792,
+          "response": {
+            "accepted_phases": [],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 7,
+            "mode": "graph",
+            "ok": true,
+            "phase_status": {
+              "engineering": "needs_review",
+              "philosophy": "needs_review",
+              "science": "needs_review",
+              "validation": "needs_review"
+            },
+            "stale_nodes": [
+              "E",
+              "R",
+              "V"
+            ],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "resume_after_process_exit",
+      "mode": "sequential",
+      "commands": 8,
+      "repair_commands": 0,
+      "failed_commands": [],
+      "wall_ms": 138.65,
+      "state_bytes": 2980,
+      "status": {
+        "accepted_phases": [
+          "philosophy",
+          "science",
+          "engineering",
+          "validation"
+        ],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 6,
+        "mode": "sequential",
+        "ok": true,
+        "phase_status": {
+          "engineering": "accepted",
+          "philosophy": "accepted",
+          "science": "accepted",
+          "validation": "accepted"
+        },
+        "stale_nodes": [],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 17.619,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 17.345,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.377,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.27,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 17.244,
+          "response": {
+            "accepted_phases": [
+              "philosophy",
+              "science"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 4,
+            "mode": "sequential",
+            "ok": true,
+            "phase_status": {
+              "engineering": "not_started",
+              "philosophy": "accepted",
+              "science": "accepted",
+              "validation": "not_started"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": []
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.533,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.099,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 16.163,
+          "response": {
+            "accepted_phases": [
+              "philosophy",
+              "science",
+              "engineering",
+              "validation"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 6,
+            "mode": "sequential",
+            "ok": true,
+            "phase_status": {
+              "engineering": "accepted",
+              "philosophy": "accepted",
+              "science": "accepted",
+              "validation": "accepted"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "resume_after_process_exit",
+      "mode": "graph",
+      "commands": 8,
+      "repair_commands": 0,
+      "failed_commands": [],
+      "wall_ms": 144.506,
+      "state_bytes": 2975,
+      "status": {
+        "accepted_phases": [
+          "philosophy",
+          "science",
+          "engineering",
+          "validation"
+        ],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 6,
+        "mode": "graph",
+        "ok": true,
+        "phase_status": {
+          "engineering": "accepted",
+          "philosophy": "accepted",
+          "science": "accepted",
+          "validation": "accepted"
+        },
+        "stale_nodes": [],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 17.728,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 18.805,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 19.387,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.902,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 16.45,
+          "response": {
+            "accepted_phases": [
+              "philosophy",
+              "science"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 4,
+            "mode": "graph",
+            "ok": true,
+            "phase_status": {
+              "engineering": "not_started",
+              "philosophy": "accepted",
+              "science": "accepted",
+              "validation": "not_started"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": []
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.196,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.4,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 17.638,
+          "response": {
+            "accepted_phases": [
+              "philosophy",
+              "science",
+              "engineering",
+              "validation"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 6,
+            "mode": "graph",
+            "ok": true,
+            "phase_status": {
+              "engineering": "accepted",
+              "philosophy": "accepted",
+              "science": "accepted",
+              "validation": "accepted"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "recovery_after_correction",
+      "mode": "sequential",
+      "commands": 12,
+      "repair_commands": 4,
+      "failed_commands": [],
+      "wall_ms": 219.785,
+      "state_bytes": 3646,
+      "status": {
+        "accepted_phases": [
+          "philosophy",
+          "science",
+          "engineering",
+          "validation"
+        ],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 11,
+        "mode": "sequential",
+        "ok": true,
+        "phase_status": {
+          "engineering": "accepted",
+          "philosophy": "accepted",
+          "science": "accepted",
+          "validation": "accepted"
+        },
+        "stale_nodes": [],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 19.435,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 18.538,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.796,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.79,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 19.063,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.43,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "revise",
+          "exit_code": 0,
+          "elapsed_ms": 17.701,
+          "response": {
+            "action": "revise",
+            "affected": [
+              "E"
+            ],
+            "id": "E",
+            "ok": true
+          }
+        },
+        {
+          "command": "revise",
+          "exit_code": 0,
+          "elapsed_ms": 17.697,
+          "response": {
+            "action": "revise",
+            "affected": [
+              "E"
+            ],
+            "id": "E",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.817,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.867,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.287,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 17.364,
+          "response": {
+            "accepted_phases": [
+              "philosophy",
+              "science",
+              "engineering",
+              "validation"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 11,
+            "mode": "sequential",
+            "ok": true,
+            "phase_status": {
+              "engineering": "accepted",
+              "philosophy": "accepted",
+              "science": "accepted",
+              "validation": "accepted"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "recovery_after_correction",
+      "mode": "graph",
+      "commands": 14,
+      "repair_commands": 6,
+      "failed_commands": [],
+      "wall_ms": 251.049,
+      "state_bytes": 3881,
+      "status": {
+        "accepted_phases": [
+          "philosophy",
+          "science",
+          "engineering",
+          "validation"
+        ],
+        "action": "status",
+        "case_id": "cold_chain_fixture",
+        "history_length": 13,
+        "mode": "graph",
+        "ok": true,
+        "phase_status": {
+          "engineering": "accepted",
+          "philosophy": "accepted",
+          "science": "accepted",
+          "validation": "accepted"
+        },
+        "stale_nodes": [],
+        "unsafe_accepted_phases": []
+      },
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 0,
+          "elapsed_ms": 18.458,
+          "response": {
+            "action": "init",
+            "case_id": "cold_chain_fixture",
+            "ok": true
+          }
+        },
+        {
+          "command": "approve",
+          "exit_code": 0,
+          "elapsed_ms": 17.368,
+          "response": {
+            "action": "approve",
+            "id": "N",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 16.752,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "philosophy"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.372,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 19.17,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 18.141,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "revise",
+          "exit_code": 0,
+          "elapsed_ms": 18.157,
+          "response": {
+            "action": "revise",
+            "affected": [
+              "E",
+              "R",
+              "V"
+            ],
+            "id": "E",
+            "ok": true
+          }
+        },
+        {
+          "command": "revise",
+          "exit_code": 0,
+          "elapsed_ms": 17.425,
+          "response": {
+            "action": "revise",
+            "affected": [
+              "E",
+              "R",
+              "V"
+            ],
+            "id": "E",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 16.937,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "science"
+          }
+        },
+        {
+          "command": "review",
+          "exit_code": 0,
+          "elapsed_ms": 18.235,
+          "response": {
+            "action": "review",
+            "id": "R",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 19.664,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "engineering"
+          }
+        },
+        {
+          "command": "review",
+          "exit_code": 0,
+          "elapsed_ms": 18.734,
+          "response": {
+            "action": "review",
+            "id": "V",
+            "ok": true
+          }
+        },
+        {
+          "command": "advance",
+          "exit_code": 0,
+          "elapsed_ms": 17.863,
+          "response": {
+            "action": "advance",
+            "ok": true,
+            "phase": "validation"
+          }
+        },
+        {
+          "command": "status",
+          "exit_code": 0,
+          "elapsed_ms": 16.773,
+          "response": {
+            "accepted_phases": [
+              "philosophy",
+              "science",
+              "engineering",
+              "validation"
+            ],
+            "action": "status",
+            "case_id": "cold_chain_fixture",
+            "history_length": 13,
+            "mode": "graph",
+            "ok": true,
+            "phase_status": {
+              "engineering": "accepted",
+              "philosophy": "accepted",
+              "science": "accepted",
+              "validation": "accepted"
+            },
+            "stale_nodes": [],
+            "unsafe_accepted_phases": []
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "invalid_dependency",
+      "mode": "sequential",
+      "commands": 1,
+      "repair_commands": 0,
+      "failed_commands": [
+        {
+          "command": "init",
+          "error": "unknown dependency MISSING in P"
+        }
+      ],
+      "wall_ms": 17.118,
+      "state_bytes": 0,
+      "status": null,
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 2,
+          "elapsed_ms": 17.118,
+          "response": {
+            "error": "unknown dependency MISSING in P",
+            "ok": false
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "invalid_dependency",
+      "mode": "graph",
+      "commands": 1,
+      "repair_commands": 0,
+      "failed_commands": [
+        {
+          "command": "init",
+          "error": "unknown dependency MISSING in P"
+        }
+      ],
+      "wall_ms": 17.677,
+      "state_bytes": 0,
+      "status": null,
+      "events": [
+        {
+          "command": "init",
+          "exit_code": 2,
+          "elapsed_ms": 17.677,
+          "response": {
+            "error": "unknown dependency MISSING in P",
+            "ok": false
+          }
+        }
+      ]
+    }
+  ]
+}
