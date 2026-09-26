@@ -1,7 +1,7 @@
 """Read-only preflight for declared food-chain field observations.
 
 Usage: ``python scripts/audit_field_flows.py field.json`` (``-`` reads stdin).
-The JSON object has ``schema: 1`` or ``schema: 2``, ``study_id``, ``balance_tolerance_kg``,
+The JSON object has ``schema: 1``, ``schema: 2`` or ``schema: 3``, ``study_id``, ``balance_tolerance_kg``,
 ``tolerance_source``, ``currency``, and arrays ``actors``, ``groups``,
 ``periods``, ``lots``, ``flows``, ``burdens``. ``service`` is optional.
 
@@ -24,13 +24,27 @@ path from an externally fed production lot that visits storage, transport and
 at least two transformation lots. Their relative order is not fixed; the two
 transformations occur in series along the same path, possibly with other
 operations between them.
-``scope_status`` distinguishes this schema-2 witness check from schema 1's
+``scope_status`` distinguishes this schema-2/3 witness check from schema 1's
 unchecked stage coverage; ``stage_witnesses`` lists one lot path per declared
-terminal consumption flow for schema 2, or is empty for schema 1.
+terminal consumption flow for schema 2/3, or is empty for schema 1.
 The witness is a path of linked operations: a lot with multiple inputs and
 outputs does not identify which input material became a given output. These
 declarations do not certify undeclared branches or households. Schema 1 remains
-accepted without this stage coverage check. Each flow has
+accepted without this stage coverage check. Schema 3 retains schema-2 stage
+roles, terminal load-bound evidence and lot-path witnesses, and requires each
+lot to declare nonempty ``allocations`` of ``{input_flow_id, output_flow_id,
+mass, source}``. Allocation ``mass`` uses the same mass shape. Its ``source``
+adds ``input_load_id`` and ``output_load_id`` to the standard evidence fields;
+the IDs must match the linked physical loads, and the observation must occur
+within the period at or after the output flow. Positive rows must cover each
+incident flow, have unique input-output pairs, and sum to each input and
+output's *nominal* mass exactly in rational kg. This strict, opt-in nominal
+reconciliation avoids demanding impossible exact equality of uncertain
+marginals. Schema 3 propagates conservative mass lower bounds for minimum
+stage requirements through these allocations and requires a positive complete-stage
+bound for every declared human-consumption flow. ``lineage_bounds`` reports
+those declared lower bounds; they are not authenticated physical provenance.
+Each flow has
 ``id``, globally unique physical ``load_id``, ``group_id``, ``period``,
 ``from_lot_id`` and ``to_lot_id`` (one may be null), ``kind``, ``mass``,
 ``source``, ``destination`` and ``outcome``. External inputs use kind feed,
@@ -76,7 +90,7 @@ the first assignment; the latter cannot predate its declared approval.
 This is a structural audit of supplied JSON. It cannot authenticate sources,
 load identity, weighing calibration, safety tests, approval signatures,
 representativeness, causal assignment, actor coverage, equivalence content,
-or field impact. ``stage`` is free text; schema-2 ``stage_role`` is also only a
+or field impact. ``stage`` is free text; schema-2/3 ``stage_role`` is also only a
 declaration. Full production-to-consumption scope and observed household
 coverage require an external audit. Its worst-case
 balance allowance sums declared measurement uncertainties and a declared
@@ -108,6 +122,16 @@ NOTICE = (
     "Declared JSON only: physical identity, stage truth, source truth, calibration, safety, "
     "nutrition, independent approval, causal design and observed impact are not "
     "authenticated. No V or G is calculated; criterion 3 is not assessed."
+)
+NOTICE_SCHEMA3 = (
+    "Valid means only that the declared graph and nominal allocations are internally "
+    "consistent. Schema 3 checks a conservative lower bound of complete-stage mass "
+    "lineage for every declared human-consumption flow. Lot-path witnesses are only "
+    "context and do not prove within-lot physical lineage. Declared JSON only: "
+    "physical identity, allocation truth, stage truth, source truth, calibration, "
+    "safety, nutrition, independent approval, causal design and observed impact are "
+    "not authenticated. Undeclared branches and households are not checked. "
+    "No V or G is calculated; criterion 3 is not assessed."
 )
 MASS_FACTORS = {"kg": Fraction(1), "g": Fraction(1, 1000), "t": Fraction(1000)}
 MAX_ABS_NUMBER = Decimal("1e18")
@@ -213,6 +237,19 @@ def _load_bound_period_evidence(value: Any, label: str, interval: tuple[datetime
     return observed_at
 
 
+def _allocation_period_evidence(value: Any, label: str, interval: tuple[datetime, datetime],
+                                input_load_id: str, output_load_id: str) -> datetime:
+    source = _object(value, label, {
+        "source_id", "locator", "observed_at_utc", "method", "input_load_id", "output_load_id",
+    })
+    evidence = {key: source[key] for key in ("source_id", "locator", "observed_at_utc", "method")}
+    observed_at = _period_evidence(evidence, label, interval)
+    for field, expected in (("input_load_id", input_load_id), ("output_load_id", output_load_id)):
+        if _text(source[field], f"{label}.{field}") != expected:
+            raise FieldFlowError(f"{label}.{field} does not match linked flow.load_id")
+    return observed_at
+
+
 def _mass(value: Any, label: str) -> tuple[Fraction, Fraction]:
     row = _object(value, label, {"value", "unit", "uncertainty"})
     unit = _choice(row["unit"], f"{label}.unit", set(MASS_FACTORS))
@@ -270,7 +307,7 @@ def _validate_destination(flow: dict[str, Any], label: str, mass: tuple[Fraction
         return None, None
     dest = _object(destination, f"{label}.destination", {"kind", "source"})
     kind = _choice(dest["kind"], f"{label}.destination.kind", NONHUMAN_DESTINATIONS | {"human_consumption"})
-    if schema == 2:
+    if schema >= 2:
         destination_at = _load_bound_period_evidence(
             dest["source"], f"{label}.destination.source", interval, flow["load_id"]
         )
@@ -279,7 +316,7 @@ def _validate_destination(flow: dict[str, Any], label: str, mass: tuple[Fraction
     observed = _object(outcome, f"{label}.outcome", {"status", "mass", "source", "safety", "nutrition"})
     status = _choice(observed["status"], f"{label}.outcome.status", {"observed_consumed", "observed_other"})
     observed_mass = _mass(observed["mass"], f"{label}.outcome.mass")
-    if schema == 2:
+    if schema >= 2:
         outcome_at = _load_bound_period_evidence(
             observed["source"], f"{label}.outcome.source", interval, flow["load_id"]
         )
@@ -473,14 +510,172 @@ def _stage_witness_paths(lots: dict[str, dict[str, Any]], flows: dict[str, dict[
     return witnesses
 
 
+def _validate_allocations(lots: dict[str, dict[str, Any]], flows: dict[str, dict[str, Any]],
+                          period_times: dict[str, tuple[datetime, datetime]],
+                          ) -> dict[str, list[tuple[str, str, Fraction, Fraction]]]:
+    """Check schema-3 load-bound rows and exact nominal incident-flow totals."""
+    result: dict[str, list[tuple[str, str, Fraction, Fraction]]] = {}
+    for lot_id, lot in lots.items():
+        label = f"lot {lot_id}.allocations"
+        rows: list[tuple[str, str, Fraction, Fraction]] = []
+        pairs: set[tuple[str, str]] = set()
+        input_totals: dict[str, Fraction] = defaultdict(Fraction)
+        output_totals: dict[str, Fraction] = defaultdict(Fraction)
+        for index, raw in enumerate(_array(lot["allocations"], label)):
+            row_label = f"{label}[{index}]"
+            row = _object(raw, row_label, {"input_flow_id", "output_flow_id", "mass", "source"})
+            input_id = _text(row["input_flow_id"], f"{row_label}.input_flow_id")
+            output_id = _text(row["output_flow_id"], f"{row_label}.output_flow_id")
+            if input_id not in lot["inputs"] or output_id not in lot["outputs"]:
+                raise FieldFlowError(f"{row_label} must reference local input and output flows")
+            pair = input_id, output_id
+            if pair in pairs:
+                raise FieldFlowError(f"{row_label} duplicates allocation pair {pair}")
+            pairs.add(pair)
+            mass, uncertainty = _mass(row["mass"], f"{row_label}.mass")
+            observed_at = _allocation_period_evidence(
+                row["source"], f"{row_label}.source", period_times[lot["period"]],
+                flows[input_id]["load_id"], flows[output_id]["load_id"],
+            )
+            if observed_at < flows[output_id]["observed_at"]:
+                raise FieldFlowError(f"{row_label}.source predates its output flow")
+            rows.append((input_id, output_id, mass, uncertainty))
+            input_totals[input_id] += mass
+            output_totals[output_id] += mass
+        if set(input_totals) != lot["inputs"] or set(output_totals) != lot["outputs"]:
+            raise FieldFlowError(f"{label} must cover every local input and output flow")
+        for side, totals, flow_ids in (("input", input_totals, lot["inputs"]),
+                                      ("output", output_totals, lot["outputs"])):
+            for flow_id in sorted(flow_ids):
+                nominal = flows[flow_id]["mass"][0]
+                if totals[flow_id] != nominal:
+                    raise FieldFlowError(
+                        f"{label} {side} flow {flow_id} has nominal allocation sum "
+                        f"{_exact_decimal(totals[flow_id])} kg, expected {_exact_decimal(nominal)} kg; "
+                        "schema 3 requires exact nominal reconciliation because uncertain "
+                        "marginals may not reconcile exactly"
+                    )
+        result[lot_id] = rows
+    return result
+
+
+def _lineage_bounds(lots: dict[str, dict[str, Any]], flows: dict[str, dict[str, Any]],
+                    consumed: dict[tuple[str, str], set[str]], lot_order: list[str],
+                    allocations: dict[str, list[tuple[str, str, Fraction, Fraction]]],
+                    ) -> list[dict[str, str]]:
+    """Propagate conservative mass meeting each minimum stage requirement."""
+    StageState = tuple[bool, bool, int]
+    incident_limits: dict[str, list[tuple[Fraction, Fraction]]] = defaultdict(list)
+    row_limits: dict[str, list[tuple[Fraction, Fraction]]] = {}
+    for lot_id, rows in allocations.items():
+        input_bounds: dict[str, list[Fraction]] = defaultdict(lambda: [Fraction(0), Fraction(0)])
+        output_bounds: dict[str, list[Fraction]] = defaultdict(lambda: [Fraction(0), Fraction(0)])
+        row_limits[lot_id] = []
+        for input_id, output_id, nominal, uncertainty in rows:
+            lower, upper = max(Fraction(0), nominal - uncertainty), nominal + uncertainty
+            row_limits[lot_id].append((lower, upper))
+            for totals, flow_id in ((input_bounds, input_id), (output_bounds, output_id)):
+                totals[flow_id][0] += lower
+                totals[flow_id][1] += upper
+        for totals in (input_bounds, output_bounds):
+            for flow_id, (lower, upper) in totals.items():
+                incident_limits[flow_id].append((lower, upper))
+
+    flow_limits: dict[str, tuple[Fraction, Fraction]] = {}
+    for flow_id, flow in flows.items():
+        nominal, uncertainty = flow["mass"]
+        lower = max(Fraction(0), nominal - uncertainty)
+        upper = nominal + uncertainty
+        for incident_lower, incident_upper in incident_limits[flow_id]:
+            lower = max(lower, incident_lower)
+            upper = min(upper, incident_upper)
+        if lower > upper:
+            raise FieldFlowError(f"schema 3 flow {flow_id} has inconsistent mass intervals")
+        flow_limits[flow_id] = lower, upper
+
+    allocation_lowers: dict[str, list[Fraction]] = {}
+    for lot_id, rows in allocations.items():
+        by_input: dict[str, list[int]] = defaultdict(list)
+        by_output: dict[str, list[int]] = defaultdict(list)
+        for index, (input_id, output_id, _, _) in enumerate(rows):
+            by_input[input_id].append(index)
+            by_output[output_id].append(index)
+        tightened = [list(limits) for limits in row_limits[lot_id]]
+        for groups in (by_input, by_output):
+            for flow_id, indices in groups.items():
+                flow_lower, flow_upper = flow_limits[flow_id]
+                sum_lower = sum((row_limits[lot_id][i][0] for i in indices), Fraction(0))
+                sum_upper = sum((row_limits[lot_id][i][1] for i in indices), Fraction(0))
+                for index in indices:
+                    original_lower, original_upper = row_limits[lot_id][index]
+                    tightened[index][0] = max(tightened[index][0],
+                                              flow_lower - (sum_upper - original_upper))
+                    tightened[index][1] = min(tightened[index][1],
+                                              flow_upper - (sum_lower - original_lower))
+        if any(lower > upper for lower, upper in tightened):
+            raise FieldFlowError(f"schema 3 lot {lot_id} has inconsistent allocation intervals")
+        allocation_lowers[lot_id] = [lower for lower, _ in tightened]
+
+    thresholds: list[StageState] = [
+        (stored, transported, transformations)
+        for stored in (False, True)
+        for transported in (False, True)
+        for transformations in (0, 1, 2)
+    ]
+    bounds: dict[str, dict[StageState, Fraction]] = defaultdict(lambda: defaultdict(Fraction))
+    for flow_id, flow in flows.items():
+        target = flow["to"]
+        if flow["from"] is None and flow["kind"] == "feed" and target is not None:
+            if lots[target]["stage_role"] == "production":
+                bounds[flow_id][(False, False, 0)] = flow_limits[flow_id][0]
+    for lot_id in lot_order:
+        role = lots[lot_id]["stage_role"]
+        for index, (input_id, output_id, _, _) in enumerate(allocations[lot_id]):
+            allocation_lower = allocation_lowers[lot_id][index]
+            input_upper = flow_limits[input_id][1]
+            for stored, transported, transformations in thresholds:
+                # The preimage of an "at least" threshold is itself one
+                # threshold. Keep the mass of all qualifying input states
+                # together before taking the conservative intersection.
+                required_before: StageState = (
+                    stored and role != "storage",
+                    transported and role != "transport",
+                    max(0, transformations - (role == "transformation")),
+                )
+                guaranteed = bounds[input_id].get(required_before, Fraction(0))
+                successor = max(Fraction(0), guaranteed + allocation_lower - input_upper)
+                if successor == 0:
+                    continue
+                bounds[output_id][(stored, transported, transformations)] += successor
+    result: list[dict[str, str]] = []
+    missing: list[str] = []
+    for group_id, period in sorted(consumed):
+        for flow_id in sorted(consumed[(group_id, period)]):
+            guaranteed = bounds[flow_id].get((True, True, 2), Fraction(0))
+            if guaranteed <= 0:
+                missing.append(flow_id)
+            else:
+                result.append({
+                    "group_id": group_id, "period": period,
+                    "consumption_flow_id": flow_id,
+                    "guaranteed_stage_mass_kg": _exact_decimal(guaranteed),
+                })
+    if missing:
+        raise FieldFlowError(
+            "schema 3 has no positive conservative complete-stage mass lineage "
+            f"from externally fed production for human-consumption flows: {missing}"
+        )
+    return result
+
+
 def audit_field_flows(data: Any) -> dict[str, Any]:
     """Validate declarations and return a structural report, never an impact estimate."""
     root = _object(data, "field data", {
         "schema", "study_id", "balance_tolerance_kg", "tolerance_source", "currency",
         "actors", "groups", "periods", "lots", "flows", "burdens",
     }, {"service"})
-    if type(root["schema"]) is not int or root["schema"] not in {1, 2}:
-        raise FieldFlowError("schema must be integer 1 or 2")
+    if type(root["schema"]) is not int or root["schema"] not in {1, 2, 3}:
+        raise FieldFlowError("schema must be integer 1, 2 or 3")
     schema = root["schema"]
     study_id = _text(root["study_id"], "study_id")
     tolerance = Fraction(_number(root["balance_tolerance_kg"], "balance_tolerance_kg"))
@@ -537,7 +732,8 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
         item = _object(raw, label, {
             "id", "group_id", "period", "stage", "source", "input_flow_ids",
             "output_flow_ids", "observed_input_load_ids", "observed_output_load_ids",
-        } | ({"stage_role"} if schema == 2 else set()))
+        } | ({"stage_role"} if schema >= 2 else set())
+          | ({"allocations"} if schema == 3 else set()))
         lot_id = _unique_id(item["id"], f"{label}.id", ids)
         group_id = _text(item["group_id"], f"{label}.group_id")
         period = _text(item["period"], f"{label}.period")
@@ -545,7 +741,7 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
             raise FieldFlowError(f"{label} references unknown group or period")
         _text(item["stage"], f"{label}.stage")
         stage_role = (_choice(item["stage_role"], f"{label}.stage_role", STAGE_ROLES)
-                      if schema == 2 else None)
+                      if schema >= 2 else None)
         lot_at = _period_evidence(item["source"], f"{label}.source", period_times[period])
         inputs = _ids(item["input_flow_ids"], f"{label}.input_flow_ids")
         outputs = _ids(item["output_flow_ids"], f"{label}.output_flow_ids")
@@ -556,6 +752,7 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
             "input_loads": set(_ids(item["observed_input_load_ids"], f"{label}.observed_input_load_ids")),
             "output_loads": set(_ids(item["observed_output_load_ids"], f"{label}.observed_output_load_ids")),
             "observed_at": lot_at, "stage_role": stage_role,
+            "allocations": item["allocations"] if schema == 3 else None,
         }
     flows: dict[str, dict[str, Any]] = {}
     load_ids: set[str] = set()
@@ -613,7 +810,7 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
             if outcome_at is None:
                 raise FieldFlowError(f"{label} lacks observed consumption time")
             consumed_outcome_at[flow_id] = outcome_at
-        flows[flow_id] = {"from": source_lot, "to": target_lot, "kind": kind,
+        flows[flow_id] = {"from": source_lot, "to": target_lot, "kind": kind, "load_id": load_id,
                           "mass": mass, "group_id": group_id, "period": period,
                           "observed_at": flow_at, "outcome_at": outcome_at}
         if source_lot is not None:
@@ -632,9 +829,11 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
                 indegree[flow["to"]] += 1
     queue = deque(lot_id for lot_id, degree in indegree.items() if degree == 0)
     visited = 0
+    lot_order: list[str] = []
     while queue:
         parent = queue.popleft()
         visited += 1
+        lot_order.append(parent)
         for child in adjacency[parent]:
             indegree[child] -= 1
             if indegree[child] == 0:
@@ -665,8 +864,11 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
     actual_gp = {(lot["group_id"], lot["period"]) for lot in lots.values()}
     if actual_gp != expected_gp or any(not roots[key] or not terminals[key] for key in expected_gp):
         raise FieldFlowError("every group-period needs a complete observed path from external input to terminal destination")
+    allocations = _validate_allocations(lots, flows, period_times) if schema == 3 else {}
     stage_witnesses = (_stage_witness_paths(lots, flows, consumed, adjacency, expected_gp)
-                       if schema == 2 else [])
+                       if schema >= 2 else [])
+    lineage_bounds = (_lineage_bounds(lots, flows, consumed, lot_order, allocations)
+                      if schema == 3 else [])
     burden_keys: set[tuple[str, str, str]] = set()
     for index, raw in enumerate(_array(root["burdens"], "burdens")):
         label = f"burdens[{index}]"
@@ -694,18 +896,21 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
         raise FieldFlowError(f"missing actor-specific burden rows: {sorted(expected_burdens - burden_keys)}")
     service_status = _validate_service(root.get("service"), groups, periods, actors, consumed,
                                        period_times, consumed_outcome_at)
+    notice = NOTICE_SCHEMA3 if schema == 3 else NOTICE
     return {
         "schema": schema, "classification": CLASSIFICATION, "valid": True,
-        "study_id": study_id, "notice": NOTICE,
+        "study_id": study_id, "notice": notice,
         "counts": {"groups": len(groups), "lots": len(lots), "flows": len(flows),
                    "terminal_flows": sum(terminals.values()),
                    "consumed_flows": sum(map(len, consumed.values())), "burden_rows": len(burden_keys)},
         "balances": sorted(balances, key=lambda item: item["lot_id"]),
-        "scope_status": ("declared_stage_witness_per_consumed_flow_only" if schema == 2
+        "scope_status": ("declared_conservative_mass_lineage_per_consumed_flow" if schema == 3
+                         else "declared_stage_witness_per_consumed_flow_only" if schema == 2
                          else "declared_graph_only_full_chain_not_checked"),
         "stage_witnesses": stage_witnesses,
+        **({"lineage_bounds": lineage_bounds} if schema == 3 else {}),
         "service_status": service_status,
-        "criterion_3": {"status": "not_assessed", "reason": NOTICE},
+        "criterion_3": {"status": "not_assessed", "reason": notice},
     }
 
 
@@ -724,7 +929,7 @@ def _invalid_constant(value: str) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("field_data", help="schema-1 or schema-2 field observation JSON path, or - for stdin")
+    parser.add_argument("field_data", help="schema-1, schema-2 or schema-3 field observation JSON path, or - for stdin")
     args = parser.parse_args(argv)
     try:
         source = sys.stdin.read() if args.field_data == "-" else Path(args.field_data).read_text(encoding="utf-8")

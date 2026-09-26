@@ -7,6 +7,7 @@ import json
 import subprocess
 import sys
 from decimal import Decimal
+from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
@@ -15,7 +16,7 @@ import pytest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "audit_field_flows.py"
 sys.path.insert(0, str(SCRIPT.parent))
-from audit_field_flows import FieldFlowError, audit_field_flows  # noqa: E402
+from audit_field_flows import FieldFlowError, _lineage_bounds, audit_field_flows  # noqa: E402
 
 
 def _evidence(label: str) -> dict[str, str]:
@@ -206,6 +207,80 @@ def field_data_with_stage_witnesses() -> dict[str, Any]:
 
 def _by_id(rows: list[dict[str, Any]], item_id: str) -> dict[str, Any]:
     return next(row for row in rows if row["id"] == item_id)
+
+
+def _allocation(data: dict[str, Any], incoming: str, outgoing: str,
+                amount: float, *, unit: str = "kg") -> dict[str, Any]:
+    source = _evidence(f"allocation-{incoming}-{outgoing}")
+    source["input_load_id"] = _by_id(data["flows"], incoming)["load_id"]
+    source["output_load_id"] = _by_id(data["flows"], outgoing)["load_id"]
+    return {
+        "input_flow_id": incoming, "output_flow_id": outgoing,
+        "mass": _mass(amount, unit, uncertainty=0), "source": source,
+    }
+
+
+def field_data_with_schema3_allocations() -> dict[str, Any]:
+    """Exact nominal accounting for a synthetic full-stage fixture."""
+    data = field_data_with_stage_witnesses()
+    data["schema"] = 3
+    for group in ("control", "intervention"):
+        for period in ("pre", "post"):
+            prefix = f"{group}-{period}"
+
+            def a(incoming: str, outgoing: str, amount: float) -> dict[str, Any]:
+                return _allocation(data, f"{prefix}-{incoming}", f"{prefix}-{outgoing}", amount)
+
+            _by_id(data["lots"], f"{prefix}-wash")["allocations"] = [
+                a("raw", "transfer", 95), a("raw", "reject", 5),
+                a("water", "wash-moisture", 10),
+            ]
+            _by_id(data["lots"], f"{prefix}-logistics-a")["allocations"] = [
+                a("transfer", "stored", 95),
+            ]
+            _by_id(data["lots"], f"{prefix}-logistics-b")["allocations"] = [
+                a("stored", "transported", 95),
+            ]
+            _by_id(data["lots"], f"{prefix}-process")["allocations"] = [
+                a("transported", "consumed", 70),
+                a("transported", "coproduct", 25),
+                a("ingredient", "process-moisture", 5),
+            ]
+            _by_id(data["lots"], f"{prefix}-finish")["allocations"] = [
+                a("consumed", "finished", 70),
+            ]
+    return data
+
+
+def _extend_final_mix(data: dict[str, Any], *, long_to_consumption: int) -> None:
+    prefix = "control-post"
+    finish = _by_id(data["lots"], f"{prefix}-finish")
+    late = _flow(prefix, "late-ingredient", None, finish["id"], "ingredient", 70)
+    compost = _flow(prefix, "late-compost", finish["id"], None, "residue", 70, "compost")
+    data["flows"].extend([late, compost])
+    finish["input_flow_ids"].append(late["id"])
+    finish["observed_input_load_ids"].append(late["load_id"])
+    finish["output_flow_ids"].append(compost["id"])
+    finish["observed_output_load_ids"].append(compost["load_id"])
+    compost["destination"]["source"]["load_id"] = compost["load_id"]
+    compost["outcome"]["source"]["load_id"] = compost["load_id"]
+    finished = f"{prefix}-finished"
+    before = f"{prefix}-consumed"
+    finish["allocations"] = [
+        _allocation(data, before, finished, long_to_consumption),
+        _allocation(data, before, compost["id"], 70 - long_to_consumption),
+        _allocation(data, late["id"], finished, 70 - long_to_consumption),
+        _allocation(data, late["id"], compost["id"], long_to_consumption),
+    ] if 0 < long_to_consumption < 70 else [
+        _allocation(data, before, compost["id"], 70),
+        _allocation(data, late["id"], finished, 70),
+    ]
+
+
+def _set_flow_mass(flow: dict[str, Any], value: int) -> None:
+    flow["mass"]["value"] = value
+    if flow["outcome"] is not None:
+        flow["outcome"]["mass"]["value"] = value
 
 
 def test_complete_synthetic_graph_with_additions_moisture_and_coproducts() -> None:
@@ -767,6 +842,238 @@ def test_schema2_cannot_hide_a_consumed_branch_with_no_production_ancestor() -> 
     data["lots"].append(lot)
     with pytest.raises(FieldFlowError, match="not reachable from externally fed production"):
         audit_field_flows(_as_schema2(data))
+
+
+def test_schema3_conservative_declared_mass_lineage_and_legacy_contracts() -> None:
+    data = field_data_with_schema3_allocations()
+    report = audit_field_flows(data)
+    assert report["schema"] == 3 and report["valid"] is True
+    assert report["scope_status"] == "declared_conservative_mass_lineage_per_consumed_flow"
+    assert len(report["lineage_bounds"]) == report["counts"]["consumed_flows"] == 4
+    assert all(Decimal(row["guaranteed_stage_mass_kg"]) > 0 for row in report["lineage_bounds"])
+    assert report["criterion_3"]["status"] == "not_assessed"
+    assert "V" not in report and "G" not in report
+
+    legacy = copy.deepcopy(data)
+    legacy["schema"] = 2
+    for lot in legacy["lots"]:
+        del lot["allocations"]
+    old = audit_field_flows(legacy)
+    assert old["scope_status"] == "declared_stage_witness_per_consumed_flow_only"
+    assert "lineage_bounds" not in old
+
+
+@pytest.mark.parametrize("long_to_consumption,passes", [(0, False), (20, True)])
+def test_schema3_distinguishes_late_ingredient_from_long_path(
+    long_to_consumption: int, passes: bool,
+) -> None:
+    data = field_data_with_schema3_allocations()
+    _extend_final_mix(data, long_to_consumption=long_to_consumption)
+
+    legacy = copy.deepcopy(data)
+    legacy["schema"] = 2
+    for lot in legacy["lots"]:
+        del lot["allocations"]
+    assert audit_field_flows(legacy)["valid"] is True
+
+    if passes:
+        report = audit_field_flows(data)
+        bound = next(row for row in report["lineage_bounds"]
+                     if row["consumption_flow_id"] == "control-post-finished")
+        assert Decimal(bound["guaranteed_stage_mass_kg"]) > 0
+    else:
+        with pytest.raises(FieldFlowError, match="control-post-finished"):
+            audit_field_flows(data)
+
+
+@pytest.mark.parametrize("long_into_finish,passes", [(1, False), (2, True)])
+def test_schema3_does_not_splice_different_material_across_serial_mixes(
+    long_into_finish: int, passes: bool,
+) -> None:
+    data = field_data_with_schema3_allocations()
+    prefix = "control-post"
+    for flow in data["flows"]:
+        if (flow["group_id"], flow["period"]) == ("control", "post"):
+            flow["mass"]["uncertainty"] = 0
+            if flow["outcome"] is not None:
+                flow["outcome"]["mass"]["uncertainty"] = 0
+    ingredient = _by_id(data["flows"], f"{prefix}-ingredient")
+    coproduct = _by_id(data["flows"], f"{prefix}-coproduct")
+    _set_flow_mass(ingredient, 70 - long_into_finish)
+    _set_flow_mass(coproduct, 90 - long_into_finish)
+    process = _by_id(data["lots"], f"{prefix}-process")
+    process["allocations"] = [
+        _allocation(data, f"{prefix}-transported", f"{prefix}-consumed", long_into_finish),
+        _allocation(data, f"{prefix}-transported", f"{prefix}-coproduct", 90 - long_into_finish),
+        _allocation(data, f"{prefix}-transported", f"{prefix}-process-moisture", 5),
+        _allocation(data, f"{prefix}-ingredient", f"{prefix}-consumed", 70 - long_into_finish),
+    ]
+    finish = _by_id(data["lots"], f"{prefix}-finish")
+    finished = _by_id(data["flows"], f"{prefix}-finished")
+    _set_flow_mass(finished, 69)
+    compost = _flow(prefix, "serial-compost", finish["id"], None, "residue", 1, "compost")
+    compost["mass"]["uncertainty"] = 0
+    compost["outcome"]["mass"]["uncertainty"] = 0
+    compost["destination"]["source"]["load_id"] = compost["load_id"]
+    compost["outcome"]["source"]["load_id"] = compost["load_id"]
+    data["flows"].append(compost)
+    finish["output_flow_ids"].append(compost["id"])
+    finish["observed_output_load_ids"].append(compost["load_id"])
+    finish["allocations"] = [
+        _allocation(data, f"{prefix}-consumed", finished["id"], 69),
+        _allocation(data, f"{prefix}-consumed", compost["id"], 1),
+    ]
+    for row in data["service"]["rows"]:
+        if (row["group_id"], row["period"]) == ("control", "post"):
+            row["consumed_service"]["value"] = 69
+
+    legacy = copy.deepcopy(data)
+    legacy["schema"] = 2
+    for lot in legacy["lots"]:
+        del lot["allocations"]
+    assert audit_field_flows(legacy)["valid"] is True
+    if passes:
+        result = audit_field_flows(data)
+        assert any(row["consumption_flow_id"] == finished["id"]
+                   and Decimal(row["guaranteed_stage_mass_kg"]) > 0
+                   for row in result["lineage_bounds"])
+    else:
+        with pytest.raises(FieldFlowError, match="control-post-finished"):
+            audit_field_flows(data)
+
+
+def test_schema3_rejects_duplicate_or_incomplete_nominal_allocations() -> None:
+    data = field_data_with_schema3_allocations()
+    storage = _by_id(data["lots"], "control-post-logistics-a")
+    row = storage["allocations"][0]
+    row["mass"]["value"] = 40
+    duplicate = copy.deepcopy(row)
+    duplicate["mass"]["value"] = 55
+    storage["allocations"].append(duplicate)
+    with pytest.raises(FieldFlowError, match="duplicate"):
+        audit_field_flows(data)
+
+    data = field_data_with_schema3_allocations()
+    row = _by_id(data["lots"], "control-post-logistics-a")["allocations"][0]
+    row["mass"]["value"] = 94
+    with pytest.raises(FieldFlowError, match="allocation"):
+        audit_field_flows(data)
+
+
+def test_schema3_allocation_units_and_load_binding() -> None:
+    data = field_data_with_schema3_allocations()
+    _by_id(data["lots"], "control-post-logistics-a")["allocations"][0]["mass"] = _mass(
+        95000, "g", uncertainty=0,
+    )
+    _by_id(data["lots"], "control-post-logistics-b")["allocations"][0]["mass"] = _mass(
+        0.095, "t", uncertainty=0,
+    )
+    assert audit_field_flows(data)["valid"] is True
+    row = _by_id(data["lots"], "control-post-logistics-a")["allocations"][0]
+    row["source"]["input_load_id"] = "load-from-another-flow"
+    with pytest.raises(FieldFlowError, match="input_load_id"):
+        audit_field_flows(data)
+
+
+def test_schema3_uses_exact_complement_to_tighten_uncertain_allocation() -> None:
+    data = field_data_with_schema3_allocations()
+    _extend_final_mix(data, long_to_consumption=20)
+    finish = _by_id(data["lots"], "control-post-finish")
+    long_to_finished = next(row for row in finish["allocations"]
+                            if (row["input_flow_id"], row["output_flow_id"]) ==
+                            ("control-post-consumed", "control-post-finished"))
+    long_to_finished["mass"]["uncertainty"] = 20
+    report = audit_field_flows(data)
+    bound = next(row for row in report["lineage_bounds"]
+                 if row["consumption_flow_id"] == "control-post-finished")
+    assert bound["guaranteed_stage_mass_kg"] == "20"
+
+
+def test_schema3_does_not_treat_ambiguous_positive_nominal_as_guaranteed() -> None:
+    data = field_data_with_schema3_allocations()
+    _extend_final_mix(data, long_to_consumption=20)
+    finish = _by_id(data["lots"], "control-post-finish")
+    for row in finish["allocations"]:
+        row["mass"]["uncertainty"] = 20
+    with pytest.raises(FieldFlowError, match="control-post-finished"):
+        audit_field_flows(data)
+
+
+def test_schema3_uses_exact_incident_allocations_to_tighten_flow_mass() -> None:
+    data = field_data_with_schema3_allocations()
+    _by_id(data["flows"], "control-post-raw")["mass"]["uncertainty"] = 100
+    report = audit_field_flows(data)
+    bound = next(row for row in report["lineage_bounds"]
+                 if row["consumption_flow_id"] == "control-post-finished")
+    assert Decimal(bound["guaranteed_stage_mass_kg"]) > 0
+
+
+def test_schema3_preserves_union_of_branches_before_common_later_stages() -> None:
+    roles = {
+        "produce": "production", "early-storage": "storage",
+        "early-transport": "transport", "direct": "other", "merge": "other",
+        "split": "other", "late-storage": "storage", "late-transport": "transport",
+        "transform-a": "transformation", "transform-b": "transformation",
+    }
+    lots = {lot_id: {"stage_role": role} for lot_id, role in roles.items()}
+    flow_rows = [
+        ("origin", None, "produce", "feed", 100),
+        ("p-store", "produce", "early-storage", "product", 40),
+        ("p-transport", "produce", "early-transport", "product", 40),
+        ("p-direct", "produce", "direct", "product", 20),
+        ("stored", "early-storage", "merge", "product", 40),
+        ("transported", "early-transport", "merge", "product", 40),
+        ("directed", "direct", "merge", "product", 20),
+        ("mixed", "merge", "split", "product", 100),
+        ("common", "split", "late-storage", "product", 60),
+        ("residual", "split", None, "residue", 40),
+        ("stored-again", "late-storage", "late-transport", "product", 60),
+        ("transported-again", "late-transport", "transform-a", "product", 60),
+        ("once", "transform-a", "transform-b", "product", 60),
+        ("consumed", "transform-b", None, "product", 60),
+    ]
+    flows = {
+        flow_id: {"from": source, "to": target, "kind": kind,
+                  "mass": (Fraction(amount), Fraction(0))}
+        for flow_id, source, target, kind, amount in flow_rows
+    }
+    allocation_rows = {
+        "produce": [("origin", "p-store", 40), ("origin", "p-transport", 40),
+                    ("origin", "p-direct", 20)],
+        "early-storage": [("p-store", "stored", 40)],
+        "early-transport": [("p-transport", "transported", 40)],
+        "direct": [("p-direct", "directed", 20)],
+        "merge": [("stored", "mixed", 40), ("transported", "mixed", 40),
+                  ("directed", "mixed", 20)],
+        "split": [("mixed", "common", 60), ("mixed", "residual", 40)],
+        "late-storage": [("common", "stored-again", 60)],
+        "late-transport": [("stored-again", "transported-again", 60)],
+        "transform-a": [("transported-again", "once", 60)],
+        "transform-b": [("once", "consumed", 60)],
+    }
+    allocations = {
+        lot_id: [(incoming, outgoing, Fraction(amount), Fraction(0))
+                 for incoming, outgoing, amount in rows]
+        for lot_id, rows in allocation_rows.items()
+    }
+    bounds = _lineage_bounds(lots, flows, {("control", "post"): {"consumed"}},
+                             list(roles), allocations)
+    assert bounds[0]["guaranteed_stage_mass_kg"] == "60"
+
+
+def test_schema3_cli_reports_bounds_without_modifying_input(tmp_path: Path) -> None:
+    path = tmp_path / "field-schema3.json"
+    original = json.dumps(field_data_with_schema3_allocations(), ensure_ascii=False).encode("utf-8")
+    path.write_bytes(original)
+    completed = subprocess.run([sys.executable, str(SCRIPT), str(path)], text=True,
+                               capture_output=True, check=False)
+    assert completed.returncode == 0, completed.stderr
+    report = json.loads(completed.stdout)
+    assert report["schema"] == 3
+    assert report["scope_status"] == "declared_conservative_mass_lineage_per_consumed_flow"
+    assert len(report["lineage_bounds"]) == 4
+    assert report["criterion_3"]["status"] == "not_assessed"
+    assert path.read_bytes() == original
 
 
 def test_cli_reads_without_modifying_input_and_rejects_duplicate_json_keys(tmp_path: Path) -> None:
