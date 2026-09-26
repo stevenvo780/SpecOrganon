@@ -36,6 +36,18 @@ En la tabla 16, `cantidad` es el porcentaje de pérdida que FAO atribuye al **pr
 
 Todas las cifras de esta tabla proceden del [estudio de FAO (2018)](https://openknowledge.fao.org/3/BU688EN/bu688en.pdf), con trabajo de campo de 2016. Un seguimiento de carga en un evento no es una muestra representativa del distrito ni una observación continua del mismo lote a través de todos los eventos. FAO dice expresamente que siguió **cargas distintas** cuando había intervalos largos (p. 27). Los porcentajes de los renglones tampoco constituyen un balance de masa por el cambio de denominador y las bifurcaciones; está prohibido usarlos como si fueran una serie única `entrada → salida`.
 
+### Extracción reproducible de las tres cargas seguidas
+
+[`cases/mango/fao_table15_loads.json`](../cases/mango/fao_table15_loads.json) transcribe por separado las tres observaciones de la tabla 15. Cotejé de nuevo el PDF oficial y su SHA-256 el 2026-09-26. Los IDs `P1_table15_sorting`, `P2_table15_transport` y `P3_table15_ripening` son identificadores **locales de fila**, no identificadores de lotes publicados. La fuente no da fecha exacta de cada evento ni incertidumbre de las pesadas; `null` significa dato ausente, no incertidumbre cero.
+
+| Fila y lugar | Duración | Entrada → salida | Pérdida informada | Recalculada con los pesos publicados |
+| --- | ---: | ---: | ---: | ---: |
+| P1, Sarakallu | 8 h | 5 → 4,4 t | 12 % | 12 % |
+| P2, Manjunatha, Kanipakam | 2 h | 4 200 → 4 180 kg | 0,5 % | 0,47619 % |
+| P3, Suvera, Kanipakam | 6 días | 101,4 → 81,3 kg, cuatro cajas | 19,75 % | 19,82249 % |
+
+El recálculo usa `100 × (entrada − salida) / entrada` con aritmética decimal. **P1 incluye una estimación:** FAO dice en la p. 27 que no pudo pesar la fruta en finca y aproximó mediante promedios la fruta dejada allí; sus 12 % no son la diferencia entre dos pesadas directas en finca. El desacuerdo en P3 queda abierto: los pesos impresos no reproducen exactamente 19,75 %, y el informe no publica los pesos sin redondear ni su incertidumbre. No se corrige el porcentaje original ni se atribuye una causa a la diferencia. El informe describe daño por manejo previo en la carga P3; no atribuye su pérdida a un efecto causal de la maduración tradicional. P2 y P3 ocurrieron incluso en plantas distintas; las tres filas **no** aportan una serie de un mismo lote, seguimiento hasta consumo o estimación del efecto de una intervención. La tabla 16A resume porcentajes por proceso con un alcance diferente; tampoco los convierte en una cadena enlazada.
+
 ### Valor, calidad e inocuidad
 
 La tabla 14A de FAO (p. 27) define una escala local de calidad de 0 a 4 y reducciones de valor de mercado asociadas a grados de deterioro. Es **un instrumento de valoración del estudio**, no precios universales ni prueba de la disposición real a pagar en 2026. FAO diferencia pérdidas de cantidad de degradación cualitativa, y describe fruta rechazada que puede venderse con descuento, alimentar ganado, ir a otros productos o descartarse (pp. 23–24, 31–32). [Fuente FAO](https://openknowledge.fao.org/3/BU688EN/bu688en.pdf).
