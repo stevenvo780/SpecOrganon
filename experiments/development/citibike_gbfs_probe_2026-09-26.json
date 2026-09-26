@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_one_shot_public_feed_quality_probe",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "source": {
+    "official_page": "https://citibikenyc.com/system-data",
+    "discovery_url": "https://gbfs.citibikenyc.com/gbfs/2.3/gbfs.json",
+    "station_information_url_discovered": "https://gbfs.lyft.com/gbfs/2.3/bkn/en/station_information.json",
+    "station_status_url_discovered": "https://gbfs.lyft.com/gbfs/2.3/bkn/en/station_status.json",
+    "specification": "https://github.com/MobilityData/gbfs/blob/v2.3/gbfs.md",
+    "data_policy": "https://citibikenyc.com/data-sharing-policy"
+  },
+  "capture": {
+    "started_at_utc": "2026-09-26T15:11:06Z",
+    "ended_at_utc": "2026-09-26T15:11:08Z",
+    "method": "single unauthenticated sequential read of official discovery, station_information and station_status JSON by a read-only native subagent",
+    "http_status": {"discovery": 200, "station_information": 200, "station_status": 200},
+    "version_declared": "2.3",
+    "sha256_raw_responses": {
+      "discovery": "bfdf6133782bb3071bb98ade533a712b956a1d42ac310c8e409357cf4ff103f0",
+      "station_information": "7c6bfaae05e938e84404627db5012483ba805bc6d051f70cc36065a250f4fd06",
+      "station_status": "830d4c9de041eb2887379be6ada12b209e998675689635be6fd348e66e13f860"
+    },
+    "raw_responses_retained": false,
+    "station_information_rows": 2520,
+    "station_status_rows": 2520,
+    "duplicate_station_ids": 0,
+    "station_id_set_mismatches": 0,
+    "feed_last_updated_difference_seconds": 1,
+    "station_last_reported_more_than_five_minutes_old_raw_check": 91
+  },
+  "quality_result": {
+    "is_installed_non_json_boolean_rows": 2520,
+    "is_renting_non_json_boolean_rows": 2520,
+    "is_returning_non_json_boolean_rows": 2520,
+    "exact_types_and_values": "not recorded",
+    "availability_counts": null,
+    "status": "required_flag_type_check_failed",
+    "reason": "GBFS v2.3 requires JSON booleans for these three fields; no predeclared coercion rule exists. Old last_reported values may include sentinels."
+  },
+  "interpretation_limits": [
+    "This was one sequential snapshot, not a station-minute series or an atomic pair of feeds.",
+    "Raw responses were not retained; their hashes identify the observed bytes but do not make this mutable snapshot replayable.",
+    "No availability, frustrated-ride, intervention, causal-effect or generalization metric was computed.",
+    "The public data policy limits automated extraction and stand-alone redistribution; this probe does not establish permission for a recurring capture program.",
+    "Criterion 5 remains not demonstrated."
+  ]
+}

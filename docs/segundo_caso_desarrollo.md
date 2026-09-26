@@ -1,6 +1,6 @@
 # Segundo caso de desarrollo: disponibilidad de Citi Bike
 
-**Estado:** la aplicación documental de junio de 2026 en [caso_citibike_ejecucion.md](caso_citibike_ejecucion.md) ya abrió este candidato. Por tanto, este periodo y paquete no sirven como reserva ciega para la comparación confirmatoria. Se usan como demostración de desarrollo y transferencia parcial en otro dominio; una reserva futura debe seleccionarse y sellarse antes de consultarla. No se usó el resultado de este caso para seleccionar los tres prototipos del núcleo.
+**Estado:** la aplicación documental de junio de 2026 en [caso_citibike_ejecucion.md](caso_citibike_ejecucion.md) ya abrió este candidato. Por tanto, este periodo y paquete no sirven como reserva ciega para la comparación confirmatoria. Se usan como demostración de desarrollo y transferencia parcial en otro dominio; una reserva futura debe seleccionarse y sellarse antes de consultarla. Un sondeo puntual del feed actual encontró indicadores de estado con tipos incompatibles con GBFS 2.3 y dejó la disponibilidad sin calcular. No se usó el resultado de este caso para seleccionar los tres prototipos del núcleo.
 
 ## Problema propuesto
 
