@@ -42,14 +42,15 @@ server = MCPServer(
     description="Evidence-linked case workflow with review, contradictions, phase gates and traceability.",
     instructions=(
         "Start with init, add items with put, inspect status and gate before advance. "
-        "Record reviews and human decisions explicitly; an actor label alone is not identity verification."
+        "Record reviews and human decisions explicitly. Signed cases require an offline Ed25519 "
+        "signature checked against the operator-controlled ORGANON_APPROVERS_FILE."
     ),
 )
 
 
 @server.tool(description="Create a case at path with a title, domain and actor label.")
-def init(path: str, title: str, domain: str, actor: str) -> dict[str, Any]:
-    return _invoke("init", path=path, title=title, domain=domain, actor=actor)
+def init(path: str, title: str, domain: str, actor: str, approval_policy: str = "signed") -> dict[str, Any]:
+    return _invoke("init", path=path, title=title, domain=domain, actor=actor, approval_policy=approval_policy)
 
 
 @server.tool(description="Add or revise an evidence-linked case item; refs are item IDs.")
@@ -75,9 +76,14 @@ def review(path: str, id: str, verdict: str, reason: str, actor: str) -> dict[st
     return _invoke("review", path=path, id=id, verdict=verdict, reason=reason, actor=actor)
 
 
-@server.tool(description="Record a human approval decision for an item.")
-def approve(path: str, id: str, reason: str, actor: str) -> dict[str, Any]:
-    return _invoke("approve", path=path, id=id, reason=reason, actor=actor)
+@server.tool(description="Return canonical bytes for offline Ed25519 signing of an exact normative item revision.")
+def approval_challenge(path: str, id: str, reason: str, actor: str) -> dict[str, Any]:
+    return _invoke("approval_challenge", path=path, id=id, reason=reason, actor=actor)
+
+
+@server.tool(description="Record a normative approval; signed cases require a trusted Ed25519 signature.")
+def approve(path: str, id: str, reason: str, actor: str, signature: str | None = None) -> dict[str, Any]:
+    return _invoke("approve", path=path, id=id, reason=reason, actor=actor, signature=signature)
 
 
 @server.tool(description="Record a contradiction between two items.")

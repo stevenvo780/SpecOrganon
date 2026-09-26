@@ -1,8 +1,8 @@
 """Versioned dependency graph and review gates for the SpecOrganon workflow.
 
-All public operations use the same ledger regardless of transport. Actors are
-self-attested; a ``human:`` approval is a recorded attestation, not identity
-authentication. Field impact still requires an external evaluation.
+All public operations use the same ledger regardless of transport. Signed
+approvals are checked against an external public-key trust file; key custody
+and field impact still require external evaluation.
 """
 
 from __future__ import annotations
@@ -14,7 +14,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-from .ledger import ConflictError, LedgerError, append_event, init_project, read_project
+from . import approval
+from .ledger import ZERO_HASH, ConflictError, LedgerError, append_event, init_project, read_project
 from .workflow import KIND_TO_PHASE, KINDS, PHASES, PHASE_BY_ID
 
 
@@ -32,11 +33,21 @@ def _hash(value: Any) -> str:
 
 def _project(path: str | Path) -> dict[str, Any]:
     ledger = read_project(path)
+    project = dict(ledger["project"])
+    project.setdefault("approval_policy", "signed")
+    try:
+        approvers, trust_status = approval.trust_context(project, path)
+    except ValueError:
+        approvers = {}
+        trust_status = "unavailable"
     state: dict[str, Any] = {
-        "project": ledger["project"],
+        "project": project,
         "revision": len(ledger["events"]),
+        "head_hash": ledger["events"][-1]["hash"] if ledger["events"] else ZERO_HASH,
         "items": {},
         "approvals": set(),
+        "approval_statuses": {},
+        "approval_trust": trust_status,
         "item_reviews": {},
         "challenges": {},
         "resolutions": {},
@@ -46,12 +57,46 @@ def _project(path: str | Path) -> dict[str, Any]:
     for event in ledger["events"]:
         kind, payload, seq = event["kind"], event["payload"], event["seq"]
         if kind == "item_put":
+            item_id = payload.get("id") if isinstance(payload, dict) else None
+            prior = state["items"].get(item_id)
+            version = payload.get("version") if isinstance(payload, dict) else None
+            expected_version = prior["version"] + 1 if prior else 1
+            deps = payload.get("deps") if isinstance(payload, dict) else None
+            if (not isinstance(item_id, str) or not isinstance(version, int) or isinstance(version, bool)
+                    or version != expected_version or not isinstance(deps, dict)
+                    or (prior is not None and prior["kind"] != payload.get("kind"))):
+                raise MethodError(f"invalid item revision at sequence {seq}")
+            for ref, ref_version in deps.items():
+                referenced = state["items"].get(ref)
+                if (ref == item_id or referenced is None or not isinstance(ref_version, int)
+                        or isinstance(ref_version, bool) or referenced["version"] != ref_version):
+                    raise MethodError(f"invalid item dependency at sequence {seq}")
             item = dict(payload)
             item["seq"] = seq
             item["author"] = event["actor"]
             state["items"][item["id"]] = item
         elif kind == "approval":
-            state["approvals"].add((payload["id"], payload["version"]))
+            item = state["items"].get(payload.get("id"))
+            if item is None or item["version"] != payload.get("version") or item["kind"] not in {"norm", "decision"}:
+                continue
+            key = (item["id"], item["version"])
+            if project["approval_policy"] == "fixture":
+                valid = (trust_status == "fixture" and event["actor"] == "human:fixture"
+                         and isinstance(payload.get("reason"), str) and bool(payload["reason"].strip()))
+                status = "fixture" if valid else "unverified"
+            else:
+                valid = (trust_status == "configured" and isinstance(payload.get("reason"), str)
+                         and isinstance(payload.get("signature"), str)
+                         and isinstance(payload.get("key_sha256"), str)
+                         and approval.verify(project, item, event["actor"], payload["reason"],
+                                             payload["signature"], payload["key_sha256"], approvers,
+                                             path, event["prev_hash"]))
+                status = "signed_verified" if valid else "unverified"
+            if valid:
+                state["approval_statuses"][key] = status
+                state["approvals"].add(key)
+            elif key not in state["approvals"]:
+                state["approval_statuses"][key] = status
         elif kind == "item_review":
             state["item_reviews"][(payload["id"], payload["version"])] = {
                 "seq": seq, "actor": event["actor"], **payload
@@ -298,6 +343,7 @@ def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
             "contested": item_id in contested,
             "issues": _item_issues(item) + automatic.get(item_id, []),
             "approved": (item_id, item["version"]) in state["approvals"],
+            "approval_status": state["approval_statuses"].get((item_id, item["version"]), "missing"),
         }
         for item_id, item in items.items()
     }
@@ -322,7 +368,7 @@ def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: boo
             blockers.append(f"{item_id} has an unresolved contradiction")
         blockers.extend(f"{item_id}: {issue}" for issue in flag["issues"])
         if item["kind"] in {"norm", "decision"} and not flag["approved"]:
-            blockers.append(f"{item_id} requires a recorded human approval")
+            blockers.append(f"{item_id} requires {'a fixture' if state['project']['approval_policy'] == 'fixture' else 'a verified human'} approval")
     for kind, minimum in phase.required:
         count = sum(item["kind"] == kind and not flags[item["id"]]["stale"] and not flags[item["id"]]["contested"] and not flags[item["id"]]["issues"] for item in in_phase)
         if count < minimum:
@@ -439,8 +485,8 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return statuses
 
 
-def create_case(path: str | Path, title: str, domain: str, actor: str) -> dict[str, Any]:
-    init_project(path, title, domain, actor)
+def create_case(path: str | Path, title: str, domain: str, actor: str, approval_policy: str = "signed") -> dict[str, Any]:
+    init_project(path, title, domain, actor, approval_policy)
     return get_state(path)
 
 
@@ -487,16 +533,50 @@ def review_item(path: str | Path, id: str, verdict: str, reason: str, actor: str
     return append_event(path, "item_review", {"id": id, "version": item["version"], "verdict": verdict, "reason": reason.strip()}, actor, expected_seq=state["revision"])
 
 
-def approve(path: str | Path, id: str, reason: str, actor: str) -> dict[str, Any]:
-    state = _project(path)
+def _approval_target(state: dict[str, Any], id: str, reason: str, actor: str) -> dict[str, Any]:
     item = state["items"].get(id)
     if item is None or item["kind"] not in {"norm", "decision"}:
         raise MethodError("only a current norm or decision can receive approval")
     if not isinstance(actor, str) or not actor.startswith("human:") or len(actor) <= len("human:"):
-        raise MethodError("approval actor must be a self-attested human:<name>")
+        raise MethodError("approval actor must be human:<name>")
     if not isinstance(reason, str) or not reason.strip():
         raise MethodError("approval requires an explicit reason or record locator")
-    return append_event(path, "approval", {"id": id, "version": item["version"], "reason": reason.strip()}, actor, expected_seq=state["revision"])
+    return item
+
+
+def approval_challenge(path: str | Path, id: str, reason: str, actor: str) -> dict[str, Any]:
+    state = _project(path)
+    item = _approval_target(state, id, reason, actor)
+    if state["project"]["approval_policy"] != "signed":
+        raise MethodError("fixture cases do not need signed approval challenges")
+    return approval.challenge(state["project"], item, actor, reason.strip(), path, state["head_hash"])
+
+
+def approve(path: str | Path, id: str, reason: str, actor: str, signature: str | None = None) -> dict[str, Any]:
+    state = _project(path)
+    item = _approval_target(state, id, reason, actor)
+    payload = {"id": id, "version": item["version"], "reason": reason.strip()}
+    if state["project"]["approval_policy"] == "fixture":
+        if state["approval_trust"] != "fixture":
+            raise MethodError("fixture approval is disabled or conflicts with a registered signed case")
+        if actor != "human:fixture" or signature is not None:
+            raise MethodError("fixture approval requires human:fixture and no signature")
+    else:
+        if not isinstance(signature, str) or not signature:
+            raise MethodError("signed approval requires an Ed25519 signature")
+        try:
+            approvers, _ = approval.trust_context(state["project"], path)
+        except ValueError as exc:
+            raise MethodError(str(exc)) from exc
+        key = approvers.get(actor)
+        if key is None:
+            raise MethodError("approval actor has no trusted public key")
+        fingerprint = approval.key_fingerprint(key)
+        if not approval.verify(state["project"], item, actor, reason.strip(), signature, fingerprint, approvers,
+                               path, state["head_hash"]):
+            raise MethodError("approval signature is invalid for this case, item, actor or reason")
+        payload.update({"signature": signature, "key_sha256": fingerprint})
+    return append_event(path, "approval", payload, actor, expected_seq=state["revision"])
 
 
 def challenge(path: str | Path, left: str, right: str, reason: str, actor: str) -> dict[str, Any]:
@@ -534,7 +614,9 @@ def get_state(path: str | Path) -> dict[str, Any]:
     phases = _phase_statuses(state)
     active_resolutions = _active_resolutions(state)
     open_challenges = [challenge for seq, challenge in state["challenges"].items() if seq not in active_resolutions]
-    return {"project": state["project"], "revision": state["revision"], "items": items, "phases": phases, "open_challenges": open_challenges}
+    return {"project": state["project"], "project_sha256": approval.project_fingerprint(state["project"]),
+            "revision": state["revision"], "approval_trust": state["approval_trust"],
+            "items": items, "phases": phases, "open_challenges": open_challenges}
 
 
 def gate(path: str | Path, phase: str) -> dict[str, Any]:

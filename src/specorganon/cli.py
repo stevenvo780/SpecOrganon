@@ -17,6 +17,7 @@ ENGINE_OPERATIONS = {
     "status": "get_state",
     "review": "review_item",
     "approve": "approve",
+    "approval_challenge": "approval_challenge",
     "challenge": "challenge",
     "resolve_challenge": "resolve_challenge",
     "gate": "gate",
@@ -72,6 +73,8 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("--title", required=True)
     init.add_argument("--domain", required=True)
     init.add_argument("--actor", required=True)
+    init.add_argument("--approval-policy", choices=("signed", "fixture"), default="signed",
+                      help="signed for real cases; fixture for explicitly synthetic tests")
 
     put = commands.add_parser("put", help="Add or revise a case item")
     put.add_argument("path")
@@ -97,6 +100,13 @@ def build_parser() -> argparse.ArgumentParser:
     approve.add_argument("id")
     approve.add_argument("--reason", required=True)
     approve.add_argument("--actor", required=True)
+    approve.add_argument("--signature", help="Base64 Ed25519 signature of approval-challenge message")
+
+    approval_challenge = commands.add_parser("approval-challenge", help="Prepare exact bytes for offline human signing")
+    approval_challenge.add_argument("path")
+    approval_challenge.add_argument("id")
+    approval_challenge.add_argument("--reason", required=True)
+    approval_challenge.add_argument("--actor", required=True)
 
     challenge = commands.add_parser("challenge", help="Record a contradiction between items")
     challenge.add_argument("path")

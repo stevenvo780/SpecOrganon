@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import tempfile
+import uuid
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -78,10 +79,12 @@ def _locked(directory: Path) -> Iterator[None]:
             fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
 
 
-def init_project(directory: str | Path, title: str, domain: str, actor: str) -> dict[str, Any]:
+def init_project(directory: str | Path, title: str, domain: str, actor: str, approval_policy: str = "signed") -> dict[str, Any]:
     """Create a project, refusing to replace an existing ledger."""
     if not all(isinstance(v, str) and v.strip() for v in (title, domain, actor)):
         raise LedgerError("title, domain and actor must be nonempty strings")
+    if approval_policy not in {"signed", "fixture"}:
+        raise LedgerError("approval_policy must be signed or fixture")
     directory = Path(directory)
     with _locked(directory):
         target = project_file(directory)
@@ -89,7 +92,8 @@ def init_project(directory: str | Path, title: str, domain: str, actor: str) -> 
             raise LedgerError(f"project already exists: {target}")
         data = {
             "schema": SCHEMA_VERSION,
-            "project": {"title": title.strip(), "domain": domain.strip(), "created_at": _now(), "created_by": actor.strip()},
+            "project": {"case_id": str(uuid.uuid4()), "title": title.strip(), "domain": domain.strip(),
+                        "created_at": _now(), "created_by": actor.strip(), "approval_policy": approval_policy},
             "events": [],
         }
         _atomic_write(target, data)
@@ -108,6 +112,17 @@ def read_project(directory: str | Path) -> dict[str, Any]:
         raise LedgerError("unsupported or malformed project ledger")
     if not isinstance(data.get("project"), dict):
         raise LedgerError("malformed project metadata")
+    policy = data["project"].get("approval_policy", "signed")
+    if not isinstance(policy, str) or policy not in {"signed", "fixture"}:
+        raise LedgerError("malformed project approval policy")
+    case_id = data["project"].get("case_id")
+    if case_id is not None:
+        try:
+            valid_case_id = isinstance(case_id, str) and str(uuid.UUID(case_id)) == case_id
+        except (ValueError, AttributeError):
+            valid_case_id = False
+        if not valid_case_id:
+            raise LedgerError("malformed project case_id")
     prior = ZERO_HASH
     for index, event in enumerate(data["events"], start=1):
         if not isinstance(event, dict) or event.get("seq") != index or event.get("prev_hash") != prior:
