@@ -41,3 +41,11 @@ El registro inmutable de un estudio confirmatorio todavía no existe y ningún p
 - **Motivo:** la revisión adversarial reprodujo que un decimal JSON mayor que el límite de un componente podía redondearse por `float` a 20 y que una diferencia real de `Q` apenas mayor de 10 podía redondearse a 10, evitando el tercer juez. No existe aún ninguna nota de la reserva.
 - **Cambio:** cada juez asigna puntos **enteros** de 0–20 a cada uno de los cinco componentes; el total individual es su suma exacta. La media de dos jueces cuando procede puede ser fraccionaria y se conserva sin redondear para el análisis.
 - **Sin cambios:** rúbrica de cinco componentes, umbral de arbitraje mayor de 10, criterios y umbrales de aceptación, casos, panel, brazos, réplicas, recursos y presupuesto. Sigue pendiente el registro bajo custodia y la autorización del ensayo.
+
+## 2026-09-26 · Procedencia entre resultado terminal y paquete cegado
+
+- **Versión anterior:** SHA-256 `8159fae6b182d787f90a102c4ed1e1e1e917a37f6dba23b8255a2ca09c76237b`.
+- **Versión aclarada:** SHA-256 `ab0e6fc86017ce1c7a9d270c29f81f31d8bc742c0493e5728e1c8b7a110b7510`.
+- **Motivo:** antes de casos reservados, la revisión de la unión entre recibos y juicios encontró que el artefacto/traza terminal y el paquete/traza cegados pueden tener bytes distintos después de seleccionar evidencia y retirar información sensible. Exigir igualdad de sus digests podía rechazar una evaluación válida; no exigir ninguna cadena de preparación permitiría atribuir un juicio a otra corrida.
+- **Cambio:** se distinguen los cuatro digests. Antes de la evaluación, el custodio conserva bajo control externo un acta por ID opaco con la corrida e intento terminales, manifiesto de fuentes/pruebas y receta de preparación/redacción; su parte identificadora queda privada hasta cerrar juicios. El mapa de apertura referencia el digest del acta y los bytes originales y cegados se cotejan después. Un hash declarado sin acta custodiada no prueba procedencia.
+- **Sin cambios:** regla de consolidación de `Q`, incidentes y `E`, cegamiento por etapas, cinco criterios y umbrales, casos, panel, brazos, réplicas, recursos y presupuesto. Ningún resultado reservado se ha observado ni se ha autorizado el ensayo.
