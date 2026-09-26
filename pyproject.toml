@@ -19,7 +19,10 @@ dev = ["pytest>=8,<10"]
 
 [tool.ruff]
 # Trial outputs are immutable evidence; audit and execute them without rewriting their bytes.
-extend-exclude = ["experiments/development/energy_pilot/runs"]
+extend-exclude = [
+  "experiments/development/energy_pilot/runs",
+  "experiments/development/local_cli_2026-09-26",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/specorganon"]
