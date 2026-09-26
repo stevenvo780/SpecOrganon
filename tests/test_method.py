@@ -22,9 +22,13 @@ def _accept(path, phase):
     assert engine.gate(path, phase)["accepted"]
 
 
-def _complete_synthetic_case(path):
+def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1"),
+                             e1_refs=("pr1",), e1_origin="simulated", inf_refs=("e1", "h1"),
+                             sibling_protocol=False, stop_before_observe=False, stop_before_specify=False):
     engine.create_case(path, "Synthetic control", "test", "human:fixture", approval_policy="fixture")
     _put(path, "p1", "problem")
+    if study_problem != "p1":
+        _put(path, study_problem, "problem")
     _put(path, "a1", "actor", ["p1"])
     _put(path, "b1", "boundary", ["p1"])
     _accept(path, "frame")
@@ -33,20 +37,26 @@ def _complete_synthetic_case(path):
     _put(path, "s1", "assumption", ["p1"])
     _put(path, "f1", "frame_option", ["p1"], text="one framing")
     _put(path, "f2", "frame_option", ["p1"], text="another framing")
-    _put(path, "n1", "norm", ["p1", "a1"])
+    _put(path, "n1", "norm", norm_refs)
     assert not engine.gate(path, "critique")["ready"]
     engine.approve(path, "n1", "synthetic human attestation for mechanics test", "human:fixture")
     _accept(path, "critique")
 
-    _put(path, "q1", "question", ["p1"])
+    _put(path, "q1", "question", [study_problem])
     _put(path, "h1", "hypothesis", ["q1"])
     _put(path, "pr1", "protocol", ["q1", "h1"], {"population": "synthetic", "method": "enumeration", "comparison": "baseline", "uncertainty": "none in fixture"})
+    if sibling_protocol:
+        _put(path, "q2", "question", ["p1"])
+        _put(path, "h2", "hypothesis", ["q2"])
+        _put(path, "pr2", "protocol", ["q2", "h2"], {"population": "synthetic", "method": "enumeration", "comparison": "baseline", "uncertainty": "none in fixture"})
     _put(path, "e0", "evidence", ["pr1"], {"origin": "simulated", "source": "synthetic fixture", "date": "2026-09-26", "locator": "predeclared context"})
     _put(path, "i1", "indicator", ["p1", "n1", "e0"], {"metric": "count", "unit": "count"})
     _accept(path, "study")
 
-    _put(path, "e1", "evidence", ["pr1"], {"origin": "simulated", "source": "synthetic fixture", "date": "2026-09-26", "locator": "test_method.py", "metric_key": "count", "scope": "fixture", "unit": "count", "value": 10})
-    _put(path, "inf1", "inference", ["e1", "h1"])
+    _put(path, "e1", "evidence", e1_refs, {"origin": e1_origin, "source": "synthetic fixture", "date": "2026-09-26", "locator": "test_method.py", "metric_key": "count", "scope": "fixture", "unit": "count", "value": 10})
+    _put(path, "inf1", "inference", inf_refs)
+    if stop_before_observe:
+        return
     _accept(path, "observe")
 
     _put(path, "syn1", "synthesis", ["inf1", "e1"])
@@ -62,6 +72,8 @@ def _complete_synthetic_case(path):
     _put(path, "d1", "decision", ["cmp1", "n1", "e1"])
     _put(path, "req1", "requirement", ["d1"])
     _put(path, "crit1", "criterion", ["req1", "i1"], {"metric": "count", "threshold": 0, "reject": "negative count"})
+    if stop_before_specify:
+        return
     assert not engine.gate(path, "specify")["ready"]
     engine.approve(path, "d1", "synthetic human attestation for mechanics test", "human:fixture")
     _accept(path, "specify")
@@ -88,6 +100,90 @@ def test_full_synthetic_workflow_and_late_evidence_revision(tmp_path):
     assert state["items"]["req1"]["stale"]
     assert not state["phases"]["validate"]["accepted"]
     assert "e1" in {item["id"] for item in engine.trace(path, "req1")["ancestors"]}
+
+
+@pytest.mark.parametrize(("origin", "expected_blocker"), (
+    ("simulated", "e1 must link a valid protocol"),
+    ("published", "inf1 must link evidence to a valid protocol"),
+))
+def test_orphaned_observation_cannot_advance_workflow(tmp_path, origin, expected_blocker):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, e1_refs=(), e1_origin=origin, stop_before_observe=True)
+    blockers = engine.gate(path, "observe")["blockers"]
+    assert any(expected_blocker in blocker for blocker in blockers)
+    with pytest.raises(engine.MethodError, match="phase cannot be accepted"):
+        engine.review_phase(path, "observe", "accept", "orphaned fixture", "agent:reviewer")
+
+
+def test_independent_published_evidence_can_be_interpreted_under_protocol(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, study_problem="p2", sibling_protocol=True,
+                             e1_refs=(), e1_origin="published", inf_refs=("e1", "pr2"))
+    assert engine.get_state(path)["items"]["e1"]["deps"] == {}
+    assert all(engine.gate(path, phase.id)["accepted"] for phase in PHASES)
+
+
+@pytest.mark.parametrize("e1_origin", ["simulated", "published"])
+def test_inference_cannot_relabel_protocol_bound_evidence_with_sibling_protocol(tmp_path, e1_origin):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, study_problem="p2", sibling_protocol=True,
+                             e1_origin=e1_origin, inf_refs=("e1", "pr2"), stop_before_observe=True)
+    blockers = engine.gate(path, "observe")["blockers"]
+    assert any("inf1 applies protocol-bound evidence to an unrelated protocol problem" in blocker
+               for blocker in blockers)
+
+    # Build the later branches without advancing them: a sibling protocol must
+    # not make the same unsupported evidence look coherent at specification.
+    _put(path, "syn1", "synthesis", ["inf1", "e1"])
+    _put(path, "o1", "option", ["syn1", "n1"])
+    _put(path, "o2", "option", ["syn1", "n1"])
+    _put(path, "cmp1", "comparison", ["o1", "o2"])
+    _put(path, "d1", "decision", ["cmp1", "n1", "e1"])
+    _put(path, "req1", "requirement", ["d1"])
+    _put(path, "crit1", "criterion", ["req1", "i1"], {"metric": "count", "threshold": 0, "reject": "negative count"})
+    specification_blockers = engine.gate(path, "specify")["blockers"]
+    assert any("req1 lacks a shared problem between norm and protocol-grounded evidence" in blocker
+               for blocker in specification_blockers)
+
+
+def test_protocol_needs_a_hypothesis_question_problem_chain(tmp_path):
+    path = tmp_path / "case"
+    engine.create_case(path, "Question lineage control", "test", "human:fixture", approval_policy="fixture")
+    _put(path, "p1", "problem")
+    _put(path, "a1", "actor", ["p1"])
+    _put(path, "b1", "boundary", ["p1"])
+    _accept(path, "frame")
+    for id, kind, refs in (("c1", "concept", ("p1",)), ("s1", "assumption", ("p1",)),
+                           ("f1", "frame_option", ("p1",)), ("f2", "frame_option", ("p1",)),
+                           ("n1", "norm", ("p1", "a1"))):
+        _put(path, id, kind, refs, text="second framing" if id == "f2" else id)
+    engine.approve(path, "n1", "synthetic fixture approval", "human:fixture")
+    _accept(path, "critique")
+    _put(path, "q1", "question")
+    _put(path, "h1", "hypothesis", ["q1"])
+    _put(path, "pr1", "protocol", ["q1", "h1"], {
+        "population": "synthetic", "method": "enumeration", "comparison": "baseline", "uncertainty": "fixture",
+    })
+    _put(path, "i1", "indicator", ["p1", "n1"], {"metric": "count", "unit": "count"})
+    assert any("valid hypothesis → question → problem chain" in blocker
+               for blocker in engine.gate(path, "study")["blockers"])
+
+
+def test_specification_rejects_disjoint_evidence_and_norm_problem_lineages(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, study_problem="p2", stop_before_specify=True)
+    engine.approve(path, "d1", "synthetic fixture approval", "human:fixture")
+    blockers = engine.gate(path, "specify")["blockers"]
+    assert any("req1 lacks a shared problem between norm and protocol-grounded evidence" in blocker
+               for blocker in blockers)
+    assert any("crit1 lacks a shared problem between norm and protocol-grounded evidence" in blocker
+               for blocker in blockers)
+
+
+def test_specification_accepts_explicit_two_problem_normative_bridge(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, study_problem="p2", norm_refs=("p1", "p2", "a1"))
+    assert all(engine.gate(path, phase.id)["accepted"] for phase in PHASES)
 
 
 def test_inconsistent_published_calculation_blocks_observation(tmp_path):

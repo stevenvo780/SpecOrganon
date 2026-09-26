@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_evidence_lineage_unsealed",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "baseline_commit": "81ab589191e04014f8e27b2a372aef08e940a4ba",
+  "artifacts": {
+    "baseline_src/specorganon/engine.py_sha256": "25bae27deb2b97e91ccd473693fa007e71239cc8b5b6267583d52d985ab647b4",
+    "src/specorganon/engine.py_sha256": "557866ee4f474d4d9858a2c4553d8e42e73a11a010080cc1c148b3ed5b9ee3a5",
+    "tests/test_method.py_sha256": "8f2a8c90ff4ed074d3eb385db8a83acecea8f5470d67dda8b0ea32869b34e03d",
+    "wheel_sha256": "99a1dcb93873906ad1fb4a257bafbf415d7fe4f45cbd2d4aff83c184fd8b7bdb"
+  },
+  "reproduction": {
+    "source": "Synthetic case fixture in tests/test_method.py with ORGANON_ALLOW_FIXTURES=1; baseline engine loaded from git show in a separate Python module.",
+    "orphan_simulated_evidence": {
+      "graph": "e1 simulated with refs=[]; inf1 uses e1; other study evidence remains protocol-bound",
+      "baseline": "all nine phases accepted",
+      "current": "observe blocked for e1 and inf1"
+    },
+    "disjoint_normative_and_evidence_problems": {
+      "graph": "n1 links p1; e1 links pr1 to q1 and p2; decision and requirement aggregate both branches",
+      "baseline": "specify ready",
+      "current": "specify blocks req1 and crit1 for lack of shared problem"
+    },
+    "protocol_sibling": {
+      "graph": "e1 already links pr1 and p2; inf1 cites e1 plus pr2 and p1; n1 links p1",
+      "current": "observe blocks the unrelated sibling protocol for both simulated and published e1"
+    },
+    "positive_control": "Published e1 with refs=[] can be interpreted by inf1 citing pr2 and p1; all nine phases accepted in the synthetic fixture."
+  },
+  "checks": {
+    "full_pytest": "uv run pytest -q: 496 passed",
+    "ruff": "uv run ruff check .: all checks passed",
+    "diff_check": "git diff --check: passed",
+    "clean_wheel_smoke": {
+      "python_3_11_15": "9 phases, 29 items, 49 events, 14 CLI commands and 14 MCP tools exercised; checkpoint after 3 events resumed by MCP",
+      "python_3_12_3": "9 phases, 29 items, 49 events, 14 CLI commands and 14 MCP tools exercised; checkpoint after 4 events resumed by MCP"
+    },
+    "independent_review": "Read-only reviewer reproduced both blocked sibling cases and the accepted independent published evidence case."
+  },
+  "limits": [
+    "Fixtures and approvals are synthetic; source truth, human identity, competence and causal effect are not authenticated.",
+    "The structural lineage check does not prove that evidence content supports the inference or decision; that needs independent review.",
+    "The clean smoke covers the exercised CLI and MCP routes, not every possible state or failure.",
+    "The sealed 21-injection bank, field intervention and confirmatory model comparison remain pending."
+  ],
+  "criterion_2": "not_demonstrated"
+}

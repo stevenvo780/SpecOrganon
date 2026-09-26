@@ -362,6 +362,84 @@ def _has_path(items: dict[str, dict], item_id: str, kinds: set[str]) -> bool:
     return any(items[ancestor]["kind"] in kinds for ancestor in _ancestors(items, item_id))
 
 
+def _valid_protocol_problems(items: dict[str, dict], flags: dict[str, dict], item_id: str) -> set[str]:
+    """Find valid protocol → hypothesis → question → problem lineages."""
+    def usable(candidate: str) -> bool:
+        flag = flags[candidate]
+        return not (flag["stale"] or flag["contested"] or flag["issues"])
+
+    problems: set[str] = set()
+    for protocol_id in _ancestors(items, item_id):
+        if items[protocol_id]["kind"] != "protocol" or not usable(protocol_id):
+            continue
+        protocol_ancestors = _ancestors(items, protocol_id)
+        questions = [question_id for question_id in protocol_ancestors
+                     if items[question_id]["kind"] == "question" and usable(question_id)]
+        hypotheses = [hypothesis_id for hypothesis_id in protocol_ancestors
+                      if items[hypothesis_id]["kind"] == "hypothesis" and usable(hypothesis_id)]
+        for hypothesis_id in hypotheses:
+            hypothesis_ancestors = _ancestors(items, hypothesis_id)
+            for question_id in questions:
+                if question_id not in hypothesis_ancestors:
+                    continue
+                problems.update(
+                    ancestor for ancestor in _ancestors(items, question_id)
+                    if items[ancestor]["kind"] == "problem" and usable(ancestor)
+                )
+    return problems
+
+
+def _inference_evidence_problems(items: dict[str, dict], flags: dict[str, dict],
+                                 inference_id: str) -> tuple[set[str], bool]:
+    """Attribute protocols to actual evidence, never to an unrelated sibling branch.
+
+    An independent published source can be interpreted under a protocol named
+    directly by the inference. Evidence already linked to a protocol retains
+    its own problem lineage regardless of origin; a sibling cannot relabel it.
+    """
+    inference = items[inference_id]
+    direct_protocol_problems: set[str] = set()
+    for ref in inference["deps"]:
+        if items[ref]["kind"] == "protocol":
+            direct_protocol_problems.update(_valid_protocol_problems(items, flags, ref))
+    problems: set[str] = set()
+    mismatch = False
+    for evidence_id in _ancestors(items, inference_id):
+        evidence = items[evidence_id]
+        if evidence["kind"] != "evidence":
+            continue
+        own_problems = _valid_protocol_problems(items, flags, evidence_id)
+        if _has_path(items, evidence_id, {"protocol"}):
+            problems.update(own_problems)
+            if direct_protocol_problems and not own_problems & direct_protocol_problems:
+                mismatch = True
+        elif evidence["data"].get("origin") == "published":
+            problems.update(direct_protocol_problems)
+    return problems, mismatch
+
+
+def _evidence_based_problems(items: dict[str, dict], flags: dict[str, dict], item_id: str) -> set[str]:
+    """Problem lineages supported by evidence under a coherent protocol path."""
+    problems: set[str] = set()
+    for ancestor in _ancestors(items, item_id):
+        kind = items[ancestor]["kind"]
+        if kind == "evidence":
+            problems.update(_valid_protocol_problems(items, flags, ancestor))
+        elif kind == "inference":
+            inference_problems, mismatch = _inference_evidence_problems(items, flags, ancestor)
+            if not mismatch:
+                problems.update(inference_problems)
+    return problems
+
+
+def _normative_problems(items: dict[str, dict], item_id: str) -> set[str]:
+    problems: set[str] = set()
+    for ancestor in _ancestors(items, item_id):
+        if items[ancestor]["kind"] == "norm":
+            problems.update(ref for ref in _ancestors(items, ancestor) if items[ref]["kind"] == "problem")
+    return problems
+
+
 def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: bool, flags: dict[str, dict]) -> list[str]:
     phase = PHASE_BY_ID[phase_id]
     items = state["items"]
@@ -397,12 +475,23 @@ def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: boo
         for item in in_phase:
             if item["kind"] == "protocol" and not refs_of(item, {"question", "hypothesis"}):
                 blockers.append(f"{item['id']} must link question and hypothesis")
+            if item["kind"] == "protocol" and not _valid_protocol_problems(items, flags, item["id"]):
+                blockers.append(f"{item['id']} needs a valid hypothesis → question → problem chain")
             if item["kind"] == "indicator" and not refs_of(item, {"problem", "norm"}):
                 blockers.append(f"{item['id']} must link problem and normative commitment")
     elif phase_id == "observe":
         for item in in_phase:
+            if (item["kind"] == "evidence" and item["data"].get("origin") != "published"
+                    and not _valid_protocol_problems(items, flags, item["id"])):
+                blockers.append(f"{item['id']} must link a valid protocol with hypothesis, question and problem")
             if item["kind"] == "inference" and not refs_of(item, {"evidence"}):
                 blockers.append(f"{item['id']} must link evidence")
+            if item["kind"] == "inference":
+                evidence_problems, mismatch = _inference_evidence_problems(items, flags, item["id"])
+                if not evidence_problems:
+                    blockers.append(f"{item['id']} must link evidence to a valid protocol and problem chain")
+                if mismatch:
+                    blockers.append(f"{item['id']} applies protocol-bound evidence to an unrelated protocol problem")
     elif phase_id == "explain":
         for item in in_phase:
             if item["kind"] == "synthesis" and not refs_of(item, {"inference", "evidence"}):
@@ -428,6 +517,10 @@ def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: boo
                 blockers.append(f"{item['id']} must link comparison, norm and evidence")
             if item["kind"] in {"requirement", "criterion"} and not refs_of(item, {"problem", "norm", "evidence", "decision"}):
                 blockers.append(f"{item['id']} lacks a path to problem, norm, evidence or decision")
+            if item["kind"] in {"requirement", "criterion"}:
+                if not (_normative_problems(items, item["id"])
+                        & _evidence_based_problems(items, flags, item["id"])):
+                    blockers.append(f"{item['id']} lacks a shared problem between norm and protocol-grounded evidence")
             if item["kind"] == "criterion":
                 indicators = [items[ref] for ref in _ancestors(items, item["id"]) if items[ref]["kind"] == "indicator"]
                 if not any(indicator["data"].get("metric") == item["data"].get("metric") for indicator in indicators):
