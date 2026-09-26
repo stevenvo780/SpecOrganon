@@ -33,10 +33,12 @@ def main() -> None:
                  if key not in {"ORGANON_APPROVERS_FILE", "ORGANON_LEDGER_ANCHORS_FILE"}}
     smoke_env["ORGANON_ALLOW_FIXTURES"] = "1"
     cli_commands_seen: set[str] = set()
+    mcp_tools_seen: set[str] = set()
     expected_cli_commands = {
         "init", "put", "status", "review", "approve", "approval-challenge", "challenge",
         "resolve-challenge", "gate", "review-phase", "advance", "trace", "next-task", "run",
     }
+    expected_mcp_tools = {name.replace("-", "_") for name in expected_cli_commands}
 
     def command(*args: str) -> dict:
         result = subprocess.run([str(cli), *args], text=True, capture_output=True, check=True, env=smoke_env)
@@ -62,18 +64,23 @@ def main() -> None:
             smoke_env["ORGANON_APPROVERS_FILE"] = str(trust_file)
             params = StdioServerParameters(command=str(mcp), cwd=directory, env=smoke_env)
             async with Client(params, mode="legacy") as client:
-                tools = {tool.name for tool in (await client.list_tools()).tools}
-                assert tools == {name.replace("-", "_") for name in expected_cli_commands}
-                data(await client.call_tool("init", {
+                async def call_tool(name: str, arguments: dict):
+                    result = await client.call_tool(name, arguments)
+                    mcp_tools_seen.add(name)
+                    return result
+
+                discovered_tools = {tool.name for tool in (await client.list_tools()).tools}
+                assert discovered_tools == expected_mcp_tools
+                data(await call_tool("init", {
                     "path": path, "title": "Synthetic clean install fixture", "domain": "fixture", "actor": "human:fixture", "approval_policy": "fixture",
                 }))
                 first = command("run", path, "--manifest", str(repo / "workflows" / "synthetic_full.json"), "--actor", "agent:runner")
                 assert first["reason"] == "independent_review_required"
-                assert first["next"] == data(await client.call_tool("next_task", {"path": path}))
+                assert first["next"] == data(await call_tool("next_task", {"path": path}))
 
                 decisions = 0
                 for _ in range(24):
-                    task = data(await client.call_tool("next_task", {"path": path}))
+                    task = data(await call_tool("next_task", {"path": path}))
                     if task["status"] == "done":
                         break
                     if task["action"] == "human_approval":
@@ -81,26 +88,26 @@ def main() -> None:
                             command("approve", path, target["id"], "--reason", "Synthetic fixture approval", "--actor", "human:fixture")
                             decisions += 1
                     elif task["action"] == "review_phase":
-                        data(await client.call_tool("review_phase", {
+                        data(await call_tool("review_phase", {
                             "path": path, "phase": task["phase"], "verdict": "accept",
                             "reason": "Synthetic fixture review", "actor": "agent:reviewer",
                         }))
                         decisions += 1
                     else:
                         raise AssertionError((task["phase"], task["action"], task["blockers"]))
-                    result = data(await client.call_tool("run", {"path": path, "manifest": manifest, "actor": "agent:runner"}))
+                    result = data(await call_tool("run", {"path": path, "manifest": manifest, "actor": "agent:runner"}))
                     assert result["status"] in {"waiting", "complete"}
                 else:
                     raise AssertionError("decision budget exceeded")
 
                 status = command("status", path)
-                assert status == data(await client.call_tool("status", {"path": path}))
+                assert status == data(await call_tool("status", {"path": path}))
                 assert len(status["items"]) == 29
                 assert all(phase["accepted"] for phase in status["phases"].values())
                 assert status["items"]["n1"]["approval_status"] == "fixture"
                 assert status["items"]["ass1"]["data"]["verdict"] == "no_demostrado"
                 before = (case / "organon.json").read_bytes()
-                rejected = await client.call_tool("put", {
+                rejected = await call_tool("put", {
                     "path": path, "id": "bad", "kind": "invented-kind", "text": "invalid", "actor": "agent:runner",
                 })
                 assert rejected.is_error
@@ -126,6 +133,79 @@ def main() -> None:
                 command("resolve-challenge", cli_case, str(objection["seq"]), "syn2", "--actor", "agent:writer")
                 assert command("status", cli_case)["open_challenges"] == []
                 assert not command("gate", cli_case, "frame")["accepted"]
+
+                # Invoke the remaining MCP operations on an isolated synthetic fixture.
+                mcp_case = Path(directory) / "mcp-inventory-case"
+                mcp_path = str(mcp_case)
+                data(await call_tool("init", {
+                    "path": mcp_path, "title": "MCP inventory fixture", "domain": "fixture",
+                    "actor": "human:fixture", "approval_policy": "fixture",
+                }))
+                for item_id, kind, description, refs in (
+                    ("p1", "problem", "Synthetic problem", []),
+                    ("a1", "actor", "Synthetic affected actor", ["p1"]),
+                    ("b1", "boundary", "Synthetic boundary", ["p1"]),
+                ):
+                    data(await call_tool("put", {
+                        "path": mcp_path, "id": item_id, "kind": kind, "text": description,
+                        "refs": refs, "actor": "agent:writer",
+                    }))
+                assert command("gate", mcp_path, "frame")["ready"]
+                data(await call_tool("review_phase", {
+                    "path": mcp_path, "phase": "frame", "verdict": "accept",
+                    "reason": "Synthetic frame review", "actor": "agent:reviewer",
+                }))
+                advanced = data(await call_tool("advance", {
+                    "path": mcp_path, "phase": "frame", "actor": "agent:writer",
+                }))
+                ledger_path = mcp_case / "organon.json"
+                events = json.loads(ledger_path.read_text(encoding="utf-8"))["events"]
+                assert [event["kind"] for event in events] == [
+                    "item_put", "item_put", "item_put", "phase_review", "phase_advance",
+                ]
+                assert advanced == events[-1]
+                assert command("status", mcp_path)["phases"]["frame"]["accepted"]
+
+                contested = data(await call_tool("challenge", {
+                    "path": mcp_path, "left": "p1", "right": "a1",
+                    "reason": "Synthetic framing dispute", "actor": "agent:reviewer",
+                }))
+                challenged_status = command("status", mcp_path)
+                assert contested == json.loads(ledger_path.read_text(encoding="utf-8"))["events"][-1]
+                assert [entry["seq"] for entry in challenged_status["open_challenges"]] == [contested["seq"]]
+                assert not challenged_status["phases"]["frame"]["accepted"]
+                assert challenged_status == data(await call_tool("status", {"path": mcp_path}))
+
+                data(await call_tool("put", {
+                    "path": mcp_path, "id": "syn1", "kind": "synthesis",
+                    "text": "Synthetic reconciliation", "refs": ["p1", "a1"], "actor": "agent:writer",
+                }))
+                reviewed = data(await call_tool("review", {
+                    "path": mcp_path, "id": "syn1", "verdict": "accept",
+                    "reason": "Addresses both synthetic items", "actor": "agent:reviewer",
+                }))
+                assert reviewed == json.loads(ledger_path.read_text(encoding="utf-8"))["events"][-1]
+                resolved = data(await call_tool("resolve_challenge", {
+                    "path": mcp_path, "challenge_seq": contested["seq"],
+                    "resolution_item": "syn1", "actor": "agent:writer",
+                }))
+                events = json.loads(ledger_path.read_text(encoding="utf-8"))["events"]
+                assert [event["kind"] for event in events] == [
+                    "item_put", "item_put", "item_put", "phase_review", "phase_advance",
+                    "challenge", "item_put", "item_review", "challenge_resolved",
+                ]
+                assert resolved == events[-1]
+                assert resolved["payload"]["challenge_seq"] == contested["seq"]
+                assert resolved["payload"]["resolution_item"] == "syn1"
+                assert resolved["payload"]["review_seq"] == reviewed["seq"]
+                resolved_status = command("status", mcp_path)
+                assert resolved_status == data(await call_tool("status", {"path": mcp_path}))
+                assert resolved_status["open_challenges"] == []
+                assert not resolved_status["phases"]["frame"]["accepted"]
+                mcp_trace = data(await call_tool("trace", {"path": mcp_path, "id": "syn1"}))
+                assert mcp_trace == command("trace", mcp_path, "syn1")
+                assert mcp_trace["item"]["id"] == "syn1"
+                assert {item["id"] for item in mcp_trace["ancestors"]} == {"p1", "a1"}
 
                 # Exercise the full signed protocol using only synthetic data and an in-memory private key.
                 signed_dir = Path(directory) / "signed-case"
@@ -165,7 +245,7 @@ def main() -> None:
                 assert not unsigned_gate["ready"] and any("approval" in blocker for blocker in unsigned_gate["blockers"])
                 before_challenge = (signed_dir / "organon.json").read_bytes()
                 cli_challenge = command("approval-challenge", signed_case, "n1", "--reason", signed_reason, "--actor", signed_actor)
-                mcp_challenge = data(await client.call_tool("approval_challenge", {
+                mcp_challenge = data(await call_tool("approval_challenge", {
                     "path": signed_case, "id": "n1", "reason": signed_reason, "actor": signed_actor,
                 }))
                 assert mcp_challenge == cli_challenge
@@ -183,20 +263,20 @@ def main() -> None:
                 approval_args = {"path": signed_case, "id": "n1", "reason": signed_reason, "actor": signed_actor}
                 command_rejected("approve", signed_case, "n1", "--reason", signed_reason, "--actor", signed_actor)
                 wrong_signature = base64.b64encode(bytes(64)).decode("ascii")
-                rejected_signature = await client.call_tool("approve", {**approval_args, "signature": wrong_signature})
+                rejected_signature = await call_tool("approve", {**approval_args, "signature": wrong_signature})
                 assert rejected_signature.is_error
                 assert "approval signature is invalid" in str(rejected_signature.content)
                 assert (signed_dir / "organon.json").read_bytes() == before_challenge
                 assert command("gate", signed_case, "critique") == unsigned_gate
 
                 signature = base64.b64encode(signer.sign(message)).decode("ascii")
-                data(await client.call_tool("approve", {**approval_args, "signature": signature}))
+                data(await call_tool("approve", {**approval_args, "signature": signature}))
                 signed_status = command("status", signed_case)
-                assert signed_status == data(await client.call_tool("status", {"path": signed_case}))
+                assert signed_status == data(await call_tool("status", {"path": signed_case}))
                 assert signed_status["items"]["n1"]["approved"]
                 assert signed_status["items"]["n1"]["approval_status"] == "signed_verified"
                 signed_gate = command("gate", signed_case, "critique")
-                assert signed_gate == data(await client.call_tool("gate", {"path": signed_case, "phase": "critique"}))
+                assert signed_gate == data(await call_tool("gate", {"path": signed_case, "phase": "critique"}))
                 assert signed_gate["ready"] and not signed_gate["accepted"]
                 command("review-phase", signed_case, "critique", "--verdict", "accept", "--reason", "Synthetic independent review", "--actor", "agent:reviewer")
                 command("advance", signed_case, "critique", "--actor", "agent:runner")
@@ -204,19 +284,21 @@ def main() -> None:
 
                 approved_ledger = (signed_dir / "organon.json").read_bytes()
                 trust_file.write_text(json.dumps({"schema": 2, "cases": {}}), encoding="utf-8")
-                reopened = data(await client.call_tool("status", {"path": signed_case}))
+                reopened = data(await call_tool("status", {"path": signed_case}))
                 assert reopened == command("status", signed_case)
                 assert reopened["approval_trust"] == "unavailable"
                 assert not reopened["items"]["n1"]["approved"]
-                reopened_gate = data(await client.call_tool("gate", {"path": signed_case, "phase": "critique"}))
+                reopened_gate = data(await call_tool("gate", {"path": signed_case, "phase": "critique"}))
                 assert reopened_gate == command("gate", signed_case, "critique")
                 assert not reopened_gate["ready"] and not reopened_gate["accepted"]
                 assert any("approval" in blocker for blocker in reopened_gate["blockers"])
                 assert (signed_dir / "organon.json").read_bytes() == approved_ledger
                 assert cli_commands_seen == expected_cli_commands
+                assert mcp_tools_seen == expected_mcp_tools
                 return {"phases_accepted": len(status["phases"]), "items": len(status["items"]),
                         "decisions": decisions, "revision": status["revision"], "invalid_input_preserved_ledger": True,
                         "idempotent_replay": True, "cli_commands_exercised": len(cli_commands_seen),
+                        "mcp_tools_exercised": len(mcp_tools_seen),
                         "signed_approval_verified": True, "invalid_signatures_rejected": True,
                         "trust_removal_reopened": True}
 

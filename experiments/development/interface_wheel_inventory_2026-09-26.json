@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_clean_wheel_interface_inventory",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "artifacts": {
+    "scripts/clean_smoke.py": "44f429cb28c1e474e65b6ee5502c04e1338738f3ac9e8d7726151060fb36d037",
+    "dist/specorganon-0.1.0-py3-none-any.whl": "0dda85771f4f0e54edd713ba5361a83905fd489e6f06023fe285e14b03e21375"
+  },
+  "finding_repaired": "The previous clean-wheel smoke discovered 14 MCP tools but invoked only 9; the remaining 5 were covered by a development-environment integration test. The current smoke invokes and checks all 14 through an installed stdio MCP client in each clean environment.",
+  "runs": [
+    {
+      "python": "3.11.15",
+      "wheel_install": "fresh temporary virtual environment; exit 0",
+      "smoke_exit_code": 0,
+      "cli_commands_exercised": 14,
+      "mcp_tools_exercised": 14,
+      "phases_accepted": 9,
+      "items": 29,
+      "revision": 49,
+      "idempotent_replay": true,
+      "invalid_input_preserved_ledger": true,
+      "invalid_signatures_rejected": true,
+      "synthetic_signed_approval_verified": true,
+      "trust_removal_reopened": true
+    },
+    {
+      "python": "3.12.3",
+      "wheel_install": "fresh temporary virtual environment; exit 0",
+      "smoke_exit_code": 0,
+      "cli_commands_exercised": 14,
+      "mcp_tools_exercised": 14,
+      "phases_accepted": 9,
+      "items": 29,
+      "revision": 49,
+      "idempotent_replay": true,
+      "invalid_input_preserved_ledger": true,
+      "invalid_signatures_rejected": true,
+      "synthetic_signed_approval_verified": true,
+      "trust_removal_reopened": true
+    }
+  ],
+  "gates": [
+    {"command": "uv build --wheel", "result": "Successfully built specorganon-0.1.0-py3-none-any.whl"},
+    {"command": "uv run ruff check scripts/clean_smoke.py", "result": "All checks passed!"}
+  ],
+  "limits": [
+    "Cases and signatures are synthetic; the smoke does not verify authority or consent from a competent person.",
+    "The smoke checks invoked tools and their selected effects, not a controlled comparison of agents or interventions.",
+    "No real reserved matrix, field intervention, provider telemetry or measured impact is included.",
+    "The built wheel is a local artifact and is not committed to the repository."
+  ]
+}

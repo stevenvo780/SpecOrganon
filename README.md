@@ -14,7 +14,7 @@ uv run pytest -q
 uv build --wheel
 ```
 
-Para probar el wheel fuera del árbol de desarrollo, crea un entorno temporal, instala `dist/specorganon-0.1.0-py3-none-any.whl` y ejecuta `scripts/clean_smoke.py` con el Python de ese entorno. El script crea una fixture sintética, descubre e invoca el servidor MCP por stdio, alterna CLI/MCP, recorre las nueve fases, comprueba `organon.json`, rechaza una entrada inválida y verifica una repetición sin duplicados. Además ejercita una aprobación Ed25519 **sintética** con clave generada en memoria y comprueba rechazo de firma inválida y bloqueo al retirar el registro de confianza:
+Para probar el wheel fuera del árbol de desarrollo, crea un entorno temporal, instala `dist/specorganon-0.1.0-py3-none-any.whl` y ejecuta `scripts/clean_smoke.py` con el Python de ese entorno. El script crea fixtures sintéticas, invoca los 14 comandos CLI y las 14 herramientas de un cliente MCP stdio real, recorre las nueve fases, comprueba `organon.json`, rechaza una entrada inválida y verifica una repetición sin duplicados. Además ejercita una aprobación Ed25519 **sintética** con clave generada en memoria y comprueba rechazo de firma inválida y bloqueo al retirar el registro de confianza:
 
 ```sh
 uv venv /tmp/organon-check
