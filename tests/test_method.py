@@ -3,6 +3,7 @@
 import pytest
 
 from specorganon import engine
+from specorganon.ledger import read_project
 from specorganon.workflow import PHASES
 
 
@@ -113,6 +114,119 @@ def test_independent_resolution_required_for_manual_challenge(tmp_path):
         raise AssertionError("resolution without independent review")
     engine.review_item(path, "s1", "accept", "checked source scopes", "agent:reviewer")
     engine.resolve_challenge(path, conflict["seq"], "s1", "agent:analyst")
+    assert engine.get_state(path)["open_challenges"] == []
+
+
+def test_reviewed_resolution_clears_exact_automatic_pair_and_keeps_history(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _put(path, "e2", "evidence", ["pr1"], {
+        "origin": "simulated", "source": "second synthetic source", "date": "2026-09-26",
+        "locator": "independent fixture", "metric_key": "count", "scope": "fixture",
+        "unit": "count", "value": 12,
+    })
+    state = engine.get_state(path)
+    assert any("e1 vs e2" in issue for issue in state["items"]["e1"]["issues"])
+    assert state["items"]["inf1"]["contested"]
+    assert state["items"]["ass1"]["contested"]
+    assert not state["phases"]["observe"]["ready"]
+    assert not state["phases"]["validate"]["accepted"]
+
+    # Resolving a different pair must not clear the quantitative disagreement.
+    other = engine.challenge(path, "e0", "e2", "compare contextual source", "agent:reviewer")
+    _put(path, "syn0", "synthesis", ["e0", "e2", "inf1"], text="Contextual source checked")
+    engine.review_item(path, "syn0", "accept", "checked both sources", "agent:reviewer")
+    engine.resolve_challenge(path, other["seq"], "syn0", "agent:analyst")
+    assert any("e1 vs e2" in issue for issue in engine.get_state(path)["items"]["e1"]["issues"])
+
+    conflict = engine.challenge(path, "e2", "e1", "same scope disagrees", "agent:reviewer")
+    _put(path, "syn2", "synthesis", ["inf1", "e1", "e2"], text="Both measurements disagree; retain both")
+    with pytest.raises(engine.MethodError, match="independent accepted item review"):
+        engine.resolve_challenge(path, conflict["seq"], "syn2", "agent:analyst")
+    engine.review_item(path, "syn2", "accept", "reviewed disagreement and limits", "agent:reviewer")
+    assert any("e1 vs e2" in issue for issue in engine.get_state(path)["items"]["e1"]["issues"])
+    resolution = engine.resolve_challenge(path, conflict["seq"], "syn2", "agent:analyst")
+
+    state = engine.get_state(path)
+    assert state["items"]["e1"]["data"]["value"] == 10
+    assert state["items"]["e2"]["data"]["value"] == 12
+    assert not any("conflicting metric" in issue for id in ("e1", "e2") for issue in state["items"][id]["issues"])
+    assert not any(state["items"][id]["contested"] for id in ("e1", "e2", "inf1", "syn1", "ass1"))
+    _accept(path, "study")
+    assert engine.gate(path, "observe")["ready"]
+    assert not engine.gate(path, "observe")["accepted"]
+    assert engine.get_state(path)["open_challenges"] == []
+    for phase in PHASES[3:]:
+        _accept(path, phase.id)
+
+    events = read_project(path)["events"]
+    assert events[conflict["seq"] - 1]["payload"]["left"] == "e2"
+    assert events[conflict["seq"] - 1]["payload"]["right"] == "e1"
+    assert events[resolution["seq"] - 1]["payload"]["challenge_seq"] == conflict["seq"]
+    assert events[resolution["seq"] - 1]["payload"]["resolution_item"] == "syn2"
+
+
+@pytest.mark.parametrize(("revised_evidence", "new_value"), (("e1", 11), ("e2", 13)))
+def test_automatic_pair_reopens_after_resolution_or_evidence_revision(tmp_path, revised_evidence, new_value):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _put(path, "e2", "evidence", ["pr1"], {
+        "origin": "simulated", "source": "second synthetic source", "date": "2026-09-26",
+        "locator": "independent fixture", "metric_key": "count", "scope": "fixture",
+        "unit": "count", "value": 12,
+    })
+    conflict = engine.challenge(path, "e1", "e2", "same scope disagrees", "agent:reviewer")
+    _put(path, "syn2", "synthesis", ["inf1", "e1", "e2"], text="Both measurements disagree; retain both")
+    engine.review_item(path, "syn2", "accept", "reviewed disagreement and limits", "agent:reviewer")
+    engine.resolve_challenge(path, conflict["seq"], "syn2", "agent:analyst")
+    assert engine.gate(path, "observe")["ready"]
+
+    engine.review_item(path, "syn2", "reject", "found an unresolved limitation", "agent:reviewer")
+    assert not engine.gate(path, "observe")["ready"]
+    engine.review_item(path, "syn2", "accept", "limitation addressed in review", "agent:reviewer")
+    assert not engine.gate(path, "observe")["ready"]
+    engine.resolve_challenge(path, conflict["seq"], "syn2", "agent:analyst")
+    assert engine.gate(path, "observe")["ready"]
+
+    _put(path, "syn2", "synthesis", ["inf1", "e1", "e2"], text="Revised account of disagreement")
+    state = engine.get_state(path)
+    assert any("e1 vs e2" in issue for issue in state["items"]["e1"]["issues"])
+    assert conflict["seq"] in {entry["seq"] for entry in state["open_challenges"]}
+    assert not engine.gate(path, "observe")["ready"]
+    engine.review_item(path, "syn2", "accept", "checked revised account", "agent:reviewer")
+    engine.resolve_challenge(path, conflict["seq"], "syn2", "agent:analyst")
+    assert engine.gate(path, "observe")["ready"]
+
+    revised_data = dict(engine.get_state(path)["items"][revised_evidence]["data"])
+    revised_data["value"] = new_value
+    _put(path, revised_evidence, "evidence", ["pr1"], revised_data)
+    state = engine.get_state(path)
+    assert state["items"]["syn2"]["stale"]
+    assert any("e1 vs e2" in issue for issue in state["items"][revised_evidence]["issues"])
+    assert conflict["seq"] in {entry["seq"] for entry in state["open_challenges"]}
+    assert not engine.gate(path, "observe")["ready"]
+
+
+def test_each_conflicting_pair_needs_its_own_active_resolution(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    for id, value in (("e2", 12), ("e3", 14)):
+        _put(path, id, "evidence", ["pr1"], {
+            "origin": "simulated", "source": f"synthetic {id}", "date": "2026-09-26",
+            "locator": id, "metric_key": "count", "scope": "fixture", "unit": "count", "value": value,
+        })
+    pairs = (("e1", "e2"), ("e1", "e3"), ("e2", "e3"))
+    for index, (left, right) in enumerate(pairs):
+        conflict = engine.challenge(path, left, right, "same scope disagrees", "agent:reviewer")
+        synthesis = f"syn{left[-1]}{right[-1]}"
+        _put(path, synthesis, "synthesis", ["inf1", left, right], text=f"Retain and reconcile {left} and {right}")
+        engine.review_item(path, synthesis, "accept", "checked both sources", "agent:reviewer")
+        engine.resolve_challenge(path, conflict["seq"], synthesis, "agent:analyst")
+        issues = [issue for item in (left, right) for issue in engine.get_state(path)["items"][item]["issues"]]
+        assert not any(f"{left} vs {right}" in issue for issue in issues)
+        if index < len(pairs) - 1:
+            assert not engine.gate(path, "observe")["ready"]
+    assert engine.gate(path, "observe")["ready"]
     assert engine.get_state(path)["open_challenges"] == []
 
 

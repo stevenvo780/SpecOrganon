@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from . import approval
-from .ledger import ZERO_HASH, ConflictError, LedgerError, append_event, init_project, read_project
+from .ledger import ZERO_HASH, LedgerError, append_event, init_project, read_project
 from .workflow import KIND_TO_PHASE, KINDS, PHASES, PHASE_BY_ID
 
 
@@ -178,8 +178,13 @@ def _stale(items: dict[str, dict], item_id: str, visiting: set[str] | None = Non
     return False
 
 
-def _automatic_conflicts(state: dict[str, Any]) -> dict[str, list[str]]:
-    """Flag incompatible quantitative assertions about one metric and scope."""
+def _automatic_conflicts(state: dict[str, Any], active_resolutions: set[int]) -> dict[str, list[str]]:
+    """Flag each incompatible pair unless that exact pair has an active resolution."""
+    resolved_pairs = {
+        frozenset((challenge["left"], challenge["right"]))
+        for seq, challenge in state["challenges"].items()
+        if seq in active_resolutions
+    }
     groups: dict[tuple[str, str, str], list[dict]] = {}
     for item in state["items"].values():
         if item["kind"] != "evidence":
@@ -197,6 +202,8 @@ def _automatic_conflicts(state: dict[str, Any]) -> dict[str, list[str]]:
                 except (TypeError, ValueError):
                     continue
                 if math.isfinite(a) and math.isfinite(b) and abs(a - b) > tolerance:
+                    if frozenset((left["id"], right["id"])) in resolved_pairs:
+                        continue
                     label = f"conflicting metric {group[0]} in {group[1]}: {left['id']} vs {right['id']}"
                     issues.setdefault(left["id"], []).append(label)
                     issues.setdefault(right["id"], []).append(label)
@@ -335,7 +342,7 @@ def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if seq not in active_resolutions:
             contested |= _dependents(items, challenge["left"])
             contested |= _dependents(items, challenge["right"])
-    automatic = _automatic_conflicts(state)
+    automatic = _automatic_conflicts(state, active_resolutions)
     for item_id in automatic:
         contested |= _dependents(items, item_id)
     return {
