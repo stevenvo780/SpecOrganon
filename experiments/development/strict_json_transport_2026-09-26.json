@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_strict_json_regression",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "baseline_commit": "2e88aefaa4c16967f0913ac09e7fc552780252c1",
+  "baseline_sha256": {
+    "src/specorganon/cli.py": "0422deafe7b5635e7fdf65a0695bfce2b85bd25525a14e7dce8e95651c88c03c",
+    "src/specorganon/ledger.py": "09bd215d6027236dd3ede882177ee1a5fd8d9c190637933cc29c88b034607729"
+  },
+  "current_sha256": {
+    "src/specorganon/cli.py": "452f5ce658d5c434386543e9517663ecbea8b9a586f2604f602167c413b47065",
+    "src/specorganon/ledger.py": "6b1eaa545cf8bd7bb5621a47d097d99ea74b87abb2805fed7fe43ceeb165522a",
+    "scripts/clean_smoke.py": "10234e83bf5eb91a7004de59a21cfd67a990cc5bcd73858b75b9fd9aa94888c6",
+    "tests/test_interfaces.py": "bd232019f2c5df7de6cab7e082e46caf5a9c41cd9449e80786f18d07465aaaf8",
+    "tests/test_ledger.py": "2c60795d306a985b0e2c38d05db107669fd0292cc0404e45adf00d4888de4083",
+    "wheel": "ce6652270e377e5cb6f97de883348e375cd0869b2325c03f298a1bb99c4e6b92"
+  },
+  "reproduction": {
+    "baseline_false_green": "Installed CLI accepted put --data '{\"value\":NaN}' with exit 0 and persisted NaN in organon.json; MCP status then returned text containing nan with no structured result.",
+    "current_negative_controls": [
+      "CLI rejects NaN, Infinity in nested data, 1e9999, nonzero numbers such as 1e-9999 that would underflow to zero, and 0.1234567890123456789 because its decimal value would change on round-trip serialization; rejected inputs leave the ledger unchanged.",
+      "CLI --roles, --expected-deps and run manifest reject nonfinite JSON.",
+      "Python ledger append rejects nested nonfinite values before atomic replacement.",
+      "Reading a contaminated ledger through the real MCP client fails instead of reporting a successful status; a direct ledger test rejects an underflow literal on read."
+    ],
+    "current_positive_control": "Valid Unicode and finite decimal data retain CLI/MCP structured status parity; 0.1, 1.00, 1e20 and explicit signed zero forms remain accepted."
+  },
+  "checks": {
+    "full_pytest": "uv run pytest -q: 577 passed",
+    "wheel_build": "uv build --wheel: succeeded",
+    "python_3_11_15_clean_smoke": "fresh wheel install, exit 0; 9 phases, 29 items, revision 49, 14 CLI commands, 14 MCP tools, NaN/Infinity/overflow/underflow/decimal-value-loss rejected without mutation",
+    "python_3_12_3_clean_smoke": "fresh wheel install, exit 0; 9 phases, 29 items, revision 49, 14 CLI commands, 14 MCP tools, NaN/Infinity/overflow/underflow/decimal-value-loss rejected without mutation",
+    "ruff": "uv run ruff check .: passed"
+  },
+  "limits": [
+    "This guards JSON syntax and the decimal value seen after float parsing and JSON round-trip serialization; binary floating-point still does not represent ordinary decimals exactly in memory. Evidence requiring exact decimal arithmetic needs an explicit representation or an independently reviewed tolerance.",
+    "The MCP client can serialize a nonfinite outgoing Python value to null before the server sees it; the poisoned-ledger test checks server-side reading, not that client serialization path.",
+    "The clean smoke covers its synthetic routes and does not establish every possible production state or GOAL criterion 1."
+  ],
+  "criterion_1": "not_demonstrated"
+}

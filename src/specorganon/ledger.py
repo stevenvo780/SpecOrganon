@@ -9,9 +9,11 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import json
+import math
 import os
 import tempfile
 import uuid
+from decimal import Decimal, InvalidOperation
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -33,8 +35,38 @@ class ConflictError(LedgerError):
     """A writer's expected revision does not match the current revision."""
 
 
+def _reject_nonfinite(raw: str) -> None:
+    raise ValueError(f"non-finite JSON number {raw} is not allowed")
+
+
+def _finite_float(raw: str) -> float:
+    value = float(raw)
+    if not math.isfinite(value):
+        _reject_nonfinite(raw)
+    mantissa = raw.split("e", 1)[0].split("E", 1)[0]
+    if value == 0.0:
+        if any(digit in "123456789" for digit in mantissa):
+            raise ValueError("JSON number underflows to zero")
+        return value
+    try:
+        if Decimal(str(value)) != Decimal(raw):
+            raise ValueError("JSON number loses decimal precision")
+    except InvalidOperation as exc:
+        raise ValueError("JSON number exceeds supported decimal range") from exc
+    return value
+
+
+def strict_json_loads(raw: str) -> Any:
+    """Parse JSON without nonfinite numbers or visible decimal value loss."""
+    return json.loads(raw, parse_constant=_reject_nonfinite, parse_float=_finite_float)
+
+
 def _canonical(value: Any) -> bytes:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    try:
+        return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+                          allow_nan=False).encode("utf-8")
+    except ValueError as exc:
+        raise LedgerError(f"ledger value is not strict JSON: {exc}") from exc
 
 
 def _digest(value: Any) -> str:
@@ -50,7 +82,10 @@ def project_file(directory: str | Path) -> Path:
 
 
 def _atomic_write(path: Path, data: dict[str, Any]) -> None:
-    payload = json.dumps(data, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+    try:
+        payload = json.dumps(data, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n"
+    except ValueError as exc:
+        raise LedgerError(f"ledger value is not strict JSON: {exc}") from exc
     temp_name: str | None = None
     try:
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent, prefix=".organon-", delete=False) as temp:
@@ -105,10 +140,10 @@ def init_project(directory: str | Path, title: str, domain: str, actor: str, app
 def read_project(directory: str | Path, *, verify_external_anchor: bool = True) -> dict[str, Any]:
     target = project_file(directory)
     try:
-        data = json.loads(target.read_text(encoding="utf-8"))
+        data = strict_json_loads(target.read_text(encoding="utf-8"))
     except FileNotFoundError as exc:
         raise LedgerError(f"project not found: {target}") from exc
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError) as exc:
         raise LedgerError(f"cannot read project: {target}: {exc}") from exc
     if not isinstance(data, dict) or data.get("schema") != SCHEMA_VERSION or not isinstance(data.get("events"), list):
         raise LedgerError("unsupported or malformed project ledger")

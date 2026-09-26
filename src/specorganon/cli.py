@@ -41,34 +41,28 @@ def invoke(operation: str, **kwargs: Any) -> Any:
     raise ValueError(f"unknown operation: {operation}")
 
 
-def _json_object(raw: str) -> dict[str, Any]:
+def _strict_object(raw: str, name: str) -> dict[str, Any]:
+    from specorganon.ledger import strict_json_loads
+
     try:
-        value = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise argparse.ArgumentTypeError(f"invalid JSON object: {exc.msg}") from exc
+        value = strict_json_loads(raw)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"invalid {name} JSON object: {exc}") from exc
     if not isinstance(value, dict):
-        raise argparse.ArgumentTypeError("--data must be a JSON object")
+        raise argparse.ArgumentTypeError(f"{name} must be a JSON object")
     return value
+
+
+def _json_object(raw: str) -> dict[str, Any]:
+    return _strict_object(raw, "--data")
 
 
 def _json_roles(raw: str) -> dict[str, Any]:
-    try:
-        value = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise argparse.ArgumentTypeError(f"invalid --roles JSON object: {exc.msg}") from exc
-    if not isinstance(value, dict):
-        raise argparse.ArgumentTypeError("--roles must be a JSON object")
-    return value
+    return _strict_object(raw, "--roles")
 
 
 def _json_expected_deps(raw: str) -> dict[str, Any]:
-    try:
-        value = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise argparse.ArgumentTypeError(f"invalid --expected-deps JSON object: {exc.msg}") from exc
-    if not isinstance(value, dict):
-        raise argparse.ArgumentTypeError("--expected-deps must be a JSON object")
-    return value
+    return _strict_object(raw, "--expected-deps")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -171,10 +165,12 @@ def main(argv: list[str] | None = None) -> int:
     command = args.pop("command").replace("-", "_")
     try:
         if command == "run":
+            from specorganon.ledger import strict_json_loads
+
             with args.pop("manifest").open(encoding="utf-8") as source:
-                args["manifest"] = json.load(source)
+                args["manifest"] = strict_json_loads(source.read())
         result = invoke(command, **args)
-        print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+        print(json.dumps(result, ensure_ascii=False, sort_keys=True, allow_nan=False))
     except (ValueError, OSError, TypeError, json.JSONDecodeError) as exc:
         print(f"organon: {exc}", file=sys.stderr)
         return 1

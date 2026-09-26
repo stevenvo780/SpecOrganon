@@ -251,6 +251,61 @@ def test_bad_cli_json_preserves_case(tmp_path):
     assert (case / "organon.json").read_bytes() == before
 
 
+@pytest.mark.parametrize(
+    ("data", "error"),
+    (
+        ('{"value":NaN}', "non-finite JSON number"),
+        ('{"nested":{"values":[1,Infinity]}}', "non-finite JSON number"),
+        ('{"nested":{"value":-Infinity}}', "non-finite JSON number"),
+        ('{"value":1e9999}', "non-finite JSON number"),
+        ('{"value":1e-9999}', "JSON number underflows to zero"),
+        ('{"value":-1e-9999}', "JSON number underflows to zero"),
+        ('{"value":0.1234567890123456789}', "JSON number loses decimal precision"),
+    ),
+)
+def test_cli_rejects_nonfinite_or_underflow_json_before_mutation(tmp_path, data, error):
+    case = tmp_path / "strict-json-case"
+    cli("init", str(case), "--title", "Case", "--domain", "test", "--actor", "agent:writer")
+    project_file = case / "organon.json"
+    before = project_file.read_bytes()
+
+    failed = subprocess.run(
+        [str(CLI), "put", str(case), "bad", "--kind", "problem", "--text", "Bad data",
+         "--data", data, "--actor", "agent:writer"],
+        text=True, capture_output=True,
+    )
+    assert failed.returncode != 0
+    assert error in failed.stderr
+    assert project_file.read_bytes() == before
+
+
+def test_mcp_status_rejects_nonfinite_ledger_and_keeps_valid_json_structured(tmp_path):
+    case = tmp_path / "strict-mcp-case"
+    path = str(case)
+    cli("init", path, "--title", "Case", "--domain", "test", "--actor", "agent:writer")
+    cli("put", path, "valid", "--kind", "problem", "--text", "Valid decimal and Unicode",
+        "--data", '{"measurement":{"value":0.125,"label":"piñón"}}', "--actor", "agent:writer")
+    project_file = case / "organon.json"
+
+    async def exercise() -> None:
+        params = StdioServerParameters(command=str(MCP), cwd=str(tmp_path), env=os.environ.copy())
+        async with Client(params, mode="legacy") as client:
+            valid = await client.call_tool("status", {"path": path})
+            assert isinstance(valid.structured_content, dict)
+            assert result_data(valid)["items"]["valid"]["data"] == {
+                "measurement": {"value": 0.125, "label": "piñón"}
+            }
+
+            poisoned = json.loads(project_file.read_text(encoding="utf-8"))
+            poisoned["events"][0]["payload"]["data"]["measurement"]["value"] = float("nan")
+            project_file.write_text(json.dumps(poisoned, ensure_ascii=False), encoding="utf-8")
+            rejected = await client.call_tool("status", {"path": path})
+            assert rejected.is_error
+            assert any("non-finite JSON number NaN" in part.text for part in rejected.content)
+
+    asyncio.run(exercise())
+
+
 def test_cli_and_mcp_guarded_puts_reject_stale_versions_without_writing(tmp_path):
     case = tmp_path / "guarded-case"
     path = str(case)

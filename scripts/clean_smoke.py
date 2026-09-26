@@ -115,6 +115,22 @@ def main() -> None:
                 })
                 assert rejected.is_error
                 assert (case / "organon.json").read_bytes() == before
+                for invalid_data, expected_error in (
+                    ('{"value":NaN}', "non-finite JSON number"),
+                    ('{"nested":{"value":Infinity}}', "non-finite JSON number"),
+                    ('{"value":1e9999}', "non-finite JSON number"),
+                    ('{"value":1e-9999}', "JSON number underflows to zero"),
+                    ('{"value":0.1234567890123456789}', "JSON number loses decimal precision"),
+                ):
+                    nonfinite = subprocess.run([
+                        str(cli), "put", path, "bad-number", "--kind", "problem",
+                        "--text", "Non-finite fixture", "--data", invalid_data,
+                        "--actor", "agent:runner",
+                    ], text=True, capture_output=True, env=smoke_env)
+                    assert nonfinite.returncode != 0
+                    assert expected_error in nonfinite.stderr
+                    assert (case / "organon.json").read_bytes() == before
+                assert command("status", path) == data(await call_tool("status", {"path": path}))
                 replay = command("run", path, "--manifest", str(repo / "workflows" / "synthetic_full.json"), "--actor", "agent:runner")
                 assert replay["applied"] == 0 and replay["status"] == "complete"
                 assert (case / "organon.json").read_bytes() == before
@@ -679,6 +695,7 @@ def main() -> None:
                 assert mcp_tools_seen == expected_mcp_tools
                 return {"phases_accepted": len(status["phases"]), "items": len(status["items"]),
                         "decisions": decisions, "revision": status["revision"], "invalid_input_preserved_ledger": True,
+                        "nonfinite_json_rejected": True,
                         "idempotent_replay": True, "cli_commands_exercised": len(cli_commands_seen),
                         "mcp_tools_exercised": len(mcp_tools_seen),
                         "guarded_put": True,
