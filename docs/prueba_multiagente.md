@@ -1,0 +1,17 @@
+# Pruebas de coordinación de agentes reales
+
+**Corte:** 2026-09-26 UTC. Este registro documenta operaciones de subagentes nativos sobre ledgers reales del toolkit. No representa una comparación de modelos ni mide impacto de una intervención.
+
+## Autor y revisor en un workflow completo
+
+Un agente `multiagent_writer` creó [`cases/synthetic_multiagent/organon.json`](../cases/synthetic_multiagent/organon.json) mediante `run_manifest`, con los 29 pasos `put` de [`workflows/synthetic_full.json`](../workflows/synthetic_full.json). Terminó con 29 ítems, ninguna revisión y `next_task.action=review_phase` para `frame`. El agente principal añadió dos aprobaciones `human:fixture` cuyo motivo dice explícitamente que son decisiones **simuladas por el harness de IA, sin consentimiento humano real**. Un segundo agente nativo, `case_reviewer`, inspeccionó los gates y registró revisión aceptada y avance de las nueve fases, incluida `validate`.
+
+Lectura actual del ledger con `read_project` y `get_state`: **49 eventos**: 29 `item_put` de `agent:multiagent_writer`, dos `approval` de fixture, nueve `phase_review` y nueve `phase_advance` de `agent:case_reviewer`. Hay 29 ítems y las nueve fases figuran `accepted=true` e `independent_review=true`. `ass1.verdict=no_demostrado` para campo; la prueba de `build` es un comando declarado de fixture, no una ejecución externa. Esta corrida demuestra división de escritura y revisión, gates entre agentes y persistencia. No demuestra aprobación humana, validez empírica ni la utilidad de añadir un agente frente a uno solo.
+
+En los casos documentales reales, un agente distinto del autor también revisó y avanzó `frame` de [mango](../cases/mango/organon.json) y [Citi Bike](../cases/citibike/organon.json). El revisor verificó alcance y fuentes para ese encuadre; las normas siguen sin aprobación y las fases siguientes bloqueadas. Esa revisión encontró límites de los datos y ayudó a no presentar un encuadre documental como resultado de campo. No se midieron minutos, tokens o coste marginal de la revisión.
+
+## Dos escritores asignados en paralelo
+
+En [`cases/synthetic_concurrent/organon.json`](../cases/synthetic_concurrent/organon.json), el agente principal creó `p0`. Se lanzaron dos agentes nativos para escribir ítems **disjuntos**: `concurrent_a` insertó 20 `actor` y `concurrent_b` 20 `boundary`, todos referenciando `p0`. Cada uno reportó cero conflictos; `read_project` verificó 41 eventos, 41 ítems válidos y 20 eventos por escritor. La secuencia de autores es `root → concurrent_a (20) → concurrent_b (20)`, con solo dos cambios de autor. Por tanto, el ledger demuestra que ambas asignaciones persistieron sin pérdida, **pero no demuestra solapamiento temporal de sus escrituras** ni mejora de tiempo por paralelismo. El [test de replays simultáneos](../tests/test_runner.py) comprueba aparte que dos procesos que ejecutan el mismo manifiesto no duplican eventos, con resultado aplicado `[0,3]`; son procesos, no agentes de modelo.
+
+El resultado negativo es útil: lanzar dos agentes no garantiza paralelismo efectivo cuando la preparación y la serialización del ledger dominan una tarea pequeña. Para estimar beneficio de especialización, revisión o exploración paralela harán falta tareas más sustantivas, telemetría de tiempo/tokens/coste, configuraciones iguales salvo la coordinación, réplicas y evaluadores externos, según el [protocolo](protocolo_experimental.md). No se atribuye calidad superior a estos ejemplos.
