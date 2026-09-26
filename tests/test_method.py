@@ -1,7 +1,12 @@
 """Behavioral tests using declared synthetic inputs, not field observations."""
 
+import pytest
+
 from specorganon import engine
 from specorganon.workflow import PHASES
+
+
+pytestmark = pytest.mark.usefixtures("enable_fixture_policy")
 
 
 def _put(path, id, kind, refs=(), data=None, text=None):
@@ -17,7 +22,7 @@ def _accept(path, phase):
 
 
 def _complete_synthetic_case(path):
-    engine.create_case(path, "Synthetic control", "test", "human:fixture")
+    engine.create_case(path, "Synthetic control", "test", "human:fixture", approval_policy="fixture")
     _put(path, "p1", "problem")
     _put(path, "a1", "actor", ["p1"])
     _put(path, "b1", "boundary", ["p1"])
@@ -86,7 +91,7 @@ def test_full_synthetic_workflow_and_late_evidence_revision(tmp_path):
 
 def test_inconsistent_published_calculation_blocks_observation(tmp_path):
     path = tmp_path / "case"
-    engine.create_case(path, "FAO arithmetic control", "food", "human:fixture")
+    engine.create_case(path, "FAO arithmetic control", "food", "human:fixture", approval_policy="fixture")
     _put(path, "e1", "evidence", data={"origin": "published", "source": "FAO 2018", "date": "2018", "locator": "Table 18", "value": 79925.4, "unit": "t/year", "calculation": {"operator": "product", "operands": [183828.4, 0.15], "tolerance": 0.1}})
     issues = engine.get_state(path)["items"]["e1"]["issues"]
     assert any("differs from recomputed" in issue for issue in issues)
@@ -95,7 +100,7 @@ def test_inconsistent_published_calculation_blocks_observation(tmp_path):
 
 def test_independent_resolution_required_for_manual_challenge(tmp_path):
     path = tmp_path / "case"
-    engine.create_case(path, "Challenge control", "test", "human:fixture")
+    engine.create_case(path, "Challenge control", "test", "human:fixture", approval_policy="fixture")
     _put(path, "e1", "evidence", data={"origin": "published", "source": "A", "date": "2026", "locator": "1"})
     _put(path, "e2", "evidence", data={"origin": "published", "source": "B", "date": "2026", "locator": "1"})
     conflict = engine.challenge(path, "e1", "e2", "different denominators", "agent:reviewer")
@@ -113,7 +118,7 @@ def test_independent_resolution_required_for_manual_challenge(tmp_path):
 
 def test_rejection_after_advance_revokes_phase(tmp_path):
     path = tmp_path / "case"
-    engine.create_case(path, "Review control", "test", "human:fixture")
+    engine.create_case(path, "Review control", "test", "human:fixture", approval_policy="fixture")
     _put(path, "p1", "problem")
     _put(path, "a1", "actor", ["p1"])
     _put(path, "b1", "boundary", ["p1"])
@@ -134,7 +139,7 @@ def test_rejection_after_advance_revokes_phase(tmp_path):
 
 def test_resolved_challenge_still_needs_fresh_phase_review(tmp_path):
     path = tmp_path / "case"
-    engine.create_case(path, "Challenge control", "test", "human:fixture")
+    engine.create_case(path, "Challenge control", "test", "human:fixture", approval_policy="fixture")
     _put(path, "p1", "problem")
     _put(path, "a1", "actor", ["p1"])
     _put(path, "b1", "boundary", ["p1"])
@@ -150,7 +155,7 @@ def test_resolved_challenge_still_needs_fresh_phase_review(tmp_path):
 
 def test_resolution_reopens_when_its_reviewed_basis_changes(tmp_path):
     path = tmp_path / "case"
-    engine.create_case(path, "Resolution version control", "test", "human:fixture")
+    engine.create_case(path, "Resolution version control", "test", "human:fixture", approval_policy="fixture")
     _put(path, "p1", "problem")
     _put(path, "a1", "actor", ["p1"])
     _put(path, "b1", "boundary", ["p1"])

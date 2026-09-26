@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
 
+import pytest
 from mcp.client import Client
 from mcp.client.stdio import StdioServerParameters
 
@@ -15,12 +17,14 @@ from mcp.client.stdio import StdioServerParameters
 BIN = Path(sys.executable).parent
 CLI = BIN / "organon"
 MCP = BIN / "organon-mcp"
+pytestmark = pytest.mark.usefixtures("enable_fixture_policy")
 TOOLS = {
     "init",
     "put",
     "status",
     "review",
     "approve",
+    "approval_challenge",
     "challenge",
     "resolve_challenge",
     "gate",
@@ -48,13 +52,13 @@ def result_data(result) -> dict:
 def test_cli_and_real_stdio_mcp_share_state_and_gate(tmp_path):
     case = tmp_path / "case"
     path = str(case)
-    cli("init", path, "--title", "Food chain", "--domain", "food", "--actor", "human")
+    cli("init", path, "--title", "Food chain", "--domain", "food", "--actor", "human:fixture", "--approval-policy", "fixture")
     project_file = case / "organon.json"
     assert project_file.is_file()
     assert json.loads(project_file.read_text())["project"]["title"] == "Food chain"
 
     async def exercise() -> None:
-        params = StdioServerParameters(command=str(MCP), cwd=str(tmp_path))
+        params = StdioServerParameters(command=str(MCP), cwd=str(tmp_path), env=os.environ.copy())
         async with Client(params, mode="legacy") as client:
             discovered = await client.list_tools()
             assert TOOLS <= {tool.name for tool in discovered.tools}
@@ -63,7 +67,7 @@ def test_cli_and_real_stdio_mcp_share_state_and_gate(tmp_path):
             result_data(
                 await client.call_tool(
                     "init",
-                    {"path": str(second), "title": "Second case", "domain": "test", "actor": "human:owner"},
+                    {"path": str(second), "title": "Second case", "domain": "test", "actor": "human:fixture", "approval_policy": "fixture"},
                 )
             )
             assert (second / "organon.json").is_file()
@@ -165,7 +169,7 @@ def test_cli_and_real_stdio_mcp_share_state_and_gate(tmp_path):
             result_data(
                 await client.call_tool(
                     "approve",
-                    {"path": path, "id": "commitment", "reason": "Owner approved the stated value", "actor": "human:owner"},
+                    {"path": path, "id": "commitment", "reason": "Fixture approved the stated value", "actor": "human:fixture"},
                 )
             )
             assert cli("status", path)["items"]["commitment"]["approved"] is True
@@ -222,7 +226,7 @@ def test_cli_and_real_stdio_mcp_share_state_and_gate(tmp_path):
 
 def test_bad_cli_json_preserves_case(tmp_path):
     case = tmp_path / "case"
-    cli("init", str(case), "--title", "Case", "--domain", "test", "--actor", "human")
+    cli("init", str(case), "--title", "Case", "--domain", "test", "--actor", "human:fixture", "--approval-policy", "fixture")
     before = (case / "organon.json").read_bytes()
     failed = subprocess.run(
         [
@@ -257,7 +261,7 @@ def test_mcp_auto_mode_confines_cases_to_explicit_root(tmp_path):
 
     async def exercise() -> None:
         params = StdioServerParameters(
-            command=str(MCP), cwd=str(launch), env={"ORGANON_ROOT": str(root)}
+            command=str(MCP), cwd=str(launch), env={**os.environ, "ORGANON_ROOT": str(root)}
         )
         async with Client(params, mode="auto") as client:
             discovered = await client.list_tools()
@@ -265,14 +269,14 @@ def test_mcp_auto_mode_confines_cases_to_explicit_root(tmp_path):
 
             for candidate in ("../outside/blocked", str(outside / "blocked"), "escape/blocked"):
                 rejected = await client.call_tool(
-                    "init", {"path": candidate, "title": "Blocked", "domain": "test", "actor": "human:owner"}
+                    "init", {"path": candidate, "title": "Blocked", "domain": "test", "actor": "human:fixture", "approval_policy": "fixture"}
                 )
                 assert rejected.is_error, candidate
                 assert not (outside / "blocked" / "organon.json").exists()
 
             result_data(
                 await client.call_tool(
-                    "init", {"path": "case", "title": "Allowed", "domain": "test", "actor": "human:owner"},
+                    "init", {"path": "case", "title": "Allowed", "domain": "test", "actor": "human:fixture", "approval_policy": "fixture"},
                 )
             )
             project_file = root / "case" / "organon.json"

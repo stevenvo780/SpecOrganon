@@ -8,13 +8,16 @@ import subprocess
 import sys
 import time
 
+import pytest
 from specorganon import engine
 from specorganon.runner import run_manifest
 
 
+pytestmark = pytest.mark.usefixtures("enable_fixture_policy")
+
 def test_sigkill_during_manifest_replays_without_duplicates(tmp_path):
     case = tmp_path / "case"
-    engine.create_case(case, "Interrupted fixture", "fixture", "human:fixture")
+    engine.create_case(case, "Interrupted fixture", "fixture", "human:fixture", approval_policy="fixture")
     steps = [{"op": "put", "id": "p1", "kind": "problem", "text": "Fixture problem", "refs": [], "data": {}}]
     steps.extend(
         {"op": "put", "id": f"a{i}", "kind": "actor", "text": f"Fixture actor {i}", "refs": ["p1"], "data": {}}

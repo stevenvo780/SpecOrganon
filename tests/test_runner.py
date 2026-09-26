@@ -16,6 +16,7 @@ from specorganon.workflow import PHASES
 
 
 MANIFEST = Path(__file__).resolve().parents[1] / "workflows" / "synthetic_full.json"
+pytestmark = pytest.mark.usefixtures("enable_fixture_policy")
 
 
 def _manifest() -> dict:
@@ -38,7 +39,7 @@ def _subprocess_run(case: Path) -> dict:
 
 def test_manifest_restarts_and_completes_synthetic_case(tmp_path):
     case = tmp_path / "case"
-    engine.create_case(case, "Synthetic runner control", "fixture", "human:fixture")
+    engine.create_case(case, "Synthetic runner control", "fixture", "human:fixture", approval_policy="fixture")
     first = run_manifest(case, _manifest(), "agent:runner")
     assert first["status"] == "waiting"
     assert first["reason"] == "independent_review_required"
@@ -87,7 +88,7 @@ def test_manifest_restarts_and_completes_synthetic_case(tmp_path):
 
 def test_next_task_is_bounded_and_exposes_versioned_inputs(tmp_path):
     case = tmp_path / "case"
-    engine.create_case(case, "Context control", "fixture", "human:fixture")
+    engine.create_case(case, "Context control", "fixture", "human:fixture", approval_policy="fixture")
     engine.put_item(case, "p1", "problem", "x" * 900, [], {}, "agent:writer")
     for index in range(30):
         engine.put_item(case, f"a{index}", "actor", f"actor {index}", ["p1"], {}, "agent:writer")
@@ -106,7 +107,7 @@ def test_next_task_is_bounded_and_exposes_versioned_inputs(tmp_path):
 
 def test_invalid_manifest_is_rejected_before_any_write(tmp_path):
     case = tmp_path / "case"
-    engine.create_case(case, "Invalid control", "fixture", "human:fixture")
+    engine.create_case(case, "Invalid control", "fixture", "human:fixture", approval_policy="fixture")
     good = {"op": "put", "id": "p1", "kind": "problem", "text": "Problem", "refs": [], "data": {}}
     bad_shapes = [
         {"schema": 1, "steps": [good, {"op": "approve", "id": "n1"}]},
@@ -124,7 +125,7 @@ def test_invalid_manifest_is_rejected_before_any_write(tmp_path):
 
 def test_checkpoint_divergence_and_stale_dependency_need_explicit_revision(tmp_path):
     case = tmp_path / "case"
-    engine.create_case(case, "Revision control", "fixture", "human:fixture")
+    engine.create_case(case, "Revision control", "fixture", "human:fixture", approval_policy="fixture")
     manifest = {"schema": 1, "steps": [
         {"op": "put", "id": "p1", "kind": "problem", "text": "Initial", "refs": [], "data": {}},
         {"op": "put", "id": "a1", "kind": "actor", "text": "Actor", "refs": ["p1"], "data": {}},
@@ -142,7 +143,7 @@ def test_checkpoint_divergence_and_stale_dependency_need_explicit_revision(tmp_p
 
 def test_explicit_item_revision_is_idempotent(tmp_path):
     case = tmp_path / "case"
-    engine.create_case(case, "Explicit revision", "fixture", "human:fixture")
+    engine.create_case(case, "Explicit revision", "fixture", "human:fixture", approval_policy="fixture")
     engine.put_item(case, "p1", "problem", "Initial", [], {}, "agent:researcher")
     manifest = {"schema": 1, "steps": [
         {"op": "put", "id": "p1", "kind": "problem", "text": "Revised", "refs": [], "data": {}, "expected_version": 1},
@@ -157,7 +158,7 @@ def test_explicit_item_revision_is_idempotent(tmp_path):
 
 def test_concurrent_replays_do_not_duplicate_events(tmp_path):
     case = tmp_path / "case"
-    engine.create_case(case, "Concurrent replay", "fixture", "human:fixture")
+    engine.create_case(case, "Concurrent replay", "fixture", "human:fixture", approval_policy="fixture")
     manifest = {"schema": 1, "steps": [
         {"op": "put", "id": "p1", "kind": "problem", "text": "Problem", "refs": [], "data": {}},
         {"op": "put", "id": "a1", "kind": "actor", "text": "Actor", "refs": ["p1"], "data": {}},
@@ -196,7 +197,7 @@ def _subprocess_custom(case: Path, manifest: dict) -> dict:
 
 def test_next_task_does_not_recommend_review_when_gate_has_semantic_blocker(tmp_path):
     case = tmp_path / "case"
-    engine.create_case(case, "Semantic blocker", "fixture", "human:fixture")
+    engine.create_case(case, "Semantic blocker", "fixture", "human:fixture", approval_policy="fixture")
     engine.put_item(case, "p1", "problem", "Problem", [], {}, "agent:writer")
     engine.put_item(case, "a1", "actor", "Actor", ["p1"], {}, "agent:writer")
     engine.put_item(case, "b1", "boundary", "Boundary", ["p1"], {}, "agent:writer")
@@ -219,7 +220,7 @@ def test_next_task_does_not_recommend_review_when_gate_has_semantic_blocker(tmp_
 
 def test_contradiction_stops_manifest_without_advancing(tmp_path):
     case = tmp_path / "case"
-    engine.create_case(case, "Challenge control", "fixture", "human:fixture")
+    engine.create_case(case, "Challenge control", "fixture", "human:fixture", approval_policy="fixture")
     engine.put_item(case, "p1", "problem", "Problem", [], {}, "agent:writer")
     engine.put_item(case, "a1", "actor", "Actor", ["p1"], {}, "agent:writer")
     engine.challenge(case, "p1", "a1", "Framing disputed", "agent:reviewer")
@@ -238,7 +239,7 @@ def test_contradiction_stops_manifest_without_advancing(tmp_path):
 
 def test_runner_repairs_stale_item_and_keeps_unrelated_branch_open(tmp_path):
     case = tmp_path / "case"
-    engine.create_case(case, "Repair and branching", "fixture", "human:fixture")
+    engine.create_case(case, "Repair and branching", "fixture", "human:fixture", approval_policy="fixture")
     engine.put_item(case, "p1", "problem", "First framing", [], {}, "agent:writer")
     engine.put_item(case, "a1", "actor", "Affected group", ["p1"], {}, "agent:writer")
     engine.put_item(case, "p1", "problem", "Revised framing", [], {}, "agent:writer")
