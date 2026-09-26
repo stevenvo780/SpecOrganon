@@ -81,6 +81,28 @@ La firma prueba control de la clave configurada para ese actor. No prueba por s�
 
 La firma cubre la cabeza del ledger **anterior** a la aprobación. Los hashes de eventos detectan roturas de la cadena, pero no hacen al archivo resistente a escritura maliciosa: quien puede editarlo directamente puede borrar eventos posteriores o añadir falsas revisiones y avances de fase, y recalcular los hashes. La firma protege la decisión y el prefijo previo; los actores de `review` y `review-phase` siguen siendo etiquetas autodeclaradas. Para auditar producción, registra fuera del caso la secuencia y cabeza de **cada transición autorizada**, o usa almacenamiento append-only bajo custodia independiente. Protege también el archivo de confianza, cuyo cambio altera la verificación de aprobaciones históricas.
 
+### Ancla externa opcional del ledger
+
+`ORGANON_LEDGER_ANCHORS_FILE` activa la comprobación de una cabeza externa **exacta** en cada lectura CLI, MCP o del motor. Su valor es la ruta absoluta de un JSON separado del directorio del caso. El esquema 1 contiene un registro por UUID:
+
+```json
+{
+  "schema": 1,
+  "cases": {
+    "UUID_DEL_CASO": {
+      "path": "/ruta/absoluta/canonica/mi-caso",
+      "project_sha256": "SHA256_HEX_DE_METADATA_CANONICA",
+      "seq": 0,
+      "head_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+}
+```
+
+Para iniciar un caso, deja esa variable sin configurar durante `init`; la CLI rechaza cualquier inicialización si ya está configurada, sin crear el caso. Obtén después una propuesta de registro con `uv run python scripts/ledger_anchor_candidate.py ./mi-caso`. El script valida la cadena local y muestra un `entry` para revisión, pero omite la comprobación del ancla externa solo para poder proponer una cabeza nueva: **no escribe el registro ni autoriza el evento**. Un custodio independiente coteja identidad del caso, intención y legitimidad de cada transición, conserva el archivo fuera del caso con controles de integridad y publica el registro inicial. Solo entonces activa la variable en los procesos CLI y MCP.
+
+Cada escritura autorizada deja el ledger en la secuencia siguiente. La llamada que añadió el evento devuelve su resultado, pero una lectura o escritura posterior falla con `ledger anchor verification failed` hasta que el custodio compruebe esa transición y publique la nueva cabeza. Ejecuta de nuevo el comando pendiente tras la actualización; para un manifiesto, vuelve a llamar a `run` con el mismo archivo y se omiten los pasos ya registrados. **Nunca copies automáticamente la cabeza propuesta al ancla**: un evento insertado directamente y una cadena recalculada también podrían producir una propuesta sintácticamente válida. El verificador rechaza archivos ausentes, malformados o desactualizados y casos firmados no registrados. Una fixture no registrada solo se omite con `ORGANON_ALLOW_FIXTURES=1`; un caso registrado no puede rebajarse a fixture por cambiar metadatos. Si se falsifican o restauran juntos el ledger y el archivo de anclas, este verificador por sí solo no lo detecta: su valor depende de custodia y frescura independientes. Tampoco autentica revisores ni sustituye la aprobación humana.
+
 Para pruebas sintéticas se exige crear el caso explícitamente con `--approval-policy fixture` en una ruta no registrada y habilitar `ORGANON_ALLOW_FIXTURES=1` en los procesos de prueba. Solo acepta aprobaciones de `human:fixture`, sin `--signature`; son simulaciones y no autorizan trabajo real. Si la variable falta, el ledger de fixture sigue siendo legible, pero sus aprobaciones no satisfacen las compuertas. Una ruta registrada como caso firmado no puede degradarse a fixture aunque se alteren sus metadatos. El entorno de producción debe omitir esa variable. Un caso firmado rechaza aprobaciones sin firma válida y sin registro externo del caso y su clave pública.
 
 ## MCP por stdio

@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "kind": "technical_development_followup",
+  "classification": "synthetic development validation; not field or confirmatory method comparison",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "local_suite": {
+    "command": "uv run pytest -q",
+    "result": "97 passed"
+  },
+  "wheel": {
+    "command": "uv build --wheel --out-dir /tmp/specorganon-wheel-20260926-anchor-final",
+    "filename": "specorganon-0.1.0-py3-none-any.whl",
+    "sha256": "6c12d2b39646791685f49fd9d3195ad6ae5299109174aee7822042aa6c3310e1"
+  },
+  "clean_installs": [
+    {
+      "python": "3.11.15",
+      "smoke_command": "<clean-venv>/bin/python scripts/clean_smoke.py /workspace/SpecOrganon",
+      "smoke_result": {
+        "cli_commands_exercised": 14,
+        "decisions": 11,
+        "idempotent_replay": true,
+        "invalid_input_preserved_ledger": true,
+        "invalid_signatures_rejected": true,
+        "items": 29,
+        "phases_accepted": 9,
+        "revision": 49,
+        "signed_approval_verified": true,
+        "trust_removal_reopened": true
+      },
+      "interface_and_anchor_integration": "8 passed"
+    },
+    {
+      "python": "3.12.3",
+      "smoke_command": "<clean-venv>/bin/python scripts/clean_smoke.py /workspace/SpecOrganon",
+      "smoke_result": {
+        "cli_commands_exercised": 14,
+        "decisions": 11,
+        "idempotent_replay": true,
+        "invalid_input_preserved_ledger": true,
+        "invalid_signatures_rejected": true,
+        "items": 29,
+        "phases_accepted": 9,
+        "revision": 49,
+        "signed_approval_verified": true,
+        "trust_removal_reopened": true
+      },
+      "interface_and_anchor_integration": "8 passed"
+    }
+  ],
+  "external_anchor": {
+    "configuration": "ORGANON_LEDGER_ANCHORS_FILE",
+    "mode": "exact external sequence and head on every read",
+    "negative_cases_rejected": [
+      "stale anchor through CLI and real MCP",
+      "locally coherent truncated ledger",
+      "validly rehashed extra event",
+      "validly rehashed same-length fork",
+      "anchor file inside case directory",
+      "init with anchor enabled before ledger creation"
+    ],
+    "known_external_custody_limit": "Joint rollback of ledger and anchor is accepted; independent custody and freshness are required.",
+    "legitimate_write_cost": "The next operation is blocked until an independent custodian reviews the transition and updates the anchor."
+  },
+  "native_agent_overlap": {
+    "report": "experiments/development/native_overlap_2026-09-26.json",
+    "verification_command": "python3 scripts/check_native_overlap.py",
+    "result": "PASS: round 1 41 events (A 40, B 0); round 2 81 events (A 40, B 40), 80 actor switches, 487098218 ns interval overlap, retries A 39/B 40"
+  },
+  "acceptance_verdicts": {
+    "functioning_complete": "no_demostrado",
+    "methodological_integrity": "no_demostrado",
+    "food_problem_resolution": "no_demostrado",
+    "method_contribution": "no_demostrado",
+    "generalization": "no_demostrado"
+  }
+}
