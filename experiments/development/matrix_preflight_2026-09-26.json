@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_preflight_no_confirmatory_runs",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3637ea6fde78933f5c6582238e83f6981fce627410bfdf1adb37b3711021c9e2",
+  "artifacts": {
+    "scripts/plan_confirmatory.py": "e6a99e7f0f4a2122aa0e8256b8ac5e8274779a56ba11403439751676422a3506",
+    "scripts/analyze_confirmatory.py": "e63866c8c3471f3ed40a5036e6ad810eb17bdc4f77fdb5f7480e5fba30dfac03",
+    "tests/test_plan_confirmatory.py": "7fe29d694f7ba5593607851a01eb6f777e735e9638005de1d6b71eff8544e3b8",
+    "tests/test_analyze_confirmatory.py": "715f8df42bd9f14c30fcb6024f7e12a4216c7d3a80b1ef3cc5f3bee5b7706332"
+  },
+  "design_checks": {
+    "maximum_confirmatory_rows": 432,
+    "rows_with_one_single_effort_model": 378,
+    "rows_with_two_single_effort_models": 324,
+    "arm_order_balanced_within_each_three_replica_stratum": true,
+    "schedule_and_run_identity_validation": true,
+    "paired_q_with_equal_model_weight": true,
+    "missing_score_disables_primary_estimate": true,
+    "criterion_4_assessment": "not_assessed"
+  },
+  "gates": [
+    {
+      "command": "uv run pytest -q",
+      "result": "165 passed in 7.67s"
+    },
+    {
+      "command": "python3 -B -m pytest -q tests/test_analyze_confirmatory.py tests/test_plan_confirmatory.py",
+      "result": "68 passed; independently reviewed after the validation fixes"
+    },
+    {
+      "command": "uv run ruff check scripts/plan_confirmatory.py scripts/analyze_confirmatory.py tests/test_plan_confirmatory.py tests/test_analyze_confirmatory.py",
+      "result": "All checks passed!"
+    },
+    {
+      "command": "git diff --check",
+      "result": "exit 0"
+    }
+  ],
+  "negative_controls": [
+    "A T arm with a different case package is rejected even after run and schedule hashes are recomputed.",
+    "A stratum without cross-replica arm-order balance is rejected even after hashes are recomputed.",
+    "A reduced schedule lacking execution identity fields is rejected."
+  ],
+  "not_performed": [
+    "No sealed registry, external custodian, or reserved case bytes.",
+    "No provider inference calls, observed model quality, or model billing.",
+    "No independent dual ratings, full criterion-4 metrics, ablations, or field trial.",
+    "No approval of normative thresholds, resource spending, or human reviewer identity."
+  ]
+}

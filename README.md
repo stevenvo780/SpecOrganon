@@ -40,7 +40,7 @@ Para conectar un cliente MCP stdio, usa `uv run organon-mcp` (o el ejecutable in
 
 ## Artefactos y evidencia
 
-- [Antecedentes](docs/antecedentes.md), [tres alternativas y resultados negativos](docs/alternativas.md), [prototipos ejecutables](prototypes/), [decisiones](docs/decisiones.md) y [protocolo prospectivo de comparación](docs/protocolo_experimental.md).
+- [Antecedentes](docs/antecedentes.md), [tres alternativas y resultados negativos](docs/alternativas.md), [prototipos ejecutables](prototypes/), [decisiones](docs/decisiones.md) y [protocolo prospectivo de comparación](docs/protocolo_experimental.md). La [preparación ejecutable de la matriz](docs/preparacion_matriz.md) genera calendarios candidatos y analiza puntuaciones de desarrollo; el [panel de modelos](docs/panel_modelos_preliminar.md) aún no está congelado.
 - [Investigación del mango](docs/caso_alimentos_investigacion.md), [caso documental versionado](cases/mango/organon.json) y [seed reproducible](cases/mango/seed.json). Las cifras de FAO provienen de un estudio de 2016; el caso conserva una inconsistencia aritmética publicada como control negativo. No hay medición propia hasta consumo ni piloto de campo.
 - [Segundo dominio](docs/segundo_caso_desarrollo.md): disponibilidad de estaciones Citi Bike. Su demostración documental de transferencia se informa por separado de cualquier comparación confirmatoria.
 - [Prueba multiagente](docs/prueba_multiagente.md): autor y revisor nativos recorrieron las nueve fases de una fixture. Una ronda de escritores falló por conflicto de revisión; la siguiente, con reintentos, conservó 80 ítems disjuntos y mostró 487 098 218 ns de actividad solapada, sin demostrar ventaja de tiempo, calidad o coste.
