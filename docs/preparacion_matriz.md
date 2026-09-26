@@ -31,7 +31,25 @@ uv run python scripts/verify_released_run.py calendario-candidato.json /ruta-pri
 
 El padre del destino debe pertenecer al usuario que ejecuta el script y no permitir escritura al grupo ni a otros. Eso reduce sustituciones por otros usuarios, pero **un proceso hostil con el mismo UID aún puede cambiar rutas o archivos**. La comprobación de hashes tampoco detecta una respuesta oculta incrustada como fragmento o paráfrasis en un archivo visible. Antes de una reserva real hacen falta una revisión humana independiente de los materiales visibles, una cuenta y almacenamiento de custodia separados de los ejecutores, el registro previo inmutable y una entrega con acceso controlado. El resultado local no afirma ninguna de esas garantías.
 
-La entrega todavía no es una especificación ejecutable. El planificador fija `case_package`, `tool_policy` y `toolkit` como referencias y digests de bytes, sin imponer un formato para interpretar el caso, aplicar la política de herramientas o instalar el toolkit. Tampoco incluye una instrucción de invocación del proveedor ni pruebas de que este aceptó la versión y el esfuerzo solicitados. Un ejecutor genérico debe fijar y validar esos formatos y adaptadores **antes** de usar casos reservados; un archivo de bytes arbitrarios no se puede tratar como un caso ejecutable por tener un hash correcto. `release_block_order` es una coordenada, no una barrera efectiva: la secuencia de liberación requiere eventos de cierre y custodia independientes.
+### Formatos visibles de desarrollo
+
+[`scripts/case_package.py`](../scripts/case_package.py) fija un formato de **paquete visible**, no de respuesta: ZIP sin compresión que contiene exactamente `case.json` de esquema 1 y los archivos que enumera. El manifiesto identifica `case_id`, el archivo de tarea, cada fuente con tamaño y SHA-256, y los nombres planos de entregables. El inspector exige rutas relativas seguras, archivos regulares, estructura ZIP estricta y concordancia de todos los bytes; limita cada fuente a 128 MiB y el conjunto a 512 MiB. El extractor valida antes de crear un destino nuevo privado y vuelve a comprobar cada copia; un fallo deja el destino parcial sin confianza. El [caso público D-E](../cases/building_energy/case.json) puede empaquetarse y extraerse así:
+
+```sh
+uv run python scripts/case_package.py pack cases/building_energy /ruta-privada/D-E.zip
+uv run python scripts/case_package.py inspect /ruta-privada/D-E.zip --expected-case-id D-E
+uv run python scripts/case_package.py extract /ruta-privada/D-E.zip /ruta-privada/D-E-extraido --expected-case-id D-E
+```
+
+[`scripts/tool_policy.py`](../scripts/tool_policy.py) acepta una política JSON estricta de esquema 1 con clasificación `common_tool_policy_development_unenforced`, digest de imagen de ejecución, red `disabled`, lectura `[/case]`, escritura `[/work]`, lista de herramientas genéricas con versión y digest de ejecutable, y límites `measured_tokens`, `active_seconds` y `tool_calls`. La inspección exige que esos límites coincidan con los de una entrega o con límites esperados suministrados por separado. Su salida indica expresamente que **no aplica** aislamiento, red, acceso a herramientas ni topes: un JSON coherente no configura por sí solo el proceso del proveedor. La imagen y los ejecutables declarados tampoco se cotejan con un entorno activo.
+
+[`scripts/inspect_released_payload.py`](../scripts/inspect_released_payload.py) integra estos dos controles para una entrega ya creada. Requiere el calendario candidato por una ruta independiente, coteja la entrega al inicio y al final, compara el `case_id` del ZIP con la corrida, verifica límites y SHA-256 de la política y exige textos UTF-8 no vacíos, sin NUL, para contrato y prompts del brazo; S incluye su guía. En T solo coteja el hash externo de `toolkit`, sin validar su formato. El reporte es `development_released_payload_inspection_unsealed` y siempre deja `execution_ready: false`:
+
+```sh
+uv run python scripts/inspect_released_payload.py calendario-candidato.json /ruta-privada/entrega-nueva
+```
+
+El planificador sigue tratando los tres activos como digests suministrados; los controles de contenido solo los comprueban al inspeccionar una entrega. `toolkit` aún no tiene un formato de instalación comparable. No existe un ejecutor genérico que monte `/case` y `/work`, aplique la política y los límites, instale T y obtenga recibos autenticados del proveedor. Tampoco hay pruebas de que un proveedor aceptó versión y esfuerzo. Un paquete con hash correcto no equivale a una corrida ejecutable. `release_block_order` es una coordenada, no una barrera efectiva: la secuencia de liberación requiere eventos de cierre y custodia independientes.
 
 ## Firma offline del diseño candidato
 

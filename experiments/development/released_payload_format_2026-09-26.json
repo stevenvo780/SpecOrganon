@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "classification": "development_visible_payload_format_control_unsealed",
+  "date_utc": "2026-09-26",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "scope": [
+    "visible case ZIP format and extraction",
+    "declarative common tool policy format",
+    "read-only released payload inspection for N, S and T"
+  ],
+  "checks": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_case_package.py tests/test_tool_policy.py tests/test_inspect_released_payload.py",
+      "result": "87 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "810 passed in 28.05s"
+    },
+    {
+      "command": "ruff check scripts/case_package.py scripts/tool_policy.py scripts/inspect_released_payload.py tests/test_case_package.py tests/test_tool_policy.py tests/test_inspect_released_payload.py",
+      "result": "All checks passed"
+    },
+    {
+      "command": "uv build --wheel",
+      "result": "Successfully built dist/specorganon-0.1.0-py3-none-any.whl"
+    }
+  ],
+  "public_case_smoke": {
+    "case_id": "D-E",
+    "zip_sha256": "b4e2034c249380ad343c193bf23252e8187dad615c8b582ef5b804a1225aeaed",
+    "zip_bytes": 618218,
+    "listed_files": 3,
+    "two_packs_byte_identical": true,
+    "extracted_files_match_sources": true
+  },
+  "adversarial_review": {
+    "case_ancestor_rename": "reproduced false success, then rejected after full path checks",
+    "case_review_after_fix": "no actionable findings within declared contract",
+    "policy_parent_symlink_and_trailing_slash": "rejected after review",
+    "policy_review_after_fix": "no confirmed findings within declared contract",
+    "integrated_release_review": "no actionable false green within declared offline contract",
+    "reviewers": "native development agents, not accredited independent human judges"
+  },
+  "limitations": [
+    "D-E is public development material, not a reserved blind case",
+    "format checks cannot detect a hidden answer embedded or paraphrased in visible files",
+    "same-UID processes can race a point-in-time path check after it returns",
+    "caller-supplied schedule, hashes, runtime image and tool identities are not externally authenticated",
+    "the policy is declarative and does not enforce OS isolation, network, tools or runtime caps",
+    "T toolkit content and installation are not checked",
+    "no provider execution, authenticated telemetry, receipts, blind scoring or sealed custody occurred"
+  ],
+  "criterion_4": "not_assessed"
+}
