@@ -15,12 +15,14 @@ import pytest
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 SCRIPT = SCRIPTS / "inspect_released_payload.py"
 sys.path.insert(0, str(SCRIPTS))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import case_package  # noqa: E402
 import inspect_released_payload as inspector  # noqa: E402
 import plan_confirmatory  # noqa: E402
 import preflight_assets  # noqa: E402
 import tool_policy  # noqa: E402
 import verify_released_run  # noqa: E402
+from toolkit_wheel_fixture import build_toolkit_wheel  # noqa: E402
 
 
 def _sha(data: bytes) -> str:
@@ -57,6 +59,7 @@ def _fixture(
     corrupt_zip: bool = False,
     wrong_case_id: bool = False,
     policy_cap_mismatch: bool = False,
+    corrupt_wheel: bool = False,
     prompt_n: bytes = b"Arm N instructions.\n",
 ) -> tuple[dict[str, Any], dict[str, Any], Path, tuple[bytes, ...]]:
     source = tmp_path / "source"
@@ -103,14 +106,15 @@ def _fixture(
     input_paths: dict[str, Any] = {}
     input_manifest: dict[str, Any] = {}
     for role in ("task_contract", "common_prompt", "sdd_guide", "rubric", "toolkit"):
-        payload = (
-            b"HIDDEN-RUBRIC-SENTINEL"
-            if role == "rubric"
-            else b"\x00opaque toolkit, not a verified format\xff"
-            if role == "toolkit"
-            else f"Visible {role} instructions.\n".encode()
-        )
         path = source / role
+        if role == "toolkit":
+            payload = build_toolkit_wheel(path)
+            if corrupt_wheel:
+                payload += b"undeclared ZIP trailer"
+        elif role == "rubric":
+            payload = b"HIDDEN-RUBRIC-SENTINEL"
+        else:
+            payload = f"Visible {role} instructions.\n".encode()
         input_paths[role] = str(path)
         input_manifest[role] = _reference(path, payload)
         if role == "rubric":
@@ -235,6 +239,7 @@ def _cli(schedule_path: Path, release: Path) -> subprocess.CompletedProcess[str]
                 "task_contract",
                 "common_prompt",
                 "arm_prompt",
+                "toolkit",
             },
         ),
     ],
@@ -276,12 +281,15 @@ def test_integrated_inspection_is_read_only_and_never_claims_execution(
         + len(f"value\n{case_id}\n".encode()),
         "deliverable_count": 1,
     }
-    assert result["toolkit_format_checked"] is False
+    assert result["toolkit_format_checked"] is (arm == "T")
+    assert result["toolkit_version"] == ("0.1.0" if arm == "T" else None)
+    assert result["toolkit_dependencies_checked"] is False
+    assert result["toolkit_install_checked"] is False
     assert result["execution_ready"] is False
     assert "unauthenticated" in " ".join(result["limitations"])
     assert "telemetry" in " ".join(result["limitations"])
     assert "receipts" in " ".join(result["limitations"])
-    assert "toolkit" not in result["validated_roles"]
+    assert ("toolkit" in result["validated_roles"]) is (arm == "T")
     assert {
         path.name: (path.read_bytes(), path.stat().st_mtime_ns)
         for path in release.iterdir()
@@ -301,6 +309,7 @@ def test_integrated_inspection_is_read_only_and_never_claims_execution(
         ("S", "R-M", {"policy_cap_mismatch": True}, "tool_policy inspection failed"),
         ("N", "R-F", {"prompt_n": b"\xffbad UTF-8"}, "arm_prompt is not strict UTF-8"),
         ("N", "R-F", {"prompt_n": b"bad\x00prompt"}, "arm_prompt must be nonempty"),
+        ("T", "R-S", {"corrupt_wheel": True}, "toolkit wheel inspection failed"),
     ],
 )
 def test_outer_hashes_can_pass_while_content_gate_rejects(

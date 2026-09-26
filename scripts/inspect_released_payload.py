@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from case_package import CasePackageError, MAX_ARCHIVE_BYTES, inspect_package
+from inspect_toolkit_wheel import ToolkitWheelError, inspect_toolkit_wheel
 from tool_policy import ToolPolicyError, inspect_tool_policy
 from verify_released_run import (
     ReleaseVerificationError,
@@ -155,6 +156,15 @@ def inspect_released_payload(
     for role, expected_sha256 in text_roles.items():
         _inspect_text(release_dir, role, expected_sha256)
 
+    toolkit_inspection = None
+    if arm == "T":
+        try:
+            toolkit_inspection = inspect_toolkit_wheel(Path(release_dir) / "toolkit")
+        except ToolkitWheelError as exc:
+            raise PayloadInspectionError("toolkit wheel inspection failed") from exc
+        if toolkit_inspection["sha256"] != schedule_raw["inputs"]["toolkit"]["sha256"]:
+            raise PayloadInspectionError("toolkit bytes differ from schedule")
+
     try:
         final_release = verify_release(schedule_raw, release_dir)
     except ReleaseVerificationError as exc:
@@ -180,7 +190,12 @@ def inspect_released_payload(
             "source_bytes": sum(item["bytes"] for item in case_manifest["files"]),
             "deliverable_count": len(case_manifest["deliverables"]),
         },
-        "validated_roles": ["case_package", "tool_policy", *text_roles],
+        "validated_roles": [
+            "case_package",
+            "tool_policy",
+            *text_roles,
+            *(["toolkit"] if toolkit_inspection is not None else []),
+        ],
         "outer_hash_verified_roles": sorted(
             [
                 "case_package",
@@ -189,9 +204,19 @@ def inspect_released_payload(
                 *(["toolkit"] if arm == "T" else []),
             ]
         ),
-        "toolkit_format_checked": False,
+        "toolkit_format_checked": toolkit_inspection is not None,
+        "toolkit_version": (
+            toolkit_inspection["version"] if toolkit_inspection is not None else None
+        ),
+        "toolkit_dependencies_checked": False,
+        "toolkit_install_checked": False,
         "execution_ready": False,
-        "limitations": LIMITATIONS,
+        "limitations": LIMITATIONS
+        + (
+            ["Toolkit dependencies, installation, CLI and MCP were not checked."]
+            if arm == "T"
+            else []
+        ),
     }
 
 
