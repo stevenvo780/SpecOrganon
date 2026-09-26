@@ -1,0 +1,583 @@
+"""Versioned dependency graph and review gates for the SpecOrganon workflow.
+
+All public operations use the same ledger regardless of transport. Actors are
+self-attested; a ``human:`` approval is a recorded attestation, not identity
+authentication. Field impact still requires an external evaluation.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import math
+import re
+from pathlib import Path
+from typing import Any
+
+from .ledger import ConflictError, LedgerError, append_event, init_project, read_project
+from .workflow import KIND_TO_PHASE, KINDS, PHASES, PHASE_BY_ID
+
+
+ITEM_ID = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,63}$")
+VERDICTS = {"accept", "reject"}
+
+
+class MethodError(LedgerError):
+    """An action violates a method invariant or a phase gate."""
+
+
+def _hash(value: Any) -> str:
+    return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def _project(path: str | Path) -> dict[str, Any]:
+    ledger = read_project(path)
+    state: dict[str, Any] = {
+        "project": ledger["project"],
+        "revision": len(ledger["events"]),
+        "items": {},
+        "approvals": set(),
+        "item_reviews": {},
+        "challenges": {},
+        "resolutions": {},
+        "phase_reviews": [],
+        "advances": [],
+    }
+    for event in ledger["events"]:
+        kind, payload, seq = event["kind"], event["payload"], event["seq"]
+        if kind == "item_put":
+            item = dict(payload)
+            item["seq"] = seq
+            item["author"] = event["actor"]
+            state["items"][item["id"]] = item
+        elif kind == "approval":
+            state["approvals"].add((payload["id"], payload["version"]))
+        elif kind == "item_review":
+            state["item_reviews"][(payload["id"], payload["version"])] = {
+                "seq": seq, "actor": event["actor"], **payload
+            }
+        elif kind == "challenge":
+            state["challenges"][seq] = {"seq": seq, "actor": event["actor"], **payload}
+        elif kind == "challenge_resolved":
+            resolution_item = state["items"][payload["resolution_item"]]
+            review = state["item_reviews"].get((resolution_item["id"], resolution_item["version"]))
+            state["resolutions"][payload["challenge_seq"]] = {
+                "seq": seq,
+                "item": resolution_item["id"],
+                "version": payload.get("resolution_version", resolution_item["version"]),
+                "review_seq": payload.get("review_seq", review["seq"] if review else None),
+            }
+        elif kind == "phase_review":
+            state["phase_reviews"].append({"seq": seq, "actor": event["actor"], **payload})
+        elif kind == "phase_advance":
+            state["advances"].append({"seq": seq, "actor": event["actor"], **payload})
+        else:
+            raise MethodError(f"unknown event type at sequence {seq}: {kind}")
+    return state
+
+
+def _ancestors(items: dict[str, dict], item_id: str) -> set[str]:
+    found: set[str] = set()
+    pending = [item_id]
+    while pending:
+        current = pending.pop()
+        if current in found or current not in items:
+            continue
+        found.add(current)
+        pending.extend(items[current]["deps"])
+    return found
+
+
+def _dependents(items: dict[str, dict], item_id: str) -> set[str]:
+    found = {item_id}
+    changed = True
+    while changed:
+        changed = False
+        for candidate, item in items.items():
+            if candidate not in found and any(ref in found for ref in item["deps"]):
+                found.add(candidate)
+                changed = True
+    return found
+
+
+def _active_resolutions(state: dict[str, Any]) -> set[int]:
+    """A resolution is valid only while its reviewed item still addresses both sides."""
+    active: set[int] = set()
+    items = state["items"]
+    for challenge_seq, record in state["resolutions"].items():
+        item = items.get(record["item"])
+        challenge = state["challenges"].get(challenge_seq)
+        if item is None or challenge is None or item["version"] != record["version"] or _stale(items, item["id"]):
+            continue
+        if not {challenge["left"], challenge["right"]}.issubset(_ancestors(items, item["id"])):
+            continue
+        review = state["item_reviews"].get((item["id"], item["version"]))
+        if (review is None or review["seq"] != record["review_seq"] or review["verdict"] != "accept"
+                or review["actor"] == item["author"]):
+            continue
+        active.add(challenge_seq)
+    return active
+
+
+def _stale(items: dict[str, dict], item_id: str, visiting: set[str] | None = None) -> bool:
+    visiting = set() if visiting is None else visiting
+    if item_id in visiting:
+        return True
+    item = items[item_id]
+    for ref, version in item["deps"].items():
+        if ref not in items or items[ref]["version"] != version:
+            return True
+        if _stale(items, ref, visiting | {item_id}):
+            return True
+    return False
+
+
+def _automatic_conflicts(state: dict[str, Any]) -> dict[str, list[str]]:
+    """Flag incompatible quantitative assertions about one metric and scope."""
+    groups: dict[tuple[str, str, str], list[dict]] = {}
+    for item in state["items"].values():
+        if item["kind"] != "evidence":
+            continue
+        data = item["data"]
+        if all(key in data for key in ("metric_key", "scope", "unit", "value")):
+            groups.setdefault((str(data["metric_key"]), str(data["scope"]), str(data["unit"])), []).append(item)
+    issues: dict[str, list[str]] = {}
+    for group, members in groups.items():
+        for i, left in enumerate(members):
+            for right in members[i + 1 :]:
+                try:
+                    a, b = float(left["data"]["value"]), float(right["data"]["value"])
+                    tolerance = max(float(left["data"].get("tolerance", 0)), float(right["data"].get("tolerance", 0)))
+                except (TypeError, ValueError):
+                    continue
+                if math.isfinite(a) and math.isfinite(b) and abs(a - b) > tolerance:
+                    label = f"conflicting metric {group[0]} in {group[1]}: {left['id']} vs {right['id']}"
+                    issues.setdefault(left["id"], []).append(label)
+                    issues.setdefault(right["id"], []).append(label)
+    return issues
+
+
+def _item_issues(item: dict[str, Any]) -> list[str]:
+    data, kind = item["data"], item["kind"]
+    issues: list[str] = []
+    if kind == "evidence":
+        if data.get("origin") not in {"published", "observed", "derived", "simulated"}:
+            issues.append("evidence origin must be published, observed, derived or simulated")
+        for field in ("source", "date", "locator"):
+            if not isinstance(data.get(field), str) or not data[field].strip():
+                issues.append(f"evidence lacks {field}")
+        if data.get("origin") == "observed" and not data.get("method"):
+            issues.append("observed evidence lacks collection method")
+        calc = data.get("calculation")
+        if calc is not None:
+            try:
+                if calc["operator"] != "product" or not isinstance(calc["operands"], list) or not calc["operands"]:
+                    raise ValueError("unsupported calculation")
+                expected = math.prod(float(value) for value in calc["operands"])
+                reported = float(data["value"])
+                tolerance = float(calc.get("tolerance", 0))
+                if not all(math.isfinite(v) for v in (expected, reported, tolerance)) or tolerance < 0:
+                    raise ValueError("non-finite calculation")
+                if abs(expected - reported) > tolerance:
+                    issues.append(f"reported calculation {reported} differs from recomputed {expected}")
+            except (KeyError, TypeError, ValueError, OverflowError):
+                issues.append("malformed or unsupported calculation")
+    elif kind == "protocol":
+        for field in ("population", "method", "comparison", "uncertainty"):
+            if not data.get(field):
+                issues.append(f"protocol lacks {field}")
+    elif kind == "indicator":
+        for field in ("metric", "unit"):
+            if not data.get(field):
+                issues.append(f"indicator lacks {field}")
+    elif kind == "criterion":
+        for field in ("metric", "threshold", "reject"):
+            if field not in data or data[field] is None or data[field] == "":
+                issues.append(f"criterion lacks {field}")
+    elif kind == "test":
+        if data.get("passed") is not True or not data.get("command"):
+            issues.append("test lacks a passing recorded command")
+    elif kind in {"baseline", "result"}:
+        if data.get("origin") not in {"field", "simulation", "technical", "published"}:
+            issues.append(f"{kind} lacks origin classification")
+        if not data.get("source") or not data.get("date"):
+            issues.append(f"{kind} lacks source or date")
+    elif kind == "assessment":
+        if data.get("verdict") not in {"cumplido", "incumplido", "no_demostrado"}:
+            issues.append("assessment lacks valid verdict")
+        if data.get("claim_scope") not in {"field", "simulation", "technical"}:
+            issues.append("assessment lacks field, simulation or technical claim_scope")
+        for field in ("uncertainty", "adverse_effects", "cost"):
+            if field not in data:
+                issues.append(f"assessment lacks {field}")
+    return issues
+
+
+def _numeric(value: Any) -> float | None:
+    if isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) -> list[str]:
+    """Check that a fulfilled claim is at least numerically and procedurally auditable.
+
+    This does not establish source authenticity or causal identification; an
+    independent evaluator must still judge those.
+    """
+    if assessment["data"].get("verdict") != "cumplido":
+        return []
+    issues: list[str] = []
+    ancestors = [items[key] for key in _ancestors(items, assessment["id"])]
+    results = [item for item in ancestors if item["kind"] == "result"]
+    baselines = [item for item in ancestors if item["kind"] == "baseline"]
+    criteria = [item for item in ancestors if item["kind"] == "criterion"]
+    if len(results) != 1 or len(baselines) != 1 or len(criteria) != 1:
+        return [f"{assessment['id']} success needs exactly one linked result, baseline and criterion"]
+    result, baseline, criterion = results[0], baselines[0], criteria[0]
+    scope = assessment["data"].get("claim_scope")
+    if result["data"].get("origin") != scope or baseline["data"].get("origin") != scope:
+        issues.append(f"{assessment['id']} {scope} success cannot use another evidence origin")
+    if result["seq"] <= criterion["seq"]:
+        issues.append(f"{assessment['id']} success uses a criterion written after the result")
+    threshold = criterion["data"].get("threshold")
+    effect = result["data"].get("effect")
+    if not isinstance(threshold, dict) or not isinstance(effect, dict):
+        return issues + [f"{assessment['id']} success needs structured threshold and measured effect"]
+    operator = threshold.get("operator")
+    statistic = threshold.get("statistic")
+    threshold_value = _numeric(threshold.get("value"))
+    estimate = _numeric(effect.get("estimate"))
+    interval = effect.get("interval")
+    if operator not in {">=", "<="} or statistic not in {"estimate", "lower_ci", "upper_ci"} or threshold_value is None:
+        issues.append(f"{assessment['id']} has an invalid preregistered threshold")
+    if effect.get("metric") != criterion["data"].get("metric") or baseline["data"].get("metric") != effect.get("metric"):
+        issues.append(f"{assessment['id']} metric differs between baseline, result and criterion")
+    if _numeric(baseline["data"].get("value")) is None or estimate is None:
+        issues.append(f"{assessment['id']} lacks numeric baseline or effect estimate")
+    if not isinstance(interval, list) or len(interval) != 2 or any(_numeric(value) is None for value in interval):
+        issues.append(f"{assessment['id']} lacks a finite two-sided uncertainty interval")
+        low = high = None
+    else:
+        low, high = _numeric(interval[0]), _numeric(interval[1])
+        if low > high or (estimate is not None and not low <= estimate <= high):
+            issues.append(f"{assessment['id']} has an inconsistent effect interval")
+    if scope == "field":
+        if not all(effect.get(field) for field in ("design", "comparator", "unit")):
+            issues.append(f"{assessment['id']} field success lacks design, comparator or unit")
+        sample_size = effect.get("sample_size")
+        if not isinstance(sample_size, int) or isinstance(sample_size, bool) or sample_size < 1:
+            issues.append(f"{assessment['id']} field success lacks a positive sample size")
+    values = {"estimate": estimate, "lower_ci": low, "upper_ci": high}
+    chosen = values.get(statistic)
+    if threshold_value is not None and chosen is not None and operator in {">=", "<="}:
+        passes = chosen >= threshold_value if operator == ">=" else chosen <= threshold_value
+        if not passes:
+            issues.append(f"{assessment['id']} measured {statistic} does not meet the prior threshold")
+    return issues
+
+
+def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    items = state["items"]
+    contested: set[str] = set()
+    active_resolutions = _active_resolutions(state)
+    for seq, challenge in state["challenges"].items():
+        if seq not in active_resolutions:
+            contested |= _dependents(items, challenge["left"])
+            contested |= _dependents(items, challenge["right"])
+    automatic = _automatic_conflicts(state)
+    for item_id in automatic:
+        contested |= _dependents(items, item_id)
+    return {
+        item_id: {
+            "stale": _stale(items, item_id),
+            "contested": item_id in contested,
+            "issues": _item_issues(item) + automatic.get(item_id, []),
+            "approved": (item_id, item["version"]) in state["approvals"],
+        }
+        for item_id, item in items.items()
+    }
+
+
+def _has_path(items: dict[str, dict], item_id: str, kinds: set[str]) -> bool:
+    return any(items[ancestor]["kind"] in kinds for ancestor in _ancestors(items, item_id))
+
+
+def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: bool, flags: dict[str, dict]) -> list[str]:
+    phase = PHASE_BY_ID[phase_id]
+    items = state["items"]
+    blockers: list[str] = []
+    if not previous_accepted:
+        blockers.append("previous phase is not currently accepted")
+    in_phase = [item for item in items.values() if KIND_TO_PHASE[item["kind"]] == phase_id]
+    for item in in_phase:
+        item_id, flag = item["id"], flags[item["id"]]
+        if flag["stale"]:
+            blockers.append(f"{item_id} depends on an older revision")
+        if flag["contested"]:
+            blockers.append(f"{item_id} has an unresolved contradiction")
+        blockers.extend(f"{item_id}: {issue}" for issue in flag["issues"])
+        if item["kind"] in {"norm", "decision"} and not flag["approved"]:
+            blockers.append(f"{item_id} requires a recorded human approval")
+    for kind, minimum in phase.required:
+        count = sum(item["kind"] == kind and not flags[item["id"]]["stale"] and not flags[item["id"]]["contested"] and not flags[item["id"]]["issues"] for item in in_phase)
+        if count < minimum:
+            blockers.append(f"needs {minimum} valid {kind}; has {count}")
+
+    def refs_of(item: dict, required: set[str]) -> bool:
+        return all(_has_path(items, item["id"], {kind}) for kind in required)
+
+    if phase_id == "critique":
+        for item in in_phase:
+            if item["kind"] == "norm" and not refs_of(item, {"problem", "actor"}):
+                blockers.append(f"{item['id']} must link problem and actor")
+        frames = [item["text"].strip().casefold() for item in in_phase if item["kind"] == "frame_option"]
+        if len(frames) >= 2 and len(set(frames)) < 2:
+            blockers.append("frame options must differ")
+    elif phase_id == "study":
+        for item in in_phase:
+            if item["kind"] == "protocol" and not refs_of(item, {"question", "hypothesis"}):
+                blockers.append(f"{item['id']} must link question and hypothesis")
+            if item["kind"] == "indicator" and not refs_of(item, {"problem", "norm"}):
+                blockers.append(f"{item['id']} must link problem and normative commitment")
+    elif phase_id == "observe":
+        for item in in_phase:
+            if item["kind"] == "inference" and not refs_of(item, {"evidence"}):
+                blockers.append(f"{item['id']} must link evidence")
+    elif phase_id == "explain":
+        for item in in_phase:
+            if item["kind"] == "synthesis" and not refs_of(item, {"inference", "evidence"}):
+                blockers.append(f"{item['id']} must link inference and evidence")
+            if item["kind"] == "uncertainty" and not refs_of(item, {"synthesis"}):
+                blockers.append(f"{item['id']} must link synthesis")
+    elif phase_id == "compare":
+        for item in in_phase:
+            if item["kind"] == "option" and not refs_of(item, {"synthesis", "norm"}):
+                blockers.append(f"{item['id']} must link synthesis and norm")
+            if item["kind"] == "comparison":
+                direct_options = [ref for ref in item["deps"] if items[ref]["kind"] == "option"]
+                if len(direct_options) < 2:
+                    blockers.append(f"{item['id']} must directly compare two options")
+            if item["kind"] == "risk" and not refs_of(item, {"option"}):
+                blockers.append(f"{item['id']} must link an option")
+    elif phase_id == "specify":
+        for indicator in items.values():
+            if indicator["kind"] == "indicator" and not _has_path(items, indicator["id"], {"evidence"}):
+                blockers.append(f"{indicator['id']} lacks a path to evidence before specification")
+        for item in in_phase:
+            if item["kind"] == "decision" and not refs_of(item, {"comparison", "norm", "evidence"}):
+                blockers.append(f"{item['id']} must link comparison, norm and evidence")
+            if item["kind"] in {"requirement", "criterion"} and not refs_of(item, {"problem", "norm", "evidence", "decision"}):
+                blockers.append(f"{item['id']} lacks a path to problem, norm, evidence or decision")
+            if item["kind"] == "criterion":
+                indicators = [items[ref] for ref in _ancestors(items, item["id"]) if items[ref]["kind"] == "indicator"]
+                if not any(indicator["data"].get("metric") == item["data"].get("metric") for indicator in indicators):
+                    blockers.append(f"{item['id']} needs a linked indicator with the same success metric")
+    elif phase_id == "build":
+        for item in in_phase:
+            if item["kind"] == "implementation" and not refs_of(item, {"requirement"}):
+                blockers.append(f"{item['id']} must link requirement")
+            if item["kind"] == "test" and not refs_of(item, {"implementation", "criterion"}):
+                blockers.append(f"{item['id']} must link implementation and criterion")
+    elif phase_id == "validate":
+        for item in in_phase:
+            if item["kind"] == "result":
+                if not refs_of(item, {"baseline", "criterion"}):
+                    blockers.append(f"{item['id']} must link baseline and criterion")
+                linked_criteria = [items[ref] for ref in _ancestors(items, item["id"]) if items[ref]["kind"] == "criterion"]
+                if any(criterion["seq"] >= item["seq"] for criterion in linked_criteria):
+                    blockers.append(f"{item['id']} precedes a current criterion revision")
+            if item["kind"] == "assessment":
+                if not refs_of(item, {"result", "risk"}):
+                    blockers.append(f"{item['id']} must link result and risk")
+                blockers.extend(_success_claim_issues(items, item))
+    return sorted(set(blockers))
+
+
+def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    flags = _flags(state)
+    active_resolutions = _active_resolutions(state)
+    statuses: dict[str, dict[str, Any]] = {}
+    previous_accepted = True
+    previous_marker = 0
+    for phase in PHASES:
+        phase_item_ids = {item["id"] for item in state["items"].values() if KIND_TO_PHASE[item["kind"]] == phase.id}
+        relevant_ids = set().union(*(_ancestors(state["items"], item_id) for item_id in phase_item_ids)) if phase_item_ids else set()
+        challenge_history = sorted(
+            (seq, seq in active_resolutions, state["resolutions"].get(seq, {}).get("seq"))
+            for seq, entry in state["challenges"].items()
+            if entry["left"] in relevant_ids or entry["right"] in relevant_ids
+        )
+        items = sorted(
+            (item["id"], item["version"], flags[item["id"]]["stale"], flags[item["id"]]["contested"], flags[item["id"]]["issues"])
+            for item in state["items"].values() if KIND_TO_PHASE[item["kind"]] == phase.id
+        )
+        snapshot = _hash({"phase": phase.id, "items": items, "previous_marker": previous_marker, "challenges": challenge_history})
+        blockers = _phase_blockers(state, phase.id, previous_accepted, flags)
+        reviews = [review for review in state["phase_reviews"] if review["phase"] == phase.id and review["snapshot"] == snapshot]
+        review = reviews[-1] if reviews else None
+        advances = [marker for marker in state["advances"] if marker["phase"] == phase.id and marker["snapshot"] == snapshot and review and review["verdict"] == "accept" and marker["review_seq"] == review["seq"] and marker["seq"] > review["seq"]]
+        marker = advances[-1] if advances else None
+        accepted = not blockers and marker is not None and (phase.id != "validate" or bool(review and review["independent"]))
+        statuses[phase.id] = {
+            "phase": phase.id,
+            "front": phase.front,
+            "ready": not blockers,
+            "accepted": accepted,
+            "reviewed": review is not None and review["verdict"] == "accept",
+            "independent_review": bool(review and review["independent"]),
+            "blockers": blockers,
+            "snapshot": snapshot,
+            "advance_seq": marker["seq"] if marker else None,
+        }
+        previous_accepted = accepted
+        previous_marker = marker["seq"] if accepted else 0
+    return statuses
+
+
+def create_case(path: str | Path, title: str, domain: str, actor: str) -> dict[str, Any]:
+    init_project(path, title, domain, actor)
+    return get_state(path)
+
+
+def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str) -> dict[str, Any]:
+    if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+        raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+    if kind not in KINDS:
+        raise MethodError(f"unknown item kind: {kind}")
+    if not isinstance(text, str) or not text.strip():
+        raise MethodError("item text must be nonempty")
+    if not isinstance(refs, list) or any(not isinstance(ref, str) for ref in refs) or len(refs) != len(set(refs)):
+        raise MethodError("refs must be a list of distinct item ids")
+    if not isinstance(data, dict):
+        raise MethodError("data must be an object")
+    state = _project(path)
+    items = state["items"]
+    if any(ref not in items for ref in refs):
+        raise MethodError(f"unknown references: {sorted(set(refs) - set(items))}")
+    if id in refs or any(id in _ancestors(items, ref) for ref in refs):
+        raise MethodError("dependency cycle")
+    if id in items and items[id]["kind"] != kind:
+        raise MethodError("an item's kind cannot change across revisions")
+    item = {
+        "id": id,
+        "kind": kind,
+        "version": items[id]["version"] + 1 if id in items else 1,
+        "text": text.strip(),
+        "deps": {ref: items[ref]["version"] for ref in refs},
+        "data": data,
+    }
+    event = append_event(path, "item_put", item, actor, expected_seq=state["revision"])
+    return {**item, "seq": event["seq"], "author": actor}
+
+
+def review_item(path: str | Path, id: str, verdict: str, reason: str, actor: str) -> dict[str, Any]:
+    state = _project(path)
+    item = state["items"].get(id)
+    if item is None:
+        raise MethodError(f"unknown item: {id}")
+    if verdict not in VERDICTS or not reason.strip():
+        raise MethodError("review needs accept/reject and reason")
+    if actor == item["author"]:
+        raise MethodError("item reviewer must differ from its author")
+    return append_event(path, "item_review", {"id": id, "version": item["version"], "verdict": verdict, "reason": reason.strip()}, actor, expected_seq=state["revision"])
+
+
+def approve(path: str | Path, id: str, reason: str, actor: str) -> dict[str, Any]:
+    state = _project(path)
+    item = state["items"].get(id)
+    if item is None or item["kind"] not in {"norm", "decision"}:
+        raise MethodError("only a current norm or decision can receive approval")
+    if not isinstance(actor, str) or not actor.startswith("human:") or len(actor) <= len("human:"):
+        raise MethodError("approval actor must be a self-attested human:<name>")
+    if not isinstance(reason, str) or not reason.strip():
+        raise MethodError("approval requires an explicit reason or record locator")
+    return append_event(path, "approval", {"id": id, "version": item["version"], "reason": reason.strip()}, actor, expected_seq=state["revision"])
+
+
+def challenge(path: str | Path, left: str, right: str, reason: str, actor: str) -> dict[str, Any]:
+    state = _project(path)
+    if left == right or left not in state["items"] or right not in state["items"]:
+        raise MethodError("challenge requires two distinct existing items")
+    if not isinstance(reason, str) or not reason.strip():
+        raise MethodError("challenge requires a reason")
+    return append_event(path, "challenge", {"left": left, "right": right, "reason": reason.strip()}, actor, expected_seq=state["revision"])
+
+
+def resolve_challenge(path: str | Path, challenge_seq: int, resolution_item: str, actor: str) -> dict[str, Any]:
+    state = _project(path)
+    contested = state["challenges"].get(challenge_seq)
+    if contested is None or challenge_seq in _active_resolutions(state):
+        raise MethodError("unknown or already resolved challenge")
+    item = state["items"].get(resolution_item)
+    if item is None or item["kind"] not in {"synthesis", "assessment"} or item["seq"] <= challenge_seq:
+        raise MethodError("resolution needs a later synthesis or assessment item")
+    if not {contested["left"], contested["right"]}.issubset(_ancestors(state["items"], resolution_item)):
+        raise MethodError("resolution must address both challenged items")
+    review = state["item_reviews"].get((resolution_item, item["version"]))
+    if review is None or review["verdict"] != "accept" or review["actor"] == item["author"]:
+        raise MethodError("resolution needs an independent accepted item review")
+    return append_event(path, "challenge_resolved", {
+        "challenge_seq": challenge_seq, "resolution_item": resolution_item,
+        "resolution_version": item["version"], "review_seq": review["seq"],
+    }, actor, expected_seq=state["revision"])
+
+
+def get_state(path: str | Path) -> dict[str, Any]:
+    state = _project(path)
+    flags = _flags(state)
+    items = {item_id: {**item, **flags[item_id]} for item_id, item in state["items"].items()}
+    phases = _phase_statuses(state)
+    active_resolutions = _active_resolutions(state)
+    open_challenges = [challenge for seq, challenge in state["challenges"].items() if seq not in active_resolutions]
+    return {"project": state["project"], "revision": state["revision"], "items": items, "phases": phases, "open_challenges": open_challenges}
+
+
+def gate(path: str | Path, phase: str) -> dict[str, Any]:
+    if phase not in PHASE_BY_ID:
+        raise MethodError(f"unknown phase: {phase}")
+    return _phase_statuses(_project(path))[phase]
+
+
+def review_phase(path: str | Path, phase: str, verdict: str, reason: str, actor: str) -> dict[str, Any]:
+    state = _project(path)
+    if phase not in PHASE_BY_ID or verdict not in VERDICTS or not isinstance(reason, str) or not reason.strip():
+        raise MethodError("phase review needs a known phase, accept/reject and reason")
+    status = _phase_statuses(state)[phase]
+    if verdict == "accept" and not status["ready"]:
+        raise MethodError("phase cannot be accepted: " + "; ".join(status["blockers"]))
+    authors = {item["author"] for item in state["items"].values() if KIND_TO_PHASE[item["kind"]] == phase}
+    payload = {"phase": phase, "verdict": verdict, "reason": reason.strip(), "snapshot": status["snapshot"], "independent": actor not in authors}
+    return append_event(path, "phase_review", payload, actor, expected_seq=state["revision"])
+
+
+def advance(path: str | Path, phase: str, actor: str) -> dict[str, Any]:
+    state = _project(path)
+    if phase not in PHASE_BY_ID:
+        raise MethodError(f"unknown phase: {phase}")
+    status = _phase_statuses(state)[phase]
+    if not status["ready"]:
+        raise MethodError("phase cannot advance: " + "; ".join(status["blockers"]))
+    reviews = [review for review in state["phase_reviews"] if review["phase"] == phase and review["snapshot"] == status["snapshot"]]
+    if not reviews or reviews[-1]["verdict"] != "accept":
+        raise MethodError("phase needs an accepted review of its current snapshot")
+    if phase == "validate" and not reviews[-1]["independent"]:
+        raise MethodError("validation needs an independent review of its current snapshot")
+    return append_event(path, "phase_advance", {"phase": phase, "snapshot": status["snapshot"], "review_seq": reviews[-1]["seq"]}, actor, expected_seq=state["revision"])
+
+
+def trace(path: str | Path, id: str) -> dict[str, Any]:
+    state = get_state(path)
+    if id not in state["items"]:
+        raise MethodError(f"unknown item: {id}")
+    ancestors = _ancestors(state["items"], id)
+    dependents = _dependents(state["items"], id)
+    return {
+        "item": state["items"][id],
+        "ancestors": [state["items"][key] for key in sorted(ancestors - {id})],
+        "dependents": [state["items"][key] for key in sorted(dependents - {id})],
+    }
