@@ -5,11 +5,14 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
+import random
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from pathlib import Path
+from statistics import median
 from typing import Any
 
 import pytest
@@ -17,7 +20,11 @@ import pytest
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 SCRIPT = SCRIPTS / "analyze_secondary_metrics.py"
 sys.path.insert(0, str(SCRIPTS))
-from analyze_secondary_metrics import SecondaryError, analyze_secondary_metrics  # noqa: E402
+from analyze_confirmatory import _validate_schedule  # noqa: E402
+from analyze_secondary_metrics import (  # noqa: E402
+    SecondaryError, _decimal_percentile, _secondary_uncertainty,
+    analyze_secondary_metrics as _analyze_secondary_metrics,
+)
 from plan_confirmatory import compile_schedule  # noqa: E402
 
 
@@ -215,6 +222,11 @@ def bundle() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, 
     return _bundle()
 
 
+def analyze_secondary_metrics(*inputs: Any, development_resamples: int = 12) -> dict[str, Any]:
+    """Keep routine tests fast; the CLI test exercises the 10,000-draw default."""
+    return _analyze_secondary_metrics(*inputs, development_resamples=development_resamples)
+
+
 def test_full_weighted_secondary_math_and_model_medians(bundle: tuple[dict[str, Any], ...]) -> None:
     result = analyze_secondary_metrics(*bundle)
 
@@ -227,6 +239,12 @@ def test_full_weighted_secondary_math_and_model_medians(bundle: tuple[dict[str, 
     for metric in ("E", "T", "R"):
         assert result["aggregate"][metric]["by_arm"]["T"] == pytest.approx(0.25)
         assert result["aggregate"][metric]["T_minus_S_pp"] == pytest.approx(25)
+    assert result["bootstrap"] == {"seed": 29, "resamples": 12, "default_resamples": 10_000}
+    assert result["aggregate"]["E"]["ci95_percentile"]["T_minus_S_pp"] == [25, 25]
+    for metric in ("T", "R"):
+        assert result["aggregate"][metric]["ci95_percentile"] == {
+            "T": [0.25, 0.25], "T_minus_S_pp": [25, 25],
+        }
     assert result["aggregate"]["E"]["incident_counts"]["by_type_available"] == {
         "false_test": 18
     }
@@ -237,8 +255,22 @@ def test_full_weighted_secondary_math_and_model_medians(bundle: tuple[dict[str, 
     assert sum(row["E"] for row in result["runs"] if row["arm"] == "T") / 126 == pytest.approx(1 / 7)
     assert result["aggregate"]["W"]["by_arm"] == {"N": 60, "S": 60, "T": 70}
     assert result["aggregate"]["W"]["T_over_S"] == pytest.approx(7 / 6)
+    assert result["aggregate"]["W"]["ci95_percentile"]["by_arm"] == {
+        "N": [60, 60], "S": [60, 60], "T": [70, 70],
+    }
+    assert result["aggregate"]["W"]["ci95_percentile"]["T_over_S"] == pytest.approx(
+        [7 / 6, 7 / 6]
+    )
+    assert result["aggregate"]["W"]["zero_S_bootstrap_draws"] == 0
     assert result["aggregate"]["P"]["by_arm"] == {"N": "51", "S": "51", "T": "52"}
     assert Decimal(result["aggregate"]["P"]["T_over_S"]) == pytest.approx(Decimal(52) / 51)
+    assert result["aggregate"]["P"]["ci95_percentile"]["by_arm"] == {
+        "N": ["51", "51"], "S": ["51", "51"], "T": ["52", "52"],
+    }
+    assert [float(value) for value in result["aggregate"]["P"]["ci95_percentile"]["T_over_S"]] == pytest.approx(
+        [52 / 51, 52 / 51]
+    )
+    assert result["aggregate"]["P"]["zero_S_bootstrap_draws"] == 0
     agent_count = 1 if bundle[0]["runs"][0]["agents"] == "solo" else 3
     assert result["runs"][0]["K"] == {
         "input_uncached": 80 * agent_count,
@@ -255,6 +287,126 @@ def test_full_weighted_secondary_math_and_model_medians(bundle: tuple[dict[str, 
     assert result["aggregate"]["H"]["by_arm_available_totals"]["T"]["active_seconds_by_type"]["external_reviews"] == 126
 
 
+def test_one_draw_uses_paired_replicas_and_equal_model_weights(
+    bundle: tuple[dict[str, Any], ...],
+) -> None:
+    schedule, triplets, efforts = _validate_schedule(bundle[0])
+    first_model = schedule["models"][0]["model_id"]
+    model_bases = {model["model_id"]: base for model, base in
+                   zip(schedule["models"], (10, 20, 100, 200), strict=True)}
+    values: dict[str, dict[str, float | Decimal]] = {
+        metric: {} for metric in ("E", "T", "R", "W", "P")
+    }
+    for run in schedule["runs"]:
+        selected = float(run["model_id"] == first_model and (
+            (run["arm"] == "S" and run["replica"] == 1)
+            or (run["arm"] == "T" and run["replica"] == 3)
+        ))
+        wall = float(model_bases[run["model_id"]] + run["replica"] * (
+            2 if run["arm"] == "T" else 1
+        ))
+        for metric in ("E", "T", "R"):
+            values[metric][run["run_id"]] = selected
+        values["W"][run["run_id"]] = wall
+        values["P"][run["run_id"]] = Decimal(str(wall))
+    aggregates = {
+        "W": {"by_arm": {"S": 1}}, "P": {"by_arm": {"S": "1"}},
+    }
+    actual = _secondary_uncertainty(schedule, triplets, efforts, values, aggregates, 1)
+
+    # Independent one-draw calculation selects each scheduled N/S/T triplet
+    # together, then applies the registered model/effort weights and medians.
+    rng = random.Random(schedule["seed"])
+    keys = sorted({key[:4] for key in triplets})
+    selected_runs = {
+        key: [triplets[(*key, rng.randrange(3) + 1)] for _ in range(3)]
+        for key in keys
+    }
+    by_arm = {}
+    for arm in ("S", "T"):
+        by_arm[arm] = math.fsum(
+            math.fsum(values["E"][arms[arm]["run_id"]] for arms in selected_runs[key])
+            / (3 * 4 * efforts[key[0]] * 2 * 3)
+            for key in keys
+        )
+    expected_pp = (by_arm["T"] - by_arm["S"]) * 100
+    for metric in ("E", "T", "R"):
+        assert actual["intervals"][metric]["ci95_percentile"]["T_minus_S_pp"] == pytest.approx(
+            [expected_pp, expected_pp]
+        )
+    for metric in ("T", "R"):
+        assert actual["intervals"][metric]["ci95_percentile"]["T"] == pytest.approx(
+            [by_arm["T"], by_arm["T"]]
+        )
+    for metric in ("W", "P"):
+        expected_medians = {}
+        for arm in ("N", "S", "T"):
+            expected_medians[arm] = median(
+                median(values[metric][arms[arm]["run_id"]]
+                       for key in keys if key[0] == model["model_id"]
+                       for arms in selected_runs[key])
+                for model in schedule["models"]
+            )
+            interval = actual["intervals"][metric]["ci95_percentile"]["by_arm"][arm]
+            if metric == "P":
+                assert [Decimal(item) for item in interval] == [expected_medians[arm]] * 2
+            else:
+                assert interval == [expected_medians[arm]] * 2
+        ratio = actual["intervals"][metric]["ci95_percentile"]["T_over_S"]
+        assert float(ratio[0]) == pytest.approx(
+            float(expected_medians["T"] / expected_medians["S"])
+        )
+    assert actual == _secondary_uncertainty(
+        schedule, dict(reversed(list(triplets.items()))), efforts,
+        {metric: dict(reversed(list(rows.items()))) for metric, rows in values.items()},
+        aggregates, 1,
+    )
+
+
+def test_bootstrap_zero_s_draws_keep_median_intervals(
+    bundle: tuple[dict[str, Any], ...],
+) -> None:
+    schedule, triplets, efforts = _validate_schedule(bundle[0])
+    model_ids = [model["model_id"] for model in schedule["models"]]
+    values: dict[str, dict[str, float | Decimal]] = {"W": {}, "P": {}}
+    for run in schedule["runs"]:
+        if run["arm"] == "S":
+            if run["model_id"] == model_ids[0]:
+                amount = 0 if run["replica"] == 1 else 1
+            elif run["model_id"] in model_ids[1:3]:
+                amount = 0
+            else:
+                amount = 2
+        else:
+            amount = 1
+        values["W"][run["run_id"]] = float(amount)
+        values["P"][run["run_id"]] = Decimal(amount)
+    result = _secondary_uncertainty(
+        schedule, triplets, efforts, values,
+        {"W": {"by_arm": {"S": 0.5}}, "P": {"by_arm": {"S": "0.5"}}}, 300,
+    )
+    for metric in ("W", "P"):
+        assert 0 < result["intervals"][metric]["zero_S_bootstrap_draws"] < 300
+        assert result["intervals"][metric]["ci95_percentile"]["T_over_S"] is None
+        assert result["intervals"][metric]["ci95_percentile"]["by_arm"]["S"] is not None
+    assert result["intervals"]["W"]["zero_S_bootstrap_draws"] == result["intervals"]["P"]["zero_S_bootstrap_draws"]
+
+
+def test_decimal_percentiles_interpolate_without_float_conversion() -> None:
+    values = [Decimal("1.0000000000000000000000000000001"), Decimal("3")]
+    assert _decimal_percentile(values, Decimal("0.025")) == Decimal(
+        "1.0500000000000000000000000000000975"
+    )
+    assert _decimal_percentile(values, Decimal("0.975")) == Decimal(
+        "2.9500000000000000000000000000000025"
+    )
+    widely_scaled = [Decimal("1e-80"), Decimal("2")]
+    with localcontext() as context:
+        context.prec = 120
+        expected = Decimal("1e-80") * Decimal("0.025") + Decimal("2") * Decimal("0.975")
+    assert _decimal_percentile(widely_scaled, Decimal("0.975")) == expected
+
+
 def test_missing_data_and_zero_s_cost_do_not_create_favorable_claims(
     bundle: tuple[dict[str, Any], ...],
 ) -> None:
@@ -267,6 +419,16 @@ def test_missing_data_and_zero_s_cost_do_not_create_favorable_claims(
         assert result["aggregate"][metric]["missing_count"] == 1
         assert result["aggregate"][metric]["by_arm"]["T"] is None
     assert result["aggregate"]["P"]["T_over_S"] is None
+    assert result["aggregate"]["E"]["ci95_percentile"]["T_minus_S_pp"] == [25, 25]
+    for metric in ("T", "R"):
+        assert result["aggregate"][metric]["ci95_percentile"] == {
+            "T": None, "T_minus_S_pp": None,
+        }
+    for metric in ("W", "P"):
+        assert result["aggregate"][metric]["ci95_percentile"] == {
+            "by_arm": {"N": None, "S": None, "T": None}, "T_over_S": None,
+        }
+        assert result["aggregate"][metric]["zero_S_bootstrap_draws"] is None
     assert result["criterion_4"]["status"] == "not_assessed"
 
     secondary = copy.deepcopy(bundle[3])
@@ -276,6 +438,9 @@ def test_missing_data_and_zero_s_cost_do_not_create_favorable_claims(
     result = analyze_secondary_metrics(schedule, receipts, assembly, secondary)
     assert result["aggregate"]["P"]["by_arm"]["S"] == "0"
     assert result["aggregate"]["P"]["T_over_S"] is None
+    assert result["aggregate"]["P"]["ci95_percentile"]["T_over_S"] is None
+    assert result["aggregate"]["P"]["zero_S_bootstrap_draws"] == 12
+    assert result["aggregate"]["P"]["ci95_percentile"]["by_arm"]["T"] == ["52", "52"]
 
 
 def test_failed_recovery_can_have_no_resume_time(
@@ -311,8 +476,13 @@ def test_recovery_only_missing_keeps_other_measured_metrics(
     assert all(row[metric] is not None for metric in ("C", "T", "H", "W", "K", "P", "E"))
     assert result["aggregate"]["R"]["missing_count"] == 1
     assert result["aggregate"]["R"]["by_arm"]["T"] is None
+    assert result["aggregate"]["R"]["ci95_percentile"] == {
+        "T": None, "T_minus_S_pp": None,
+    }
     for metric in ("E", "T", "W", "P"):
         assert result["aggregate"][metric]["missing_count"] == 0
+    assert result["aggregate"]["T"]["ci95_percentile"]["T"] == [0.25, 0.25]
+    assert result["aggregate"]["W"]["ci95_percentile"]["by_arm"]["T"] == [70, 70]
 
 
 def test_unrated_assembly_run_has_missing_e_not_zero(bundle: tuple[dict[str, Any], ...]) -> None:
@@ -331,6 +501,8 @@ def test_unrated_assembly_run_has_missing_e_not_zero(bundle: tuple[dict[str, Any
     assert result["runs"][0]["E"] is None
     assert result["aggregate"]["E"]["missing_count"] == 1
     assert result["aggregate"]["E"]["T_minus_S_pp"] is None
+    assert result["aggregate"]["E"]["ci95_percentile"]["T_minus_S_pp"] is None
+    assert result["aggregate"]["T"]["ci95_percentile"]["T"] == [0.25, 0.25]
 
 
 def test_declared_adjudication_q_is_recomputed(bundle: tuple[dict[str, Any], ...]) -> None:
@@ -505,6 +677,94 @@ def test_long_decimal_component_sum_is_exact(bundle: tuple[dict[str, Any], ...])
         analyze_secondary_metrics(schedule, receipts, assembly, secondary)
 
 
+def test_cost_component_sum_preserves_mixed_magnitude_and_scale(
+    bundle: tuple[dict[str, Any], ...],
+) -> None:
+    schedule, receipts, assembly, secondary = copy.deepcopy(bundle)
+    cost = secondary["runs"][0]["cost"]
+    huge = "1" + "0" * 99
+    tiny = "0." + "0" * 99 + "1"
+    exact_total = huge + "." + "0" * 99 + "1"
+    assert all(len(value) <= 256 for value in (huge, tiny, exact_total))
+    cost.update({
+        "model_usd": huge, "tools_usd": tiny,
+        "human_usd": "0", "total_usd": exact_total,
+    })
+    analyze_secondary_metrics(schedule, receipts, assembly, secondary)
+    cost["total_usd"] = huge
+    with pytest.raises(SecondaryError, match="exact component sum"):
+        analyze_secondary_metrics(schedule, receipts, assembly, secondary)
+
+
+def test_cost_interval_keeps_decimal_difference_beyond_float_precision(
+    bundle: tuple[dict[str, Any], ...],
+) -> None:
+    schedule, receipts, assembly, secondary = copy.deepcopy(bundle)
+    tiny_excess = "2.0000000000000000000000000000001"
+    for run, row in zip(schedule["runs"], secondary["runs"], strict=True):
+        amount = tiny_excess if run["arm"] == "T" else "1"
+        row["cost"].update({"model_usd": amount, "total_usd": amount})
+    result = analyze_secondary_metrics(schedule, receipts, assembly, secondary)
+    assert result["aggregate"]["P"]["T_over_S"] == tiny_excess
+    assert result["aggregate"]["P"]["ci95_percentile"]["by_arm"]["T"] == [
+        tiny_excess, tiny_excess
+    ]
+    assert result["aggregate"]["P"]["ci95_percentile"]["T_over_S"] == [
+        tiny_excess, tiny_excess
+    ]
+    assert result["aggregate"]["P"]["ci95_percentile"]["T_over_S"][0] != "2"
+
+
+@pytest.mark.parametrize("large_scale", [False, True])
+def test_cost_bootstrap_retains_tiny_addend_in_four_model_median(
+    bundle: tuple[dict[str, Any], ...], large_scale: bool,
+) -> None:
+    schedule, receipts, assembly, secondary = copy.deepcopy(bundle)
+    tiny = "0." + "0" * (252 if large_scale else 79) + "1"
+    s_amount = "1" + "0" * 255 if large_scale else "1"
+    four = "4" + "0" * 255 if large_scale else "4"
+    eight = "8" + "0" * 255 if large_scale else "8"
+    model_costs = dict(zip(
+        (model["model_id"] for model in schedule["models"]),
+        ("0", tiny, four, eight), strict=True,
+    ))
+    for run, row in zip(schedule["runs"], secondary["runs"], strict=True):
+        amount = model_costs[run["model_id"]] if run["arm"] == "T" else s_amount
+        row["cost"].update({"model_usd": amount, "total_usd": amount})
+    result = analyze_secondary_metrics(schedule, receipts, assembly, secondary)
+    with localcontext() as context:
+        context.prec = 1200
+        expected_t = (Decimal(tiny) + Decimal(four)) / 2
+        expected_ratio = expected_t / Decimal(s_amount)
+    point = Decimal(result["aggregate"]["P"]["T_over_S"])
+    assert point == expected_ratio > 2
+    assert [Decimal(value) for value in result["aggregate"]["P"]["ci95_percentile"]["by_arm"]["T"]] == [
+        expected_t, expected_t
+    ]
+    assert [Decimal(value) for value in result["aggregate"]["P"]["ci95_percentile"]["T_over_S"]] == [
+        expected_ratio, expected_ratio
+    ]
+
+
+@pytest.mark.parametrize("bad_resamples", [0, -1, 10_001, True, 1.0, "12"])
+def test_invalid_development_resamples_rejected(
+    bundle: tuple[dict[str, Any], ...], bad_resamples: Any,
+) -> None:
+    with pytest.raises(SecondaryError, match="development_resamples must be an integer"):
+        _analyze_secondary_metrics(*bundle, development_resamples=bad_resamples)
+
+
+def test_secondary_row_order_does_not_change_bootstrap(
+    bundle: tuple[dict[str, Any], ...],
+) -> None:
+    original = analyze_secondary_metrics(*bundle)
+    reordered = copy.deepcopy(bundle)
+    reordered[3]["runs"].reverse()
+    result = analyze_secondary_metrics(*reordered)
+    assert result["bootstrap"] == original["bootstrap"]
+    assert result["aggregate"] == original["aggregate"]
+
+
 def test_cli_one_stdin_and_structured_error(
     bundle: tuple[dict[str, Any], ...], tmp_path: Path,
 ) -> None:
@@ -517,7 +777,11 @@ def test_cli_one_stdin_and_structured_error(
     result = subprocess.run(command, input=json.dumps(bundle[3]), text=True,
                             capture_output=True, check=False)
     assert result.returncode == 0, result.stdout + result.stderr
-    assert json.loads(result.stdout)["criterion_4"]["status"] == "not_assessed"
+    output = json.loads(result.stdout)
+    assert output["criterion_4"]["status"] == "not_assessed"
+    assert output["bootstrap"] == {"seed": 29, "resamples": 10_000,
+                                   "default_resamples": 10_000}
+    assert output["aggregate"]["P"]["ci95_percentile"]["T_over_S"] is not None
     command[-2] = "-"
     result = subprocess.run(command, input="{}", text=True, capture_output=True, check=False)
     assert result.returncode == 2

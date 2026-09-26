@@ -21,14 +21,17 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import random
 import re
 from collections import defaultdict
+from collections.abc import Iterable
 from decimal import Decimal, localcontext
 from statistics import median
 from typing import Any
 
 from analyze_confirmatory import (
-    AnalysisError, _canonical_digest, _nonempty_text, _read_json, _sha256,
+    AGENTS, ARMS, CASES, DEFAULT_RESAMPLES, REPLICAS, AnalysisError,
+    _canonical_digest, _nonempty_text, _percentile, _read_json, _sha256,
     _validate_evaluations, _validate_schedule,
 )
 from audit_run_receipts import ReceiptError, _utc_time, audit_receipts
@@ -533,10 +536,10 @@ def _validate_secondary(
         cost = _exact(row["cost"], f"{label}.cost", COST_FIELDS)
         money_fields = ("model_usd", "tools_usd", "human_usd", "total_usd")
         amounts = {key: _money(cost[key], f"{label}.cost.{key}") for key in money_fields}
-        # Decimal arithmetic obeys its context precision. Increase it above
-        # the supplied coefficients so the component sum is checked exactly.
+        # A large integer plus a tiny fractional component needs precision
+        # spanning both magnitudes, even when the declared total omits the latter.
         with localcontext() as context:
-            context.prec = max(len(cost[key].replace(".", "")) for key in money_fields) + 4
+            context.prec = _decimal_places(amounts.values()) + 4
             components = sum((amounts[key] for key in money_fields[:3]), Decimal(0))
         if components != amounts["total_usd"]:
             raise SecondaryError(f"{label}.cost.total_usd differs from exact component sum")
@@ -638,9 +641,7 @@ def _model_medians(
         groups[(run["arm"], run["model_id"])].append(values[run["run_id"]])
     with localcontext() as context:
         if money:
-            context.prec = max(
-                len(format(value, "f").replace(".", "")) for value in values.values()
-            ) + 30
+            context.prec = _decimal_places(values.values()) + 30
         model_medians = {
             arm: {model: median(groups[(arm, model)]) for model in model_ids}
             for arm in arms
@@ -663,11 +664,165 @@ def _model_medians(
     }
 
 
+def _decimal_places(values: Iterable[Decimal]) -> int:
+    """Count both integer magnitude and fractional scale, including leading zeros."""
+    integer_places = 0
+    fractional_places = 0
+    for value in values:
+        if value:
+            integer_places = max(integer_places, value.adjusted() + 1)
+        fractional_places = max(fractional_places, -value.as_tuple().exponent)
+    return max(integer_places, 0) + fractional_places
+
+
+def _decimal_percentile(sorted_values: list[Decimal], proportion: Decimal) -> Decimal:
+    position = Decimal(len(sorted_values) - 1) * proportion
+    low = int(position)
+    high = min(low + 1, len(sorted_values) - 1)
+    with localcontext() as context:
+        context.prec = _decimal_places(sorted_values) + 30
+        return sorted_values[low] + (sorted_values[high] - sorted_values[low]) * (position - low)
+
+
+def _secondary_uncertainty(
+    schedule: dict[str, Any], triplets: dict[tuple[Any, ...], dict[str, dict[str, Any]]],
+    effort_counts: dict[str, int], values: dict[str, dict[str, float | Decimal]],
+    aggregates: dict[str, dict[str, Any]], resamples: int,
+) -> dict[str, Any]:
+    """Use one replica draw per sorted stratum for every complete metric."""
+    complete = {metric for metric, rows in values.items() if len(rows) == len(schedule["runs"])}
+    strata: dict[tuple[str, str, str, str], list[dict[str, dict[str, Any]]]] = defaultdict(list)
+    for key, arms in sorted(triplets.items()):
+        strata[key[:4]].append(arms)
+    ordered = sorted(strata.items())
+    if any(len(replicas) != len(REPLICAS) for _, replicas in ordered):
+        raise SecondaryError("secondary bootstrap requires three replicas per stratum")
+    model_ids = sorted(effort_counts)
+    weights = [
+        1 / (len(model_ids) * effort_counts[key[0]] * len(AGENTS) * len(CASES))
+        for key, _ in ordered
+    ]
+    panels = {
+        metric: [
+            tuple(tuple(rows[arms[arm]["run_id"]] for arms in replicas) for arm in ARMS)
+            for _, replicas in ordered
+        ]
+        for metric, rows in values.items() if metric in complete
+    }
+    draws: dict[str, dict[str, list[Any]]] = {
+        metric: {"T": [], "T_minus_S_pp": []} for metric in ("E", "T", "R")
+        if metric in complete
+    }
+    for metric in ("W", "P"):
+        if metric in complete:
+            draws[metric] = {**{arm: [] for arm in ARMS}, "T_over_S": []}
+    zero_s_draws = {metric: 0 for metric in ("W", "P") if metric in complete}
+    money_places = _decimal_places(values["P"].values()) if "P" in complete else 1
+    rng = random.Random(schedule["seed"])
+
+    for _ in range(resamples if complete else 0):
+        sampled = [tuple(rng.randrange(3) for _ in REPLICAS) for _ in ordered]
+        for metric in ("E", "T", "R"):
+            if metric not in complete:
+                continue
+            panels_for_metric = panels[metric]
+            s_mean = math.fsum(
+                weight * math.fsum(panel[1][index] for index in indices) / 3
+                for weight, panel, indices in zip(weights, panels_for_metric, sampled, strict=True)
+            )
+            t_mean = math.fsum(
+                weight * math.fsum(panel[2][index] for index in indices) / 3
+                for weight, panel, indices in zip(weights, panels_for_metric, sampled, strict=True)
+            )
+            if metric != "E":
+                draws[metric]["T"].append(t_mean)
+            draws[metric]["T_minus_S_pp"].append((t_mean - s_mean) * 100)
+
+        for metric in ("W", "P"):
+            if metric not in complete:
+                continue
+            grouped: dict[str, dict[str, list[float | Decimal]]] = {
+                model: {arm: [] for arm in ARMS} for model in model_ids
+            }
+            for (key, _), panel, indices in zip(ordered, panels[metric], sampled, strict=True):
+                for arm_number, arm in enumerate(ARMS):
+                    grouped[key[0]][arm].extend(panel[arm_number][index] for index in indices)
+            with localcontext() as context:
+                if metric == "P":
+                    # Four-model medians and ratios need headroom beyond input precision.
+                    context.prec = 2 * money_places + 40
+                arm_medians = {
+                    arm: median(median(grouped[model][arm]) for model in model_ids)
+                    for arm in ARMS
+                }
+                for arm in ARMS:
+                    draws[metric][arm].append(arm_medians[arm])
+                if arm_medians["S"] == 0:
+                    zero_s_draws[metric] += 1
+                else:
+                    draws[metric]["T_over_S"].append(arm_medians["T"] / arm_medians["S"])
+
+    intervals: dict[str, Any] = {}
+    for metric in ("E", "T", "R"):
+        labels = ("T_minus_S_pp",) if metric == "E" else ("T", "T_minus_S_pp")
+        if metric in complete:
+            for label in labels:
+                draws[metric][label].sort()
+        intervals[metric] = {
+            "ci95_percentile": {
+                label: ([_percentile(draws[metric][label], 0.025),
+                         _percentile(draws[metric][label], 0.975)]
+                        if metric in complete else None)
+                for label in labels
+            }
+        }
+    for metric in ("W", "P"):
+        if metric in complete:
+            for arm in ARMS:
+                draws[metric][arm].sort()
+            if zero_s_draws[metric] == 0:
+                draws[metric]["T_over_S"].sort()
+        def interval(label: str) -> list[float] | list[str] | None:
+            if metric not in complete or (label == "T_over_S" and (
+                aggregates[metric]["by_arm"]["S"] == ("0" if metric == "P" else 0)
+                or zero_s_draws[metric]
+            )):
+                return None
+            ordered_values = draws[metric][label]
+            if metric == "P":
+                return [
+                    _decimal_text(_decimal_percentile(ordered_values, proportion))
+                    for proportion in (Decimal("0.025"), Decimal("0.975"))
+                ]
+            return [_percentile(ordered_values, 0.025), _percentile(ordered_values, 0.975)]
+        intervals[metric] = {
+            "ci95_percentile": {
+                "by_arm": {arm: interval(arm) for arm in ARMS},
+                "T_over_S": interval("T_over_S"),
+            },
+            "zero_S_bootstrap_draws": zero_s_draws.get(metric),
+        }
+    return {
+        "bootstrap": {
+            "seed": schedule["seed"], "resamples": resamples if complete else 0,
+            "default_resamples": DEFAULT_RESAMPLES,
+        },
+        "intervals": intervals,
+    }
+
+
 def analyze_secondary_metrics(
     raw_schedule: Any, raw_receipts: Any, raw_assembly: Any, raw_secondary: Any,
+    *, development_resamples: int | None = None,
 ) -> dict[str, Any]:
     """Validate declared bindings and calculate secondary metrics without a seal."""
-    schedule, _, _ = _validate_schedule(raw_schedule)
+    schedule, triplets, effort_counts = _validate_schedule(raw_schedule)
+    if development_resamples is None:
+        resamples = DEFAULT_RESAMPLES
+    elif type(development_resamples) is int and 1 <= development_resamples <= DEFAULT_RESAMPLES:
+        resamples = development_resamples
+    else:
+        raise SecondaryError("development_resamples must be an integer from 1 through 10000")
     receipt_audit = audit_receipts(schedule, raw_receipts)
     if receipt_audit["violations"]:
         raise SecondaryError(
@@ -847,6 +1002,21 @@ def analyze_secondary_metrics(
         },
         "by_arm_available": incident_by_arm,
     }
+    aggregates = {
+        "E": e_aggregate,
+        "T": _balanced(schedule, t_values),
+        "R": _balanced(schedule, r_values),
+        "W": _model_medians(schedule, w_values, money=False),
+        "P": _model_medians(schedule, p_values, money=True),
+        **descriptive,
+    }
+    uncertainty = _secondary_uncertainty(
+        schedule, triplets, effort_counts,
+        {"E": e_values, "T": t_values, "R": r_values, "W": w_values, "P": p_values},
+        aggregates, resamples,
+    )
+    for metric, interval in uncertainty["intervals"].items():
+        aggregates[metric].update(interval)
     return {
         "schema": 1, "classification": CLASSIFICATION, "notice": NOTICE,
         "schedule_sha256": schedule["schedule_sha256"],
@@ -854,6 +1024,7 @@ def analyze_secondary_metrics(
         "assembly_sha256": assembly_digest,
         "secondary_sha256": _canonical_digest(raw_secondary),
         "rate_card_sha256": raw_secondary["rate_card_sha256"],
+        "bootstrap": uncertainty["bootstrap"],
         "counts": {
             "scheduled_runs": len(schedule["runs"]),
             "secondary_measured_runs": len(t_values),
@@ -861,14 +1032,7 @@ def analyze_secondary_metrics(
             "assembly_E_available_runs": len(e_values),
         },
         "runs": output_runs,
-        "aggregate": {
-            "E": e_aggregate,
-            "T": _balanced(schedule, t_values),
-            "R": _balanced(schedule, r_values),
-            "W": _model_medians(schedule, w_values, money=False),
-            "P": _model_medians(schedule, p_values, money=True),
-            **descriptive,
-        },
+        "aggregate": aggregates,
         "criterion_4": {"status": "not_assessed", "reason": NOTICE},
     }
 
