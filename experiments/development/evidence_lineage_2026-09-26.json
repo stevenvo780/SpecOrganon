@@ -4,11 +4,13 @@
   "classification": "development_evidence_lineage_unsealed",
   "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
   "baseline_commit": "81ab589191e04014f8e27b2a372aef08e940a4ba",
+  "indicator_gap_commit": "73535218e1ae90fcbc628c4fa24f2371984c5c11",
   "artifacts": {
     "baseline_src/specorganon/engine.py_sha256": "25bae27deb2b97e91ccd473693fa007e71239cc8b5b6267583d52d985ab647b4",
-    "src/specorganon/engine.py_sha256": "557866ee4f474d4d9858a2c4553d8e42e73a11a010080cc1c148b3ed5b9ee3a5",
-    "tests/test_method.py_sha256": "8f2a8c90ff4ed074d3eb385db8a83acecea8f5470d67dda8b0ea32869b34e03d",
-    "wheel_sha256": "99a1dcb93873906ad1fb4a257bafbf415d7fe4f45cbd2d4aff83c184fd8b7bdb"
+    "indicator_gap_src/specorganon/engine.py_sha256": "557866ee4f474d4d9858a2c4553d8e42e73a11a010080cc1c148b3ed5b9ee3a5",
+    "src/specorganon/engine.py_sha256": "a2762345677cc7d7e39555ea38ec2b94e1270b6ee159687e5ca73a5c9e10603b",
+    "tests/test_method.py_sha256": "1b296525bfbf89fd96b61285c2b7a7ae158b659dcfc5c0e599bd75209ce6a04a",
+    "wheel_sha256": "d66b74f62d8688d4a6c4570ca85c3901b0f9ebe7f4571b9f7d27fa13b01da315"
   },
   "reproduction": {
     "source": "Synthetic case fixture in tests/test_method.py with ORGANON_ALLOW_FIXTURES=1; baseline engine loaded from git show in a separate Python module.",
@@ -26,21 +28,32 @@
       "graph": "e1 already links pr1 and p2; inf1 cites e1 plus pr2 and p1; n1 links p1",
       "current": "observe blocks the unrelated sibling protocol for both simulated and published e1"
     },
+    "disjoint_indicator": {
+      "graph": "i1 links n1 and p1 but its evidence e0 links only pr2 and p2; req1 and crit1 have coherent p1 paths",
+      "at_indicator_gap_commit": "specify ready with no blockers",
+      "current": "specify blocks i1 only"
+    },
+    "explicit_measurement_conflicts": {
+      "graph": "i1 declares count/count; evidence e0 declares count/count at p2; evidence ex declares either temperature/count or count/kg at p1",
+      "current": "specify blocks i1 for either explicit metric or unit conflict, directly and through an inference",
+      "positive_control": "Changing ex to count/count at p1 makes specify ready."
+    },
     "positive_control": "Published e1 with refs=[] can be interpreted by inf1 citing pr2 and p1; all nine phases accepted in the synthetic fixture."
   },
   "checks": {
-    "full_pytest": "uv run pytest -q: 496 passed",
+    "full_pytest": "uv run pytest -q: 507 passed",
     "ruff": "uv run ruff check .: all checks passed",
     "diff_check": "git diff --check: passed",
     "clean_wheel_smoke": {
       "python_3_11_15": "9 phases, 29 items, 49 events, 14 CLI commands and 14 MCP tools exercised; checkpoint after 3 events resumed by MCP",
       "python_3_12_3": "9 phases, 29 items, 49 events, 14 CLI commands and 14 MCP tools exercised; checkpoint after 4 events resumed by MCP"
     },
-    "independent_review": "Read-only reviewer reproduced both blocked sibling cases and the accepted independent published evidence case."
+    "independent_review": "Read-only reviewer reproduced blocked sibling, indicator, metric and unit cases with positive controls, including direct and inferred evidence routes."
   },
   "limits": [
     "Fixtures and approvals are synthetic; source truth, human identity, competence and causal effect are not authenticated.",
     "The structural lineage check does not prove that evidence content supports the inference or decision; that needs independent review.",
+    "Missing metric_key or unit on evidence remains provisional support; reviewers must judge semantic relevance and any conversion or derived metric.",
     "The clean smoke covers the exercised CLI and MCP routes, not every possible state or failure.",
     "The sealed 21-injection bank, field intervention and confirmatory model comparison remain pending."
   ],

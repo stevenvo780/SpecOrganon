@@ -23,12 +23,18 @@ def _accept(path, phase):
 
 
 def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1"),
-                             e1_refs=("pr1",), e1_origin="simulated", inf_refs=("e1", "h1"),
-                             sibling_protocol=False, stop_before_observe=False, stop_before_specify=False):
+                             e0_refs=("pr1",), e0_origin="simulated", e0_metric_key=None, e0_unit=None,
+                             e1_refs=("pr1",), e1_origin="simulated",
+                             inf_refs=("e1", "h1"), sibling_protocol=False, sibling_problem="p1",
+                             indicator_protocol_ref=None, indicator_extra_metric=None, indicator_extra_unit=None,
+                             indicator_extra_via_inference=False,
+                             stop_before_observe=False, stop_before_specify=False):
     engine.create_case(path, "Synthetic control", "test", "human:fixture", approval_policy="fixture")
     _put(path, "p1", "problem")
     if study_problem != "p1":
         _put(path, study_problem, "problem")
+    if sibling_protocol and sibling_problem not in {"p1", study_problem}:
+        _put(path, sibling_problem, "problem")
     _put(path, "a1", "actor", ["p1"])
     _put(path, "b1", "boundary", ["p1"])
     _accept(path, "frame")
@@ -46,11 +52,31 @@ def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1")
     _put(path, "h1", "hypothesis", ["q1"])
     _put(path, "pr1", "protocol", ["q1", "h1"], {"population": "synthetic", "method": "enumeration", "comparison": "baseline", "uncertainty": "none in fixture"})
     if sibling_protocol:
-        _put(path, "q2", "question", ["p1"])
+        _put(path, "q2", "question", [sibling_problem])
         _put(path, "h2", "hypothesis", ["q2"])
         _put(path, "pr2", "protocol", ["q2", "h2"], {"population": "synthetic", "method": "enumeration", "comparison": "baseline", "uncertainty": "none in fixture"})
-    _put(path, "e0", "evidence", ["pr1"], {"origin": "simulated", "source": "synthetic fixture", "date": "2026-09-26", "locator": "predeclared context"})
-    _put(path, "i1", "indicator", ["p1", "n1", "e0"], {"metric": "count", "unit": "count"})
+    e0_data = {"origin": e0_origin, "source": "synthetic fixture", "date": "2026-09-26",
+               "locator": "predeclared context"}
+    if e0_metric_key is not None:
+        e0_data["metric_key"] = e0_metric_key
+    if e0_unit is not None:
+        e0_data["unit"] = e0_unit
+    _put(path, "e0", "evidence", e0_refs, e0_data)
+    indicator_refs = ["p1", "n1", "e0"]
+    if indicator_protocol_ref is not None:
+        indicator_refs.append(indicator_protocol_ref)
+    if indicator_extra_metric is not None:
+        extra_data = {"origin": "simulated", "source": "synthetic fixture", "date": "2026-09-26",
+                      "locator": "extra context", "metric_key": indicator_extra_metric}
+        if indicator_extra_unit is not None:
+            extra_data["unit"] = indicator_extra_unit
+        _put(path, "ex", "evidence", ["pr1"], extra_data)
+        extra_ref = "ex"
+        if indicator_extra_via_inference:
+            _put(path, "ix", "inference", ["ex", "h1"])
+            extra_ref = "ix"
+        indicator_refs.append(extra_ref)
+    _put(path, "i1", "indicator", indicator_refs, {"metric": "count", "unit": "count"})
     _accept(path, "study")
 
     _put(path, "e1", "evidence", e1_refs, {"origin": e1_origin, "source": "synthetic fixture", "date": "2026-09-26", "locator": "test_method.py", "metric_key": "count", "scope": "fixture", "unit": "count", "value": 10})
@@ -118,8 +144,17 @@ def test_orphaned_observation_cannot_advance_workflow(tmp_path, origin, expected
 def test_independent_published_evidence_can_be_interpreted_under_protocol(tmp_path):
     path = tmp_path / "case"
     _complete_synthetic_case(path, study_problem="p2", sibling_protocol=True,
-                             e1_refs=(), e1_origin="published", inf_refs=("e1", "pr2"))
+                             e0_refs=("pr2",), e1_refs=(), e1_origin="published", inf_refs=("e1", "pr2"))
     assert engine.get_state(path)["items"]["e1"]["deps"] == {}
+    assert all(engine.gate(path, phase.id)["accepted"] for phase in PHASES)
+
+
+def test_independent_published_indicator_evidence_can_use_explicit_protocol(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, e0_refs=(), e0_origin="published", indicator_protocol_ref="pr1")
+    evidence = engine.get_state(path)["items"]["e0"]
+    assert evidence["deps"] == {}
+    assert "metric_key" not in evidence["data"] and "unit" not in evidence["data"]
     assert all(engine.gate(path, phase.id)["accepted"] for phase in PHASES)
 
 
@@ -178,6 +213,54 @@ def test_specification_rejects_disjoint_evidence_and_norm_problem_lineages(tmp_p
                for blocker in blockers)
     assert any("crit1 lacks a shared problem between norm and protocol-grounded evidence" in blocker
                for blocker in blockers)
+
+
+@pytest.mark.parametrize(("indicator_protocol", "ready"), (("pr2", False), ("pr1", True)))
+def test_indicator_must_share_problem_with_its_normative_evidence(tmp_path, indicator_protocol, ready):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, sibling_protocol=True, sibling_problem="p2",
+                             e0_refs=(indicator_protocol,), stop_before_specify=True)
+    engine.approve(path, "d1", "synthetic fixture approval", "human:fixture")
+    status = engine.gate(path, "specify")
+    assert status["ready"] is ready
+    indicator_blocker = "i1 lacks a shared problem between norm and protocol-grounded evidence"
+    assert (indicator_blocker in status["blockers"]) is not ready
+    assert not any("req1 lacks a shared problem" in blocker or "crit1 lacks a shared problem" in blocker
+                   for blocker in status["blockers"])
+
+
+@pytest.mark.parametrize("via_inference", [False, True])
+@pytest.mark.parametrize(("extra_metric", "ready"), (("temperature", False), ("count", True)))
+def test_indicator_support_problem_must_match_its_explicit_metric(tmp_path, extra_metric, ready, via_inference):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, sibling_protocol=True, sibling_problem="p2",
+                             e0_refs=("pr2",), e0_metric_key="count",
+                             indicator_extra_metric=extra_metric,
+                             indicator_extra_via_inference=via_inference, stop_before_specify=True)
+    engine.approve(path, "d1", "synthetic fixture approval", "human:fixture")
+    status = engine.gate(path, "specify")
+    assert status["ready"] is ready
+    indicator_blocker = "i1 lacks a shared problem between norm and protocol-grounded evidence"
+    assert (indicator_blocker in status["blockers"]) is not ready
+    assert not any("req1 lacks a shared problem" in blocker or "crit1 lacks a shared problem" in blocker
+                   for blocker in status["blockers"])
+
+
+@pytest.mark.parametrize("via_inference", [False, True])
+@pytest.mark.parametrize(("extra_unit", "ready"), (("kg", False), ("count", True)))
+def test_indicator_support_problem_must_match_its_explicit_unit(tmp_path, extra_unit, ready, via_inference):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, sibling_protocol=True, sibling_problem="p2",
+                             e0_refs=("pr2",), e0_metric_key="count", e0_unit="count",
+                             indicator_extra_metric="count", indicator_extra_unit=extra_unit,
+                             indicator_extra_via_inference=via_inference, stop_before_specify=True)
+    engine.approve(path, "d1", "synthetic fixture approval", "human:fixture")
+    status = engine.gate(path, "specify")
+    assert status["ready"] is ready
+    indicator_blocker = "i1 lacks a shared problem between norm and protocol-grounded evidence"
+    assert (indicator_blocker in status["blockers"]) is not ready
+    assert not any("req1 lacks a shared problem" in blocker or "crit1 lacks a shared problem" in blocker
+                   for blocker in status["blockers"])
 
 
 def test_specification_accepts_explicit_two_problem_normative_bridge(tmp_path):
