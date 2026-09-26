@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_documentary_case_append",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "source": {
+    "publisher": "FAO",
+    "publication_year": 2018,
+    "study_window": "April–June 2016",
+    "url": "https://openknowledge.fao.org/3/BU688EN/bu688en.pdf",
+    "pdf_sha256_verified": "533ed42e554ae8eb76986c9c2c79e317e0f5fcdadc92f4de1be17c5854366980",
+    "source_rows": "Table 15, printed pp. 28–30; distinct-load explanation on printed p. 27",
+    "extraction_path": "cases/mango/fao_table15_loads.json",
+    "extraction_sha256": "d76733408d207d1d2960986c2a7c18e2c8eb05f59bf074dd5b3a972becd0b6e4"
+  },
+  "append": {
+    "baseline_commit": "ce41d6c1f93ed9c4a7cfcf2b284b417624edbbad",
+    "baseline_events": 27,
+    "baseline_head_hash": "5a0bd44b7276928826090a57f7fad5c2994792a29f1df3fc8603db30331564e7",
+    "old_events_1_through_27_identical_to_baseline": true,
+    "project_metadata_identical_to_baseline": true,
+    "new_event_sequences": [28, 29, 30],
+    "new_item_ids": ["e_P1_table15_sorting", "e_P2_table15_transport", "e_P3_table15_ripening"],
+    "new_item_refs": ["b_scope"],
+    "new_item_expected_deps": {"b_scope": 1},
+    "seed_items": 26,
+    "ledger_events": 30,
+    "ledger_hash_chain_read_success": true,
+    "new_seed_items_match_ledger_payloads": true,
+    "new_items_have_no_engine_issues": true,
+    "current_head_hash": "5c483124d1014e23b5edb6dd47b62c8c4211998adf27bff9a46d25375dad23f3",
+    "seed_sha256": "83a1957b1cedc672a108430eaad85926a167f435f4d16cc41aedb1253ea232ea",
+    "ledger_sha256": "a5bc7f92d080270ccd4eef54129c3406352155cc60d643695abfafcbfbfed315"
+  },
+  "rows": [
+    {
+      "local_row_id": "P1_table15_sorting",
+      "item_id": "e_P1_table15_sorting",
+      "printed_input": "5 tonne",
+      "printed_output": "4.4 tonne",
+      "reported_loss_pct": "12",
+      "recomputed_from_printed_weights_pct": "12.00000",
+      "caveat": "Farm input was partly estimated; these are not two direct farm weighings."
+    },
+    {
+      "local_row_id": "P2_table15_transport",
+      "item_id": "e_P2_table15_transport",
+      "printed_input": "4200 kg",
+      "printed_output": "4180 kg",
+      "reported_loss_pct": "0.5",
+      "recomputed_from_printed_weights_pct": "0.47619",
+      "caveat": "The printed percentage is rounded relative to the printed weights."
+    },
+    {
+      "local_row_id": "P3_table15_ripening",
+      "item_id": "e_P3_table15_ripening",
+      "printed_input": "101.4 kg",
+      "printed_output": "81.3 kg",
+      "reported_loss_pct": "19.75",
+      "recomputed_from_printed_weights_pct": "19.82249",
+      "caveat": "Printed weights do not reproduce the printed percentage exactly; the original unrounded measurements and uncertainty are unavailable."
+    }
+  ],
+  "post_append_gate": {
+    "frame_accepted": true,
+    "critique_accepted": false,
+    "critique_blocker": "n_distribution requires a verified human approval",
+    "observe_accepted": false,
+    "observe_blocker": "e_table18: reported calculation 79925.4 differs from recomputed 27574.26"
+  },
+  "gates": {
+    "uv run pytest -q tests/test_mango_case_data.py": "1 passed",
+    "uv run pytest -q": "519 passed",
+    "uv run ruff check .": "All checks passed!",
+    "git diff --check": "passed"
+  },
+  "limits": [
+    "The three rows are separate tracked loads, with local row IDs rather than published physical load IDs.",
+    "Exact observation dates and measurement uncertainty are unpublished; null does not mean zero uncertainty.",
+    "There is no linked chain to household consumption, prospective baseline, intervention assignment, current outcome or causal effect.",
+    "A locally valid hash chain and PDF digest establish internal integrity and source identity, not physical sample identity, independent custody or human normative approval."
+  ],
+  "criterion_3": "not_assessed"
+}
