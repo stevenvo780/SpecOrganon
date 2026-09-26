@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_declared_field_preflight_regression",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "baseline_commit": "4ae1d56085c2eecd641363e7d91aba04ea66fc57",
+  "baseline_sha256": {
+    "scripts/audit_field_flows.py": "9ba5f644768ab45958bd379cf926e6164353074a66e15d33390609af67f53e78",
+    "tests/test_audit_field_flows.py": "b895873521d48c6de199e15bc426d01f6bd104c45031424f6aa9ce704af2df12"
+  },
+  "current_sha256": {
+    "scripts/audit_field_flows.py": "92810b9ffe0fccda93aa28b5d8c11e10cd056b49d6865d9a36b79ed1f4e795c1",
+    "tests/test_audit_field_flows.py": "225ebc2e79153620c4f50da7a97551da75e1ae3c39d58090d66660a00a4b028b"
+  },
+  "reproduction": {
+    "fixture": "field_data_with_stage_witnesses() from tests/test_audit_field_flows.py, with invented observations",
+    "baseline_false_greens": [
+      "Schema 2 accepted a terminal destination source copied from a different load; it did not bind destination.source.load_id to the terminal flow.",
+      "Schema 2 accepted a terminal outcome source copied from a different load; it did not bind outcome.source.load_id to the terminal flow.",
+      "Schema 2 accepted an additional short human-consumption branch in the same group-period when another branch supplied the sole complete stage witness."
+    ],
+    "current_negative_controls": [
+      "Sources copied across groups or across loads in the same group are rejected for both destination and outcome, including nonhuman terminal outputs.",
+      "Schema 2 rejects a terminal destination or outcome source without load_id.",
+      "A short consumed branch next to a complete branch is rejected and its terminal flow ID is reported."
+    ],
+    "current_positive_controls": [
+      "A retrospective destination/outcome observation of the same load remains accepted.",
+      "Two complete consumed branches in one group-period produce distinct witnesses: five consumed flows and five stage_witnesses in the fixture.",
+      "Schema 1 still accepts its historical unbound terminal source shape with declared_graph_only_full_chain_not_checked."
+    ]
+  },
+  "active_contract": {
+    "schema_2_terminal_sources": "Every terminal destination.source and outcome.source must declare the terminal flow.load_id.",
+    "schema_2_stage_witnesses": "One continuous declared production-storage-transport-two-transformations path per declared human-consumption flow; no fixed order for storage and transport.",
+    "schema_2_scope_status": "declared_stage_witness_per_consumed_flow_only",
+    "schema_1_scope_status": "declared_graph_only_full_chain_not_checked",
+    "criterion_3": "not_assessed"
+  },
+  "review": {
+    "independent_focused_tests": "85 passed across field and Citi Bike transfer tests",
+    "finding": "The field guide retained the old per-group-period contract; it was updated before handoff.",
+    "adversarial_limit": "An extra externally fed ingredient into the final lot can still share a witness with output from that lot; the operation graph cannot identify input-output material lineage within a mixed lot."
+  },
+  "gates": {
+    "uv run pytest -q tests/test_audit_field_flows.py": "84 passed",
+    "uv run pytest -q": "557 passed",
+    "uv run ruff check .": "All checks passed!",
+    "git diff --check": "passed"
+  },
+  "limits": [
+    "All observations and identifiers in these tests are invented development declarations, not authenticated physical records.",
+    "The new check covers every declared consumed flow, not undeclared branches, households, within-lot mixing or physical sample identity.",
+    "Schema 1 deliberately retains its weaker terminal-source and stage-coverage contract.",
+    "No V or G is calculated and no food-field impact or GOAL criterion 3 is established."
+  ],
+  "criterion_3": "not_assessed"
+}

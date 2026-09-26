@@ -151,10 +151,19 @@ def field_data(*, with_service: bool = True) -> dict[str, Any]:
     return result
 
 
+def _as_schema2(data: dict[str, Any]) -> dict[str, Any]:
+    """Bind each declared terminal observation to its load in schema 2 fixtures."""
+    data["schema"] = 2
+    for flow in data["flows"]:
+        if flow["to_lot_id"] is None:
+            flow["destination"]["source"]["load_id"] = flow["load_id"]
+            flow["outcome"]["source"]["load_id"] = flow["load_id"]
+    return data
+
+
 def field_data_with_stage_witnesses() -> dict[str, Any]:
     """Add a synthetic serial scope path to every schema-1 group-period."""
     data = field_data()
-    data["schema"] = 2
     for group in ("control", "intervention"):
         for period in ("pre", "post"):
             prefix = f"{group}-{period}"
@@ -192,7 +201,7 @@ def field_data_with_stage_witnesses() -> dict[str, Any]:
             service_row = next(row for row in data["service"]["rows"]
                                if (row["group_id"], row["period"]) == (group, period))
             service_row["consumption_flow_ids"] = [finished["id"]]
-    return data
+    return _as_schema2(data)
 
 
 def _by_id(rows: list[dict[str, Any]], item_id: str) -> dict[str, Any]:
@@ -480,6 +489,53 @@ def test_consumption_evidence_must_identify_its_own_physical_load(
         audit_field_flows(data)
 
 
+@pytest.mark.parametrize("source_location", ["destination", "outcome"])
+@pytest.mark.parametrize("target_id,other_group_id,same_group_id", [
+    ("control-post-finished", "intervention-post-finished", "control-post-coproduct"),
+    ("control-post-reject", "intervention-post-reject", "control-post-wash-moisture"),
+])
+@pytest.mark.parametrize("change", ["copied_other_group", "copied_same_group", "missing_load_id"])
+def test_schema2_terminal_sources_identify_their_own_physical_load(
+    source_location: str, target_id: str, other_group_id: str, same_group_id: str, change: str
+) -> None:
+    data = field_data_with_stage_witnesses()
+    target = _by_id(data["flows"], target_id)[source_location]["source"]
+    if change == "missing_load_id":
+        target.pop("load_id")
+        expected = r"missing keys \['load_id'\]"
+    else:
+        donor_id = other_group_id if change == "copied_other_group" else same_group_id
+        donor = _by_id(data["flows"], donor_id)[source_location]["source"]
+        target.update(copy.deepcopy(donor))
+        expected = r"load_id does not match terminal flow\.load_id"
+    with pytest.raises(FieldFlowError, match=rf"{source_location}\.source.*{expected}"):
+        audit_field_flows(data)
+
+
+def test_schema2_terminal_sources_allow_retrospective_observation_of_the_same_load() -> None:
+    data = field_data_with_stage_witnesses()
+    flow = _by_id(data["flows"], "control-post-finished")
+    flow["destination"]["source"]["observed_at_utc"] = "2026-03-15T13:00:00Z"
+    flow["outcome"]["source"]["observed_at_utc"] = "2026-03-16T12:00:00Z"
+    assert flow["destination"]["source"]["load_id"] == flow["load_id"]
+    assert flow["outcome"]["source"]["load_id"] == flow["load_id"]
+    service_row = next(row for row in data["service"]["rows"]
+                       if (row["group_id"], row["period"]) == ("control", "post"))
+    service_row["source"]["observed_at_utc"] = "2026-03-17T12:00:00Z"
+    assert audit_field_flows(data)["valid"] is True
+
+
+def test_schema1_keeps_unbound_terminal_sources_and_limited_scope() -> None:
+    data = field_data()
+    target = _by_id(data["flows"], "control-post-consumed")
+    donor = _by_id(data["flows"], "intervention-post-consumed")
+    assert "load_id" not in target["destination"]["source"]
+    target["outcome"]["source"] = copy.deepcopy(donor["outcome"]["source"])
+    report = audit_field_flows(data)
+    assert report["valid"] is True
+    assert report["scope_status"] == "declared_graph_only_full_chain_not_checked"
+
+
 def test_exact_mass_arithmetic_does_not_erase_tiny_addition() -> None:
     data = field_data(with_service=False)
     data["balance_tolerance_kg"] = 0
@@ -529,7 +585,7 @@ def test_schema2_reports_a_continuous_declared_stage_witness() -> None:
     report = audit_field_flows(field_data_with_stage_witnesses())
     assert report["valid"] is True
     assert report["schema"] == 2
-    assert report["scope_status"] == "declared_stage_witness_per_group_period_only"
+    assert report["scope_status"] == "declared_stage_witness_per_consumed_flow_only"
     assert len(report["stage_witnesses"]) == 4
     assert report["stage_witnesses"][0] == {
         "group_id": "control", "period": "post",
@@ -541,6 +597,57 @@ def test_schema2_reports_a_continuous_declared_stage_witness() -> None:
     assert "physical identity" in report["notice"]
 
 
+def test_schema2_rejects_short_consumed_branch_beside_a_complete_path() -> None:
+    data = field_data_with_stage_witnesses()
+    prefix = "control-post"
+    wash = _by_id(data["lots"], f"{prefix}-wash")
+    raw = _flow(prefix, "short-raw", None, wash["id"], "feed", 10)
+    short = _flow(prefix, "short-eaten", wash["id"], None, "product", 10,
+                  "human_consumption")
+    wash["input_flow_ids"].append(raw["id"])
+    wash["observed_input_load_ids"].append(raw["load_id"])
+    wash["output_flow_ids"].append(short["id"])
+    wash["observed_output_load_ids"].append(short["load_id"])
+    data["flows"].extend([raw, short])
+    service_row = next(row for row in data["service"]["rows"]
+                       if (row["group_id"], row["period"]) == ("control", "post"))
+    service_row["consumption_flow_ids"].append(short["id"])
+    service_row["consumed_service"]["value"] = 80
+    with pytest.raises(FieldFlowError, match=r"lacks a continuous declared path.*control-post-short-eaten"):
+        audit_field_flows(_as_schema2(data))
+
+
+def test_schema2_reports_each_consumed_flow_across_multiple_complete_branches() -> None:
+    data = field_data_with_stage_witnesses()
+    prefix = "control-post"
+    stages = ["branch-production", "branch-storage", "branch-transport",
+              "branch-first-transform", "branch-second-transform"]
+    roles = ["production", "storage", "transport", "transformation", "transformation"]
+    lot_ids = [f"{prefix}-{stage}" for stage in stages]
+    raw = _flow(prefix, "branch-raw", None, lot_ids[0], "feed", 10)
+    links = [_flow(prefix, f"branch-link-{index}", lot_ids[index], lot_ids[index + 1],
+                   "product", 10) for index in range(len(stages) - 1)]
+    eaten = _flow(prefix, "branch-eaten", lot_ids[-1], None, "product", 10,
+                  "human_consumption")
+    branch_flows = [raw, *links, eaten]
+    data["flows"].extend(branch_flows)
+    for index, (stage, role) in enumerate(zip(stages, roles, strict=True)):
+        lot = _lot(prefix, stage, [branch_flows[index]], [branch_flows[index + 1]])
+        lot["stage_role"] = role
+        data["lots"].append(lot)
+    service_row = next(row for row in data["service"]["rows"]
+                       if (row["group_id"], row["period"]) == ("control", "post"))
+    service_row["consumption_flow_ids"].append(eaten["id"])
+    service_row["consumed_service"]["value"] = 80
+    report = audit_field_flows(_as_schema2(data))
+    assert report["valid"] is True
+    assert report["counts"]["consumed_flows"] == 5
+    assert len(report["stage_witnesses"]) == 5
+    witnesses = {row["consumption_flow_id"]: row["lot_ids"] for row in report["stage_witnesses"]}
+    assert witnesses[eaten["id"]] == lot_ids
+    assert witnesses["control-post-finished"] != lot_ids
+
+
 def test_schema2_accepts_transport_before_storage_on_same_path() -> None:
     data = field_data_with_stage_witnesses()
     for lot in data["lots"]:
@@ -548,12 +655,11 @@ def test_schema2_accepts_transport_before_storage_on_same_path() -> None:
             lot["stage_role"] = "transport"
         elif lot["stage_role"] == "transport":
             lot["stage_role"] = "storage"
-    assert audit_field_flows(data)["scope_status"] == "declared_stage_witness_per_group_period_only"
+    assert audit_field_flows(data)["scope_status"] == "declared_stage_witness_per_consumed_flow_only"
 
 
 def test_schema2_accepts_transformation_before_storage_and_transport() -> None:
     data = field_data(with_service=False)
-    data["schema"] = 2
     data["lots"] = []
     data["flows"] = []
     stages = ["production", "first-transform", "storage", "transport", "second-transform"]
@@ -572,7 +678,7 @@ def test_schema2_accepts_transformation_before_storage_and_transport() -> None:
                 lot = _lot(prefix, stage, [path_flows[index]], [path_flows[index + 1]])
                 lot["stage_role"] = role
                 data["lots"].append(lot)
-    report = audit_field_flows(data)
+    report = audit_field_flows(_as_schema2(data))
     assert report["valid"] is True
     assert report["stage_witnesses"][0]["lot_ids"] == [f"control-post-{stage}" for stage in stages]
     assert report["criterion_3"]["status"] == "not_assessed"
@@ -602,16 +708,14 @@ def test_schema2_rejects_missing_or_invalid_stage_coverage(change: str, match: s
 
 def test_schema2_rejects_a_short_graph_even_if_all_mass_and_outcomes_balance() -> None:
     data = field_data(with_service=False)
-    data["schema"] = 2
     for lot in data["lots"]:
         lot["stage_role"] = "production" if lot["id"].endswith("-wash") else "transformation"
     with pytest.raises(FieldFlowError, match="lacks a continuous declared path"):
-        audit_field_flows(data)
+        audit_field_flows(_as_schema2(data))
 
 
 def test_schema2_cannot_join_stage_roles_on_disjoint_coproduct_branches() -> None:
     data = field_data(with_service=False)
-    data["schema"] = 2
     data["lots"] = []
     data["flows"] = []
     for group in ("control", "intervention"):
@@ -647,7 +751,7 @@ def test_schema2_cannot_join_stage_roles_on_disjoint_coproduct_branches() -> Non
                 lot["stage_role"] = role
                 data["lots"].append(lot)
     with pytest.raises(FieldFlowError, match="lacks a continuous declared path"):
-        audit_field_flows(data)
+        audit_field_flows(_as_schema2(data))
 
 
 def test_schema2_cannot_hide_a_consumed_branch_with_no_production_ancestor() -> None:
@@ -662,7 +766,7 @@ def test_schema2_cannot_hide_a_consumed_branch_with_no_production_ancestor() -> 
     data["flows"].extend([raw, eaten])
     data["lots"].append(lot)
     with pytest.raises(FieldFlowError, match="not reachable from externally fed production"):
-        audit_field_flows(data)
+        audit_field_flows(_as_schema2(data))
 
 
 def test_cli_reads_without_modifying_input_and_rejects_duplicate_json_keys(tmp_path: Path) -> None:
@@ -689,7 +793,7 @@ def test_cli_accepts_schema2_and_reports_declared_witnesses(tmp_path: Path) -> N
     assert result.returncode == 0
     report = json.loads(result.stdout)
     assert report["schema"] == 2
-    assert report["scope_status"] == "declared_stage_witness_per_group_period_only"
+    assert report["scope_status"] == "declared_stage_witness_per_consumed_flow_only"
     assert len(report["stage_witnesses"]) == 4
     assert report["criterion_3"]["status"] == "not_assessed"
     assert path.read_bytes() == original

@@ -19,18 +19,17 @@ Each lot is one observed operation: ``id``, ``group_id``, ``period``, ``stage``,
 ``source``, ``input_flow_ids``, ``output_flow_ids``,
 ``observed_input_load_ids`` and ``observed_output_load_ids``. Schema 2 also
 requires ``stage_role``: production, storage, transport, transformation or
-other. For every group-period, it requires one continuous declared path from
-an externally fed production lot to a human-consumption flow that visits
-storage, transport and at least two transformation lots. Their relative order
-is not fixed; the two transformations occur in series along the same path,
-possibly with other operations between them.
-Every declared human-consumption flow must be reachable from production.
+other. For every declared human-consumption flow, it requires one continuous
+path from an externally fed production lot that visits storage, transport and
+at least two transformation lots. Their relative order is not fixed; the two
+transformations occur in series along the same path, possibly with other
+operations between them.
 ``scope_status`` distinguishes this schema-2 witness check from schema 1's
-unchecked stage coverage; ``stage_witnesses`` lists one lot path and terminal
-consumption flow per group-period for schema 2, or is empty for schema 1.
+unchecked stage coverage; ``stage_witnesses`` lists one lot path per declared
+terminal consumption flow for schema 2, or is empty for schema 1.
 The witness is a path of linked operations: a lot with multiple inputs and
 outputs does not identify which input material became a given output. These
-declarations do not certify every branch or household. Schema 1 remains
+declarations do not certify undeclared branches or households. Schema 1 remains
 accepted without this stage coverage check. Each flow has
 ``id``, globally unique physical ``load_id``, ``group_id``, ``period``,
 ``from_lot_id`` and ``to_lot_id`` (one may be null), ``kind``, ``mass``,
@@ -41,7 +40,10 @@ Moisture leaving the measured system must be an explicit moisture flow;
 added water and ingredients must be explicit incoming flows. A terminal
 output needs ``destination: {kind, source}`` and ``outcome: {status, mass,
 source, safety: {status, source}, nutrition}``, including a second mass
-measurement. Nonhuman destinations are animal_feed, compost, fuel, landfill,
+measurement. In schema 2, destination and outcome ``source`` each require the
+terminal flow's globally unique physical ``load_id``; schema 1 keeps its
+original unbound evidence shape. Nonhuman destinations are animal_feed,
+compost, fuel, landfill,
 wastewater, evaporation and industrial_use; their outcome status is
 observed_other and nutrition is null. Human consumption needs
 observed_consumed, ``safety.status: safe`` and ``nutrition: {status: useful,
@@ -100,9 +102,9 @@ from typing import Any
 CLASSIFICATION = "field_flow_preflight_declared_only"
 NOTICE = (
     "Valid means only that the declared graph is internally consistent. Schema 2 "
-    "checks a declared stage-role witness path per group-period; schema 1 does "
-    "not check stage coverage. Neither checks full population, branch coverage "
-    "or within-lot input-output lineage. "
+    "checks a declared stage-role witness path for every human-consumption "
+    "flow; schema 1 does not check stage coverage. Neither checks full "
+    "population, undeclared branches or within-lot input-output lineage. "
     "Declared JSON only: physical identity, stage truth, source truth, calibration, safety, "
     "nutrition, independent approval, causal design and observed impact are not "
     "authenticated. No V or G is calculated; criterion 3 is not assessed."
@@ -258,7 +260,7 @@ def _unique_id(value: Any, label: str, seen: set[str]) -> str:
 
 def _validate_destination(flow: dict[str, Any], label: str, mass: tuple[Fraction, Fraction],
                           interval: tuple[datetime, datetime],
-                          flow_at: datetime) -> tuple[str | None, datetime | None]:
+                          flow_at: datetime, schema: int) -> tuple[str | None, datetime | None]:
     terminal = flow["to_lot_id"] is None
     destination = flow["destination"]
     outcome = flow["outcome"]
@@ -268,11 +270,21 @@ def _validate_destination(flow: dict[str, Any], label: str, mass: tuple[Fraction
         return None, None
     dest = _object(destination, f"{label}.destination", {"kind", "source"})
     kind = _choice(dest["kind"], f"{label}.destination.kind", NONHUMAN_DESTINATIONS | {"human_consumption"})
-    destination_at = _period_evidence(dest["source"], f"{label}.destination.source", interval)
+    if schema == 2:
+        destination_at = _load_bound_period_evidence(
+            dest["source"], f"{label}.destination.source", interval, flow["load_id"]
+        )
+    else:
+        destination_at = _period_evidence(dest["source"], f"{label}.destination.source", interval)
     observed = _object(outcome, f"{label}.outcome", {"status", "mass", "source", "safety", "nutrition"})
     status = _choice(observed["status"], f"{label}.outcome.status", {"observed_consumed", "observed_other"})
     observed_mass = _mass(observed["mass"], f"{label}.outcome.mass")
-    outcome_at = _period_evidence(observed["source"], f"{label}.outcome.source", interval)
+    if schema == 2:
+        outcome_at = _load_bound_period_evidence(
+            observed["source"], f"{label}.outcome.source", interval, flow["load_id"]
+        )
+    else:
+        outcome_at = _period_evidence(observed["source"], f"{label}.outcome.source", interval)
     if not flow_at <= destination_at <= outcome_at:
         raise FieldFlowError(f"{label} terminal chronology must be flow <= destination <= outcome")
     if abs(mass[0] - observed_mass[0]) > mass[1] + observed_mass[1]:
@@ -378,7 +390,7 @@ def _validate_service(service: Any, groups: dict[str, dict[str, Any]], periods: 
 def _stage_witness_paths(lots: dict[str, dict[str, Any]], flows: dict[str, dict[str, Any]],
                          consumed: dict[tuple[str, str], set[str]], adjacency: dict[str, set[str]],
                          group_periods: set[tuple[str, str]]) -> list[dict[str, Any]]:
-    """Find a single uninterrupted stage sequence per group-period in schema 2."""
+    """Find an uninterrupted stage sequence for each consumed flow in schema 2."""
     def advance(lot_id: str, stored: bool, transported: bool,
                 transformations: int) -> tuple[str, bool, bool, int]:
         role = lots[lot_id]["stage_role"]
@@ -427,7 +439,7 @@ def _stage_witness_paths(lots: dict[str, dict[str, Any]], flows: dict[str, dict[
         parents: dict[tuple[str, bool, bool, int], tuple[str, bool, bool, int] | None] = {
             state: None for state in start_states
         }
-        witness: dict[str, Any] | None = None
+        witnesses_for_key: dict[str, dict[str, Any]] = {}
         while candidates:
             state = candidates.popleft()
             lot_id, stored, transported, transformations = state
@@ -437,21 +449,27 @@ def _stage_witness_paths(lots: dict[str, dict[str, Any]], flows: dict[str, dict[
                 while cursor is not None:
                     path.append(cursor[0])
                     cursor = parents[cursor]
-                witness = {"group_id": key[0], "period": key[1], "lot_ids": path[::-1],
-                           "consumption_flow_id": consumed_by_lot[lot_id][0]}
-                break
+                for flow_id in consumed_by_lot[lot_id]:
+                    witnesses_for_key.setdefault(
+                        flow_id,
+                        {"group_id": key[0], "period": key[1], "lot_ids": path[::-1],
+                         "consumption_flow_id": flow_id},
+                    )
+                if len(witnesses_for_key) == len(consumed[key]):
+                    break
             for child in sorted(adjacency[lot_id]):
                 child_state = advance(child, stored, transported, transformations)
                 if child_state not in parents:
                     parents[child_state] = state
                     candidates.append(child_state)
-        if witness is None:
+        missing = consumed[key] - witnesses_for_key.keys()
+        if not witnesses_for_key or missing:
             raise FieldFlowError(
                 f"group-period {key} lacks a continuous declared path from externally fed "
                 "production to human consumption visiting storage, transport, and two "
-                "transformations in series (no fixed stage order)"
+                f"transformations in series (no fixed stage order) for flows: {sorted(missing)}"
             )
-        witnesses.append(witness)
+        witnesses.extend(witnesses_for_key[flow_id] for flow_id in sorted(witnesses_for_key))
     return witnesses
 
 
@@ -587,7 +605,7 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
         mass = _mass(item["mass"], f"{label}.mass")
         flow_at = _period_evidence(item["source"], f"{label}.source", period_times[period])
         destination_kind, outcome_at = _validate_destination(item, label, mass,
-                                                             period_times[period], flow_at)
+                                                             period_times[period], flow_at, schema)
         if target_lot is None:
             terminals[key] += 1
         if destination_kind == "human_consumption":
@@ -683,7 +701,7 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
                    "terminal_flows": sum(terminals.values()),
                    "consumed_flows": sum(map(len, consumed.values())), "burden_rows": len(burden_keys)},
         "balances": sorted(balances, key=lambda item: item["lot_id"]),
-        "scope_status": ("declared_stage_witness_per_group_period_only" if schema == 2
+        "scope_status": ("declared_stage_witness_per_consumed_flow_only" if schema == 2
                          else "declared_graph_only_full_chain_not_checked"),
         "stage_witnesses": stage_witnesses,
         "service_status": service_status,
