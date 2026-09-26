@@ -1,0 +1,548 @@
+{
+  "events": [
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "ce7a98163bcf7c5a4c781fb03ff9ae7922749601d0c5215cadaefbbf50dda787",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "p_food",
+        "kind": "problem",
+        "text": "Conservar servicio alimentario inocuo y útil desde producción hasta consumo sin desplazar perjuicios entre actores; la magnitud actual en esta cadena es desconocida.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "1df6686281fdab91efdbe0aca04932e3f7db8175f4fcfa6529c3b51c5c02e2b4",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_food": 1
+        },
+        "id": "a_chain",
+        "kind": "actor",
+        "text": "Productores, trabajadores, agregadores, transportistas, plantas, vendedores, consumidores y gestores de residuos pueden ganar o perder de modo distinto.",
+        "version": 1
+      },
+      "prev_hash": "ce7a98163bcf7c5a4c781fb03ff9ae7922749601d0c5215cadaefbbf50dda787",
+      "seq": 2
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "4b0cf256daa5e19c276e62720dc859561c41d77eec5e4d9ae1998fd855485707",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_food": 1
+        },
+        "id": "b_scope",
+        "kind": "boundary",
+        "text": "FAO observó en 2016 dos circuitos separados: mango fresco de Vizianagaram y mango para pulpa de Chittoor. No siguió un lote único hasta consumo; los tramos domésticos quedan sin medir.",
+        "version": 1
+      },
+      "prev_hash": "1df6686281fdab91efdbe0aca04932e3f7db8175f4fcfa6529c3b51c5c02e2b4",
+      "seq": 3
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "5d01ba329093b8f3b8222d715d93c3e56ca84c34f270672f52d3e1792b0b300d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_chain": 1,
+          "p_food": 1
+        },
+        "id": "c_value",
+        "kind": "concept",
+        "text": "Valor no equivale a precio ni masa: incluye servicio comestible e inocuo, nutrientes, ingresos netos por actor, recursos y efectos ambientales.",
+        "version": 1
+      },
+      "prev_hash": "4b0cf256daa5e19c276e62720dc859561c41d77eec5e4d9ae1998fd855485707",
+      "seq": 4
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "78916388e19ff6cb4720bac2938471373ddea7c353efca225914301d3b099dce",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "b_scope": 1
+        },
+        "id": "s_history",
+        "kind": "assumption",
+        "text": "Los datos publicados de 2016 sirven para formular hipótesis y detectar errores, no como línea base actual de 2026.",
+        "version": 1
+      },
+      "prev_hash": "5d01ba329093b8f3b8222d715d93c3e56ca84c34f270672f52d3e1792b0b300d",
+      "seq": 5
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "b1c4c4691987a1ab8240fb6632f7b997733d3361cfb6bc64f61bc335209b4ce5",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_food": 1
+        },
+        "id": "f_mass",
+        "kind": "frame_option",
+        "text": "Formulación rival A: minimizar toneladas descartadas, con riesgo de confundir transformación y pérdida.",
+        "version": 1
+      },
+      "prev_hash": "78916388e19ff6cb4720bac2938471373ddea7c353efca225914301d3b099dce",
+      "seq": 6
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "b0e37a96f87b56eba735d1a4b5979a1bd758a0167459931742a5299f72917c4b",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_chain": 1,
+          "p_food": 1
+        },
+        "id": "f_service",
+        "kind": "frame_option",
+        "text": "Formulación rival B: conservar servicio alimentario inocuo y beneficios distribuidos, con medición de flujos y costes.",
+        "version": 1
+      },
+      "prev_hash": "b1c4c4691987a1ab8240fb6632f7b997733d3361cfb6bc64f61bc335209b4ce5",
+      "seq": 7
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "6b40737a2e71bf8fe5eba998f05a931fd5619a16bb1a57dd9ae66f1592806f19",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_chain": 1,
+          "p_food": 1
+        },
+        "id": "n_distribution",
+        "kind": "norm",
+        "text": "Compromiso propuesto, pendiente de aprobación humana: no aumentar riesgo de inocuidad ni trasladar cargas desproporcionadas a productores, trabajadores o consumidores para reducir merma agregada.",
+        "version": 1
+      },
+      "prev_hash": "b0e37a96f87b56eba735d1a4b5979a1bd758a0167459931742a5299f72917c4b",
+      "seq": 8
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "fdaaf3c61477f5e06c17e7462de064307c632e6346b5a6a136ecfd55e8c4c21e",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "b_scope": 1,
+          "p_food": 1
+        },
+        "id": "q_transport",
+        "kind": "question",
+        "text": "¿Qué parte de la pérdida de calidad y servicio en fruta fresca se relaciona con el embalaje y transporte, frente a daño previo y otros factores?",
+        "version": 1
+      },
+      "prev_hash": "6b40737a2e71bf8fe5eba998f05a931fd5619a16bb1a57dd9ae66f1592806f19",
+      "seq": 9
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "55096473211eae5063cca168422a40900735c72d35ca12e9a758139ace661ee8",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n_distribution": 1,
+          "q_transport": 1
+        },
+        "id": "h_crates",
+        "kind": "hypothesis",
+        "text": "Un protocolo de manejo y embalaje retornable podría conservar calidad durante transporte sin desplazar costes o riesgos inaceptables.",
+        "version": 1
+      },
+      "prev_hash": "fdaaf3c61477f5e06c17e7462de064307c632e6346b5a6a136ecfd55e8c4c21e",
+      "seq": 10
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "9c6cb79a7dcf3ba509758d57da88fe0cb5d739604a18d7971e875bfb240ea45e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "control operativo contemporáneo con asignación por grupos si es factible",
+          "method": "medición prospectiva por lote y evaluación ciega de calidad cuando sea posible",
+          "population": "lotes actuales por origen-ruta-destino, pendiente de reclutamiento",
+          "uncertainty": "confusión por madurez, clima, selección y pérdidas domésticas"
+        },
+        "deps": {
+          "h_crates": 1,
+          "q_transport": 1
+        },
+        "id": "pr_lots",
+        "kind": "protocol",
+        "text": "Diseño prospectivo de lotes comparables con registro de calidad inicial, destino, costes, inocuidad y seguimiento hasta consumo; aún requiere sitio y autorización.",
+        "version": 1
+      },
+      "prev_hash": "55096473211eae5063cca168422a40900735c72d35ca12e9a758139ace661ee8",
+      "seq": 11
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "4555406ffb62afccf89ecde16890bc46a9eb2975505d77cce1854283d9726392",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "V: servicio alimentario consumido / máximo factible aprobado",
+          "unit": "fracción [0,1]"
+        },
+        "deps": {
+          "n_distribution": 1,
+          "p_food": 1
+        },
+        "id": "i_safe_service",
+        "kind": "indicator",
+        "text": "Fracción de servicio alimentario inocuo efectivamente consumido, con desgloses por actor y flujos laterales; equivalencias aún pendientes de aprobación.",
+        "version": 1
+      },
+      "prev_hash": "9c6cb79a7dcf3ba509758d57da88fe0cb5d739604a18d7971e875bfb240ea45e",
+      "seq": 12
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "9dfdcd75263dee79dbcae1603d4e76c03494f6bda5166fb81162f2ca3f1e6bf1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2018",
+          "locator": "tabla 16B, página impresa 32",
+          "metric_key": "perdida_cantidad",
+          "origin": "published",
+          "scope": "fresco_transporte_estudio_2016",
+          "source": "https://openknowledge.fao.org/3/BU688EN/bu688en.pdf",
+          "unit": "porcentaje",
+          "value": 15
+        },
+        "deps": {
+          "pr_lots": 1
+        },
+        "id": "e_fresh_transport",
+        "kind": "evidence",
+        "text": "FAO tabla 16B informa 15% de pérdida cuantitativa en transporte distante de fruta fresca y 20% de calidad afectada; son indicadores distintos de cargas del estudio.",
+        "version": 1
+      },
+      "prev_hash": "4555406ffb62afccf89ecde16890bc46a9eb2975505d77cce1854283d9726392",
+      "seq": 13
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "e51a8425347e2014d2c17ba82611ce62c3464439f99e4b859257af9b28e33934",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2018",
+          "locator": "tabla 16A, página impresa 31",
+          "metric_key": "perdida_cantidad",
+          "origin": "published",
+          "scope": "pulpa_maduracion_tradicional_2016",
+          "source": "https://openknowledge.fao.org/3/BU688EN/bu688en.pdf",
+          "unit": "porcentaje",
+          "value": 19
+        },
+        "deps": {
+          "pr_lots": 1
+        },
+        "id": "e_pulp_traditional",
+        "kind": "evidence",
+        "text": "FAO tabla 16A informa 19% de pérdida cuantitativa para maduración tradicional de mango destinado a pulpa.",
+        "version": 1
+      },
+      "prev_hash": "9dfdcd75263dee79dbcae1603d4e76c03494f6bda5166fb81162f2ca3f1e6bf1",
+      "seq": 14
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "1de00b8a1d25f71ae6b1f4dc160aee73e4e85f654d3cdcdc66b23679d19634e3",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2018",
+          "locator": "tabla 16A, página impresa 31",
+          "metric_key": "perdida_cantidad",
+          "origin": "published",
+          "scope": "pulpa_maduracion_camara_2016",
+          "source": "https://openknowledge.fao.org/3/BU688EN/bu688en.pdf",
+          "unit": "rango porcentaje",
+          "value": "3-6"
+        },
+        "deps": {
+          "pr_lots": 1
+        },
+        "id": "e_pulp_chamber",
+        "kind": "evidence",
+        "text": "FAO tabla 16A informa 3–6% de pérdida cuantitativa en maduración en cámara, alternativa a la tradicional, no etapa sucesiva ni efecto causal identificado.",
+        "version": 1
+      },
+      "prev_hash": "e51a8425347e2014d2c17ba82611ce62c3464439f99e4b859257af9b28e33934",
+      "seq": 15
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "6dc431b695d253097a35eb49625f6a0d07219b13dc711f3001b44929de77da86",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "calculation": {
+            "operands": [
+              183828.4,
+              0.15
+            ],
+            "operator": "product",
+            "tolerance": 0.1
+          },
+          "date": "2018",
+          "locator": "tabla 18, página impresa 40",
+          "metric_key": "perdida_proyectada",
+          "origin": "published",
+          "scope": "tabla18_fresco_vizianagaram",
+          "source": "https://openknowledge.fao.org/3/BU688EN/bu688en.pdf",
+          "unit": "toneladas/año",
+          "value": 79925.4
+        },
+        "deps": {
+          "pr_lots": 1
+        },
+        "id": "e_table18",
+        "kind": "evidence",
+        "text": "Control negativo: FAO tabla 18 declara 79 925,4 t/año como 15% de 183 828,4 t/año, operación inconsistente.",
+        "version": 1
+      },
+      "prev_hash": "1de00b8a1d25f71ae6b1f4dc160aee73e4e85f654d3cdcdc66b23679d19634e3",
+      "seq": 16
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "9157a5c43871507c017d39ed1ac69f12e594a4c1c423ae26f94f5b02d84c44b3",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_pulp_chamber": 1,
+          "e_pulp_traditional": 1,
+          "e_table18": 1,
+          "h_crates": 1
+        },
+        "id": "inf_not_causal",
+        "kind": "inference",
+        "text": "La diferencia entre cámaras y maduración tradicional no estima causalmente el efecto de instalar cámaras; la cifra de tabla 18 no puede sustentar rentabilidad sin corregir denominador.",
+        "version": 1
+      },
+      "prev_hash": "6dc431b695d253097a35eb49625f6a0d07219b13dc711f3001b44929de77da86",
+      "seq": 17
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "eb699536c54ac5ceebb8d1f6a6403f9a175efc963a315e6b02a5a20236acf43c",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_fresh_transport": 1,
+          "e_table18": 1,
+          "inf_not_causal": 1
+        },
+        "id": "syn_limits",
+        "kind": "synthesis",
+        "text": "La evidencia publicada orienta el diseño, pero no mide consumo ni beneficio de una intervención propia; la aritmética de tabla 18 impide aceptar su proyección.",
+        "version": 1
+      },
+      "prev_hash": "9157a5c43871507c017d39ed1ac69f12e594a4c1c423ae26f94f5b02d84c44b3",
+      "seq": 18
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "645a0efc897b99aadf2b6a31aa65739657c3aff9486350276af0e3daea2fed5d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "syn_limits": 1
+        },
+        "id": "unc_field",
+        "kind": "uncertainty",
+        "text": "Desconocemos pérdidas actuales, variabilidad por lote, resultado a consumo, costes netos y efectos distributivos.",
+        "version": 1
+      },
+      "prev_hash": "eb699536c54ac5ceebb8d1f6a6403f9a175efc963a315e6b02a5a20236acf43c",
+      "seq": 19
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "17044d28a93ea8fdc03ed8a8246e854fbb3f640473272b1e3a009ca28493fcbd",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n_distribution": 1,
+          "syn_limits": 1
+        },
+        "id": "o_crates",
+        "kind": "option",
+        "text": "Piloto potencial de embalaje retornable y manejo por lote en cadena fresca; medir retorno de envases, coste e inocuidad.",
+        "version": 1
+      },
+      "prev_hash": "645a0efc897b99aadf2b6a31aa65739657c3aff9486350276af0e3daea2fed5d",
+      "seq": 20
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "f3b4a24a16f92fe87d2d75e32273d290d494d8bec63ebfdd7f8708b0863c6b04",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n_distribution": 1,
+          "syn_limits": 1
+        },
+        "id": "o_handling",
+        "kind": "option",
+        "text": "Piloto alternativo de formación y control de cosecha/clasificación sin nuevo embalaje; medir daño inicial y costes laborales.",
+        "version": 1
+      },
+      "prev_hash": "17044d28a93ea8fdc03ed8a8246e854fbb3f640473272b1e3a009ca28493fcbd",
+      "seq": 21
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "1066665c16cedfd5ff5c772cecffb7d397cb4a0462dc1e8dbdad46148a692f4a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_fresh_transport": 1,
+          "o_crates": 1,
+          "o_handling": 1
+        },
+        "id": "cmp_options",
+        "kind": "comparison",
+        "text": "Las opciones tienen mecanismos y costes distintos; no hay datos actuales suficientes para elegir por eficacia, equidad o coste.",
+        "version": 1
+      },
+      "prev_hash": "f3b4a24a16f92fe87d2d75e32273d290d494d8bec63ebfdd7f8708b0863c6b04",
+      "seq": 22
+    },
+    {
+      "actor": "agent:analyst",
+      "at": "2026-09-26T10:15:15+00:00",
+      "hash": "01337a06a13f20808980c21f9e221fa99cffa083c4fc9e407dd1f69088043416",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n_distribution": 1,
+          "o_crates": 1
+        },
+        "id": "r_safety",
+        "kind": "risk",
+        "text": "Reducir descarte puede desplazar fruta insegura a consumo; controles FSSAI y análisis de lote siguen pendientes.",
+        "version": 1
+      },
+      "prev_hash": "1066665c16cedfd5ff5c772cecffb7d397cb4a0462dc1e8dbdad46148a692f4a",
+      "seq": 23
+    },
+    {
+      "actor": "agent:case_reviewer",
+      "at": "2026-09-26T10:17:16+00:00",
+      "hash": "4936e17b8b94c62a9d6c84959ea8da997849068989ed395c5dea94f6cd58f7a8",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "reason": "El encuadre distingue fresco de Vizianagaram y pulpa de Chittoor conforme al estudio FAO de 2016; incluye actores y perjuicios posibles, reconoce consumo no medido y magnitud actual desconocida, sin aprobar el compromiso normativo.",
+        "snapshot": "16f4ca83f3622a9c224c24e2bb84443745fa756d19330a35920bc29277a7a523",
+        "verdict": "accept"
+      },
+      "prev_hash": "01337a06a13f20808980c21f9e221fa99cffa083c4fc9e407dd1f69088043416",
+      "seq": 24
+    },
+    {
+      "actor": "agent:case_reviewer",
+      "at": "2026-09-26T10:17:16+00:00",
+      "hash": "9cca92032b7eaf94d52bf96e8151242cc26e021b0205e52845ba3ff727de4c70",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 24,
+        "snapshot": "16f4ca83f3622a9c224c24e2bb84443745fa756d19330a35920bc29277a7a523"
+      },
+      "prev_hash": "4936e17b8b94c62a9d6c84959ea8da997849068989ed395c5dea94f6cd58f7a8",
+      "seq": 25
+    },
+    {
+      "actor": "agent:case_reviewer",
+      "at": "2026-09-26T10:35:55+00:00",
+      "hash": "2fb707e830566a970f574040deb3f3d6818602be466d786a2a025fc48c1de8ed",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "reason": "Revalidación del snapshot actual: el problema conserva servicio inocuo sin afirmar magnitud presente; actores y frontera siguen sustentados por los dos circuitos distintos observados por FAO en 2016 y declaran consumo doméstico no medido. La revisión no aprueba normas.",
+        "snapshot": "f5ddbd208ad2d165276a78fbfa4ad2579cc95b8fb8a6c35951daa5115343069d",
+        "verdict": "accept"
+      },
+      "prev_hash": "9cca92032b7eaf94d52bf96e8151242cc26e021b0205e52845ba3ff727de4c70",
+      "seq": 26
+    },
+    {
+      "actor": "agent:case_reviewer",
+      "at": "2026-09-26T10:35:55+00:00",
+      "hash": "5a0bd44b7276928826090a57f7fad5c2994792a29f1df3fc8603db30331564e7",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 26,
+        "snapshot": "f5ddbd208ad2d165276a78fbfa4ad2579cc95b8fb8a6c35951daa5115343069d"
+      },
+      "prev_hash": "2fb707e830566a970f574040deb3f3d6818602be466d786a2a025fc48c1de8ed",
+      "seq": 27
+    }
+  ],
+  "project": {
+    "created_at": "2026-09-26T10:15:15+00:00",
+    "created_by": "agent:analyst",
+    "domain": "cadena alimentaria",
+    "title": "Mango de Andhra Pradesh: ensayo documental"
+  },
+  "schema": 1
+}
