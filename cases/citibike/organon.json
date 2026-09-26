@@ -1,0 +1,714 @@
+{
+  "events": [
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "b46250d587d498a3410f92d36823824a556861cf4e2b0688dbeac64794e714ba",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "p_access",
+        "kind": "problem",
+        "text": "Determinar cómo estudiar y reducir episodios en que una persona no encuentra bicicleta o anclaje utilizable en Citi Bike, sin confundir tamaño de flota, estaciones abiertas, trayectos completados y demanda frustrada; el impacto real aún no está medido.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "04924f95a8521ff7c84f575c429ce10bcd1af1a6dace2c9acb4f2fb8db5c1adf",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_access": 1
+        },
+        "id": "a_riders",
+        "kind": "actor",
+        "text": "Personas que inician o terminan trayectos, incluidas quienes disponen de menos alternativas de transporte y quienes requieren una bicicleta o anclaje accesible; sus viajes no realizados no aparecen necesariamente en el historial de viajes.",
+        "version": 1
+      },
+      "prev_hash": "b46250d587d498a3410f92d36823824a556861cf4e2b0688dbeac64794e714ba",
+      "seq": 2
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "6f423f450c8a3d84ba8949eb7cabb5e676946401fbcbbb985546b0e7be7625ec",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_access": 1
+        },
+        "id": "a_operations",
+        "kind": "actor",
+        "text": "Operador, personal de redistribución y mantenimiento, administración de transporte, peatones y vecindario pueden recibir beneficios, costes o riesgos distintos de una intervención.",
+        "version": 1
+      },
+      "prev_hash": "04924f95a8521ff7c84f575c429ce10bcd1af1a6dace2c9acb4f2fb8db5c1adf",
+      "seq": 3
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "53e7e5a8f29df093f2a7e8290671818612eca539c02a0d59f9349f0191fc125f",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_access": 1
+        },
+        "id": "b_june",
+        "kind": "boundary",
+        "text": "Caso documental: informe mensual del sistema Citi Bike de junio de 2026, publicado para NYC DOT; sus totales son de red, no de una estación. No hay archivo GBFS histórico, registros de intentos fallidos ni intervención propia en este expediente.",
+        "version": 1
+      },
+      "prev_hash": "6f423f450c8a3d84ba8949eb7cabb5e676946401fbcbbb985546b0e7be7625ec",
+      "seq": 4
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "cfe11402c41d75037048c69be1094acc8a5c259ecf1d543ab2ce947affbb3c1e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-06",
+          "locator": "página impresa 3, Ridership",
+          "metric_key": "completed_trips",
+          "origin": "published",
+          "scope": "citibike_network_june_2026",
+          "sha256_source": "9c09c95c44cf8311c4003e4c1e5eb100e2135164c5a6c1de48a2782538a6ad2e",
+          "source": "https://mot-marketing-whitelabel-prod.s3.us-east-1.amazonaws.com/nyc/June-2026-Citi-Bike-Monthly-Report.pdf",
+          "unit": "trips",
+          "value": 5494600
+        },
+        "deps": {
+          "b_june": 1
+        },
+        "id": "e_rides",
+        "kind": "evidence",
+        "text": "El operador informa 5.494.600 trayectos completados en junio de 2026; esta cifra no incluye intentos que no iniciaron un viaje.",
+        "version": 1
+      },
+      "prev_hash": "53e7e5a8f29df093f2a7e8290671818612eca539c02a0d59f9349f0191fc125f",
+      "seq": 5
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "8a986b3a63bfb472e3aed0e3f430e62b504a664d1ad1a0c584ad912a876debc4",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-09-26",
+          "locator": "Citi Bike Trip Histories, párrafo de procesamiento de datos",
+          "origin": "published",
+          "source": "https://citibikenyc.com/system-data"
+        },
+        "deps": {
+          "b_june": 1
+        },
+        "id": "e_trip_filter",
+        "kind": "evidence",
+        "text": "Los ficheros históricos publicados excluyen viajes de personal, viajes de estaciones de prueba y viajes menores de 60 segundos; tampoco registran intentos de inicio o devolución que nunca se convirtieron en viaje.",
+        "version": 1
+      },
+      "prev_hash": "cfe11402c41d75037048c69be1094acc8a5c259ecf1d543ab2ce947affbb3c1e",
+      "seq": 6
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "bccf1d1bbbd03ab224c263ffdacdc64470221d39badde18eafceaa68986a5775",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-06",
+          "locator": "página impresa 3, Introduction; página 4, Station Maintenance Operations",
+          "metric_key": "active_stations_end_month",
+          "origin": "published",
+          "scope": "citibike_network_june_2026",
+          "sha256_source": "9c09c95c44cf8311c4003e4c1e5eb100e2135164c5a6c1de48a2782538a6ad2e",
+          "source": "https://mot-marketing-whitelabel-prod.s3.us-east-1.amazonaws.com/nyc/June-2026-Citi-Bike-Monthly-Report.pdf",
+          "unit": "stations",
+          "value": 2400
+        },
+        "deps": {
+          "b_june": 1
+        },
+        "id": "e_stations",
+        "kind": "evidence",
+        "text": "El informe declara 2.400 estaciones activas al cierre de junio de 2026; no es un recuento de bicicletas o anclajes disponibles en cada instante.",
+        "version": 1
+      },
+      "prev_hash": "8a986b3a63bfb472e3aed0e3f430e62b504a664d1ad1a0c584ad912a876debc4",
+      "seq": 7
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "7ea5fde97bc7efdf8ce350e9fdc88a45e3c5a34994ab712376c3d71fb65e4040",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-06",
+          "locator": "página impresa 3, Rebalancing Operations",
+          "metric_key": "rebalanced_bicycles_reported",
+          "origin": "published",
+          "scope": "citibike_network_june_2026",
+          "sha256_source": "9c09c95c44cf8311c4003e4c1e5eb100e2135164c5a6c1de48a2782538a6ad2e",
+          "source": "https://mot-marketing-whitelabel-prod.s3.us-east-1.amazonaws.com/nyc/June-2026-Citi-Bike-Monthly-Report.pdf",
+          "unit": "bicycles",
+          "value": 101757
+        },
+        "deps": {
+          "b_june": 1
+        },
+        "id": "e_rebalance",
+        "kind": "evidence",
+        "text": "El informe declara 101.757 bicicletas redistribuidas en junio, mediante camiones, furgonetas, servicio de valet e incentivos; no separa el efecto causal de cada mecanismo.",
+        "version": 1
+      },
+      "prev_hash": "bccf1d1bbbd03ab224c263ffdacdc64470221d39badde18eafceaa68986a5775",
+      "seq": 8
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "d4f00c747e440170fdf7a132cfc259d54e6f659f0e9d6c84ea034863f5c38092",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-06",
+          "locator": "página impresa 7, SLA 9 Bicycle Availability",
+          "metric_key": "fleet_vs_required_level",
+          "origin": "published",
+          "scope": "citibike_network_june_2026",
+          "sha256_source": "9c09c95c44cf8311c4003e4c1e5eb100e2135164c5a6c1de48a2782538a6ad2e",
+          "source": "https://mot-marketing-whitelabel-prod.s3.us-east-1.amazonaws.com/nyc/June-2026-Citi-Bike-Monthly-Report.pdf",
+          "unit": "percent_of_required_fleet",
+          "value": 108.97
+        },
+        "deps": {
+          "b_june": 1
+        },
+        "id": "e_sla_fleet",
+        "kind": "evidence",
+        "text": "El SLA 9 informa 108,97 % del nivel de flota requerido, definido como promedio mensual de una medición diaria entre las 11:00 y las 15:00; no mide disponibilidad por estación.",
+        "version": 1
+      },
+      "prev_hash": "7ea5fde97bc7efdf8ce350e9fdc88a45e3c5a34994ab712376c3d71fb65e4040",
+      "seq": 9
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "00f1a3651db6feb872519eaeb8e757bdc38587d251cd62c353d19765b7d321a1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-06",
+          "locator": "página impresa 4, Station Maintenance Operations",
+          "metric_key": "station_uptime_reported",
+          "origin": "published",
+          "scope": "citibike_network_june_2026",
+          "sha256_source": "9c09c95c44cf8311c4003e4c1e5eb100e2135164c5a6c1de48a2782538a6ad2e",
+          "source": "https://mot-marketing-whitelabel-prod.s3.us-east-1.amazonaws.com/nyc/June-2026-Citi-Bike-Monthly-Report.pdf",
+          "unit": "percent",
+          "value": 99.79
+        },
+        "deps": {
+          "b_june": 1
+        },
+        "id": "e_uptime",
+        "kind": "evidence",
+        "text": "El informe declara 99,79 % de uptime de estaciones en junio; no aporta aquí una serie de minutos con bicicleta o anclaje disponible en cada estación.",
+        "version": 1
+      },
+      "prev_hash": "d4f00c747e440170fdf7a132cfc259d54e6f659f0e9d6c84ea034863f5c38092",
+      "seq": 10
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "099cfbdb6d09bbdc453ae9aa2373b8c00b4b35edd3798a8eeaef969706e20c26",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-09-26",
+          "locator": "Real-Time Data, enlace Get the GBFS feed here; lista de recursos del sitio",
+          "origin": "published",
+          "source": "https://citibikenyc.com/system-data"
+        },
+        "deps": {
+          "b_june": 1
+        },
+        "id": "e_gbfs",
+        "kind": "evidence",
+        "text": "La página oficial de Citi Bike enlaza su feed GBFS de estado en tiempo real; no ofrece allí un archivo histórico de estados por estación para junio de 2026.",
+        "version": 1
+      },
+      "prev_hash": "00f1a3651db6feb872519eaeb8e757bdc38587d251cd62c353d19765b7d321a1",
+      "seq": 11
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "545d0752901cc5fcdebaad3149fba69fdc7125faf5bdac662074662f925ea108",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2022-04-05",
+          "locator": "Introduction; Files; station_status.json",
+          "origin": "published",
+          "source": "https://github.com/MobilityData/gbfs/blob/v2.3/gbfs.md"
+        },
+        "deps": {
+          "b_june": 1
+        },
+        "id": "e_gbfs_spec",
+        "kind": "evidence",
+        "text": "GBFS v2.3 define station_status con bicicletas y anclajes disponibles y declara que su propósito es el estado actual, no datos históricos. Un feed consultado hoy no reconstruye junio de 2026.",
+        "version": 1
+      },
+      "prev_hash": "099cfbdb6d09bbdc453ae9aa2373b8c00b4b35edd3798a8eeaef969706e20c26",
+      "seq": 12
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "11698ea7a637bfc4c1ddb59ba5724d394b884bbf55456fb51154d9e1bbe8c89f",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_riders": 1,
+          "e_sla_fleet": 1,
+          "p_access": 1
+        },
+        "id": "c_access",
+        "kind": "concept",
+        "text": "Acceso al servicio exige distinguir disponibilidad para iniciar, disponibilidad para devolver y uso efectivo; 100 % de programa operativo o abundancia de flota no equivalen a acceso individual.",
+        "version": 1
+      },
+      "prev_hash": "545d0752901cc5fcdebaad3149fba69fdc7125faf5bdac662074662f925ea108",
+      "seq": 13
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "20688b7a2da70ffe8dd7017c2212f31628163fd0a35ca4d1c720a6756b962827",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "b_june": 1
+        },
+        "id": "s_proxy",
+        "kind": "assumption",
+        "text": "Supuesto provisional por comprobar: el SLA mensual de tamaño de flota podría servir como proxy de acceso a bicicletas en estaciones durante junio de 2026. No usarlo como línea base hasta verificarlo.",
+        "version": 1
+      },
+      "prev_hash": "11698ea7a637bfc4c1ddb59ba5724d394b884bbf55456fb51154d9e1bbe8c89f",
+      "seq": 14
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "8c237f69e31f68c9bc89987e15ceb1f8eceac5ae7624217c0dd9803515dea00b",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_sla_fleet": 1,
+          "p_access": 1
+        },
+        "id": "f_fleet",
+        "kind": "frame_option",
+        "text": "Encuadre rival A: aumentar el tamaño agregado de la flota para mejorar la cifra de SLA, aun si bicicletas y anclajes se concentran en lugares inconvenientes.",
+        "version": 1
+      },
+      "prev_hash": "20688b7a2da70ffe8dd7017c2212f31628163fd0a35ca4d1c720a6756b962827",
+      "seq": 15
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "c2bb0d0cfe1e831c3746d8940addfc891ba5e7c89adc8ed531acedaa1d616ee4",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_operations": 1,
+          "a_riders": 1,
+          "p_access": 1
+        },
+        "id": "f_journey",
+        "kind": "frame_option",
+        "text": "Encuadre rival B: reducir fallos de inicio y devolución por estación y franja horaria, evaluando accesibilidad, carga laboral y costes.",
+        "version": 1
+      },
+      "prev_hash": "8c237f69e31f68c9bc89987e15ceb1f8eceac5ae7624217c0dd9803515dea00b",
+      "seq": 16
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "b267591053086fc99456bfbdf92036735b76343cf824402497170170d2f4c83b",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_operations": 1,
+          "a_riders": 1,
+          "p_access": 1
+        },
+        "id": "n_fair_access",
+        "kind": "norm",
+        "text": "Compromiso propuesto y pendiente de aprobación humana: mejorar acceso sin trasladar sistemáticamente indisponibilidad a barrios con menos alternativas ni añadir riesgos laborales o barreras para devolver bicicletas.",
+        "version": 1
+      },
+      "prev_hash": "c2bb0d0cfe1e831c3746d8940addfc891ba5e7c89adc8ed531acedaa1d616ee4",
+      "seq": 17
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "42ee5bddadd59d1bc8464c97dcc61b9d2ccf5a7103d71ab8751eb6ffa743de97",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "b_june": 1,
+          "p_access": 1,
+          "s_proxy": 1
+        },
+        "id": "q_outage",
+        "kind": "question",
+        "text": "En un panel prospectivo de estaciones y franjas prefijadas, ¿qué proporción de estación-minutos carece de bicicleta utilizable o anclaje libre, y cómo difiere según zona y demanda observada?",
+        "version": 1
+      },
+      "prev_hash": "b267591053086fc99456bfbdf92036735b76343cf824402497170170d2f4c83b",
+      "seq": 18
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "4d11d022b185d3d9e2425e159c20d1897517bd0c3c03a9b3af12b96c5a5f90da",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n_fair_access": 1,
+          "q_outage": 1,
+          "s_proxy": 1
+        },
+        "id": "h_targeted",
+        "kind": "hypothesis",
+        "text": "Una redistribución focalizada podría reducir minutos de indisponibilidad frente a informar alternativas a usuarios, sin aumentar daños ni costes inaceptables; requiere evaluación comparativa.",
+        "version": 1
+      },
+      "prev_hash": "42ee5bddadd59d1bc8464c97dcc61b9d2ccf5a7103d71ab8751eb6ffa743de97",
+      "seq": 19
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "f49c39d34e73ec5df08b1df49d0b965a2db8d994b4320c1771410d416c283030",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "estaciones o franjas comparables con asignación prospectiva si el operador participa; sin comparador definido todavía",
+          "method": "captura autorizada del GBFS v2.3 con sello de tiempo y cobertura; clasificar estación operativa, bicicletas y anclajes",
+          "population": "estaciones y franjas de Citi Bike seleccionadas previamente, aún sin muestra fijada",
+          "uncertainty": "faltantes del feed, cambios de red, demanda latente, clima, eventos y desplazamiento entre estaciones"
+        },
+        "deps": {
+          "e_gbfs": 1,
+          "e_gbfs_spec": 1,
+          "h_targeted": 1,
+          "q_outage": 1
+        },
+        "id": "pr_panel",
+        "kind": "protocol",
+        "text": "Diseño futuro: archivar station_status a intervalos prefijados, validar frescura y cambios de estación, seleccionar estaciones antes del análisis y comparar periodos o grupos con control de tendencias; no se ha ejecutado.",
+        "version": 1
+      },
+      "prev_hash": "4d11d022b185d3d9e2425e159c20d1897517bd0c3c03a9b3af12b96c5a5f90da",
+      "seq": 20
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "17aec5c601e2026a7fc9fc2946f06f4fdce39b229830e898506b152f0ba37de3",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "station_minutes_usable_fraction_by_action",
+          "unit": "fraction [0,1]"
+        },
+        "deps": {
+          "e_gbfs": 1,
+          "e_gbfs_spec": 1,
+          "e_sla_fleet": 1,
+          "n_fair_access": 1,
+          "p_access": 1
+        },
+        "id": "i_access_minutes",
+        "kind": "indicator",
+        "text": "Indicadores candidatos separados: fracción de estación-minutos con servicio de alquiler habilitado y al menos una bicicleta utilizable; fracción con devolución habilitada y al menos un anclaje libre. Registrar cobertura y desagregación territorial.",
+        "version": 1
+      },
+      "prev_hash": "f49c39d34e73ec5df08b1df49d0b965a2db8d994b4320c1771410d416c283030",
+      "seq": 21
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "5f470ce4854d4bc24f120e46bfe9e5b121a9018bbffe28b5f554174781992380",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_gbfs_spec": 1,
+          "e_sla_fleet": 1,
+          "e_trip_filter": 1,
+          "e_uptime": 1,
+          "s_proxy": 1
+        },
+        "id": "inf_sla_limit",
+        "kind": "inference",
+        "text": "El 108,97 % del SLA 9 y 99,79 % de uptime no identifican minutos de indisponibilidad por estación ni viajes frustrados: cambian la unidad y el denominador. El supuesto proxy requiere corrección.",
+        "version": 1
+      },
+      "prev_hash": "17aec5c601e2026a7fc9fc2946f06f4fdce39b229830e898506b152f0ba37de3",
+      "seq": 22
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "4751c85678b9ad5b83781354d3761fdefe06dd88e74dabf3418ffc57aff356da",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_rebalance": 1,
+          "e_rides": 1,
+          "e_stations": 1,
+          "inf_sla_limit": 1
+        },
+        "id": "syn_gap",
+        "kind": "synthesis",
+        "text": "Hay operación y redistribución publicadas, pero el expediente no observa una serie histórica por estación ni demanda frustrada; no puede atribuir un efecto de redistribución ni elegir una intervención por eficacia.",
+        "version": 1
+      },
+      "prev_hash": "5f470ce4854d4bc24f120e46bfe9e5b121a9018bbffe28b5f554174781992380",
+      "seq": 23
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "876c04970a9a675c1e3ab6c86f3222cdb952d930f01d4d70e5b06a6475f02b08",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "syn_gap": 1
+        },
+        "id": "unc_gap",
+        "kind": "uncertainty",
+        "text": "Desconocemos duración y localización de estaciones vacías/llenas, coberturas de GBFS en junio, intentos fallidos, costes marginales, desplazamiento de flota y efectos por grupo.",
+        "version": 1
+      },
+      "prev_hash": "4751c85678b9ad5b83781354d3761fdefe06dd88e74dabf3418ffc57aff356da",
+      "seq": 24
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "e326601a8b6e3a73e6a55bb858920e0bd45a386734ae6f251b3b195d3f70e7c8",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n_fair_access": 1,
+          "pr_panel": 1,
+          "syn_gap": 1
+        },
+        "id": "o_targeted",
+        "kind": "option",
+        "text": "Opción de estudio futuro: redistribución focalizada con panel de estación-minutos y evaluación de costes, trabajo y desplazamiento territorial; requiere autorización operativa.",
+        "version": 1
+      },
+      "prev_hash": "876c04970a9a675c1e3ab6c86f3222cdb952d930f01d4d70e5b06a6475f02b08",
+      "seq": 25
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "d4895ba472b785a7e5933760bf1629442791f90f8db969cb49597f399ec90b5c",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_gbfs": 1,
+          "n_fair_access": 1,
+          "syn_gap": 1
+        },
+        "id": "o_information",
+        "kind": "option",
+        "text": "Opción alternativa: información de bicicletas y anclajes cercanos y su frescura, sin alterar físicamente la redistribución; evaluar desvío de personas y accesibilidad digital.",
+        "version": 1
+      },
+      "prev_hash": "e326601a8b6e3a73e6a55bb858920e0bd45a386734ae6f251b3b195d3f70e7c8",
+      "seq": 26
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "62f40a22f471060442526e251657727048a77de9180b3844645e3122b6d66bcc",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_rebalance": 1,
+          "o_information": 1,
+          "o_targeted": 1,
+          "unc_gap": 1
+        },
+        "id": "cmp_options",
+        "kind": "comparison",
+        "text": "Ambas opciones tienen mecanismos, costes y perjuicios diferentes. Los datos publicados no permiten comparar el efecto causal de ninguna; la prueba necesitaría medición común y comparador.",
+        "version": 1
+      },
+      "prev_hash": "d4895ba472b785a7e5933760bf1629442791f90f8db969cb49597f399ec90b5c",
+      "seq": 27
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "e6f6bad85c7be47d68ea4bb17d337513d3833b804f799c84a9dce6697acb8884",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n_fair_access": 1,
+          "o_information": 1,
+          "o_targeted": 1
+        },
+        "id": "risk_shift",
+        "kind": "risk",
+        "text": "Un algoritmo que mejore la estación objetivo puede vaciar otra; redistribución extra añade carga y emisiones, y una interfaz puede excluir personas sin acceso digital.",
+        "version": 1
+      },
+      "prev_hash": "62f40a22f471060442526e251657727048a77de9180b3844645e3122b6d66bcc",
+      "seq": 28
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "5ef36401e56ad16e72cb088c2358fa6d49b411e960ee957dc3da3145249e090f",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "cmp_options": 1,
+          "e_gbfs": 1,
+          "e_gbfs_spec": 1,
+          "e_sla_fleet": 1,
+          "n_fair_access": 1
+        },
+        "id": "d_candidate",
+        "kind": "decision",
+        "text": "Decisión candidata, no aprobada: priorizar medición de disponibilidad por estación y efectos desplazados antes de seleccionar redistribución u otra intervención.",
+        "version": 1
+      },
+      "prev_hash": "e6f6bad85c7be47d68ea4bb17d337513d3833b804f799c84a9dce6697acb8884",
+      "seq": 29
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:22+00:00",
+      "hash": "ae4a78e9915cd29880298348c5d12ef9017c38c1f265ed18e9d515f533801fdc",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "d_candidate": 1,
+          "e_gbfs_spec": 1,
+          "i_access_minutes": 1,
+          "pr_panel": 1
+        },
+        "id": "req_archive",
+        "kind": "requirement",
+        "text": "Requisito candidato, no implementado: un protocolo de captura debería registrar versión del feed, estación, hora del feed y captura, bicicletas, anclajes, estado operativo y faltantes, con trazabilidad a la comparación y a la decisión humana.",
+        "version": 1
+      },
+      "prev_hash": "5ef36401e56ad16e72cb088c2358fa6d49b411e960ee957dc3da3145249e090f",
+      "seq": 30
+    },
+    {
+      "actor": "agent:citibike_analyst",
+      "at": "2026-09-26T10:32:37+00:00",
+      "hash": "39b8ef294af659a52d722bec71a0fe20b49c2f72357da92b0d2b492be33d2cf2",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "reason": "El SLA 9 mide nivel de flota, GBFS publica estado actual y este expediente carece de archivo de junio."
+        },
+        "deps": {
+          "b_june": 1,
+          "e_gbfs": 1,
+          "e_gbfs_spec": 1,
+          "e_sla_fleet": 1
+        },
+        "id": "s_proxy",
+        "kind": "assumption",
+        "text": "Supuesto corregido tras revisar el SLA 9 y GBFS v2.3: el promedio mensual de flota no estima disponibilidad por estación ni reconstruye junio de 2026; se necesita una serie temporal obtenida prospectivamente y un indicador de intentos frustrados independiente.",
+        "version": 2
+      },
+      "prev_hash": "ae4a78e9915cd29880298348c5d12ef9017c38c1f265ed18e9d515f533801fdc",
+      "seq": 31
+    },
+    {
+      "actor": "agent:case_reviewer",
+      "at": "2026-09-26T10:35:41+00:00",
+      "hash": "5e133fe1475e9ada21c8fd30f8a97b2b1740dada026fe541c6574cba4d1a286b",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "reason": "El encuadre separa inicio, devolución y viajes completados de demanda frustrada; identifica usuarios, operación y terceros; limita las cifras oficiales a la red de junio de 2026. SLA 9 mide flota agregada, no acceso por estación, y el supuesto proxy fue corregido; no se afirma impacto ni se aprueba la norma.",
+        "snapshot": "fa8ff602ea51100641e7d8dbfd4f3273a1f34a86b389f983c468bf46fe393b77",
+        "verdict": "accept"
+      },
+      "prev_hash": "39b8ef294af659a52d722bec71a0fe20b49c2f72357da92b0d2b492be33d2cf2",
+      "seq": 32
+    },
+    {
+      "actor": "agent:case_reviewer",
+      "at": "2026-09-26T10:35:41+00:00",
+      "hash": "3ead64d6bf0489b3a6f94f288fe24c0faae5281da0a04ba75a7032428e6d753c",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 32,
+        "snapshot": "fa8ff602ea51100641e7d8dbfd4f3273a1f34a86b389f983c468bf46fe393b77"
+      },
+      "prev_hash": "5e133fe1475e9ada21c8fd30f8a97b2b1740dada026fe541c6574cba4d1a286b",
+      "seq": 33
+    }
+  ],
+  "project": {
+    "created_at": "2026-09-26T10:32:22+00:00",
+    "created_by": "agent:citibike_analyst",
+    "domain": "movilidad compartida",
+    "title": "Citi Bike: acceso a bicicletas y anclajes, caso documental de junio de 2026"
+  },
+  "schema": 1
+}
