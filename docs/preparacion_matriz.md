@@ -49,15 +49,38 @@ uv run python scripts/case_package.py extract /ruta-privada/D-E.zip /ruta-privad
 uv run python scripts/inspect_toolkit_wheel.py dist/specorganon-0.1.0-py3-none-any.whl
 ```
 
-[`scripts/inspect_released_payload.py`](../scripts/inspect_released_payload.py) integra los tres controles para una entrega ya creada. Requiere el calendario candidato por una ruta independiente, coteja la entrega al inicio y al final, compara el `case_id` del ZIP con la corrida, verifica límites y SHA-256 de la política y exige textos UTF-8 no vacíos, sin NUL, para contrato y prompts del brazo; S incluye su guía. En T además exige wheel estáticamente íntegro y digest igual al del calendario. El reporte es `development_released_payload_inspection_unsealed` y siempre deja `execution_ready: false`:
+[`scripts/inspect_released_payload.py`](../scripts/inspect_released_payload.py) integra los controles para una entrega ya creada. Requiere el calendario candidato por una ruta independiente, coteja la entrega al inicio y al final, compara el `case_id` del ZIP con la corrida, verifica límites y SHA-256 de la política y exige textos UTF-8 no vacíos, sin NUL, para contrato y prompts del brazo; S incluye su guía. En T acepta el wheel puro histórico o un ZIP de wheels con manifiesto y `uv.lock` incorporados; exige estructura estática íntegra y digest exterior igual al del calendario. Informa cuál de los dos formatos encontró. El reporte es `development_released_payload_inspection_unsealed` y siempre deja `execution_ready: false`:
 
 ```sh
 uv run python scripts/inspect_released_payload.py calendario-candidato.json /ruta-privada/entrega-nueva
 ```
 
-El planificador sigue tratando los tres activos como digests suministrados; los controles de contenido solo los comprueban al inspeccionar una entrega. El wheel T no trae un wheelhouse de dependencias: el instalador offline del piloto D-E depende de una caché `uv` previa y no demuestra instalación limpia desde el único archivo liberado. Tampoco existe un ejecutor genérico que monte `/case` y `/work`, aplique la política y los límites, instale T desde activos autocontenidos y obtenga recibos autenticados del proveedor. No hay pruebas de que un proveedor aceptó versión y esfuerzo. Un paquete con hash correcto no equivale a una corrida ejecutable. `release_block_order` es una coordenada, no una barrera efectiva: la secuencia de liberación requiere eventos de cierre y custodia independientes.
+El planificador sigue tratando los activos como digests suministrados; los controles de contenido solo los comprueban al inspeccionar una entrega. El wheel T puro no trae sus dependencias. El nuevo ZIP T permite transportar un conjunto de wheels como **un solo archivo** ligado al calendario, sin alterar el esquema del planificador ni la separación N/S/T. El inspector coteja estructura del contenedor, wheel raíz, lock incorporado y nombres, tamaños y hashes de cada wheel dependiente contra ese lock; **no inspecciona el interior de los wheels de terceros ni prueba clausura o instalación**. Por eso su campo `static_format_checked` permanece falso cuando hay dependencias. Una instalación offline desde una copia liberada se documenta por separado; no convierte el inspector en un ejecutor. Tampoco existe un ejecutor genérico que monte `/case` y `/work`, aplique la política y los límites y obtenga recibos autenticados del proveedor. No hay pruebas de que un proveedor aceptó versión y esfuerzo. Un paquete con hash correcto no equivale a una corrida ejecutable. `release_block_order` es una coordenada, no una barrera efectiva: la secuencia de liberación requiere eventos de cierre y custodia independientes.
 
 Un [sondeo de wheelhouse temporal](../experiments/development/offline_wheelhouse_py312_2026-09-26.json) exportó dependencias fijadas en `uv.lock`, descargó 28 wheels cuyos nombres, tamaños y SHA-256 coincidieron con el lock, añadió el wheel local y logró instalar en un entorno nuevo de **CPython 3.12.3 linux-x86_64** usando `--offline --no-cache --no-index --find-links`. `uv pip check` y el smoke sintético instalado pasaron: nueve fases, 29 ítems, 14 comandos CLI y 14 herramientas MCP. Con el mismo conjunto de wheels, un entorno CPython 3.11.15 rechazó `cffi` por etiqueta ABI `cp312`. El directorio fue temporal: **no se incorporó** a `toolkit` ni a una entrega T. El resultado prueba viabilidad local para ese intérprete y plataforma, no una instalación reproducible desde la entrega, aislamiento, telemetría o eficacia.
+
+[`scripts/toolkit_bundle.py`](../scripts/toolkit_bundle.py) construye el ZIP T con `bundle.json` canónico, los bytes de `uv.lock` y `wheels/*.whl`. Actualmente fija el destino **CPython 3.12 Linux x86_64**; el paquete observado de desarrollo contiene 29 wheels y no sirve para CPython 3.11. Se reproduce desde un directorio privado nuevo de wheels y un `uv.lock` fijado:
+
+```sh
+uv export --locked --no-dev --no-emit-project --no-hashes --no-header --no-annotate --output-file /ruta-privada/requirements.txt
+python3 -m pip --isolated download --only-binary=:all: --index-url https://pypi.org/simple --dest /ruta-privada/wheels --requirement /ruta-privada/requirements.txt
+uv build --wheel
+cp dist/specorganon-0.1.0-py3-none-any.whl /ruta-privada/wheels/
+python3 scripts/toolkit_bundle.py pack /ruta-privada/wheels uv.lock /ruta-privada/toolkit.zip
+python3 scripts/toolkit_bundle.py inspect /ruta-privada/toolkit.zip
+```
+
+El empaquetador rechaza wheels de dependencia cuyos bytes no coinciden con el lock que recibe, pero el lock es una entrada local sin autoridad externa. La descarga durante la **construcción** no forma parte de la prueba offline de **instalación**. Para esta última, el custodio fija primero el SHA exterior de `toolkit.zip` en el calendario candidato, lo libera con `preflight_assets.py`, inspecciona esa entrega y extrae **su copia** de `toolkit` a un directorio nuevo. Luego puede comprobar un entorno nuevo del destino declarado:
+
+```sh
+python3 scripts/toolkit_bundle.py extract /ruta-privada/entrega-T/toolkit /ruta-privada/extraido-nuevo
+uv venv --no-python-downloads --python /usr/bin/python3.12 /ruta-privada/venv-nuevo
+uv pip install --offline --no-cache --no-index --find-links /ruta-privada/extraido-nuevo/wheels --python /ruta-privada/venv-nuevo/bin/python specorganon==0.1.0
+uv pip check --python /ruta-privada/venv-nuevo/bin/python
+UV_OFFLINE=1 PIP_NO_INDEX=1 /ruta-privada/venv-nuevo/bin/python scripts/clean_smoke.py "$PWD"
+```
+
+El [registro de la copia T liberada](../experiments/development/released_toolkit_bundle_py312_2026-09-26.json) guarda hashes, instalación y smoke sintético. Este procedimiento ejecuta el código del wheel local en un entorno de desarrollo sin aislamiento de sistema operativo; no se debe confundir con una corrida de proveedor ni con aprobación de contenido o custodia externa.
 
 ## Firma offline del diseño candidato
 

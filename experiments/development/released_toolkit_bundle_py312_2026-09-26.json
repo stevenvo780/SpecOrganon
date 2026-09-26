@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "classification": "development_released_toolkit_bundle_probe_unsealed",
+  "date_utc": "2026-09-26",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "artifact": {
+    "local_path": "dist/toolkit-cpython312-linux_x86_64.zip",
+    "git_tracked": false,
+    "sha256": "3606e7862cc5fd10686827b909b28bfef29ac42e29f427d03c275b5f640444c7",
+    "bytes": 9688897,
+    "wheel_count": 29,
+    "root_wheel_sha256": "b06599f47ba8913e046ebd38c4ee14cea41ab28167c610d8fc4e8442bbc5085a",
+    "uv_lock_sha256": "1fce8926bf98a49fb24f5363a601ca4b6c06bd7485162dec501d2bdf78f16cf0",
+    "target": {
+      "python_implementation": "CPython",
+      "python_version": "3.12",
+      "platform": "linux_x86_64"
+    },
+    "second_pack_byte_identical": true
+  },
+  "released_copy": {
+    "classification": "synthetic_unsealed_preflight_fixture",
+    "arm": "T",
+    "case_id": "R-F",
+    "run_id": "conf-25c9d9e070384152d5ae368d",
+    "sha256_equal_to_source": true,
+    "bytes_equal_to_source": true,
+    "verified_by": [
+      "preflight_assets.preflight",
+      "verify_released_run.verify_release",
+      "inspect_released_payload.inspect_released_payload"
+    ],
+    "container_format_checked": true,
+    "root_wheel_format_checked": true,
+    "dependency_wheel_format_checked": false,
+    "dependency_closure_checked_by_static_inspector": false,
+    "execution_ready": false
+  },
+  "offline_execution_probe": {
+    "source": "extracted bytes of released_copy toolkit after the final extraction checks",
+    "interpreter": "CPython 3.12.3",
+    "network_index_cache_flags": [
+      "--offline",
+      "--no-cache",
+      "--no-index",
+      "--find-links"
+    ],
+    "installed_packages": 29,
+    "install_returncode": 0,
+    "uv_pip_check_returncode": 0,
+    "clean_smoke_returncode": 0,
+    "clean_smoke": {
+      "phases_accepted": 9,
+      "items": 29,
+      "revision": 49,
+      "decisions": 11,
+      "cli_commands_exercised": 14,
+      "mcp_tools_exercised": 14,
+      "transport_parity_operations": 14,
+      "idempotent_replay": true,
+      "sigkill_mcp_resume": true,
+      "guarded_put": true,
+      "signed_approval_verified": true,
+      "signed_cli_approval_verified": true,
+      "trust_removal_reopened": true
+    }
+  },
+  "negative_target_control": {
+    "interpreter": "CPython 3.11.15",
+    "source": "the same extracted released_copy toolkit",
+    "install_returncode": 1,
+    "reason": "cffi 2.1.1 wheel has cp312 tag and cannot satisfy cp311"
+  },
+  "checks": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_toolkit_bundle.py tests/test_inspect_released_payload.py tests/test_inspect_toolkit_wheel.py",
+      "result": "84 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "885 passed in 31.45s"
+    },
+    {
+      "command": "ruff check .",
+      "result": "All checks passed"
+    },
+    {
+      "command": "ruff format --check scripts/toolkit_bundle.py scripts/inspect_toolkit_wheel.py scripts/inspect_released_payload.py tests/test_toolkit_bundle.py tests/test_inspect_toolkit_wheel.py tests/test_inspect_released_payload.py",
+      "result": "6 files already formatted"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": "uv build --wheel",
+      "result": "built specorganon-0.1.0-py3-none-any.whl with unchanged SHA-256 b06599f47ba8913e046ebd38c4ee14cea41ab28167c610d8fc4e8442bbc5085a"
+    }
+  ],
+  "adversarial_review": {
+    "initial_false_successes": [
+      "arbitrary dependency bytes and manylinux_2_99 accepted as fully static-format checked",
+      "extract returned success after destination directory name was replaced",
+      "pack returned success after output file name was replaced"
+    ],
+    "repairs": [
+      "separate outer container and root-wheel checks from dependency-wheel internals; static_format_checked is false when dependencies are present",
+      "compare manylinux tags with current host glibc capability",
+      "recheck parent, destination, wheel directory, named files and bytes before pack or extract returns"
+    ],
+    "post_fix_repro": {
+      "arbitrary_dependency_bytes_report_static_format_checked": false,
+      "manylinux_2_99_accepted": false,
+      "extract_swap_returned_success": false,
+      "pack_swap_returned_success": false,
+      "actual_29_wheel_bundle_inspection_returncode": 0
+    },
+    "reviewer": "native read-only development agent, not an accredited independent human judge"
+  },
+  "limitations": [
+    "The ZIP under dist is a local ignored development output, not a Git-tracked or externally custodied release.",
+    "The caller-supplied schedule and embedded uv.lock are unauthenticated.",
+    "The static inspector does not inspect dependency wheel internals or prove dependency closure; the offline install demonstrates closure only for the tested host and interpreter.",
+    "The smoke executes locally built code without OS isolation; no provider was invoked and no runtime network or tool cap was enforced.",
+    "No model matrix, blind independent scoring, authenticated provider receipts, approved budget, or food-chain field effect was tested.",
+    "A same-UID process can race point-in-time checks after the final read."
+  ],
+  "criterion_4": "not_assessed"
+}
