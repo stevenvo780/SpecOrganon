@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_documentary_transfer_cli_regression",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "test_sha256": "51bcc02440906da70eabfddbd0e52f7061cf5af994e4894eef6625e1e9de86cc",
+  "case_sha256": {
+    "cases/citibike/seed.json": "2a00f0c604d9bd805c24afda3bbb703a5474b4c988b55c4c3f7b7b5679f08109",
+    "cases/citibike/organon.json": "204b8094474113a52f2d271f5ae10e174979c66628e1753dc5df8e2b1e682678",
+    "cases/citibike/revision_check.json": "803f7031dc515da4de14d78a1d0fe5f0b8a56c9a6211d7126e175b85a8bf82d0"
+  },
+  "method": "Seed the committed documentary case in a temporary directory, replay the exact s_proxy version-2 item_put payload from event 31 through the installed organon CLI under signed policy, and compare stable status and trace semantics with the recorded revision check.",
+  "observed": {
+    "seed_items_and_revision": 30,
+    "replayed_revision": 31,
+    "stale_descendant_count": 12,
+    "candidate_decision_stale": true,
+    "candidate_requirement_stale": true,
+    "trace_req_archive_contains_s_proxy_v2": true,
+    "frame_independently_reviewed_and_accepted": true,
+    "critique_blocked_without_verified_human_approval": true,
+    "specify_blocked_with_stale_decision_and_requirement": true,
+    "unsigned_approval_rejected_without_mutation": true,
+    "committed_source_ledger_byte_identical_after_test": true
+  },
+  "historical_snapshot_note": "revision_check.json records gate blocker strings immediately after event 31. Current engine wording for human approval differs and the current trace checks add blockers; the regression compares stable readiness, acceptance, staleness and IDs instead of exact historical blocker text.",
+  "gates": {
+    "uv run pytest -q tests/test_citibike_transfer.py": "1 passed",
+    "uv run pytest -q": "557 passed",
+    "uv run ruff check .": "All checks passed!",
+    "git diff --check": "passed"
+  },
+  "limits": [
+    "This is a no-network documentary replay in a temporary case; it does not recapture the June 2026 report or any live GBFS response.",
+    "The case is exposed development material, not sealed R-M or an independent mobility assessment.",
+    "No station-minute availability, frustrated trips, intervention, causal effect or normative human approval is established.",
+    "The CLI gate regression verifies structural reuse of the toolkit, not GOAL criterion 5 generalization."
+  ],
+  "criterion_5": "not_assessed"
+}
