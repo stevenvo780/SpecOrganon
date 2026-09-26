@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_integrity_controls_unsealed",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "artifacts": {
+    "dist/specorganon-0.1.0-py3-none-any.whl": "0dda85771f4f0e54edd713ba5361a83905fd489e6f06023fe285e14b03e21375",
+    "src/specorganon/engine.py": "4d6d14df08ec185585e80e76614901a00c03a545b7cc3cd788bff2d6556dcb14",
+    "scripts/audit_field_flows.py": "8355e7468c6026fbe3e2f5f0707da0c1a36d0eeda0dd93aa731d27cc8ad4d18a",
+    "scripts/analyze_secondary_metrics.py": "0343e7f25df837fede88660e03a70b6bdee0e5d9b5019ef080b7483482a6c114",
+    "tests/test_method.py": "a41bd64899900bc9f632ac287912585e2fa0e78b2d4bc997b331180b7abd4809",
+    "tests/test_audit_field_flows.py": "cfc355825310d3775270870372ab9e6b077141d2835e7d100ce4f54712c1e380",
+    "tests/test_analyze_secondary_metrics.py": "6bcf8e0cde59332945bf073ffe17165cec7f74fd3c6adef904f1822fd9a7f6f4"
+  },
+  "findings_reproduced_and_fixed": [
+    "A reviewed explicit resolution of a same-scope numeric evidence pair left the automatic conflict permanently blocking the workflow; now only the exact active resolved pair is cleared, and changes reopen it.",
+    "Declared tolerance and equivalence record sources could be dated after group assignment; now both precede first assignment and the equivalence record is no earlier than its declared approval.",
+    "Secondary analysis accepted assembly details with duplicate schema-2 preparation records and omitted duplicate terminal-pair warnings; it now applies the assembler's schema-1 ambiguity and schema-2 warning rules."
+  ],
+  "gates": [
+    {"command": "uv run pytest -q", "result": "452 passed in 17.12s"},
+    {"command": "uv run ruff check .", "result": "All checks passed!"},
+    {"command": "git diff --check", "result": "exit 0"},
+    {"command": "uv build --wheel", "result": "Successfully built dist/specorganon-0.1.0-py3-none-any.whl"},
+    {"command": "wheel installed in a fresh Python 3.11.15 venv; clean_smoke.py", "result": "exit 0; 9 phases, 29 items, 49 events, 14 CLI commands, MCP client, invalid input, replay and synthetic signed approval"},
+    {"command": "wheel installed in a fresh Python 3.12.3 venv; clean_smoke.py", "result": "exit 0; 9 phases, 29 items, 49 events, 14 CLI commands, MCP client, invalid input, replay and synthetic signed approval"}
+  ],
+  "independent_read_only_review": {
+    "scope": "all three code changes and regression tests",
+    "result": "no reproducible material finding",
+    "gate": ".venv/bin/python -m pytest -q: 452 passed"
+  },
+  "not_performed": [
+    "No authentication of approval identity, field source timestamps, equivalence records, preparation-act bytes, provider receipts or judge custody.",
+    "No field V or G calculation, causal result, reserved N/SDD/toolkit comparison, ablation or second-domain complete execution.",
+    "No change to GOAL.md, preregistered thresholds or any acceptance verdict."
+  ]
+}
