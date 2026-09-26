@@ -239,6 +239,27 @@ def test_malformed_q_rejected(bad_q: Any) -> None:
         analyze(schedule, evaluations, development_resamples=10)
 
 
+def test_optional_scored_artifact_digest_is_validated_and_preserved() -> None:
+    schedule = _schedule()
+    evaluations = _evaluations(schedule)
+    row = evaluations["runs"][0]
+    row["artifact_sha256"] = _hash("synthetic scored artifact")
+    result = analyze(schedule, evaluations, development_resamples=10)
+    assert any(
+        arm.get("artifact_sha256") == row["artifact_sha256"]
+        for triplet in result["triplets"] for arm in triplet["arms"].values()
+    )
+
+    row["artifact_sha256"] = "invalid"
+    with pytest.raises(AnalysisError, match="artifact_sha256"):
+        analyze(schedule, evaluations, development_resamples=10)
+    row["artifact_sha256"] = _hash("synthetic scored artifact")
+    row.pop("q")
+    row["status"] = "truncated"
+    with pytest.raises(AnalysisError, match="artifact_sha256 requires q"):
+        analyze(schedule, evaluations, development_resamples=10)
+
+
 def test_tampered_schedule_digest_rejected() -> None:
     schedule = _schedule()
     evaluations = _evaluations(schedule)

@@ -7,7 +7,7 @@ responses are JSON on stdout; the command never writes files or calls providers.
 Evaluation schema 1 supplies one record for *every* scheduled run::
 
     {"schema": 1, "schedule_sha256": "<schedule digest>", "runs": [
-      {"run_id": "conf-...", "q": 72},
+      {"run_id": "conf-...", "q": 72, "artifact_sha256": "<optional digest>"},
       {"run_id": "conf-...", "status": "missing", "reason": "no rating"},
       {"run_id": "conf-...", "status": "truncated", "q": 43}
     ]}
@@ -15,7 +15,10 @@ Evaluation schema 1 supplies one record for *every* scheduled run::
 ``status: scored`` is an optional explicit form for a usable Q. A truncated
 run can carry a Q from available artifacts and remains usable, or omit Q and
 make its triplet incomplete. Missing runs cannot carry Q. Scores are numeric
-values from 0 through 100; no missing value is imputed or replaced.
+values from 0 through 100; no missing value is imputed or replaced. A scored
+row may name the artifact digest used for scoring. The separate reconciliation
+command requires this binding to match a terminal receipt; this Q-only command
+does not validate receipts or artifact bytes.
 
 The output is *always* development_analysis_unsealed. Q alone cannot establish
 criterion 4: independent dual ratings, E/T/R/K/P, ablations, and an external
@@ -317,7 +320,7 @@ def _validate_evaluations(raw: Any, scheduled_digest: str, scheduled_ids: set[st
     by_run: dict[str, dict[str, Any]] = {}
     for index, value in enumerate(rows):
         row = _object(value, f"evaluations.runs[{index}]")
-        if not {"run_id"} <= set(row) or set(row) - {"run_id", "status", "q", "reason"}:
+        if not {"run_id"} <= set(row) or set(row) - {"run_id", "status", "q", "reason", "artifact_sha256"}:
             raise AnalysisError(f"evaluations.runs[{index}] has missing or unexpected keys")
         run_id = _nonempty_text(row["run_id"], f"evaluations.runs[{index}].run_id")
         if run_id in by_run:
@@ -335,6 +338,10 @@ def _validate_evaluations(raw: Any, scheduled_digest: str, scheduled_ids: set[st
             q = row["q"]
             if type(q) not in (int, float) or not 0 <= q <= 100 or (type(q) is float and not math.isfinite(q)):
                 raise AnalysisError(f"run {run_id} q must be a finite number from 0 through 100")
+        if "artifact_sha256" in row:
+            if "q" not in row:
+                raise AnalysisError(f"run {run_id} artifact_sha256 requires q")
+            _sha256(row["artifact_sha256"], f"run {run_id} artifact_sha256")
         if "reason" in row:
             if status == "scored":
                 raise AnalysisError(f"scored run {run_id} cannot carry a missing/truncated reason")
@@ -342,6 +349,8 @@ def _validate_evaluations(raw: Any, scheduled_digest: str, scheduled_ids: set[st
         by_run[run_id] = {"run_id": run_id, "status": status}
         if "q" in row:
             by_run[run_id]["q"] = row["q"]
+        if "artifact_sha256" in row:
+            by_run[run_id]["artifact_sha256"] = row["artifact_sha256"]
         if "reason" in row:
             by_run[run_id]["reason"] = row["reason"]
     omitted = scheduled_ids - by_run.keys()
@@ -519,7 +528,12 @@ def _invalid_constant(value: str) -> None:
 
 def _read_json(path: str) -> Any:
     source = sys.stdin.read() if path == "-" else Path(path).read_text(encoding="utf-8")
-    return json.loads(source, object_pairs_hook=_unique_pairs, parse_constant=_invalid_constant)
+    try:
+        return json.loads(source, object_pairs_hook=_unique_pairs, parse_constant=_invalid_constant)
+    except (ValueError, RecursionError) as exc:
+        if isinstance(exc, AnalysisError):
+            raise
+        raise AnalysisError(f"invalid JSON value: {exc}") from exc
 
 
 def main(argv: list[str] | None = None) -> int:
