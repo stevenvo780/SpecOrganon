@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_guarded_concurrent_writes",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "artifacts": {
+    "src/specorganon/engine.py": "25bae27deb2b97e91ccd473693fa007e71239cc8b5b6267583d52d985ab647b4",
+    "src/specorganon/runner.py": "de206d3ec13305c958590dcb5a8a98a3202f87745d6c60253d5093036f9059b4",
+    "scripts/clean_smoke.py": "ec1aea86b5d1f74c1d782a42936206f87f95adafbb58163ca5e464e712dd54e4",
+    "dist/specorganon-0.1.0-py3-none-any.whl": "9372671b8a12b6bf8082d5a3ff764d417f5527451e9348e7cbb7178c07b09eff"
+  },
+  "reason_for_change": "The first archived native-agent overlap round left writer B with zero items after a global revision conflict. A separate runner audit reproduced a direct writer changing the target between the runner precheck and the engine read. Independent review then reproduced a manifest prepared against external p1 version 1 binding its content to p1 version 2 when no reference version was declared.",
+  "contract": {
+    "direct_put": "Callers can supply expected_version (0 for create) and expected_deps for every direct ref. Complete guards enable at most three internal retries after unrelated global sequence changes; target, direct ref, or case identity changes raise ConflictError. Legacy or partial guards remain fail-fast.",
+    "runner": "All manifests for a case remain serialized. A put step with an external ref requires an exact expected_deps map before any ledger write; refs created earlier in the same manifest inherit the earlier step's declared result version. The runner passes target and ref expectations to the engine, including across direct-writer races.",
+    "external_anchor": "Anchor verification errors are not retried; the external custodian still must advance the exact head after each authorized event."
+  },
+  "gates": [
+    {"command": "uv run pytest -q", "result": "478 passed in 18.72s"},
+    {"command": "uv run ruff check .", "result": "All checks passed!"},
+    {"command": "git diff --check", "result": "exit 0"},
+    {"command": "uv build --wheel", "result": "Successfully built specorganon-0.1.0-py3-none-any.whl"}
+  ],
+  "forced_two_process_collision": {
+    "test": "tests/test_put_concurrency.py::test_two_processes_resolve_one_forced_global_conflict_without_caller_retry",
+    "result": "passed",
+    "first_expected_seq_each_process": 1,
+    "observed_attempt_sequences": [[1], [1, 2]],
+    "ledger_events": 3,
+    "item_ids": ["p1", "a1", "b1"],
+    "caller_retry": false
+  },
+  "fresh_wheel_runs": [
+    {"python": "3.11.15", "wheel_install": "fresh temporary virtual environment; exit 0", "smoke_exit_code": 0,
+     "cli_commands_exercised": 14, "mcp_tools_exercised": 14, "guarded_put": true,
+     "phases_accepted": 9, "items": 29, "revision": 49,
+     "invalid_input_preserved_ledger": true, "idempotent_replay": true},
+    {"python": "3.12.3", "wheel_install": "fresh temporary virtual environment; exit 0", "smoke_exit_code": 0,
+     "cli_commands_exercised": 14, "mcp_tools_exercised": 14, "guarded_put": true,
+     "phases_accepted": 9, "items": 29, "revision": 49,
+     "invalid_input_preserved_ledger": true, "idempotent_replay": true}
+  ],
+  "limits": [
+    "The collision test uses two real local processes, not two model agents; it checks correctness, not throughput or quality improvement.",
+    "Expected dependencies cover direct refs. Content depending on other case state needs explicit coordination and review.",
+    "A direct put without complete expectations remains fail-fast and does not prove the author's earlier read snapshot.",
+    "The smoke cases and signatures are synthetic. No normative human approval, reserved model comparison, field intervention, or measured impact is shown.",
+    "The wheel is a local build artifact and is not committed."
+  ]
+}

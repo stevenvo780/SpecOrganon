@@ -32,7 +32,7 @@ uv run organon status ./mi-caso
 uv run organon trace ./mi-caso problema
 ```
 
-`put` acepta `--ref ID` repetible y `--data '{"clave":"valor"}'` para campos estructurados. `--data` debe ser un objeto JSON. `gate` consulta sin avanzar; `advance` aplica la decisión del motor. `next-task` muestra versiones, entradas y bloqueos. `run` lee un manifiesto JSON y se detiene ante aprobaciones o revisiones pendientes:
+`put` acepta `--ref ID` repetible y `--data '{"clave":"valor"}'` para campos estructurados. `--data` debe ser un objeto JSON. Para escribir sobre un caso compartido, indica `--expected-version 0` al crear un ID (o la versión actual al revisarlo) y `--expected-deps '{"problema":1}'` con la versión de **cada** referencia. Si otra escritura cambió el ID o una referencia, `put` rechaza la operación sin crear una revisión inesperada. Con ambas precondiciones completas, reintenta de forma acotada únicamente conflictos de secuencia causados por eventos ajenos a esos ítems. Una llamada sin las precondiciones conserva el comportamiento anterior y puede necesitar un reintento coordinado por el llamador; no declara qué versión del caso vio quien preparó el contenido. Las versiones directas tampoco fijan cambios semánticos de otras partes del caso: un contenido que depende de un snapshot mayor necesita coordinación explícita. En MCP, `put` acepta los objetos opcionales `expected_version` y `expected_deps` con el mismo contrato. `gate` consulta sin avanzar; `advance` aplica la decisión del motor. `next-task` muestra versiones, entradas y bloqueos. `run` lee un manifiesto JSON y se detiene ante aprobaciones o revisiones pendientes:
 
 ```sh
 uv run organon next-task ./mi-caso --roles '{"reviewer":"agent:revisor"}'
