@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_secondary_metrics_unsealed",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "90ca6e1aa22956f4379f3f104b6540587bcaf66b9845f46207477a1e0b44d6a1",
+  "artifacts": {
+    "scripts/analyze_secondary_metrics.py": "82d2927c3186fa0db1e737dbc11ddef09a651624ca39c7a6aa519d506f841f49",
+    "tests/test_analyze_secondary_metrics.py": "a78b9dc989bad0deb44c5d5664b0d09ed0e8258239cee6241720134801025819"
+  },
+  "scope": {
+    "secondary_tests_collected": 28,
+    "confirmatory_provider_calls": 0,
+    "reserved_case_bytes": 0,
+    "real_human_ratings": 0,
+    "authenticated_injection_or_human_events": 0,
+    "verified_provider_invoices": 0,
+    "criterion_4": "not_assessed"
+  },
+  "gates": [
+    {"command": "uv run pytest -q", "result": "425 passed in 14.30s"},
+    {"command": "uv run ruff check scripts/analyze_secondary_metrics.py tests/test_analyze_secondary_metrics.py", "result": "All checks passed!"},
+    {"command": "python3 -m py_compile scripts/analyze_secondary_metrics.py tests/test_analyze_secondary_metrics.py", "result": "exit 0"},
+    {"command": "git diff --check", "result": "exit 0"}
+  ],
+  "adversarial_findings_resolved": [
+    "Recovery duration greater than declared release-to-delivery wall time is rejected.",
+    "A recovery never achieved may carry null resume time rather than a fabricated zero.",
+    "A missing interruption leaves R missing without deleting available T, W or P.",
+    "Human wait below the audited receipt wait is rejected; extra wait outside attempts is retained.",
+    "Human event counts and active seconds are reported by type; declared active parts must sum to the declared total.",
+    "Resolved critical incident identifiers are counted once per run and type, separately from binary E.",
+    "Missing required observations and a zero S median cannot yield a favorable aggregate or ratio."
+  ],
+  "independent_read_only_review": {
+    "scope": "secondary analyzer and tests",
+    "result": "initial temporal, human and incident findings plus recovery-specific missing and active-time breakdown reproduced, corrected and rechecked; no further concrete false green in that scope"
+  },
+  "not_performed": [
+    "No original judge files, reference, audit, injection, human event, release, invoice or rate-card bytes authenticated by this analyzer.",
+    "No model/provider telemetry, tariff, identity, blinding, custody or independent timestamp verified.",
+    "No confidence intervals for secondary effects, full API/system wait decomposition or model-agent-tool token decomposition computed.",
+    "No real N/SDD/toolkit matrix, ablations, field site, approved value equivalence or observed impact."
+  ]
+}
