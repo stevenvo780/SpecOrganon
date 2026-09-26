@@ -33,7 +33,12 @@ def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def _sources(tmp_path: Path, *, dependency: bool = True) -> tuple[Path, Path]:
+def _sources(
+    tmp_path: Path,
+    *,
+    dependency: bool = True,
+    dependency_filename: str = DEPENDENCY,
+) -> tuple[Path, Path]:
     wheel_dir = tmp_path / "wheels"
     wheel_dir.mkdir()
     build_toolkit_wheel(wheel_dir / ROOT)
@@ -41,11 +46,11 @@ def _sources(tmp_path: Path, *, dependency: bool = True) -> tuple[Path, Path]:
     text = 'version = 1\n[[package]]\nname = "specorganon"\nversion = "0.1.0"\nsource = { editable = "." }\n'
     if dependency:
         payload = b"synthetic dependency wheel bytes; never installed\n"
-        (wheel_dir / DEPENDENCY).write_bytes(payload)
+        (wheel_dir / dependency_filename).write_bytes(payload)
         text += (
             '\n[[package]]\nname = "demo-dep"\nversion = "1.0"\n'
             'source = { registry = "https://example.invalid/simple" }\n'
-            f'wheels = [{{ url = "https://example.invalid/{DEPENDENCY}", '
+            f'wheels = [{{ url = "https://example.invalid/{dependency_filename}", '
             f'hash = "sha256:{_sha(payload)}", size = {len(payload)} }}]\n'
         )
     lock.write_text(text, encoding="utf-8")
@@ -53,11 +58,22 @@ def _sources(tmp_path: Path, *, dependency: bool = True) -> tuple[Path, Path]:
 
 
 def _pack(
-    tmp_path: Path, *, dependency: bool = True
+    tmp_path: Path,
+    *,
+    dependency: bool = True,
+    dependency_filename: str = DEPENDENCY,
+    python_version: str = "3.12",
 ) -> tuple[Path, Path, Path, dict[str, Any]]:
-    wheel_dir, lock = _sources(tmp_path, dependency=dependency)
+    wheel_dir, lock = _sources(
+        tmp_path, dependency=dependency, dependency_filename=dependency_filename
+    )
     output = tmp_path / "toolkit.bundle"
-    result = bundle.pack_toolkit_bundle(wheel_dir, lock, bundle.DEFAULT_TARGET, output)
+    result = bundle.pack_toolkit_bundle(
+        wheel_dir,
+        lock,
+        {**bundle.DEFAULT_TARGET, "python_version": python_version},
+        output,
+    )
     return wheel_dir, lock, output, result
 
 
@@ -163,6 +179,80 @@ def test_root_only_minimal_lock_is_static_but_never_install_ready(
     assert bundle.inspect_toolkit_bundle(output) == result
 
 
+@pytest.mark.parametrize(
+    "dependency_filename",
+    [
+        "demo_dep-1.0-cp311-cp311-manylinux2014_x86_64.whl",
+        "demo_dep-1.0-cp310-abi3-manylinux2014_x86_64.whl",
+    ],
+)
+def test_cpython311_bundle_uses_declared_target_for_pack_inspect_and_extract(
+    tmp_path: Path, dependency_filename: str
+) -> None:
+    wheel_dir, _, output, packed = _pack(
+        tmp_path, python_version="3.11", dependency_filename=dependency_filename
+    )
+    assert packed["target"] == {
+        "python_implementation": "CPython",
+        "python_version": "3.11",
+        "platform": "linux_x86_64",
+    }
+    assert packed["static_format_checked"] is False
+    assert packed["install_checked"] is False
+    assert bundle.inspect_toolkit_bundle(output) == packed
+    extracted = tmp_path / "extracted-311"
+    assert bundle.extract_toolkit_bundle(output, extracted) == packed
+    assert (extracted / "wheels" / dependency_filename).read_bytes() == (
+        wheel_dir / dependency_filename
+    ).read_bytes()
+
+
+def test_cp312_wheel_rejected_for_declared_cpython311_even_when_lock_matches(
+    tmp_path: Path,
+) -> None:
+    dependency_filename = "demo_dep-1.0-cp312-cp312-manylinux2014_x86_64.whl"
+    wheel_dir, lock = _sources(tmp_path, dependency_filename=dependency_filename)
+    output = tmp_path / "incompatible.bundle"
+    with pytest.raises(bundle.ToolkitBundleError, match="incompatible"):
+        bundle.pack_toolkit_bundle(
+            wheel_dir,
+            lock,
+            {**bundle.DEFAULT_TARGET, "python_version": "3.11"},
+            output,
+        )
+    assert not output.exists()
+
+    accepted = tmp_path / "accepted-312.bundle"
+    packed = bundle.pack_toolkit_bundle(
+        wheel_dir, lock, bundle.DEFAULT_TARGET, accepted
+    )
+    assert packed["target"] == bundle.DEFAULT_TARGET
+    manifest = _manifest(accepted)
+    manifest["target"]["python_version"] = "3.11"
+    forged = tmp_path / "forged-311.bundle"
+    _rewrite(accepted, forged, replacements={"bundle.json": _canonical(manifest)})
+    with pytest.raises(bundle.ToolkitBundleError, match="incompatible"):
+        bundle.inspect_toolkit_bundle(forged)
+
+
+def test_python_and_abi_tags_follow_declared_interpreter(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(bundle.platform, "libc_ver", lambda: ("glibc", "2.39"))
+    monkeypatch.setattr(bundle.platform, "machine", lambda: "x86_64")
+    monkeypatch.setattr(bundle.sys, "platform", "linux")
+    assert bundle._compatible_tags("py3", "none", "any", "3.11")
+    assert bundle._compatible_tags("py3", "none", "any", "3.12")
+    assert bundle._compatible_tags("cp311", "cp311", "linux_x86_64", "3.11")
+    assert not bundle._compatible_tags("cp311", "cp311", "linux_x86_64", "3.12")
+    assert bundle._compatible_tags("cp311", "abi3", "linux_x86_64", "3.11")
+    assert bundle._compatible_tags("cp311", "abi3", "linux_x86_64", "3.12")
+    assert not bundle._compatible_tags("cp312", "abi3", "linux_x86_64", "3.11")
+    assert not bundle._compatible_tags("cp312", "cp312", "linux_x86_64", "3.11")
+    assert not bundle._compatible_tags("py312", "none", "any", "3.11")
+    assert not bundle._compatible_tags("py311", "none", "any", "3.12")
+
+
 def test_arbitrary_locked_dependency_bytes_are_reported_as_uninspected(
     tmp_path: Path,
 ) -> None:
@@ -188,6 +278,62 @@ def test_manylinux_tags_must_match_real_glibc_level(
     assert not bundle._compatible_tags("cp312", "cp312", "manylinux_2_99_x86_64")
     assert not bundle._compatible_tags("cp312", "cp312", "manylinux_2_39_other")
     assert not bundle._compatible_tags("cp312", "cp312", "musllinux_1_2_x86_64")
+
+
+@pytest.mark.parametrize(
+    "python_version,cp_tag", [("3.11", "cp311"), ("3.12", "cp312")]
+)
+def test_manylinux_numeric_floor_and_legacy_aliases(
+    monkeypatch: pytest.MonkeyPatch, python_version: str, cp_tag: str
+) -> None:
+    monkeypatch.setattr(bundle.platform, "libc_ver", lambda: ("glibc", "2.39"))
+    monkeypatch.setattr(bundle.platform, "machine", lambda: "x86_64")
+    monkeypatch.setattr(bundle.sys, "platform", "linux")
+    for tag in (
+        "manylinux_1_0_x86_64",
+        "manylinux_2_0_x86_64",
+        "manylinux_2_4_x86_64",
+        "manylinux_02_39_x86_64",
+        "manylinux_2_039_x86_64",
+        "manylinux_2_0039_x86_64",
+    ):
+        assert not bundle._compatible_tags(cp_tag, cp_tag, tag, python_version)
+    for tag in (
+        "manylinux_2_5_x86_64",
+        "manylinux1_x86_64",
+        "manylinux2010_x86_64",
+        "manylinux2014_x86_64",
+    ):
+        assert bundle._compatible_tags(cp_tag, cp_tag, tag, python_version)
+
+
+@pytest.mark.parametrize(
+    "python_version,cp_tag", [("3.11", "cp311"), ("3.12", "cp312")]
+)
+@pytest.mark.parametrize(
+    "manylinux",
+    [
+        "manylinux_1_0",
+        "manylinux_2_4",
+        "manylinux_02_39",
+        "manylinux_2_039",
+        "manylinux_2_0039",
+    ],
+)
+def test_builder_rejects_invalid_manylinux_even_when_lock_matches(
+    tmp_path: Path, python_version: str, cp_tag: str, manylinux: str
+) -> None:
+    filename = f"demo_dep-1.0-{cp_tag}-{cp_tag}-{manylinux}_x86_64.whl"
+    wheel_dir, lock = _sources(tmp_path, dependency_filename=filename)
+    output = tmp_path / "subminimum.bundle"
+    with pytest.raises(bundle.ToolkitBundleError, match="incompatible"):
+        bundle.pack_toolkit_bundle(
+            wheel_dir,
+            lock,
+            {**bundle.DEFAULT_TARGET, "python_version": python_version},
+            output,
+        )
+    assert not output.exists()
 
 
 def test_builder_rejects_future_manylinux_wheel_even_if_lock_matches(
@@ -232,6 +378,68 @@ def test_pack_cli_and_inspect_cli(tmp_path: Path) -> None:
         packed.stderr + inspected.stderr
     )
     assert json.loads(packed.stdout) == json.loads(inspected.stdout)
+
+    explicit_312 = tmp_path / "explicit-312.bundle"
+    explicit_process = subprocess.run(
+        [
+            sys.executable,
+            "-B",
+            str(SCRIPT),
+            "pack",
+            str(wheel_dir),
+            str(lock),
+            str(explicit_312),
+            "--python-version",
+            "3.12",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert explicit_process.returncode == 0, explicit_process.stderr
+    assert explicit_312.read_bytes() == output.read_bytes()
+    assert json.loads(explicit_process.stdout) == json.loads(packed.stdout)
+
+    explicit_311 = tmp_path / "explicit-311.bundle"
+    process_311 = subprocess.run(
+        [
+            sys.executable,
+            "-B",
+            str(SCRIPT),
+            "pack",
+            str(wheel_dir),
+            str(lock),
+            str(explicit_311),
+            "--python-version",
+            "3.11",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert process_311.returncode == 0, process_311.stderr
+    assert json.loads(process_311.stdout)["target"]["python_version"] == "3.11"
+    assert bundle.inspect_toolkit_bundle(explicit_311) == json.loads(process_311.stdout)
+
+    rejected = tmp_path / "invalid-version.bundle"
+    invalid = subprocess.run(
+        [
+            sys.executable,
+            "-B",
+            str(SCRIPT),
+            "pack",
+            str(wheel_dir),
+            str(lock),
+            str(rejected),
+            "--python-version",
+            "3.10",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert invalid.returncode == 2
+    assert not rejected.exists()
 
 
 @pytest.mark.parametrize(

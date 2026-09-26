@@ -48,6 +48,7 @@ DEFAULT_TARGET = {
     "python_version": "3.12",
     "platform": "linux_x86_64",
 }
+SUPPORTED_PYTHON_VERSIONS = frozenset({"3.11", "3.12"})
 BUNDLE_FIELDS = frozenset(
     {"schema", "classification", "target", "uv_lock_sha256", "wheels", "root_wheel"}
 )
@@ -103,14 +104,24 @@ def _exact_object(value: Any, fields: frozenset[str], label: str) -> dict[str, A
 
 def _target(value: Any) -> dict[str, str]:
     target = _exact_object(value, TARGET_FIELDS, "target")
-    if target != DEFAULT_TARGET:
+    if (
+        any(type(target[field]) is not str for field in TARGET_FIELDS)
+        or target["python_implementation"] != "CPython"
+        or target["python_version"] not in SUPPORTED_PYTHON_VERSIONS
+        or target["platform"] != "linux_x86_64"
+    ):
         raise ToolkitBundleError(
-            "target is not the supported CPython 3.12 Linux x86_64 target"
+            "target must declare CPython 3.11 or 3.12 on Linux x86_64"
         )
     return dict(target)
 
 
-def _filename(value: Any, *, require_compatible: bool = True) -> tuple[str, str]:
+def _filename(
+    value: Any,
+    *,
+    target: dict[str, str] | None = None,
+    require_compatible: bool = True,
+) -> tuple[str, str]:
     if (
         type(value) is not str
         or len(value) > 200
@@ -121,18 +132,34 @@ def _filename(value: Any, *, require_compatible: bool = True) -> tuple[str, str]
     if len(parts) != 5:
         raise ToolkitBundleError("wheel filename must have five standard components")
     distribution, version, python_tag, abi_tag, platform_tag = parts
-    if require_compatible and not _compatible_tags(python_tag, abi_tag, platform_tag):
-        raise ToolkitBundleError("wheel filename is incompatible with bundle target")
+    if require_compatible:
+        checked_target = _target(DEFAULT_TARGET if target is None else target)
+        if not _compatible_tags(
+            python_tag, abi_tag, platform_tag, checked_target["python_version"]
+        ):
+            raise ToolkitBundleError(
+                "wheel filename is incompatible with bundle target"
+            )
     return re.sub(r"[-_.]+", "-", distribution).casefold(), version
 
 
-def _compatible_tags(python_tag: str, abi_tag: str, platform_tag: str) -> bool:
+def _compatible_tags(
+    python_tag: str,
+    abi_tag: str,
+    platform_tag: str,
+    python_version: str = DEFAULT_TARGET["python_version"],
+) -> bool:
+    if python_version not in SUPPORTED_PYTHON_VERSIONS:
+        return False
+    target_minor = int(python_version.split(".")[1])
+    exact_python = f"py3{target_minor}"
+    exact_cpython = f"cp3{target_minor}"
     python_tags = python_tag.split(".")
     platforms = platform_tag.split(".")
     pure = (
         abi_tag == "none"
         and "any" in platforms
-        and any(tag in {"py3", "py312", "cp312"} for tag in python_tags)
+        and any(tag in {"py3", exact_python, exact_cpython} for tag in python_tags)
     )
     if pure:
         return True
@@ -157,17 +184,24 @@ def _compatible_tags(python_tag: str, abi_tag: str, platform_tag: str) -> bool:
         if tag in aliases:
             return aliases[tag] <= host_glibc
         match = re.fullmatch(r"manylinux_([0-9]+)_([0-9]+)_x86_64", tag)
-        return match is not None and tuple(map(int, match.groups())) <= host_glibc
+        if match is None:
+            return False
+        required_glibc = tuple(map(int, match.groups()))
+        if tag != f"manylinux_{required_glibc[0]}_{required_glibc[1]}_x86_64":
+            return False
+        return (2, 5) <= required_glibc <= host_glibc
 
     linux = any(supports_platform(tag) for tag in platforms)
     if not linux:
         return False
-    if abi_tag == "none" and any(tag in {"py3", "py312"} for tag in python_tags):
+    if abi_tag == "none" and any(tag in {"py3", exact_python} for tag in python_tags):
         return True
-    if abi_tag == "cp312" and "cp312" in python_tags:
+    if abi_tag == exact_cpython and exact_cpython in python_tags:
         return True
     return abi_tag == "abi3" and any(
-        tag.startswith("cp3") and tag[3:].isdigit() and int(tag[3:]) <= 12
+        tag.startswith("cp3")
+        and tag[3:].isdigit()
+        and 2 <= int(tag[3:]) <= target_minor
         for tag in python_tags
     )
 
@@ -192,7 +226,7 @@ def _manifest(data: bytes) -> dict[str, Any]:
         raise ToolkitBundleError("bundle.json schema must be integer 1")
     if manifest["classification"] != CLASSIFICATION:
         raise ToolkitBundleError("bundle.json classification is invalid")
-    _target(manifest["target"])
+    checked_target = _target(manifest["target"])
     if (
         type(manifest["uv_lock_sha256"]) is not str
         or SHA256_RE.fullmatch(manifest["uv_lock_sha256"]) is None
@@ -206,7 +240,7 @@ def _manifest(data: bytes) -> dict[str, Any]:
     for item in wheels:
         record = _exact_object(item, WHEEL_FIELDS, "wheel record")
         name, digest, size = record["filename"], record["sha256"], record["bytes"]
-        distribution, _version = _filename(name)
+        distribution, _version = _filename(name, target=checked_target)
         if type(digest) is not str or SHA256_RE.fullmatch(digest) is None:
             raise ToolkitBundleError("wheel SHA-256 is invalid")
         if type(size) is not int or not 1 <= size <= MAX_BUNDLE_BYTES:
@@ -479,7 +513,7 @@ def _inspect_bytes(data: bytes) -> tuple[dict[str, Any], dict[str, bytes]]:
         payload = entries["wheels/" + filename]
         if len(payload) != item["bytes"] or _sha(payload) != item["sha256"]:
             raise ToolkitBundleError("wheel bytes differ from bundle.json")
-        distribution, version = _filename(filename)
+        distribution, version = _filename(filename, target=manifest["target"])
         if distribution in seen_distributions:
             raise ToolkitBundleError("bundle has multiple wheels for one distribution")
         seen_distributions.add(distribution)
@@ -688,7 +722,7 @@ def pack_toolkit_bundle(
     roots: list[str] = []
     distributions: set[str] = set()
     for path in wheel_files:
-        distribution, version = _filename(path.name)
+        distribution, version = _filename(path.name, target=checked_target)
         if distribution in distributions:
             raise ToolkitBundleError(
                 "wheel_dir has multiple wheels for one distribution"
@@ -818,6 +852,9 @@ def main(argv: list[str] | None = None) -> int:
     pack.add_argument("wheel_dir")
     pack.add_argument("uv_lock")
     pack.add_argument("output")
+    pack.add_argument(
+        "--python-version", choices=sorted(SUPPORTED_PYTHON_VERSIONS), default="3.12"
+    )
     inspect = commands.add_parser("inspect")
     inspect.add_argument("bundle")
     extract = commands.add_parser("extract")
@@ -827,7 +864,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "pack":
             result = pack_toolkit_bundle(
-                args.wheel_dir, args.uv_lock, DEFAULT_TARGET, args.output
+                args.wheel_dir,
+                args.uv_lock,
+                {**DEFAULT_TARGET, "python_version": args.python_version},
+                args.output,
             )
         elif args.command == "extract":
             result = extract_toolkit_bundle(args.bundle, args.output_dir)

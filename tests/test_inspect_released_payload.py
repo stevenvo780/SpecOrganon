@@ -212,7 +212,9 @@ def _cli(schedule_path: Path, release: Path) -> subprocess.CompletedProcess[str]
     )
 
 
-def _bundle_bytes(tmp_path: Path, *, dependency: bool = False) -> bytes:
+def _bundle_bytes(
+    tmp_path: Path, *, dependency: bool = False, python_version: str = "3.12"
+) -> bytes:
     build_dir = tmp_path / "bundle-build"
     wheels = build_dir / "wheels"
     wheels.mkdir(parents=True)
@@ -239,7 +241,7 @@ def _bundle_bytes(tmp_path: Path, *, dependency: bool = False) -> bytes:
         lock,
         {
             "python_implementation": "CPython",
-            "python_version": "3.12",
+            "python_version": python_version,
             "platform": "linux_x86_64",
         },
         output,
@@ -432,6 +434,22 @@ def test_bundle_with_dependency_reports_uninspected_wheel_in_release(
     assert report["toolkit_dependency_wheel_format_checked"] is False
     assert report["toolkit_format_checked"] is False
     assert report["toolkit_wheel_count"] == 2
+    assert report["execution_ready"] is False
+
+
+def test_bundle_target_311_is_preserved_in_released_t(tmp_path: Path) -> None:
+    bundle = _bundle_bytes(tmp_path, python_version="3.11")
+    _, schedule_path, release, _ = _release(
+        tmp_path,
+        "T",
+        "R-F",
+        toolkit_bundle_bytes=bundle,
+    )
+    result = _cli(schedule_path, release)
+    assert result.returncode == 0, result.stderr
+    report = json.loads(result.stdout)
+    assert report["toolkit_format"] == "bundle"
+    assert report["toolkit_target"]["python_version"] == "3.11"
     assert report["execution_ready"] is False
 
 
