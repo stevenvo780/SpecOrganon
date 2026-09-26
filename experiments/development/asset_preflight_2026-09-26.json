@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_asset_preflight_no_reserved_assets",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3637ea6fde78933f5c6582238e83f6981fce627410bfdf1adb37b3711021c9e2",
+  "artifacts": {
+    "scripts/preflight_assets.py": "6e68b2e5d13abf605684ab10b3c6f010398dc430a179ce8489f9f91db98392d5",
+    "tests/test_preflight_assets.py": "44148dc4071c480ce1036706925644a6af9ce9754089e3b787380380da9524e7"
+  },
+  "scope": {
+    "scheduled_models_and_cases": "synthetic fixture only",
+    "asset_files_checked": 15,
+    "release_unit": "one scheduled run_id and its assigned arm",
+    "output_classification": "development_release_unsealed",
+    "provider_calls": 0,
+    "reserved_case_bytes": 0
+  },
+  "gates": [
+    {
+      "command": "uv run pytest -q tests/test_preflight_assets.py",
+      "result": "24 passed in 0.65s"
+    },
+    {
+      "command": "uv run pytest -q",
+      "result": "189 passed in 8.65s"
+    },
+    {
+      "command": "uv run ruff check scripts/preflight_assets.py tests/test_preflight_assets.py",
+      "result": "All checks passed!"
+    },
+    {
+      "command": "git diff --check",
+      "result": "exit 0"
+    }
+  ],
+  "adversarial_findings": [
+    {
+      "finding": "Opening a directory descriptor with os.fdopen failed during release.",
+      "resolution": "Reproduced, changed to dir_fd operations, and covered by real N/S/T CLI tests."
+    },
+    {
+      "finding": "A visible asset changed after its first hash could be copied.",
+      "resolution": "Copied bytes are rehashed and compared before the final manifest; a failed release leaves no valid manifest."
+    },
+    {
+      "finding": "A hidden reference changed after its first hash could go unnoticed at manifest time.",
+      "resolution": "Hidden references and rubric are reopened and rehashed just before the manifest. This remains a point-in-time check."
+    },
+    {
+      "finding": "A hostile process with the same UID can replace a newly created directory even under a private parent.",
+      "resolution": "The script rejects a symlink or group/other-writable parent, but same-UID hostility needs a separate custodian account and access controls."
+    },
+    {
+      "finding": "Hashes do not reveal a hidden answer embedded as a fragment or paraphrase in a visible asset.",
+      "resolution": "Independent human content review remains required before any reserved release."
+    }
+  ],
+  "not_performed": [
+    "No sealed registry, independent custodian, or real reserved case files.",
+    "No model execution, receipt, telemetry, independent rating, or field trial.",
+    "No proof of provider access, prices, reviewer identity, or authorized resources."
+  ]
+}
