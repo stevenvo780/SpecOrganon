@@ -2,7 +2,10 @@
 
 Usage: ``python scripts/audit_blind_ratings.py manifest.json ratings.json``.
 Either path may be ``-`` for stdin, but not both. The script reads JSON and
-prints JSON; it never opens the referenced artifact, rubric, or trace bytes.
+prints JSON; it never opens the referenced blinded result package, rubric,
+or blinded trace bytes. Here ``artifact_sha256`` names the blinded package,
+which can differ from a terminal execution receipt's artifact digest after
+selection or redaction. ``trace_sha256`` similarly names the blinded trace.
 
 Schema 1 uses this shape (digests are lowercase SHA-256 hex strings)::
 
