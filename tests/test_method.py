@@ -1,9 +1,12 @@
-"""Behavioral tests using declared synthetic inputs, not field observations."""
+"""Behavioral tests using synthetic inputs and committed ledgers, not field observations."""
+
+from pathlib import Path
 
 import pytest
 
 from specorganon import engine
 from specorganon.ledger import read_project
+from specorganon.runner import next_task
 from specorganon.workflow import PHASES
 
 
@@ -126,6 +129,89 @@ def test_full_synthetic_workflow_and_late_evidence_revision(tmp_path):
     assert state["items"]["req1"]["stale"]
     assert not state["phases"]["validate"]["accepted"]
     assert "e1" in {item["id"] for item in engine.trace(path, "req1")["ancestors"]}
+
+
+@pytest.mark.parametrize("case_name", ("mango", "citibike", "synthetic_multiagent"))
+def test_existing_ledgers_without_item_reviews_keep_accepted_frame(case_name):
+    path = Path(__file__).resolve().parents[1] / "cases" / case_name
+    events = read_project(path)["events"]
+    assert not any(event["kind"] == "item_review" for event in events)
+    recorded_review = next(event for event in reversed(events)
+                           if event["kind"] == "phase_review" and event["payload"]["phase"] == "frame")
+
+    frame = engine.gate(path, "frame")
+    assert frame["snapshot"] == recorded_review["payload"]["snapshot"]
+    assert frame["ready"] and frame["reviewed"] and frame["accepted"]
+
+
+def test_rejected_item_review_revokes_dependent_phases_until_fresh_advances(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    before = engine.get_state(path)
+
+    with pytest.raises(engine.MethodError, match="reviewer must differ"):
+        engine.review_item(path, "req1", "reject", "author cannot reject own work", "agent:analyst")
+    engine.review_item(path, "req1", "reject", "requirement is unsound", "agent:reviewer")
+    state = engine.get_state(path)
+    assert any("latest item review rejected" in issue for issue in state["items"]["req1"]["issues"])
+    assert any("rejected item review of req1" in issue for issue in state["items"]["crit1"]["issues"])
+    assert any("rejected item review of req1" in issue for issue in state["items"]["impl1"]["issues"])
+    assert state["phases"]["compare"]["accepted"]
+    assert state["phases"]["specify"]["snapshot"] != before["phases"]["specify"]["snapshot"]
+    for phase in ("specify", "build", "validate"):
+        assert not state["phases"][phase]["ready"]
+        assert not state["phases"][phase]["accepted"]
+    task = next_task(path)
+    assert (task["status"], task["phase"], task["action"]) == ("pending", "specify", "repair_artifacts")
+    with pytest.raises(engine.MethodError, match="phase cannot be accepted"):
+        engine.review_phase(path, "specify", "accept", "premature review", "agent:reviewer")
+
+    engine.review_item(path, "req1", "accept", "rechecked requirement", "agent:reviewer")
+    state = engine.get_state(path)
+    assert state["phases"]["specify"]["ready"]
+    assert not state["phases"]["specify"]["accepted"]
+    assert not any("rejected item review" in issue for issue in state["items"]["req1"]["issues"])
+    assert next_task(path)["action"] == "review_phase"
+    with pytest.raises(engine.MethodError, match="accepted review of its current snapshot"):
+        engine.advance(path, "specify", "agent:lead")
+    for phase in ("specify", "build", "validate"):
+        _accept(path, phase)
+    assert all(engine.gate(path, phase.id)["accepted"] for phase in PHASES)
+
+
+def test_rejected_review_of_older_version_does_not_reject_revised_item(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    engine.review_item(path, "req1", "reject", "first version is unsound", "agent:reviewer")
+    _put(path, "req1", "requirement", ["d1"], text="revised requirement")
+    state = engine.get_state(path)
+    assert state["items"]["req1"]["version"] == 2
+    assert not any("rejected item review" in issue for issue in state["items"]["req1"]["issues"])
+    assert state["items"]["crit1"]["stale"]
+
+    for item_id in ("crit1", "impl1", "t1", "base1", "res1", "ass1"):
+        item = engine.get_state(path)["items"][item_id]
+        _put(path, item_id, item["kind"], item["deps"], item["data"], item["text"])
+    assert engine.gate(path, "specify")["ready"]
+    for phase in ("specify", "build", "validate"):
+        _accept(path, phase)
+    assert all(engine.gate(path, phase.id)["accepted"] for phase in PHASES)
+
+
+def test_terminal_item_reacceptance_cannot_restore_old_phase_advance(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    original_snapshot = engine.gate(path, "frame")["snapshot"]
+    engine.review_item(path, "b1", "reject", "boundary excludes an affected group", "agent:reviewer")
+    assert not engine.gate(path, "frame")["accepted"]
+
+    engine.review_item(path, "b1", "accept", "boundary rechecked", "agent:reviewer")
+    status = engine.gate(path, "frame")
+    assert status["ready"]
+    assert not status["accepted"]
+    assert status["snapshot"] != original_snapshot
+    task = next_task(path)
+    assert (task["phase"], task["action"]) == ("frame", "review_phase")
 
 
 @pytest.mark.parametrize(("origin", "expected_blocker"), (

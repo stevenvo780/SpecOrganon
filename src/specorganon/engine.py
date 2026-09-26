@@ -346,11 +346,21 @@ def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
     automatic = _automatic_conflicts(state, active_resolutions)
     for item_id in automatic:
         contested |= _dependents(items, item_id)
+    # Rejection concerns the current version and every artifact that relies on it;
+    # it does not make unchanged dependency versions "stale".
+    review_issues: dict[str, list[str]] = {}
+    for item_id, item in items.items():
+        review = state["item_reviews"].get((item_id, item["version"]))
+        if review is not None and review["verdict"] == "reject":
+            for dependent_id in _dependents(items, item_id):
+                issue = ("latest item review rejected this version" if dependent_id == item_id
+                         else f"depends on rejected item review of {item_id}")
+                review_issues.setdefault(dependent_id, []).append(issue)
     return {
         item_id: {
             "stale": _stale(items, item_id),
             "contested": item_id in contested,
-            "issues": _item_issues(item) + automatic.get(item_id, []),
+            "issues": _item_issues(item) + automatic.get(item_id, []) + review_issues.get(item_id, []),
             "approved": (item_id, item["version"]) in state["approvals"],
             "approval_status": state["approval_statuses"].get((item_id, item["version"]), "missing"),
         }
@@ -589,7 +599,19 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
             (item["id"], item["version"], flags[item["id"]]["stale"], flags[item["id"]]["contested"], flags[item["id"]]["issues"])
             for item in state["items"].values() if KIND_TO_PHASE[item["kind"]] == phase.id
         )
-        snapshot = _hash({"phase": phase.id, "items": items, "previous_marker": previous_marker, "challenges": challenge_history})
+        # A new item verdict needs a new phase review and advance, even when an
+        # accepted verdict removes the rejection issue from an unchanged item.
+        item_reviews = sorted(
+            (item_id, review["seq"], review["verdict"])
+            for item_id in relevant_ids
+            if (review := state["item_reviews"].get((item_id, state["items"][item_id]["version"]))) is not None
+        )
+        snapshot_data = {"phase": phase.id, "items": items,
+                         "previous_marker": previous_marker, "challenges": challenge_history}
+        # Existing ledgers recorded this payload without an item_reviews key.
+        if item_reviews:
+            snapshot_data["item_reviews"] = item_reviews
+        snapshot = _hash(snapshot_data)
         blockers = _phase_blockers(state, phase.id, previous_accepted, flags)
         reviews = [review for review in state["phase_reviews"] if review["phase"] == phase.id and review["snapshot"] == snapshot]
         review = reviews[-1] if reviews else None

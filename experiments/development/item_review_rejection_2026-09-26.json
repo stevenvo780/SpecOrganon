@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_method_gate_regression",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "baseline_commit": "adc263a451b5659f1332b7b1669150d70bb55d39",
+  "baseline_sha256": {
+    "src/specorganon/engine.py": "a2762345677cc7d7e39555ea38ec2b94e1270b6ee159687e5ca73a5c9e10603b",
+    "tests/test_method.py": "1b296525bfbf89fd96b61285c2b7a7ae158b659dcfc5c0e599bd75209ce6a04a"
+  },
+  "current_sha256": {
+    "src/specorganon/engine.py": "c654c52b4767d377516c8ff18291c452685db63c7353a7dfbc9a7ba458c043e0",
+    "tests/test_method.py": "344d78be3d3468efe84a152122746a69c099c46dd5e61514a25306d6cee5cccb"
+  },
+  "reproduction": {
+    "fixture": "The full nine-phase synthetic case built by _complete_synthetic_case in tests/test_method.py.",
+    "action": "Call review_item(case, 'req1', 'reject', reason, independent_reviewer) after all nine phases have been accepted.",
+    "baseline": {
+      "specify_build_validate_accepted": true,
+      "req1_has_rejection_issue": false,
+      "runner_next_task_action": "complete",
+      "reject_then_accept_restores_old_snapshot_without_new_phase_review": true
+    },
+    "current": {
+      "req1_and_dependents_have_rejection_issues": true,
+      "specify_build_validate_accepted": false,
+      "runner_next_task_action": "repair_artifacts",
+      "reject_then_accept_requires_fresh_phase_review_and_advance": true,
+      "rejected_review_of_prior_item_version_does_not_reject_current_revision": true,
+      "terminal_item_review_changes_its_phase_snapshot": true,
+      "existing_no_item_review_snapshots_preserved": true
+    }
+  },
+  "mechanism": "The current version's latest item review contributes rejection issues to that item and its dependents. Current review sequence and verdict contribute to relevant phase snapshots; without relevant item reviews the historical snapshot payload is unchanged. The stale flag remains reserved for changed dependency versions.",
+  "compatibility_controls": {
+    "ledgers": ["cases/mango/organon.json", "cases/citibike/organon.json", "cases/synthetic_multiagent/organon.json"],
+    "item_review_events_in_each": 0,
+    "frame_snapshot_matches_latest_recorded_review": true,
+    "frame_ready_reviewed_accepted": true,
+    "ledgers_rewritten": false
+  },
+  "wheel": {
+    "sha256": "975603b3c8f10b77d1fea18d9fcab97599f36d64f758d1e8abeb72c39f845ddf",
+    "python_versions": ["3.11.15", "3.12.3"],
+    "fresh_installs_smoke_exit_code": [0, 0],
+    "cli_commands_exercised_each": 14,
+    "mcp_tools_exercised_each": 14,
+    "transport_parity_operations_each": 14,
+    "phases_accepted_each": 9,
+    "items_each": 29,
+    "revision_each": 49
+  },
+  "gates": {
+    "PYTHONPATH=src pytest -q tests/test_method.py tests/test_runner.py": "53 passed",
+    "uv run pytest -q": "533 passed",
+    "uv run ruff check .": "All checks passed!",
+    "uv build --wheel": "Successfully built specorganon-0.1.0-py3-none-any.whl",
+    "git diff --check": "passed"
+  },
+  "limits": [
+    "All case data and reviews in this regression are synthetic. Actor labels do not authenticate reviewer identity or competence.",
+    "The correction closes a structural acceptance bypass but does not establish source truth or human normative approval in real cases.",
+    "Other untested gate paths may still exist; criterion 2 remains not demonstrated."
+  ],
+  "criterion_2": "not_assessed"
+}
