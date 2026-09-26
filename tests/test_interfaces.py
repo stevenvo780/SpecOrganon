@@ -251,6 +251,74 @@ def test_bad_cli_json_preserves_case(tmp_path):
     assert (case / "organon.json").read_bytes() == before
 
 
+def test_cli_and_mcp_guarded_puts_reject_stale_versions_without_writing(tmp_path):
+    case = tmp_path / "guarded-case"
+    path = str(case)
+    cli("init", path, "--title", "Guarded writes", "--domain", "test", "--actor", "human:fixture",
+        "--approval-policy", "fixture")
+    project_file = case / "organon.json"
+    cli("put", path, "p1", "--kind", "problem", "--text", "Initial problem", "--actor", "agent:writer",
+        "--expected-version", "0", "--expected-deps", "{}")
+
+    async def exercise() -> None:
+        params = StdioServerParameters(command=str(MCP), cwd=str(tmp_path), env=os.environ.copy())
+        async with Client(params, mode="legacy") as client:
+            result_data(await client.call_tool("put", {
+                "path": path, "id": "a1", "kind": "actor", "text": "Initial actor", "refs": ["p1"],
+                "data": {}, "actor": "agent:writer", "expected_version": 0, "expected_deps": {"p1": 1},
+            }))
+            assert cli("status", path)["items"]["a1"]["deps"] == {"p1": 1}
+
+            cli("put", path, "p1", "--kind", "problem", "--text", "Revised problem",
+                "--actor", "agent:writer", "--expected-version", "1", "--expected-deps", "{}")
+            before = project_file.read_bytes()
+            stale_target = subprocess.run([
+                str(CLI), "put", path, "p1", "--kind", "problem", "--text", "Lost update",
+                "--actor", "agent:writer", "--expected-version", "1", "--expected-deps", "{}",
+            ], text=True, capture_output=True)
+            assert stale_target.returncode != 0
+            assert "item version conflict" in stale_target.stderr
+            assert project_file.read_bytes() == before
+
+            stale_target_mcp = await client.call_tool("put", {
+                "path": path, "id": "p1", "kind": "problem", "text": "Lost update", "refs": [],
+                "data": {}, "actor": "agent:writer", "expected_version": 1, "expected_deps": {},
+            })
+            assert stale_target_mcp.is_error
+            assert project_file.read_bytes() == before
+
+            stale_ref = subprocess.run([
+                str(CLI), "put", path, "a1", "--kind", "actor", "--text", "Stale actor",
+                "--ref", "p1", "--actor", "agent:writer", "--expected-version", "1",
+                "--expected-deps", '{"p1": 1}',
+            ], text=True, capture_output=True)
+            assert stale_ref.returncode != 0
+            assert "dependency version conflict" in stale_ref.stderr
+            assert project_file.read_bytes() == before
+
+            stale_ref_mcp = await client.call_tool("put", {
+                "path": path, "id": "a1", "kind": "actor", "text": "Stale actor", "refs": ["p1"],
+                "data": {}, "actor": "agent:writer", "expected_version": 1, "expected_deps": {"p1": 1},
+            })
+            assert stale_ref_mcp.is_error
+            assert project_file.read_bytes() == before
+
+            cli("put", path, "a1", "--kind", "actor", "--text", "Actor with revised problem",
+                "--ref", "p1", "--actor", "agent:writer", "--expected-version", "1",
+                "--expected-deps", '{"p1": 2}')
+            result_data(await client.call_tool("put", {
+                "path": path, "id": "a1", "kind": "actor", "text": "Actor clarified", "refs": ["p1"],
+                "data": {}, "actor": "agent:writer", "expected_version": 2, "expected_deps": {"p1": 2},
+            }))
+            state = cli("status", path)
+            assert state["items"]["p1"]["version"] == 2
+            assert state["items"]["a1"]["version"] == 3
+            assert state["items"]["a1"]["deps"] == {"p1": 2}
+            assert len(json.loads(project_file.read_text())["events"]) == 5
+
+    asyncio.run(exercise())
+
+
 def test_mcp_auto_mode_confines_cases_to_explicit_root(tmp_path):
     root = tmp_path / "allowed"
     launch = tmp_path / "launch"

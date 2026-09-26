@@ -113,6 +113,9 @@ def test_invalid_manifest_is_rejected_before_any_write(tmp_path):
         {"schema": 1, "steps": [good, {"op": "approve", "id": "n1"}]},
         {"schema": 1, "steps": [good, {"op": "put", "id": "a1", "kind": [], "text": "Actor", "refs": [], "data": {}}]},
         {"schema": 1, "steps": [good, {"op": "put", "id": "a1", "kind": "actor", "text": "Actor", "refs": ["later"], "data": {}}]},
+        {"schema": 1, "steps": [good, {"op": "put", "id": "a1", "kind": "actor", "text": "Actor", "refs": ["p1"], "data": {}, "expected_deps": {}}]},
+        {"schema": 1, "steps": [good, {"op": "put", "id": "a1", "kind": "actor", "text": "Actor", "refs": ["p1"], "data": {}, "expected_deps": {"p1": True}}]},
+        {"schema": 1, "steps": [good, {"op": "put", "id": "a1", "kind": "actor", "text": "Actor", "refs": ["p1"], "data": {}, "expected_deps": {"p1": 2}}]},
         {"schema": 1, "steps": [good, {"op": "advance", "phase": []}]},
         {"schema": 1, "steps": [good, {"op": "put", "id": "p1", "kind": "problem", "text": "Other", "refs": [], "data": {}}]},
     ]
@@ -154,6 +157,109 @@ def test_explicit_item_revision_is_idempotent(tmp_path):
     again = _subprocess_custom(case, manifest)
     assert again["applied"] == 0 and again["skipped"] == 1
     assert engine.get_state(case)["revision"] == 2
+
+
+def test_earlier_manifest_ref_uses_declared_result_version_without_mutating_manifest(tmp_path):
+    case = tmp_path / "case"
+    engine.create_case(case, "Local reference revision", "fixture", "human:fixture", approval_policy="fixture")
+    engine.put_item(case, "p1", "problem", "Initial problem", [], {}, "agent:writer")
+    manifest = {"schema": 1, "steps": [
+        {"op": "put", "id": "p1", "kind": "problem", "text": "Revised problem", "refs": [],
+         "data": {}, "expected_version": 1},
+        {"op": "put", "id": "a1", "kind": "actor", "text": "Actor for revised problem", "refs": ["p1"],
+         "data": {}},
+    ]}
+    original = json.dumps(manifest, sort_keys=True)
+    assert run_manifest(case, manifest, "agent:runner")["applied"] == 2
+    assert engine.get_state(case)["items"]["a1"]["deps"] == {"p1": 2}
+    assert run_manifest(case, manifest, "agent:runner")["skipped"] == 2
+    assert json.dumps(manifest, sort_keys=True) == original
+
+
+def test_external_ref_changed_after_manifest_draft_requires_expected_deps_before_write(tmp_path):
+    case = tmp_path / "case"
+    engine.create_case(case, "External reference", "fixture", "human:fixture", approval_policy="fixture")
+    engine.put_item(case, "p1", "problem", "Problem v1", [], {}, "agent:writer")
+    draft = {"schema": 1, "steps": [
+        {"op": "put", "id": "p2", "kind": "problem", "text": "Unrelated first step", "refs": [], "data": {}},
+        {"op": "put", "id": "a1", "kind": "actor", "text": "Actor drafted for p1 v1", "refs": ["p1"],
+         "data": {}},
+    ]}
+    engine.put_item(case, "p1", "problem", "Problem v2", [], {}, "agent:writer")
+    before = (case / "organon.json").read_bytes()
+
+    with pytest.raises(ManifestError, match="needs expected_deps for external refs"):
+        run_manifest(case, draft, "agent:runner")
+    assert (case / "organon.json").read_bytes() == before
+    assert "p2" not in engine.get_state(case)["items"]
+
+    pinned = {"schema": 1, "steps": [{**draft["steps"][1], "expected_deps": {"p1": 1}}]}
+    with pytest.raises(ManifestError, match="expected reference versions \\{'p1': 1\\}, found \\{'p1': 2\\}"):
+        run_manifest(case, pinned, "agent:runner")
+    assert (case / "organon.json").read_bytes() == before
+    assert "a1" not in engine.get_state(case)["items"]
+
+
+def test_manifest_expected_deps_precondition_guards_repair(tmp_path):
+    case = tmp_path / "case"
+    engine.create_case(case, "Dependency revision", "fixture", "human:fixture", approval_policy="fixture")
+    engine.put_item(case, "p1", "problem", "Initial problem", [], {}, "agent:writer")
+    create = {"schema": 1, "steps": [
+        {"op": "put", "id": "a1", "kind": "actor", "text": "Initial actor", "refs": ["p1"],
+         "data": {}, "expected_deps": {"p1": 1}},
+    ]}
+    assert run_manifest(case, create, "agent:runner")["applied"] == 1
+    assert run_manifest(case, create, "agent:runner")["skipped"] == 1
+
+    engine.put_item(case, "p1", "problem", "Revised problem", [], {}, "agent:writer")
+    with pytest.raises(ManifestError, match="expected reference versions"):
+        run_manifest(case, create, "agent:runner")
+    repair_step = {"op": "put", "id": "a1", "kind": "actor", "text": "Actor after revision",
+                   "refs": ["p1"], "data": {}, "expected_version": 1, "expected_deps": {"p1": 1}}
+    before = (case / "organon.json").read_bytes()
+    with pytest.raises(ManifestError, match="expected reference versions"):
+        run_manifest(case, {"schema": 1, "steps": [repair_step]}, "agent:runner")
+    assert (case / "organon.json").read_bytes() == before
+
+    repair_step["expected_deps"] = {"p1": 2}
+    assert run_manifest(case, {"schema": 1, "steps": [repair_step]}, "agent:runner")["applied"] == 1
+    repaired = engine.get_state(case)["items"]["a1"]
+    assert repaired["version"] == 2
+    assert repaired["deps"] == {"p1": 2}
+
+
+@pytest.mark.parametrize("competing_item", ["a1", "p1"])
+def test_direct_writer_race_at_runner_precheck_cannot_double_revise(tmp_path, monkeypatch, competing_item):
+    case = tmp_path / "case"
+    engine.create_case(case, "Direct writer race", "fixture", "human:fixture", approval_policy="fixture")
+    engine.put_item(case, "p1", "problem", "Initial problem", [], {}, "agent:writer")
+    engine.put_item(case, "a1", "actor", "Initial actor", ["p1"], {}, "agent:writer")
+    manifest = {"schema": 1, "steps": [
+        {"op": "put", "id": "a1", "kind": "actor", "text": "Runner revision", "refs": ["p1"],
+         "data": {}, "expected_version": 1, "expected_deps": {"p1": 1}},
+    ]}
+    original_put = engine.put_item
+
+    def race_before_runner_put(*args, **kwargs):
+        assert kwargs["expected_version"] == 1
+        assert kwargs["expected_deps"] == {"p1": 1}
+        if competing_item == "a1":
+            original_put(case, "a1", "actor", "Direct actor revision", ["p1"], {}, "agent:direct")
+        else:
+            original_put(case, "p1", "problem", "Direct problem revision", [], {}, "agent:direct")
+        return original_put(*args, **kwargs)
+
+    monkeypatch.setattr(engine, "put_item", race_before_runner_put)
+    with pytest.raises(ManifestError, match="step 0 failed"):
+        run_manifest(case, manifest, "agent:runner")
+
+    state = engine.get_state(case)
+    assert state["revision"] == 3
+    assert len(read_project(case)["events"]) == 3
+    assert read_project(case)["events"][-1]["actor"] == "agent:direct"
+    assert state["items"]["a1"]["version"] == (2 if competing_item == "a1" else 1)
+    assert state["items"]["p1"]["version"] == (2 if competing_item == "p1" else 1)
+    assert state["items"]["a1"]["text"] != "Runner revision"
 
 
 def test_concurrent_replays_do_not_duplicate_events(tmp_path):
@@ -245,7 +351,8 @@ def test_runner_repairs_stale_item_and_keeps_unrelated_branch_open(tmp_path):
     engine.put_item(case, "p1", "problem", "Revised framing", [], {}, "agent:writer")
     assert engine.get_state(case)["items"]["a1"]["stale"]
     repair = {"schema": 1, "steps": [
-        {"op": "put", "id": "a1", "kind": "actor", "text": "Affected group under revised framing", "refs": ["p1"], "data": {}, "expected_version": 1},
+        {"op": "put", "id": "a1", "kind": "actor", "text": "Affected group under revised framing", "refs": ["p1"],
+         "data": {}, "expected_version": 1, "expected_deps": {"p1": 2}},
     ]}
     result = run_manifest(case, repair, "agent:runner")
     assert result["applied"] == 1

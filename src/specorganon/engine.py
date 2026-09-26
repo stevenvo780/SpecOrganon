@@ -16,12 +16,13 @@ from pathlib import Path
 from typing import Any
 
 from . import approval
-from .ledger import ZERO_HASH, LedgerError, append_event, init_project, read_project
+from .ledger import ZERO_HASH, ConflictError, LedgerError, append_event, init_project, read_project
 from .workflow import KIND_TO_PHASE, KINDS, PHASES, PHASE_BY_ID
 
 
 ITEM_ID = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,63}$")
 VERDICTS = {"accept", "reject"}
+_PUT_MAX_RETRIES = 3
 
 
 class MethodError(LedgerError):
@@ -500,7 +501,8 @@ def create_case(path: str | Path, title: str, domain: str, actor: str, approval_
     return get_state(path)
 
 
-def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str) -> dict[str, Any]:
+def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+             expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
     if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
         raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
     if kind not in KINDS:
@@ -511,24 +513,58 @@ def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], d
         raise MethodError("refs must be a list of distinct item ids")
     if not isinstance(data, dict):
         raise MethodError("data must be an object")
+    if (expected_version is not None and (not isinstance(expected_version, int) or isinstance(expected_version, bool)
+                                          or expected_version < 0)):
+        raise MethodError("expected_version must be a nonnegative integer")
+    if (expected_deps is not None and (not isinstance(expected_deps, dict) or set(expected_deps) != set(refs)
+                                      or any(not isinstance(version, int) or isinstance(version, bool) or version < 1
+                                             for version in expected_deps.values()))):
+        raise MethodError("expected_deps must map exactly the refs to positive integer versions")
     state = _project(path)
     items = state["items"]
     if any(ref not in items for ref in refs):
         raise MethodError(f"unknown references: {sorted(set(refs) - set(items))}")
+    observed_version = items[id]["version"] if id in items else 0
+    observed_deps = {ref: items[ref]["version"] for ref in refs}
+    if expected_version is not None and expected_version != observed_version:
+        raise ConflictError(f"item version conflict: expected {expected_version}, current {observed_version}")
+    if expected_deps is not None and expected_deps != observed_deps:
+        raise ConflictError("item dependency version conflict")
     if id in refs or any(id in _ancestors(items, ref) for ref in refs):
         raise MethodError("dependency cycle")
     if id in items and items[id]["kind"] != kind:
         raise MethodError("an item's kind cannot change across revisions")
+    case_id = state["project"].get("case_id")
     item = {
         "id": id,
         "kind": kind,
-        "version": items[id]["version"] + 1 if id in items else 1,
+        "version": observed_version + 1,
         "text": text.strip(),
-        "deps": {ref: items[ref]["version"] for ref in refs},
+        "deps": observed_deps,
         "data": data,
     }
-    event = append_event(path, "item_put", item, actor, expected_seq=state["revision"])
-    return {**item, "seq": event["seq"], "author": actor}
+    guarded = expected_version is not None and (not refs or expected_deps is not None)
+    for attempt in range(_PUT_MAX_RETRIES + 1):
+        if attempt:
+            state = _project(path)
+            items = state["items"]
+            if state["project"].get("case_id") != case_id:
+                raise ConflictError("case changed during item put")
+            current = items.get(id)
+            if (current["version"] if current else 0) != observed_version:
+                raise ConflictError("item changed during item put")
+            if any(ref not in items or items[ref]["version"] != version for ref, version in observed_deps.items()):
+                raise ConflictError("item dependency changed during item put")
+            if id in refs or any(id in _ancestors(items, ref) for ref in refs):
+                raise MethodError("dependency cycle")
+        try:
+            event = append_event(path, "item_put", item, actor, expected_seq=state["revision"])
+        except ConflictError:
+            if not guarded or attempt == _PUT_MAX_RETRIES:
+                raise
+        else:
+            return {**item, "seq": event["seq"], "author": actor}
+    raise AssertionError("unreachable item put retry state")
 
 
 def review_item(path: str | Path, id: str, verdict: str, reason: str, actor: str) -> dict[str, Any]:

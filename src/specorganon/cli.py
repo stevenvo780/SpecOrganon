@@ -61,6 +61,16 @@ def _json_roles(raw: str) -> dict[str, Any]:
     return value
 
 
+def _json_expected_deps(raw: str) -> dict[str, Any]:
+    try:
+        value = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise argparse.ArgumentTypeError(f"invalid --expected-deps JSON object: {exc.msg}") from exc
+    if not isinstance(value, dict):
+        raise argparse.ArgumentTypeError("--expected-deps must be a JSON object")
+    return value
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="organon",
@@ -84,6 +94,9 @@ def build_parser() -> argparse.ArgumentParser:
     put.add_argument("--ref", action="append", dest="refs", default=[], help="Referenced item ID; repeatable")
     put.add_argument("--data", type=_json_object, default={}, help="JSON object with structured fields")
     put.add_argument("--actor", required=True)
+    put.add_argument("--expected-version", type=int, help="Current item version; 0 requires an absent item")
+    put.add_argument("--expected-deps", type=_json_expected_deps,
+                     help="JSON object mapping every referenced item ID to its expected version")
 
     status = commands.add_parser("status", help="Read the current case state")
     status.add_argument("path")

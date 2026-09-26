@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from . import engine
+from .ledger import ConflictError
 from .workflow import KIND_TO_PHASE, KINDS, PHASES, PHASE_BY_ID
 
 
@@ -198,7 +199,7 @@ def _manifest_steps(manifest: dict[str, Any]) -> list[dict[str, Any]]:
         op = step.get("op")
         if op == "put":
             required = {"op", "id", "kind", "text", "refs", "data"}
-            if required - set(step) or set(step) - required - {"expected_version"}:
+            if required - set(step) or set(step) - required - {"expected_version", "expected_deps"}:
                 raise ManifestError(f"step {index} has missing or unknown put fields")
             if not isinstance(step["id"], str) or not engine.ITEM_ID.fullmatch(step["id"]):
                 raise ManifestError(f"step {index} has invalid item id")
@@ -215,6 +216,11 @@ def _manifest_steps(manifest: dict[str, Any]) -> list[dict[str, Any]]:
             expected = step.get("expected_version", 0)
             if type(expected) is not int or expected < 0:
                 raise ManifestError(f"step {index} expected_version must be a nonnegative integer")
+            if "expected_deps" in step:
+                deps = step["expected_deps"]
+                if (not isinstance(deps, dict) or set(deps) != set(refs)
+                        or any(type(version) is not int or version < 1 for version in deps.values())):
+                    raise ManifestError(f"step {index} expected_deps must map every ref to a positive version")
         elif op == "advance":
             if set(step) != {"op", "phase"} or not isinstance(step["phase"], str) or step["phase"] not in PHASE_BY_ID:
                 raise ManifestError(f"step {index} needs a known phase")
@@ -228,6 +234,28 @@ def _manifest_steps(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     except (TypeError, ValueError) as exc:
         raise ManifestError("manifest must contain finite JSON values") from exc
     return manifest["steps"]
+
+
+def _expected_step_deps(steps: list[dict[str, Any]]) -> list[dict[str, int] | None]:
+    """Pin each put to declared or earlier manifest item versions."""
+    planned_versions: dict[str, int] = {}
+    expectations: list[dict[str, int] | None] = []
+    for index, step in enumerate(steps):
+        if step["op"] != "put":
+            expectations.append(None)
+            continue
+        external_refs = set(step["refs"]) - planned_versions.keys()
+        if external_refs and "expected_deps" not in step:
+            raise ManifestError(f"step {index} needs expected_deps for external refs: {sorted(external_refs)}")
+        deps = (dict(step["expected_deps"]) if "expected_deps" in step
+                else {ref: planned_versions[ref] for ref in step["refs"]})
+        mismatched = {ref: planned_versions[ref] for ref in step["refs"]
+                      if ref in planned_versions and deps[ref] != planned_versions[ref]}
+        if mismatched:
+            raise ManifestError(f"step {index} expected_deps conflicts with earlier manifest versions: {mismatched}")
+        expectations.append(deps)
+        planned_versions[step["id"]] = step.get("expected_version", 0) + 1
+    return expectations
 
 
 def _response(path: str | Path, status: str, cursor: int, total: int, applied: int, skipped: int, reason: str | None = None) -> dict[str, Any]:
@@ -253,7 +281,7 @@ def _pending_reason(task: dict[str, Any]) -> str:
 
 @contextmanager
 def _run_lock(path: str | Path) -> Iterator[None]:
-    """Serialize manifest replays across processes without changing the ledger."""
+    """Serialize all manifest executions for a case without changing the ledger."""
     with (Path(path) / ".organon.runner.lock").open("a+") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
         try:
@@ -290,16 +318,21 @@ def _apply_manifest(path: str | Path, steps: list[dict[str, Any]], actor: str) -
             if step["id"] in step["refs"]:
                 raise ManifestError(f"step {index} references itself")
             known_ids.add(step["id"])
+    expectations = _expected_step_deps(steps)
     applied = skipped = 0
     for index, step in enumerate(steps):
         state = engine.get_state(path)
         item = state["items"].get(step["id"]) if step["op"] == "put" else None
         if step["op"] == "put":
             expected = step.get("expected_version", 0)
+            expected_deps = expectations[index]
+            assert expected_deps is not None
             ref_versions = {ref: state["items"][ref]["version"] for ref in step["refs"]}
+            if expected_deps != ref_versions:
+                raise ManifestError(f"step {index} expected reference versions {expected_deps}, found {ref_versions}")
             if item is not None and item["version"] == expected + 1:
                 if (item["kind"], item["text"], item["deps"], item["data"]) != (
-                    step["kind"], step["text"].strip(), ref_versions, step["data"]
+                    step["kind"], step["text"].strip(), expected_deps, step["data"]
                 ):
                     raise ManifestError(f"step {index} diverges from item {step['id']} version {item['version']}")
                 skipped += 1
@@ -309,8 +342,9 @@ def _apply_manifest(path: str | Path, steps: list[dict[str, Any]], actor: str) -
             if item is None and expected != 0:
                 raise ManifestError(f"step {index} expected missing item {step['id']} at version {expected}")
             try:
-                engine.put_item(path, step["id"], step["kind"], step["text"], step["refs"], step["data"], actor)
-            except engine.MethodError as exc:
+                engine.put_item(path, step["id"], step["kind"], step["text"], step["refs"], step["data"], actor,
+                                expected_version=expected, expected_deps=expected_deps)
+            except (engine.MethodError, ConflictError) as exc:
                 raise ManifestError(f"step {index} failed: {exc}") from exc
             applied += 1
         else:

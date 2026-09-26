@@ -122,13 +122,24 @@ def main() -> None:
                 # Complete the CLI command inventory on a separate synthetic case.
                 cli_case = str(Path(directory) / "cli-case")
                 command("init", cli_case, "--title", "CLI inventory fixture", "--domain", "fixture", "--actor", "human:fixture", "--approval-policy", "fixture")
-                command("put", cli_case, "p1", "--kind", "problem", "--text", "Fixture problem", "--actor", "agent:writer")
-                command("put", cli_case, "a1", "--kind", "actor", "--text", "Fixture actor", "--ref", "p1", "--actor", "agent:writer")
-                command("put", cli_case, "b1", "--kind", "boundary", "--text", "Fixture boundary", "--ref", "p1", "--actor", "agent:writer")
+                command("put", cli_case, "p1", "--kind", "problem", "--text", "Fixture problem", "--actor", "agent:writer",
+                        "--expected-version", "0")
+                cli_ledger = Path(cli_case) / "organon.json"
+                before_stale = cli_ledger.read_bytes()
+                stale = subprocess.run([
+                    str(cli), "put", cli_case, "p1", "--kind", "problem", "--text", "Competing create",
+                    "--actor", "agent:other", "--expected-version", "0",
+                ], text=True, capture_output=True, env=smoke_env)
+                assert stale.returncode != 0 and cli_ledger.read_bytes() == before_stale
+                command("put", cli_case, "a1", "--kind", "actor", "--text", "Fixture actor", "--ref", "p1",
+                        "--actor", "agent:writer", "--expected-version", "0", "--expected-deps", '{"p1":1}')
+                command("put", cli_case, "b1", "--kind", "boundary", "--text", "Fixture boundary", "--ref", "p1",
+                        "--actor", "agent:writer", "--expected-version", "0", "--expected-deps", '{"p1":1}')
                 command("review-phase", cli_case, "frame", "--verdict", "accept", "--reason", "Fixture review", "--actor", "agent:reviewer")
                 command("advance", cli_case, "frame", "--actor", "agent:writer")
                 objection = command("challenge", cli_case, "p1", "a1", "--reason", "Fixture dispute", "--actor", "agent:reviewer")
-                command("put", cli_case, "syn2", "--kind", "synthesis", "--text", "Fixture reconciliation", "--ref", "p1", "--ref", "a1", "--actor", "agent:writer")
+                command("put", cli_case, "syn2", "--kind", "synthesis", "--text", "Fixture reconciliation", "--ref", "p1", "--ref", "a1",
+                        "--actor", "agent:writer", "--expected-version", "0", "--expected-deps", '{"p1":1,"a1":1}')
                 command("review", cli_case, "syn2", "--verdict", "accept", "--reason", "Fixture source review", "--actor", "agent:reviewer")
                 command("resolve-challenge", cli_case, str(objection["seq"]), "syn2", "--actor", "agent:writer")
                 assert command("status", cli_case)["open_challenges"] == []
@@ -141,15 +152,23 @@ def main() -> None:
                     "path": mcp_path, "title": "MCP inventory fixture", "domain": "fixture",
                     "actor": "human:fixture", "approval_policy": "fixture",
                 }))
-                for item_id, kind, description, refs in (
-                    ("p1", "problem", "Synthetic problem", []),
-                    ("a1", "actor", "Synthetic affected actor", ["p1"]),
-                    ("b1", "boundary", "Synthetic boundary", ["p1"]),
+                for item_id, kind, description, refs, expected_deps in (
+                    ("p1", "problem", "Synthetic problem", [], {}),
+                    ("a1", "actor", "Synthetic affected actor", ["p1"], {"p1": 1}),
+                    ("b1", "boundary", "Synthetic boundary", ["p1"], {"p1": 1}),
                 ):
                     data(await call_tool("put", {
                         "path": mcp_path, "id": item_id, "kind": kind, "text": description,
-                        "refs": refs, "actor": "agent:writer",
+                        "refs": refs, "actor": "agent:writer", "expected_version": 0,
+                        "expected_deps": expected_deps,
                     }))
+                before_stale = (mcp_case / "organon.json").read_bytes()
+                stale_ref = await call_tool("put", {
+                    "path": mcp_path, "id": "stale", "kind": "actor", "text": "Stale reference",
+                    "refs": ["p1"], "actor": "agent:other", "expected_version": 0,
+                    "expected_deps": {"p1": 2},
+                })
+                assert stale_ref.is_error and (mcp_case / "organon.json").read_bytes() == before_stale
                 assert command("gate", mcp_path, "frame")["ready"]
                 data(await call_tool("review_phase", {
                     "path": mcp_path, "phase": "frame", "verdict": "accept",
@@ -179,6 +198,7 @@ def main() -> None:
                 data(await call_tool("put", {
                     "path": mcp_path, "id": "syn1", "kind": "synthesis",
                     "text": "Synthetic reconciliation", "refs": ["p1", "a1"], "actor": "agent:writer",
+                    "expected_version": 0, "expected_deps": {"p1": 1, "a1": 1},
                 }))
                 reviewed = data(await call_tool("review", {
                     "path": mcp_path, "id": "syn1", "verdict": "accept",
@@ -299,6 +319,7 @@ def main() -> None:
                         "decisions": decisions, "revision": status["revision"], "invalid_input_preserved_ledger": True,
                         "idempotent_replay": True, "cli_commands_exercised": len(cli_commands_seen),
                         "mcp_tools_exercised": len(mcp_tools_seen),
+                        "guarded_put": True,
                         "signed_approval_verified": True, "invalid_signatures_rejected": True,
                         "trust_removal_reopened": True}
 

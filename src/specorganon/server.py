@@ -53,7 +53,7 @@ def init(path: str, title: str, domain: str, actor: str, approval_policy: str = 
     return _invoke("init", path=path, title=title, domain=domain, actor=actor, approval_policy=approval_policy)
 
 
-@server.tool(description="Add or revise an evidence-linked case item; refs are item IDs.")
+@server.tool(description="Add or revise an evidence-linked case item; supply expected_version and expected_deps for guarded concurrent writes.")
 def put(
     path: str,
     id: str,
@@ -62,8 +62,11 @@ def put(
     actor: str,
     refs: list[str] | None = None,
     data: dict[str, Any] | None = None,
+    expected_version: int | None = None,
+    expected_deps: dict[str, int] | None = None,
 ) -> dict[str, Any]:
-    return _invoke("put", path=path, id=id, kind=kind, text=text, refs=refs or [], data=data or {}, actor=actor)
+    return _invoke("put", path=path, id=id, kind=kind, text=text, refs=refs or [], data=data or {}, actor=actor,
+                   expected_version=expected_version, expected_deps=expected_deps)
 
 
 @server.tool(description="Read the current case state.")
