@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_declared_field_preflight_regression",
+  "baseline_commit": "838c109d086285c5097b19070503269f3c5bd5dd",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "baseline_sha256": {
+    "scripts/audit_field_flows.py": "8355e7468c6026fbe3e2f5f0707da0c1a36d0eeda0dd93aa731d27cc8ad4d18a",
+    "tests/test_audit_field_flows.py": "cfc355825310d3775270870372ab9e6b077141d2835e7d100ce4f54712c1e380"
+  },
+  "current_sha256": {
+    "scripts/audit_field_flows.py": "99359c65b48633e1f64165dae2f9f6ca4d5bd53322a9cf4746b19836118e04e8",
+    "tests/test_audit_field_flows.py": "ecbf155f52b6c6450da6d157eac42bafeff577f0171fa73771dcd6248d2b2006"
+  },
+  "reproduction": {
+    "fixture": "field_data() from the test file at each revision; control-post-consumed terminal flow",
+    "method": "Load baseline script and test fixture from git show at baseline_commit; load current files from worktree. Change only the named safety or nutrition source on a fresh fixture for each run and call audit_field_flows. The baseline accepted all four mutations; the current implementation raised FieldFlowError.",
+    "mutations": [
+      {
+        "case": "safety_before_output",
+        "change": "Set outcome.safety.source.observed_at_utc to 2026-03-15T11:59:59Z, one second before terminal flow time",
+        "baseline_valid": true,
+        "baseline_criterion_3": "not_assessed",
+        "current_valid": false,
+        "current_error": "flows[15].outcome.safety.source.observed_at_utc predates terminal output flow"
+      },
+      {
+        "case": "nutrition_before_output",
+        "change": "Set outcome.nutrition.source.observed_at_utc to 2026-03-15T11:59:59Z, one second before terminal flow time",
+        "baseline_valid": true,
+        "baseline_criterion_3": "not_assessed",
+        "current_valid": false,
+        "current_error": "flows[15].outcome.nutrition.source.observed_at_utc predates terminal output flow"
+      },
+      {
+        "case": "safety_other_group",
+        "change": "Copy only outcome.safety.source from intervention-post-consumed to control-post-consumed",
+        "baseline_valid": true,
+        "baseline_criterion_3": "not_assessed",
+        "current_valid": false,
+        "current_error": "flows[15].outcome.safety.source.load_id does not match terminal flow.load_id"
+      },
+      {
+        "case": "nutrition_other_group",
+        "change": "Copy only outcome.nutrition.source from intervention-post-consumed to control-post-consumed",
+        "baseline_valid": true,
+        "baseline_criterion_3": "not_assessed",
+        "current_valid": false,
+        "current_error": "flows[15].outcome.nutrition.source.load_id does not match terminal flow.load_id"
+      }
+    ]
+  },
+  "positive_controls": {
+    "evidence_at_output": "valid:true in synthetic fixture",
+    "retrospective_evidence_at_2026_03_16": "valid:true and criterion_3:not_assessed in synthetic fixture",
+    "generic_evidence_schema": "four fields retained for ordinary source objects; load_id is required only for human-consumption safety and nutrition sources"
+  },
+  "gates": {
+    "uv run pytest -q tests/test_audit_field_flows.py": "57 passed",
+    "uv run pytest -q": "486 passed",
+    "uv run ruff check .": "All checks passed!",
+    "git diff --check": "passed"
+  },
+  "limits": [
+    "All fixture observations are invented development data. The preflight checks consistency of declared times and load IDs, not physical sample identity or authenticity of evidence.",
+    "A declarant can relabel a borrowed source; external custody, records, measurements and competent review remain necessary.",
+    "The script does not calculate V or G and does not establish field impact or criterion 3."
+  ],
+  "criterion_3": "not_assessed"
+}

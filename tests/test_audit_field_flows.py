@@ -36,21 +36,28 @@ def _flow(prefix: str, name: str, source: str | None, target: str | None,
           kind: str, value: float, destination: str | None = None,
           *, unit: str = "kg", load_id: str | None = None) -> dict[str, Any]:
     flow_id = f"{prefix}-{name}"
+    physical_load_id = load_id or f"load-{flow_id}"
     outcome = None
     dest = None
     if destination is not None:
         dest = {"kind": destination, "source": _evidence(flow_id + "-destination")}
         consumed = destination == "human_consumption"
+        safety_source = _evidence(flow_id + "-safety")
+        nutrition = None
+        if consumed:
+            safety_source["load_id"] = physical_load_id
+            nutrition_source = _evidence(flow_id + "-nutrition")
+            nutrition_source["load_id"] = physical_load_id
+            nutrition = {"status": "useful", "source": nutrition_source}
         outcome = {
             "status": "observed_consumed" if consumed else "observed_other",
             "mass": _mass(value, unit), "source": _evidence(flow_id + "-outcome"),
             "safety": {"status": "safe" if consumed else "not_assessed",
-                       "source": _evidence(flow_id + "-safety")},
-            "nutrition": ({"status": "useful", "source": _evidence(flow_id + "-nutrition")}
-                          if consumed else None),
+                       "source": safety_source},
+            "nutrition": nutrition,
         }
     return {
-        "id": flow_id, "load_id": load_id or f"load-{flow_id}",
+        "id": flow_id, "load_id": physical_load_id,
         "group_id": prefix.split("-")[0], "period": prefix.split("-")[1],
         "from_lot_id": source, "to_lot_id": target, "kind": kind,
         "mass": _mass(value, unit), "source": _evidence(flow_id),
@@ -201,6 +208,8 @@ def test_preflight_rejects_false_completeness_or_unjustified_service(change: str
         wash["output_flow_ids"].append("control-pre-transfer")
     elif change == "duplicate_physical_load":
         consumed["load_id"] = "load-control-pre-coproduct"
+        for evidence_kind in ("safety", "nutrition"):
+            consumed["outcome"][evidence_kind]["source"]["load_id"] = consumed["load_id"]
     elif change == "wrong_group_period":
         _by_id(data["flows"], "control-pre-transfer")["period"] = "post"
     elif change == "missing_moisture":
@@ -381,6 +390,48 @@ def test_within_period_chronology_is_checked(change: str, match: str) -> None:
     elif change == "outcome_before_destination":
         consumed["outcome"]["source"]["observed_at_utc"] = "2026-03-01T12:00:00Z"
     with pytest.raises(FieldFlowError, match=match):
+        audit_field_flows(data)
+
+
+@pytest.mark.parametrize("evidence_kind", ["safety", "nutrition"])
+def test_consumption_evidence_cannot_predate_terminal_output(evidence_kind: str) -> None:
+    data = field_data()
+    consumed = _by_id(data["flows"], "control-post-consumed")
+    consumed["outcome"][evidence_kind]["source"]["observed_at_utc"] = "2026-03-15T11:59:59Z"
+    with pytest.raises(
+        FieldFlowError,
+        match=rf"outcome\.{evidence_kind}\.source\.observed_at_utc predates terminal output flow",
+    ):
+        audit_field_flows(data)
+
+
+@pytest.mark.parametrize("observed_at", ["2026-03-15T12:00:00Z", "2026-03-16T12:00:00Z"])
+def test_consumption_evidence_may_be_at_output_or_after_consumption(observed_at: str) -> None:
+    data = field_data()
+    consumed = _by_id(data["flows"], "control-post-consumed")
+    assert consumed["source"]["observed_at_utc"] == consumed["outcome"]["source"]["observed_at_utc"]
+    for evidence_kind in ("safety", "nutrition"):
+        assert consumed["outcome"][evidence_kind]["source"]["load_id"] == consumed["load_id"]
+        consumed["outcome"][evidence_kind]["source"]["observed_at_utc"] = observed_at
+    assert audit_field_flows(data)["valid"] is True
+
+
+@pytest.mark.parametrize("evidence_kind", ["safety", "nutrition"])
+@pytest.mark.parametrize("change,match", [
+    ("copied_other_group", r"load_id does not match terminal flow\.load_id"),
+    ("missing_load_id", r"missing keys \['load_id'\]"),
+])
+def test_consumption_evidence_must_identify_its_own_physical_load(
+    evidence_kind: str, change: str, match: str
+) -> None:
+    data = field_data()
+    consumed = _by_id(data["flows"], "control-post-consumed")
+    if change == "copied_other_group":
+        other = _by_id(data["flows"], "intervention-post-consumed")
+        consumed["outcome"][evidence_kind]["source"] = copy.deepcopy(other["outcome"][evidence_kind]["source"])
+    else:
+        consumed["outcome"][evidence_kind]["source"].pop("load_id")
+    with pytest.raises(FieldFlowError, match=rf"outcome\.{evidence_kind}\.source.*{match}"):
         audit_field_flows(data)
 
 

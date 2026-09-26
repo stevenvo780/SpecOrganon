@@ -31,10 +31,16 @@ measurement. Nonhuman destinations are animal_feed, compost, fuel, landfill,
 wastewater, evaporation and industrial_use; their outcome status is
 observed_other and nutrition is null. Human consumption needs
 observed_consumed, ``safety.status: safe`` and ``nutrition: {status: useful,
-source}``. Retail sale or an unknown outcome is not a terminal observation.
+source}``. For human consumption, the safety and nutrition ``source`` objects
+each also declare the terminal flow's physical ``load_id``. This identifier is
+checked for consistency, not authenticated. Retail sale or an unknown outcome
+is not a terminal observation.
 Nonterminal flows have null destination and outcome.
 Observation times must follow input flow → lot operation → output flow →
 terminal destination → observed outcome within the declared period.
+For human consumption, safety and nutrition evidence must not predate the
+output flow; retrospective evidence after consumption remains permitted within
+the declared period.
 
 Each burden row has ``group_id``, ``period``, ``actor_id``, ``source``,
 ``net_income`` (in top-level currency), and nonnegative ``cost``,
@@ -177,6 +183,17 @@ def _period_evidence(value: Any, label: str, interval: tuple[datetime, datetime]
     return observed_at
 
 
+def _load_bound_period_evidence(value: Any, label: str, interval: tuple[datetime, datetime],
+                                expected_load_id: str) -> datetime:
+    source = _object(value, label, {"source_id", "locator", "observed_at_utc", "method", "load_id"})
+    evidence = {key: source[key] for key in ("source_id", "locator", "observed_at_utc", "method")}
+    observed_at = _period_evidence(evidence, label, interval)
+    declared_load_id = _text(source["load_id"], f"{label}.load_id")
+    if declared_load_id != expected_load_id:
+        raise FieldFlowError(f"{label}.load_id does not match terminal flow.load_id")
+    return observed_at
+
+
 def _mass(value: Any, label: str) -> tuple[Fraction, Fraction]:
     row = _object(value, label, {"value", "unit", "uncertainty"})
     unit = _choice(row["unit"], f"{label}.unit", set(MASS_FACTORS))
@@ -245,14 +262,23 @@ def _validate_destination(flow: dict[str, Any], label: str, mass: tuple[Fraction
         raise FieldFlowError(f"{label} terminal mass differs from observed destination mass beyond uncertainty")
     safety = _object(observed["safety"], f"{label}.outcome.safety", {"status", "source"})
     safety_status = _choice(safety["status"], f"{label}.outcome.safety.status", {"safe", "unsafe", "not_assessed"})
-    _period_evidence(safety["source"], f"{label}.outcome.safety.source", interval)
+    if kind == "human_consumption":
+        safety_at = _load_bound_period_evidence(safety["source"], f"{label}.outcome.safety.source",
+                                                interval, flow["load_id"])
+    else:
+        _period_evidence(safety["source"], f"{label}.outcome.safety.source", interval)
     if kind == "human_consumption":
         if status != "observed_consumed" or safety_status != "safe":
             raise FieldFlowError(f"{label} human consumption requires observed ingestion and safe evidence")
+        if safety_at < flow_at:
+            raise FieldFlowError(f"{label}.outcome.safety.source.observed_at_utc predates terminal output flow")
         nutrition = _object(observed["nutrition"], f"{label}.outcome.nutrition", {"status", "source"})
         if nutrition["status"] != "useful":
             raise FieldFlowError(f"{label} human consumption requires useful nutrition evidence")
-        _period_evidence(nutrition["source"], f"{label}.outcome.nutrition.source", interval)
+        nutrition_at = _load_bound_period_evidence(nutrition["source"], f"{label}.outcome.nutrition.source",
+                                                   interval, flow["load_id"])
+        if nutrition_at < flow_at:
+            raise FieldFlowError(f"{label}.outcome.nutrition.source.observed_at_utc predates terminal output flow")
         if flow["kind"] not in {"product", "coproduct"}:
             raise FieldFlowError(f"{label} residue or moisture cannot be classified as consumed food")
     elif status != "observed_other" or observed["nutrition"] is not None:
