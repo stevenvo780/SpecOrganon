@@ -1,0 +1,508 @@
+{
+  "events": [
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:14+00:00",
+      "hash": "089f884e2643f21fd863f614e2873099502757768cc8ef3b18a4324adb19408a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "prob-01",
+        "kind": "problem",
+        "text": "Evaluar la factibilidad de intervenciones de eficiencia energetica en electrodomesticos para una vivienda de bajo consumo sin perjudicar confort, seguridad, trabajo o costes.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:14+00:00",
+      "hash": "1f250fb7dd24dde37a48025ad8915154ef29460c0d39becd6be60552293965ef",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "actor-01",
+        "kind": "actor",
+        "text": "Habitantes del hogar (bienestar, confort y rutinas diarias), investigador/analista energetico (diseno y evaluacion del ensayo prospectivo).",
+        "version": 1
+      },
+      "prev_hash": "089f884e2643f21fd863f614e2873099502757768cc8ef3b18a4324adb19408a",
+      "seq": 2
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:14+00:00",
+      "hash": "14d8cbf2d8c5e13a6ee6b1bdc77e2b5351ce898405a4c612fc4595c1fd6b5423",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "bound-01",
+        "kind": "boundary",
+        "text": "Muestra observacional de 7 dias completos (1008 intervalos de 10 min) del repositorio UCI. No incluye medicion desagregada por aparato, asignacion causal ni intervenciones reales.",
+        "version": 1
+      },
+      "prev_hash": "1f250fb7dd24dde37a48025ad8915154ef29460c0d39becd6be60552293965ef",
+      "seq": 3
+    },
+    {
+      "actor": "reviewer_t2",
+      "at": "2026-09-26T19:54:19+00:00",
+      "hash": "78090b6449a157edd7df4cf55dfd8e7288165bad3c4701b5ce04664f78b53d27",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "reason": "Delimitacion completa y acorde al contrato observacional",
+        "snapshot": "f8aeeafcee030607093578a6b49c84f33de392cfca66fe0cf5d6d6b621914e6c",
+        "verdict": "accept"
+      },
+      "prev_hash": "14d8cbf2d8c5e13a6ee6b1bdc77e2b5351ce898405a4c612fc4595c1fd6b5423",
+      "seq": 4
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:19+00:00",
+      "hash": "2896394102d403e53566b191e26879f04ab0370d1ade7c542f37060a8be70d27",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "f8aeeafcee030607093578a6b49c84f33de392cfca66fe0cf5d6d6b621914e6c"
+      },
+      "prev_hash": "78090b6449a157edd7df4cf55dfd8e7288165bad3c4701b5ce04664f78b53d27",
+      "seq": 5
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:25+00:00",
+      "hash": "9f59412ac30db32a0220674092ef798ce1ee08d0263a1320e585fad02e6a454d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "concept-01",
+        "kind": "concept",
+        "text": "Eficiencia en electrodomesticos: reduccion de consumo en Wh sin degradar el nivel de servicio ni vulnerar limites de confort termico, seguridad operativa o carga de trabajo de los ocupantes.",
+        "version": 1
+      },
+      "prev_hash": "2896394102d403e53566b191e26879f04ab0370d1ade7c542f37060a8be70d27",
+      "seq": 6
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:26+00:00",
+      "hash": "c98a034e1e13e648f12ed66af19f3f6d9c13e0e4c18a68185abe2eba6a003eb6",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "assump-01",
+        "kind": "assumption",
+        "text": "Se asume provisionalmente que las variaciones en Appliances reflejan patrones de ocupacion y operacion de electrodomesticos, pero se carece de sub-metering por enchufe.",
+        "version": 1
+      },
+      "prev_hash": "9f59412ac30db32a0220674092ef798ce1ee08d0263a1320e585fad02e6a454d",
+      "seq": 7
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:26+00:00",
+      "hash": "912bfef8a9d32318a995d10b1bec0252d36d5b1fb6b3ccb5230f89a3a7c3ae4a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "opt-frame-01",
+        "kind": "frame_option",
+        "text": "Encuadre A: Intervencion tecnologica automatizada de corte de cargas standby y programacion horaria.",
+        "version": 1
+      },
+      "prev_hash": "c98a034e1e13e648f12ed66af19f3f6d9c13e0e4c18a68185abe2eba6a003eb6",
+      "seq": 8
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:26+00:00",
+      "hash": "0e4eeaecf12de9d32df3ef489242b4d216b51c2e3148618891ee42d889673bd1",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "opt-frame-02",
+        "kind": "frame_option",
+        "text": "Encuadre B: Intervencion conductual de retroalimentacion y recomendaciones horarias a ocupantes.",
+        "version": 1
+      },
+      "prev_hash": "912bfef8a9d32318a995d10b1bec0252d36d5b1fb6b3ccb5230f89a3a7c3ae4a",
+      "seq": 9
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:26+00:00",
+      "hash": "659f470089c050ae3d4eeca199ad684b6d3f4b9dd3ca44dbf707d69f3a9c4330",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "norm-01",
+        "kind": "norm",
+        "text": "Principio de no perjuicio: No sacrificar confort termico, habitabilidad ni imponer cargas de trabajo sin consentimiento informado de los habitantes.",
+        "version": 1
+      },
+      "prev_hash": "0e4eeaecf12de9d32df3ef489242b4d216b51c2e3148618891ee42d889673bd1",
+      "seq": 10
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:30+00:00",
+      "hash": "ad029d915aed7e097825c54f58e5d920ae427600a5932a675412af976c160f17",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "actor-01": 1,
+          "prob-01": 1
+        },
+        "id": "norm-01",
+        "kind": "norm",
+        "text": "Principio de no perjuicio: No sacrificar confort termico, habitabilidad ni imponer cargas de trabajo sin consentimiento informado de los habitantes.",
+        "version": 2
+      },
+      "prev_hash": "659f470089c050ae3d4eeca199ad684b6d3f4b9dd3ca44dbf707d69f3a9c4330",
+      "seq": 11
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:39+00:00",
+      "hash": "4ed406f5f810c352926d34c41afe45e9cc359d124c0d27d2d081185b60d4ac03",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "quest-01",
+        "kind": "question",
+        "text": "Con la muestra observacional adjunta, que intervencion concreta mereceria un ensayo prospectivo para reducir el consumo de electrodomesticos sin trasladar perjuicios a confort, seguridad, trabajo o costes?",
+        "version": 1
+      },
+      "prev_hash": "ad029d915aed7e097825c54f58e5d920ae427600a5932a675412af976c160f17",
+      "seq": 12
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:39+00:00",
+      "hash": "9c14f3720bd5f0d736ef084e4901114995d68d804d9c53aeb46acae7169dda0b",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "hypo-01",
+        "kind": "hypothesis",
+        "text": "H1: La eliminacion de consumos pasivos/standby y la reprogramacion horaria de electrodomesticos programables pueden reducir el consumo semanal sin alterar las temperaturas de confort ni degradar la habitabilidad.",
+        "version": 1
+      },
+      "prev_hash": "4ed406f5f810c352926d34c41afe45e9cc359d124c0d27d2d081185b60d4ac03",
+      "seq": 13
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:39+00:00",
+      "hash": "5581262ed9690bb97aca98b41e2952f0c5ff38161664dcb13cb2f6bbdf7ceec5",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "ind-01",
+        "kind": "indicator",
+        "text": "Indicador primario: Consumo electrico total en kWh/semana de Appliances medido en intervalos de 10 min. Indicadores secundarios de salvaguarda: T1-T9 (temperaturas interiores en oC) y RH_1-RH_9 (humedad relativa en %).",
+        "version": 1
+      },
+      "prev_hash": "9c14f3720bd5f0d736ef084e4901114995d68d804d9c53aeb46acae7169dda0b",
+      "seq": 14
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:39+00:00",
+      "hash": "3bc1d8c69c795d79dd762b67329e390aeb5c2a85b869caff259cf0288b93c0c6",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "proto-01",
+        "kind": "protocol",
+        "text": "Protocolo prospectivo: Ensayo cruzado (crossover) o A/B longitudinal de 4 semanas (2 semanas linea base, 2 semanas intervencion), registrando sub-metering por enchufe y cuestionario diario de confort/interferencias.",
+        "version": 1
+      },
+      "prev_hash": "5581262ed9690bb97aca98b41e2952f0c5ff38161664dcb13cb2f6bbdf7ceec5",
+      "seq": 15
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:47+00:00",
+      "hash": "55c0103cdb49fe31c185bb2f7114186fb5587566fbac9f5bba0e2482050c8036",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "evid-01",
+        "kind": "evidence",
+        "text": "Datos observados en sample_first_complete_week.csv: 1008 intervalos de 10 min continuos. Total semanal Appliances = 118.280 kWh; Lights = 5.320 kWh. Minimo por intervalo = 20 Wh (standby base ~120 W), maximo = 1080 Wh. Carga nocturna (01:00-05:50) = 10.040 kWh (media 47.8 Wh/10-min).",
+        "version": 1
+      },
+      "prev_hash": "3bc1d8c69c795d79dd762b67329e390aeb5c2a85b869caff259cf0288b93c0c6",
+      "seq": 16
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:47+00:00",
+      "hash": "9d23469c14f030206a01952f42d19d51c76b859f303dd5eb146935f453f8dbcd",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "infer-01",
+        "kind": "inference",
+        "text": "Inferencia: Existe un consumo base continuo de ~120-300 W durante periodos de inactividad nocturna que suma ~10.04 kWh/semana, y picos diurnos intermitentes de hasta 6.48 kW que sugieren ciclos de coccion, lavado o calentamiento de agua.",
+        "version": 1
+      },
+      "prev_hash": "55c0103cdb49fe31c185bb2f7114186fb5587566fbac9f5bba0e2482050c8036",
+      "seq": 17
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:47+00:00",
+      "hash": "34f90f7f6606404c7b787675e5e536ec88d9725e32bdab92bf8a5d074e308c47",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "synth-01",
+        "kind": "synthesis",
+        "text": "Sintesis explicativa: El consumo total observado (118.28 kWh/semana) se compone de una carga base permanente (~8.5% del total semanal) y ciclos de alta potencia en vigilia (~91.5%). La muestra no desagrega que aparatos causan cada fraccion.",
+        "version": 1
+      },
+      "prev_hash": "9d23469c14f030206a01952f42d19d51c76b859f303dd5eb146935f453f8dbcd",
+      "seq": 18
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:47+00:00",
+      "hash": "088ad4de602316a94ca54971c378dce898a61e9d02dd92db54208f70564cf743",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "uncert-01",
+        "kind": "uncertainty",
+        "text": "Incertidumbres criticas: 1) Falta de sub-metering por circuito/aparato; 2) Desconocimiento del perfil de ocupacion y preferencias termicas; 3) Duracion limitada a 7 dias invernales; 4) Variables aleatorias rv1/rv2 sin valor causal.",
+        "version": 1
+      },
+      "prev_hash": "34f90f7f6606404c7b787675e5e536ec88d9725e32bdab92bf8a5d074e308c47",
+      "seq": 19
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "6012d20711a7a7b6b12a07b618c1723125304362065aa66ae53b72c428199e7e",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "opt-01",
+        "kind": "option",
+        "text": "Intervencion 1: Regletas inteligentes y enchufes temporizados para corte automatico de cargas en standby (multimedia, oficina, auxiliares).",
+        "version": 1
+      },
+      "prev_hash": "088ad4de602316a94ca54971c378dce898a61e9d02dd92db54208f70564cf743",
+      "seq": 20
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "1a8a115258ffd32d3de120b7b750b2b5f9a2b697ad312ecbd461e77c592dc5a7",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "opt-02",
+        "kind": "option",
+        "text": "Intervencion 2: Campana conductual y retroalimentacion de horarios para desplazar/optimizar ciclos de electrodomesticos de alta potencia.",
+        "version": 1
+      },
+      "prev_hash": "6012d20711a7a7b6b12a07b618c1723125304362065aa66ae53b72c428199e7e",
+      "seq": 21
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "614c7d3f87192a1093e2e9d213d4f9f1a1c01671aa232d1c162d57bbbd9558f8",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "risk-01",
+        "kind": "risk",
+        "text": "Riesgos: Desconexion inadvertida de aparatos esenciales (Intervencion 1) y fatiga/incomodidad en rutinas domesticas de los habitantes (Intervencion 2).",
+        "version": 1
+      },
+      "prev_hash": "1a8a115258ffd32d3de120b7b750b2b5f9a2b697ad312ecbd461e77c592dc5a7",
+      "seq": 22
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "6f65b9a713fed4d7cee8650541919e9cad0c7a464f4f32299571ef0c20cecb66",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "comp-01",
+        "kind": "comparison",
+        "text": "Comparativa: Intervencion 1 ofrece reduccion pasiva cuantificable sin carga cognitiva pero requiere inversion; Intervencion 2 es de coste cero pero con adherencia incierta y riesgo de friccion.",
+        "version": 1
+      },
+      "prev_hash": "614c7d3f87192a1093e2e9d213d4f9f1a1c01671aa232d1c162d57bbbd9558f8",
+      "seq": 23
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "df7ad215627f49f674d8b532f3c5c79fa17e815120372d9a34929be17f84417d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "crit-01",
+        "kind": "criterion",
+        "text": "Criterios: Ahorro comprobable en kWh, preservacion estricta de confort y seguridad, aceptacion de los habitantes, inversion economica acotada.",
+        "version": 1
+      },
+      "prev_hash": "6f65b9a713fed4d7cee8650541919e9cad0c7a464f4f32299571ef0c20cecb66",
+      "seq": 24
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "5d58eff9c34688a3f7860d3309cd99110fb71a5467f6db59700bdc8ba99bc9fd",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "dec-01",
+        "kind": "decision",
+        "text": "Decision provisional: Proponer un ensayo prospectivo de corte de standby selectivo (Intervencion 1), precedido obligatoriamente de sub-metering basal.",
+        "version": 1
+      },
+      "prev_hash": "df7ad215627f49f674d8b532f3c5c79fa17e815120372d9a34929be17f84417d",
+      "seq": 25
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "b2b47ad95fc7fb96403aacea4929fdd3cd2b0e96995ce4c3956cf6eda4fccb04",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "req-01",
+        "kind": "requirement",
+        "text": "Requisitos: 14 dias de medicion basal desagregada por circuito, exclusion de electrodomesticos criticos, mecanismo de anulacion manual y aprobacion humana firmada.",
+        "version": 1
+      },
+      "prev_hash": "5d58eff9c34688a3f7860d3309cd99110fb71a5467f6db59700bdc8ba99bc9fd",
+      "seq": 26
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "9123c1e6cca76e8fb681bc4ed43e0a65b48590c91055bc69b3b4aa137c65afa2",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "impl-01",
+        "kind": "implementation",
+        "text": "Implementacion: Codigo analysis.py para procesar y auditar la serie temporal de 10 min, reportando balance energetico y carga base.",
+        "version": 1
+      },
+      "prev_hash": "b2b47ad95fc7fb96403aacea4929fdd3cd2b0e96995ce4c3956cf6eda4fccb04",
+      "seq": 27
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "b32aca294bdfd1a0bf15782b7fe9b9ab24f9f65a0c65497f1d76159b2adf5770",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "test-01",
+        "kind": "test",
+        "text": "Prueba tecnica: Ejecucion exitosa de analysis.py verificando 1008 intervalos de 10 min sin huecos y calculo de 118.280 kWh totales.",
+        "version": 1
+      },
+      "prev_hash": "9123c1e6cca76e8fb681bc4ed43e0a65b48590c91055bc69b3b4aa137c65afa2",
+      "seq": 28
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "1964631991632d7eed8b8c328d8c362a04e6db4a8af2bf2a41dcdc880ecf01e3",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "base-01",
+        "kind": "baseline",
+        "text": "Linea base observada: 118.280 kWh/semana de Appliances (media 16.897 kWh/dia), con consumo nocturno de 10.040 kWh.",
+        "version": 1
+      },
+      "prev_hash": "b32aca294bdfd1a0bf15782b7fe9b9ab24f9f65a0c65497f1d76159b2adf5770",
+      "seq": 29
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "a6ffc1d8ac221edbac6b09fbb5bbc8c779168a77f94bfdcd0822c1f16fbfd720",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "res-01",
+        "kind": "result",
+        "text": "Resultado de factibilidad: Integridad de datos y pipeline analitico verificados; compuerta normativa bloqueada en espera de decision/firma humana legitima.",
+        "version": 1
+      },
+      "prev_hash": "1964631991632d7eed8b8c328d8c362a04e6db4a8af2bf2a41dcdc880ecf01e3",
+      "seq": 30
+    },
+    {
+      "actor": "agent_t2",
+      "at": "2026-09-26T19:54:55+00:00",
+      "hash": "5863910518757e89a1ee05c2f6eec5e8a77b2d7d041f3b7cbb51a36511d7787b",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "assess-01",
+        "kind": "assessment",
+        "text": "Evaluacion final: Factibilidad analitica demostrada; no se afirma eficacia causal ni autorizacion de intervencion sin consentimiento de una persona competente.",
+        "version": 1
+      },
+      "prev_hash": "a6ffc1d8ac221edbac6b09fbb5bbc8c779168a77f94bfdcd0822c1f16fbfd720",
+      "seq": 31
+    }
+  ],
+  "project": {
+    "approval_policy": "signed",
+    "case_id": "9f9116c7-0457-410e-b5bd-7e05bacb7032",
+    "created_at": "2026-09-26T19:53:48+00:00",
+    "created_by": "agent_t2",
+    "domain": "building_energy",
+    "title": "Feasibility study of appliance energy intervention"
+  },
+  "schema": 1
+}

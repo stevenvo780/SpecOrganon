@@ -1,0 +1,30 @@
+Se han generado y verificado los dos archivos solicitados en `/tmp/specorganon-energy-pilot-GOSLO6/n`:
+
+1. **[`analysis.py`](file:///tmp/specorganon-energy-pilot-GOSLO6/n/analysis.py)**: Script en Python estándar que lee [`sample_first_complete_week.csv`](file:///tmp/specorganon-energy-pilot-GOSLO6/n/sample_first_complete_week.csv), comprueba la integridad temporal y calcula los consumos e indicadores pertinentes sin usar `rv1`/`rv2`.
+2. **[`report.md`](file:///tmp/specorganon-energy-pilot-GOSLO6/n/report.md)**: Informe estructurado (1.054 palabras) que distingue medidas empíricas, inferencias, supuestos y decisiones bajo aprobación, evalúa dos intervenciones frente a riesgos de confort, seguridad y coste, justifica por qué no es responsable asumir causalidad con datos agregados observacionales, y detalla el diseño del ensayo prospectivo controlado.
+
+---
+
+### Resultados de la Ejecución de `analysis.py`
+
+- **Verificación de continuidad:** **Éxito**. Se leyeron exactamente 1.008 registros de 10 minutos (7 días completos: del `2016-01-12 00:00:00` al `2016-01-18 23:50:00`) sin discontinuidades.
+- **Totales de energía:**
+  - `Appliances`: **118,280 kWh** (118.280 Wh).
+  - `lights`: **5,320 kWh** (5.320 Wh).
+  - Total combinado: **123,600 kWh**.
+- **Desglose diario de `Appliances`:**
+  - Mar 2016-01-12: 12,340 kWh (10,4%)
+  - Mié 2016-01-13: 13,970 kWh (11,8%)
+  - Jue 2016-01-14: 21,800 kWh (18,4%)
+  - Vie 2016-01-15: 18,050 kWh (15,3%)
+  - Sáb 2016-01-16: 18,040 kWh (15,3%)
+  - Dom 2016-01-17: 20,550 kWh (17,4%)
+  - Lun 2016-01-18: 13,530 kWh (11,4%)
+- **Estructura de carga observada:**
+  - Consumo base/standby ($\le 50$ Wh/intervalo): 47,7% del tiempo, representando el 17,2% del consumo total (20,360 kWh).
+  - Consumo en picos activos ($> 50$ Wh/intervalo): 52,3% del tiempo, representando el 82,8% del consumo total (97,920 kWh).
+  - Distribución temporal: 85,9% diurno (101,650 kWh) frente a 14,1% nocturno (16,630 kWh).
+
+No se registraron fallos ni se requirió lectura fuera del directorio de trabajo.
+
+[cloud-offload provider=gemini model=gemini/flash access=write cwd=/tmp/specorganon-energy-pilot-GOSLO6/n duration_s=42.0 depth=0 agy_model=Gemini 3.7 Flash (Medium)]

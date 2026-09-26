@@ -1,0 +1,42 @@
+### Resumen de Ejecución (Brazo S · SDD)
+
+Se ha completado el ciclo de Desarrollo Dirigido por Especificación (SDD) en el directorio `/tmp/specorganon-energy-pilot-GOSLO6/s`, generando y validando los dos entregables requeridos: [`analysis.py`](file:///tmp/specorganon-energy-pilot-GOSLO6/s/analysis.py) y [`report.md`](file:///tmp/specorganon-energy-pilot-GOSLO6/s/report.md).
+
+---
+
+### Verificaciones y Resultados de `analysis.py`
+
+El script fue ejecutado exitosamente con la biblioteca estándar de Python (`python3 analysis.py`, código de salida `0`):
+
+1. **Integridad del Conjunto:**
+   - Registros leídos: **1.008 filas** (esperado: 1.008).
+   - Rango temporal: `2016-01-12 00:00:00` a `2016-01-18 23:50:00`.
+   - Continuidad: **Verificada (10 min exactos por intervalo, sin solapamientos ni huecos)**.
+2. **Consumo Energético Semanal y Diario:**
+   - **Total semanal de `Appliances`:** **118,280 kWh** (118.280,0 Wh).
+   - **Total semanal de `lights`:** **5,320 kWh** (5.320,0 Wh).
+   - **Desglose diario (`Appliances`):**
+     - 2016-01-12 (Martes): **12,340 kWh**
+     - 2016-01-13 (Miércoles): **13,970 kWh**
+     - 2016-01-14 (Jueves): **21,800 kWh**
+     - 2016-01-15 (Viernes): **18,050 kWh**
+     - 2016-01-16 (Sábado): **18,040 kWh**
+     - 2016-01-17 (Domingo): **20,550 kWh**
+     - 2016-01-18 (Lunes): **13,530 kWh**
+3. **Observaciones Pertinentes Adicionales:**
+   - Carga base residual (percentil 10): **40,0 Wh/intervalo** ($\approx 240\text{ W}$ constantes).
+   - Distribución intradiaria: Noche (00:00–06:00) representa el **10,5%** (12,470 kWh), día (06:00–18:00) el **54,4%** (64,300 kWh) y tarde-noche punta (18:00–24:00) el **35,1%** (41,510 kWh).
+   - Variables aleatorias `rv1` y `rv2` fueron estrictamente excluidas de cualquier deducción causal.
+
+---
+
+### Contenido de `report.md`
+
+El informe ([`report.md`](file:///tmp/specorganon-energy-pilot-GOSLO6/s/report.md), 1.059 palabras) cubre:
+- **Trazabilidad SDD:** Registro de especificación, verificación empírica y contraste de requisitos.
+- **Clasificación epistemológica:** Diferenciación estricta entre medidas directas del CSV, inferencias estadísticas, supuestos operativos y decisiones sujetas a consentimiento de los ocupantes.
+- **Comparación de intervenciones:** Evaluación de gestión de cargas standby vs. desplazamiento de picos horarios, delimitando criterios de confort, seguridad y fricción laboral para los habitantes.
+- **Justificación de no elección prematura:** Explicación metodológica de por qué los datos observacionales agregados de 7 días no permiten elegir responsablemente una intervención sin incurrir en riesgos.
+- **Diseño del ensayo prospectivo:** Protocolo experimental cruzado (*crossover trial*), métrica primaria (kWh/día desagregado en circuitos monitorizados), salvaguardas de confort/seguridad, regla de datos faltantes, tratamiento de incertidumbre (IC 95%) y criterios objetivos de parada/retirada.
+
+[cloud-offload provider=gemini model=gemini/flash access=write cwd=/tmp/specorganon-energy-pilot-GOSLO6/s duration_s=46.4 depth=0 agy_model=Gemini 3.7 Flash (Medium)]

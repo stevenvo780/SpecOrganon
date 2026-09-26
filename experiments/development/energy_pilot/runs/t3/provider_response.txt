@@ -1,0 +1,26 @@
+### Resumen de Ejecución y Resultados (Brazo T · SpecOrganon)
+
+En el entorno aislado [`/tmp/specorganon-energy-pilot-GOSLO6/t3`](file:///tmp/specorganon-energy-pilot-GOSLO6/t3), se han generado y verificado todos los artefactos requeridos:
+
+1. **Análisis de Datos ([`analysis.py`](file:///tmp/specorganon-energy-pilot-GOSLO6/t3/analysis.py)):**
+   - **Continuidad temporal:** Verificación exitosa de los **1008 intervalos** consecutivos de 10 minutos (12 al 18 de enero de 2016) sin huecos ni discrepancias temporales.
+   - **Resultados de consumo medido:**
+     - Total semanal de `Appliances`: **118,280 kWh** (media: 16,897 kWh/día; rango: 12,34 kWh el martes 12 a 21,80 kWh el jueves 14).
+     - Total semanal de `lights`: **5,320 kWh** (total combinado: 123,600 kWh).
+   - **Observación adicional:** Carga basal estimada ($\le 30$ Wh/intervalo de 10 min) presente en 94 intervalos (9,3%), sumando 2,570 kWh (2,2% del total). Concentración acusada de demanda en franja punta vespertina (17:00 a 21:00, promedio 201–244 Wh/intervalo, potencia media equivalente 1,2–1,46 kW).
+   - Las variables aleatorias `rv1` y `rv2` fueron excluidas de cualquier uso causal.
+
+2. **Informe Evaluativo ([`report.md`](file:///tmp/specorganon-energy-pilot-GOSLO6/t3/report.md)):**
+   - Delimitación rigurosa de medidas observadas, inferencias técnicas, supuestos y decisiones de valor.
+   - Comparación entre gestión horaria de cargas flexibles (Opción A) y eliminación de standby (Opción B).
+   - Justificación de por qué no es responsable elegir una intervención definitiva con datos agregados observacionales.
+   - Especificación completa del protocolo prospectivo (*submetering* desagregado, 4 semanas de ensayo cruzado, métrica primaria $\Delta\text{kWh}$, salvaguardas de confort con parada térmica en $19^\circ\text{C}$, asignación de costes y regla de datos faltantes).
+
+3. **Ejecución y Estado en SpecOrganon ([`case/`](file:///tmp/specorganon-energy-pilot-GOSLO6/t3/case) y [`cli_invocations.jsonl`](file:///tmp/specorganon-energy-pilot-GOSLO6/t3/cli_invocations.jsonl)):**
+   - **Inicialización:** Caso inicializado documentalmente con política `signed` (`.venv/bin/organon init`).
+   - **Fase `frame`:** Artefactos registrados, revisados de forma independiente y avanzados exitosamente (`seq: 5`, `ready: true`, `accepted: true`).
+   - **Compuerta `critique`:** Registro completo de artefactos normativos (`conc-1`, `asm-1`, `fo-1`, `fo-2`, `norm-1`). La compuerta se detuvo formalmente ante el bloqueo normativo:
+     `"blockers": ["norm-1 requires a verified human approval"]`
+   - Sin utilizar firmas sintéticas, claves inventadas ni elusiones simuladas, se preservó el registro del bloqueo y el ledger completo.
+
+[cloud-offload provider=gemini model=gemini/flash access=write cwd=/tmp/specorganon-energy-pilot-GOSLO6/t3 duration_s=123.3 depth=0 agy_model=Gemini 3.7 Flash (Medium)]

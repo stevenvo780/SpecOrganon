@@ -1,0 +1,20 @@
+Se ha completado la ejecución del **Brazo T (T2 · SpecOrganon)** en `/tmp/specorganon-energy-pilot-GOSLO6/t2`.
+
+### 1. Archivos Creados y Verificación Técnica
+- [`analysis.py`](file:///tmp/specorganon-energy-pilot-GOSLO6/t2/analysis.py): Ejecutado con éxito usando la biblioteca estándar de Python. Verificó la continuidad perfecta de **1008 intervalos de 10 minutos** (0 discontinuidades), calculando:
+  - **Consumo total semanal (`Appliances`):** **118.280 kWh** (118.280 Wh).
+  - **Consumo total iluminación (`lights`):** **5.320 kWh** (5.320 Wh).
+  - **Carga base nocturna (01:00–05:50):** 10.040 kWh (~287 W promedio continuo).
+  - **Extremos de intervalo:** Mínimo de 20 Wh (~120 W continuos) y máximo de 1080 Wh (~6,48 kW pico medio en 10 min).
+- [`report.md`](file:///tmp/specorganon-energy-pilot-GOSLO6/t2/report.md): Documento metodológico y analítico de 1110 palabras que delimita medidas directas frente a inferencias, compara dos intervenciones (corte de *standby* vs. intervención conductual), define el protocolo del ensayo prospectivo controlado y detalla el registro de trazabilidad en SpecOrganon.
+
+---
+
+### 2. Ejecución y Estado del Caso en SpecOrganon
+- **Inicialización:** Caso `9f9116c7-0457-410e-b5bd-7e05bacb7032` creado con política estricta `--approval-policy signed` en el directorio `case/`.
+- **Artefactos Registrados:** 31 elementos en las 9 fases (`prob-01`, `actor-01`, `bound-01`, `concept-01`, `assump-01`, `opt-frame-01`, `opt-frame-02`, `norm-01`, `quest-01`, `hypo-01`, `ind-01`, `proto-01`, `evid-01`, `infer-01`, `synth-01`, `uncert-01`, `opt-01`, `opt-02`, `risk-01`, `comp-01`, `crit-01`, `dec-01`, `req-01`, `impl-01`, `test-01`, `base-01`, `res-01`, `assess-01`).
+- **Fase Avanzada:** `frame` (Fase 1) revisada y aceptada formalmente (`seq: 5`).
+- **Estado de la Compuerta Normativa:** Bloqueada en la fase `critique` (`ready: false`, `accepted: false`) debido al requisito de firma digital humana verificada en `norm-01` (`norm-01 requires a verified human approval`).
+- **Resolución Metodológica:** En estricto cumplimiento del contrato observacional, no se simularon firmas ni se emplearon claves sintéticas. El bloqueo formal queda preservado en el ledger inmutable de SpecOrganon (`organon.json`), demostrando la factibilidad técnica y analítica sin afirmar consentimiento inexistente ni eficacia causal.
+
+[cloud-offload provider=gemini model=gemini/flash access=write cwd=/tmp/specorganon-energy-pilot-GOSLO6/t2 duration_s=140.3 depth=0 agy_model=Gemini 3.7 Flash (Medium)]

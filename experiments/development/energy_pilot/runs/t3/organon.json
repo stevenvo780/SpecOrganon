@@ -1,0 +1,508 @@
+{
+  "events": [
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:20+00:00",
+      "hash": "85c1ad0a4fca0572c37e8f256f1841effbeacb5b6a33d5a471dfdb89d1ee9e02",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "prob-1",
+        "kind": "problem",
+        "text": "Consumo electrico de electrodomesticos en vivienda unifamiliar durante periodo invernal sin desglose submetering por aparato.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:20+00:00",
+      "hash": "398f87e62715a161151728676e827929147012a2c828304c481f3d04342b3d41",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "act-1",
+        "kind": "actor",
+        "text": "Habitantes de la vivienda, analista energetico, operador de red.",
+        "version": 1
+      },
+      "prev_hash": "85c1ad0a4fca0572c37e8f256f1841effbeacb5b6a33d5a471dfdb89d1ee9e02",
+      "seq": 2
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:20+00:00",
+      "hash": "f028c0d0e9331ca18df4fb310742417ea2f066e201e8622a3b62948b4e1c3cad",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "bnd-1",
+        "kind": "boundary",
+        "text": "Serie temporal de 7 dias (1008 intervalos de 10 min) del 12 al 18 de enero de 2016. Excluye intervenciones reales o compromisos normativos.",
+        "version": 1
+      },
+      "prev_hash": "398f87e62715a161151728676e827929147012a2c828304c481f3d04342b3d41",
+      "seq": 3
+    },
+    {
+      "actor": "reviewer",
+      "at": "2026-09-26T20:02:29+00:00",
+      "hash": "5cf7e899ae47f04a946833d7e1a5e0269132e6273b848d7b97d4560227c1a736",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "reason": "Problema, actores y fronteras adecuadamente delimitados segun el contrato comun.",
+        "snapshot": "081270405e970c35931a7f049e8fb1ee811fdd5f9ad17ab0732433e18284de6e",
+        "verdict": "accept"
+      },
+      "prev_hash": "f028c0d0e9331ca18df4fb310742417ea2f066e201e8622a3b62948b4e1c3cad",
+      "seq": 4
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:29+00:00",
+      "hash": "1fe695406b2ac0c9d21677bedf614f9169a023f131a774cfa9f9cf4274cd28d2",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "081270405e970c35931a7f049e8fb1ee811fdd5f9ad17ab0732433e18284de6e"
+      },
+      "prev_hash": "5cf7e899ae47f04a946833d7e1a5e0269132e6273b848d7b97d4560227c1a736",
+      "seq": 5
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:35+00:00",
+      "hash": "16e4bb6fb2ed4bd0bd4ff898bd2303e5b4596fbe3438542244e951659ab94238",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "conc-1",
+        "kind": "concept",
+        "text": "Eficiencia energetica vs confort: reducir kWh sin degradar condiciones de habitabilidad o temperatura interior.",
+        "version": 1
+      },
+      "prev_hash": "1fe695406b2ac0c9d21677bedf614f9169a023f131a774cfa9f9cf4274cd28d2",
+      "seq": 6
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:35+00:00",
+      "hash": "533e5c2e40370b94a38bab7c15acfcb95f7710b25fa7669a46936cefd3fbb043",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "asm-1",
+        "kind": "assumption",
+        "text": "Los datos agregados de Appliances reflejan habitos de uso y cargas base sin cambios en la envolvente termica.",
+        "version": 1
+      },
+      "prev_hash": "16e4bb6fb2ed4bd0bd4ff898bd2303e5b4596fbe3438542244e951659ab94238",
+      "seq": 7
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:35+00:00",
+      "hash": "7918a012b544330baf67d31fe898921b6930bc7bd7cfa66f16c18bf8f7cf847e",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "fo-1",
+        "kind": "frame_option",
+        "text": "Opcion 1: Gestion horaria y desplazamiento de picos de carga flexible.",
+        "version": 1
+      },
+      "prev_hash": "533e5c2e40370b94a38bab7c15acfcb95f7710b25fa7669a46936cefd3fbb043",
+      "seq": 8
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:35+00:00",
+      "hash": "12e86692bfd080c5149e330aeb0a3e6f7f98fc0bcf641b0c975b3f8e9bcb4c7f",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "fo-2",
+        "kind": "frame_option",
+        "text": "Opcion 2: Reduccion de cargas de espera (standby) y eficiencia de base.",
+        "version": 1
+      },
+      "prev_hash": "7918a012b544330baf67d31fe898921b6930bc7bd7cfa66f16c18bf8f7cf847e",
+      "seq": 9
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:35+00:00",
+      "hash": "22873e4fbe65673dc6d758b348b0e6508611cc2d40fd3928e7a2483ae03f547f",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "norm-1",
+        "kind": "norm",
+        "text": "Priorizar no degradar el confort termico ni la seguridad de los ocupantes por encima del ahorro energetico.",
+        "version": 1
+      },
+      "prev_hash": "12e86692bfd080c5149e330aeb0a3e6f7f98fc0bcf641b0c975b3f8e9bcb4c7f",
+      "seq": 10
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:39+00:00",
+      "hash": "5c337b45f6ffcb46d2dc02d56eeb0bbbcdcd6f0bdcfdbc78d36dd4b30bf7a8ce",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "act-1": 1,
+          "prob-1": 1
+        },
+        "id": "norm-1",
+        "kind": "norm",
+        "text": "Priorizar no degradar el confort termico ni la seguridad de los ocupantes por encima del ahorro energetico.",
+        "version": 2
+      },
+      "prev_hash": "22873e4fbe65673dc6d758b348b0e6508611cc2d40fd3928e7a2483ae03f547f",
+      "seq": 11
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:49+00:00",
+      "hash": "cea437c836521bbfd48bd6d931168b62e864a1250d2b3e7a763e73a704a23459",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "q-1",
+        "kind": "question",
+        "text": "Cual es la proporcion de consumo basal frente a consumo de picos y su correlacion con temperatura exterior?",
+        "version": 1
+      },
+      "prev_hash": "5c337b45f6ffcb46d2dc02d56eeb0bbbcdcd6f0bdcfdbc78d36dd4b30bf7a8ce",
+      "seq": 12
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:49+00:00",
+      "hash": "68eee96a8eda2dc6c8c2827029a179cb81700f2be4d3f352b63c4b072ae11520",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "hyp-1",
+        "kind": "hypothesis",
+        "text": "El consumo basal es independiente de la temperatura, mientras que los picos responden a habitos horarios.",
+        "version": 1
+      },
+      "prev_hash": "cea437c836521bbfd48bd6d931168b62e864a1250d2b3e7a763e73a704a23459",
+      "seq": 13
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:49+00:00",
+      "hash": "363dcb8f93f7a6006b82502df441afd07894f6a3731ba6fc70c04643c3a5956d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "ind-1",
+        "kind": "indicator",
+        "text": "Consumo total semanal de Appliances (118.28 kWh) y potencia media horaria.",
+        "version": 1
+      },
+      "prev_hash": "68eee96a8eda2dc6c8c2827029a179cb81700f2be4d3f352b63c4b072ae11520",
+      "seq": 14
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:49+00:00",
+      "hash": "3aadeb960db26d65c912fc29113d41091354073315b7ad668e829ba997cb6d84",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "proto-1",
+        "kind": "protocol",
+        "text": "Lectura de serie de 1008 intervalos de 10 min y agregacion horaria y diaria.",
+        "version": 1
+      },
+      "prev_hash": "363dcb8f93f7a6006b82502df441afd07894f6a3731ba6fc70c04643c3a5956d",
+      "seq": 15
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:57+00:00",
+      "hash": "03f9088f99bd293da9a8226ff0b29f097cc28771912ede942a27b56271bd8957",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "ev-1",
+        "kind": "evidence",
+        "text": "1008 intervalos continuos de 10 min. Appliances: 118.280 kWh; Lights: 5.320 kWh; Carga base: 20-30 Wh/10 min; Picos de hasta 1080 Wh/10 min entre 17:00 y 21:00.",
+        "version": 1
+      },
+      "prev_hash": "3aadeb960db26d65c912fc29113d41091354073315b7ad668e829ba997cb6d84",
+      "seq": 16
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:57+00:00",
+      "hash": "150a63702990ed2542862f62431d6edc4b387ecf44e9f562b852b4972db457bb",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "inf-1",
+        "kind": "inference",
+        "text": "Patron bimodal diario con alta concentracion en franja de 17:00 a 21:00 y carga base nocturna estable.",
+        "version": 1
+      },
+      "prev_hash": "03f9088f99bd293da9a8226ff0b29f097cc28771912ede942a27b56271bd8957",
+      "seq": 17
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:57+00:00",
+      "hash": "248f35d42dd2ffe6e32e7582298edbcf4a5739361efae1606eb8bfeb6241f2fa",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "syn-1",
+        "kind": "synthesis",
+        "text": "Los datos observacionales carecen de submetering por aparato, ocupacion directa o precios tarifarios.",
+        "version": 1
+      },
+      "prev_hash": "150a63702990ed2542862f62431d6edc4b387ecf44e9f562b852b4972db457bb",
+      "seq": 18
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:57+00:00",
+      "hash": "f71c197b82ac458aa3f5e522f0b03238281cb1b6904bf58551150575f8b7f4b3",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "unc-1",
+        "kind": "uncertainty",
+        "text": "Imposibilidad de aislar efectos causales o atribuir consumo a aparatos concretos sin medicion prospectiva.",
+        "version": 1
+      },
+      "prev_hash": "248f35d42dd2ffe6e32e7582298edbcf4a5739361efae1606eb8bfeb6241f2fa",
+      "seq": 19
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:57+00:00",
+      "hash": "c774cfca3972a15fa19b44257120c9a55258620f37ee3bc9eb885bd0903f1cb4",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "opt-1",
+        "kind": "option",
+        "text": "Opcion A: Desplazamiento horario de cargas flexibles fuera de horas punta.",
+        "version": 1
+      },
+      "prev_hash": "f71c197b82ac458aa3f5e522f0b03238281cb1b6904bf58551150575f8b7f4b3",
+      "seq": 20
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:57+00:00",
+      "hash": "eedc7e2af599ff4a373192919d223a4ce5f900811906db51cf163eb5866aa659",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "opt-2",
+        "kind": "option",
+        "text": "Opcion B: Eliminacion de consumo fantasma mediante regletas programables en cargas standby.",
+        "version": 1
+      },
+      "prev_hash": "c774cfca3972a15fa19b44257120c9a55258620f37ee3bc9eb885bd0903f1cb4",
+      "seq": 21
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:57+00:00",
+      "hash": "85afbc17bde32a648196b4b52ec011251e5c6c544a7882c70a697823842b961d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "cmp-1",
+        "kind": "comparison",
+        "text": "Opcion A impacta costes en tarifas dinamicas pero exige cambio de habitos; Opcion B es pasiva pero su ahorro potencial esta limitado a la carga base.",
+        "version": 1
+      },
+      "prev_hash": "eedc7e2af599ff4a373192919d223a4ce5f900811906db51cf163eb5866aa659",
+      "seq": 22
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:57+00:00",
+      "hash": "fe7f88b135ad9da80ebc3c87ee7174e9c232abfe7246b7ec2bdaf86e679591e8",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "rsk-1",
+        "kind": "risk",
+        "text": "Riesgo de degradacion de confort o conflicto con rutinas del hogar en Opcion A; coste de equipamiento superior al ahorro en Opcion B.",
+        "version": 1
+      },
+      "prev_hash": "85afbc17bde32a648196b4b52ec011251e5c6c544a7882c70a697823842b961d",
+      "seq": 23
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:57+00:00",
+      "hash": "798605957b31d0e11140cf734cea485d6ff89b02cbb60c75d5432ebebd71aaa7",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "dec-1",
+        "kind": "decision",
+        "text": "Postponer seleccion definitiva hasta obtener medicion desagregada prospectiva y consentimiento formal.",
+        "version": 1
+      },
+      "prev_hash": "fe7f88b135ad9da80ebc3c87ee7174e9c232abfe7246b7ec2bdaf86e679591e8",
+      "seq": 24
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:57+00:00",
+      "hash": "439545cacbaa551a0e9f0f8b66b785ffc97a6b9337bea36cdb55d38e30a86119",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "crt-1",
+        "kind": "criterion",
+        "text": "Maximizacion de ahorro energetico/economico con variacion nula de confort interior y seguridad.",
+        "version": 1
+      },
+      "prev_hash": "798605957b31d0e11140cf734cea485d6ff89b02cbb60c75d5432ebebd71aaa7",
+      "seq": 25
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:58+00:00",
+      "hash": "1f55516341984a5c8b1e38e891d02a16e1575e7252ad728be1425218157e6a7a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "req-1",
+        "kind": "requirement",
+        "text": "Instalacion de submetering en circuitos principales durante al menos 4 semanas de ensayo prospectivo.",
+        "version": 1
+      },
+      "prev_hash": "439545cacbaa551a0e9f0f8b66b785ffc97a6b9337bea36cdb55d38e30a86119",
+      "seq": 26
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:58+00:00",
+      "hash": "fa29a709c07726381499192af46937faae560e8eb6ab7aedc398c0ddf5e505af",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "imp-1",
+        "kind": "implementation",
+        "text": "Protocolo de ensayo prospectivo con medicion pre/post y registro de confort ambiental.",
+        "version": 1
+      },
+      "prev_hash": "1f55516341984a5c8b1e38e891d02a16e1575e7252ad728be1425218157e6a7a",
+      "seq": 27
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:58+00:00",
+      "hash": "5912cb343b16477647d36b799e44c40553db81c44a655cb58374018dd15295b5",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "tst-1",
+        "kind": "test",
+        "text": "Script analysis.py para verificacion de continuidad, balance energetico diario y analisis de picos.",
+        "version": 1
+      },
+      "prev_hash": "fa29a709c07726381499192af46937faae560e8eb6ab7aedc398c0ddf5e505af",
+      "seq": 28
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:58+00:00",
+      "hash": "e9566321398d67c5f3c2e975ccf2aea86c6c4a0534127d02b7be8d6208566335",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "bsl-1",
+        "kind": "baseline",
+        "text": "Consumo base de 7 dias: 118.280 kWh/semana en Appliances (media 16.897 kWh/dia).",
+        "version": 1
+      },
+      "prev_hash": "5912cb343b16477647d36b799e44c40553db81c44a655cb58374018dd15295b5",
+      "seq": 29
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:58+00:00",
+      "hash": "c2532221cecc4f6743b5e58fa05b6bab2747067167d1d8416f66a1e14c53e958",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "res-1",
+        "kind": "result",
+        "text": "Factibilidad tecnica del analisis confirmada; detencion formal en compuerta normativa por politica signed.",
+        "version": 1
+      },
+      "prev_hash": "e9566321398d67c5f3c2e975ccf2aea86c6c4a0534127d02b7be8d6208566335",
+      "seq": 30
+    },
+    {
+      "actor": "analyst",
+      "at": "2026-09-26T20:02:58+00:00",
+      "hash": "77fe30ba9a6a005e97150d597617888849f94d9d98f3d525fdcb3c316291de72",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "asm-val-1",
+        "kind": "assessment",
+        "text": "Recomendacion sujeta a ensayo prospectivo y autorizacion de los ocupantes.",
+        "version": 1
+      },
+      "prev_hash": "c2532221cecc4f6743b5e58fa05b6bab2747067167d1d8416f66a1e14c53e958",
+      "seq": 31
+    }
+  ],
+  "project": {
+    "approval_policy": "signed",
+    "case_id": "83f3d38e-021b-467b-934e-26a3e07de37f",
+    "created_at": "2026-09-26T20:02:13+00:00",
+    "created_by": "analyst",
+    "domain": "energy",
+    "title": "Evaluacion energetica de electrodomesticos"
+  },
+  "schema": 1
+}

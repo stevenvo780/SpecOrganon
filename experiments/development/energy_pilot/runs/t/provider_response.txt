@@ -1,0 +1,27 @@
+### Resultado de Ejecución y Verificación (Brazo T · SpecOrganon)
+
+#### 1. Verificación de Entorno y Gobernanza
+* **SpecOrganon CLI / MCP:** No instalados/disponibles en el entorno de ejecución (`which specorganon` y módulo Python no encontrados; sin MCPs de Organon).
+* **Política `signed` y Gobernanza:** Conforme a la política `signed` sin fixtures sintéticos, se registra formalmente el **bloqueo normativo por ausencia de consentimiento / autorización formal de habitantes o comités competentes** para intervenciones reales. La entrega se circunscribe a factibilidad analítica y diseño experimental prospectivo.
+
+#### 2. Archivos Creados
+* [`analysis.py`](file:///tmp/specorganon-energy-pilot-GOSLO6/t/analysis.py): Script en Python estándar que valida lectura, continuidad temporal y cálculos.
+* [`report.md`](file:///tmp/specorganon-energy-pilot-GOSLO6/t/report.md): Informe metodológico de 9 fases (983 palabras) con delimitación de actores, comparación de alternativas, límites de inferencia causal y protocolo prospectivo de ensayo controlado.
+
+#### 3. Ejecución y Resultados de [`analysis.py`](file:///tmp/specorganon-energy-pilot-GOSLO6/t/analysis.py)
+* **Continuidad:** **1008 intervalos de 10 min** entre `2016-01-12 00:00:00` y `2016-01-18 23:50:00` (**Continuidad 100% verificada, 0 huecos**).
+* **Consumo semanal (`Appliances`):** **$118{,}280\text{ kWh}$** ($118{,}280\text{ Wh}$). Iluminación (`lights`): **$5{,}320\text{ kWh}$**. Total submedido: **$123{,}600\text{ kWh}$**.
+* **Totales diarios (`Appliances`):**
+  * 2016-01-12 (Mar): $12{,}340\text{ kWh}$
+  * 2016-01-13 (Mié): $13{,}970\text{ kWh}$
+  * 2016-01-14 (Jue): $21{,}800\text{ kWh}$
+  * 2016-01-15 (Vie): $18{,}050\text{ kWh}$
+  * 2016-01-16 (Sáb): $18{,}040\text{ kWh}$
+  * 2016-01-17 (Dom): $20{,}550\text{ kWh}$
+  * 2016-01-18 (Lun): $13{,}530\text{ kWh}$
+* **Observaciones adicionales:**
+  * Demanda base/standby ($\le 60\text{ Wh/intervalo}$): $57{,}5\%$ del tiempo.
+  * Picos intensivos ($> 200\text{ Wh/intervalo}$): $16{,}4\%$ del tiempo, fuertemente concentrados en la franja 17:00–21:59.
+  * Diagnóstico de variables: `rv1` y `rv2` son secuencias numéricas idénticas excluidas de inferencia causal.
+
+[cloud-offload provider=gemini model=gemini/flash access=write cwd=/tmp/specorganon-energy-pilot-GOSLO6/t duration_s=40.0 depth=0 agy_model=Gemini 3.7 Flash (Medium)]
