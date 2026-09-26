@@ -23,7 +23,15 @@ uv run python scripts/preflight_assets.py calendario-candidato.json mapa-custodi
 
 `--check` no crea un destino y devuelve `development_asset_preflight_unsealed`. La segunda forma crea un directorio nuevo, con permisos restrictivos, para **un solo** `run_id`. Copia paquete visible del caso, contrato y prompt comunes, prompt de ese brazo y política de herramientas; S recibe además la guía SDD y T recibe el toolkit. N no recibe ninguno de esos dos. Las referencias ocultas, la rúbrica con respuestas, prompts de otros brazos y el calendario íntegro no se copian. El manifiesto final liga archivos verificados, límites e identidad de esa corrida, y conserva `development_release_unsealed`. Si falla una copia, el directorio parcial queda sin manifiesto válido para inspección; no se borra ni se sobrescribe un destino anterior.
 
+Quien custodia el calendario puede cotejar nuevamente una entrega existente con su copia del calendario candidato obtenida **por un canal independiente de la entrega**, sin exponer el calendario íntegro al ejecutor. [`scripts/verify_released_run.py`](../scripts/verify_released_run.py) abre la ruta y cada archivo sin seguir enlaces simbólicos, exige entradas y permisos exactos, y contrasta manifiesto, coordenadas, límites y bytes con el calendario. Rechaza paquetes alterados incluso si el manifiesto declara un hash nuevo. Su salida `development_release_verification_unsealed` acredita solo esa concordancia local en el momento de la lectura.
+
+```sh
+uv run python scripts/verify_released_run.py calendario-candidato.json /ruta-privada/entrega-nueva
+```
+
 El padre del destino debe pertenecer al usuario que ejecuta el script y no permitir escritura al grupo ni a otros. Eso reduce sustituciones por otros usuarios, pero **un proceso hostil con el mismo UID aún puede cambiar rutas o archivos**. La comprobación de hashes tampoco detecta una respuesta oculta incrustada como fragmento o paráfrasis en un archivo visible. Antes de una reserva real hacen falta una revisión humana independiente de los materiales visibles, una cuenta y almacenamiento de custodia separados de los ejecutores, el registro previo inmutable y una entrega con acceso controlado. El resultado local no afirma ninguna de esas garantías.
+
+La entrega todavía no es una especificación ejecutable. El planificador fija `case_package`, `tool_policy` y `toolkit` como referencias y digests de bytes, sin imponer un formato para interpretar el caso, aplicar la política de herramientas o instalar el toolkit. Tampoco incluye una instrucción de invocación del proveedor ni pruebas de que este aceptó la versión y el esfuerzo solicitados. Un ejecutor genérico debe fijar y validar esos formatos y adaptadores **antes** de usar casos reservados; un archivo de bytes arbitrarios no se puede tratar como un caso ejecutable por tener un hash correcto. `release_block_order` es una coordenada, no una barrera efectiva: la secuencia de liberación requiere eventos de cierre y custodia independientes.
 
 ## Firma offline del diseño candidato
 
@@ -45,6 +53,14 @@ uv run python scripts/audit_run_receipts.py calendario-candidato.json intentos-d
 ```
 
 El reporte liga el digest canónico de los recibos, pero **no coteja los bytes** de trazas o artefactos ni autentica la telemetría del proveedor, la identidad del modelo, el aislamiento real de sesiones, precios o costes. Tampoco sustituye los eventos de liberación y cierre custodiados exigidos por el protocolo; los tiempos declarados pueden fingirse. `matrix_receipts_complete` solo describe cobertura y ausencia de violaciones en el JSON suministrado: no acredita puntuaciones Q completas. La salida permanece `development_receipt_audit_unsealed` y `criterion_4.status: not_assessed`. Un ejecutor real deberá registrar y proteger trazas originales, normalizar telemetría por proveedor y verificar facturación; el auditor no lo sustituye.
+
+El runner local D-E no proporciona los IDs ni el uso **por solicitud al proveedor** que exige el esquema 1 de recibos, ni ata sus pilotos expuestos a un `run_id` reservado. Sus índices de pasos y totales finales no se deben reinterpretar como solicitudes autenticadas. Esos pilotos se registran por separado como observaciones de desarrollo; las corridas reservadas sin recibo siguen faltantes en la auditoría.
+
+[`scripts/observe_development_run.py`](../scripts/observe_development_run.py) lee un directorio privado ya creado por el runner y coteja los hashes de materiales registrados, trazas de CLI, artefactos y, cuando corresponde, instalación del toolkit y replay. Vuelve a derivar el uso agregado desde la traza local y marca como desconocidos los IDs de solicitud, versión autenticada, costes, atribución de agentes y cumplimiento de topes. No ejecuta el código generado ni emite `attempts` del auditor. Las trazas e informes crudos quedan en el directorio privado; la salida solo lleva digests y contadores locales. Un registro parcial informa lo que falta o carece de registro, sin convertirlo en una corrida terminada.
+
+```sh
+uv run python scripts/observe_development_run.py /ruta-privada/de-un-piloto
+```
 
 ## Conciliación de recibos y puntuaciones declaradas
 
