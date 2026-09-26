@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_native_agent_direct_cli_trial",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "artifacts_sha256": {
+    "cases/synthetic_native_direct/organon.json": "b28231d6e9afe0ca30b7355bafbfd8c4408f420a8922d8139a2ce6d5a21deffa",
+    "experiments/development/native_direct_a_2026-09-26.json": "ddc47240c04bac9739f9cc80f17a18e970feb17191f062fd28a30b101201cde0",
+    "experiments/development/native_direct_b_2026-09-26.json": "2c5c9a0a1705e9269d292a287d566cf548a9c24be1d812d0ec9ca49843e70148",
+    "experiments/development/native_direct_overlap_a_2026-09-26.json": "374bc458685284fd8ac9b922f5601a3a93826a4bec44be2a0b856874b34cc4b8",
+    "experiments/development/native_direct_overlap_b_2026-09-26.json": "9584ce014a4cc4c23114126773e7304d508e093e9469a6abc46b088ebf925c71",
+    "scripts/check_native_direct.py": "5b686ca2fa5fcc35c6da0357115547e39155219c77d34c956779dfc70e64278d",
+    "dist/specorganon-0.1.0-py3-none-any.whl": "30318e4c8efbd77c9ca10953d018bad9e0d207ff4bafe8bc0369e599b2bfa8f4"
+  },
+  "observed_in_this_turn": {
+    "native_spawn_task_paths": ["/root/native_direct_a", "/root/native_direct_b"],
+    "case_initialized_with_installed_cli": true,
+    "second_round_release": "The controller observed both workers blocked on distinct FIFO reads, then released both. This observation is in the session tool record, not independently attested by repository files."
+  },
+  "round_one": {
+    "expected_item_ids": ["a1", "a2", "a3", "a4", "b1", "b2", "b3", "b4"],
+    "recorded_cli_exit_codes": "8 of 8 zero",
+    "a_finished_before_b_started": true,
+    "gap_monotonic_ns": 9177343293,
+    "temporal_overlap_observed": false,
+    "negative_finding": "The native agents were launched in parallel, but the recorded first-round CLI intervals did not overlap."
+  },
+  "round_two": {
+    "barrier": "two blocking FIFO reads released together; controller observation only",
+    "deliberate_pause_after_each_success_ms": 5,
+    "expected_item_ids": "aa01..aa10 and bb01..bb10",
+    "recorded_cli_exit_codes": "20 of 20 zero",
+    "caller_retries_declared": 0,
+    "ledger_event_sequences": "10..29",
+    "actor_switches_in_new_events": 19,
+    "worker_interval_overlap_ns": 387033229,
+    "overlapping_cli_command_pairs": 10,
+    "ledger_items_unique": true
+  },
+  "verification": {
+    "command": "python3 scripts/check_native_direct.py --self-check",
+    "result": "status=ok; 29 ledger events; 28 recorded CLI commands; canonical hash chain valid; 20 alternating second-round events; 387033229 ns overlap; 10 overlapping CLI command pairs; wheel file hash verified; agent_identity_authenticated=false; shifted-UTC negative controls rejected",
+    "ruff_command": "uv run ruff check scripts/check_native_direct.py",
+    "ruff_result": "All checks passed!"
+  },
+  "limits": [
+    "The repository contains self-declared actor labels and worker receipts, not authenticated spawn_agent transcripts or model identities.",
+    "The files alone do not prove the FIFO release, a clean install, absence of omitted CLI calls, or that no caller retry occurred outside the recorded calls.",
+    "The verifier establishes internal consistency of archived bytes and checks a local wheel when available; the wheel is not committed or signed as a release artifact.",
+    "The short synthetic task and deliberate pauses do not measure a coordination benefit in quality, time, tokens or cost.",
+    "This is not a controlled N/SDD/toolkit model comparison, a human approval, or a field intervention."
+  ]
+}
