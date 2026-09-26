@@ -19,6 +19,7 @@ from typing import Any
 
 from case_package import CasePackageError, MAX_ARCHIVE_BYTES, inspect_package
 from inspect_toolkit_wheel import ToolkitWheelError, inspect_toolkit_wheel
+from toolkit_bundle import ToolkitBundleError, inspect_toolkit_bundle
 from tool_policy import ToolPolicyError, inspect_tool_policy
 from verify_released_run import (
     ReleaseVerificationError,
@@ -157,11 +158,21 @@ def inspect_released_payload(
         _inspect_text(release_dir, role, expected_sha256)
 
     toolkit_inspection = None
+    toolkit_format = None
     if arm == "T":
         try:
             toolkit_inspection = inspect_toolkit_wheel(Path(release_dir) / "toolkit")
-        except ToolkitWheelError as exc:
-            raise PayloadInspectionError("toolkit wheel inspection failed") from exc
+            toolkit_format = "wheel"
+        except ToolkitWheelError:
+            try:
+                toolkit_inspection = inspect_toolkit_bundle(
+                    Path(release_dir) / "toolkit"
+                )
+                toolkit_format = "bundle"
+            except ToolkitBundleError as exc:
+                raise PayloadInspectionError(
+                    "toolkit content inspection failed"
+                ) from exc
         if toolkit_inspection["sha256"] != schedule_raw["inputs"]["toolkit"]["sha256"]:
             raise PayloadInspectionError("toolkit bytes differ from schedule")
 
@@ -204,7 +215,32 @@ def inspect_released_payload(
                 *(["toolkit"] if arm == "T" else []),
             ]
         ),
-        "toolkit_format_checked": toolkit_inspection is not None,
+        "toolkit_format_checked": (
+            toolkit_inspection["static_format_checked"]
+            if toolkit_inspection is not None
+            else False
+        ),
+        "toolkit_format": toolkit_format,
+        "toolkit_bundle_checked": toolkit_format == "bundle",
+        "toolkit_container_format_checked": (
+            toolkit_inspection.get("container_format_checked", False)
+            if toolkit_inspection is not None
+            else False
+        ),
+        "toolkit_root_wheel_format_checked": toolkit_inspection is not None,
+        "toolkit_dependency_wheel_format_checked": (
+            toolkit_inspection.get("dependency_wheel_format_checked", False)
+            if toolkit_inspection is not None
+            else False
+        ),
+        "toolkit_wheel_count": (
+            toolkit_inspection.get("wheel_count", 1)
+            if toolkit_inspection is not None
+            else None
+        ),
+        "toolkit_target": (
+            toolkit_inspection.get("target") if toolkit_inspection is not None else None
+        ),
         "toolkit_version": (
             toolkit_inspection["version"] if toolkit_inspection is not None else None
         ),
@@ -213,7 +249,9 @@ def inspect_released_payload(
         "execution_ready": False,
         "limitations": LIMITATIONS
         + (
-            ["Toolkit dependencies, installation, CLI and MCP were not checked."]
+            [
+                "Toolkit dependency wheel internals, dependency closure, installation, CLI and MCP were not checked."
+            ]
             if arm == "T"
             else []
         ),

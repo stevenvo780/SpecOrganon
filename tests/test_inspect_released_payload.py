@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +23,7 @@ import inspect_released_payload as inspector  # noqa: E402
 import plan_confirmatory  # noqa: E402
 import preflight_assets  # noqa: E402
 import tool_policy  # noqa: E402
+import toolkit_bundle  # noqa: E402
 import verify_released_run  # noqa: E402
 from toolkit_wheel_fixture import build_toolkit_wheel  # noqa: E402
 
@@ -60,6 +63,7 @@ def _fixture(
     wrong_case_id: bool = False,
     policy_cap_mismatch: bool = False,
     corrupt_wheel: bool = False,
+    toolkit_bundle_bytes: bytes | None = None,
     prompt_n: bytes = b"Arm N instructions.\n",
 ) -> tuple[dict[str, Any], dict[str, Any], Path, tuple[bytes, ...]]:
     source = tmp_path / "source"
@@ -108,7 +112,11 @@ def _fixture(
     for role in ("task_contract", "common_prompt", "sdd_guide", "rubric", "toolkit"):
         path = source / role
         if role == "toolkit":
-            payload = build_toolkit_wheel(path)
+            payload = (
+                toolkit_bundle_bytes
+                if toolkit_bundle_bytes is not None
+                else build_toolkit_wheel(path)
+            )
             if corrupt_wheel:
                 payload += b"undeclared ZIP trailer"
         elif role == "rubric":
@@ -204,6 +212,41 @@ def _cli(schedule_path: Path, release: Path) -> subprocess.CompletedProcess[str]
     )
 
 
+def _bundle_bytes(tmp_path: Path, *, dependency: bool = False) -> bytes:
+    build_dir = tmp_path / "bundle-build"
+    wheels = build_dir / "wheels"
+    wheels.mkdir(parents=True)
+    build_toolkit_wheel(wheels / "specorganon-0.1.0-py3-none-any.whl")
+    lock = build_dir / "uv.lock"
+    lock_text = (
+        'version = 1\n[[package]]\nname = "specorganon"\n'
+        'version = "0.1.0"\nsource = { editable = "." }\n'
+    )
+    if dependency:
+        filename = "demo_dep-1.0-py3-none-any.whl"
+        payload = b"synthetic dependency bytes; wheel internals are uninspected\n"
+        (wheels / filename).write_bytes(payload)
+        lock_text += (
+            '\n[[package]]\nname = "demo-dep"\nversion = "1.0"\n'
+            'source = { registry = "https://example.invalid/simple" }\n'
+            f'wheels = [{{ url = "https://example.invalid/{filename}", '
+            f'hash = "sha256:{_sha(payload)}", size = {len(payload)} }}]\n'
+        )
+    lock.write_text(lock_text, encoding="utf-8")
+    output = build_dir / "toolkit.zip"
+    toolkit_bundle.pack_toolkit_bundle(
+        wheels,
+        lock,
+        {
+            "python_implementation": "CPython",
+            "python_version": "3.12",
+            "platform": "linux_x86_64",
+        },
+        output,
+    )
+    return output.read_bytes()
+
+
 @pytest.mark.parametrize(
     "arm,case_id,expected_roles",
     [
@@ -282,6 +325,13 @@ def test_integrated_inspection_is_read_only_and_never_claims_execution(
         "deliverable_count": 1,
     }
     assert result["toolkit_format_checked"] is (arm == "T")
+    assert result["toolkit_format"] == ("wheel" if arm == "T" else None)
+    assert result["toolkit_bundle_checked"] is False
+    assert result["toolkit_container_format_checked"] is False
+    assert result["toolkit_root_wheel_format_checked"] is (arm == "T")
+    assert result["toolkit_dependency_wheel_format_checked"] is False
+    assert result["toolkit_wheel_count"] == (1 if arm == "T" else None)
+    assert result["toolkit_target"] is None
     assert result["toolkit_version"] == ("0.1.0" if arm == "T" else None)
     assert result["toolkit_dependencies_checked"] is False
     assert result["toolkit_install_checked"] is False
@@ -301,6 +351,90 @@ def test_integrated_inspection_is_read_only_and_never_claims_execution(
     assert str(tmp_path) not in process.stdout + process.stderr
 
 
+@pytest.mark.parametrize("arm", ["N", "S", "T"])
+def test_bundle_is_inspected_only_when_released_to_t(tmp_path: Path, arm: str) -> None:
+    bundle = _bundle_bytes(tmp_path)
+    schedule, schedule_path, release, _ = _release(
+        tmp_path,
+        arm,
+        "R-F",
+        toolkit_bundle_bytes=bundle,
+    )
+    result = _cli(schedule_path, release)
+    assert result.returncode == 0, result.stderr
+    report = json.loads(result.stdout)
+    assert report["execution_ready"] is False
+    assert report["toolkit_install_checked"] is False
+    assert report["toolkit_dependencies_checked"] is False
+    assert report["toolkit_bundle_checked"] is (arm == "T")
+    assert report["toolkit_container_format_checked"] is (arm == "T")
+    assert report["toolkit_root_wheel_format_checked"] is (arm == "T")
+    assert report["toolkit_dependency_wheel_format_checked"] is False
+    assert report["toolkit_format"] == ("bundle" if arm == "T" else None)
+    assert report["toolkit_wheel_count"] == (1 if arm == "T" else None)
+    assert report["toolkit_target"] == (
+        {
+            "python_implementation": "CPython",
+            "python_version": "3.12",
+            "platform": "linux_x86_64",
+        }
+        if arm == "T"
+        else None
+    )
+    assert (release / "toolkit").exists() is (arm == "T")
+    if arm == "T":
+        assert (release / "toolkit").read_bytes() == bundle
+        assert report["toolkit_version"] == "0.1.0"
+        assert report["toolkit_format_checked"] is True
+        assert schedule["inputs"]["toolkit"]["sha256"] == _sha(bundle)
+
+
+def test_bundle_outer_hash_passes_but_tampered_member_fails_content_gate(
+    tmp_path: Path,
+) -> None:
+    bundle = bytearray(_bundle_bytes(tmp_path))
+    with zipfile.ZipFile(io.BytesIO(bundle)) as archive:
+        member = next(
+            info
+            for info in archive.infolist()
+            if info.filename == "wheels/specorganon-0.1.0-py3-none-any.whl"
+        )
+    position = member.header_offset + 30 + len(member.filename.encode()) + 10
+    bundle[position] ^= 1
+    _, schedule_path, release, _ = _release(
+        tmp_path,
+        "T",
+        "R-F",
+        toolkit_bundle_bytes=bytes(bundle),
+    )
+    result = _cli(schedule_path, release)
+    assert result.returncode == 2
+    assert result.stdout == ""
+    assert "toolkit content inspection failed" in result.stderr
+
+
+def test_bundle_with_dependency_reports_uninspected_wheel_in_release(
+    tmp_path: Path,
+) -> None:
+    bundle = _bundle_bytes(tmp_path, dependency=True)
+    _, schedule_path, release, _ = _release(
+        tmp_path,
+        "T",
+        "R-F",
+        toolkit_bundle_bytes=bundle,
+    )
+    result = _cli(schedule_path, release)
+    assert result.returncode == 0, result.stderr
+    report = json.loads(result.stdout)
+    assert report["toolkit_bundle_checked"] is True
+    assert report["toolkit_container_format_checked"] is True
+    assert report["toolkit_root_wheel_format_checked"] is True
+    assert report["toolkit_dependency_wheel_format_checked"] is False
+    assert report["toolkit_format_checked"] is False
+    assert report["toolkit_wheel_count"] == 2
+    assert report["execution_ready"] is False
+
+
 @pytest.mark.parametrize(
     "arm,case_id,options,error",
     [
@@ -309,7 +443,7 @@ def test_integrated_inspection_is_read_only_and_never_claims_execution(
         ("S", "R-M", {"policy_cap_mismatch": True}, "tool_policy inspection failed"),
         ("N", "R-F", {"prompt_n": b"\xffbad UTF-8"}, "arm_prompt is not strict UTF-8"),
         ("N", "R-F", {"prompt_n": b"bad\x00prompt"}, "arm_prompt must be nonempty"),
-        ("T", "R-S", {"corrupt_wheel": True}, "toolkit wheel inspection failed"),
+        ("T", "R-S", {"corrupt_wheel": True}, "toolkit content inspection failed"),
     ],
 )
 def test_outer_hashes_can_pass_while_content_gate_rejects(
