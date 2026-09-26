@@ -1,0 +1,13 @@
+# Preflight de observaciones alimentarias
+
+El [protocolo](protocolo_experimental.md#52-software-simulación-y-campo) exige medir servicio alimentario inocuo y útil **efectivamente consumido**, costes y daños por actor, y comparar grupos operativos con una línea base causal. Un porcentaje publicado de pérdida por etapa no ofrece por sí solo la genealogía de lotes, denominadores compatibles ni consumo final. El [expediente de mango](caso_alimentos_investigacion.md) se conserva como investigación documental, no como medición del ensayo.
+
+[`scripts/audit_field_flows.py`](../scripts/audit_field_flows.py) es un preflight **declarativo y de solo lectura** para preparar esa captura. Su JSON de esquema 1 registra grupos y brazos, períodos `pre`/`post`, actores, lotes, flujos físicos y cargas por actor. Cada flujo tiene masa con unidad e incertidumbre, origen y destino; una transferencia entre lotes se declara una sola vez y ambos lotes la referencian. Entradas de ingredientes y agua, coproductos, residuos y humedad se distinguen. El auditor coteja vínculos, cargas, fechas observadas y balances de masa dentro de tolerancias declaradas; exige destino y observación de consumo, inocuidad y utilidad nutricional para llamar consumido a un producto.
+
+```sh
+uv run python scripts/audit_field_flows.py observaciones-de-desarrollo.json > /ruta/de/desarrollo/preflight-campo.json
+```
+
+La sección opcional `service` permite cotejar que cada grupo y período tenga un denominador positivo, que las unidades coincidan con una equivalencia **declarada** y que el servicio consumido declarado no exceda el máximo factible. El script **no calcula `V` ni `G`**: no verifica firmas de quienes aprobaron equivalencias, ni los bytes o la autenticidad de mediciones, inocuidad o consumo. Tampoco demuestra cobertura de toda la cadena producción→almacenamiento→transporte→transformaciones→consumo, asignación aleatoria, seguimiento suficiente o ausencia de contaminación. `valid: true` solo significa que el grafo suministrado supera estos controles internos; `criterion_3.status` sigue `not_assessed`.
+
+Para un ensayo real habrá que registrar antes de asignar grupos el sitio, trazabilidad de cargas, instrumentos y calibración, tolerancias justificadas, equivalencias y umbrales aprobados por actores competentes, el plan de asignación/potencia y la custodia de observaciones. Después se necesitará cotejar fuentes originales y medir el seguimiento a consumo, efectos adversos y costes por actor. Solo entonces procede el análisis causal de §5.2; un preflight sintético o una simulación no prueban impacto de campo.

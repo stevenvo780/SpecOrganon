@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_measurement_controls_unsealed",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "8159fae6b182d787f90a102c4ed1e1e1e917a37f6dba23b8255a2ca09c76237b",
+  "artifacts": {
+    "scripts/analyze_confirmatory.py": "dde49334c736634551901bbabd21d39bac15e0c547518b7a299d5d1784cdb6d3",
+    "tests/test_analyze_confirmatory.py": "3a4eb3545b2fe4259ce12ce19fbeba9761042c3140a0a2cd37b52abece0abd1a",
+    "scripts/reconcile_matrix_evidence.py": "8f12be786403c94b6ae155af992bbc4db2fa84238d01013978582bc9c7e2efb1",
+    "tests/test_reconcile_matrix_evidence.py": "418c80ff1a01445672772bece2bee55c885e9246cc7b24f7c5b26a2b2601c1d7",
+    "scripts/audit_blind_ratings.py": "c542bc40449a30afb9e3b843a525c3dca543f007d063f6659c3d957ca87b5a6f",
+    "tests/test_audit_blind_ratings.py": "139b514e87f420866dff746eb7fb851f08fb72696a5980f6e4076aee43c9c752",
+    "scripts/audit_field_flows.py": "588f294747e250a9f7d3dba575f033e7ceb9fa0cf46da3837b6bf2ef46024cbe",
+    "tests/test_audit_field_flows.py": "9e38a635e66dca392f251e75850e51c387beab6d7f1e98a8206314709e8be448"
+  },
+  "scope": {
+    "matrix_tests_collected": 226,
+    "food_field_preflight_tests": 43,
+    "provider_calls": 0,
+    "reserved_case_bytes": 0,
+    "real_field_observations": 0,
+    "human_ratings": 0,
+    "independently_custodied_release_events": 0,
+    "criteria_3_and_4": "not_assessed"
+  },
+  "gates": [
+    {
+      "command": "uv run pytest -q tests/test_analyze_confirmatory.py tests/test_reconcile_matrix_evidence.py",
+      "result": "50 passed in 0.93s"
+    },
+    {
+      "command": "uv run pytest -q tests/test_audit_blind_ratings.py",
+      "result": "55 passed"
+    },
+    {
+      "command": "uv run pytest -q tests/test_audit_field_flows.py",
+      "result": "43 passed in 0.13s"
+    },
+    {
+      "command": "uv run pytest -q",
+      "result": "366 passed in 11.44s"
+    },
+    {
+      "command": "uv run ruff check scripts/plan_confirmatory.py scripts/preflight_assets.py scripts/check_study_signature.py scripts/audit_run_receipts.py scripts/analyze_confirmatory.py scripts/reconcile_matrix_evidence.py scripts/audit_blind_ratings.py scripts/audit_field_flows.py tests/test_plan_confirmatory.py tests/test_preflight_assets.py tests/test_check_study_signature.py tests/test_audit_run_receipts.py tests/test_analyze_confirmatory.py tests/test_reconcile_matrix_evidence.py tests/test_audit_blind_ratings.py tests/test_audit_field_flows.py",
+      "result": "All checks passed!"
+    },
+    {
+      "command": "git diff --check",
+      "result": "exit 0"
+    }
+  ],
+  "adversarial_findings_resolved": [
+    "A full synthetic Q matrix with zero terminal receipts is reported as discordant.",
+    "A scored row without a matching declared terminal artifact digest or status is reported.",
+    "A third rating without explicit incident decisions or after impossible declared chronology is rejected.",
+    "Decimal JSON literals that round across the Q component cap or the >10-point arbitration trigger are rejected; judges assign integer component points.",
+    "Consumption or service declarations dated before their supporting lot, flow, or outcome are rejected.",
+    "Mass residuals at very different scales are checked with exact fractions, and extreme numeric JSON receives a structured error.",
+    "Incompatible published FAO loads cannot be spliced into one observed lot path."
+  ],
+  "not_performed": [
+    "No real blinded evidence package, evaluator, adjudication, or independently verified incident-ID harmonization.",
+    "No consolidation or custodian reidentification of raw ratings into Q by scheduled run_id.",
+    "No authenticated provider receipt, original artifact-byte check, sealed register, or actual matrix execution.",
+    "No approved service equivalence, field site, observed consumption, causal assignment, or V/G impact estimate."
+  ]
+}
