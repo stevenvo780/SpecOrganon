@@ -1,0 +1,90 @@
+{
+  "classification": "one synthetic development trial; not field or confirmatory validation",
+  "date_utc": "2026-09-26",
+  "interpretation": [
+    "Round 1 is a negative result: a stale revision ended writer B before it persisted an item.",
+    "Round 2 used bounded ConflictError retries with backoff and 3 ms pacing after each successful write.",
+    "The worker logs show overlapping active intervals; the ledger shows interleaved, serial commits without lost IDs.",
+    "Actor labels and local logs do not authenticate the native agents or prove a speed, quality, or cost advantage.",
+    "This synthetic development trial is neither field evidence nor sealed confirmatory validation."
+  ],
+  "kind": "native_agent_overlap_development_trial",
+  "round_1": {
+    "ledger": {
+      "actor_counts": {
+        "agent:controller": 1,
+        "agent:overlap_writer_a": 40
+      },
+      "actor_switches": 1,
+      "event_count": 41,
+      "exact_ids_verified": true,
+      "file_sha256": "a98a460983f152d41de58e1b29bbc77d0ebe988eb28bd3763806fa10776199eb",
+      "hash_chain_verified": true,
+      "head_hash": "c4ab239fe5cfbb20fe355dfb31c172f767ecc0e6e3d5c5c2f42fe651fab432ee",
+      "item_count": 41,
+      "path": "cases/synthetic_overlap/organon.json"
+    },
+    "reported_writer_b_failure": {
+      "error": "ConflictError: revision conflict: expected 40, current 41",
+      "exit_code": 1,
+      "independently_rechecked_from_archived_files": false,
+      "source": "original run observation; writer B stderr is not archived"
+    },
+    "writer_b_persisted_items": 0
+  },
+  "round_2": {
+    "distinct_worker_items": 80,
+    "ledger": {
+      "actor_counts": {
+        "agent:controller": 1,
+        "agent:overlap_writer_a": 40,
+        "agent:overlap_writer_b": 40
+      },
+      "actor_switches": 80,
+      "event_count": 81,
+      "exact_ids_verified": true,
+      "file_sha256": "af80b719c80a52503dedbbf1373eb9eb16a0188de0a51b85df3a7720aa23ec68",
+      "hash_chain_verified": true,
+      "head_hash": "d92e5f9e1914989e6386b85982eb1c8339860ff53d7464b14b5732b00f6ba968",
+      "item_count": 81,
+      "path": "cases/synthetic_overlap_round2/organon.json"
+    },
+    "overlap_end_monotonic_ns": 80161668637352,
+    "overlap_start_monotonic_ns": 80161181539134,
+    "worker_interval_overlap_ns": 487098218,
+    "worker_interval_overlap_seconds": 0.487098218,
+    "worker_logs": {
+      "a": {
+        "actor": "agent:overlap_writer_a",
+        "count": 40,
+        "duration_ns": 487098218,
+        "end_monotonic_ns": 80161668637352,
+        "file_sha256": "528b7a7e8267c753540b38915c33ead8e8f196eb22ae0a52f4c8e0dabeffe022",
+        "path": "experiments/development/native_overlap_round2_a.json",
+        "revision_conflicts_retried": 39,
+        "start_monotonic_ns": 80161181539134
+      },
+      "b": {
+        "actor": "agent:overlap_writer_b",
+        "count": 40,
+        "duration_ns": 493262192,
+        "end_monotonic_ns": 80161674801216,
+        "file_sha256": "aa10e2e8dc4719a8e3d9949aae409a5039aeb0ab01345143f2ef844e1853826e",
+        "path": "experiments/development/native_overlap_round2_b.json",
+        "revision_conflicts_retried": 40,
+        "start_monotonic_ns": 80161181539024
+      }
+    }
+  },
+  "schema": 1,
+  "verification_command": "python3 scripts/check_native_overlap.py",
+  "writer_script": {
+    "backoff_cap_ms": 15,
+    "backoff_initial_ms": 2,
+    "backoff_multiplier": 1.4,
+    "file_sha256": "6b59f391917a6688196396fc96a297dd3e3a62def6f11967e8c28c8a6ca320dc",
+    "max_attempts_per_item": 100,
+    "pacing_after_success_ms": 3,
+    "path": "scripts/concurrent_agent_writer.py"
+  }
+}
