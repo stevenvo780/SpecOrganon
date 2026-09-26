@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-26",
+  "classification": "development_preparation_rating_chronology_unsealed",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "baseline_commit": "2e88aefaa4c16967f0913ac09e7fc552780252c1",
+  "baseline_sha256": {
+    "scripts/check_preparation_records.py": "a163e578add99c6949825e53c0c69542d1ff1d554887c2e79e6eac12693b3d46"
+  },
+  "current_sha256": {
+    "scripts/check_preparation_records.py": "1f7540a094ee3c448a55009b93887b5151ed1326a541d3090db670c785062c06",
+    "tests/test_check_preparation_records.py": "cafeb984a1952e7ef6502e180ab94ed05369c67be289b24667db451880e15e9c"
+  },
+  "reproduction": {
+    "fixture": "Invented two-run S/T candidate schedule, existing actas, blind manifest and two primary ratings per opaque artifact.",
+    "baseline_false_green": "With an acta dated after the first declared Q lock, the old checker verified both records because it only required preparation after the terminal attempt and did not open ratings.",
+    "current_rule": "For each opaque ID, terminal ended_at_utc < acta prepared_at_utc < earliest declared primary or adjudicator outcome-stage lock; the full rating document and its canonical digest must match the private map.",
+    "current_negative_controls": [
+      "An acta before terminal end, equal to the first lock or after that lock yields record_chronology_mismatch.",
+      "Changed ratings with an unchanged mapping digest yield mapping_document_mismatch.",
+      "Structurally invalid ratings yield invalid_ratings."
+    ],
+    "current_positive_control": "The two valid actas pass the private checker and the corresponding blind ratings assemble into two scored Q rows."
+  },
+  "checks": {
+    "focused_pytest": "uv run pytest -q tests/test_check_preparation_records.py: 19 passed",
+    "full_pytest": "uv run pytest -q: 577 passed",
+    "ruff": "uv run ruff check .: passed"
+  },
+  "limits": [
+    "The test dates, actas, ratings and judges are invented; timestamps are claims and the checker is a local read-only check.",
+    "The checker does not authenticate custody, independent preparation, transformation, terminal and blind bytes or actual score-lock time.",
+    "Forging map, ratings and actas together can pass; no reserved model comparison was run."
+  ],
+  "criterion_4": "not_assessed"
+}

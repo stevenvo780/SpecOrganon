@@ -18,6 +18,7 @@ SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 SCRIPT = SCRIPTS / "check_preparation_records.py"
 sys.path.insert(0, str(SCRIPTS))
 import check_preparation_records as checker  # noqa: E402
+from assemble_rated_q import assemble_rated_q  # noqa: E402
 from check_preparation_records import PreparationError, verify_preparation_records  # noqa: E402
 from plan_confirmatory import compile_schedule  # noqa: E402
 
@@ -119,11 +120,36 @@ def _bundle(schedule: dict[str, Any]) -> tuple[dict[str, Any], ...]:
         "attempts": attempts,
     }
     manifest = {"schema": 1, "artifacts": artifacts}
+    ratings = {
+        "schema": 1, "manifest_sha256": _digest(manifest),
+        "ratings": [
+            {
+                **artifact,
+                "evaluator_id": evaluator,
+                "role": "primary",
+                "external_to_execution": True,
+                "outcome_stage": {
+                    "recorded_at_utc": "2026-01-04T00:00:00Z",
+                    "q_components": {
+                        "formulation": 8, "evidence": 8, "alternatives": 8,
+                        "technical": 8, "validation": 8,
+                    },
+                    "q_total": 40,
+                    "artifact_form_reveal": {"revealed": False, "detail": None},
+                },
+                "trace_stage": {
+                    "recorded_at_utc": "2026-01-04T00:01:00Z",
+                    "critical_failures": [],
+                },
+            }
+            for artifact in artifacts for evaluator in ("external-a", "external-b")
+        ],
+    }
     mapping = {
         "schema": 2, "schedule_sha256": schedule["schedule_sha256"],
         "receipts_sha256": _digest(receipts),
         "manifest_sha256": _digest(manifest),
-        "ratings_sha256": _hash("locked-ratings-not-supplied-to-this-check"),
+        "ratings_sha256": _digest(ratings),
         "links": [
             {
                 "opaque_id": artifact["opaque_id"],
@@ -137,7 +163,7 @@ def _bundle(schedule: dict[str, Any]) -> tuple[dict[str, Any], ...]:
             for run, attempt, artifact in zip(runs, attempts, artifacts, strict=True)
         ],
     }
-    return schedule, receipts, manifest, mapping
+    return schedule, receipts, manifest, mapping, ratings
 
 
 def _record(link: dict[str, Any], attempt: dict[str, Any]) -> dict[str, Any]:
@@ -211,13 +237,15 @@ def _error_code(bundle: tuple[dict[str, Any], ...], directory: Path) -> str:
 
 def test_valid_records_and_private_cli_report(schedule: dict[str, Any], tmp_path: Path) -> None:
     bundle, directory = _prepared(schedule, tmp_path)
+    assembly = assemble_rated_q(bundle[0], bundle[1], bundle[2], bundle[4], bundle[3])
+    assert assembly["counts"]["scored_runs"] == 2
     report = _verify(bundle, directory)
     assert report["counts"] == {"mapped_links": 2, "records_verified": 2}
     assert report["criterion_4"]["status"] == "not_assessed"
     assert "Forged records rehashed" in " ".join(report["limitations"])
 
     paths = []
-    for name, document in zip(("schedule", "receipts", "manifest", "mapping"), bundle, strict=True):
+    for name, document in zip(("schedule", "receipts", "manifest", "mapping", "ratings"), bundle, strict=True):
         path = tmp_path / f"{name}.json"
         path.write_text(json.dumps(document), encoding="utf-8")
         paths.append(str(path))
@@ -240,7 +268,7 @@ def test_s_t_opaque_swap_with_fixed_actas_fails(schedule: dict[str, Any], tmp_pa
         left[field], right[field] = right[field], left[field]
     assert _error_code(bundle, directory) == "record_binding_mismatch"
     paths = []
-    for name, document in zip(("schedule", "receipts", "manifest", "mapping"), bundle, strict=True):
+    for name, document in zip(("schedule", "receipts", "manifest", "mapping", "ratings"), bundle, strict=True):
         path = tmp_path / f"{name}.json"
         path.write_text(json.dumps(document), encoding="utf-8")
         paths.append(str(path))
@@ -261,6 +289,37 @@ def test_duplicate_record_pointer_fails(schedule: dict[str, Any], tmp_path: Path
     left, right = bundle[3]["links"]
     right["preparation_record_sha256"] = left["preparation_record_sha256"]
     assert _error_code(bundle, directory) == "duplicate_record_pointer"
+
+
+@pytest.mark.parametrize("prepared_at", [
+    "2026-01-01T00:00:00Z",  # before the terminal attempt ended
+    "2026-01-04T00:00:00Z",  # equal to the first Q lock
+    "2026-01-04T00:00:01Z",  # after the first Q lock
+])
+def test_preparation_must_precede_the_first_rating_lock(
+    schedule: dict[str, Any], tmp_path: Path, prepared_at: str,
+) -> None:
+    bundle, directory = _prepared(schedule, tmp_path)
+    link = bundle[3]["links"][0]
+    path = directory / (link["preparation_record_sha256"] + ".json")
+    record = json.loads(path.read_bytes())
+    path.unlink()
+    record["prepared_at_utc"] = prepared_at
+    _write_record(directory, link, record)
+    assert _error_code(bundle, directory) == "record_chronology_mismatch"
+
+
+def test_rating_rows_are_validated_and_digest_bound(
+    schedule: dict[str, Any], tmp_path: Path,
+) -> None:
+    bundle, directory = _prepared(schedule, tmp_path)
+    mapping, ratings = bundle[3], bundle[4]
+    ratings["ratings"][0]["evaluator_id"] = "external-c"
+    assert _error_code(bundle, directory) == "mapping_document_mismatch"
+    mapping["ratings_sha256"] = _digest(ratings)
+    assert _verify(bundle, directory)["counts"]["records_verified"] == 2
+    ratings["ratings"][0]["evaluator_id"] = "external-b"
+    assert _error_code(bundle, directory) == "invalid_ratings"
 
 
 def test_changed_byte_wrong_attempt_missing_and_extra_record(
@@ -339,7 +398,7 @@ def test_fifo_record_and_input_fail_without_blocking(
 ) -> None:
     bundle, directory = _prepared(schedule, tmp_path)
     paths = []
-    for name, document in zip(("schedule", "receipts", "manifest", "mapping"), bundle, strict=True):
+    for name, document in zip(("schedule", "receipts", "manifest", "mapping", "ratings"), bundle, strict=True):
         path = tmp_path / f"{name}.json"
         path.write_text(json.dumps(document), encoding="utf-8")
         paths.append(str(path))
@@ -355,7 +414,7 @@ def test_fifo_record_and_input_fail_without_blocking(
     assert result.stderr == ""
     assert json.loads(result.stdout)["error"] == {"code": "record_file_invalid"}
 
-    input_fifo = tmp_path / "fifo-mapping.json"
+    input_fifo = tmp_path / "fifo-ratings.json"
     os.mkfifo(input_fifo)
     paths[-1] = str(input_fifo)
     result = subprocess.run(

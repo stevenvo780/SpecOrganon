@@ -1,7 +1,7 @@
 """Check preexisting private preparation records after blind ratings are locked.
 
 Usage: ``python scripts/check_preparation_records.py schedule.json receipts.json
-manifest.json private_mapping.json records_dir``. All inputs are local and
+manifest.json private_mapping.json ratings.json records_dir``. All inputs are local and
 read-only. The directory must contain exactly one regular ``<sha256>.json``
 file per schema-2 mapping link; the filename and the SHA-256 of its *raw bytes*
 must equal that link's ``preparation_record_sha256``. No record is generated.
@@ -30,7 +30,9 @@ artifact, must feed ``blind_package``; the terminal trace must feed
 ``blind_trace``. The selector and
 redaction strings are interpreted by the declared transformer; this checker
 does not execute it. Manifest hashes, transformer bytes, terminal/blind bytes,
-external custody, and timing relative to rating locks require separate audit.
+external custody and the authenticity of claimed rating-lock times require
+separate audit. This checker compares the declared preparation and rating-lock
+times after validating the full rating document and its mapping digest.
 Rehashing forged actas and changing the private mapping together can pass.
 The public JSON response contains aggregate counts and fixed error codes only;
 it never prints acta contents or a run-to-opaque mapping.
@@ -49,7 +51,7 @@ from pathlib import Path
 from typing import Any
 
 from analyze_confirmatory import AnalysisError, _validate_schedule
-from audit_blind_ratings import RatingError, _validate_manifest
+from audit_blind_ratings import RatingError, _validate_manifest, audit_blind_ratings
 from audit_run_receipts import ReceiptError, audit_receipts
 
 
@@ -84,8 +86,8 @@ STEP_FIELDS = frozenset({
 LIMITATIONS = [
     "Declared source and test-output hashes and transformer bytes are not opened or authenticated.",
     "Terminal and blind artifact or trace bytes are not opened; recipe completeness, execution, and redaction correctness are not proven.",
-    "The private mapping's ratings digest is syntax-checked only; rating records and locks are not opened.",
-    "External custody, independent creation, release order, and preparation before rating locks are not authenticated.",
+    "Rating rows and their canonical digest are checked; claimed lock timestamps are not externally authenticated.",
+    "External custody, independent creation, release order, and physical preparation before rating locks are not proven.",
     "Forged records rehashed together with a changed private mapping can pass this local check.",
     "Concurrent changes during or after the final directory scan can escape this local snapshot.",
     "This is an unsealed development check; criterion 4 is not assessed.",
@@ -241,6 +243,7 @@ def _validate_manifest_and_recipe(record: dict[str, Any]) -> None:
 
 def _validate_record(
     raw: Any, link: dict[str, Any], terminal: dict[str, Any],
+    first_rating_lock: datetime,
 ) -> None:
     code = "record_schema_invalid"
     record = _object(raw, RECORD_FIELDS, code)
@@ -255,7 +258,7 @@ def _validate_record(
     ):
         _digest(record[field], code)
     prepared_at = _utc(record["prepared_at_utc"], code)
-    if prepared_at <= _utc(terminal["ended_at_utc"], code):
+    if not _utc(terminal["ended_at_utc"], code) < prepared_at < first_rating_lock:
         _fail("record_chronology_mismatch")
     attempt = _object(record["terminal_attempt"], ATTEMPT_FIELDS, code)
     if type(attempt["attempt_number"]) is not int or attempt["attempt_number"] < 1:
@@ -295,6 +298,7 @@ def _read_record(directory_fd: int, filename: str) -> bytes:
 def _check_records(
     records_dir: Path, links: list[dict[str, Any]],
     terminals: dict[str, dict[str, Any]],
+    first_rating_locks: dict[str, datetime],
 ) -> None:
     flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
     try:
@@ -318,7 +322,10 @@ def _check_records(
             data = _read_record(directory_fd, digest + ".json")
             if hashlib.sha256(data).hexdigest() != digest:
                 _fail("record_digest_mismatch")
-            _validate_record(_json_bytes(data), link, terminals[link["run_id"]])
+            _validate_record(
+                _json_bytes(data), link, terminals[link["run_id"]],
+                first_rating_locks[link["opaque_id"]],
+            )
         try:
             final_available = set(os.listdir(directory_fd))
         except OSError as exc:
@@ -333,7 +340,7 @@ def _check_records(
 
 def verify_preparation_records(
     raw_schedule: Any, raw_receipts: Any, raw_manifest: Any,
-    raw_mapping: Any, records_dir: str | Path,
+    raw_mapping: Any, raw_ratings: Any, records_dir: str | Path,
 ) -> dict[str, Any]:
     """Check schema-2 declared bindings and preexisting acta bytes, read-only."""
     try:
@@ -355,6 +362,20 @@ def verify_preparation_records(
         for artifact in artifacts.values()
     ):
         _fail("manifest_rubric_mismatch")
+    try:
+        rating_audit = audit_blind_ratings(raw_manifest, raw_ratings)
+    except (RatingError, TypeError, ValueError, OverflowError) as exc:
+        raise PreparationError("invalid_ratings") from exc
+    first_rating_locks = {
+        report["opaque_id"]: min(
+            _utc(row["outcome_stage"]["recorded_at_utc"], "invalid_ratings")
+            for row in (
+                report["primary_ratings"]
+                + ([report["adjudicator_rating"]] if report["adjudicator_rating"] is not None else [])
+            )
+        )
+        for report in rating_audit["artifacts"]
+    }
 
     mapping = _object(raw_mapping, MAPPING_FIELDS, "invalid_mapping")
     if type(mapping["schema"]) is not int or mapping["schema"] != 2:
@@ -367,7 +388,8 @@ def verify_preparation_records(
     for field, expected in expected_digests.items():
         if _digest(mapping[field], "invalid_mapping") != expected:
             _fail("mapping_document_mismatch")
-    _digest(mapping["ratings_sha256"], "invalid_mapping")
+    if _digest(mapping["ratings_sha256"], "invalid_mapping") != rating_audit["ratings_sha256"]:
+        _fail("mapping_document_mismatch")
     links = mapping["links"]
     if type(links) is not list:
         _fail("invalid_mapping")
@@ -415,7 +437,7 @@ def verify_preparation_records(
         checked_links.append(link)
     if seen_opaque != artifacts.keys():
         _fail("mapping_manifest_coverage_mismatch")
-    _check_records(Path(records_dir), checked_links, terminals)
+    _check_records(Path(records_dir), checked_links, terminals, first_rating_locks)
     return {
         "schema": 1,
         "classification": CLASSIFICATION,
@@ -427,14 +449,15 @@ def verify_preparation_records(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    for name in ("schedule", "receipts", "manifest", "mapping"):
+    for name in ("schedule", "receipts", "manifest", "mapping", "ratings"):
         parser.add_argument(name, help=f"local {name} JSON path")
     parser.add_argument("records_dir", help="directory of preexisting <sha256>.json actas")
     args = parser.parse_args(argv)
     try:
         output = verify_preparation_records(
             _read_input(args.schedule), _read_input(args.receipts),
-            _read_input(args.manifest), _read_input(args.mapping), args.records_dir,
+            _read_input(args.manifest), _read_input(args.mapping),
+            _read_input(args.ratings), args.records_dir,
         )
     except PreparationError as exc:
         output = {
