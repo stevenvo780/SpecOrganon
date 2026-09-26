@@ -29,7 +29,8 @@ def main() -> None:
     bin_dir = Path(sys.executable).parent
     cli = bin_dir / "organon"
     mcp = bin_dir / "organon-mcp"
-    smoke_env = {key: value for key, value in os.environ.items() if key != "ORGANON_APPROVERS_FILE"}
+    smoke_env = {key: value for key, value in os.environ.items()
+                 if key not in {"ORGANON_APPROVERS_FILE", "ORGANON_LEDGER_ANCHORS_FILE"}}
     smoke_env["ORGANON_ALLOW_FIXTURES"] = "1"
     cli_commands_seen: set[str] = set()
     expected_cli_commands = {

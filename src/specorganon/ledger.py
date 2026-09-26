@@ -1,7 +1,7 @@
 """Atomic, versioned event storage shared by CLI and MCP.
 
-The hash chain detects accidental corruption. It does not authenticate actors:
-Git history and external signatures are needed for an adversarial audit.
+The hash chain detects local corruption. An optional external head anchor detects
+coherent history replacement while its independent custody is maintained.
 """
 
 from __future__ import annotations
@@ -16,6 +16,8 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
+
+from . import anchor
 
 
 SCHEMA_VERSION = 1
@@ -100,7 +102,7 @@ def init_project(directory: str | Path, title: str, domain: str, actor: str, app
         return data
 
 
-def read_project(directory: str | Path) -> dict[str, Any]:
+def read_project(directory: str | Path, *, verify_external_anchor: bool = True) -> dict[str, Any]:
     target = project_file(directory)
     try:
         data = json.loads(target.read_text(encoding="utf-8"))
@@ -131,6 +133,11 @@ def read_project(directory: str | Path) -> dict[str, Any]:
         if not isinstance(supplied, str) or supplied != _digest({key: value for key, value in event.items() if key != "hash"}):
             raise LedgerError(f"event digest mismatch at sequence {index}")
         prior = supplied
+    if verify_external_anchor:
+        try:
+            anchor.verify(data, directory)
+        except ValueError as exc:
+            raise LedgerError(f"ledger anchor verification failed: {exc}") from exc
     return data
 
 

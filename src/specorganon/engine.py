@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -486,6 +487,8 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def create_case(path: str | Path, title: str, domain: str, actor: str, approval_policy: str = "signed") -> dict[str, Any]:
+    if "ORGANON_LEDGER_ANCHORS_FILE" in os.environ:
+        raise MethodError("initialize a case before enabling ORGANON_LEDGER_ANCHORS_FILE; then register its sequence-zero head")
     init_project(path, title, domain, actor, approval_policy)
     return get_state(path)
 
