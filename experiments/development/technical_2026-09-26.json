@@ -5,14 +5,14 @@
   "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
   "wheel": {
     "path": "dist/specorganon-0.1.0-py3-none-any.whl",
-    "sha256": "d26169a4b14528438aca996782874d1e007cfd7124dbe24e3246141fc47093cf",
+    "sha256": "459afc2d98679368660a3d17d831ee61ff7b0f0deddb85c65cf56a4e50c37790",
     "command": "uv build --wheel",
     "result": "Successfully built dist/specorganon-0.1.0-py3-none-any.whl"
   },
   "local_suite": {
     "command": "uv run pytest -q",
-    "result": "26 passed in 3.03s",
-    "scope": "synthetic mechanics, real CLI/MCP client, runner, ledger, interruption and concurrency"
+    "result": "59 passed in 5.79s",
+    "scope": "synthetic mechanics, real CLI/MCP client, runner, ledger, interruption, concurrency, signed approvals and 21 development injections"
   },
   "prototype_controls": {
     "command": "python3 prototypes/check_results.py prototypes/results/compare.json",
@@ -24,17 +24,17 @@
       "python": "3.11.15",
       "wheel_install": "uv pip install --python <clean-venv>/bin/python dist/specorganon-0.1.0-py3-none-any.whl",
       "smoke_command": "<clean-venv>/bin/python scripts/clean_smoke.py /workspace/SpecOrganon",
-      "smoke_result": {"cli_commands_exercised": 13, "decisions": 11, "idempotent_replay": true, "invalid_input_preserved_ledger": true, "items": 29, "phases_accepted": 9, "revision": 49},
+      "smoke_result": {"cli_commands_exercised": 14, "decisions": 11, "idempotent_replay": true, "invalid_input_preserved_ledger": true, "items": 29, "phases_accepted": 9, "revision": 49},
       "interface_test_command": "<clean-venv>/bin/python -m pytest -q tests/test_interfaces.py",
-      "interface_test_result": "3 passed in 1.56s"
+      "interface_test_result": "3 passed in 1.66s"
     },
     {
       "python": "3.12.3",
       "wheel_install": "uv pip install --python <clean-venv>/bin/python dist/specorganon-0.1.0-py3-none-any.whl",
       "smoke_command": "<clean-venv>/bin/python scripts/clean_smoke.py /workspace/SpecOrganon",
-      "smoke_result": {"cli_commands_exercised": 13, "decisions": 11, "idempotent_replay": true, "invalid_input_preserved_ledger": true, "items": 29, "phases_accepted": 9, "revision": 49},
+      "smoke_result": {"cli_commands_exercised": 14, "decisions": 11, "idempotent_replay": true, "invalid_input_preserved_ledger": true, "items": 29, "phases_accepted": 9, "revision": 49},
       "interface_test_command": "<clean-venv>/bin/python -m pytest -q tests/test_interfaces.py",
-      "interface_test_result": "3 passed in 1.71s"
+      "interface_test_result": "3 passed in 1.73s"
     }
   ],
   "native_agent_workflow": {
@@ -56,12 +56,29 @@
     "actor_switches_in_ledger": 2,
     "temporal_overlap_demonstrated": false
   },
+  "approval_security": {
+    "policy_default": "signed",
+    "trusted_registry_schema": 2,
+    "signature_algorithm": "Ed25519",
+    "signature_binds": ["case canonical path", "case metadata digest", "case UUID", "item revision and digest", "prior ledger head", "actor", "reason"],
+    "independent_review": "Earlier metadata-copy, signed-to-fixture and rehashed-prior-event attacks were reproduced before the fix and rejected after it.",
+    "fixture_runtime_opt_in": "ORGANON_ALLOW_FIXTURES=1",
+    "field_human_approvals": 0
+  },
+  "development_injections": {
+    "report": "experiments/development/injection_bank_2026-09-26.json",
+    "total": 21,
+    "passed": 21,
+    "classification": "synthetic development regression, not sealed confirmatory evaluation"
+  },
   "reproducible_case_seeds": [
     {"seed": "cases/mango/seed.json", "fresh_case_items": 23, "fresh_case_revision": 23, "frame_ready": true, "critique_ready": false},
     {"seed": "cases/citibike/seed.json", "fresh_case_items": 30, "fresh_case_revision": 30, "frame_ready": true, "critique_ready": false}
   ],
   "limits": [
-    "The clean smoke uses invented fixture content and self-attested human:fixture events emitted by an AI test harness.",
+    "The clean smoke enables fixtures explicitly and uses invented content and human:fixture events emitted by an AI test harness.",
+    "An Ed25519 signature proves control of a configured key, not the person's identity, authority or informed consent; those require independent custody and verification.",
+    "Event hashes and signed approvals do not protect against malicious truncation or forged review/advance events after the signature. Production audit needs an externally anchored head and sequence or append-only storage.",
     "These results do not establish source authenticity, human consent, field impact or comparative methodological advantage.",
     "The temporary virtual environments are outside the repository; commands can recreate them."
   ]
