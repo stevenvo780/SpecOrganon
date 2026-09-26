@@ -59,28 +59,28 @@ El planificador sigue tratando los activos como digests suministrados; los contr
 
 Un [sondeo de wheelhouse temporal](../experiments/development/offline_wheelhouse_py312_2026-09-26.json) exportó dependencias fijadas en `uv.lock`, descargó 28 wheels cuyos nombres, tamaños y SHA-256 coincidieron con el lock, añadió el wheel local y logró instalar en un entorno nuevo de **CPython 3.12.3 linux-x86_64** usando `--offline --no-cache --no-index --find-links`. `uv pip check` y el smoke sintético instalado pasaron: nueve fases, 29 ítems, 14 comandos CLI y 14 herramientas MCP. Con el mismo conjunto de wheels, un entorno CPython 3.11.15 rechazó `cffi` por etiqueta ABI `cp312`. El directorio fue temporal: **no se incorporó** a `toolkit` ni a una entrega T. El resultado prueba viabilidad local para ese intérprete y plataforma, no una instalación reproducible desde la entrega, aislamiento, telemetría o eficacia.
 
-[`scripts/toolkit_bundle.py`](../scripts/toolkit_bundle.py) construye el ZIP T con `bundle.json` canónico, los bytes de `uv.lock` y `wheels/*.whl`. Actualmente fija el destino **CPython 3.12 Linux x86_64**; el paquete observado de desarrollo contiene 29 wheels y no sirve para CPython 3.11. Se reproduce desde un directorio privado nuevo de wheels y un `uv.lock` fijado:
+[`scripts/toolkit_bundle.py`](../scripts/toolkit_bundle.py) construye el ZIP T con `bundle.json` canónico, los bytes de `uv.lock` y `wheels/*.whl`. Acepta como destinos declarados **CPython 3.11 o 3.12 Linux x86_64**, cada uno con sus wheels de ABI; un ZIP 3.12 no sirve para 3.11 y viceversa. Los dos paquetes observados de desarrollo contienen 29 wheels. Este ejemplo construye el destino 3.11 desde un directorio privado nuevo de wheels y un `uv.lock` fijado:
 
 ```sh
 uv export --locked --no-dev --no-emit-project --no-hashes --no-header --no-annotate --output-file /ruta-privada/requirements.txt
-python3 -m pip --isolated download --only-binary=:all: --index-url https://pypi.org/simple --dest /ruta-privada/wheels --requirement /ruta-privada/requirements.txt
+python3.11 -m pip --isolated download --only-binary=:all: --index-url https://pypi.org/simple --dest /ruta-privada/wheels --requirement /ruta-privada/requirements.txt
 uv build --wheel
 cp dist/specorganon-0.1.0-py3-none-any.whl /ruta-privada/wheels/
-python3 scripts/toolkit_bundle.py pack /ruta-privada/wheels uv.lock /ruta-privada/toolkit.zip
+python3 scripts/toolkit_bundle.py pack --python-version 3.11 /ruta-privada/wheels /ruta/absoluta/uv.lock /ruta-privada/toolkit.zip
 python3 scripts/toolkit_bundle.py inspect /ruta-privada/toolkit.zip
 ```
 
-El empaquetador rechaza wheels de dependencia cuyos bytes no coinciden con el lock que recibe, pero el lock es una entrada local sin autoridad externa. La descarga durante la **construcción** no forma parte de la prueba offline de **instalación**. Para esta última, el custodio fija primero el SHA exterior de `toolkit.zip` en el calendario candidato, lo libera con `preflight_assets.py`, inspecciona esa entrega y extrae **su copia** de `toolkit` a un directorio nuevo. Luego puede comprobar un entorno nuevo del destino declarado:
+El empaquetador rechaza wheels de dependencia cuyos bytes no coinciden con el lock que recibe, pero el lock es una entrada local sin autoridad externa. Las etiquetas `manylinux` se cotejan con la glibc del host que inspecciona; el target no fija versión de glibc ni imagen de ejecución, así que la compatibilidad debe volver a comprobarse en el eventual host ejecutor. La descarga durante la **construcción** no forma parte de la prueba offline de **instalación**. Para esta última, el custodio fija primero el SHA exterior de `toolkit.zip` en el calendario candidato, lo libera con `preflight_assets.py`, inspecciona esa entrega y extrae **su copia** de `toolkit` a un directorio nuevo. Luego puede comprobar un entorno nuevo del destino declarado:
 
 ```sh
 python3 scripts/toolkit_bundle.py extract /ruta-privada/entrega-T/toolkit /ruta-privada/extraido-nuevo
-uv venv --no-python-downloads --python /usr/bin/python3.12 /ruta-privada/venv-nuevo
+uv venv --no-python-downloads --python /ruta/al/python3.11 /ruta-privada/venv-nuevo
 uv pip install --offline --no-cache --no-index --find-links /ruta-privada/extraido-nuevo/wheels --python /ruta-privada/venv-nuevo/bin/python specorganon==0.1.0
 uv pip check --python /ruta-privada/venv-nuevo/bin/python
 UV_OFFLINE=1 PIP_NO_INDEX=1 /ruta-privada/venv-nuevo/bin/python scripts/clean_smoke.py "$PWD"
 ```
 
-El [registro de la copia T liberada](../experiments/development/released_toolkit_bundle_py312_2026-09-26.json) guarda hashes, instalación y smoke sintético. Este procedimiento ejecuta el código del wheel local en un entorno de desarrollo sin aislamiento de sistema operativo; no se debe confundir con una corrida de proveedor ni con aprobación de contenido o custodia externa.
+Los registros de las copias T liberadas para [CPython 3.11](../experiments/development/released_toolkit_bundle_py311_2026-09-26.json) y [CPython 3.12](../experiments/development/released_toolkit_bundle_py312_2026-09-26.json) guardan hashes, instalación y smoke sintético. Para 3.12 se selecciona `python3.12` en la descarga y creación del entorno, y `--python-version 3.12` al empaquetar; omitir esa opción conserva 3.12 por compatibilidad. Este procedimiento ejecuta el código del wheel local en un entorno de desarrollo sin aislamiento de sistema operativo; no se debe confundir con una corrida de proveedor ni con aprobación de contenido o custodia externa.
 
 ## Firma offline del diseño candidato
 
