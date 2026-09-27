@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "classification": "development_local_gate_receipt_boundary_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "implementation_sha256": {
+    "scripts/preflight_assets.py": "d4e368f5e3eb44140a7b4a81183611150f625f4a97f7e674f608d875a155d139",
+    "scripts/stage_released_run.py": "b348fc971182cdc0214a9672f3394df3d646e29bdb0f062f508218dff9a66ede",
+    "scripts/verify_staged_run.py": "aa0c42bc107e05e955b1d87a614f9fd2624fb4a8ffb5d6273518684d78271f60",
+    "scripts/run_staged_local_tool.py": "b3dfefd3085c61ba7965c261f9c398e9932238ae0a5d68f320a2efdf4ae11fb2",
+    "scripts/staged_tool_session.py": "57970f857247c01b4714efc786e2b74b66de1876a0beb1d8571329d3ad0a1f6b",
+    "tests/test_preflight_assets.py": "c01276aa992977b9f6cfc45c4ba7f1782478eaad115be5a0203a87ab2c7f79fe",
+    "tests/test_stage_released_run.py": "a14bdb1d9c6b10d9efa40b49286b25d20421fe67bbbdfa7765c76e4917d5fd2f",
+    "tests/test_verify_staged_run.py": "bc7b973ced8dc34b86f4f771e0f3bc03d87268010707305899efca309aacbe8d",
+    "tests/test_run_staged_local_tool.py": "f561426b7d319f9d5cd0019346767ebb289651af3252752ae4f7d829d19b3895",
+    "tests/test_staged_tool_session.py": "2c6099476dd6ac3adb5b01c51e01b5ced6da9a2071888763a005e9943e882b67",
+    "tests/test_local_run_admission.py": "40926552a7fb920c78df57533e2b9ebd7349db0934c6dbccb1118597cfec2ef8"
+  },
+  "initial_gap": "The local gate lock ended after sandbox execution but before output inventory and durable receipt publication; gated attempt-1 stages did not retain release-claim provenance.",
+  "local_contract": {
+    "gated_stage_schema": "new gated stages use schema 2 from attempt 1; unsequenced and historical schema-1 stages remain readable but do not retain a gate",
+    "lock_scope": "shared gate lock is acquired before admission claim and durable call reservation and held through sandbox, output inventory, post-run checks and receipt file and directory fsync",
+    "registry_paths": "gate, admission, release, stage, receipt and session destinations are checked to keep registry roots disjoint and gate state free of application outputs",
+    "scope": "cooperating processes with the same UID, host and private registry roots",
+    "provider_calls": 0,
+    "criterion_4": "not_assessed"
+  },
+  "adversarial_reproductions_and_repairs": [
+    "A terminal writer paused behind the gate lock while one-shot receipt publication was paused for attempts 1 and 2; it completed only after the receipt was durable.",
+    "A terminal writer paused while a session terminal receipt was already fsynced but the call still held the gate; it completed after the session released the lock.",
+    "Closing the gate between point-in-time verification and lock acquisition now rejects a call without publishing an admission claim or reservation.",
+    "One-shot receipt and session destinations inside the gate previously poisoned its strict state directory; guarded paths now reject them before mutation.",
+    "Identical or nested gate and admission roots previously caused a shared-to-exclusive self-deadlock; path and existing-inode checks reject this configuration before the gate lock.",
+    "Release and stage destinations inside the gate are rejected before a claim or output directory is created.",
+    "A concurrent admission loser may fail closed because the registry directory changed during the operation; its test accepts this safe rejection while still requiring no losing reservation."
+  ],
+  "gates": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_local_block_release_gate.py tests/test_preflight_assets.py tests/test_stage_released_run.py tests/test_verify_staged_run.py tests/test_local_run_admission.py tests/test_run_staged_local_tool.py tests/test_staged_tool_session.py",
+      "result": "213 passed in 49.34s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "1285 passed, 1 xfailed in 138.18s"
+    },
+    {
+      "command": "ruff check scripts tests; git diff --check",
+      "result": "passed"
+    }
+  ],
+  "independent_review": {
+    "result": "The reviewer reproduced a spent-reservation race, registry self-poisoning and a shared-to-exclusive self-deadlock; final scoped re-review found no further reproducible issue in the supported gated path model.",
+    "remaining_explicit_bypass": "An attempt-1 release has schema 1 and can be re-staged with development_unsequenced; that explicit development mode is outside gate sequencing.",
+    "remaining_local_threat": "A hostile process with the same UID can mutate paths or registries; these cooperative checks do not establish independent custody."
+  },
+  "limits": [
+    "The operator's terminal and its incident, trace and artifact digests remain local declarations, without authenticated provider evidence.",
+    "A legacy schema-1 stage does not record its gate and cannot retroactively retain it during execution.",
+    "These synthetic local tool tests do not execute the model matrix, validate a provider's runtime image or enforce global token, time and cost limits.",
+    "The unrelated MCP same-UID relocation counterexample remains the one strict expected failure in the global suite."
+  ]
+}
