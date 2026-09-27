@@ -26,6 +26,8 @@ El smoke también rechaza un decimal largo que perdería valor al serializarse; 
 
 El script crea explícitamente un caso con `--approval-policy fixture` y habilita `ORGANON_ALLOW_FIXTURES=1` solo para la prueba. Sus aprobaciones y resultados son **inventados para pruebas**. Tampoco la firma sintética representa consentimiento humano. No prueban decisiones humanas reales ni eficacia de una intervención. El entorno de producción debe omitir esa variable; sin ella, las fases de una fixture no quedan aceptadas al releer el ledger.
 
+La [sonda firmada de nueve fases](scripts/probe_signed_full_workflow.py) complementa ese smoke. Su [test](tests/test_signed_full_workflow.py) construye e instala un wheel nuevo en un entorno temporal y ejecuta el manifiesto sintético con política `signed`, alternando CLI y MCP stdio. Verifica las dos aprobaciones, las nueve revisiones, los 29 artefactos, el replay sin escrituras y la reapertura al retirar la clave pública del revisor. Las claves y las decisiones son sintéticas; el recibo no sustituye revisión humana, ejecución autenticada de la prueba declarada ni impacto de campo.
+
 El smoke compara el resultado observable de 15 operaciones compartidas CLI/MCP: 13 sobre casos gemelos con entradas iguales y los desafíos `approval-challenge` y `phase-review-challenge` sobre el mismo caso firmado. También verifica por separado una firma válida aceptada mediante `approve --signature` y otra mediante MCP. Los tiempos y hashes de eventos de casos distintos no son iguales; cada evento se coteja con su propio ledger y se verifica que su tiempo UTC corresponda a la operación.
 
 ## Trabajar en un caso
