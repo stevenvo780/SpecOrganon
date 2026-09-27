@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "classification": "development_installed_wheel_process_crash_probe_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "scope": "SIGKILL of a real installed CLI process at the ledger os.replace commit window, followed by real MCP stdio resume",
+  "reproduction": {
+    "script": "scripts/probe_ledger_commit_crash.py",
+    "test": "tests/test_probe_ledger_commit_crash.py",
+    "test_builds_and_installs_wheel_offline": true,
+    "child_cwd": "private temporary directory",
+    "hook_scope": "temporary sitecustomize on installed CLI child only",
+    "hook_target": "second manifest item at the ledger os.replace call",
+    "hook_marker_count_per_window": 1,
+    "terminal_signal": "SIGKILL",
+    "resume_transport": "installed organon-mcp over real stdio Client"
+  },
+  "windows": {
+    "before_replace": {
+      "recovered_revision": 1,
+      "resume_applied": 2,
+      "resume_skipped": 1,
+      "final_revision": 3,
+      "unique_manifest_ids": 3,
+      "replay_byte_identical": true
+    },
+    "after_replace": {
+      "recovered_revision": 2,
+      "published_bytes_equal_hook_candidate": true,
+      "resume_applied": 1,
+      "resume_skipped": 2,
+      "final_revision": 3,
+      "unique_manifest_ids": 3,
+      "replay_byte_identical": true
+    }
+  },
+  "negative_controls": [
+    "empty sitecustomize makes the probe fail because no commit-window marker appears",
+    "the same missing-hook control fails under PYTHONOPTIMIZE=1",
+    "probe invariants use explicit exceptions and remain active under PYTHONOPTIMIZE=1"
+  ],
+  "checks": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_probe_ledger_commit_crash.py",
+      "result": "1 passed"
+    },
+    {
+      "command": "PYTHONOPTIMIZE=1 .venv/bin/python -m pytest -q tests/test_probe_ledger_commit_crash.py",
+      "result": "1 passed; generic pytest optimization warning"
+    },
+    {
+      "command": "installed CPython 3.11.15 and 3.12.3 environments: PYTHONOPTIMIZE=1 python scripts/probe_ledger_commit_crash.py /workspace/SpecOrganon",
+      "result": "both windows passed on each interpreter"
+    }
+  ],
+  "independent_review": {
+    "initial_false_green": "Python assert statements in the first probe disappeared under PYTHONOPTIMIZE=1 and replay was reported true unconditionally.",
+    "post_fix_optimized_probe_passed": true,
+    "post_fix_missing_hook_control_failed": true,
+    "reviewer": "native read-only development agent, not an external host custodian"
+  },
+  "limitations": [
+    "This probes process interruption on a running Linux host; it does not prove filesystem durability after host crash or power loss.",
+    "The manifest and approvals are synthetic fixtures, not a real case or human approval.",
+    "The probe tests one commit boundary and MCP resume, not all commands, all interruption points, multiagent coordination, or the full criterion 1."
+  ],
+  "criterion_1": "not_assessed"
+}
