@@ -3,7 +3,7 @@
 Usage::
 
     python scripts/audit_signed_test_execution.py CASE ITEM RUN_DIR \
-        --executable-sha256 HEX
+        [--executable-sha256 HEX]
 
 RUN_DIR must be a new, private (0700) directory containing only an ``input``
 directory. No path component of RUN_DIR or ``input`` may be a symlink. The
@@ -18,6 +18,10 @@ the JSON records that the declared argv is therefore not reproduced literally.
 This repeats the declared command now. A match cannot establish that the
 historical signed report came from an execution or an independent custodian.
 The existing engine gate is not modified. This CLI never appends to the case.
+Legacy signed cases require the CLI executable pin. In signed_observed cases,
+the test item must already pin executable and input tree hashes; the optional
+CLI pin can only confirm the item's executable pin. A schema 1 ``receipt``
+projects measured bytes for a separate observer to review and sign.
 """
 
 from __future__ import annotations
@@ -32,7 +36,7 @@ import stat
 from pathlib import Path
 from typing import Any
 
-from specorganon import engine, test_execution
+from specorganon import engine, test_execution, test_observation
 from specorganon.ledger import read_project
 
 from local_replay_sandbox import (
@@ -164,7 +168,9 @@ def _hash_beneath(root: Path, relative: str, maximum: int) -> tuple[str, int]:
             os.close(fd)
 
 
-def _current_signed_report(case: Path, item_id: str) -> tuple[dict[str, Any], dict[str, Any], str, str]:
+def _current_signed_report(
+    case: Path, item_id: str,
+) -> tuple[dict[str, Any], dict[str, Any], str, str, dict[str, str] | None]:
     state = engine.get_state(case)
     if state["project"].get("approval_policy") != "signed":
         raise AuditError("case does not use signed approvals")
@@ -191,13 +197,20 @@ def _current_signed_report(case: Path, item_id: str) -> tuple[dict[str, Any], di
     report = test_execution.validate_report(event["payload"]["report"])
     if report["argv"] != item["data"]["argv"]:
         raise AuditError("signed report argv differs from the current item")
+    strict_pins = None
+    if state["project"].get("test_gate_policy") == "signed_observed":
+        data = item["data"]
+        for name in ("executable_sha256", "input_tree_sha256"):
+            if type(data.get(name)) is not str or not SHA256.fullmatch(data[name]):
+                raise AuditError(f"strict signed test requires a current {name} pin")
+        strict_pins = {name: data[name] for name in ("executable_sha256", "input_tree_sha256")}
     head_hash = ledger["events"][-1]["hash"] if ledger["events"] else "0" * 64
     return (report, {"seq": seq, "hash": event_hash, "item_version": item["version"]},
-            head_hash, state["project"]["case_id"])
+            head_hash, state["project"]["case_id"], strict_pins)
 
 
 def audit_signed_test_execution(
-    case_dir: Path | str, item_id: str, run_dir: Path | str, executable_sha256: str,
+    case_dir: Path | str, item_id: str, run_dir: Path | str, executable_sha256: str | None = None,
     *, timeout_seconds: float = 10.0, cpu_seconds: int = 10,
     max_file_bytes: int = MAX_FILE_BYTES,
 ) -> dict[str, Any]:
@@ -213,7 +226,22 @@ def audit_signed_test_execution(
     input_dir = _private_directory(run / "input")
     if input_dir.parent != run or set(path.name for path in run.iterdir()) != {"input"}:
         raise AuditError("new run directory must contain only input before launch")
-    report, provenance, head_before, case_id = _current_signed_report(case, item_id)
+    report, provenance, head_before, case_id, strict_pins = _current_signed_report(case, item_id)
+    input_before = None
+    if strict_pins is None:
+        if executable_sha256 is None:
+            raise AuditError("legacy signed test requires --executable-sha256")
+    else:
+        if executable_sha256 is not None and executable_sha256 != strict_pins["executable_sha256"]:
+            raise AuditError("CLI executable SHA-256 pin differs from the signed test item")
+        executable_sha256 = strict_pins["executable_sha256"]
+        try:
+            input_before = test_observation.hash_input_tree(input_dir)
+        except ValueError as exc:
+            raise AuditError("input tree could not be inspected before launch") from exc
+        if input_before != strict_pins["input_tree_sha256"]:
+            raise AuditError("input tree does not match the signed test item pin")
+    assert executable_sha256 is not None
     executable_bytes = _read_executable(report["argv"][0], executable_sha256)
     capability = probe_sandbox()
     if not capability.available:
@@ -282,6 +310,55 @@ def audit_signed_test_execution(
         artifact_checks.append(item_check)
     observation["artifact_checks"] = artifact_checks
     checks["artifacts"] = all(item["matches"] for item in artifact_checks)
+    if strict_pins is not None:
+        try:
+            measured = test_observation.inspect_bundle(run, report)
+        except ValueError as exc:
+            checks["bundle_readable"] = False
+            checks["input_tree_unchanged"] = False
+            observation["receipt_error"] = f"{type(exc).__name__}: {exc}"
+        else:
+            checks["bundle_readable"] = True
+            checks["input_tree_unchanged"] = measured["input_tree_sha256"] == input_before
+            checks["input_tree_pin"] = measured["input_tree_sha256"] == strict_pins["input_tree_sha256"]
+            checks["landlock_abi"] = (
+                type(result.landlock_abi) is int and result.landlock_abi >= 5
+            )
+            observed_artifacts = {entry["path"]: entry["sha256"]
+                                  for entry in measured["artifacts"]}
+            reported_artifacts = {entry["path"]: entry["sha256"]
+                                  for entry in report["artifacts"]}
+            checks["receipt_matches_report"] = (
+                measured["stdout_sha256"] == report["stdout_sha256"]
+                and measured["stderr_sha256"] == report["stderr_sha256"]
+                and len(measured["artifacts"]) == len(report["artifacts"])
+                and observed_artifacts == reported_artifacts
+            )
+            if checks["landlock_abi"]:
+                observation["receipt"] = {
+                    "schema": 1,
+                    "case_id": case_id,
+                    "item_id": item_id,
+                    "item_version": provenance["item_version"],
+                    "report_provenance": {"seq": provenance["seq"], "hash": provenance["hash"]},
+                    "bundle_path": str(run),
+                    "executable_sha256": executable_sha256,
+                    "input_tree_sha256": measured["input_tree_sha256"],
+                    "sandbox": {
+                        "policy": "landlock_seccomp_repeat_v1",
+                        "landlock_abi": result.landlock_abi,
+                        "exit_code": result.exit_code,
+                        "timed_out": result.timed_out,
+                        "launch_error": result.launch_error,
+                    },
+                    "observed": {
+                        "stdout_sha256": measured["stdout_sha256"],
+                        "stderr_sha256": measured["stderr_sha256"],
+                        "artifacts": measured["artifacts"],
+                    },
+                }
+            else:
+                observation["receipt_error"] = "sandbox did not report Landlock ABI 5+"
     ledger_after = read_project(case)
     head_after = ledger_after["events"][-1]["hash"] if ledger_after["events"] else "0" * 64
     checks["ledger_unchanged"] = head_after == head_before
@@ -297,7 +374,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("case", type=Path)
     parser.add_argument("item_id")
     parser.add_argument("run_dir", type=Path)
-    parser.add_argument("--executable-sha256", required=True)
+    parser.add_argument("--executable-sha256")
     parser.add_argument("--timeout-seconds", type=float, default=10.0)
     parser.add_argument("--cpu-seconds", type=int, default=10)
     args = parser.parse_args(argv)

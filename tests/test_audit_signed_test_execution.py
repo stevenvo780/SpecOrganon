@@ -14,7 +14,7 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
-from specorganon import approval, engine
+from specorganon import approval, engine, test_observation
 from specorganon.ledger import read_project
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
@@ -45,11 +45,15 @@ def available_sandbox() -> None:
 
 
 def _signed_case(tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
-                 argv: list[str], report: dict) -> Path:
+                 argv: list[str], report: dict, *,
+                 input_tree_sha256: str | None = None,
+                 executable_sha256: str = EXECUTABLE_SHA256) -> Path:
     case = tmp_path / "case"
     registry = tmp_path / "registry.json"
     monkeypatch.setenv("ORGANON_APPROVERS_FILE", str(registry))
-    engine.create_case(case, "Local signed audit", "synthetic", AUTHOR)
+    strict = input_tree_sha256 is not None
+    engine.create_case(case, "Local signed audit", "synthetic", AUTHOR,
+                       **({"test_gate_policy": "signed_observed"} if strict else {}))
     project = read_project(case)["project"]
     key = Ed25519PrivateKey.generate()
     public = key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
@@ -59,9 +63,13 @@ def _signed_case(tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
         "approvers": {}, "phase_reviewers": {},
         "test_executors": {ACTOR: base64.b64encode(public).decode("ascii")},
     }}}), encoding="utf-8")
-    engine.put_item(case, "t1", "test", "Local synthetic command", [], {
+    data = {
         "passed": True, "argv": argv, "command": shlex.join(argv),
-    }, AUTHOR)
+    }
+    if strict:
+        data.update({"executable_sha256": executable_sha256,
+                     "input_tree_sha256": input_tree_sha256})
+    engine.put_item(case, "t1", "test", "Local synthetic command", [], data, AUTHOR)
     challenge = engine.test_execution_challenge(case, "t1", report, ACTOR)
     signature = base64.b64encode(key.sign(base64.b64decode(challenge["message_base64"]))).decode("ascii")
     engine.record_test_execution(case, "t1", report, ACTOR, signature)
@@ -104,11 +112,11 @@ def _report(argv: list[str], *, artifact_digest: str | None = None,
 
 
 def _cli(case: Path, run: Path, capsys: pytest.CaptureFixture[str],
-         *, pin: str = EXECUTABLE_SHA256, timeout: float = 10) -> tuple[int, dict]:
-    status = audit.main([
-        str(case), "t1", str(run), "--executable-sha256", pin,
-        "--timeout-seconds", str(timeout),
-    ])
+         *, pin: str | None = EXECUTABLE_SHA256, timeout: float = 10) -> tuple[int, dict]:
+    args = [str(case), "t1", str(run), "--timeout-seconds", str(timeout)]
+    if pin is not None:
+        args.extend(["--executable-sha256", pin])
+    status = audit.main(args)
     output = json.loads(capsys.readouterr().out)
     return status, output
 
@@ -299,3 +307,171 @@ def test_unavailable_sandbox_fails_closed_before_creating_write_roots(
     assert "Landlock unavailable" in result["error"]
     assert not (run / "artifacts").exists()
     assert not (run / "stdout.bin").exists()
+
+
+def test_strict_repeat_emits_signable_measured_receipt_without_cli_pin(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str], available_sandbox: None,
+) -> None:
+    run = _run_dir(tmp_path)
+    argv = _command()
+    case = _signed_case(tmp_path, monkeypatch, argv, _report(argv),
+                        input_tree_sha256=test_observation.hash_input_tree(run / "input"))
+    before = (case / "organon.json").read_bytes()
+
+    status, result = _cli(case, run, capsys, pin=None)
+
+    assert status == 0, result
+    assert result["observed_passed"] is True
+    assert result["checks"]["input_tree_unchanged"] is True
+    assert result["checks"]["input_tree_pin"] is True
+    receipt = result["receipt"]
+    assert set(receipt) == {
+        "schema", "case_id", "item_id", "item_version", "report_provenance",
+        "bundle_path", "executable_sha256", "input_tree_sha256", "sandbox", "observed",
+    }
+    assert receipt["schema"] == 1
+    assert receipt["case_id"] == read_project(case)["project"]["case_id"]
+    assert receipt["item_id"] == "t1" and receipt["item_version"] == 1
+    assert receipt["report_provenance"] == {
+        key: result["report_provenance"][key] for key in ("seq", "hash")
+    }
+    assert receipt["bundle_path"] == str(run.resolve(strict=True))
+    assert receipt["executable_sha256"] == EXECUTABLE_SHA256
+    assert receipt["input_tree_sha256"] == test_observation.hash_input_tree(run / "input")
+    assert receipt["sandbox"] == {
+        "policy": "landlock_seccomp_repeat_v1",
+        "landlock_abi": result["sandbox"]["landlock_abi"],
+        "exit_code": 0, "timed_out": False, "launch_error": None,
+    }
+    assert receipt["sandbox"]["landlock_abi"] >= 5
+    assert receipt["observed"] == {
+        "stdout_sha256": hashlib.sha256(GOOD).hexdigest(),
+        "stderr_sha256": hashlib.sha256(b"warning\n").hexdigest(),
+        "artifacts": [{"path": "results/output.txt", "sha256": hashlib.sha256(GOOD).hexdigest()}],
+    }
+    assert (case / "organon.json").read_bytes() == before
+
+
+@pytest.mark.parametrize("falsified", ["stdout", "artifact"])
+def test_strict_false_signed_report_keeps_negative_measured_receipt(
+    falsified: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str], available_sandbox: None,
+) -> None:
+    run = _run_dir(tmp_path)
+    argv = _command()
+    report = _report(argv, **({"stdout_digest": "0" * 64} if falsified == "stdout"
+                            else {"artifact_digest": "1" * 64}))
+    case = _signed_case(tmp_path, monkeypatch, argv, report,
+                        input_tree_sha256=test_observation.hash_input_tree(run / "input"))
+    status, result = _cli(case, run, capsys, pin=None)
+
+    assert status == 1
+    assert result["signature_verified"] is True
+    assert result["observed_passed"] is False
+    assert result["checks"]["stdout_sha256" if falsified == "stdout" else "artifacts"] is False
+    assert result["receipt"]["observed"]["stdout_sha256"] == hashlib.sha256(GOOD).hexdigest()
+    assert result["receipt"]["observed"]["artifacts"] == [
+        {"path": "results/output.txt", "sha256": hashlib.sha256(GOOD).hexdigest()},
+    ]
+
+
+@pytest.mark.parametrize("wrong_pin", ["input", "executable", "cli"])
+def test_strict_item_pins_are_checked_before_launch(
+    wrong_pin: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str], available_sandbox: None,
+) -> None:
+    run = _run_dir(tmp_path)
+    argv = _command()
+    input_pin = test_observation.hash_input_tree(run / "input")
+    case = _signed_case(
+        tmp_path, monkeypatch, argv, _report(argv),
+        input_tree_sha256="0" * 64 if wrong_pin == "input" else input_pin,
+        executable_sha256="0" * 64 if wrong_pin == "executable" else EXECUTABLE_SHA256,
+    )
+    status, result = _cli(case, run, capsys, pin="1" * 64 if wrong_pin == "cli" else None)
+
+    assert status == 2
+    assert result["signature_verified"] is True
+    assert result["observed_locally"] is False
+    assert "receipt" not in result
+    assert not (run / "artifacts").exists()
+    assert not (run / "stdout.bin").exists()
+
+
+def test_strict_input_changed_during_repeat_is_rejected_with_measured_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str], available_sandbox: None,
+) -> None:
+    run = _run_dir(tmp_path)
+    argv = _command()
+    pinned_input = test_observation.hash_input_tree(run / "input")
+    case = _signed_case(tmp_path, monkeypatch, argv, _report(argv),
+                        input_tree_sha256=pinned_input)
+    original = audit.run_sandboxed
+
+    def mutate_input(**kwargs: object) -> sandbox.SandboxResult:
+        result = original(**kwargs)
+        (run / "input" / "payload.txt").write_bytes(b"mutated after execution\n")
+        return result
+
+    monkeypatch.setattr(audit, "run_sandboxed", mutate_input)
+    status, result = _cli(case, run, capsys, pin=None)
+
+    assert status == 1
+    assert result["checks"]["input_tree_unchanged"] is False
+    assert result["checks"]["input_tree_pin"] is False
+    assert result["observed_passed"] is False
+    assert result["receipt"]["input_tree_sha256"] != pinned_input
+    assert result["receipt"]["input_tree_sha256"] == test_observation.hash_input_tree(run / "input")
+
+
+def test_strict_failed_execution_still_emits_measured_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str], available_sandbox: None,
+) -> None:
+    run = _run_dir(tmp_path)
+    argv = _command(exit_code=3)
+    case = _signed_case(tmp_path, monkeypatch, argv, _report(argv, exit_code=3),
+                        input_tree_sha256=test_observation.hash_input_tree(run / "input"))
+    status, result = _cli(case, run, capsys, pin=None)
+
+    assert status == 1
+    assert result["observed_locally"] is True
+    assert result["observed_passed"] is False
+    assert result["receipt"]["sandbox"]["exit_code"] == 3
+    assert result["receipt"]["observed"]["artifacts"] == [
+        {"path": "results/output.txt", "sha256": hashlib.sha256(GOOD).hexdigest()},
+    ]
+
+
+def test_strict_timeout_receipt_has_null_exit_code(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str], available_sandbox: None,
+) -> None:
+    run = _run_dir(tmp_path)
+    argv = _command(sleep=5)
+    case = _signed_case(tmp_path, monkeypatch, argv,
+                        _report(argv, exit_code=124, timed_out=True),
+                        input_tree_sha256=test_observation.hash_input_tree(run / "input"))
+    status, result = _cli(case, run, capsys, pin=None, timeout=0.5)
+
+    assert status == 1
+    assert result["observed_passed"] is False
+    assert result["receipt"]["sandbox"]["timed_out"] is True
+    assert result["receipt"]["sandbox"]["exit_code"] is None
+    assert result["receipt"]["observed"]["artifacts"] == []
+
+
+def test_legacy_cli_still_requires_its_executable_pin(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    run = _run_dir(tmp_path)
+    argv = _command()
+    case = _signed_case(tmp_path, monkeypatch, argv, _report(argv))
+    status, result = _cli(case, run, capsys, pin=None)
+
+    assert status == 2
+    assert "requires --executable-sha256" in result["error"]
+    assert not (run / "artifacts").exists()
