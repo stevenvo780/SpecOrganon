@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-27",
+  "decision": "D-068",
+  "component": "local development runner and independent observer",
+  "regression_before": {
+    "provider": "codex",
+    "event": "turn.completed",
+    "ambiguous_field": "input_tokens",
+    "first_value": 90000,
+    "last_value": 20,
+    "observed_last_value": 20,
+    "observed_terminal_success": true,
+    "observed_complete": true,
+    "impact": "A local trace could appear to fit the 80000-token invocation cap even while carrying a conflicting value above it. The observer reused the same parser."
+  },
+  "correction": {
+    "commit": "a075ca13585ef3ff30f84f4e42f9ee418b67669b",
+    "parser": "Shared strict UTF-8 JSONL decoder for Codex, Agy and OpenCode",
+    "rejected": [
+      "duplicate keys at any object depth",
+      "NaN, Infinity and -Infinity",
+      "floating-point overflow to infinity",
+      "invalid UTF-8"
+    ],
+    "failure_behavior": "The trace retains a line-numbered terminal error and cannot report terminal_success or complete. The observer recomputes usage from the recorded bytes and rejects a forged successful summary."
+  },
+  "verification": {
+    "focused_command": "uv run pytest -q tests/test_run_development_arm.py tests/test_observe_development_run.py",
+    "focused_result": "155 passed",
+    "global_command": "uv run pytest -q",
+    "global_result": "1662 passed in 196.61s",
+    "lint_command": "uv run ruff check scripts/run_development_arm.py tests/test_run_development_arm.py tests/test_observe_development_run.py",
+    "lint_result": "All checks passed!",
+    "independent_review": "No findings in reviewed scope. Reproduced rejection of a nested duplicate key, 1e999 in metadata and invalid UTF-8 after the final event; terminal_success and complete remained false."
+  },
+  "limits": [
+    "The traces and adversarial cases in this verification are synthetic.",
+    "Local parsing does not authenticate the provider, model, effort, token usage or billing receipts.",
+    "The N/SDD/toolkit confirmatory comparison remains unexecuted."
+  ],
+  "criterion_4": "not_demonstrated"
+}
