@@ -273,6 +273,36 @@ def fake_clis(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return bin_dir
 
 
+def _write_activation_dossier(path: Path, data: dict[str, object]) -> str:
+    path.write_text(json.dumps(data, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+@pytest.fixture
+def activation_dossier_fixture(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> tuple[Path, Path, dict[str, object]]:
+    original_root = runner.ROOT
+    root = tmp_path / "asset-root"
+    for relative in runner.DOSSIER_ASSET_PATHS:
+        target = root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        content = (b"local fixture wheel\n" if relative.startswith("dist/")
+                   else (original_root / relative).read_bytes())
+        target.write_bytes(content)
+    monkeypatch.setattr(runner, "ROOT", root)
+    monkeypatch.setattr(runner, "PACKET", root / "cases/building_energy")
+    monkeypatch.setattr(runner, "PROMPTS", root / "experiments/development/energy_pilot")
+    dossier = json.loads((original_root / "experiments/development/energy_pilot"
+                          / "activation_dossier_2026-09-27.json").read_text(encoding="utf-8"))
+    dossier["fixed_local_assets_sha256"] = {
+        relative: runner._sha256(root / relative) for relative in runner.DOSSIER_ASSET_PATHS
+    }
+    path = tmp_path / "activation.json"
+    _write_activation_dossier(path, dossier)
+    return root, path, dossier
+
+
 def fake_t_setup(
     work: Path, run_dir: Path, wheel: Path | None, _timeout_seconds: int,
     _env: dict[str, str],
@@ -552,6 +582,251 @@ def test_prepare_only_cli_reports_private_location_and_no_go(
     assert (run_dir / "prepared.json").exists()
     assert not (run_dir / "work/fake_argv.json").exists()
     assert "Development-only D-E execution" not in result.stdout
+
+
+@pytest.mark.parametrize("arm,family_slot", [
+    ("N", "A"), ("S", "A"), ("T", "A"),
+    ("N", "B"), ("S", "B"), ("T", "B"),
+])
+def test_strict_dossier_prepares_planned_cell_without_execution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    arm: str, family_slot: str,
+) -> None:
+    root, dossier_path, _ = activation_dossier_fixture
+    wheel = root / "dist/specorganon-0.1.0-py3-none-any.whl" if arm == "T" else None
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("strict offline preparation launched a command")
+
+    monkeypatch.setattr(runner, "_capture", forbidden)
+    monkeypatch.setattr(runner, "_setup_toolkit", forbidden)
+    monkeypatch.setattr(runner, "_system_strace", forbidden)
+    expected_sha = hashlib.sha256(dossier_path.read_bytes()).hexdigest()
+    run_dir, prepared = prepare_development_arm(
+        arm=arm, provider="codex", model="test-model", effort="low",
+        output_root=tmp_path / "runs", toolkit_wheel=wheel,
+        activation_dossier=dossier_path, activation_dossier_sha256=expected_sha,
+        family_slot=family_slot,
+    )
+    assert prepared["activation_dossier_sha256"] == expected_sha
+    assert prepared["family_slot"] == family_slot
+    assert prepared["dossier_assets_match"] is True
+    assert prepared["status"] == "no_go_for_provider_calls"
+    assert prepared["provider_calls"] == 0
+    assert prepared["launch_ready"] is False
+    assert prepared["execution_ready"] is False
+    assert prepared["cap_status"] == "unknown"
+    assert prepared["tool_parity_verified"] is False
+    assert prepared["human_review_verified"] is False
+    assert prepared["controlled_comparison_eligible"] is False
+    assert json.loads((run_dir / "prepared.json").read_text(encoding="utf-8")) == prepared
+    assert not (run_dir / "run.json").exists()
+    assert not (run_dir / "work/.venv").exists()
+
+
+@pytest.mark.parametrize("relative,arm", [
+    ("cases/building_energy/task.md", "N"),
+    ("experiments/development/energy_pilot/common.md", "S"),
+    ("dist/specorganon-0.1.0-py3-none-any.whl", "T"),
+    ("experiments/development/energy_pilot/rubric.md", "N"),
+])
+def test_strict_dossier_rejects_tampered_fixed_asset_before_preparation(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    relative: str, arm: str,
+) -> None:
+    root, dossier_path, _ = activation_dossier_fixture
+    asset = root / relative
+    asset.write_bytes(asset.read_bytes() + b"\ntampered\n")
+    wheel = root / "dist/specorganon-0.1.0-py3-none-any.whl" if arm == "T" else None
+    with pytest.raises(RunError, match="activation dossier asset hash differs"):
+        prepare_development_arm(
+            arm=arm, provider="codex", model="test-model", effort="low",
+            output_root=tmp_path / "runs", toolkit_wheel=wheel,
+            activation_dossier=dossier_path,
+            activation_dossier_sha256=hashlib.sha256(dossier_path.read_bytes()).hexdigest(),
+            family_slot="A",
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+def test_strict_dossier_rejects_dossier_byte_change_before_preparation(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    expected_sha = hashlib.sha256(dossier_path.read_bytes()).hexdigest()
+    dossier_path.write_bytes(dossier_path.read_bytes() + b"\n")
+    with pytest.raises(RunError, match="dossier SHA-256 differs"):
+        prepare_development_arm(
+            arm="N", provider="codex", model="test-model", effort="low",
+            output_root=tmp_path / "runs", activation_dossier=dossier_path,
+            activation_dossier_sha256=expected_sha, family_slot="A",
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+@pytest.mark.parametrize("change,error", [
+    ("schema", "unexpected schema"),
+    ("duplicate_cell", "duplicate planned cells"),
+    ("missing_cell", "missing or unexpected planned cells"),
+    ("unsafe_path", "unsafe or unexpected asset path"),
+    ("invalid_asset_hash", "invalid asset SHA-256"),
+    ("non_null_caps", "unexpected proposed scope"),
+    ("non_null_model", "unverified family configurations"),
+])
+def test_strict_dossier_rejects_invalid_canonical_content(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    change: str, error: str,
+) -> None:
+    _, dossier_path, dossier = activation_dossier_fixture
+    if change == "schema":
+        dossier["schema"] = 2
+    elif change == "duplicate_cell":
+        dossier["planned_cells"][1] = dict(dossier["planned_cells"][0])
+    elif change == "missing_cell":
+        dossier["planned_cells"].pop()
+    elif change == "unsafe_path":
+        dossier["fixed_local_assets_sha256"]["../outside.md"] = "0" * 64
+    elif change == "invalid_asset_hash":
+        dossier["fixed_local_assets_sha256"]["cases/building_energy/task.md"] = "not-a-hash"
+    elif change == "non_null_caps":
+        dossier["proposed_scope"]["maximum_provider_requests"] = 1
+    else:
+        dossier["family_configs_shared_by_all_three_arms"]["A"]["model_id"] = "test-model"
+    expected_sha = _write_activation_dossier(dossier_path, dossier)
+    with pytest.raises(RunError, match=error):
+        prepare_development_arm(
+            arm="N", provider="codex", model="test-model", effort="low",
+            output_root=tmp_path / "runs", activation_dossier=dossier_path,
+            activation_dossier_sha256=expected_sha, family_slot="A",
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+def test_strict_dossier_rejects_duplicate_json_asset_key(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    raw = dossier_path.read_text(encoding="utf-8")
+    asset_key = '"cases/building_energy/task.md"'
+    raw = raw.replace(asset_key, f'{asset_key}: "{"0" * 64}", {asset_key}', 1)
+    dossier_path.write_text(raw, encoding="utf-8")
+    with pytest.raises(RunError, match="duplicate JSON key"):
+        prepare_development_arm(
+            arm="N", provider="codex", model="test-model", effort="low",
+            output_root=tmp_path / "runs", activation_dossier=dossier_path,
+            activation_dossier_sha256=hashlib.sha256(dossier_path.read_bytes()).hexdigest(),
+            family_slot="A",
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+def test_strict_dossier_cli_creates_only_offline_record(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("CLI strict preparation launched a command")
+
+    monkeypatch.setattr(runner, "_capture", forbidden)
+    monkeypatch.setattr(runner, "_setup_toolkit", forbidden)
+    expected_sha = hashlib.sha256(dossier_path.read_bytes()).hexdigest()
+    assert runner.main([
+        "--prepare-only", "--arm", "S", "--provider", "codex",
+        "--model", "test-model", "--effort", "low", "--output-root", str(tmp_path / "runs"),
+        "--activation-dossier", str(dossier_path), "--activation-dossier-sha256", expected_sha,
+        "--family-slot", "B",
+    ]) == 0
+    result = json.loads(capsys.readouterr().out)
+    run_dir = Path(result["run_dir"])
+    prepared = json.loads((run_dir / "prepared.json").read_text(encoding="utf-8"))
+    assert result["status"] == "no_go_for_provider_calls"
+    assert result["provider_calls"] == 0
+    assert result["execution_ready"] is False
+    assert prepared["family_slot"] == "B"
+    assert prepared["activation_dossier_sha256"] == expected_sha
+    assert not (run_dir / "run.json").exists()
+
+
+def test_strict_dossier_rechecks_unassigned_asset_after_copy(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, dossier_path, _ = activation_dossier_fixture
+    rubric = root / "experiments/development/energy_pilot/rubric.md"
+    original_builder = runner._provider_invocation
+
+    def mutate_rubric(*args: object, **kwargs: object) -> object:
+        rubric.write_bytes(rubric.read_bytes() + b"\nchanged during copy\n")
+        return original_builder(*args, **kwargs)
+
+    monkeypatch.setattr(runner, "_provider_invocation", mutate_rubric)
+    with pytest.raises(RunError, match="activation dossier asset hash differs"):
+        prepare_development_arm(
+            arm="N", provider="codex", model="test-model", effort="low",
+            output_root=tmp_path / "runs", activation_dossier=dossier_path,
+            activation_dossier_sha256=hashlib.sha256(dossier_path.read_bytes()).hexdigest(),
+            family_slot="A",
+        )
+    assert not list((tmp_path / "runs").glob("*/prepared.json"))
+
+
+def test_strict_dossier_rechecks_dossier_after_copy(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    expected_sha = hashlib.sha256(dossier_path.read_bytes()).hexdigest()
+    original_builder = runner._provider_invocation
+
+    def mutate_dossier(*args: object, **kwargs: object) -> object:
+        dossier_path.write_bytes(dossier_path.read_bytes() + b"\n")
+        return original_builder(*args, **kwargs)
+
+    monkeypatch.setattr(runner, "_provider_invocation", mutate_dossier)
+    with pytest.raises(RunError, match="activation dossier changed during preparation"):
+        prepare_development_arm(
+            arm="N", provider="codex", model="test-model", effort="low",
+            output_root=tmp_path / "runs", activation_dossier=dossier_path,
+            activation_dossier_sha256=expected_sha, family_slot="A",
+        )
+    assert not list((tmp_path / "runs").glob("*/prepared.json"))
+
+
+@pytest.mark.parametrize("provided", [
+    {"activation_dossier_sha256": "0" * 64, "family_slot": "A"},
+    {"activation_dossier": Path("missing.json"), "family_slot": "A"},
+    {"activation_dossier": Path("missing.json"), "activation_dossier_sha256": "0" * 64},
+])
+def test_strict_dossier_requires_all_three_options(
+    tmp_path: Path, provided: dict[str, object],
+) -> None:
+    with pytest.raises(RunError, match="require each other"):
+        prepare_development_arm(
+            arm="N", provider="codex", model="test-model", effort="low",
+            output_root=tmp_path / "runs", **provided,
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+@pytest.mark.parametrize("argument", [
+    "--activation-dossier", "--activation-dossier-sha256", "--family-slot",
+])
+def test_strict_dossier_cli_options_require_prepare_only(
+    tmp_path: Path, argument: str,
+) -> None:
+    value = "A" if argument == "--family-slot" else "0" * 64
+    script = SCRIPTS / "run_development_arm.py"
+    result = subprocess.run([
+        sys.executable, str(script), "--arm", "N", "--provider", "codex",
+        "--model", "test-model", "--effort", "low", "--output-root",
+        str(tmp_path / "runs"), argument, value,
+    ], capture_output=True, text=True)
+    assert result.returncode == 2
+    assert "activation dossier options require --prepare-only" in result.stderr
+    assert not (tmp_path / "runs").exists()
 
 
 def _usage_trace(

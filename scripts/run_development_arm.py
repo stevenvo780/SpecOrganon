@@ -23,7 +23,7 @@ import sys
 import time
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 
@@ -31,6 +31,21 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKET = ROOT / "cases" / "building_energy"
 PROMPTS = ROOT / "experiments" / "development" / "energy_pilot"
 PUBLIC_FILES = ("task.md", "source_manifest.json", "sample_first_complete_week.csv")
+DOSSIER_ASSET_PATHS = frozenset({
+    *(f"cases/building_energy/{name}" for name in PUBLIC_FILES),
+    "experiments/development/energy_pilot/common.md",
+    *(f"experiments/development/energy_pilot/arm_{arm.lower()}.md"
+      for arm in ("N", "S", "T")),
+    "experiments/development/energy_pilot/rubric.md",
+    "dist/specorganon-0.1.0-py3-none-any.whl",
+})
+DOSSIER_KEYS = frozenset({
+    "schema", "classification", "date_utc", "case", "status", "proposed_scope",
+    "fixed_local_assets_sha256", "asset_checks",
+    "family_configs_shared_by_all_three_arms", "planned_cells", "no_go_reasons",
+    "next_reviewable_gate", "provider_requests_made_for_this_dossier",
+    "spend_authorized_usd", "criterion_4",
+})
 USAGE_FIELDS = {
     "codex": ("input_tokens", "cached_input_tokens", "cache_write_input_tokens",
               "output_tokens", "reasoning_output_tokens"),
@@ -1264,11 +1279,133 @@ def _provider_invocation(
     raise RunError("provider must be codex/agy/opencode")
 
 
+def _unique_dossier_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise RunError(f"activation dossier has a duplicate JSON key: {key}")
+        result[key] = value
+    return result
+
+
+def _dossier_asset_path(relative: str) -> Path:
+    path = PurePosixPath(relative)
+    if (not relative or path.is_absolute() or str(path) != relative
+            or any(part in {".", ".."} for part in path.parts)
+            or "\\" in relative or relative not in DOSSIER_ASSET_PATHS):
+        raise RunError(f"activation dossier has an unsafe or unexpected asset path: {relative}")
+    current = ROOT
+    for part in path.parts[:-1]:
+        current /= part
+        if current.is_symlink() or not current.is_dir():
+            raise RunError(f"activation dossier asset parent is unsafe: {relative}")
+    asset = current / path.name
+    if not _regular_file(asset):
+        raise RunError(f"activation dossier asset is missing or nonregular: {relative}")
+    return asset
+
+
+def _assert_dossier_assets(expected: dict[str, str]) -> None:
+    for relative, digest in expected.items():
+        if _sha256(_dossier_asset_path(relative)) != digest:
+            raise RunError(f"activation dossier asset hash differs: {relative}")
+
+
+def _activation_dossier_assets(
+    dossier_path: Path, expected_sha256: str, family_slot: str, arm: str,
+) -> dict[str, str]:
+    """Validate the version-one offline dossier and its entire fixed local asset set."""
+    if (type(expected_sha256) is not str
+            or re.fullmatch(r"[0-9a-f]{64}", expected_sha256) is None):
+        raise RunError("--activation-dossier-sha256 must be a lowercase SHA-256 digest")
+    if type(family_slot) is not str or family_slot not in {"A", "B"}:
+        raise RunError("--family-slot must be A or B")
+    if not _regular_file(dossier_path):
+        raise RunError("activation dossier must be a regular file")
+    raw = dossier_path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != expected_sha256:
+        raise RunError("activation dossier SHA-256 differs from the requested digest")
+    try:
+        dossier = json.loads(raw.decode("utf-8"), object_pairs_hook=_unique_dossier_json_pairs)
+    except RunError:
+        raise
+    except (UnicodeError, ValueError) as exc:
+        raise RunError("activation dossier is not valid unique-key UTF-8 JSON") from exc
+    if type(dossier) is not dict or set(dossier) != DOSSIER_KEYS or dossier["schema"] != 1 \
+            or type(dossier["schema"]) is not int:
+        raise RunError("activation dossier has an unexpected schema")
+    if (dossier["classification"] != "offline_exploratory_pilot_preflight_no_provider_calls"
+            or dossier["status"] != "no_go_for_provider_calls"
+            or dossier["criterion_4"] != "not_assessed"
+            or type(dossier["provider_requests_made_for_this_dossier"]) is not int
+            or dossier["provider_requests_made_for_this_dossier"] != 0
+            or type(dossier["spend_authorized_usd"]) is not int
+            or dossier["spend_authorized_usd"] != 0):
+        raise RunError("activation dossier is not the canonical offline NO-GO schema")
+    for key in ("date_utc", "case", "next_reviewable_gate"):
+        if type(dossier[key]) is not str or not dossier[key].strip():
+            raise RunError(f"activation dossier has invalid {key}")
+    for key in ("asset_checks", "no_go_reasons"):
+        value = dossier[key]
+        if (type(value) is not list or not value
+                or any(type(item) is not str or not item.strip() for item in value)):
+            raise RunError(f"activation dossier has invalid {key}")
+    scope = dossier["proposed_scope"]
+    if (type(scope) is not dict or set(scope) != {
+            "families", "arms_per_family", "agent_configuration",
+            "maximum_arm_runs_if_separately_authorized", "maximum_provider_requests",
+            "maximum_billable_tokens", "maximum_spend_usd", "confirmatory_evidence",
+    } or type(scope["families"]) is not int or scope["families"] != 2
+            or scope["arms_per_family"] != ["N", "S", "T"]
+            or scope["agent_configuration"] != "one_model_agent_per_run"
+            or type(scope["maximum_arm_runs_if_separately_authorized"]) is not int
+            or scope["maximum_arm_runs_if_separately_authorized"] != 6
+            or any(scope[key] is not None for key in (
+                "maximum_provider_requests", "maximum_billable_tokens", "maximum_spend_usd"))
+            or scope["confirmatory_evidence"] is not False):
+        raise RunError("activation dossier has an unexpected proposed scope")
+    configs = dossier["family_configs_shared_by_all_three_arms"]
+    config_keys = {"model_id", "model_version", "effective_effort", "other_parameters"}
+    if (type(configs) is not dict or set(configs) != {"A", "B"}
+            or any(type(config) is not dict or set(config) != config_keys
+                   or any(value is not None for value in config.values())
+                   for config in configs.values())):
+        raise RunError("activation dossier has noncanonical or unverified family configurations")
+    cells = dossier["planned_cells"]
+    if type(cells) is not list:
+        raise RunError("activation dossier planned cells must be a list")
+    pairs: list[tuple[str, str]] = []
+    for cell in cells:
+        if (type(cell) is not dict or set(cell) != {"family_slot", "arm"}
+                or type(cell["family_slot"]) is not str or type(cell["arm"]) is not str):
+            raise RunError("activation dossier has an invalid planned cell")
+        pairs.append((cell["family_slot"], cell["arm"]))
+    if len(pairs) != len(set(pairs)):
+        raise RunError("activation dossier has duplicate planned cells")
+    if set(pairs) != {(slot, assigned) for slot in ("A", "B") for assigned in ("N", "S", "T")}:
+        raise RunError("activation dossier has missing or unexpected planned cells")
+    if (family_slot, arm) not in pairs:
+        raise RunError("requested family slot and arm are not planned in the activation dossier")
+    assets = dossier["fixed_local_assets_sha256"]
+    if type(assets) is not dict:
+        raise RunError("activation dossier fixed assets must be an object")
+    for relative, digest in assets.items():
+        _dossier_asset_path(relative)
+        if type(digest) is not str or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            raise RunError(f"activation dossier has invalid asset SHA-256: {relative}")
+    if set(assets) != DOSSIER_ASSET_PATHS:
+        raise RunError("activation dossier has missing or unexpected fixed asset paths")
+    _assert_dossier_assets(assets)
+    return assets
+
+
 def prepare_development_arm(
     *, arm: str, provider: str, model: str, effort: str, output_root: Path,
     timeout_seconds: int = 600, replay_timeout_seconds: int = 90,
     setup_timeout_seconds: int = 180, toolkit_wheel: Path | None = None,
     agy_no_command_tool: bool = False,
+    activation_dossier: Path | None = None, activation_dossier_sha256: str | None = None,
+    family_slot: str | None = None,
 ) -> tuple[Path, dict[str, Any]]:
     """Record public inputs and a planned CLI invocation without executing it."""
     _validate_arm_request(arm, provider, model, effort, timeout_seconds,
@@ -1277,6 +1414,22 @@ def prepare_development_arm(
     if arm == "T" and (toolkit_wheel is None or not _regular_file(toolkit_wheel)
                        or toolkit_wheel.suffix != ".whl"):
         raise RunError("T requires --toolkit-wheel pointing to a regular .whl file")
+    dossier_options = (activation_dossier, activation_dossier_sha256, family_slot)
+    if any(option is not None for option in dossier_options) \
+            and not all(option is not None for option in dossier_options):
+        raise RunError("--activation-dossier, --activation-dossier-sha256 and --family-slot require each other")
+    dossier_assets: dict[str, str] | None = None
+    if activation_dossier is not None:
+        assert activation_dossier_sha256 is not None and family_slot is not None
+        activation_dossier = activation_dossier.expanduser()
+        dossier_assets = _activation_dossier_assets(
+            activation_dossier, activation_dossier_sha256, family_slot, arm,
+        )
+        pinned_wheel = _dossier_asset_path("dist/specorganon-0.1.0-py3-none-any.whl")
+        if arm == "T" and toolkit_wheel is not None and toolkit_wheel.expanduser().resolve() != pinned_wheel:
+            raise RunError("T toolkit wheel path differs from the activation dossier asset")
+        if arm != "T" and toolkit_wheel is not None:
+            raise RunError("N/S strict preparation does not accept --toolkit-wheel")
     output_root = output_root.expanduser().resolve()
     if toolkit_wheel is not None:
         toolkit_wheel = toolkit_wheel.expanduser().resolve()
@@ -1310,6 +1463,22 @@ def prepare_development_arm(
                 or _file_record(prompt_path) != prompt_record
                 or (arm == "T" and _file_record(toolkit_wheel) != wheel_record)):
             raise RunError("prepared inputs changed before the record could be written")
+        if dossier_assets is not None:
+            assert activation_dossier is not None and activation_dossier_sha256 is not None
+            _assert_dossier_assets(dossier_assets)
+            if not _regular_file(activation_dossier) \
+                    or _sha256(activation_dossier) != activation_dossier_sha256:
+                raise RunError("activation dossier changed during preparation")
+            copied = {
+                **{f"cases/building_energy/{name}": work / name for name in PUBLIC_FILES},
+                "experiments/development/energy_pilot/common.md": work / "common.md",
+                f"experiments/development/energy_pilot/arm_{arm.lower()}.md": work / "arm.md",
+            }
+            if any(_sha256(path) != dossier_assets[relative]
+                   for relative, path in copied.items()) or (
+                       arm == "T" and (wheel_record is None or wheel_record["sha256"]
+                                       != dossier_assets["dist/specorganon-0.1.0-py3-none-any.whl"])):
+                raise RunError("prepared inputs differ from the activation dossier")
         prepared: dict[str, Any] = {
             "schema": 1,
             "classification": "development_prompt_preparation_unsealed",
@@ -1340,6 +1509,12 @@ def prepare_development_arm(
         if arm == "T":
             prepared["limitations"].append(
                 "T wheel bytes are hashed only; wheel validity and installability were not checked")
+        if dossier_assets is not None:
+            prepared["activation_dossier_sha256"] = activation_dossier_sha256
+            prepared["family_slot"] = family_slot
+            prepared["dossier_assets_match"] = True
+            prepared["limitations"].append(
+                "dossier pins local bytes only; model configuration, caps, access and tool parity remain unverified")
         _write_json(run_dir / "prepared.json", prepared)
         return run_dir, prepared
     finally:
@@ -1670,6 +1845,12 @@ def main(argv: list[str] | None = None) -> int:
                         help="parent for a new private directory; --prepare-only writes prepared.json there")
     parser.add_argument("--prepare-only", action="store_true",
                         help="copy and pin public inputs and planned argv offline; no provider or toolkit call")
+    parser.add_argument("--activation-dossier", type=Path,
+                        help="with --prepare-only, enforce the version-one offline activation dossier")
+    parser.add_argument("--activation-dossier-sha256",
+                        help="expected SHA-256 of the exact activation dossier bytes")
+    parser.add_argument("--family-slot", choices=("A", "B"),
+                        help="planned family slot in the activation dossier")
     parser.add_argument("--timeout-seconds", type=int, default=600)
     parser.add_argument("--replay-timeout-seconds", type=int, default=90)
     parser.add_argument("--setup-timeout-seconds", type=int, default=180)
@@ -1685,6 +1866,9 @@ def main(argv: list[str] | None = None) -> int:
                         help="enforce local Linux Landlock/seccomp/rlimit limits on replay")
     args = parser.parse_args(argv)
     try:
+        dossier_options = (args.activation_dossier, args.activation_dossier_sha256, args.family_slot)
+        if any(option is not None for option in dossier_options) and not args.prepare_only:
+            raise RunError("activation dossier options require --prepare-only")
         if args.replay_run_dir is not None:
             if args.prepare_only:
                 raise RunError("--prepare-only cannot be combined with --replay-run-dir")
@@ -1706,6 +1890,11 @@ def main(argv: list[str] | None = None) -> int:
                    (args.arm, args.provider, args.model, args.effort, args.output_root)):
                 raise RunError("a run or preparation requires arm, provider, model, effort and output-root")
             operation = prepare_development_arm if args.prepare_only else run_development_arm
+            dossier_kwargs = ({
+                "activation_dossier": args.activation_dossier,
+                "activation_dossier_sha256": args.activation_dossier_sha256,
+                "family_slot": args.family_slot,
+            } if args.prepare_only else {})
             run_dir, summary = operation(
                 arm=args.arm, provider=args.provider, model=args.model, effort=args.effort,
                 output_root=args.output_root, timeout_seconds=args.timeout_seconds,
@@ -1713,6 +1902,7 @@ def main(argv: list[str] | None = None) -> int:
                 setup_timeout_seconds=args.setup_timeout_seconds,
                 toolkit_wheel=args.toolkit_wheel,
                 agy_no_command_tool=args.agy_no_command_tool,
+                **dossier_kwargs,
             )
     except (RunError, OSError) as exc:
         parser.exit(2, f"run_development_arm: {exc}\n")
