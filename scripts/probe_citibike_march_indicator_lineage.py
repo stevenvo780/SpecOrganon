@@ -49,6 +49,7 @@ REPAIR_ORDER = (
     "d_reporting",
     "req_row_report",
 )
+DERIVED_ARTIFACT_NAMES = ("organon.json", "manifest.json", "README.md")
 
 
 def _sha256(raw: bytes) -> str:
@@ -371,6 +372,56 @@ def _save_derived(
     )
 
 
+def _validate_output_destination(output: Path, derived_case: Path | None) -> None:
+    resolved_output = output.resolve()
+    historical_sources = (
+        SOURCE_LEDGER,
+        JUNE_LEDGER,
+        SEED,
+        PUBLISHED_RESULT,
+        ANALYSIS_SCRIPT,
+    )
+    if resolved_output in {path.resolve() for path in historical_sources}:
+        raise ValueError("--output must not replace a historical source")
+    if derived_case is not None:
+        derived_root = derived_case.resolve()
+        derived_artifacts = {
+            (derived_case / name).resolve() for name in DERIVED_ARTIFACT_NAMES
+        }
+        if resolved_output == derived_root or resolved_output in derived_artifacts:
+            raise ValueError("--output collides with a derived-case artifact")
+
+
+def _write_receipt_atomic(output: Path, encoded: str) -> None:
+    expected = _sha256(encoded.encode("utf-8"))
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            dir=output.parent,
+            prefix=f".{output.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as stream:
+            temporary = Path(stream.name)
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, output)
+        temporary = None
+        directory_fd = os.open(output.parent, os.O_DIRECTORY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+        if _sha256(output.read_bytes()) != expected:
+            raise AssertionError("receipt hash differs after atomic publication")
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
 def run_probe(derived_case: Path | None = None) -> dict[str, Any]:
     if not CLI.is_file() or not MCP.is_file():
         raise FileNotFoundError(
@@ -644,21 +695,16 @@ def main() -> None:
         "--derived-case", type=Path, help="Create a new append-only development case"
     )
     args = parser.parse_args()
-    if args.output and args.output.resolve() in {
-        path.resolve()
-        for path in (
-            SOURCE_LEDGER,
-            JUNE_LEDGER,
-            SEED,
-            PUBLISHED_RESULT,
-            ANALYSIS_SCRIPT,
-        )
-    }:
-        parser.error("--output must not replace a historical source")
+    if args.output:
+        try:
+            _validate_output_destination(args.output, args.derived_case)
+        except ValueError as exc:
+            parser.error(str(exc))
     result = run_probe(args.derived_case)
     encoded = json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
     if args.output:
-        args.output.write_text(encoded, encoding="utf-8")
+        _validate_output_destination(args.output, args.derived_case)
+        _write_receipt_atomic(args.output, encoded)
     print(encoded, end="")
 
 
