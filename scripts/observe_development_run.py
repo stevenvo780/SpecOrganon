@@ -703,9 +703,16 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
             limit = summary.get("active_budget_seconds")
             elapsed = budget.get("elapsed_seconds")
             exhausted_stage = budget.get("exhausted_stage")
-            if (set(budget) != {"scope", "started_at_utc", "elapsed_seconds", "exhausted_stage"}
+            if (set(budget) not in (
+                        {"scope", "started_at_utc", "elapsed_seconds", "exhausted_stage"},
+                        {"scope", "started_at_utc", "elapsed_seconds", "exhausted_stage",
+                         "active_budget_seconds"},
+                    )
                     or budget["scope"] != "single_local_invocation_no_agent_or_retry_accounting"
                     or type(limit) is not int or not 1 <= limit <= MAX_ACTIVE_BUDGET_SECONDS
+                    or ("active_budget_seconds" in budget and (
+                        type(budget["active_budget_seconds"]) is not int
+                        or budget["active_budget_seconds"] != limit))
                     or type(budget["started_at_utc"]) is not str
                     or not budget["started_at_utc"]
                     or (elapsed is not None and (
@@ -739,12 +746,16 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
                 raise ObservationError("pilot triplet copies exist without a run.json binding")
         else:
             binding = _object(pilot_binding, "pilot triplet binding")
-            if set(binding) != {
+            legacy_binding_keys = {
                 "schema", "scope", "plan_sha256", "activation_dossier_sha256",
                 "plan_record", "dossier_record", "cell", "declared_model_version",
                 "other_model_parameters",
-            } or type(binding["schema"]) is not int or binding["schema"] != 1 \
-                    or binding["scope"] != "local_requested_configuration_only":
+            }
+            binding_schema = binding.get("schema")
+            if (type(binding_schema) is not int or binding_schema not in {1, 2}
+                    or set(binding) != (legacy_binding_keys if binding_schema == 1
+                                        else legacy_binding_keys | {"active_budget_seconds"})
+                    or binding["scope"] != "local_requested_configuration_only"):
                 raise ObservationError("pilot triplet binding has invalid fields")
             plan_sha = _digest(binding["plan_sha256"], "pilot triplet plan")
             dossier_sha = _digest(binding["activation_dossier_sha256"], "activation dossier")
@@ -784,9 +795,22 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
             try:
                 selected = _validate_pilot_triplet_plan(
                     plan, dossier_sha, cell["family_slot"], arm, provider, model, effort,
+                    summary.get("active_budget_seconds"), allow_legacy_v1=True,
                 )
             except RunError as exc:
                 raise ObservationError(f"pilot triplet local binding differs: {exc}") from exc
+            if type(plan) is not dict or plan.get("schema") != binding_schema:
+                raise ObservationError("pilot triplet plan and binding schema differ")
+            if binding_schema == 2:
+                if (budget is None or set(budget) != {
+                        "scope", "started_at_utc", "elapsed_seconds", "exhausted_stage",
+                        "active_budget_seconds",
+                    } or type(binding["active_budget_seconds"]) is not int
+                        or binding["active_budget_seconds"] != plan["active_budget_seconds"]
+                        or budget["active_budget_seconds"] != plan["active_budget_seconds"]):
+                    raise ObservationError("pilot triplet active budget differs across plan, binding and run_time_budget")
+            elif budget is not None and "active_budget_seconds" in budget:
+                raise ObservationError("legacy pilot triplet cannot claim a shared budget")
             if (binding["declared_model_version"] != selected["model_version"]
                     or binding["other_model_parameters"] != selected["other_model_parameters"]):
                 raise ObservationError("pilot triplet declared parameters differ from the copied plan")
@@ -796,8 +820,11 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
                 "plan_sha256": plan_sha,
                 "activation_dossier_sha256": dossier_sha,
                 "cell": cell,
+                "plan_schema": binding_schema,
                 "declared_model_version": selected["model_version"],
                 "other_model_parameters": selected["other_model_parameters"],
+                **({"active_budget_seconds": plan["active_budget_seconds"]}
+                   if binding_schema == 2 else {}),
                 "effective_model_and_effort_verified": False,
                 "all_dossier_assets_available_locally": False,
                 "prelaunch_binding_authenticated": False,

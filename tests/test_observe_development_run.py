@@ -249,6 +249,9 @@ def test_observer_rechecks_copied_pilot_plan_dossier_and_run_metadata(
     observed = json.loads(observed_result.stdout)
     binding = observed["pilot_triplet_binding"]
     assert binding["plan_sha256"] == plan_sha
+    assert binding["plan_schema"] == 2
+    assert binding["active_budget_seconds"] == 5400
+    assert observed["run_time_budget"]["active_budget_seconds"] == 5400
     assert binding["activation_dossier_sha256"] == dossier_sha
     assert binding["cell"] == {"family_slot": "A", "arm": "N"}
     assert binding["effective_model_and_effort_verified"] is False
@@ -269,6 +272,47 @@ def test_observer_rechecks_copied_pilot_plan_dossier_and_run_metadata(
         rejected = _invoke(run_dir)
         assert rejected.returncode == 2
         assert "pilot triplet local binding differs" in rejected.stderr
+    for target, value, expected in (
+        ("binding", 37, "active budget differs"),
+        ("binding_missing", None, "invalid fields"),
+        ("run", 37, "run_time_budget has invalid local declarations"),
+        ("run_missing", None, "active budget differs"),
+        ("summary", 37, "run_time_budget has invalid local declarations"),
+        ("binding_downgrade", None, "plan and binding schema differ"),
+    ):
+        forged = json.loads(json.dumps(summary))
+        if target == "binding":
+            forged["pilot_triplet_binding"]["active_budget_seconds"] = value
+        elif target == "binding_missing":
+            del forged["pilot_triplet_binding"]["active_budget_seconds"]
+        elif target == "run":
+            forged["run_time_budget"]["active_budget_seconds"] = value
+        elif target == "run_missing":
+            del forged["run_time_budget"]["active_budget_seconds"]
+        elif target == "summary":
+            forged["active_budget_seconds"] = value
+        else:
+            forged["pilot_triplet_binding"]["schema"] = 1
+            del forged["pilot_triplet_binding"]["active_budget_seconds"]
+        _write_summary(run_dir, forged)
+        rejected = _invoke(run_dir)
+        assert rejected.returncode == 2
+        assert expected in rejected.stderr
+    _write_summary(run_dir, summary)
+    copied_plan = run_dir / "pilot_triplet_plan.json"
+    original_plan = copied_plan.read_bytes()
+    downgraded = json.loads(original_plan)
+    downgraded["schema"] = 1
+    del downgraded["active_budget_seconds"]
+    copied_plan.write_text(json.dumps(downgraded), encoding="utf-8")
+    forged = json.loads(json.dumps(summary))
+    forged["pilot_triplet_binding"]["plan_record"] = _record(copied_plan)
+    forged["pilot_triplet_binding"]["plan_sha256"] = _record(copied_plan)["sha256"]
+    _write_summary(run_dir, forged)
+    rejected_downgrade = _invoke(run_dir)
+    assert rejected_downgrade.returncode == 2
+    assert "plan and binding schema differ" in rejected_downgrade.stderr
+    copied_plan.write_bytes(original_plan)
     forged = json.loads(json.dumps(summary))
     forged["pilot_triplet_binding"]["plan_sha256"] = "0" * 64
     _write_summary(run_dir, forged)
@@ -276,16 +320,15 @@ def test_observer_rechecks_copied_pilot_plan_dossier_and_run_metadata(
     assert rejected_digest.returncode == 2
     assert "pilot triplet plan or dossier digest differs" in rejected_digest.stderr
     _write_summary(run_dir, summary)
-    copied_plan = run_dir / "pilot_triplet_plan.json"
     copied_plan.write_bytes(copied_plan.read_bytes() + b"\n")
     rejected_copy = _invoke(run_dir)
     assert rejected_copy.returncode == 2
     assert "pilot triplet plan differs from its recorded bytes" in rejected_copy.stderr
 
     duplicate = moved_plan.read_text(encoding="utf-8")
-    assert '"schema": 1' in duplicate
+    assert '"schema": 2' in duplicate
     copied_plan.write_text(
-        duplicate.replace('"schema": 1', '"schema": 1, "schema": 1', 1),
+        duplicate.replace('"schema": 2', '"schema": 2, "schema": 2', 1),
         encoding="utf-8",
     )
     forged = json.loads(json.dumps(summary))
@@ -297,9 +340,10 @@ def test_observer_rechecks_copied_pilot_plan_dossier_and_run_metadata(
     assert "pilot triplet plan: duplicate JSON key" in rejected_duplicate.stderr
 
 
+@pytest.mark.parametrize("plan_schema", [1, 2])
 def test_posthoc_pilot_binding_is_structurally_flagged_and_never_authenticated(
     tmp_path: Path, pilot_activation_dossier: tuple[Path, Path, dict[str, object]],
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, plan_schema: int,
 ) -> None:
     _, dossier_path, _ = pilot_activation_dossier
     fake_bin = tmp_path / "bin"
@@ -309,8 +353,8 @@ def test_posthoc_pilot_binding_is_structurally_flagged_and_never_authenticated(
     executable.chmod(0o755)
     monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
     dossier_sha = runner._sha256(dossier_path)
-    plan_path = tmp_path / "triplet-plan-v1.json"
-    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+    plan_path = tmp_path / f"triplet-plan-v{plan_schema}.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha, schema=plan_schema)
     run_dir, summary = run_development_arm(
         arm="N", provider="codex", model="test-model", effort="medium",
         output_root=tmp_path / "runs", timeout_seconds=10,
@@ -326,13 +370,16 @@ def test_posthoc_pilot_binding_is_structurally_flagged_and_never_authenticated(
     copied_plan.write_bytes(plan_path.read_bytes())
     copied_dossier.write_bytes(dossier_path.read_bytes())
     binding = {
-        "schema": 1, "scope": "local_requested_configuration_only",
+        "schema": plan_schema, "scope": "local_requested_configuration_only",
         "plan_sha256": plan_sha, "activation_dossier_sha256": dossier_sha,
         "plan_record": _record(copied_plan), "dossier_record": _record(copied_dossier),
         "cell": {"family_slot": "A", "arm": "N"},
         "declared_model_version": "declared-test-version",
         "other_model_parameters": {},
     }
+    if plan_schema == 2:
+        binding["active_budget_seconds"] = 5400
+        summary["run_time_budget"]["active_budget_seconds"] = 5400
     summary["pilot_triplet_binding"] = binding
     _write_summary(run_dir, summary)
     inconsistent = _invoke(run_dir)
@@ -345,10 +392,16 @@ def test_posthoc_pilot_binding_is_structurally_flagged_and_never_authenticated(
     assert result.returncode == 0, result.stderr
     observed = json.loads(result.stdout)
     assert observed["pilot_triplet_binding"]["plan_sha256"] == plan_sha
+    assert observed["pilot_triplet_binding"]["plan_schema"] == plan_schema
+    if plan_schema == 1:
+        assert "active_budget_seconds" not in observed["pilot_triplet_binding"]
+    else:
+        assert observed["pilot_triplet_binding"]["active_budget_seconds"] == 5400
     assert observed["prelaunch_binding_authenticated"] is False
     assert observed["pilot_triplet_binding"]["prelaunch_binding_authenticated"] is False
     assert observed["observation_state"] == "recorded_materials_verified_prelaunch_unproven"
     assert observed["controlled_comparison_eligible"] is False
+    assert observed["cap_status"] == "unknown"
 
 
 @pytest.mark.parametrize("provider", ["agy", "codex"])

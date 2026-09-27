@@ -16,6 +16,7 @@ import pytest
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 import run_development_arm as runner  # noqa: E402
+from observe_development_run import observe_run_dir  # noqa: E402
 from run_development_arm import (  # noqa: E402
     RunError, prepare_development_arm, replay_run_dir, run_development_arm,
 )
@@ -279,9 +280,12 @@ def _write_activation_dossier(path: Path, data: dict[str, object]) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _write_pilot_triplet_plan(path: Path, dossier_sha256: str) -> str:
+def _write_pilot_triplet_plan(
+    path: Path, dossier_sha256: str, *, schema: int = 2,
+    active_budget_seconds: object = 5400,
+) -> str:
     plan = {
-        "schema": 1,
+        "schema": schema,
         "classification": "offline_exploratory_triplet_plan_unsealed",
         "status": "configuration_declared_not_authorization",
         "activation_dossier_sha256": dossier_sha256,
@@ -299,6 +303,8 @@ def _write_pilot_triplet_plan(path: Path, dossier_sha256: str) -> str:
         ],
         "limitations": ["Synthetic requested configuration only; no provider authorization."],
     }
+    if schema == 2:
+        plan["active_budget_seconds"] = active_budget_seconds
     return _write_activation_dossier(path, plan)
 
 
@@ -868,7 +874,8 @@ def test_unbound_pilot_template_is_no_go_before_run_directory(
     fake_clis: Path,
 ) -> None:
     _, dossier_path, _ = activation_dossier_fixture
-    template = SCRIPTS.parent / "experiments/development/energy_pilot/pilot_triplet_plan_template_v1.json"
+    template = SCRIPTS.parent / "experiments/development/energy_pilot/pilot_triplet_plan_template_v2.json"
+    assert json.loads(template.read_text(encoding="utf-8"))["active_budget_seconds"] is None
     with pytest.raises(RunError, match="NO-GO template"):
         run_development_arm(
             arm="N", provider="codex", model="test-model", effort="medium",
@@ -876,6 +883,115 @@ def test_unbound_pilot_template_is_no_go_before_run_directory(
             pilot_triplet_plan_sha256=runner._sha256(template),
             activation_dossier=dossier_path,
             activation_dossier_sha256=runner._sha256(dossier_path), family_slot="A",
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+def test_configured_v1_pilot_cannot_launch_or_lookup_provider(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "legacy-plan.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha, schema=1)
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("legacy pilot reached provider lookup")
+
+    monkeypatch.setattr(runner.shutil, "which", forbidden)
+    with pytest.raises(RunError, match="schema 1 is legacy"):
+        run_development_arm(
+            arm="N", provider="codex", model="test-model", effort="medium",
+            output_root=tmp_path / "runs", pilot_triplet_plan=plan_path,
+            pilot_triplet_plan_sha256=plan_sha, activation_dossier=dossier_path,
+            activation_dossier_sha256=dossier_sha, family_slot="A",
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+@pytest.mark.parametrize("budget", [None, True, False, 0, 5401, 1.5, "37"])
+def test_pilot_plan_requires_one_strict_shared_budget_before_provider_lookup(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    monkeypatch: pytest.MonkeyPatch, budget: object,
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v2.json"
+    _write_pilot_triplet_plan(plan_path, dossier_sha, active_budget_seconds=budget)
+    if budget is None:
+        plan = json.loads(plan_path.read_text(encoding="utf-8"))
+        del plan["active_budget_seconds"]
+        _write_activation_dossier(plan_path, plan)
+    plan_sha = runner._sha256(plan_path)
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("invalid budget reached provider lookup")
+
+    monkeypatch.setattr(runner.shutil, "which", forbidden)
+    with pytest.raises(RunError, match="active_budget_seconds must be an integer from 1 to 5400"):
+        run_development_arm(
+            arm="N", provider="codex", model="test-model", effort="medium",
+            output_root=tmp_path / "runs", pilot_triplet_plan=plan_path,
+            pilot_triplet_plan_sha256=plan_sha, activation_dossier=dossier_path,
+            activation_dossier_sha256=dossier_sha, family_slot="A",
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+@pytest.mark.parametrize("requested_budget", [None, 38])
+def test_pilot_budget_mismatch_rejected_before_provider_lookup(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    monkeypatch: pytest.MonkeyPatch, requested_budget: int | None,
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v2.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha, active_budget_seconds=37)
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("mismatched budget reached provider lookup")
+
+    monkeypatch.setattr(runner.shutil, "which", forbidden)
+    budget_kwarg = ({} if requested_budget is None
+                    else {"active_budget_seconds": requested_budget})
+    with pytest.raises(RunError, match="active_budget_seconds differs from requested run budget"):
+        run_development_arm(
+            arm="N", provider="codex", model="test-model", effort="medium",
+            output_root=tmp_path / "runs", pilot_triplet_plan=plan_path,
+            pilot_triplet_plan_sha256=plan_sha, activation_dossier=dossier_path,
+            activation_dossier_sha256=dossier_sha, family_slot="A",
+            **budget_kwarg,
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+def test_pilot_rejects_duplicate_root_budget_before_provider_lookup(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v2.json"
+    _write_pilot_triplet_plan(plan_path, dossier_sha)
+    plan_text = plan_path.read_text(encoding="utf-8")
+    assert '"active_budget_seconds": 5400' in plan_text
+    plan_path.write_text(plan_text.replace(
+        '"active_budget_seconds": 5400',
+        '"active_budget_seconds": 5400, "active_budget_seconds": 5400', 1,
+    ), encoding="utf-8")
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("duplicate budget reached provider lookup")
+
+    monkeypatch.setattr(runner.shutil, "which", forbidden)
+    with pytest.raises(RunError, match="duplicate JSON key: active_budget_seconds"):
+        run_development_arm(
+            arm="N", provider="codex", model="test-model", effort="medium",
+            output_root=tmp_path / "runs", pilot_triplet_plan=plan_path,
+            pilot_triplet_plan_sha256=runner._sha256(plan_path),
+            activation_dossier=dossier_path, activation_dossier_sha256=dossier_sha,
+            family_slot="A",
         )
     assert not (tmp_path / "runs").exists()
 
@@ -904,6 +1020,10 @@ def test_pilot_triplet_a_inherits_exact_requested_tuple_and_copies_plan(
     assert binding["activation_dossier_sha256"] == dossier_sha
     assert binding["cell"] == {"family_slot": "A", "arm": arm}
     assert binding["declared_model_version"] == "declared-test-version"
+    assert binding["schema"] == 2
+    assert binding["active_budget_seconds"] == 5400
+    assert summary["active_budget_seconds"] == 5400
+    assert summary["run_time_budget"]["active_budget_seconds"] == 5400
     assert (run_dir / "pilot_triplet_plan.json").read_bytes() == plan_path.read_bytes()
     assert (run_dir / "activation_dossier.json").read_bytes() == dossier_path.read_bytes()
     assert (run_dir / "work/fake_argv.json").exists()
@@ -916,7 +1036,7 @@ def test_one_pilot_plan_digest_binds_all_six_fake_cli_cells(
     root, dossier_path, _ = activation_dossier_fixture
     dossier_sha = runner._sha256(dossier_path)
     plan_path = tmp_path / "triplet-plan-v1.json"
-    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha, active_budget_seconds=37)
     monkeypatch.setattr(runner, "_setup_toolkit", fake_t_setup)
     matrix = {
         "A": ("codex", "test-model", "medium"),
@@ -928,6 +1048,7 @@ def test_one_pilot_plan_digest_binds_all_six_fake_cli_cells(
             run_dir, summary = run_development_arm(
                 arm=arm, provider=provider, model=model, effort=effort,
                 output_root=tmp_path / "runs", timeout_seconds=10,
+                active_budget_seconds=37,
                 toolkit_wheel=(root / "dist/specorganon-0.1.0-py3-none-any.whl"
                                if arm == "T" else None),
                 pilot_triplet_plan=plan_path, pilot_triplet_plan_sha256=plan_sha,
@@ -937,6 +1058,9 @@ def test_one_pilot_plan_digest_binds_all_six_fake_cli_cells(
             seen.add((slot, arm))
             assert summary["execution_status"] != "preflight_failure"
             assert summary["pilot_triplet_binding"]["plan_sha256"] == plan_sha
+            assert summary["pilot_triplet_binding"]["active_budget_seconds"] == 37
+            assert summary["active_budget_seconds"] == 37
+            assert summary["run_time_budget"]["active_budget_seconds"] == 37
             assert summary["pilot_triplet_binding"]["cell"] == {
                 "family_slot": slot, "arm": arm,
             }
@@ -1025,9 +1149,10 @@ def test_pilot_triplet_rejects_dossier_asset_mutation_before_run_directory(
     assert not (tmp_path / "runs").exists()
 
 
+@pytest.mark.parametrize("change", ["digest", "downgrade"])
 def test_pilot_replay_rejects_changed_binding_before_generated_code_runs(
     tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
-    fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+    fake_clis: Path, monkeypatch: pytest.MonkeyPatch, change: str,
 ) -> None:
     _, dossier_path, _ = activation_dossier_fixture
     dossier_sha = runner._sha256(dossier_path)
@@ -1041,7 +1166,11 @@ def test_pilot_replay_rejects_changed_binding_before_generated_code_runs(
         family_slot="A",
     )
     assert summary["execution_status"] == "artifacts_ready_for_inspection"
-    summary["pilot_triplet_binding"]["plan_sha256"] = "0" * 64
+    if change == "digest":
+        summary["pilot_triplet_binding"]["plan_sha256"] = "0" * 64
+    else:
+        summary["pilot_triplet_binding"]["schema"] = 1
+        del summary["pilot_triplet_binding"]["active_budget_seconds"]
     runner._write_json(run_dir / "run.json", summary)
 
     def forbidden(*_args: object, **_kwargs: object) -> None:
@@ -1051,6 +1180,58 @@ def test_pilot_replay_rejects_changed_binding_before_generated_code_runs(
     with pytest.raises(RunError, match="pilot_triplet_binding changed after the model run"):
         replay_run_dir(run_dir, summary["artifacts"]["analysis.py"]["sha256"])
     assert not (run_dir / "analysis_replay.stdout").exists()
+
+
+@pytest.mark.parametrize("has_d080_budget_metadata", [True, False])
+def test_pilot_replay_reads_v1_legacy_without_shared_budget_claim(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    fake_clis: Path, has_d080_budget_metadata: bool,
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v2.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="codex", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        pilot_triplet_plan=plan_path, pilot_triplet_plan_sha256=plan_sha,
+        activation_dossier=dossier_path, activation_dossier_sha256=dossier_sha,
+        family_slot="A",
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    legacy_path = tmp_path / "triplet-plan-v1.json"
+    legacy_sha = _write_pilot_triplet_plan(legacy_path, dossier_sha, schema=1)
+    copied_plan = run_dir / "pilot_triplet_plan.json"
+    copied_plan.write_bytes(legacy_path.read_bytes())
+    binding = summary["pilot_triplet_binding"]
+    binding["schema"] = 1
+    binding["plan_sha256"] = legacy_sha
+    binding["plan_record"] = runner._file_record(copied_plan)
+    del binding["active_budget_seconds"]
+    if has_d080_budget_metadata:
+        del summary["run_time_budget"]["active_budget_seconds"]
+    else:
+        del summary["active_budget_seconds"]
+        del summary["run_time_budget"]
+    runner._write_json(run_dir / "run.json", summary)
+
+    assert runner._material_mismatches(run_dir, summary) == []
+    replayed = replay_run_dir(run_dir, summary["artifacts"]["analysis.py"]["sha256"])
+    assert replayed["execution_status"] == "output_replayed"
+    assert replayed["analysis_replay"]["exit_code"] == 0
+    assert replayed["controlled_comparison_eligible"] is False
+    assert replayed["pilot_triplet_binding"]["schema"] == 1
+    assert "active_budget_seconds" not in replayed["pilot_triplet_binding"]
+    assert runner._material_mismatches(run_dir, replayed) == []
+    observed = observe_run_dir(run_dir)
+    assert observed["pilot_triplet_binding"]["plan_schema"] == 1
+    assert "active_budget_seconds" not in observed["pilot_triplet_binding"]
+    assert observed["cap_status"] == "unknown"
+    assert observed["controlled_comparison_eligible"] is False
+    if has_d080_budget_metadata:
+        forged = json.loads(json.dumps(replayed))
+        forged["run_time_budget"]["active_budget_seconds"] = 5400
+        assert "pilot_triplet_binding" in runner._material_mismatches(run_dir, forged)
 
 
 def test_pilot_t_rejects_wheel_swapped_during_copy_before_any_subprocess(

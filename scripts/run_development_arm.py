@@ -47,10 +47,11 @@ DOSSIER_KEYS = frozenset({
     "next_reviewable_gate", "provider_requests_made_for_this_dossier",
     "spend_authorized_usd", "criterion_4",
 })
-PILOT_PLAN_KEYS = frozenset({
+PILOT_PLAN_V1_KEYS = frozenset({
     "schema", "classification", "status", "activation_dossier_sha256",
     "family_slots", "planned_cells", "limitations",
 })
+PILOT_PLAN_KEYS = PILOT_PLAN_V1_KEYS | {"active_budget_seconds"}
 PILOT_SLOT_KEYS = frozenset({
     "provider_cli", "requested_model", "requested_effort", "model_version",
     "other_model_parameters",
@@ -1529,14 +1530,27 @@ def _unique_pilot_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 
 def _validate_pilot_triplet_plan(
     plan: Any, dossier_sha256: str, family_slot: str, arm: str,
-    provider: str, model: str, effort: str,
+    provider: str, model: str, effort: str, active_budget_seconds: int,
+    *, allow_legacy_v1: bool = False,
 ) -> dict[str, Any]:
-    """Bind local requested CLI arguments to one six-cell, unsealed plan."""
-    if type(plan) is not dict or set(plan) != PILOT_PLAN_KEYS or type(plan.get("schema")) is not int \
-            or plan["schema"] != 1 or plan["classification"] != "offline_exploratory_triplet_plan_unsealed":
+    """Bind requested settings to a v2 plan; read v1 only for old observations."""
+    if type(plan) is not dict or type(plan.get("schema")) is not int:
         raise RunError("pilot triplet plan has an unexpected schema")
-    if plan["status"] != "configuration_declared_not_authorization":
+    schema = plan["schema"]
+    if schema == 1 and not allow_legacy_v1:
+        raise RunError("pilot triplet plan schema 1 is legacy and cannot launch live runs")
+    if schema not in {1, 2} or plan.get("classification") != "offline_exploratory_triplet_plan_unsealed":
+        raise RunError("pilot triplet plan has an unexpected schema")
+    if plan.get("status") != "configuration_declared_not_authorization":
         raise RunError("pilot triplet plan is a NO-GO template or has an invalid status")
+    if schema == 2:
+        budget = plan.get("active_budget_seconds")
+        if type(budget) is not int or not 1 <= budget <= MAX_ACTIVE_BUDGET_SECONDS:
+            raise RunError("pilot triplet plan active_budget_seconds must be an integer from 1 to 5400")
+        if type(active_budget_seconds) is not int or budget != active_budget_seconds:
+            raise RunError("pilot triplet plan active_budget_seconds differs from requested run budget")
+    if set(plan) != (PILOT_PLAN_KEYS if schema == 2 else PILOT_PLAN_V1_KEYS):
+        raise RunError("pilot triplet plan has an unexpected schema")
     if plan["activation_dossier_sha256"] != dossier_sha256:
         raise RunError("pilot triplet plan does not link the exact activation dossier SHA-256")
     limitations = plan["limitations"]
@@ -1590,7 +1604,7 @@ def _validate_pilot_triplet_plan(
 def _pilot_triplet_preflight(
     plan_path: Path, plan_sha256: str, dossier_path: Path, dossier_sha256: str,
     family_slot: str, arm: str, provider: str, model: str, effort: str,
-    toolkit_wheel: Path | None, agy_no_command_tool: bool,
+    active_budget_seconds: int, toolkit_wheel: Path | None, agy_no_command_tool: bool,
 ) -> tuple[bytes, bytes, dict[str, str], dict[str, Any]]:
     """Complete the local SHA and cell checks before a run directory exists."""
     if type(plan_sha256) is not str or re.fullmatch(r"[0-9a-f]{64}", plan_sha256) is None:
@@ -1613,6 +1627,7 @@ def _pilot_triplet_preflight(
         raise RunError("pilot triplet plan is not valid unique-key UTF-8 JSON") from exc
     selected = _validate_pilot_triplet_plan(
         plan, dossier_sha256, family_slot, arm, provider, model, effort,
+        active_budget_seconds,
     )
     if arm == "T":
         pinned_wheel = _dossier_asset_path("dist/specorganon-0.1.0-py3-none-any.whl")
@@ -1784,7 +1799,7 @@ def run_development_arm(
         pilot_preflight = _pilot_triplet_preflight(
             pilot_triplet_plan, pilot_triplet_plan_sha256,
             activation_dossier, activation_dossier_sha256,
-            family_slot, arm, provider, model, effort, toolkit_wheel,
+            family_slot, arm, provider, model, effort, active_budget_seconds, toolkit_wheel,
             agy_no_command_tool,
         )
     executable = shutil.which(provider)
@@ -1810,7 +1825,7 @@ def run_development_arm(
             (run_dir / "pilot_triplet_plan.json").write_bytes(plan_raw)
             (run_dir / "activation_dossier.json").write_bytes(dossier_raw)
             pilot_binding = {
-                "schema": 1, "scope": "local_requested_configuration_only",
+                "schema": 2, "scope": "local_requested_configuration_only",
                 "plan_sha256": pilot_triplet_plan_sha256,
                 "activation_dossier_sha256": activation_dossier_sha256,
                 "plan_record": _file_record(run_dir / "pilot_triplet_plan.json"),
@@ -1818,6 +1833,7 @@ def run_development_arm(
                 "cell": {"family_slot": family_slot, "arm": arm},
                 "declared_model_version": selected["model_version"],
                 "other_model_parameters": selected["other_model_parameters"],
+                "active_budget_seconds": active_budget_seconds,
             }
         work = run_dir / "work"
         work.mkdir(mode=0o700)
@@ -1838,6 +1854,8 @@ def run_development_arm(
                 "started_at_utc": budget_started_at_utc,
                 "elapsed_seconds": None,
                 "exhausted_stage": None,
+                **({"active_budget_seconds": active_budget_seconds}
+                   if pilot_binding is not None else {}),
             },
             "packet_after": None, "packet_unchanged": None,
             "toolkit": None, "cli": None, "cli_usage": None,
@@ -1850,13 +1868,13 @@ def run_development_arm(
             "limitations": ["development case and prompts are exposed; no sealed assignment",
                             "local CLI telemetry is not an authenticated provider receipt",
                             "no OS file-access isolation or global tool/token budget is proven",
-                            "active run time budget is a local invocation limit; it does not prove equal N/S/T budgets, account for human pauses or coordinate agents and retries",
+                            "active run time budget is a local invocation limit; it does not prove equal total N/S/T resource budgets, account for human pauses or coordinate agents and retries",
                             "generated analysis replay requires a later hash-bound opt-in; default replay is not filesystem/network isolated"],
             "provider_request_id": None, "price": None, "cost": None,
         }
         if pilot_binding is not None:
             summary["limitations"].append(
-                "pilot plan binds requested CLI/model/effort and local input bytes only; external human authorization, provider defaults, effective model/version/effort, provider identity, budget caps and cost are unverified")
+                "pilot plan binds requested CLI/model/effort, local active wall-time limit and input bytes only; external human authorization, provider defaults, effective model/version/effort, provider identity, provider-side caps and cost are unverified")
         else:
             summary["limitations"].append(
                 "exploratory live run has no cross-arm pilot triplet plan binding")
@@ -2052,11 +2070,42 @@ def _material_mismatches(run_dir: Path, summary: dict[str, Any]) -> list[str]:
             plan = json.loads(plan_path.read_text(encoding="utf-8"),
                               object_pairs_hook=_unique_pilot_json_pairs)
             cell = binding["cell"]
+            binding_schema = binding.get("schema")
+            legacy_binding_keys = {
+                "schema", "scope", "plan_sha256", "activation_dossier_sha256",
+                "plan_record", "dossier_record", "cell", "declared_model_version",
+                "other_model_parameters",
+            }
+            if (type(binding_schema) is not int or binding_schema not in {1, 2}
+                    or type(plan) is not dict or plan.get("schema") != binding_schema
+                    or set(binding) != (legacy_binding_keys if binding_schema == 1
+                                        else legacy_binding_keys | {"active_budget_seconds"})
+                    or binding["scope"] != "local_requested_configuration_only"):
+                raise RunError("pilot plan and binding metadata differ")
+            limit = summary.get("active_budget_seconds")
             selected = _validate_pilot_triplet_plan(
                 plan, binding["activation_dossier_sha256"], cell["family_slot"],
                 summary["arm"], summary["provider_cli"], summary["requested_model"],
-                summary["requested_effort"],
+                summary["requested_effort"], limit, allow_legacy_v1=True,
             )
+            budget = summary.get("run_time_budget")
+            budget_keys = {"scope", "started_at_utc", "elapsed_seconds", "exhausted_stage"}
+            if binding_schema == 2:
+                if (type(budget) is not dict
+                        or set(budget) != budget_keys | {"active_budget_seconds"}
+                        or budget["scope"] != "single_local_invocation_no_agent_or_retry_accounting"
+                        or type(binding["active_budget_seconds"]) is not int
+                        or binding["active_budget_seconds"] != limit
+                        or type(budget["active_budget_seconds"]) is not int
+                        or budget["active_budget_seconds"] != limit):
+                    raise RunError("pilot active budget metadata differ")
+            elif ((limit is not None and (
+                    type(limit) is not int or not 1 <= limit <= MAX_ACTIVE_BUDGET_SECONDS))
+                  or (budget is not None and type(limit) is not int)
+                  or (budget is not None and (
+                      type(budget) is not dict or set(budget) != budget_keys
+                      or budget["scope"] != "single_local_invocation_no_agent_or_retry_accounting"))):
+                raise RunError("legacy pilot has invalid local budget metadata")
             if (cell["arm"] != summary["arm"]
                     or selected["model_version"] != binding["declared_model_version"]
                     or selected["other_model_parameters"] != binding["other_model_parameters"]):
