@@ -929,6 +929,316 @@ def test_decisive_result_covers_every_requirement_of_criterion(tmp_path):
     _accept(path, "validate")
 
 
+@pytest.mark.parametrize(
+    "verdict,estimate,interval",
+    [
+        ("cumplido", 0.3, [0.15, 0.4]),
+        ("incumplido", 0.03, [0.01, 0.05]),
+    ],
+)
+def test_decisive_result_requires_test_link_to_each_implementation(
+    tmp_path,
+    verdict,
+    estimate,
+    interval,
+):
+    # A criterion can mention impl2 without t1 actually testing impl2.
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _put(path, "req2", "requirement", ["d1"])
+    _put(path, "impl2", "implementation", ["req2"])
+    _put(
+        path,
+        "crit1",
+        "criterion",
+        ["req1", "req2", "i1", "impl2"],
+        {
+            "metric": "count",
+            "threshold": {"operator": ">=", "value": 0.1, "statistic": "lower_ci"},
+            "reject": "upper CI below 0.1",
+            "reject_test": {"operator": "<", "value": 0.1, "statistic": "upper_ci"},
+        },
+    )
+    test_data = {
+        "passed": True,
+        "command": "synthetic fixture; no external command run",
+    }
+    _put(path, "t1", "test", ["impl1", "crit1"], test_data)
+    _put(
+        path,
+        "base1",
+        "baseline",
+        ["crit1"],
+        {
+            "origin": "field",
+            "source": "invented fixture",
+            "date": "2026-09-27",
+            "metric": "count",
+            "value": 0.2,
+            "unit": "count",
+        },
+    )
+    result_data = {
+        "origin": "field",
+        "source": "invented fixture",
+        "date": "2026-09-27",
+        "effect": {
+            "metric": "count",
+            "estimate": estimate,
+            "interval": interval,
+            "design": "randomized fixture",
+            "comparator": "synthetic control",
+            "sample_size": 12,
+            "unit": "count",
+        },
+    }
+    assessment_data = {
+        "verdict": verdict,
+        "claim_scope": "field",
+        "uncertainty": "synthetic interval",
+        "adverse_effects": "invented fixture",
+        "cost": "invented fixture",
+    }
+    _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
+    _accept(path, "specify")
+    _accept(path, "build")
+
+    items = engine._project(path)["items"]
+    assert "impl2" in engine._ancestors(items, "t1")
+    assert "impl2" not in items["t1"]["deps"]
+    claim = "success" if verdict == "cumplido" else "rejection"
+    missing = (
+        f"ass1 {claim} needs a current passed test linked to res1 "
+        "for crit1 and implementation of req2"
+    )
+    status = engine.gate(path, "validate")
+    assert status["blockers"] == [missing]
+    assert not status["ready"] and not status["accepted"]
+
+    _put(path, "t2", "test", ["impl2", "crit1"], test_data)
+    _put(path, "res1", "result", ["base1", "crit1", "t1", "t2"], result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
+    _accept(path, "build")
+    _accept(path, "validate")
+
+
+@pytest.mark.parametrize(
+    "verdict,estimate,interval",
+    [
+        ("cumplido", 0.3, [0.15, 0.4]),
+        ("incumplido", 0.03, [0.01, 0.05]),
+    ],
+)
+def test_decisive_result_requires_implementation_to_name_each_requirement(
+    tmp_path,
+    verdict,
+    estimate,
+    interval,
+):
+    # impl1 can inherit req2 through crit1 without declaring that it implements req2.
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _put(path, "req2", "requirement", ["d1"])
+    _put(
+        path,
+        "crit1",
+        "criterion",
+        ["req1", "req2", "i1"],
+        {
+            "metric": "count",
+            "threshold": {"operator": ">=", "value": 0.1, "statistic": "lower_ci"},
+            "reject": "upper CI below 0.1",
+            "reject_test": {"operator": "<", "value": 0.1, "statistic": "upper_ci"},
+        },
+    )
+    _put(path, "impl1", "implementation", ["req1", "crit1"])
+    test_data = {
+        "passed": True,
+        "command": "synthetic fixture; no external command run",
+    }
+    _put(path, "t1", "test", ["impl1", "crit1"], test_data)
+    _put(
+        path,
+        "base1",
+        "baseline",
+        ["crit1"],
+        {
+            "origin": "field",
+            "source": "invented fixture",
+            "date": "2026-09-27",
+            "metric": "count",
+            "value": 0.2,
+            "unit": "count",
+        },
+    )
+    result_data = {
+        "origin": "field",
+        "source": "invented fixture",
+        "date": "2026-09-27",
+        "effect": {
+            "metric": "count",
+            "estimate": estimate,
+            "interval": interval,
+            "design": "randomized fixture",
+            "comparator": "synthetic control",
+            "sample_size": 12,
+            "unit": "count",
+        },
+    }
+    assessment_data = {
+        "verdict": verdict,
+        "claim_scope": "field",
+        "uncertainty": "synthetic interval",
+        "adverse_effects": "invented fixture",
+        "cost": "invented fixture",
+    }
+    _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
+    _accept(path, "specify")
+    _accept(path, "build")
+
+    items = engine._project(path)["items"]
+    assert "req2" in engine._ancestors(items, "impl1")
+    assert "req2" not in items["impl1"]["deps"]
+    claim = "success" if verdict == "cumplido" else "rejection"
+    missing = (
+        f"ass1 {claim} needs a current passed test linked to res1 "
+        "for crit1 and implementation of req2"
+    )
+    status = engine.gate(path, "validate")
+    assert status["blockers"] == [missing]
+    assert not status["ready"] and not status["accepted"]
+
+    _put(path, "impl1", "implementation", ["req1", "req2"])
+    _put(path, "t1", "test", ["impl1", "crit1"], test_data)
+    _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
+    _accept(path, "build")
+    _accept(path, "validate")
+
+
+def _decisive_lineage_fixture(
+    path,
+    verdict,
+    *,
+    tested_implementation,
+    baseline_refs,
+    result_refs,
+):
+    _complete_synthetic_case(path)
+    if tested_implementation == "impl2":
+        _put(path, "impl2", "implementation", ["impl1"])
+    _put(
+        path,
+        "crit1",
+        "criterion",
+        ["req1", "i1"],
+        {
+            "metric": "count",
+            "threshold": {"operator": ">=", "value": 0.1, "statistic": "lower_ci"},
+            "reject": "upper CI below 0.1",
+            "reject_test": {"operator": "<", "value": 0.1, "statistic": "upper_ci"},
+        },
+    )
+    _put(
+        path,
+        "t1",
+        "test",
+        [tested_implementation, "crit1"],
+        {"passed": True, "command": "synthetic fixture; no external command run"},
+    )
+    _put(
+        path,
+        "base1",
+        "baseline",
+        baseline_refs,
+        {
+            "origin": "field",
+            "source": "invented fixture",
+            "date": "2026-09-27",
+            "metric": "count",
+            "value": 0.2,
+            "unit": "count",
+        },
+    )
+    estimate, interval = (
+        (0.3, [0.15, 0.4]) if verdict == "cumplido" else (0.03, [0.01, 0.05])
+    )
+    result_data = {
+        "origin": "field",
+        "source": "invented fixture",
+        "date": "2026-09-27",
+        "effect": {
+            "metric": "count",
+            "estimate": estimate,
+            "interval": interval,
+            "design": "randomized fixture",
+            "comparator": "synthetic control",
+            "sample_size": 12,
+            "unit": "count",
+        },
+    }
+    assessment_data = {
+        "verdict": verdict,
+        "claim_scope": "field",
+        "uncertainty": "synthetic interval",
+        "adverse_effects": "invented fixture",
+        "cost": "invented fixture",
+    }
+    _put(path, "res1", "result", result_refs, result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
+    _accept(path, "specify")
+    _accept(path, "build")
+    return result_data, assessment_data
+
+
+@pytest.mark.parametrize("verdict", ("cumplido", "incumplido"))
+def test_decisive_result_accepts_implementation_only_chain(tmp_path, verdict):
+    path = tmp_path / "case"
+    _decisive_lineage_fixture(
+        path,
+        verdict,
+        tested_implementation="impl2",
+        baseline_refs=["crit1"],
+        result_refs=["base1", "crit1", "t1"],
+    )
+
+    items = engine._project(path)["items"]
+    assert items["impl2"]["deps"].keys() == {"impl1"}
+    assert items["impl1"]["deps"].keys() == {"req1"}
+    assert engine.gate(path, "validate")["ready"]
+    _accept(path, "validate")
+
+
+@pytest.mark.parametrize("verdict", ("cumplido", "incumplido"))
+def test_decisive_result_does_not_inherit_baseline_test(tmp_path, verdict):
+    path = tmp_path / "case"
+    result_data, assessment_data = _decisive_lineage_fixture(
+        path,
+        verdict,
+        tested_implementation="impl1",
+        baseline_refs=["crit1", "t1"],
+        result_refs=["base1", "crit1"],
+    )
+
+    items = engine._project(path)["items"]
+    assert "t1" in engine._ancestors(items, "res1")
+    assert "t1" not in items["res1"]["deps"]
+    claim = "success" if verdict == "cumplido" else "rejection"
+    missing = (
+        f"ass1 {claim} needs a current passed test linked to res1 "
+        "for crit1 and implementation of req1"
+    )
+    status = engine.gate(path, "validate")
+    assert status["blockers"] == [missing]
+    assert not status["ready"] and not status["accepted"]
+
+    _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
+    _accept(path, "validate")
+
+
 @pytest.mark.parametrize("revised_kind", ("test", "implementation"))
 def test_decisive_result_loses_acceptance_after_linked_build_revision(tmp_path, revised_kind):
     path = tmp_path / "case"

@@ -136,6 +136,30 @@ def _ancestors(items: dict[str, dict], item_id: str) -> set[str]:
     return found
 
 
+def _implementation_requirements(
+    items: dict[str, dict], implementation_id: str
+) -> set[str]:
+    """Follow implementation composition without borrowing requirements from other kinds."""
+    requirements: set[str] = set()
+    seen: set[str] = set()
+    pending = [implementation_id]
+    while pending:
+        current = pending.pop()
+        if current in seen:
+            continue
+        seen.add(current)
+        implementation = items[current]
+        if implementation["kind"] != "implementation":
+            continue
+        for ref in implementation["deps"]:
+            kind = items[ref]["kind"]
+            if kind == "requirement":
+                requirements.add(ref)
+            elif kind == "implementation":
+                pending.append(ref)
+    return requirements
+
+
 def _dependents(items: dict[str, dict], item_id: str) -> set[str]:
     found = {item_id}
     changed = True
@@ -307,16 +331,22 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) ->
         if items[ref]["kind"] == "requirement"
     }
     covered_requirements: set[str] = set()
-    for ref in _ancestors(items, result["id"]):
+    # A baseline may cite a test without the result using that test.
+    for ref in result["deps"]:
         test = items[ref]
         if test["kind"] != "test" or _stale(items, ref) or _item_issues(test):
             continue
-        test_ancestors = _ancestors(items, ref)
-        if criterion["id"] not in test_ancestors:
+        if criterion["id"] not in test["deps"]:
             continue
-        for ancestor in test_ancestors:
-            if items[ancestor]["kind"] == "implementation":
-                covered_requirements.update(criterion_requirements & _ancestors(items, ancestor))
+        # Criterion ancestry cannot certify an implementation. Follow only
+        # implementation composition to explicitly linked requirements.
+        for implementation_id in test["deps"]:
+            implementation = items[implementation_id]
+            if implementation["kind"] == "implementation":
+                covered_requirements.update(
+                    criterion_requirements
+                    & _implementation_requirements(items, implementation_id)
+                )
     for requirement in sorted(criterion_requirements - covered_requirements):
         issues.append(
             f"{assessment['id']} {claim} needs a current passed test linked to {result['id']} "

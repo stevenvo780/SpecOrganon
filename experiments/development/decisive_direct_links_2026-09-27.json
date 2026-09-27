@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "classification": "synthetic_development_regression_not_field_evidence",
+  "date_utc": "2026-09-27",
+  "baseline_commit": "b10fbdb",
+  "baseline_sha256": {
+    "src/specorganon/engine.py": "22dc78bff433930615701f1193890ec6a85c8c96d56955be5af37b5b01da62a7",
+    "tests/test_method.py": "ba7c41d7713ed6c8b991010dc86f65377f83231fa58c702cce14d633e507f69e"
+  },
+  "current_sha256": {
+    "src/specorganon/engine.py": "850451a2cb3a485feb12c0279e0d7cd115d90583830fd27999b34e7da5ae6986",
+    "tests/test_method.py": "edcdfa2c610fb64bc3262810e69e06abb15b353b623f66d2cea3d8dba9d86cdc"
+  },
+  "counterexamples_before_fix": [
+    "For both synthetic field verdicts, a test of impl1 and crit1 borrowed impl2 via crit1 ancestry and falsely covered req2, although the test never linked impl2.",
+    "A tested implementation linked req1 and crit1; the criterion linked req2. Traversing all implementation ancestors falsely credited req2 without an implementation-to-requirement path.",
+    "A result linked only baseline and criterion, while baseline linked the test. Traversing all result ancestors falsely credited the baseline's test as intervention evidence."
+  ],
+  "compatibility_control": "Build-valid composition test to impl2 to impl1 to req1 remains accepted by validate when its result links the test directly.",
+  "current_rule": [
+    "A decisive result counts only test IDs in its direct deps.",
+    "Each counted test must directly name its criterion and implementation.",
+    "Only implementation-to-implementation composition edges and direct requirement deps of those implementations establish requirement coverage; criterion and baseline paths do not."
+  ],
+  "verification": [
+    {
+      "command": "PYTHONPATH=src python3 -m pytest -q tests/test_method.py tests/test_runner.py tests/test_injection_bank.py",
+      "result": "100 passed"
+    },
+    {
+      "command": "uv run --no-sync ruff check src/specorganon/engine.py tests/test_method.py",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": "uv run pytest -q",
+      "result": "1050 passed in 95.30s after both current fixes"
+    },
+    {
+      "command": "uv build --wheel --offline --out-dir TEMP, then offline install and uv pip check in fresh Python 3.11.15 and 3.12.3 environments; run installed probe_installed_decisive_gate.py",
+      "result": "both installations compatible; both probes blocked missing test and accepted directly linked test at revision 51"
+    }
+  ],
+  "limits": [
+    "Fixtures use invented field effects and test commands; the graph does not authenticate their execution, measurements, reviewers or causal attribution.",
+    "This is a narrower local proof-link contract, not the sealed 21-injection bank or a real food-chain intervention.",
+    "Criteria 2 and 3 remain not_assessed."
+  ]
+}
