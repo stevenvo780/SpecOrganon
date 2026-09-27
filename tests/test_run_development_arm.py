@@ -75,12 +75,23 @@ else:
     model = sys.argv[sys.argv.index("--model") + 1]
     print(json.dumps({"event": "init", "conversation_id": "local-conversation-id",
                       "init": {"model": model, "cwd": str(Path.cwd())}}))
-    for state in ("ACTIVE", "DONE"):
+    for state in (() if scenario == "agy_no_tool_step" else ("ACTIVE", "DONE")):
         tool_index = "2" if scenario == "agy_tool_index_string" and state == "DONE" else 2
         tool_state = 123 if scenario == "agy_tool_state_malformed" and state == "DONE" else state
+        tool_update = {"step_index": tool_index, "step_type": "tool",
+                       "state": tool_state,
+                       "tool_info": {"parameters": {"TargetFile": "private-name"}}}
+        if scenario != "agy_tool_name_missing":
+            tool_update["tool_name"] = (
+                ["write_to_file"] if scenario == "agy_tool_name_array"
+                else "RunCommand" if scenario == "agy_command_tool"
+                else "write_to_file"
+            )
+        print(json.dumps({"event": "step_update", "step_update": tool_update}))
+    if scenario == "agy_unknown_command_step":
         print(json.dumps({"event": "step_update", "step_update": {
-            "step_index": tool_index, "step_type": "tool", "tool_name": "write_to_file",
-            "state": tool_state, "tool_info": {"parameters": {"TargetFile": "private-name"}}}}))
+            "step_index": 9, "step_type": "tool_call", "tool_name": "RunCommand",
+            "state": "DONE"}}))
     step_usages = [
         {"input_tokens": 10, "output_tokens": 4, "thinking_tokens": 1,
          "cache_read_tokens": 0, "total_tokens": 14},
@@ -516,6 +527,66 @@ def test_no_command_tool_policy_changes_prompt_and_rejects_t_or_codex(
                 output_root=tmp_path / f"rejected-{arm}-{provider}", timeout_seconds=10,
                 agy_no_command_tool=True,
             )
+
+
+@pytest.mark.parametrize("scenario", [
+    "agy_command_tool", "agy_tool_name_missing", "agy_tool_name_array",
+])
+def test_no_command_pilot_rejects_observed_unapproved_tool(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch, scenario: str,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", scenario)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        agy_no_command_tool=True,
+    )
+    assert summary["cli"]["exit_code"] == 0
+    assert summary["cli_usage"]["final_status"] == "SUCCESS"
+    assert summary["execution_status"] == "cli_internal_failure"
+    assert summary["cli_usage"]["terminal_success"] is False
+    assert summary["cli_usage"]["no_command_tool_trace"]["violating_tool_steps"] == 1
+    with pytest.raises(RunError, match="not in artifacts_ready"):
+        replay_run_dir(run_dir, summary["artifacts"]["analysis.py"]["sha256"])
+    assert (run_dir / "cli.stdout.jsonl").exists()
+
+
+def test_no_command_pilot_needs_observable_file_write_step(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", "agy_no_tool_step")
+    _, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        agy_no_command_tool=True,
+    )
+    assert summary["execution_status"] == "cli_internal_failure"
+    assert summary["cli_usage"]["terminal_success"] is False
+    assert any("no observable file-writing tool step" in error
+               for error in summary["cli_usage"]["terminal_errors"])
+
+
+def test_no_command_pilot_rejects_unrecognized_command_bearing_step(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", "agy_unknown_command_step")
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        agy_no_command_tool=True,
+    )
+    assert summary["execution_status"] == "cli_internal_failure"
+    assert summary["cli_usage"]["no_command_tool_trace"] == {
+        "origin": "local_cli_jsonl_observed_steps_only_not_enforced",
+        "allowed_tool_steps": 1,
+        "violating_tool_steps": 0,
+        "uninspectable_step_events": 1,
+    }
+    with pytest.raises(RunError, match="not in artifacts_ready"):
+        replay_run_dir(run_dir, summary["artifacts"]["analysis.py"]["sha256"])
+
+    default_usage = runner._parse_usage("agy", run_dir / "cli.stdout.jsonl", "test-model")
+    assert default_usage["terminal_success"] is True
 
 
 def test_wall_timeout_terminates_cli_and_retains_partial_trace(

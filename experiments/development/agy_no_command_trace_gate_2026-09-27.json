@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "classification": "synthetic_development_regression_not_provider_evidence",
+  "date_utc": "2026-09-27",
+  "baseline_commit": "b10fbdb",
+  "baseline_sha256": {
+    "scripts/run_development_arm.py": "5ea83cfc6c16911df49815948b9ccd662d7eec75eaac8fcc0526fbcf6e0b33c0",
+    "scripts/observe_development_run.py": "145e052f19144551780044d389cf0201ae4b173e871d7d36e71a58c15cacb048"
+  },
+  "current_sha256": {
+    "scripts/run_development_arm.py": "18be92c8a94a8edc092c32061e305b6f0fe86e7ff0a50d9a9a526a0c95e90224",
+    "scripts/observe_development_run.py": "69c49866c3c05b6363e2838a01b026905796786c0240dc46055164301c873434",
+    "tests/test_run_development_arm.py": "35d85be4b2cdea5ae8f9ca4f37212a0f242a50d233abfc1fd1b3a8199eaaf6e8",
+    "tests/test_observe_development_run.py": "e38e73354daa98f17945475c253f1bfd521ea171d7955e6b2be397d24e55656d"
+  },
+  "counterexamples_before_fix": [
+    "Agy no-command fake CLI with RunCommand DONE, coherent usage, SUCCESS and required artifacts was artifacts_ready_for_inspection; the negative regression failed twice before the fix for RunCommand and missing tool_name.",
+    "Independent reviewer reproduced no-command to default tool_policy downgrade in run.json with unchanged prompt and JSONL; observer returned exit 0.",
+    "Independent reviewer reproduced unknown step_type tool_call carrying RunCommand beside a valid write_to_file; runner and observer returned artifacts_ready_for_inspection."
+  ],
+  "current_controls": [
+    "Only reported write_to_file steps pass the optional no-command local gate; forbidden or missing tool names, unknown step types and no visible write yield cli_internal_failure and block replay.",
+    "Observer recomputes the local JSONL result and the prompt SHA-256 from verified common.md and arm.md bytes; a summary-only policy downgrade is rejected.",
+    "Default parser record shape remains compatible with earlier pilot summaries; an old no-command summary without the new trace key is accepted only when every other recomputed field still matches.",
+    "A reported write-only run passes; default Agy/Codex behavior remains unchanged."
+  ],
+  "verification": [
+    {
+      "command": "uv run pytest -q tests/test_run_development_arm.py tests/test_observe_development_run.py",
+      "result": "79 passed"
+    },
+    {
+      "command": "uv run --no-sync ruff check scripts/run_development_arm.py scripts/observe_development_run.py tests/test_run_development_arm.py tests/test_observe_development_run.py",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": "uv run pytest -q",
+      "result": "1050 passed in 95.30s after both current fixes"
+    }
+  ],
+  "limits": [
+    "All tool events, token fields and provider status in the negative and positive tests are local synthetic JSONL, not authenticated Agy provider records.",
+    "The mode instructs the model and checks reported events; it does not disable execution tools or OS access and cannot detect unreported calls.",
+    "The exposed D-E pilot is not a reserved N/SDD/toolkit comparison, no cost or strict token cap is proven, and criterion_4 remains not_assessed."
+  ]
+}

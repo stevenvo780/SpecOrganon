@@ -18,6 +18,7 @@ SCRIPT = SCRIPTS / "observe_development_run.py"
 sys.path.insert(0, str(SCRIPTS))
 sys.path.insert(0, str(Path(__file__).parent))
 from run_development_arm import (  # noqa: E402
+    _assembled_prompt,
     _parse_usage,
     _toolkit_fingerprint,
     run_development_arm,
@@ -50,7 +51,11 @@ def _pilot(tmp_path: Path) -> tuple[Path, dict[str, Any]]:
         ("report.md", "private report body should not appear in observation\n"),
     ):
         (work / name).write_text(content, encoding="utf-8")
-    (run_dir / "prompt.txt").write_text("assembled private prompt\n", encoding="utf-8")
+    (run_dir / "prompt.txt").write_text(
+        _assembled_prompt("N", (work / "common.md").read_bytes(),
+                          (work / "arm.md").read_bytes()),
+        encoding="utf-8",
+    )
     (run_dir / "cli.stdout.jsonl").write_text(
         '{"type":"thread.started","thread_id":"private-thread-id"}\n'
         '{"type":"turn.completed","usage":{"input_tokens":20,'
@@ -74,6 +79,7 @@ def _pilot(tmp_path: Path) -> tuple[Path, dict[str, Any]]:
         "provider_cli": "codex",
         "requested_model": "synthetic-model",
         "requested_effort": "medium",
+        "tool_policy": "default",
         "execution_status": "artifacts_ready_for_inspection",
         "packet": packet,
         "packet_after": packet.copy(),
@@ -179,6 +185,7 @@ def test_observes_directory_emitted_by_real_runner_with_existing_fake_cli(
         timeout_seconds=10,
     )
     assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert "no_command_tool_trace" not in summary["cli_usage"]
     assert not (run_dir / "analysis_replay.stdout").exists()
     result = _invoke(run_dir)
     assert result.returncode == 0, result.stderr
@@ -193,6 +200,74 @@ def test_observes_directory_emitted_by_real_runner_with_existing_fake_cli(
     )
     assert observation["verified_streams"]["cli.stderr"] == summary["cli"]["stderr"]
     assert not (run_dir / "analysis_replay.stdout").exists()
+
+
+@pytest.mark.parametrize("scenario,violating,uninspectable", [
+    ("agy_command_tool", 1, 0),
+    ("agy_tool_name_missing", 1, 0),
+    ("agy_tool_name_array", 1, 0),
+    ("agy_unknown_command_step", 0, 1),
+])
+def test_observer_rejects_old_no_command_false_green(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, scenario: str,
+    violating: int, uninspectable: int,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    executable = fake_bin / "agy"
+    executable.write_text(FAKE_CLI, encoding="utf-8")
+    executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
+    monkeypatch.setenv("FAKE_SCENARIO", scenario)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        agy_no_command_tool=True,
+    )
+    assert summary["execution_status"] == "cli_internal_failure"
+    observed = json.loads(_invoke(run_dir).stdout)
+    assert observed["execution_status"] == "cli_internal_failure"
+    assert observed["cli_usage"]["no_command_tool_trace"]["violating_tool_steps"] == violating
+    assert observed["cli_usage"]["no_command_tool_trace"]["uninspectable_step_events"] == uninspectable
+
+    summary["execution_status"] = "artifacts_ready_for_inspection"
+    summary["cli_usage"] = _parse_usage("agy", run_dir / "cli.stdout.jsonl", "test-model")
+    _write_summary(run_dir, summary)
+    tampered = _invoke(run_dir)
+    assert tampered.returncode == 2
+    assert "cli_usage differs" in tampered.stderr
+
+    summary["tool_policy"] = "default"
+    _write_summary(run_dir, summary)
+    downgraded = _invoke(run_dir)
+    assert downgraded.returncode == 2
+    assert "tool policy differs from the verified prompt bytes" in downgraded.stderr
+
+
+def test_observer_accepts_reported_write_only_no_command_pilot(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    executable = fake_bin / "agy"
+    executable.write_text(FAKE_CLI, encoding="utf-8")
+    executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
+    run_dir, summary = run_development_arm(
+        arm="S", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        agy_no_command_tool=True,
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    observation = json.loads(_invoke(run_dir).stdout)
+    assert observation["execution_status"] == "artifacts_ready_for_inspection"
+    assert observation["cli_usage"]["no_command_tool_trace"]["allowed_tool_steps"] == 1
+    assert observation["cli_usage"]["no_command_tool_trace"]["violating_tool_steps"] == 0
+    summary["cli_usage"].pop("no_command_tool_trace")
+    _write_summary(run_dir, summary)
+    legacy_observation = json.loads(_invoke(run_dir).stdout)
+    assert legacy_observation["execution_status"] == "artifacts_ready_for_inspection"
+    assert legacy_observation["cli_usage"]["no_command_tool_trace"]["allowed_tool_steps"] == 1
 
 
 @pytest.mark.parametrize("status", ["preparing", "preflight_failure"])
@@ -509,6 +584,12 @@ def test_t_observation_verifies_setup_streams_wheel_sources_and_ledger(
             "timed_out": False,
         },
     }
+    (run_dir / "prompt.txt").write_text(
+        _assembled_prompt("T", (work / "common.md").read_bytes(),
+                          (work / "arm.md").read_bytes()),
+        encoding="utf-8",
+    )
+    summary["prompt"]["assembled_sha256"] = _record(run_dir / "prompt.txt")["sha256"]
     _write_summary(run_dir, summary)
     result = _invoke(run_dir)
     assert result.returncode == 0, result.stderr

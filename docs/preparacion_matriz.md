@@ -125,6 +125,8 @@ El runner local D-E no proporciona los IDs ni el uso **por solicitud al proveedo
 
 [`scripts/observe_development_run.py`](../scripts/observe_development_run.py) lee un directorio privado ya creado por el runner y coteja los hashes de materiales registrados, trazas de CLI, artefactos y, cuando corresponde, instalación del toolkit y replay. Vuelve a derivar el uso agregado desde la traza local y marca como desconocidos los IDs de solicitud, versión autenticada, costes, atribución de agentes y cumplimiento de topes. No ejecuta el código generado ni emite `attempts` del auditor. Las trazas e informes crudos quedan en el directorio privado; la salida solo lleva digests y contadores locales. Un registro parcial informa lo que falta o carece de registro, sin convertirlo en una corrida terminada.
 
+En el modo optativo `--agy-no-command-tool` de N/S, el runner y el observador exigen una traza local con al menos un paso `write_to_file` terminado y sin otros nombres de herramienta, tipos desconocidos ni pasos no inspeccionables. Una llamada visible `RunCommand` bloquea el estado listo y el replay. El observador reconstruye además el prompt exacto desde las copias de `common.md` y `arm.md` para impedir que el resumen cambie la política a `default` sin cambiar los bytes entregados. La lista permitida puede rechazar otro nombre legítimo de escritura hasta verificarlo; una traza limpia tampoco prueba que Agy no hizo llamadas omitidas. El prompt y este cotejo no deshabilitan herramientas ni aíslan el proceso, y esos pilotos continúan fuera de la comparación controlada.
+
 ```sh
 uv run python scripts/observe_development_run.py /ruta-privada/de-un-piloto
 ```

@@ -18,12 +18,13 @@ from contextlib import ExitStack, contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
-from run_development_arm import PUBLIC_FILES, _parse_usage
+from run_development_arm import PUBLIC_FILES, _assembled_prompt, _parse_usage
 
 
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 MAX_SUMMARY_BYTES = 4 * 1024 * 1024
 MAX_RECORDED_JSON_BYTES = 64 * 1024 * 1024
+MAX_PROMPT_COMPONENT_BYTES = 4 * 1024 * 1024
 DIR_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
 FILE_FLAGS = os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW
 ARTIFACTS = ("analysis.py", "report.md")
@@ -231,6 +232,28 @@ def _verify_hash(
     return record
 
 
+def _read_hashed_prompt_component(directory_fd: int, name: str, expected: Any) -> bytes:
+    """Read the same bounded regular-file bytes whose digest was checked."""
+    digest = _digest(expected, name)
+    fd = _open_regular(directory_fd, name)
+    try:
+        before = _hash_fd(fd, name)
+        if before["sha256"] != digest or before["bytes"] > MAX_PROMPT_COMPONENT_BYTES:
+            raise ObservationError(f"{name} has invalid prompt component bytes")
+        os.lseek(fd, 0, os.SEEK_SET)
+        raw = bytearray()
+        while chunk := os.read(fd, 1024 * 1024):
+            raw.extend(chunk)
+            if len(raw) > MAX_PROMPT_COMPONENT_BYTES:
+                raise ObservationError(f"{name} exceeds the prompt component size limit")
+        if (len(raw) != before["bytes"] or hashlib.sha256(raw).hexdigest() != digest
+                or _hash_fd(fd, name) != before):
+            raise ObservationError(f"{name} changed during prompt policy inspection")
+    finally:
+        os.close(fd)
+    return bytes(raw)
+
+
 def _parse_strict_json(raw: bytes, label: str) -> Any:
     try:
         value = json.loads(
@@ -342,7 +365,8 @@ def _verify_capture(
 
 
 def _verify_usage(
-    run_fd: int, provider: str, model: str, expected: Any, stream_record: dict[str, Any]
+    run_fd: int, provider: str, model: str, expected: Any, stream_record: dict[str, Any],
+    *, agy_no_command_tool: bool = False,
 ) -> dict[str, Any]:
     declared = _object(expected, "cli_usage")
     fd = _open_regular(run_fd, "cli.stdout.jsonl")
@@ -351,7 +375,10 @@ def _verify_usage(
         if before != stream_record:
             raise ObservationError("cli.stdout.jsonl changed before usage inspection")
         try:
-            observed = _parse_usage(provider, Path(f"/proc/self/fd/{fd}"), model)
+            observed = _parse_usage(
+                provider, Path(f"/proc/self/fd/{fd}"), model,
+                agy_no_command_tool=agy_no_command_tool,
+            )
         except (OSError, ValueError, TypeError, KeyError) as exc:
             raise ObservationError(
                 "CLI usage could not be parsed from the verified stream"
@@ -361,13 +388,20 @@ def _verify_usage(
     finally:
         os.close(fd)
     if observed != declared:
-        raise ObservationError("cli_usage differs from the verified local CLI stream")
+        # Pre-check no-command pilots stored the same aggregate parser fields
+        # without this new trace summary. Recompute the gate before accepting
+        # that historical shape; an observed command still changes terminal_success.
+        legacy_observed = dict(observed)
+        legacy_observed.pop("no_command_tool_trace", None)
+        if not agy_no_command_tool or legacy_observed != declared:
+            raise ObservationError("cli_usage differs from the verified local CLI stream")
     return {
         "origin": observed["origin"],
         "complete": observed["complete"],
         "terminal_success": observed["terminal_success"],
         "final_usage": observed["final_usage"],
         "preterminal_step_usage": observed["preterminal_step_usage"],
+        "no_command_tool_trace": observed.get("no_command_tool_trace"),
     }
 
 
@@ -488,6 +522,11 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
         status = summary.get("execution_status")
         if arm not in ("N", "S", "T") or provider not in ("codex", "agy"):
             raise ObservationError("run.json has an invalid arm or provider")
+        tool_policy = summary.get("tool_policy")
+        if tool_policy not in {"default", "no_command_tool"}:
+            raise ObservationError("run.json has an unknown tool policy")
+        if tool_policy == "no_command_tool" and (provider != "agy" or arm == "T"):
+            raise ObservationError("no-command tool policy requires Agy N/S")
         if any(
             type(value) is not str or not value.strip() for value in (model, effort)
         ):
@@ -546,6 +585,22 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
                     unavailable.append(f"work/{filename}")
                 else:
                     verified_inputs[f"work/{filename}"] = checked
+            if not partial:
+                common_bytes = _read_hashed_prompt_component(
+                    work_fd, "common.md", prompt["common_sha256"]
+                )
+                arm_bytes = _read_hashed_prompt_component(
+                    work_fd, "arm.md", prompt["arm_sha256"]
+                )
+                try:
+                    expected_prompt = _assembled_prompt(
+                        arm, common_bytes, arm_bytes,
+                        agy_no_command_tool=tool_policy == "no_command_tool",
+                    )
+                except UnicodeError as exc:
+                    raise ObservationError("assigned prompt source is not UTF-8") from exc
+                if hashlib.sha256(expected_prompt.encode("utf-8")).hexdigest() != prompt["assembled_sha256"]:
+                    raise ObservationError("tool policy differs from the verified prompt bytes")
 
             artifacts = _object(summary.get("artifacts"), "artifacts")
             if partial:
@@ -613,6 +668,7 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
                     model,
                     summary.get("cli_usage"),
                     verified_streams["cli.stdout.jsonl"],
+                    agy_no_command_tool=tool_policy == "no_command_tool",
                 )
 
                 toolkit = summary.get("toolkit")
@@ -811,6 +867,7 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
             "provider_cli": provider,
             "requested_model": model,
             "requested_effort": effort,
+            "tool_policy": tool_policy,
             "cli_usage": usage,
             "verified_inputs": verified_inputs,
             "verified_streams": verified_streams,

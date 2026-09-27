@@ -35,6 +35,9 @@ USAGE_FIELDS = {
     "agy": ("input_tokens", "output_tokens", "thinking_tokens", "cache_read_tokens",
             "total_tokens"),
 }
+# The exposed Agy pilot asks for file writes only. This is a local JSONL
+# allowlist, not a provider-side or operating-system command prohibition.
+AGY_NO_COMMAND_ALLOWED_TOOLS = frozenset({"write_to_file"})
 
 
 class RunError(ValueError):
@@ -182,8 +185,11 @@ def _usage_subset_errors(
     return errors
 
 
-def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict[str, Any]:
+def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
+                 *, agy_no_command_tool: bool = False) -> dict[str, Any]:
     """Separate terminal execution evidence from optional token-field completeness."""
+    if agy_no_command_tool and provider != "agy":
+        raise ValueError("no-command trace check requires Agy")
     final_events: list[tuple[int, dict[str, Any]]] = []
     init_models: list[str] = []
     terminal_errors: list[str] = []
@@ -192,11 +198,14 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
     last_type: str | None = None
     completed_tool_steps: set[int] = set()
     observed_tool_steps: set[int] = set()
+    no_command_allowed_steps: set[int] = set()
+    no_command_violating_steps: set[int] = set()
     failed_codex_items = 0
     failed_agy_steps: set[int] = set()
     agy_step_types: dict[int, str] = {}
     agy_colliding_indices: set[int] = set()
     agy_malformed_step_events = 0
+    agy_unknown_step_events = 0
     agy_agent_observed_steps: set[int] = set()
     agy_agent_done_steps: set[int] = set()
     agy_agent_usage: dict[int, dict[str, int]] = {}
@@ -258,8 +267,16 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
                     agy_step_types[index] = step_type
                 elif prior_type != step_type:
                     agy_colliding_indices.add(index)
+                if agy_no_command_tool and step_type not in {"tool", "agent_response"}:
+                    agy_unknown_step_events += 1
                 if step_type == "tool":
                     observed_tool_steps.add(index)
+                    if agy_no_command_tool:
+                        tool_name = update.get("tool_name")
+                        if type(tool_name) is str and tool_name in AGY_NO_COMMAND_ALLOWED_TOOLS:
+                            no_command_allowed_steps.add(index)
+                        else:
+                            no_command_violating_steps.add(index)
                     if state == "DONE":
                         completed_tool_steps.add(index)
                     elif state in {"FAILED", "ERROR"}:
@@ -303,6 +320,18 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
         terminal_errors.append(f"Codex stream contains {failed_codex_items} failed item/turn events")
     if failed_agy_steps:
         terminal_errors.append(f"agy stream contains {len(failed_agy_steps)} failed tool steps")
+    no_command_uninspectable = (agy_malformed_step_events + len(agy_colliding_indices)
+                                + len(observed_tool_steps - completed_tool_steps)
+                                + agy_unknown_step_events)
+    if agy_no_command_tool:
+        if not observed_tool_steps:
+            terminal_errors.append("agy no-command trace has no observable file-writing tool step")
+        if no_command_violating_steps:
+            terminal_errors.append(
+                f"agy no-command trace has {len(no_command_violating_steps)} tool steps outside the file-write allowlist")
+        if no_command_uninspectable:
+            terminal_errors.append(
+                f"agy no-command trace has {no_command_uninspectable} uninspectable step events")
     fields = USAGE_FIELDS[provider]
     values: dict[str, int | None] = {field: None for field in fields}
     final_status: str | None = None
@@ -398,6 +427,12 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
         "observed_unfinished_tool_steps": (len(observed_tool_steps - completed_tool_steps)
                                            if provider == "agy" else None),
         "observed_failed_agy_steps": len(failed_agy_steps) if provider == "agy" else None,
+        **({"no_command_tool_trace": {
+            "origin": "local_cli_jsonl_observed_steps_only_not_enforced",
+            "allowed_tool_steps": len(no_command_allowed_steps - no_command_violating_steps),
+            "violating_tool_steps": len(no_command_violating_steps),
+            "uninspectable_step_events": no_command_uninspectable,
+        }} if agy_no_command_tool else {}),
         "observed_failed_codex_items_partial": failed_codex_items if provider == "codex" else None,
         "final_usage": values,
         "preterminal_step_usage": preterminal,
@@ -409,13 +444,9 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
     }
 
 
-def _prompt(arm: str, work: Path, *, agy_no_command_tool: bool = False) -> tuple[str, dict[str, str]]:
-    common = PROMPTS / "common.md"
-    treatment = PROMPTS / f"arm_{arm.lower()}.md"
-    if not _regular_file(common) or not _regular_file(treatment):
-        raise RunError("common or arm prompt is absent or not a regular file")
-    common_bytes = common.read_bytes()
-    treatment_bytes = treatment.read_bytes()
+def _assembled_prompt(arm: str, common_bytes: bytes, treatment_bytes: bytes,
+                      *, agy_no_command_tool: bool = False) -> str:
+    """Rebuild the exact prompt so a later observer can bind its policy to bytes."""
     wrapper = (
         "Development-only D-E execution. Work in the current directory. Read only the local "
         "task.md, source_manifest.json and sample_first_complete_week.csv as case inputs. "
@@ -441,6 +472,18 @@ def _prompt(arm: str, work: Path, *, agy_no_command_tool: bool = False) -> tuple
             + "\n# Assigned arm\n" + treatment_bytes.decode("utf-8")
             + treatment_note + no_command_note)
     # This is an execution instruction, not a cryptographic confinement boundary.
+    return text
+
+
+def _prompt(arm: str, work: Path, *, agy_no_command_tool: bool = False) -> tuple[str, dict[str, str]]:
+    common = PROMPTS / "common.md"
+    treatment = PROMPTS / f"arm_{arm.lower()}.md"
+    if not _regular_file(common) or not _regular_file(treatment):
+        raise RunError("common or arm prompt is absent or not a regular file")
+    common_bytes = common.read_bytes()
+    treatment_bytes = treatment.read_bytes()
+    text = _assembled_prompt(arm, common_bytes, treatment_bytes,
+                             agy_no_command_tool=agy_no_command_tool)
     return text, {"common_sha256": hashlib.sha256(common_bytes).hexdigest(),
                   "arm_sha256": hashlib.sha256(treatment_bytes).hexdigest(),
                   "assembled_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest()}
@@ -659,7 +702,7 @@ def run_development_arm(
                 "T toolkit fingerprint covers only the Organon entrypoint and package Python sources, not dependencies")
         if agy_no_command_tool:
             summary["limitations"].append(
-                "No-command Agy run is an instrumental pilot, not comparable with T CLI execution")
+                "No-command Agy pilot checks reported tool steps only; it does not enforce a provider or OS prohibition or detect unreported calls, and is not comparable with T CLI execution")
         try:
             # The prompt hashes describe the bytes actually delivered to the model.
             # Copies must match them before any CLI or toolkit preparation starts.
@@ -693,7 +736,10 @@ def run_development_arm(
                               stdout_path=run_dir / "cli.stdout.jsonl",
                               stderr_path=run_dir / "cli.stderr", stdin_text=stdin_text, env=env)
             summary["cli"] = result
-            summary["cli_usage"] = _parse_usage(provider, run_dir / "cli.stdout.jsonl", model)
+            summary["cli_usage"] = _parse_usage(
+                provider, run_dir / "cli.stdout.jsonl", model,
+                agy_no_command_tool=agy_no_command_tool,
+            )
             summary["packet_after"] = {
                 name: _file_record(work / name) for name in PUBLIC_FILES
             }
