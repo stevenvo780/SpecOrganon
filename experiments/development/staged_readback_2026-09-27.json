@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "classification": "development_staged_run_readback_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "scope": "Read-only, point-in-time verification of an existing N/S/T stage against a caller-supplied candidate schedule and run_id",
+  "implementation": {
+    "stage_verifier": "scripts/verify_staged_run.py",
+    "case_package": "strict ZIP inspection from the already opened regular-file descriptor using positional reads",
+    "tool_policy": "strict JSON inspection from bytes captured while hashing the opened descriptor",
+    "toolkit": "strict wheel or bundle inspection from bytes captured while hashing the opened descriptor",
+    "final_checks": [
+      "all input descriptors are rehashed and their named entries and metadata rechecked",
+      "the extracted case tree and its private files are checked twice",
+      "stage.json, input/case/work directories, root entries, and ancestor chain are rechecked"
+    ],
+    "stage_verified_at_read": true,
+    "execution_ready": false
+  },
+  "adversarial_reproduction": {
+    "initial_false_green": "a malformed pinned case_package with an undeclared ZIP trailer passed when an ancestor was swapped to a clean copy only during path-based inspect_package calls",
+    "candidate_schedule_and_stage_manifest_recomputed_for_malformed_hash": true,
+    "post_fix_baseline_rejects": true,
+    "post_fix_temporary_ancestor_swap_rejects": true,
+    "post_fix_cause": "ZIP end record is invalid or exceeds package bounds",
+    "pinned_stage_package_remained_malformed": true,
+    "reviewer": "native read-only development agent, not an external custodian"
+  },
+  "checks": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_case_package.py tests/test_tool_policy.py tests/test_toolkit_bundle.py",
+      "result": "132 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_verify_staged_run.py tests/test_stage_released_run.py",
+      "result": "41 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "954 passed"
+    }
+  ],
+  "limitations": [
+    "The caller-supplied schedule is not authenticated or independently sealed.",
+    "A same-UID writer may change the stage after the point-in-time check returns; a future executor must recheck at use.",
+    "No runtime isolation, applied limits, provider receipts, model run, blinded rating, or external custody was tested.",
+    "The adversarial review was bounded and did not perform fuzzing."
+  ],
+  "criterion_4": "not_assessed"
+}
