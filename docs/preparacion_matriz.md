@@ -98,6 +98,16 @@ El [registro de preparación](../experiments/development/staged_visible_run_2026
 python3 scripts/verify_staged_run.py calendario-candidato.json RUN_ID /ruta-privada/stage-existente
 ```
 
+### Ejecución local de una herramienta genérica preparada
+
+[`scripts/run_staged_local_tool.py`](../scripts/run_staged_local_tool.py) toma un stage existente con `work/` vacío, lo revalida contra el calendario suministrado y coteja el SHA-256 de un ejecutable local con la entrada `generic_tools` de la política visible. Copia esos bytes a un descriptor `memfd`, comprueba su hash y aplica los cuatro sellos de escritura, crecimiento, reducción y modificación de sellos antes de lanzarlo. Invoca **una sola vez** ese ejecutable con las rutas absolutas de `case/`, `inputs/` y `work/` como argumentos; el directorio actual es `case/`. Landlock concede lectura a los árboles visibles y a los archivos y directorios necesarios del runtime Python local, y escritura a `work/`. Seccomp y límites por proceso restringen sockets, descendientes, tiempo, espacio virtual y tamaño por archivo. La salida estándar, el error y un recibo local se guardan en un directorio privado nuevo, fuera del stage.
+
+```sh
+python3 scripts/run_staged_local_tool.py calendario-candidato.json RUN_ID /ruta-privada/stage-existente ID_HERRAMIENTA /ruta/absoluta/ejecutable /ruta-privada/recibo-nuevo
+```
+
+El recibo identifica la corrida, el ejecutable y la política, informa `execution_bytes_sealed` solo tras confirmar el lanzamiento desde el descriptor sellado, inventaría los archivos de `work/` con hashes y comprueba que los insumos visibles y el ejecutable de origen conserven sus bytes al terminar. Una salida que exceda el inventario queda marcada como incompleta; tampoco se confunde una falla de instalación del aislamiento con un fallo del programa. La verificación previa y posterior detecta cambios persistentes, pero no impide sustituciones transitorias del stage, intérprete o bibliotecas por otro proceso con el mismo UID. La política declara `/case`, `/work` y un digest de imagen de runtime; este host usa rutas reales, no montajes con esos nombres, y **no verifica** la imagen declarada. Las bibliotecas y paquetes instalados en el runtime son legibles para el hijo, por lo que este ensayo no acredita igualdad de entorno entre N, S y T. No hay cuota agregada de RAM o disco, límite efectivo de tokens, proveedor, modelo, evaluador ni custodia externa. `provider_calls: 0`, `measured_tokens: null` y `criterion_4: not_assessed` separan expresamente el recibo local de los recibos confirmatorios. El [registro sintético N/S/T](../experiments/development/staged_local_tool_sealed_2026-09-27.json) conserva los resultados y los falsos verdes reparados.
+
 ## Firma offline del diseño candidato
 
 [`scripts/check_study_signature.py`](../scripts/check_study_signature.py) vuelve a verificar los 15 archivos, exige el SHA-256 original de `GOAL.md` y que los bytes del protocolo coincidan con el digest del calendario. `challenge` produce los bytes canónicos en base64 para una firma Ed25519 externa; el mensaje liga propósito, GOAL, protocolo, calendario y roles/digests de activos. No incluye rutas ni contenido de los casos. La herramienta no genera ni lee claves privadas.

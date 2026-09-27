@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "classification": "development_local_generic_tool_execution_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "implementation_sha256": {
+    "scripts/local_replay_sandbox.py": "d74417aa658c603dd91f69644781724c40133368ac720c2aa272d556ce58c444",
+    "scripts/run_staged_local_tool.py": "5a4c349f12bf9052de07a58cb9b76fc90c180c72fd92ffebe7f57d801d63f2a9"
+  },
+  "gates": [
+    {
+      "command": ".venv/bin/pytest -q tests/test_local_replay_sandbox.py tests/test_run_staged_local_tool.py",
+      "result": "39 passed"
+    },
+    {
+      "command": ".venv/bin/pytest -q",
+      "result": "1093 passed in 148.19s"
+    },
+    {
+      "command": "ruff check scripts/local_replay_sandbox.py tests/test_local_replay_sandbox.py scripts/run_staged_local_tool.py tests/test_run_staged_local_tool.py",
+      "result": "All checks passed!"
+    }
+  ],
+  "synthetic_stage_runs": [
+    {
+      "arm": "N",
+      "run_id": "conf-f9b5d17dc9b9dee54f5ebef3",
+      "status": "success",
+      "execution_bytes_sealed": true,
+      "stage_unchanged_after_run": true,
+      "deliverables_present": true,
+      "output_inventory_complete": true,
+      "deliverable_sha256": "1205d4bf5fbf88974426fa7a705932e1058e37b2afddab2fccf040721a75671a"
+    },
+    {
+      "arm": "S",
+      "run_id": "conf-8333fcd9a02d67e85fe51cfe",
+      "status": "success",
+      "execution_bytes_sealed": true,
+      "stage_unchanged_after_run": true,
+      "deliverables_present": true,
+      "output_inventory_complete": true,
+      "deliverable_sha256": "1205d4bf5fbf88974426fa7a705932e1058e37b2afddab2fccf040721a75671a"
+    },
+    {
+      "arm": "T",
+      "run_id": "conf-c9890e14f76fc04015701583",
+      "status": "success",
+      "execution_bytes_sealed": true,
+      "stage_unchanged_after_run": true,
+      "deliverables_present": true,
+      "output_inventory_complete": true,
+      "deliverable_sha256": "1205d4bf5fbf88974426fa7a705932e1058e37b2afddab2fccf040721a75671a"
+    }
+  ],
+  "shared_synthetic_run_observations": {
+    "sealed_executable_sha256": "77544c6b78cfdddc2e5566c014628a4a6c70697dcc2ae43ae801392695fa4958",
+    "deliverable_bytes": 13,
+    "hidden_bytes_absent_from_receipt": true,
+    "provider_calls": 0,
+    "measured_tokens": null,
+    "runtime_image_verified": false,
+    "criterion_4": "not_assessed"
+  },
+  "independent_review": {
+    "initial_false_positives_reproduced": [
+      "tool executable pathname swapped during launch",
+      "staged tool policy or arm prompt changed after verification",
+      "private executable copy swapped during launch"
+    ],
+    "initial_false_negative_reproduced": "valid subdirectory under work changed its link count",
+    "resolution": "bind staged input hashes to the independent schedule; launch executable bytes from a kernel-sealed memfd; compare only stable work identity",
+    "final_result": "no new high-severity false positive found within local contract",
+    "sealed_fd_observation": "F_GET_SEALS returned 0xf; a write to the FD failed with EPERM"
+  },
+  "limits": [
+    "The synthetic N/S/T tool calls are not model or provider runs and do not compare methodology outcomes.",
+    "The runtime image declaration is not verified; interpreter, libraries, staged inputs, and supervisor can still race with a same-UID process.",
+    "Landlock, seccomp, RLIMIT_AS, RLIMIT_CPU, RLIMIT_FSIZE, and a parent wall deadline lack aggregate cgroup memory or disk quotas and do not certify arbitrary hostile code.",
+    "Local receipts and hashes have no external custodian, provider-authenticated tokens or costs, blinded judges, or field outcomes. Criterion 4 remains not assessed."
+  ]
+}
