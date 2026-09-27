@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "analysis": "secondary_descriptive_bounds",
+  "input": {
+    "table": "cases/bread_norway/survey_table1.json",
+    "table_sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+    "pdf": "cases/bread_norway/source_survey.pdf",
+    "pdf_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+    "doi": "10.3390/su10072251",
+    "locator": "Table 1, printed page 4 of 15 (PDF page 4)"
+  },
+  "denominator": {
+    "all_respondents": 1000,
+    "known_category_responses": 967,
+    "do_not_know_responses": 33
+  },
+  "at_least_7_slices_per_week": {
+    "known_responses": 97,
+    "possible_responses": [
+      97,
+      130
+    ],
+    "possible_percent_of_all_respondents": [
+      "9.7",
+      "13.0"
+    ]
+  },
+  "zero_slices_per_week": {
+    "known_responses": 429,
+    "possible_responses": [
+      429,
+      462
+    ],
+    "possible_percent_of_all_respondents": [
+      "42.9",
+      "46.2"
+    ]
+  },
+  "weekly_slices_across_respondent_households": {
+    "lower_bound": 1720,
+    "finite_upper_bound": null,
+    "lower_bound_rule": "Use the minimum integer in each reported bin and assign zero to Do not know.",
+    "upper_bound_reason": "More than 12 slices is open-ended with positive count; Do not know is also unbounded."
+  },
+  "interpretation_limits": [
+    "Respondent estimates of weekly household fresh-bread waste, not measured slices or mass.",
+    "This survey does not identify purchasers of the separate 736 g bread in the LCA.",
+    "These historical responses are not a linked or prospective field baseline.",
+    "No intervention, comparator, or causal effect is observed here.",
+    "Ranges assign Do not know responses to endpoints; they are not confidence intervals."
+  ]
+}

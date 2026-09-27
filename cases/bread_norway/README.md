@@ -19,3 +19,12 @@ uv run python scripts/verify_bread_frame.py
 ```
 
 La revisión de `frame` no aprueba los valores propuestos ni convierte porcentajes históricos en una línea base de campo. Las fases posteriores, el ensayo y el criterio 3 siguen pendientes.
+
+## Análisis secundario de la encuesta
+
+La [transcripción de la tabla 1](survey_table1.json) fija la fuente archivada y sus siete frecuencias. El [analizador reproducible](../../scripts/analyze_bread_survey.py) comprueba el hash del PDF y recalcula el [recibo](../../experiments/development/bread_survey_bounds_2026-09-27.json): 97 de 1.000 respuestas declaran al menos siete rebanadas desechadas por semana; si las 33 respuestas «no sabe» pertenecieran a ese grupo, serían 130. El intervalo descriptivo es 9,7–13,0 % de las respuestas. La cota inferior de las categorías declaradas suma 1.720 rebanadas semanales en esos hogares; no hay cota superior finita porque «más de 12» es una categoría abierta. Estas cifras son estimaciones autodeclaradas sobre pan fresco en general, sin identificación del pan del ACV, incertidumbre muestral calculada ni efecto de intervención. Tampoco habilitan el avance de `critique`.
+
+```sh
+uv run python scripts/analyze_bread_survey.py
+uv run pytest -q tests/test_analyze_bread_survey.py
+```
