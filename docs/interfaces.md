@@ -4,11 +4,11 @@ Ambas interfaces llaman las mismas funciones de `specorganon.engine` y `specorga
 
 ## CLI
 
-Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 19 operaciones públicas:
+Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 21 operaciones públicas:
 
 | CLI | MCP | Función |
 | --- | --- | --- |
-| `init` | `init` | Crear el caso con `approval_policy="signed"` por defecto y un `case_id` UUID. |
+| `init` | `init` | Crear el caso con `approval_policy="signed"` y `test_gate_policy="signed_report"` por defecto y un `case_id` UUID. |
 | `put` | `put` | Añadir o revisar un ítem. |
 | `status` | `status` | Leer estado y confianza de aprobaciones. |
 | `review` | `review` | Revisar un ítem. |
@@ -16,6 +16,8 @@ Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <coman
 | `approve` | `approve` | Registrar una aprobación normativa verificada. |
 | `test-execution-challenge` | `test_execution_challenge` | Obtener los bytes exactos de un reporte de ejecución de prueba para firma offline. |
 | `record-test-execution` | `record_test_execution` | Registrar el reporte firmado por un ejecutor externo de un test `signed`. |
+| `test-observation-challenge` | `test_observation_challenge` | Obtener los bytes exactos de una repetición local para firma de observador. |
+| `record-test-observation` | `record_test_observation` | Registrar una repetición firmada, vinculada al reporte y a sus bytes conservados. |
 | `field-attestation-challenge` | `field_attestation_challenge` | Preparar los bytes de una declaración de evaluador externo sobre fuentes de campo. |
 | `attest-field` | `attest_field` | Registrar esa declaración firmada; no habilita un veredicto decisivo de campo. |
 | `challenge` | `challenge` | Registrar una contradicción. |
@@ -67,13 +69,16 @@ Al crear el caso, `init` guarda un `case_id` UUID y devuelve `project_sha256`, e
       },
       "test_executors": {
         "executor:pruebas": "BASE64_DE_32_BYTES_DE_UNA_TERCERA_CLAVE_PUBLICA"
+      },
+      "test_observers": {
+        "observer:repeticion": "BASE64_DE_32_BYTES_DE_UNA_CUARTA_CLAVE_PUBLICA"
       }
     }
   }
 }
 ```
 
-Todos los marcadores se reemplazan por el UUID, la ruta canónica absoluta, el digest de 64 caracteres hexadecimales y las claves públicas reales del caso. `phase_reviewers` y `test_executors` son opcionales para leer un expediente antiguo; sin la clave correspondiente no se acepta una nueva revisión de fase ni un test `signed`. Cada actor `executor:<nombre>` tiene una clave distinta de las de aprobadores y revisores. El operador protege la integridad de ese archivo y verifica por un proceso externo la identidad, custodia de clave, competencia y separación de cada revisor y ejecutor, así como la facultad de decisión de cada aprobador. Un registro para otro UUID, otra ruta o metadatos distintos no da confianza a las firmas. No se guardan claves privadas en el caso, el repositorio, comandos, logs ni solicitudes MCP.
+Todos los marcadores se reemplazan por el UUID, la ruta canónica absoluta, el digest de 64 caracteres hexadecimales y las claves públicas reales del caso. `phase_reviewers`, `test_executors` y `test_observers` son opcionales para leer un expediente antiguo; sin la clave correspondiente no se acepta una nueva revisión de fase, un test `signed` o una observación estricta. Las claves de esos roles no se reutilizan entre actores. El operador protege la integridad de ese archivo y verifica por un proceso externo la identidad, custodia de clave, competencia y separación de cada revisor, ejecutor y observador, así como la facultad de decisión de cada aprobador. Un registro para otro UUID, otra ruta o metadatos distintos no da confianza a las firmas. No se guardan claves privadas en el caso, el repositorio, comandos, logs ni solicitudes MCP.
 
 1. Tras revisar la versión vigente de la norma o decisión, solicita el desafío con el actor y el motivo exactos:
 
@@ -111,6 +116,16 @@ Cada artefacto opcional declara `{"path":"ruta/relativa/canónica","sha256":"<64
 Con `ORGANON_APPROVERS_FILE` configurado, solicita `organon test-execution-challenge RUTA ID --report 'JSON' --actor executor:pruebas`, verifica fuera del agente `message_base64` y `message_sha256`, y firma los bytes decodificados con la clave privada del ejecutor. El mensaje canónico tiene propósito `specorganon.test_execution` y liga UUID, ruta y metadatos del caso, cabeza previa del ledger, ID, versión, hash y dependencias del test, actor y reporte completo. Registra con `organon record-test-execution RUTA ID --report 'EL_MISMO_JSON' --actor executor:pruebas --signature FIRMA_BASE64`. Las herramientas MCP `test_execution_challenge` y `record_test_execution` reciben el reporte como objeto JSON y siguen el mismo contrato; ninguna ejecuta el comando.
 
 `status` expone el historial y el estado del test; `next-task` señala `execute_test` cuando falta una ejecución válida. Solo el último reporte **firmado y verificable** de la versión vigente permite pasar si `exit_code` es 0 y `timed_out` es falso. Un fallo firmado posterior bloquea; una firma inválida posterior no reemplaza el último reporte válido. Cambiar el test, retirar la clave o registrar una nueva ejecución vigente puede invalidar `build`, `validate` y sus revisiones anteriores. Los ledgers `signed` antiguos siguen legibles, pero un test sin `argv` o recibo queda bloqueado. La política `fixture` conserva su semántica sintética. La firma acredita el control de la clave configurada y lo que esa clave declaró; no prueba identidad del ejecutor, honestidad del reporte, integridad de su host, validez del test ni una intervención real.
+
+### Repetición observada optativa
+
+Al crear un caso nuevo, `init --test-gate-policy signed_observed` fija una compuerta más estricta para **todos** sus tests. El valor por defecto y los ledgers anteriores mantienen `signed_report` sin añadir un campo a sus metadatos ni cambiar sus firmas. No se activa el modo nuevo editando a mano un caso antiguo: cambiaría la huella registrada y exigiría un caso y firmas nuevos. El modo estricto requiere `data.executable_sha256` y `data.input_tree_sha256` fijados en el ítem antes del reporte, además de `argv` absoluto canónico y `command`.
+
+Tras el reporte firmado, el observador prepara un directorio absoluto nuevo, privado (0700), con `input/` también privado. El SHA-256 del árbol de entrada usa la lista canónica ordenada de directorios y archivos regulares con ruta, digest y tamaño; puede calcularse con `specorganon.test_observation.hash_input_tree`. El [auditor local](../scripts/audit_signed_test_execution.py) repite el comando con el ejecutable sellado bajo Landlock y seccomp, coteja ambos pines antes del lanzamiento y la entrada después, y devuelve un objeto `receipt` de esquema 1 con procedencia del reporte, ruta del bundle, resultado del sandbox y hashes medidos. En este modo el pin de CLI se toma del ítem; si se proporciona `--executable-sha256`, debe coincidir. El auditor conserva el modo anterior con ese argumento obligatorio. `argv[0]` se sustituye por una ruta `procfd` dentro del hijo.
+
+El observador registrado verifica el recibo y los bytes conservados, obtiene `test-observation-challenge RUTA ID --receipt 'JSON' --actor observer:repeticion`, coteja `message_base64` y su SHA-256, firma los bytes decodificados fuera del agente y registra `record-test-observation` con el mismo recibo y `--signature FIRMA_BASE64`. En MCP, `receipt` es un objeto JSON real. CLI/MCP solo registran la firma; **no ejecutan el comando**. El motor reabre de forma acotada y sin seguir enlaces el ejecutable, la entrada, stdout, stderr y los artefactos declarados del bundle al registrar y al releer el caso. Un reporte con hashes inventados, una observación negativa vigente, una entrada o salida alterada, un bundle perdido, una clave retirada o un reporte nuevo bloquean `build` y los usos decisivos del test. El último recibo autenticado del reporte vigente prevalece incluso si luego se pierden sus bytes, por lo que borrar una observación negativa no restaura una positiva antigua. Una nueva observación exige revisión y avance nuevos de las fases dependientes; `next-task` pide `observe_test` para repetirla.
+
+La firma acredita la declaración de una clave configurada y el motor comprueba los bytes **actualmente disponibles**; un observador que controla clave y bundle puede fabricarlos sin ejecutar nada. La diferencia de claves tampoco prueba independencia personal. El auditor local no prueba la corrida histórica, no descarta cambios transitorios de otro proceso del mismo UID, solo hashea artefactos declarados y requiere el sandbox disponible. Custodia de claves, registro, bundle y ancla externa del ledger, así como juicio sobre la validez del test, siguen siendo tareas externas.
 
 Para `signed`, el control de independencia incluye autores de versiones anteriores del mismo ítem aunque otro actor publique una versión vigente idéntica. El snapshot de revisión incluye la identidad del último evento de aprobación **verificado** de cada norma o decisión pertinente. Por eso, revocar una clave y sustituir una aprobación válida requiere revisar y avanzar de nuevo la fase dependiente; la revisión vieja no revive al registrar una segunda aprobación de la misma versión. Una firma inválida posterior no reemplaza la aprobación verificada, ni una aprobación ajena invalida otra fase. El formato nuevo puede dejar una revisión firmada histórica como obsoleta si dependía de aprobaciones cuya procedencia no figuraba en su snapshot anterior; consulta `gate` y consigue una revisión nueva antes de avanzar. Los eventos del ledger no se reescriben.
 
@@ -154,7 +169,7 @@ Para pruebas sintéticas se exige crear el caso explícitamente con `--approval-
 
 ## MCP por stdio
 
-El ejecutable es `.venv/bin/organon-mcp` (o `uv run organon-mcp`). Configúralo como servidor MCP con transporte `stdio`. Publica las 19 herramientas de la tabla. Los parámetros tienen los mismos nombres que las funciones del motor: `init` acepta `approval_policy`; `approval_challenge`, `phase_review_challenge` y `test_execution_challenge` devuelven mensajes canónicos; `approve`, `review_phase` y `record_test_execution` aceptan `signature`. `refs` es una lista de IDs; `data` y `report` son objetos JSON. En MCP, `run` recibe el objeto JSON `manifest` directamente, mientras que la CLI lo lee de `--manifest`. El servidor usa los mismos registros externos de aprobación y evaluación que la CLI para comprobar firmas; el cliente MCP no debe recibir una clave privada.
+El ejecutable es `.venv/bin/organon-mcp` (o `uv run organon-mcp`). Configúralo como servidor MCP con transporte `stdio`. Publica las 21 herramientas de la tabla. Los parámetros tienen los mismos nombres que las funciones del motor: `init` acepta `approval_policy` y `test_gate_policy`; `approval_challenge`, `phase_review_challenge`, `test_execution_challenge` y `test_observation_challenge` devuelven mensajes canónicos; `approve`, `review_phase`, `record_test_execution` y `record_test_observation` aceptan `signature`. `refs` es una lista de IDs; `data`, `report` y `receipt` son objetos JSON. En MCP, `run` recibe el objeto JSON `manifest` directamente, mientras que la CLI lo lee de `--manifest`. El servidor usa los mismos registros externos de aprobación y evaluación que la CLI para comprobar firmas; el cliente MCP no debe recibir una clave privada.
 
 El [control de frontera stdio](../experiments/development/mcp_strict_wire_2026-09-27.json) lee cada línea en bytes, con un límite de 8 MiB, y rechaza UTF-8 inválido, claves duplicadas incluso anidadas o escapadas, valores no finitos, subdesbordamiento y pérdida decimal antes del parser del SDK. Comprueba la forma del sobre JSON-RPC y rechaza solicitudes que mezclen `method` con campos de respuesta, lotes, IDs inválidos y campos de sobre extra. En `tools/call`, `put.data`, `put.expected_deps`, `run.manifest`, `next_task.roles` y `test_execution_challenge.report`/`record_test_execution.report` deben llegar como objetos reales, y `put.refs` como lista; las versiones y `challenge_seq` requieren enteros reales, sin conversión de booleanos. Los rechazos se envían como errores JSON-RPC y no ejecutan la herramienta; una línea inválida no impide una petición válida posterior. Los valores de texto dentro de `data` siguen siendo contenido del caso y no se vuelven a interpretar como JSON. El control usa partes internas de `mcp==2.2.0`, versión fijada en el paquete y comprobada con cliente real y wheel instalado en Python 3.11 y 3.12. No autentica el origen del mensaje ni la evidencia que contiene.
 
