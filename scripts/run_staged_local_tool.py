@@ -84,28 +84,69 @@ class LocalToolError(ValueError):
     """The local tool run cannot be prepared or its receipt cannot be saved."""
 
 
+def _reject_overlapping_registry_roots(
+    gate_root: Path | str | None, admission_root: Path | str | None,
+) -> None:
+    """Keep gate and admission locks on disjoint directory identities."""
+    if gate_root is None:
+        return
+    try:
+        gate = admission.configured_root(gate_root)
+        admitted = admission.configured_root(admission_root)
+        pairs = ((gate, admitted), (gate.resolve(), admitted.resolve()))
+    except (admission.AdmissionError, OSError, RuntimeError, TypeError) as exc:
+        raise LocalToolError("registry roots could not be validated") from exc
+    if any(
+        left == right or left.is_relative_to(right) or right.is_relative_to(left)
+        for left, right in pairs
+    ):
+        raise LocalToolError("gate and admission roots must be disjoint")
+
+    def identity(path: Path) -> tuple[int, int] | None:
+        try:
+            info = os.stat(path)
+        except (FileNotFoundError, NotADirectoryError):
+            return None
+        except OSError as exc:
+            raise LocalToolError("registry root identity could not be checked") from exc
+        return info.st_dev, info.st_ino
+
+    gate_identity = identity(gate)
+    admission_identity = identity(admitted)
+    if (
+        (gate_identity is not None and any(
+            identity(path) == gate_identity for path in (admitted, *admitted.parents)
+        ))
+        or (admission_identity is not None and any(
+            identity(path) == admission_identity for path in (gate, *gate.parents)
+        ))
+    ):
+        raise LocalToolError("gate and admission roots must be disjoint")
+
+
 def _require_retry_gate(
     schedule: dict[str, Any], run_id: str, verified_stage: dict[str, Any],
     gate_root: Path | str | None,
 ) -> None:
-    """Bind a retry stage to its currently published local release attempt."""
+    """Bind a gated stage to its currently published local release attempt."""
     attempt_number = verified_stage["attempt_number"]
-    if attempt_number == 1:
+    release_dir = verified_stage["release_dir"]
+    if release_dir is None:
         if gate_root is not None:
-            raise LocalToolError("attempt-1 stage has no recorded release gate identity")
+            raise LocalToolError("stage has no recorded release gate identity")
         return
     if gate_root is None:
-        raise LocalToolError("retry stage requires an explicit gate root before launch")
+        raise LocalToolError("gated stage requires an explicit gate root before launch")
     try:
         claim = verify_claim(
-            schedule, run_id, gate_root, verified_stage["release_dir"],
+            schedule, run_id, gate_root, release_dir,
             attempt_number=attempt_number,
         )
     except BlockReleaseError as exc:
         raise LocalToolError(f"retry release gate rejected launch: {exc}") from exc
     if (claim["claim_sha256"] != verified_stage["claim_sha256"]
         or claim["publication_sha256"] != verified_stage["publication_sha256"]):
-        raise LocalToolError("retry stage differs from its published release claim")
+        raise LocalToolError("gated stage differs from its published release claim")
 
 
 @contextmanager
@@ -113,23 +154,24 @@ def _held_retry_gate(
     schedule: dict[str, Any], run_id: str, verified_stage: dict[str, Any],
     gate_root: Path | str | None,
 ) -> Iterator[None]:
-    """Keep an active retry claim open across one local sandbox operation."""
+    """Keep a gated claim open until the local receipt is durable."""
     attempt_number = verified_stage["attempt_number"]
-    if attempt_number == 1:
+    release_dir = verified_stage["release_dir"]
+    if release_dir is None:
         if gate_root is not None:
-            raise LocalToolError("attempt-1 stage has no recorded release gate identity")
+            raise LocalToolError("stage has no recorded release gate identity")
         yield
         return
     if gate_root is None:
-        raise LocalToolError("retry stage requires an explicit gate root before launch")
+        raise LocalToolError("gated stage requires an explicit gate root before launch")
     try:
         with hold_claim(
-            schedule, run_id, gate_root, verified_stage["release_dir"],
+            schedule, run_id, gate_root, release_dir,
             attempt_number=attempt_number,
         ) as claim:
             if (claim["claim_sha256"] != verified_stage["claim_sha256"]
                 or claim["publication_sha256"] != verified_stage["publication_sha256"]):
-                raise LocalToolError("retry stage differs from its published release claim")
+                raise LocalToolError("gated stage differs from its published release claim")
             yield
     except BlockReleaseError as exc:
         raise LocalToolError(f"retry release gate rejected launch: {exc}") from exc
@@ -364,6 +406,11 @@ def run_staged_local_tool(
         raise LocalToolError("stage, executable, and receipt paths must be absolute")
     if any(part in (".", "..") for path in (stage, tool, receipt) for part in path.parts):
         raise LocalToolError("paths must not contain dot components")
+    if gate_root is not None:
+        gate_path = Path(gate_root)
+        if receipt == gate_path or receipt.is_relative_to(gate_path):
+            raise LocalToolError("receipt directory must be separate from gate root")
+    _reject_overlapping_registry_roots(gate_root, admission_root)
     if type(tool_id) is not str or not tool_id:
         raise LocalToolError("tool_id is required")
     try:
@@ -418,53 +465,53 @@ def run_staged_local_tool(
         stage / "case" / "case.json", "staged case manifest", 1024 * 1024
     ))
     deliverables = case_manifest["deliverables"]
-    root_descriptor = admission.descriptor(admission_root)
-    selected_owner = admission.owner("oneshot", stage, receipt)
-    _private_receipt_dir(receipt, stage)
-    claim_sha256 = admission.publish_claim(
-        schedule["schedule_sha256"], run_id, selected_owner, root_descriptor,
-        override=admission_root, attempt_number=attempt_number,
-    )
-    reservation = {
-        "schema": 1, "classification": "development_staged_local_tool_reservation_unsealed",
-        "schedule_sha256": schedule["schedule_sha256"], "run_id": run_id,
-        "run_sha256": verified["run_sha256"], "attempt_number": attempt_number,
-        **root_descriptor, "local_run_claim_sha256": claim_sha256,
-        "stage_dir": str(stage), "receipt_dir": str(receipt),
-        "tool_id": tool_id, "tool_version": selected["version"],
-        "executable_sha256": actual,
-        "policy_sha256": hashlib.sha256(policy_bytes).hexdigest(),
-        "immutable_snapshot_sha256": hashlib.sha256(
-            json.dumps(before, sort_keys=True, ensure_ascii=True,
-                       separators=(",", ":"), allow_nan=False).encode("utf-8")
-        ).hexdigest(),
-        "limits_applied": {
-            "wall_seconds": wall_seconds, "cpu_seconds": cpu_seconds,
-            "address_space_bytes": address_space_bytes,
-            "file_bytes_per_file": file_bytes_per_file,
-        },
-        "global_run_limits_enforced": False,
-    }
-    _write_receipt(receipt / "reservation.json", reservation)
-    reservation_bytes = _read_bounded_file(
-        receipt / "reservation.json", "one-shot local reservation", 4096
-    )
-    expected_reservation = (
-        json.dumps(reservation, sort_keys=True, ensure_ascii=False,
-                   separators=(",", ":")) + "\n"
-    ).encode("utf-8")
-    if reservation_bytes != expected_reservation:
-        raise LocalToolError("one-shot reservation changed before launch")
-    if admission.require_claim(
-        schedule["schedule_sha256"], run_id, selected_owner, root_descriptor,
-        override=admission_root, attempt_number=attempt_number,
-    ) != claim_sha256:
-        raise LocalToolError("local admission claim changed before launch")
-    stdout_path = receipt / "stdout"
-    stderr_path = receipt / "stderr"
-    sandbox_result = None
-    launch_error = None
     with _held_retry_gate(schedule, run_id, verified, gate_root):
+        root_descriptor = admission.descriptor(admission_root)
+        selected_owner = admission.owner("oneshot", stage, receipt)
+        _private_receipt_dir(receipt, stage)
+        claim_sha256 = admission.publish_claim(
+            schedule["schedule_sha256"], run_id, selected_owner, root_descriptor,
+            override=admission_root, attempt_number=attempt_number,
+        )
+        reservation = {
+            "schema": 1, "classification": "development_staged_local_tool_reservation_unsealed",
+            "schedule_sha256": schedule["schedule_sha256"], "run_id": run_id,
+            "run_sha256": verified["run_sha256"], "attempt_number": attempt_number,
+            **root_descriptor, "local_run_claim_sha256": claim_sha256,
+            "stage_dir": str(stage), "receipt_dir": str(receipt),
+            "tool_id": tool_id, "tool_version": selected["version"],
+            "executable_sha256": actual,
+            "policy_sha256": hashlib.sha256(policy_bytes).hexdigest(),
+            "immutable_snapshot_sha256": hashlib.sha256(
+                json.dumps(before, sort_keys=True, ensure_ascii=True,
+                           separators=(",", ":"), allow_nan=False).encode("utf-8")
+            ).hexdigest(),
+            "limits_applied": {
+                "wall_seconds": wall_seconds, "cpu_seconds": cpu_seconds,
+                "address_space_bytes": address_space_bytes,
+                "file_bytes_per_file": file_bytes_per_file,
+            },
+            "global_run_limits_enforced": False,
+        }
+        _write_receipt(receipt / "reservation.json", reservation)
+        reservation_bytes = _read_bounded_file(
+            receipt / "reservation.json", "one-shot local reservation", 4096
+        )
+        expected_reservation = (
+            json.dumps(reservation, sort_keys=True, ensure_ascii=False,
+                       separators=(",", ":")) + "\n"
+        ).encode("utf-8")
+        if reservation_bytes != expected_reservation:
+            raise LocalToolError("one-shot reservation changed before launch")
+        if admission.require_claim(
+            schedule["schedule_sha256"], run_id, selected_owner, root_descriptor,
+            override=admission_root, attempt_number=attempt_number,
+        ) != claim_sha256:
+            raise LocalToolError("local admission claim changed before launch")
+        stdout_path = receipt / "stdout"
+        stderr_path = receipt / "stderr"
+        sandbox_result = None
+        launch_error = None
         try:
             sandbox_result = run_sandboxed(
                 argv=[str(tool), str(stage / "case"), str(stage / "inputs"), str(stage / "work")],
@@ -481,92 +528,92 @@ def run_staged_local_tool(
             )
         except (SandboxError, SandboxUnavailable, OSError, ValueError) as exc:
             launch_error = f"{type(exc).__name__}: {exc}"
-    if sandbox_result is not None:
-        launch_error = sandbox_result.launch_error
+        if sandbox_result is not None:
+            launch_error = sandbox_result.launch_error
 
-    files, _directories, inventory_complete, inventory_reason = _inventory(
-        stage / "work", max_files=MAX_WORK_FILES,
-        max_bytes=MAX_WORK_BYTES, max_file_bytes=MAX_WORK_FILE_BYTES,
-        max_entries=MAX_WORK_ENTRIES,
-    )
-    try:
-        stage_unchanged = _immutable_snapshot(stage) == before
-        stage_change_reason = None if stage_unchanged else "stage visible bytes or metadata changed"
-    except (LocalToolError, OSError) as exc:
-        stage_unchanged = False
-        stage_change_reason = str(exc)
-    try:
-        executable_unchanged = hashlib.sha256(
-            _read_bounded_file(tool, "tool executable", MAX_EXECUTABLE_BYTES)
-        ).hexdigest() == actual
-    except ToolPolicyError:
-        executable_unchanged = False
-    execution_bytes_sealed = (
-        sandbox_result is not None
-        and sandbox_result.sealed_executable_sha256 == actual
-        and sandbox_result.launch_error is None
-    )
-    if sandbox_result is not None and not execution_bytes_sealed and launch_error is None:
-        launch_error = "sealed executable launch was not confirmed"
-    output_paths = {entry["path"] for entry in files}
-    deliverables_present = (
-        all(item in output_paths for item in deliverables) if inventory_complete else None
-    )
-    if not stage_unchanged or not executable_unchanged:
-        status = "stage_or_executable_mutated"
-    elif sandbox_result is not None and sandbox_result.timed_out:
-        status = "timeout"
-    elif launch_error is not None:
-        status = "launch_failure"
-    elif sandbox_result is None or sandbox_result.exit_code != 0:
-        status = "tool_failure"
-    elif not inventory_complete:
-        status = "output_inventory_incomplete"
-    elif not deliverables_present:
-        status = "deliverables_missing"
-    else:
-        status = "success"
-    report = {
-        "schema": 1, "classification": CLASSIFICATION, "notice": NOTICE,
-        "run_id": run_id, "run_sha256": verified["run_sha256"],
-        "schedule_sha256": verified["schedule_sha256"],
-        "attempt_number": attempt_number, **root_descriptor,
-        "local_run_claim_sha256": claim_sha256,
-        "reservation_sha256": hashlib.sha256(reservation_bytes).hexdigest(),
-        "global_run_limits_enforced": False,
-        "tool_id": tool_id, "tool_version": selected["version"],
-        "executable_sha256": actual, "executable_unchanged_after_run": executable_unchanged,
-        "sealed_executable_sha256": (
-            sandbox_result.sealed_executable_sha256 if sandbox_result else None
-        ),
-        "execution_bytes_sealed": execution_bytes_sealed,
-        "policy_sha256": hashlib.sha256(policy_bytes).hexdigest(),
-        "runtime_image_sha256_declared": policy["runtime_image_sha256"],
-        "runtime_image_verified": False,
-        "status": status, "exit_code": sandbox_result.exit_code if sandbox_result else None,
-        "timed_out": sandbox_result.timed_out if sandbox_result else False,
-        "launch_error": launch_error,
-        "duration_seconds": sandbox_result.duration_seconds if sandbox_result else None,
-        "landlock_abi": sandbox_result.landlock_abi if sandbox_result else None,
-        "stage_unchanged_after_run": stage_unchanged,
-        "stage_change_reason": stage_change_reason,
-        "output_inventory_complete": inventory_complete,
-        "output_inventory_reason": inventory_reason,
-        "outputs": [{key: entry[key] for key in ("path", "bytes", "sha256")} for entry in files],
-        "deliverables": deliverables, "deliverables_present": deliverables_present,
-        "stdout": str(stdout_path) if stdout_path.exists() else None,
-        "stderr": str(stderr_path) if stderr_path.exists() else None,
-        "provider_calls": 0, "measured_tokens": None,
-        "criterion_4": "not_assessed", "provider_receipt": False,
-        "local_tool_calls": 0 if launch_error else 1,
-        "limits_applied": {
-            "wall_seconds": wall_seconds, "cpu_seconds": cpu_seconds,
-            "address_space_bytes": address_space_bytes,
-            "file_bytes_per_file": file_bytes_per_file,
-        },
-    }
-    _write_receipt(receipt / "receipt.json", report)
-    return report
+        files, _directories, inventory_complete, inventory_reason = _inventory(
+            stage / "work", max_files=MAX_WORK_FILES,
+            max_bytes=MAX_WORK_BYTES, max_file_bytes=MAX_WORK_FILE_BYTES,
+            max_entries=MAX_WORK_ENTRIES,
+        )
+        try:
+            stage_unchanged = _immutable_snapshot(stage) == before
+            stage_change_reason = None if stage_unchanged else "stage visible bytes or metadata changed"
+        except (LocalToolError, OSError) as exc:
+            stage_unchanged = False
+            stage_change_reason = str(exc)
+        try:
+            executable_unchanged = hashlib.sha256(
+                _read_bounded_file(tool, "tool executable", MAX_EXECUTABLE_BYTES)
+            ).hexdigest() == actual
+        except ToolPolicyError:
+            executable_unchanged = False
+        execution_bytes_sealed = (
+            sandbox_result is not None
+            and sandbox_result.sealed_executable_sha256 == actual
+            and sandbox_result.launch_error is None
+        )
+        if sandbox_result is not None and not execution_bytes_sealed and launch_error is None:
+            launch_error = "sealed executable launch was not confirmed"
+        output_paths = {entry["path"] for entry in files}
+        deliverables_present = (
+            all(item in output_paths for item in deliverables) if inventory_complete else None
+        )
+        if not stage_unchanged or not executable_unchanged:
+            status = "stage_or_executable_mutated"
+        elif sandbox_result is not None and sandbox_result.timed_out:
+            status = "timeout"
+        elif launch_error is not None:
+            status = "launch_failure"
+        elif sandbox_result is None or sandbox_result.exit_code != 0:
+            status = "tool_failure"
+        elif not inventory_complete:
+            status = "output_inventory_incomplete"
+        elif not deliverables_present:
+            status = "deliverables_missing"
+        else:
+            status = "success"
+        report = {
+            "schema": 1, "classification": CLASSIFICATION, "notice": NOTICE,
+            "run_id": run_id, "run_sha256": verified["run_sha256"],
+            "schedule_sha256": verified["schedule_sha256"],
+            "attempt_number": attempt_number, **root_descriptor,
+            "local_run_claim_sha256": claim_sha256,
+            "reservation_sha256": hashlib.sha256(reservation_bytes).hexdigest(),
+            "global_run_limits_enforced": False,
+            "tool_id": tool_id, "tool_version": selected["version"],
+            "executable_sha256": actual, "executable_unchanged_after_run": executable_unchanged,
+            "sealed_executable_sha256": (
+                sandbox_result.sealed_executable_sha256 if sandbox_result else None
+            ),
+            "execution_bytes_sealed": execution_bytes_sealed,
+            "policy_sha256": hashlib.sha256(policy_bytes).hexdigest(),
+            "runtime_image_sha256_declared": policy["runtime_image_sha256"],
+            "runtime_image_verified": False,
+            "status": status, "exit_code": sandbox_result.exit_code if sandbox_result else None,
+            "timed_out": sandbox_result.timed_out if sandbox_result else False,
+            "launch_error": launch_error,
+            "duration_seconds": sandbox_result.duration_seconds if sandbox_result else None,
+            "landlock_abi": sandbox_result.landlock_abi if sandbox_result else None,
+            "stage_unchanged_after_run": stage_unchanged,
+            "stage_change_reason": stage_change_reason,
+            "output_inventory_complete": inventory_complete,
+            "output_inventory_reason": inventory_reason,
+            "outputs": [{key: entry[key] for key in ("path", "bytes", "sha256")} for entry in files],
+            "deliverables": deliverables, "deliverables_present": deliverables_present,
+            "stdout": str(stdout_path) if stdout_path.exists() else None,
+            "stderr": str(stderr_path) if stderr_path.exists() else None,
+            "provider_calls": 0, "measured_tokens": None,
+            "criterion_4": "not_assessed", "provider_receipt": False,
+            "local_tool_calls": 0 if launch_error else 1,
+            "limits_applied": {
+                "wall_seconds": wall_seconds, "cpu_seconds": cpu_seconds,
+                "address_space_bytes": address_space_bytes,
+                "file_bytes_per_file": file_bytes_per_file,
+            },
+        }
+        _write_receipt(receipt / "receipt.json", report)
+        return report
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -582,7 +629,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--address-space-bytes", type=int, default=512 * 1024 * 1024)
     parser.add_argument("--file-bytes-per-file", type=int, default=8 * 1024 * 1024)
     parser.add_argument("--admission-root")
-    parser.add_argument("--gate-dir", help="required to run a retry stage")
+    parser.add_argument("--gate-dir", help="required to run a gated stage, including attempt 1")
     args = parser.parse_args(argv)
     try:
         report = run_staged_local_tool(

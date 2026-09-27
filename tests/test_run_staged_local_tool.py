@@ -4,9 +4,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
+import threading
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
 
 import pytest
 
@@ -17,6 +21,7 @@ sys.path.insert(0, str(SCRIPTS))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import local_replay_sandbox as sandbox  # noqa: E402
 import local_run_admission as admission  # noqa: E402
+import local_block_release_gate as gate  # noqa: E402
 import plan_confirmatory  # noqa: E402
 import preflight_assets  # noqa: E402
 import run_staged_local_tool as runner  # noqa: E402
@@ -38,7 +43,9 @@ def _tool(path: Path, body: str) -> None:
     path.chmod(0o700)
 
 
-def _stage(tmp_path: Path, arm: str, body: str) -> tuple[dict, Path, str, Path, Path, tuple[bytes, ...]]:
+def _stage(
+    tmp_path: Path, arm: str, body: str, *, gate_attempt: int | None = None,
+) -> tuple[dict, Path, str, Path, Path, tuple[bytes, ...]]:
     tool = tmp_path / "generic_tool"
     _tool(tool, body)
     schedule, assets, schedule_path, hidden = fixture._fixture(tmp_path)
@@ -64,17 +71,55 @@ def _stage(tmp_path: Path, arm: str, body: str) -> tuple[dict, Path, str, Path, 
     schedule_path.write_text(json.dumps(schedule), encoding="utf-8")
     assets["schedule_sha256"] = schedule["schedule_sha256"]
     assets["input_sha256"] = schedule["input_sha256"]
-    run = next(item for item in schedule["runs"] if item["arm"] == arm and item["case_id"] == "R-F")
+    run = (schedule["runs"][0] if gate_attempt is not None else next(
+        item for item in schedule["runs"] if item["arm"] == arm and item["case_id"] == "R-F"
+    ))
     release = tmp_path / "release"
+    gate_root = tmp_path / "gate" if gate_attempt is not None else None
+    if gate_attempt == 2:
+        first_release = tmp_path / "first-release"
+        preflight_assets.preflight(
+            schedule, assets, run_id=run["run_id"], output_dir=first_release,
+            gate_root=gate_root,
+        )
+        _record_terminal(schedule, run, first_release, tmp_path, "external_failure", 1)
     preflight_assets.preflight(
         schedule, assets, run_id=run["run_id"], output_dir=release,
-        development_unsequenced=True,
+        gate_root=gate_root, development_unsequenced=gate_attempt is None,
+        attempt_number=gate_attempt or 1,
     )
     stage = tmp_path / "stage"
     stage_released_run.stage_released_run(
-        schedule, release, stage, development_unsequenced=True
+        schedule, release, stage, gate_root=gate_root,
+        development_unsequenced=gate_attempt is None,
+        attempt_number=gate_attempt or 1,
     )
     return schedule, schedule_path, run["run_id"], stage, tool, hidden
+
+
+def _record_terminal(
+    schedule: dict, run: dict, release: Path, tmp_path: Path,
+    status: str, attempt_number: int, *, attempting: threading.Event | None = None,
+) -> None:
+    trace_sha256 = _sha(f"synthetic trace {attempt_number}".encode())
+    evidence = tmp_path / f"terminal-{attempt_number}.json"
+    item = {
+        "schema": 1, "schedule_sha256": schedule["schedule_sha256"],
+        "run_id": run["run_id"], "run_sha256": run["run_sha256"],
+        "attempt_number": attempt_number, "release_dir": str(release),
+        "status": status, "trace_sha256": trace_sha256,
+    }
+    item["incident_sha256" if status == "external_failure" else "artifact_sha256"] = _sha(
+        f"synthetic {status} {attempt_number}".encode()
+    )
+    evidence.write_text(json.dumps(item, sort_keys=True) + "\n", encoding="utf-8")
+    evidence.chmod(0o600)
+    if attempting is not None:
+        attempting.set()
+    gate.record_terminal(
+        schedule, run["run_id"], tmp_path / "gate", status,
+        trace_sha256, evidence, attempt_number=attempt_number,
+    )
 
 
 @pytest.fixture
@@ -93,6 +138,11 @@ assert (inputs / 'tool_policy').is_file()
 (work / 'report.md').write_text('local result\\n')
 print('local stdout')
 print('local stderr', file=sys.stderr)
+"""
+GATED_BODY = """
+import sys
+from pathlib import Path
+Path(sys.argv[3], 'report.md').write_text('gated local result\\n')
 """
 
 
@@ -136,6 +186,327 @@ def test_real_stage_run_and_separate_receipt(
     assert set(path.name for path in stage.iterdir()) == {"case", "inputs", "work", "stage.json"}
     for secret in hidden:
         assert secret not in (receipt / "receipt.json").read_bytes()
+
+
+def test_gated_attempt_one_requires_gate_and_runs_through_cli(
+    tmp_path: Path, available_sandbox: None,
+) -> None:
+    schedule, schedule_path, run_id, stage, tool, _ = _stage(
+        tmp_path, "N", GATED_BODY, gate_attempt=1
+    )
+    receipt = tmp_path / "receipt"
+    with pytest.raises(runner.LocalToolError, match="gate root"):
+        runner.run_staged_local_tool(
+            schedule, run_id, stage, "local_analyzer", tool, receipt
+        )
+    assert not receipt.exists()
+    process = subprocess.run(
+        [sys.executable, "-B", str(SCRIPTS / "run_staged_local_tool.py"),
+         str(schedule_path), run_id, str(stage), "local_analyzer", str(tool),
+         str(receipt), "--gate-dir", str(tmp_path / "gate")],
+        capture_output=True, text=True, check=False, timeout=20,
+    )
+    assert process.returncode == 0, process.stderr
+    report = json.loads(process.stdout)
+    assert report["status"] == "success"
+    assert report["attempt_number"] == 1
+    assert json.loads((receipt / "receipt.json").read_text()) == report
+
+
+@pytest.mark.parametrize("attempt_number", [1, 2])
+@pytest.mark.parametrize("receipt_child", [False, True])
+def test_gated_receipt_cannot_poison_gate_registry(
+    tmp_path: Path, attempt_number: int, receipt_child: bool,
+) -> None:
+    schedule, _, run_id, stage, tool, _ = _stage(
+        tmp_path, "N", GATED_BODY, gate_attempt=attempt_number
+    )
+    gate_root = tmp_path / "gate"
+    receipt = gate_root / "receipt" if receipt_child else gate_root
+    state_before = (gate_root / "state.json").read_bytes()
+    entries_before = {path.name for path in gate_root.iterdir()}
+    with pytest.raises(runner.LocalToolError, match="separate from gate root"):
+        runner.run_staged_local_tool(
+            schedule, run_id, stage, "local_analyzer", tool, receipt,
+            gate_root=gate_root,
+        )
+    assert (gate_root / "state.json").read_bytes() == state_before
+    assert {path.name for path in gate_root.iterdir()} == entries_before
+    assert not list((tmp_path / "admissions").glob("*.json"))
+
+
+@pytest.mark.parametrize("attempt_number", [1, 2])
+@pytest.mark.parametrize("root_relation", [
+    "equal", "admission_inside_gate", "gate_inside_admission",
+    "alias_equal", "default_env_equal",
+])
+def test_gate_and_admission_roots_cannot_overlap_or_deadlock(
+    tmp_path: Path, attempt_number: int, root_relation: str,
+) -> None:
+    schedule, schedule_path, run_id, stage, tool, _ = _stage(
+        tmp_path, "N", GATED_BODY, gate_attempt=attempt_number
+    )
+    gate_root = tmp_path / "gate"
+    admission_root = {
+        "equal": gate_root,
+        "admission_inside_gate": gate_root / "admissions",
+        "gate_inside_admission": tmp_path,
+        "alias_equal": tmp_path / "gate-alias",
+        "default_env_equal": gate_root,
+    }[root_relation]
+    if root_relation == "alias_equal":
+        admission_root.symlink_to(gate_root, target_is_directory=True)
+    receipt = tmp_path / "receipt"
+    state_before = (gate_root / "state.json").read_bytes()
+    gate_entries_before = {path.name for path in gate_root.iterdir()}
+    admission_entries_before = {path.name for path in admission_root.glob("*.json")}
+    args = [
+        sys.executable, "-B", str(SCRIPTS / "run_staged_local_tool.py"),
+        str(schedule_path), run_id, str(stage), "local_analyzer", str(tool),
+        str(receipt), "--gate-dir", str(gate_root),
+    ]
+    environment = dict(os.environ)
+    if root_relation == "default_env_equal":
+        environment[admission.ROOT_ENV] = str(gate_root)
+    else:
+        args.extend(["--admission-root", str(admission_root)])
+    process = subprocess.run(
+        args, env=environment, capture_output=True, text=True,
+        check=False, timeout=5,
+    )
+    assert process.returncode == 2, process.stderr
+    assert "gate and admission roots must be disjoint" in process.stderr
+    assert not receipt.exists()
+    assert (gate_root / "state.json").read_bytes() == state_before
+    assert {path.name for path in gate_root.iterdir()} == gate_entries_before
+    assert {path.name for path in admission_root.glob("*.json")} == admission_entries_before
+
+
+@pytest.mark.parametrize("attempt_number", [1, 2])
+def test_gate_held_through_durable_receipt_publication(
+    tmp_path: Path, available_sandbox: None, monkeypatch: pytest.MonkeyPatch,
+    attempt_number: int,
+) -> None:
+    schedule, _, run_id, stage, tool, _ = _stage(
+        tmp_path, "N", GATED_BODY, gate_attempt=attempt_number
+    )
+    receipt = tmp_path / "receipt"
+    original_write = runner._write_receipt
+    publication_started = threading.Event()
+    finish_publication = threading.Event()
+    terminal_started = threading.Event()
+    terminal_done = threading.Event()
+    reports: list[dict] = []
+    failures: list[BaseException] = []
+    terminal_saw_receipt: list[bool] = []
+
+    def paused_write(path: Path, value: dict) -> None:
+        if path.name == "receipt.json":
+            publication_started.set()
+            if not finish_publication.wait(5):
+                raise AssertionError("receipt publication pause was not released")
+        original_write(path, value)
+
+    monkeypatch.setattr(runner, "_write_receipt", paused_write)
+
+    def launch() -> None:
+        try:
+            reports.append(runner.run_staged_local_tool(
+                schedule, run_id, stage, "local_analyzer", tool, receipt,
+                gate_root=tmp_path / "gate", wall_seconds=3,
+            ))
+        except BaseException as exc:
+            failures.append(exc)
+
+    def close() -> None:
+        try:
+            run = next(item for item in schedule["runs"] if item["run_id"] == run_id)
+            _record_terminal(
+                schedule, run, tmp_path / "release", tmp_path,
+                "completed", attempt_number, attempting=terminal_started,
+            )
+            terminal_saw_receipt.append((receipt / "receipt.json").is_file())
+        except BaseException as exc:
+            failures.append(exc)
+        finally:
+            terminal_done.set()
+
+    runner_thread = threading.Thread(target=launch)
+    terminal_thread = threading.Thread(target=close)
+    runner_thread.start()
+    try:
+        assert publication_started.wait(5)
+        terminal_thread.start()
+        assert terminal_started.wait(5)
+        assert not (receipt / "receipt.json").exists()
+        assert not terminal_done.wait(0.2)
+    finally:
+        finish_publication.set()
+        runner_thread.join(timeout=10)
+        if terminal_thread.ident is not None:
+            terminal_thread.join(timeout=10)
+    assert not runner_thread.is_alive() and not terminal_thread.is_alive()
+    assert not failures
+    assert reports[0]["status"] == "success"
+    assert json.loads((receipt / "receipt.json").read_text()) == reports[0]
+    assert terminal_saw_receipt == [True]
+
+
+@pytest.mark.parametrize("attempt_number", [1, 2])
+def test_terminal_waits_before_one_shot_reservation(
+    tmp_path: Path, available_sandbox: None, monkeypatch: pytest.MonkeyPatch,
+    attempt_number: int,
+) -> None:
+    schedule, _, run_id, stage, tool, _ = _stage(
+        tmp_path, "N", GATED_BODY, gate_attempt=attempt_number
+    )
+    receipt = tmp_path / "receipt"
+    original_private = runner._private_receipt_dir
+    preparing = threading.Event()
+    proceed = threading.Event()
+    terminal_started = threading.Event()
+    terminal_done = threading.Event()
+    reports: list[dict] = []
+    failures: list[BaseException] = []
+
+    def paused_private(path: Path, stage_path: Path) -> None:
+        preparing.set()
+        if not proceed.wait(5):
+            raise AssertionError("reservation preparation pause was not released")
+        original_private(path, stage_path)
+
+    monkeypatch.setattr(runner, "_private_receipt_dir", paused_private)
+
+    def launch() -> None:
+        try:
+            reports.append(runner.run_staged_local_tool(
+                schedule, run_id, stage, "local_analyzer", tool, receipt,
+                gate_root=tmp_path / "gate", wall_seconds=3,
+            ))
+        except BaseException as exc:
+            failures.append(exc)
+
+    def close() -> None:
+        try:
+            run = next(item for item in schedule["runs"] if item["run_id"] == run_id)
+            _record_terminal(
+                schedule, run, tmp_path / "release", tmp_path,
+                "completed", attempt_number, attempting=terminal_started,
+            )
+        except BaseException as exc:
+            failures.append(exc)
+        finally:
+            terminal_done.set()
+
+    runner_thread = threading.Thread(target=launch)
+    terminal_thread = threading.Thread(target=close)
+    runner_thread.start()
+    try:
+        assert preparing.wait(5)
+        terminal_thread.start()
+        assert terminal_started.wait(5)
+        assert not receipt.exists()
+        assert not terminal_done.wait(0.2)
+    finally:
+        proceed.set()
+        runner_thread.join(timeout=10)
+        if terminal_thread.ident is not None:
+            terminal_thread.join(timeout=10)
+    assert not runner_thread.is_alive() and not terminal_thread.is_alive()
+    assert not failures
+    assert reports[0]["status"] == "success"
+    assert (receipt / "reservation.json").is_file()
+    assert json.loads((receipt / "receipt.json").read_text()) == reports[0]
+    assert terminal_done.is_set()
+
+
+def test_terminal_closed_before_gate_hold_leaves_no_one_shot_reservation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    schedule, _, run_id, stage, tool, _ = _stage(
+        tmp_path, "N", GATED_BODY, gate_attempt=2
+    )
+    receipt = tmp_path / "receipt"
+    original_hold = runner._held_retry_gate
+    before_hold = threading.Event()
+    proceed = threading.Event()
+    failures: list[BaseException] = []
+
+    @contextmanager
+    def paused_hold(*args: object) -> Iterator[None]:
+        before_hold.set()
+        if not proceed.wait(5):
+            raise AssertionError("gate entry pause was not released")
+        with original_hold(*args):
+            yield
+
+    monkeypatch.setattr(runner, "_held_retry_gate", paused_hold)
+
+    def launch() -> None:
+        try:
+            runner.run_staged_local_tool(
+                schedule, run_id, stage, "local_analyzer", tool, receipt,
+                gate_root=tmp_path / "gate", wall_seconds=3,
+            )
+        except BaseException as exc:
+            failures.append(exc)
+
+    runner_thread = threading.Thread(target=launch)
+    runner_thread.start()
+    try:
+        assert before_hold.wait(5)
+        run = next(item for item in schedule["runs"] if item["run_id"] == run_id)
+        _record_terminal(schedule, run, tmp_path / "release", tmp_path, "completed", 2)
+    finally:
+        proceed.set()
+        runner_thread.join(timeout=10)
+    assert not runner_thread.is_alive()
+    assert len(failures) == 1
+    assert isinstance(failures[0], runner.LocalToolError)
+    assert "already has a terminal" in str(failures[0])
+    assert not receipt.exists()
+    assert not list((tmp_path / "admissions").glob("*.json"))
+
+
+def test_gate_released_after_receipt_publication_error(
+    tmp_path: Path, available_sandbox: None, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    schedule, _, run_id, stage, tool, _ = _stage(
+        tmp_path, "N", GATED_BODY, gate_attempt=2
+    )
+    receipt = tmp_path / "receipt"
+    original_write = runner._write_receipt
+
+    def fail_final_write(path: Path, value: dict) -> None:
+        if path.name == "receipt.json":
+            raise OSError("synthetic durable receipt failure")
+        original_write(path, value)
+
+    monkeypatch.setattr(runner, "_write_receipt", fail_final_write)
+    with pytest.raises(OSError, match="synthetic durable receipt failure"):
+        runner.run_staged_local_tool(
+            schedule, run_id, stage, "local_analyzer", tool, receipt,
+            gate_root=tmp_path / "gate", wall_seconds=3,
+        )
+    assert not (receipt / "receipt.json").exists()
+    run = next(item for item in schedule["runs"] if item["run_id"] == run_id)
+    completed = threading.Event()
+    failures: list[BaseException] = []
+
+    def close() -> None:
+        try:
+            _record_terminal(schedule, run, tmp_path / "release", tmp_path,
+                             "completed", 2)
+        except BaseException as exc:
+            failures.append(exc)
+        finally:
+            completed.set()
+
+    terminal_thread = threading.Thread(target=close, daemon=True)
+    terminal_thread.start()
+    assert completed.wait(5), "gate lock leaked after receipt publication error"
+    terminal_thread.join(timeout=1)
+    assert not failures
 
 
 def test_rejects_mismatched_executable_before_receipt(tmp_path: Path) -> None:
