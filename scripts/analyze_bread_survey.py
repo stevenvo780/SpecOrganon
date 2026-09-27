@@ -39,6 +39,9 @@ CATEGORIES = (
     ("more_than_twelve", "More than 12 slices", 13, None),
     ("do_not_know", "Do not know", None, None),
 )
+# Audited against Table 1 of the pinned PDF. A matching PDF digest alone does
+# not prove that the separately transcribed JSON contains these frequencies.
+PUBLISHED_COUNTS = (429, 301, 140, 56, 22, 19, 33)
 
 
 class SurveyTableError(ValueError):
@@ -124,6 +127,8 @@ def validate_table(table: Any) -> dict[str, int]:
         counts[key] = count
     if sum(counts.values()) != total:
         raise SurveyTableError("category counts do not sum to 1000")
+    if tuple(counts[key] for key, _, _, _ in CATEGORIES) != PUBLISHED_COUNTS:
+        raise SurveyTableError("category counts differ from the archived Table 1")
     return counts
 
 

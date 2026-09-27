@@ -72,6 +72,7 @@ def test_published_counts_and_independent_bound_arithmetic() -> None:
     ("fractional_count", "nonnegative integer"),
     ("wrong_percent", "percentage disagrees"),
     ("inconsistent_total", "do not sum to 1000"),
+    ("compensated_counts", "differ from the archived Table 1"),
     ("extra_field", "missing or extra fields"),
 ])
 def test_malformed_transcription_is_rejected(change: str, error: str) -> None:
@@ -97,6 +98,11 @@ def test_malformed_transcription_is_rejected(change: str, error: str) -> None:
     elif change == "inconsistent_total":
         table["categories"][0]["count"] = 430
         table["categories"][0]["reported_percent"] = "43.0"
+    elif change == "compensated_counts":
+        table["categories"][0]["count"] = 430
+        table["categories"][0]["reported_percent"] = "43.0"
+        table["categories"][1]["count"] = 300
+        table["categories"][1]["reported_percent"] = "30.0"
     elif change == "extra_field":
         table["categories"][0]["invented"] = 1
     with pytest.raises(SurveyTableError, match=error):
