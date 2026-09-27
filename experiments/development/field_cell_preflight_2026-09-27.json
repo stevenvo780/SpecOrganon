@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "classification": "development_field_design_consistency_not_field_trial",
+  "date_utc": "2026-09-27",
+  "goal_sha256_unchanged": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "change": "Reject a proposed field design with fewer than two groups in any arm-stratum cell, matching the adjusted candidate's whole-group bootstrap requirement.",
+  "negative_controls": [
+    "A balanced twelve-group design with one control and one intervention group in S2 is rejected before field assignment.",
+    "A balanced twelve-group design with one control and two intervention groups in S2 is rejected before field assignment."
+  ],
+  "positive_control": "A twelve-group design with four groups per arm in S1 and two per arm in S2 passes the structural preflight while execution_ready remains false.",
+  "checks": [
+    {
+      "command": "uv run pytest -q",
+      "result": "1727 passed in 210.55s"
+    },
+    {
+      "command": "uv run ruff check .",
+      "result": "All checks passed!"
+    },
+    {
+      "command": "uv build --wheel --offline",
+      "result": "Successfully built dist/specorganon-0.1.0-py3-none-any.whl",
+      "wheel_sha256": "b65e13d602c3b7d83556af1897d817c26e44a8d61b47008f9a5128e1462d40f3",
+      "packaged_field_trial_design_matches_source": true,
+      "packaged_module_sha256": "f0e937ba77d894e9f56088d7f80b6e3fef182a4b1c153e45a1f185b1a6407cb0"
+    },
+    {
+      "python": "3.11.15",
+      "procedure": "New temporary virtual environment; uv pip install --offline from the newly built wheel; uv pip check; clean_smoke.py /workspace/SpecOrganon with the installed interpreter.",
+      "result": "offline install, dependency check and clean smoke passed"
+    },
+    {
+      "python": "3.12.3",
+      "procedure": "New temporary virtual environment; uv pip install --offline from the same wheel; uv pip check; clean_smoke.py /workspace/SpecOrganon with the installed interpreter.",
+      "result": "offline install, dependency check and clean smoke passed"
+    }
+  ],
+  "clean_smoke_observations_per_python": {
+    "phases_accepted": 9,
+    "items": 29,
+    "revision": 49,
+    "mcp_tools_discovered": 16,
+    "mcp_tools_exercised": 14,
+    "transport_parity_operations": 14,
+    "sigkill_mcp_resume": true,
+    "signed_approval_verified_with_synthetic_key": true
+  },
+  "independent_code_review": "No blocking finding against the singleton-cell contract; 46 focused tests passed during the review.",
+  "limits": [
+    "The preflight compares declarations and does not authenticate assignment, source measurements or site custody.",
+    "Two groups per cell are necessary for this candidate bootstrap but do not establish interval coverage or 80 percent power.",
+    "The clean smoke uses synthetic cases and approvals; it does not exercise a real food-chain intervention or a controlled model comparison."
+  ],
+  "criterion_3": "not_assessed",
+  "goal_criteria_demonstrated": 0
+}

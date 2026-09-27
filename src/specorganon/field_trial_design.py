@@ -216,6 +216,13 @@ def audit_field_trial_design(plan: Any, field: Any,
         if any(not arm_counts["control"] or not arm_counts["intervention"]
                for arm_counts in strata.values()):
             raise FieldTrialDesignError("each declared stratum needs both arms")
+        for stratum, arm_counts in sorted(strata.items()):
+            for arm in ("control", "intervention"):
+                if arm_counts[arm] < 2:
+                    raise FieldTrialDesignError(
+                        f"cannot bootstrap singleton arm-stratum cell: {arm}/{stratum}; "
+                        "each arm-stratum cell needs at least two groups"
+                    )
         if planned_periods["pre"][1] - planned_periods["pre"][0] < timedelta(weeks=4):
             raise FieldTrialDesignError("pre window is shorter than four weeks")
         if planned_periods["post"][1] - planned_periods["post"][0] < timedelta(weeks=8):

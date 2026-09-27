@@ -224,6 +224,36 @@ def test_both_arms_must_exist_within_each_declared_stratum() -> None:
         audit_field_trial_design(_plan(field), field)
 
 
+@pytest.mark.parametrize("second_stratum_groups, failing_cell", [
+    ({"c6", "i6"}, "control/S2"),
+    ({"c6", "i5", "i6"}, "control/S2"),
+])
+def test_singleton_arm_stratum_cell_fails_despite_balanced_total_arms(
+    second_stratum_groups: set[str], failing_cell: str,
+) -> None:
+    field = _twelve_group_field()
+    for group in field["groups"]:
+        if group["id"] in second_stratum_groups:
+            group["stratum"] = "S2"
+    with pytest.raises(FieldTrialDesignError, match=f"singleton arm-stratum cell: {failing_cell}"):
+        audit_field_trial_design(_plan(field), field)
+
+
+def test_multiple_strata_with_two_or_more_groups_per_arm_pass_design_preflight() -> None:
+    field = _twelve_group_field()
+    for group in field["groups"]:
+        if group["id"] in {"c5", "c6", "i5", "i6"}:
+            group["stratum"] = "S2"
+    report = audit_field_trial_design(_plan(field), field)
+    assert report["strata"] == {
+        "S1": {"control": 4, "intervention": 4},
+        "S2": {"control": 2, "intervention": 2},
+    }
+    assert report["structural_match_at_read"] is True
+    assert report["execution_ready"] is False
+    assert report["criterion_3"]["status"] == "not_assessed"
+
+
 def test_baseline_observed_before_registration_needs_later_declared_access() -> None:
     field = _twelve_group_field()
     plan = _plan(field)
