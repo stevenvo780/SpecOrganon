@@ -41,6 +41,7 @@ MANIFEST_FIELDS = frozenset(
         "files",
     }
 )
+RETRY_MANIFEST_FIELDS = MANIFEST_FIELDS | {"attempt_number"}
 COORDINATE_FIELDS = (
     "stratum_id",
     "block_id",
@@ -310,10 +311,21 @@ def _expected_digest(
 
 def _validate_manifest(
     raw: Any, schedule: dict[str, Any]
-) -> tuple[dict[str, Any], dict[str, str]]:
-    manifest = _object(raw, "release manifest", MANIFEST_FIELDS)
-    if type(manifest["schema"]) is not int or manifest["schema"] != 1:
-        raise ReleaseVerificationError("release manifest schema must be integer 1")
+) -> tuple[dict[str, Any], dict[str, str], int]:
+    if type(raw) is not dict or type(raw.get("schema")) is not int or raw["schema"] not in (1, 2):
+        raise ReleaseVerificationError("release manifest schema must be integer 1 or 2")
+    schema = raw["schema"]
+    manifest = _object(
+        raw, "release manifest",
+        MANIFEST_FIELDS if schema == 1 else RETRY_MANIFEST_FIELDS,
+    )
+    attempt_number = 1
+    if schema == 2:
+        attempt_number = manifest["attempt_number"]
+        if type(attempt_number) is not int or attempt_number <= 1:
+            raise ReleaseVerificationError(
+                "schema-2 release manifest attempt_number must be an integer greater than 1"
+            )
     if (
         manifest["classification"] != "development_release_unsealed"
         or type(manifest["classification"]) is not str
@@ -372,7 +384,7 @@ def _validate_manifest(
             raise ReleaseVerificationError(
                 f"release file entry {role} has invalid byte count"
             )
-    return manifest, expected_digests
+    return manifest, expected_digests, attempt_number
 
 
 def verify_release(schedule_raw: Any, release_dir: Path | str) -> dict[str, Any]:
@@ -395,7 +407,7 @@ def verify_release(schedule_raw: Any, release_dir: Path | str) -> dict[str, Any]
                 _read_manifest(manifest_fd, manifest_info.st_size), "manifest.json"
             )
             _check_release_file(release_fd, "manifest.json", manifest_fd, manifest_info)
-            manifest, digests = _validate_manifest(manifest, schedule)
+            manifest, digests, attempt_number = _validate_manifest(manifest, schedule)
             expected_names = set(digests) | {"manifest.json"}
             if set(os.listdir(release_fd)) != expected_names:
                 raise ReleaseVerificationError(
@@ -435,6 +447,7 @@ def verify_release(schedule_raw: Any, release_dir: Path | str) -> dict[str, Any]
         "notice": VERIFICATION_NOTICE,
         "run_id": manifest["run_id"],
         "run_sha256": manifest["run_sha256"],
+        "attempt_number": attempt_number,
         "schedule_sha256": schedule["schedule_sha256"],
         "verified_files": len(digests),
         "verified_bytes": verified_bytes,

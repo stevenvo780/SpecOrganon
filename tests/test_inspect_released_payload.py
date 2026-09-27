@@ -305,6 +305,7 @@ def test_integrated_inspection_is_read_only_and_never_claims_execution(
     result = json.loads(process.stdout)
     assert result["classification"] == inspector.CLASSIFICATION
     assert result["schema"] == 1
+    assert result["attempt_number"] == 1
     assert result["arm"] == arm
     assert result["case_id"] == case_id
     assert result["run_sha256"] in {run["run_sha256"] for run in schedule["runs"]}
@@ -352,6 +353,27 @@ def test_integrated_inspection_is_read_only_and_never_claims_execution(
         assert marker not in released_bytes
         assert marker not in process.stdout.encode()
     assert str(tmp_path) not in process.stdout + process.stderr
+
+
+def test_inspection_carries_retry_attempt_and_rejects_tampered_number(tmp_path: Path) -> None:
+    schedule, schedule_path, release, _ = _release(tmp_path, "N", "R-F")
+    manifest_path = release / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["schema"] = 2
+    manifest["attempt_number"] = 2
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    valid = _cli(schedule_path, release)
+
+    assert valid.returncode == 0, valid.stderr
+    assert json.loads(valid.stdout)["attempt_number"] == 2
+    assert inspector.inspect_released_payload(schedule, release)["attempt_number"] == 2
+
+    manifest["attempt_number"] = True
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    tampered = _cli(schedule_path, release)
+    assert tampered.returncode == 2
+    assert tampered.stdout == ""
 
 
 @pytest.mark.parametrize("arm", ["N", "S", "T"])

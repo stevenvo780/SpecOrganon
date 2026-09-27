@@ -189,6 +189,7 @@ def inspect_released_payload(
         "notice": NOTICE,
         "run_id": run["run_id"],
         "run_sha256": run["run_sha256"],
+        "attempt_number": final_release["attempt_number"],
         "schedule_sha256": final_release["schedule_sha256"],
         "arm": arm,
         "case_id": case_id,

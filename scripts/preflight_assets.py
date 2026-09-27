@@ -7,6 +7,9 @@ Usage::
         --run-id conf-... --output-dir /absolute/new/directory \
         --gate-dir /absolute/gate/directory
     python scripts/preflight_assets.py schedule.json assets.json \
+        --run-id conf-... --output-dir /absolute/retry/directory \
+        --gate-dir /absolute/gate/directory --attempt-number 2
+    python scripts/preflight_assets.py schedule.json assets.json \
         --run-id conf-... --output-dir /absolute/new/directory \
         --development-unsequenced
 
@@ -290,6 +293,7 @@ def preflight(
     output_dir: Path | None = None,
     gate_root: Path | None = None,
     development_unsequenced: bool = False,
+    attempt_number: int = 1,
 ) -> dict[str, Any]:
     """Check all bound bytes; optionally create one new, narrowly scoped release."""
     schedule = _candidate_schedule(copy.deepcopy(schedule_raw))
@@ -298,11 +302,17 @@ def preflight(
         raise PreflightError("run_id and output_dir must be supplied together")
     if type(development_unsequenced) is not bool:
         raise PreflightError("development_unsequenced must be a boolean")
+    if type(attempt_number) is not int or attempt_number < 1:
+        raise PreflightError("attempt_number must be a positive integer")
     if run_id is None:
         if gate_root is not None or development_unsequenced:
             raise PreflightError("release mode requires run_id and output_dir")
+        if attempt_number != 1:
+            raise PreflightError("check-only preflight requires attempt_number 1")
     elif (gate_root is not None) == development_unsequenced:
         raise PreflightError("release requires exactly one of gate_root or development_unsequenced")
+    elif development_unsequenced and attempt_number != 1:
+        raise PreflightError("development_unsequenced requires attempt_number 1")
     run = None
     if run_id is not None:
         if type(run_id) is not str:
@@ -365,7 +375,10 @@ def preflight(
             # A successful claim is durable. Later publication failure leaves
             # the claim active and a partial directory without a manifest.
             try:
-                claim_release(schedule, run["run_id"], gate_root, output)
+                claim_release(
+                    schedule, run["run_id"], gate_root, output,
+                    attempt_number=attempt_number,
+                )
             except BlockReleaseError as exc:
                 raise PreflightError(f"release gate rejected claim: {exc}") from exc
 
@@ -402,7 +415,7 @@ def preflight(
                     "order_position", "release_block_order", "arm",
                 )
                 manifest = {
-                    "schema": 1,
+                    "schema": 1 if attempt_number == 1 else 2,
                     "classification": "development_release_unsealed",
                     "notice": "Independent human content review and external custody are required before case reservation.",
                     "run_id": run["run_id"],
@@ -412,6 +425,8 @@ def preflight(
                     "limits": schedule["per_run_limits"],
                     "files": files,
                 }
+                if attempt_number > 1:
+                    manifest["attempt_number"] = attempt_number
                 _reverify_hidden_assets(paths, digests, opened)
                 if not _directory_matches_name(directory_fd, parent_fd, name):
                     raise PreflightError("output_dir identity changed during release")
@@ -426,7 +441,8 @@ def preflight(
                 if gate_root is not None:
                     try:
                         mark_published(
-                            schedule, run["run_id"], gate_root, output, published_sha256
+                            schedule, run["run_id"], gate_root, output, published_sha256,
+                            attempt_number=attempt_number,
                         )
                     except BlockReleaseError as exc:
                         raise PreflightError(f"release gate could not mark publication: {exc}") from exc
@@ -473,6 +489,10 @@ def main(argv: list[str] | None = None) -> int:
     mode.add_argument("--check", action="store_true", help="verify without writing")
     mode.add_argument("--run-id", help="release exactly one scheduled run")
     parser.add_argument("--output-dir", help="new absolute release directory; required with --run-id")
+    parser.add_argument(
+        "--attempt-number", type=int, default=1,
+        help="scheduled run attempt (default 1; retries require --gate-dir)",
+    )
     release_mode = parser.add_mutually_exclusive_group()
     release_mode.add_argument("--gate-dir", help="absolute durable block release gate directory")
     release_mode.add_argument(
@@ -493,6 +513,7 @@ def main(argv: list[str] | None = None) -> int:
             output_dir=Path(args.output_dir) if args.output_dir else None,
             gate_root=Path(args.gate_dir) if args.gate_dir else None,
             development_unsequenced=args.development_unsequenced,
+            attempt_number=args.attempt_number,
         )
     except PreflightError as exc:
         print(f"Asset preflight failed: {exc}", file=sys.stderr)

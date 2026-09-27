@@ -77,6 +77,7 @@ def test_cli_verifies_valid_release_without_writes(
         "notice": consumer.VERIFICATION_NOTICE,
         "run_id": _manifest(output)["run_id"],
         "run_sha256": _manifest(output)["run_sha256"],
+        "attempt_number": 1,
         "schedule_sha256": schedule["schedule_sha256"],
         "verified_files": expected_count,
         "verified_bytes": sum(
@@ -92,6 +93,50 @@ def test_cli_verifies_valid_release_without_writes(
         and "authorized" not in result
         and "executed" not in result
     )
+
+
+def test_schema_two_release_normalizes_retry_attempt(tmp_path: Path) -> None:
+    schedule, schedule_path, output = _release(tmp_path)
+    manifest = _manifest(output)
+    manifest["schema"] = 2
+    manifest["attempt_number"] = 2
+    _write_manifest(output, manifest)
+
+    process = _cli(schedule_path, output)
+
+    assert process.returncode == 0, process.stderr
+    assert json.loads(process.stdout)["attempt_number"] == 2
+    assert consumer.verify_release(schedule, output)["attempt_number"] == 2
+
+
+@pytest.mark.parametrize("attempt", [None, 1, 0, True, "2"])
+def test_schema_two_missing_or_invalid_retry_attempt_is_rejected(
+    tmp_path: Path, attempt: Any
+) -> None:
+    _, schedule_path, output = _release(tmp_path)
+    manifest = _manifest(output)
+    manifest["schema"] = 2
+    if attempt is not None:
+        manifest["attempt_number"] = attempt
+    _write_manifest(output, manifest)
+
+    process = _cli(schedule_path, output)
+
+    assert process.returncode == 2
+    assert process.stdout == ""
+    assert "release manifest" in process.stderr
+
+
+def test_schema_one_rejects_attempt_number_field(tmp_path: Path) -> None:
+    _, schedule_path, output = _release(tmp_path)
+    manifest = _manifest(output)
+    manifest["attempt_number"] = 1
+    _write_manifest(output, manifest)
+
+    process = _cli(schedule_path, output)
+
+    assert process.returncode == 2
+    assert "exactly" in process.stderr
 
 
 def test_changed_bytes_rejected_even_after_manifest_digest_forgery(

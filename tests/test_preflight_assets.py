@@ -18,8 +18,9 @@ SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 SCRIPT = SCRIPTS / "preflight_assets.py"
 sys.path.insert(0, str(SCRIPTS))
 import preflight_assets  # noqa: E402
-from local_block_release_gate import BlockReleaseError, verify_claim  # noqa: E402
+from local_block_release_gate import BlockReleaseError, record_terminal, verify_claim  # noqa: E402
 from plan_confirmatory import compile_schedule  # noqa: E402
+from verify_released_run import verify_release  # noqa: E402
 
 
 def _hash(data: bytes) -> str:
@@ -185,6 +186,33 @@ def test_check_rejects_release_mode_without_writing(tmp_path: Path) -> None:
     assert not gate.exists()
 
 
+def test_retry_requires_gate_for_cli_and_api(tmp_path: Path) -> None:
+    schedule, assets, schedule_path, asset_map_path = _fixture(tmp_path)
+    run_id = schedule["runs"][0]["run_id"]
+    output = tmp_path / "retry"
+
+    check = _cli(schedule_path, asset_map_path, "--check", "--attempt-number", "2")
+    development = _cli(
+        schedule_path, asset_map_path,
+        "--run-id", run_id, "--output-dir", str(output),
+        "--development-unsequenced", "--attempt-number", "2",
+    )
+    direct = _cli(
+        schedule_path, asset_map_path,
+        "--run-id", run_id, "--output-dir", str(output), "--attempt-number", "2",
+    )
+
+    assert check.returncode == 2 and "check-only" in check.stderr
+    assert development.returncode == 2 and "development_unsequenced" in development.stderr
+    assert direct.returncode == 2 and "requires --gate-dir" in direct.stderr
+    with pytest.raises(preflight_assets.PreflightError, match="development_unsequenced"):
+        preflight_assets.preflight(
+            schedule, assets, run_id=run_id, output_dir=output,
+            development_unsequenced=True, attempt_number=2,
+        )
+    assert not output.exists()
+
+
 @pytest.mark.parametrize("arm,expected", [
     ("N", {"case_package", "task_contract", "common_prompt", "arm_prompt", "tool_policy"}),
     ("S", {"case_package", "task_contract", "common_prompt", "arm_prompt", "tool_policy", "sdd_guide"}),
@@ -265,6 +293,53 @@ def test_gated_release_claims_first_run_and_denies_second_before_output(tmp_path
     assert "release gate rejected claim" in denied.stderr
     assert not second_output.exists()
     assert str(tmp_path) not in denied.stderr
+
+
+def test_gated_attempt_two_after_declared_external_failure(tmp_path: Path) -> None:
+    schedule, assets, _, _ = _fixture(tmp_path)
+    first = schedule["runs"][0]
+    gate = tmp_path / "gate"
+    initial = tmp_path / "release-attempt-1"
+    retry = tmp_path / "release-attempt-2"
+    initial_manifest = preflight_assets.preflight(
+        schedule, assets, run_id=first["run_id"], output_dir=initial,
+        gate_root=gate,
+    )
+    assert initial_manifest["schema"] == 1
+    assert "attempt_number" not in initial_manifest
+    assert verify_release(schedule, initial)["attempt_number"] == 1
+
+    trace_sha256 = _hash(b"synthetic external failure trace")
+    evidence = tmp_path / "external-failure.json"
+    evidence.write_text(json.dumps({
+        "schema": 1,
+        "schedule_sha256": schedule["schedule_sha256"],
+        "run_id": first["run_id"],
+        "run_sha256": first["run_sha256"],
+        "attempt_number": 1,
+        "release_dir": str(initial),
+        "status": "external_failure",
+        "trace_sha256": trace_sha256,
+        "incident_sha256": _hash(b"synthetic incident"),
+    }, sort_keys=True) + "\n", encoding="utf-8")
+    evidence.chmod(0o600)
+    record_terminal(
+        schedule, first["run_id"], gate, "external_failure", trace_sha256,
+        evidence, attempt_number=1,
+    )
+
+    retry_manifest = preflight_assets.preflight(
+        schedule, assets, run_id=first["run_id"], output_dir=retry,
+        gate_root=gate, attempt_number=2,
+    )
+
+    assert retry_manifest["schema"] == 2
+    assert retry_manifest["attempt_number"] == 2
+    assert json.loads((retry / "manifest.json").read_text(encoding="utf-8")) == retry_manifest
+    assert verify_release(schedule, retry)["attempt_number"] == 2
+    assert verify_claim(
+        schedule, first["run_id"], gate, retry, attempt_number=2
+    )["attempt_number"] == 2
 
 
 def test_mutating_caller_schedule_after_claim_cannot_change_published_manifest(
