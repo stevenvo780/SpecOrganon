@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "classification": "development_installed_wheel_mcp_server_process_crash_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256_unchanged": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256_unchanged": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "probe_sha256": "6782dd1f00b5548532447584f34c2c779e570cd4ddf3b1da2ce029ea17567f63",
+  "reused_commit_probe_sha256": "71473fec23cd1e2a8a90764d0f4e4cf20c645a84223786891b390c17c37f3587",
+  "test_sha256": "526a673e746e0cf42e59f6a18e56f0ba83be1123e5822191ef4d91b993367824",
+  "installed_wheel": {
+    "filename": "specorganon-0.1.0-py3-none-any.whl",
+    "sha256": "e2f1bb8cb56c5f7a2bc66ea6a89caf9b50168e9c1277587219c30232052cfb9b",
+    "python_versions_tested": ["Python 3.11.15", "Python 3.12.3"],
+    "same_probe_report_in_both_versions": true,
+    "build_install": "uv build --offline --wheel, uv venv --offline --no-project, uv pip install --offline into a new temporary environment"
+  },
+  "positive_probe": {
+    "command": "<fresh-venv>/bin/python scripts/probe_mcp_server_crash.py /workspace/SpecOrganon",
+    "exit_code": 0,
+    "report": {
+      "classification": "installed_wheel_mcp_server_sigkill_commit_window_probe",
+      "hook_activations_per_window": 1,
+      "host_or_power_loss_durability_tested": false,
+      "windows": {
+        "before_replace": {
+          "byte_identical_replay": true,
+          "checkpoint_revision": 1,
+          "cli_mcp_status_equal": true,
+          "final_revision": 3,
+          "resume_applied": 2,
+          "resume_skipped": 1,
+          "transport_error_types": ["MCPError"],
+          "transport_failed": true,
+          "unique_manifest_ids": 3
+        },
+        "after_replace": {
+          "byte_identical_replay": true,
+          "checkpoint_revision": 2,
+          "cli_mcp_status_equal": true,
+          "final_revision": 3,
+          "resume_applied": 1,
+          "resume_skipped": 2,
+          "transport_error_types": ["MCPError"],
+          "transport_failed": true,
+          "unique_manifest_ids": 3
+        }
+      }
+    }
+  },
+  "negative_controls": [
+    {
+      "mutation": "empty sitecustomize hook, ordinary MCP run completes",
+      "outcome": "probe fails with 'MCP run returned without a server crash' in normal and optimized Python"
+    },
+    {
+      "mutation": "replace os.kill(SIGKILL) with os._exit(17) in the MCP child hook",
+      "outcome": "probe fails with 'MCP server did not exit with SIGKILL (17)'"
+    },
+    {
+      "mutation": "replace the call_tool connection-close exception with an unrelated ValueError after the child dies",
+      "outcome": "probe fails with 'reason other than connection closure'"
+    }
+  ],
+  "checks": [
+    {"command": "uv run pytest -q tests/test_probe_ledger_commit_crash.py", "result": "1 passed in 26.72s"},
+    {"command": "uv run pytest -q", "result": "1032 passed in 105.88s"},
+    {"command": "uv run --no-sync ruff check scripts/probe_mcp_server_crash.py tests/test_probe_ledger_commit_crash.py", "result": "All checks passed!"}
+  ],
+  "independent_review": "A read-only reviewer first reproduced a false positive by changing the MCP child to os._exit(17). The wrapper now waits on the installed child, ties its PID to the hook marker and requires returncode -SIGKILL. The reviewer then found no remaining false green in the stated process-crash scope; connection-close classification and three controls were checked.",
+  "limits": [
+    "The wheel, case, human label, ledger and manifest are synthetic development fixtures. The test uses an installed wheel and a real stdio MCP client, but no model or human decision.",
+    "The probe covers only process death around the second ledger os.replace, before and after publication; it does not test power or host loss, filesystem durability after host failure, or every interruption point.",
+    "A successful CLI/MCP status comparison after reconnect does not establish full workflow acceptance, independent reviewer identity or source authenticity."
+  ],
+  "criterion_1": "not_assessed"
+}
