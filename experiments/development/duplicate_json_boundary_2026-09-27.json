@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "classification": "development_duplicate_json_boundary_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "implementation_sha256": {
+    "src/specorganon/ledger.py": "1ec3244d13fecd0ee7a91e9b39e04100660ff37cd1199db15d194742979260a4",
+    "src/specorganon/approval.py": "6a92abe7a4200ccb713e2dee99c234b008d769525268e8062e681ed548acce98",
+    "tests/test_ledger.py": "db00dd0a5c43bf75369bb1fe6d57dcd6bb881ed1e5b0a1e08cea3e8621366d65",
+    "tests/test_interfaces.py": "8734bd00081591d2e716ecc7daa1a9d060008284aa761a6a1653448ea523c5a7",
+    "tests/test_approval_security.py": "b79cf2303fc1ceee0087338500130e9fd61899ae07a193c252fb203b6872a65f"
+  },
+  "initial_false_green": {
+    "cli": "A real CLI put --data with nested duplicate threshold.value returned success and wrote the last value, 0.9, to the ledger before the correction.",
+    "ledger": "A duplicate key placed before its original in an event can leave the parsed object and its recomputed digest unchanged under last-wins parsing.",
+    "approval_registry": "The external trusted-approver registry used last-wins JSON parsing for repeated keys, including nested approver labels."
+  },
+  "corrected_contract": [
+    "The shared CLI and ledger parser rejects duplicate object keys at any nesting depth, including keys equal after JSON Unicode-escape decoding.",
+    "CLI put --data and run --manifest reject ambiguous JSON before case mutation.",
+    "Ledger read and append reject an ambiguous stored event before accepting its parsed digest or rewriting the file.",
+    "The external trusted-approver registry rejects repeated keys before accepting a signed approval."
+  ],
+  "gates": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_ledger.py tests/test_interfaces.py tests/test_approval_security.py",
+      "result": "44 passed in 12.44s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "1215 passed, 1 xfailed in 122.10s"
+    },
+    {
+      "command": "ruff check and Python compileall on five affected files; git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": "uv build --wheel --offline; offline --no-index installs from local dependency bundles into fresh CPython 3.11.15 and 3.12.3 venvs; uv pip check",
+      "result": "29 packages installed and compatible in each; wheel SHA-256 b3a5af5361aa7734163dd5d0d3b20eb70c61862c12bc49172e44e83d8a0505e3"
+    },
+    {
+      "command": "UV_OFFLINE=1 PIP_NO_INDEX=1 <fresh-venv-python> scripts/clean_smoke.py /workspace/SpecOrganon",
+      "result": "both interpreters: nine accepted phases, 29 items, 49 events, 14 CLI commands, 14 MCP tools, signed synthetic flow and SIGKILL recovery"
+    },
+    {
+      "command": "installed CLI put --data and run --manifest with nested duplicate keys; compare ledger bytes before and after",
+      "result": "both interpreters rejected with duplicate error and left ledger bytes identical; imports resolved to site-packages"
+    }
+  ],
+  "independent_review": {
+    "result": "No further duplicate-key bypass or approval-registry regression was found in the corrected CLI, ledger, and registry paths.",
+    "mcp_wire_counterexample": "The installed MCP 2.2.0 JSON-RPC adapter parsed a raw tools/call request with nested value:0.1,value:0.9 into an arguments object containing value:0.9 before the Organon handler. The SDK stdio parser has no public pre-parse line-validation hook in the inspected version."
+  },
+  "limits": [
+    "Raw MCP JSON-RPC duplicate keys remain accepted before application code sees arguments; the corrected parser does not protect that wire boundary.",
+    "A current SDK transport extension or upstream change is needed for a stable pre-parse duplicate-key gate; a private monkeypatch was not treated as a trustworthy fix.",
+    "The one global xfail captures the separate MCP same-UID directory relocation limit documented in the prior path-hardening record.",
+    "These are synthetic technical controls, not authenticated source evidence, human authority, field impact, or confirmatory model comparison; criteria 1 and 2 remain not demonstrated."
+  ]
+}
