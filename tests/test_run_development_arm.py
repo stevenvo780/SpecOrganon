@@ -260,6 +260,38 @@ def test_codex_item_trace_rejects_open_failed_or_contradictory_items(
     assert any(error_fragment in error for error in parsed["terminal_errors"])
 
 
+@pytest.mark.parametrize("exit_code", ["1", 1.0, True, None])
+def test_codex_command_rejects_noninteger_exit_code(
+    tmp_path: Path, exit_code: object,
+) -> None:
+    trace = tmp_path / "codex.jsonl"
+    _codex_item_trace(trace, [
+        {"type": "item.started", "item": {"id": "item-1", "type": "command_execution"}},
+        {"type": "item.completed", "item": {
+            "id": "item-1", "type": "command_execution", "status": "completed",
+            "exit_code": exit_code,
+        }},
+    ])
+    parsed = runner._parse_usage("codex", trace, "test-model")
+    assert parsed["terminal_success"] is False
+    assert parsed["complete"] is False
+    assert any("malformed item events" in error for error in parsed["terminal_errors"])
+
+
+def test_codex_command_accepts_integer_zero_exit_code(tmp_path: Path) -> None:
+    trace = tmp_path / "codex.jsonl"
+    _codex_item_trace(trace, [
+        {"type": "item.started", "item": {"id": "item-1", "type": "command_execution"}},
+        {"type": "item.completed", "item": {
+            "id": "item-1", "type": "command_execution", "status": "completed",
+            "exit_code": 0,
+        }},
+    ])
+    parsed = runner._parse_usage("codex", trace, "test-model")
+    assert parsed["terminal_success"] is True
+    assert parsed["complete"] is True
+
+
 @pytest.mark.parametrize("provider", ["codex", "agy"])
 def test_usage_subsets_accept_equality_and_keep_raw_trace(
     tmp_path: Path,

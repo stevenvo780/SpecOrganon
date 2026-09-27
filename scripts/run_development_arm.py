@@ -249,6 +249,9 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
                 if kind == "item.completed":
                     exit_code = item.get("exit_code")
                     status = item.get("status")
+                    if (item.get("type") == "command_execution" and "exit_code" in item
+                            and type(exit_code) is not int):
+                        codex_malformed_item_events += 1
                     if ((type(status) is str and status in {"failed", "error"})
                             or (item.get("type") == "command_execution" and type(exit_code) is int
                                 and exit_code != 0)):
