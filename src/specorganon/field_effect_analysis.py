@@ -84,8 +84,9 @@ def _declared_ci(value: Any) -> dict[str, Any]:
     estimate = _numeric(effect["estimate"], "analysis.adjusted_effect.estimate")
     lower = _numeric(ci["lower"], "analysis.adjusted_effect.ci95.lower")
     upper = _numeric(ci["upper"], "analysis.adjusted_effect.ci95.upper")
-    if lower >= upper or not lower <= estimate <= upper:
-        raise FieldEffectAnalysisError("adjusted interval is empty or inconsistent with estimate")
+    # A percentile bootstrap interval can exclude its point estimate.
+    if lower >= upper:
+        raise FieldEffectAnalysisError("adjusted interval is empty or inverted")
     return {"estimate": str(estimate), "ci95": [str(lower), str(upper)]}
 
 

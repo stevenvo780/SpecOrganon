@@ -113,14 +113,16 @@ def test_analysis_rejects_missing_or_incorrect_primary_arithmetic(change: str, m
 @pytest.mark.parametrize("change,match", [
     ("missing", "must have exactly"),
     ("empty", "must be a finite number"),
-    ("zero_width", "empty or inconsistent"),
-    ("inverted", "empty or inconsistent"),
-    ("outside_estimate", "empty or inconsistent"),
+    ("nonfinite_estimate", "finite"),
+    ("nonfinite_lower", "finite"),
+    ("nonfinite_upper", "finite"),
+    ("zero_width", "empty or inverted"),
+    ("inverted", "empty or inverted"),
     ("one_sided", "unambiguously two-sided"),
     ("wrong_level", "95% confidence"),
     ("wrong_resampling", "group resampling"),
 ])
-def test_ci_claim_must_be_present_typed_and_internally_consistent(change: str, match: str) -> None:
+def test_ci_claim_must_be_present_typed_and_structurally_valid(change: str, match: str) -> None:
     case = _case()
     adjusted = case[4]["adjusted_effect"]
     ci = adjusted["ci95"]
@@ -128,12 +130,16 @@ def test_ci_claim_must_be_present_typed_and_internally_consistent(change: str, m
         del ci["lower"]
     elif change == "empty":
         ci["lower"] = ""
+    elif change == "nonfinite_estimate":
+        adjusted["estimate"] = float("nan")
+    elif change == "nonfinite_lower":
+        ci["lower"] = float("-inf")
+    elif change == "nonfinite_upper":
+        ci["upper"] = float("inf")
     elif change == "zero_width":
         ci["lower"] = ci["upper"] = 0.5
     elif change == "inverted":
         ci["lower"], ci["upper"] = 0.7, 0.2
-    elif change == "outside_estimate":
-        adjusted["estimate"] = 0.9
     elif change == "one_sided":
         ci["sidedness"] = "one_sided_upper"
     elif change == "wrong_level":
@@ -142,6 +148,16 @@ def test_ci_claim_must_be_present_typed_and_internally_consistent(change: str, m
         adjusted["resampling_unit"] = "row"
     with pytest.raises(FieldEffectAnalysisError, match=match):
         _audit(case)
+
+
+def test_nonempty_ci_excluding_estimate_is_declared_only() -> None:
+    case = _case()
+    case[4]["adjusted_effect"]["estimate"] = 0.9
+    report = _audit(case)
+    assert report["classification"] == "field_effect_arithmetic_declared_only"
+    assert report["adjusted_effect_declared"] == {"estimate": "0.9", "ci95": ["0.2", "0.7"]}
+    assert report["decision_ready"] is False
+    assert report["criterion_3"]["status"] == "not_assessed"
 
 
 def test_descriptive_harm_margin_is_recomputed_and_can_fail() -> None:
