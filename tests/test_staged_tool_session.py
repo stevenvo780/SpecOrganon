@@ -20,11 +20,17 @@ SCRIPTS = ROOT / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import local_replay_sandbox as sandbox  # noqa: E402
+import local_run_admission as admission  # noqa: E402
 import plan_confirmatory  # noqa: E402
 import preflight_assets  # noqa: E402
 import stage_released_run  # noqa: E402
 import staged_tool_session as session_runner  # noqa: E402
 import test_inspect_released_payload as fixture  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def isolated_admission_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(admission.ROOT_ENV, str(tmp_path / "admissions"))
 
 
 FIRST = """
@@ -410,7 +416,7 @@ def test_stage_run_anchor_rejects_second_session_and_budget_reset(
     assert sorted(path.name for path in (session / "calls").iterdir()) == ["000001"]
 
 
-def test_same_release_run_can_spend_local_cap_in_two_stage_instances(
+def test_same_release_run_second_stage_cannot_spend_local_cap(
     tmp_path: Path, available_sandbox: None,
 ) -> None:
     schedule, _, run_id, first_stage, first, _, _ = _stage(tmp_path, cap=1)
@@ -423,19 +429,24 @@ def test_same_release_run_can_spend_local_cap_in_two_stage_instances(
     second_summary = session_runner.create_session(schedule, run_id, second_stage, second_session)
     assert first_summary["run_id"] == second_summary["run_id"] == run_id
     assert first_summary["schedule_sha256"] == second_summary["schedule_sha256"]
-    for stage, session in ((first_stage, first_session), (second_stage, second_session)):
-        receipt = session_runner.call_tool(schedule, run_id, stage, session, "first", first,
-                                           wall_seconds=3)
-        assert receipt["status"] == "success"
-        assert receipt["reserved_tool_calls"] == 1
-        assert receipt["budget_scope"] == "stage_instance_local"
-        assert receipt["global_run_limits_enforced"] is False
-        assert (stage / "work" / "intermediate.txt").read_text() == "sealed first output\n"
-        summary = session_runner.resume_session(schedule, run_id, stage, session)
-        assert summary["status"] == "exhausted"
-        assert summary["remaining_tool_calls"] == 0
-        assert summary["budget_scope"] == "stage_instance_local"
-        assert summary["global_run_limits_enforced"] is False
+    assert first_summary["local_run_claim_status"] == "unclaimed"
+    assert second_summary["local_run_claim_status"] == "unclaimed"
+    receipt = session_runner.call_tool(schedule, run_id, first_stage, first_session,
+                                       "first", first, wall_seconds=3)
+    assert receipt["status"] == "success"
+    assert receipt["reserved_tool_calls"] == 1
+    assert receipt["global_run_limits_enforced"] is False
+    assert (first_stage / "work" / "intermediate.txt").read_text() == "sealed first output\n"
+    first_status = session_runner.resume_session(schedule, run_id, first_stage, first_session)
+    assert first_status["status"] == "exhausted"
+    assert first_status["remaining_tool_calls"] == 0
+    second_status = session_runner.resume_session(schedule, run_id, second_stage, second_session)
+    assert second_status["status"] == "blocked"
+    assert "another local owner" in second_status["blocked_reason"]
+    with pytest.raises(session_runner.SessionError, match="another local owner"):
+        session_runner.call_tool(schedule, run_id, second_stage, second_session,
+                                 "first", first, wall_seconds=3)
+    assert list((second_stage / "work").iterdir()) == []
     assert session_runner._anchor_path(first_stage, run_id) != session_runner._anchor_path(second_stage, run_id)
 
 

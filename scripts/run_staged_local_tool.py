@@ -38,6 +38,7 @@ from contextlib import ExitStack
 from pathlib import Path
 from typing import Any
 
+import local_run_admission as admission
 from local_replay_sandbox import (
     SandboxError,
     SandboxUnavailable,
@@ -274,6 +275,7 @@ def _private_receipt_dir(path: Path, stage: Path) -> None:
         if parent.st_uid != os.geteuid() or parent.st_mode & 0o022:
             raise LocalToolError("receipt parent must be owned by current UID and not writable by others")
         os.mkdir(name, 0o700, dir_fd=parent_fd)
+        os.fsync(parent_fd)
         child = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
         if not stat.S_ISDIR(child.st_mode) or child.st_uid != os.geteuid() or stat.S_IMODE(child.st_mode) != 0o700:
             raise LocalToolError("receipt directory is not private")
@@ -286,6 +288,11 @@ def _write_receipt(path: Path, value: dict[str, Any]) -> None:
         output.write(data)
         output.flush()
         os.fsync(output.fileno())
+    directory_fd = os.open(path.parent, DIR_FLAGS)
+    try:
+        os.fsync(directory_fd)
+    finally:
+        os.close(directory_fd)
 
 
 def run_staged_local_tool(
@@ -294,6 +301,7 @@ def run_staged_local_tool(
     wall_seconds: float = 30.0, cpu_seconds: int = 10,
     address_space_bytes: int = 512 * 1024 * 1024,
     file_bytes_per_file: int = 8 * 1024 * 1024,
+    admission_root: Path | str | None = None,
 ) -> dict[str, Any]:
     """Prepare, execute once, and save a separate local receipt."""
     stage = Path(stage_dir)
@@ -355,7 +363,48 @@ def run_staged_local_tool(
         stage / "case" / "case.json", "staged case manifest", 1024 * 1024
     ))
     deliverables = case_manifest["deliverables"]
+    root_descriptor = admission.descriptor(admission_root)
+    selected_owner = admission.owner("oneshot", stage, receipt)
     _private_receipt_dir(receipt, stage)
+    claim_sha256 = admission.publish_claim(
+        schedule["schedule_sha256"], run_id, selected_owner, root_descriptor,
+        override=admission_root,
+    )
+    reservation = {
+        "schema": 1, "classification": "development_staged_local_tool_reservation_unsealed",
+        "schedule_sha256": schedule["schedule_sha256"], "run_id": run_id,
+        "run_sha256": verified["run_sha256"], "attempt_number": 1,
+        **root_descriptor, "local_run_claim_sha256": claim_sha256,
+        "stage_dir": str(stage), "receipt_dir": str(receipt),
+        "tool_id": tool_id, "tool_version": selected["version"],
+        "executable_sha256": actual,
+        "policy_sha256": hashlib.sha256(policy_bytes).hexdigest(),
+        "immutable_snapshot_sha256": hashlib.sha256(
+            json.dumps(before, sort_keys=True, ensure_ascii=True,
+                       separators=(",", ":"), allow_nan=False).encode("utf-8")
+        ).hexdigest(),
+        "limits_applied": {
+            "wall_seconds": wall_seconds, "cpu_seconds": cpu_seconds,
+            "address_space_bytes": address_space_bytes,
+            "file_bytes_per_file": file_bytes_per_file,
+        },
+        "global_run_limits_enforced": False,
+    }
+    _write_receipt(receipt / "reservation.json", reservation)
+    reservation_bytes = _read_bounded_file(
+        receipt / "reservation.json", "one-shot local reservation", 4096
+    )
+    expected_reservation = (
+        json.dumps(reservation, sort_keys=True, ensure_ascii=False,
+                   separators=(",", ":")) + "\n"
+    ).encode("utf-8")
+    if reservation_bytes != expected_reservation:
+        raise LocalToolError("one-shot reservation changed before launch")
+    if admission.require_claim(
+        schedule["schedule_sha256"], run_id, selected_owner, root_descriptor,
+        override=admission_root,
+    ) != claim_sha256:
+        raise LocalToolError("local admission claim changed before launch")
     stdout_path = receipt / "stdout"
     stderr_path = receipt / "stderr"
     sandbox_result = None
@@ -425,6 +474,10 @@ def run_staged_local_tool(
         "schema": 1, "classification": CLASSIFICATION, "notice": NOTICE,
         "run_id": run_id, "run_sha256": verified["run_sha256"],
         "schedule_sha256": verified["schedule_sha256"],
+        "attempt_number": 1, **root_descriptor,
+        "local_run_claim_sha256": claim_sha256,
+        "reservation_sha256": hashlib.sha256(reservation_bytes).hexdigest(),
+        "global_run_limits_enforced": False,
         "tool_id": tool_id, "tool_version": selected["version"],
         "executable_sha256": actual, "executable_unchanged_after_run": executable_unchanged,
         "sealed_executable_sha256": (
@@ -472,6 +525,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--cpu-seconds", type=int, default=10)
     parser.add_argument("--address-space-bytes", type=int, default=512 * 1024 * 1024)
     parser.add_argument("--file-bytes-per-file", type=int, default=8 * 1024 * 1024)
+    parser.add_argument("--admission-root")
     args = parser.parse_args(argv)
     try:
         report = run_staged_local_tool(
@@ -480,8 +534,9 @@ def main(argv: list[str] | None = None) -> int:
             wall_seconds=args.wall_seconds, cpu_seconds=args.cpu_seconds,
             address_space_bytes=args.address_space_bytes,
             file_bytes_per_file=args.file_bytes_per_file,
+            admission_root=args.admission_root,
         )
-    except (LocalToolError, StageVerificationError, ReleaseVerificationError,
+    except (admission.AdmissionError, LocalToolError, StageVerificationError, ReleaseVerificationError,
             ToolPolicyError, OSError, KeyError, TypeError, ValueError) as exc:
         print(f"Local tool preparation failed: {exc}", file=sys.stderr)
         return 2

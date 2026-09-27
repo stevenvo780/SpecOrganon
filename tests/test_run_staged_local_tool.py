@@ -16,11 +16,17 @@ SCRIPTS = ROOT / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import local_replay_sandbox as sandbox  # noqa: E402
+import local_run_admission as admission  # noqa: E402
 import plan_confirmatory  # noqa: E402
 import preflight_assets  # noqa: E402
 import run_staged_local_tool as runner  # noqa: E402
 import stage_released_run  # noqa: E402
 import test_inspect_released_payload as fixture  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def isolated_admission_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(admission.ROOT_ENV, str(tmp_path / "admissions"))
 
 
 def _sha(data: bytes) -> str:
@@ -118,7 +124,9 @@ def test_real_stage_run_and_separate_receipt(
     assert (receipt / "stdout").read_text() == "local stdout\n"
     assert (receipt / "stderr").read_text() == "local stderr\n"
     assert (receipt.stat().st_mode & 0o777) == 0o700
-    assert {path.name for path in receipt.iterdir()} == {"stdout", "stderr", "receipt.json"}
+    assert {path.name for path in receipt.iterdir()} == {
+        "stdout", "stderr", "reservation.json", "receipt.json"
+    }
     assert all((path.stat().st_mode & 0o777) == 0o600 for path in receipt.iterdir())
     assert set(path.name for path in stage.iterdir()) == {"case", "inputs", "work", "stage.json"}
     for secret in hidden:
