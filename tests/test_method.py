@@ -27,7 +27,7 @@ def _accept(path, phase):
 
 def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1"),
                              e0_refs=("pr1",), e0_origin="simulated", e0_metric_key=None, e0_unit=None,
-                             e1_refs=("pr1",), e1_origin="simulated",
+                             e1_refs=("pr1",), e1_origin="simulated", e1_value=10,
                              e1_metric_key="count", e1_unit="count",
                              inf_refs=("e1", "h1"), sibling_protocol=False, sibling_problem="p1",
                              indicator_protocol_ref=None, indicator_extra_metric=None, indicator_extra_unit=None,
@@ -99,7 +99,7 @@ def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1")
     _put(path, "i1", "indicator", indicator_refs, {"metric": "count", "unit": "count"})
     _accept(path, "study")
 
-    _put(path, "e1", "evidence", e1_refs, {"origin": e1_origin, "source": "synthetic fixture", "date": "2026-09-26", "locator": "test_method.py", "metric_key": e1_metric_key, "scope": "fixture", "unit": e1_unit, "value": 10})
+    _put(path, "e1", "evidence", e1_refs, {"origin": e1_origin, "source": "synthetic fixture", "date": "2026-09-26", "locator": "test_method.py", "metric_key": e1_metric_key, "scope": "fixture", "unit": e1_unit, "value": e1_value})
     _put(path, "inf1", "inference", inf_refs)
     if stop_before_observe:
         return
@@ -169,6 +169,17 @@ def test_committed_no_demostrado_ledger_remains_accepted_without_result_test_lin
     assert not any(item["kind"] == "test" for item in engine.trace(path, "res1")["ancestors"])
     assert engine.gate(path, "validate")["ready"]
     assert state["phases"]["validate"]["accepted"]
+
+
+def test_committed_mango_published_range_remains_valid_context():
+    path = Path(__file__).resolve().parents[1] / "cases" / "mango"
+    state = engine.get_state(path)
+    chamber = state["items"]["e_pulp_chamber"]
+    assert chamber["data"]["unit"] == "rango porcentaje"
+    assert chamber["data"]["value"] == "3-6"
+    assert not chamber["issues"]
+    assert not any("e_pulp_chamber: evidence metric value" in blocker
+                   for blocker in state["phases"]["observe"]["blockers"])
 
 
 def test_rejected_item_review_revokes_dependent_phases_until_fresh_advances(tmp_path):
@@ -391,6 +402,181 @@ def test_inconsistent_published_calculation_blocks_observation(tmp_path):
     assert not engine.gate(path, "observe")["ready"]
 
 
+def test_large_integer_product_mismatch_blocks_observation_until_tolerated(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, stop_before_observe=True)
+    assert engine.gate(path, "observe")["ready"]
+    data = {
+        "origin": "simulated", "source": "synthetic fixture", "date": "2026-09-26",
+        "locator": "independent calculation", "metric_key": "independent-count",
+        "scope": "calculation", "unit": "count", "value": 2**53 + 1,
+        "calculation": {"operator": "product", "operands": [2**53, 1], "tolerance": 0},
+    }
+    _put(path, "e2", "evidence", ["pr1"], data)
+    assert any("differs from recomputed" in issue for issue in engine.get_state(path)["items"]["e2"]["issues"])
+    assert not engine.gate(path, "observe")["ready"]
+
+    tolerated = {**data, "calculation": {**data["calculation"], "tolerance": 1}}
+    _put(path, "e2", "evidence", ["pr1"], tolerated)
+    assert not engine.get_state(path)["items"]["e2"]["issues"]
+    assert engine.gate(path, "observe")["ready"]
+
+    for invalid in ({"operator": "product", "operands": [2**53, 1], "tolerance": -1},
+                    {"operator": "product", "operands": ["Infinity", 1], "tolerance": 0}):
+        _put(path, "e2", "evidence", ["pr1"], {**data, "calculation": invalid})
+        assert "malformed or unsupported calculation" in engine.get_state(path)["items"]["e2"]["issues"]
+        assert not engine.gate(path, "observe")["ready"]
+
+
+@pytest.mark.parametrize("base", (2**53, 10**40))
+def test_exact_integer_conflict_blocks_observe_and_honors_tolerance(tmp_path, base):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, e1_value=base, stop_before_observe=True)
+    assert engine.gate(path, "observe")["ready"]
+    data = {
+        "origin": "simulated", "source": "second synthetic source", "date": "2026-09-26",
+        "locator": "independent fixture", "metric_key": "count", "scope": "fixture",
+        "unit": "count", "value": base + 1, "tolerance": 0,
+    }
+    _put(path, "e2", "evidence", ["pr1"], data)
+    state = engine.get_state(path)
+    assert any("e1 vs e2" in issue for issue in state["items"]["e1"]["issues"])
+    assert any("e1 vs e2" in issue for issue in state["items"]["e2"]["issues"])
+    assert not state["phases"]["observe"]["ready"]
+
+    _put(path, "e2", "evidence", ["pr1"], {**data, "tolerance": 1})
+    state = engine.get_state(path)
+    assert not any("conflicting metric" in issue for id in ("e1", "e2")
+                   for issue in state["items"][id]["issues"])
+    assert state["phases"]["observe"]["ready"]
+
+
+@pytest.mark.parametrize(("value", "unit", "valid"), (
+    ("3-6", "rango porcentaje", True),
+    ("6-3", "rango porcentaje", False),
+    ("3-6", "porcentaje", False),
+    ("unknown", "rango porcentaje", False),
+    ("unknown", "porcentaje", False),
+    ("1e1000000000-2", "rango porcentaje", False),
+))
+def test_contextual_range_requires_declared_unit_and_bounded_ordered_endpoints(tmp_path, value, unit, valid):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, e1_value=value, e1_unit=unit, stop_before_observe=True)
+    state = engine.get_state(path)
+    issues = state["items"]["e1"]["issues"]
+    assert ("evidence metric value must be a finite supported number" not in issues) is valid
+    assert state["phases"]["observe"]["ready"] is valid
+
+
+@pytest.mark.parametrize(("other_value", "disjoint"), (
+    ("7-9", True),
+    (7, True),
+    ("5-8", False),
+    (6, False),
+))
+def test_range_and_scalar_conflicts_use_exact_interval_gap(tmp_path, other_value, disjoint):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, e1_value="3-6", e1_unit="rango porcentaje", stop_before_observe=True)
+    assert engine.gate(path, "observe")["ready"]
+    data = {
+        "origin": "simulated", "source": "second synthetic source", "date": "2026-09-26",
+        "locator": "independent fixture", "metric_key": "count", "scope": "fixture",
+        "unit": "rango porcentaje", "value": other_value, "tolerance": 0,
+    }
+    _put(path, "e2", "evidence", ["pr1"], data)
+    state = engine.get_state(path)
+    assert any("e1 vs e2" in issue for issue in state["items"]["e1"]["issues"]) is disjoint
+    assert state["phases"]["observe"]["ready"] is not disjoint
+
+    if disjoint:
+        _put(path, "e2", "evidence", ["pr1"], {**data, "tolerance": 1})
+        state = engine.get_state(path)
+        assert not any("e1 vs e2" in issue for issue in state["items"]["e1"]["issues"])
+        assert state["phases"]["observe"]["ready"]
+
+
+def test_range_prefix_normalizes_only_unit_representation_for_conflicts(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, e1_value="3-6", e1_unit="rango porcentaje", stop_before_observe=True)
+    base = {
+        "origin": "simulated", "source": "second synthetic source", "date": "2026-09-26",
+        "locator": "independent fixture", "metric_key": "count", "scope": "fixture",
+        "tolerance": 0,
+    }
+    for value, unit, conflict in ((10, "porcentaje", True),
+                                  ("7-9", "range porcentaje", True),
+                                  (10, "kilogramos", False)):
+        _put(path, "e2", "evidence", ["pr1"], {**base, "value": value, "unit": unit})
+        state = engine.get_state(path)
+        assert any("e1 vs e2" in issue for issue in state["items"]["e1"]["issues"]) is conflict
+        assert state["phases"]["observe"]["ready"] is not conflict
+
+    _put(path, "e2", "evidence", ["pr1"], {**base, "value": 10, "unit": "porcentaje", "tolerance": 4})
+    state = engine.get_state(path)
+    assert not any("e1 vs e2" in issue for issue in state["items"]["e1"]["issues"])
+    assert state["phases"]["observe"]["ready"]
+
+
+def test_contextual_range_cannot_be_used_as_scalar_calculation(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, e1_value="3-6", e1_unit="rango porcentaje", stop_before_observe=True)
+    data = dict(engine.get_state(path)["items"]["e1"]["data"])
+    data["calculation"] = {"operator": "product", "operands": [3, 2], "tolerance": 0}
+    _put(path, "e1", "evidence", ["pr1"], data)
+    assert "malformed or unsupported calculation" in engine.get_state(path)["items"]["e1"]["issues"]
+    assert not engine.gate(path, "observe")["ready"]
+
+
+@pytest.mark.parametrize(("field", "invalid", "expected_issue"), (
+    ("value", "unknown", "evidence metric value must be a finite supported number"),
+    ("value", "1e1000000000", "evidence metric value must be a finite supported number"),
+    ("value", "9" * 300, "evidence metric value must be a finite supported number"),
+    ("tolerance", -1, "evidence metric tolerance must be a nonnegative finite supported number"),
+    ("tolerance", "unknown", "evidence metric tolerance must be a nonnegative finite supported number"),
+    ("tolerance", "1e1000000000", "evidence metric tolerance must be a nonnegative finite supported number"),
+))
+def test_invalid_metric_numbers_block_without_spurious_conflict(tmp_path, field, invalid, expected_issue):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, stop_before_observe=True)
+    assert engine.gate(path, "observe")["ready"]
+    data = {
+        "origin": "simulated", "source": "second synthetic source", "date": "2026-09-26",
+        "locator": "independent fixture", "metric_key": "count", "scope": "fixture",
+        "unit": "count", "value": 10,
+    }
+    data[field] = invalid
+    _put(path, "e2", "evidence", ["pr1"], data)
+    state = engine.get_state(path)
+    assert expected_issue in state["items"]["e2"]["issues"]
+    assert not any("conflicting metric" in issue for id in ("e1", "e2")
+                   for issue in state["items"][id]["issues"])
+    assert not state["phases"]["observe"]["ready"]
+
+    data[field] = 0 if field == "tolerance" else 10
+    _put(path, "e2", "evidence", ["pr1"], data)
+    assert not engine.get_state(path)["items"]["e2"]["issues"]
+    assert engine.gate(path, "observe")["ready"]
+
+
+@pytest.mark.parametrize("operands", (
+    ["1e1000000000", 0],
+    [1] * 65,
+    ["1e500"] * 5,
+))
+def test_product_numeric_budget_blocks_observation_without_large_fraction(tmp_path, operands):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path, stop_before_observe=True)
+    data = {
+        "origin": "simulated", "source": "synthetic fixture", "date": "2026-09-26",
+        "locator": "bounded calculation", "metric_key": "bounded-product",
+        "scope": "calculation", "unit": "count", "value": 0,
+        "calculation": {"operator": "product", "operands": operands, "tolerance": 0},
+    }
+    _put(path, "e2", "evidence", ["pr1"], data)
+    assert "malformed or unsupported calculation" in engine.get_state(path)["items"]["e2"]["issues"]
+    assert not engine.gate(path, "observe")["ready"]
+
+
 def test_independent_resolution_required_for_manual_challenge(tmp_path):
     path = tmp_path / "case"
     engine.create_case(path, "Challenge control", "test", "human:fixture", approval_policy="fixture")
@@ -540,6 +726,117 @@ def test_rejection_after_advance_revokes_phase(tmp_path):
     engine.review_phase(path, "frame", "accept", "exclusion resolved in review record", "agent:reviewer")
     assert not engine.gate(path, "frame")["accepted"]
     engine.advance(path, "frame", "agent:analyst")
+    assert engine.gate(path, "frame")["accepted"]
+
+
+def test_exact_review_and_advance_retries_preserve_accepted_descendants(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    events = read_project(path)["events"]
+    review = next(event for event in reversed(events)
+                  if event["kind"] == "phase_review" and event["payload"]["phase"] == "frame")
+    marker = next(event for event in reversed(events)
+                  if event["kind"] == "phase_advance" and event["payload"]["phase"] == "frame")
+    before = (path / "organon.json").read_bytes()
+
+    assert engine.review_phase(path, "frame", "accept", "fixture review", "agent:reviewer") == review
+    assert engine.advance(path, "frame", "agent:lead") == marker
+    assert (path / "organon.json").read_bytes() == before
+    assert engine.gate(path, "frame")["advance_seq"] == marker["seq"]
+    assert all(engine.gate(path, phase.id)["accepted"] for phase in PHASES)
+
+
+def test_advance_retry_rejects_missing_or_different_actor_without_writing(tmp_path):
+    path = tmp_path / "case"
+    engine.create_case(path, "Actor retry control", "test", "human:fixture", approval_policy="fixture")
+    _put(path, "p1", "problem")
+    _put(path, "a1", "actor", ["p1"])
+    _put(path, "b1", "boundary", ["p1"])
+    _accept(path, "frame")
+    marker = next(event for event in reversed(read_project(path)["events"])
+                  if event["kind"] == "phase_advance")
+    before = (path / "organon.json").read_bytes()
+
+    with pytest.raises(engine.MethodError, match="nonempty actor"):
+        engine.advance(path, "frame", "")
+    with pytest.raises(engine.MethodError, match="nonempty actor"):
+        engine.advance(path, "frame", "   ")
+    with pytest.raises(engine.MethodError, match="already advanced by another actor"):
+        engine.advance(path, "frame", "agent:other")
+    assert engine.advance(path, "frame", " agent:lead ") == marker
+    assert (path / "organon.json").read_bytes() == before
+
+
+@pytest.mark.parametrize(("kind", "same_request"), (
+    ("phase_review", True), ("phase_review", False),
+    ("phase_advance", True), ("phase_advance", False),
+))
+def test_phase_transition_cas_race_recovers_only_exact_peer_event(tmp_path, monkeypatch, kind, same_request):
+    path = tmp_path / "case"
+    engine.create_case(path, "CAS retry control", "test", "human:fixture", approval_policy="fixture")
+    _put(path, "p1", "problem")
+    _put(path, "a1", "actor", ["p1"])
+    _put(path, "b1", "boundary", ["p1"])
+    if kind == "phase_advance":
+        engine.review_phase(path, "frame", "accept", "fixture review", "agent:reviewer")
+    before_count = len(read_project(path)["events"])
+    append = engine.append_event
+    winner = {}
+
+    def append_after_peer(path, event_kind, payload, actor, *, expected_seq):
+        assert event_kind == kind
+        peer_payload = payload if same_request or kind == "phase_advance" else {**payload, "reason": "different peer review"}
+        peer_actor = actor if same_request or kind == "phase_review" else "agent:other"
+        winner["event"] = append(path, event_kind, peer_payload, peer_actor, expected_seq=expected_seq)
+        return append(path, event_kind, payload, actor, expected_seq=expected_seq)
+
+    monkeypatch.setattr(engine, "append_event", append_after_peer)
+    def operation():
+        if kind == "phase_review":
+            return engine.review_phase(path, "frame", "accept", "fixture review", "agent:reviewer")
+        return engine.advance(path, "frame", "agent:lead")
+
+    if same_request:
+        assert operation() == winner["event"]
+    else:
+        with pytest.raises(engine.ConflictError, match="revision conflict"):
+            operation()
+    assert len(read_project(path)["events"]) == before_count + 1
+    assert read_project(path)["events"][-1] == winner["event"]
+
+
+def test_new_review_and_upstream_revision_require_fresh_markers(tmp_path):
+    path = tmp_path / "case"
+    engine.create_case(path, "Review and revision control", "test", "human:fixture", approval_policy="fixture")
+    _put(path, "p1", "problem")
+    _put(path, "a1", "actor", ["p1"])
+    _put(path, "b1", "boundary", ["p1"])
+    _accept(path, "frame")
+    original = engine.gate(path, "frame")
+
+    revised_review = engine.review_phase(path, "frame", "accept", "clarified reason", "agent:reviewer")
+    assert not engine.gate(path, "frame")["accepted"]
+    revised_marker = engine.advance(path, "frame", "agent:lead")
+    assert revised_marker["payload"]["review_seq"] == revised_review["seq"]
+    assert revised_marker["seq"] != original["advance_seq"]
+
+    another_reviewer = engine.review_phase(path, "frame", "accept", "clarified reason", "agent:second-reviewer")
+    assert another_reviewer["seq"] != revised_review["seq"]
+    assert not engine.gate(path, "frame")["accepted"]
+    engine.advance(path, "frame", "agent:lead")
+
+    _put(path, "p1", "problem", text="revised problem")
+    _put(path, "a1", "actor", ["p1"])
+    _put(path, "b1", "boundary", ["p1"])
+    changed = engine.gate(path, "frame")
+    assert changed["ready"]
+    assert changed["snapshot"] != original["snapshot"]
+    assert not changed["reviewed"] and not changed["accepted"]
+    fresh_review = engine.review_phase(path, "frame", "accept", "reviewed revised problem", "agent:reviewer")
+    fresh_marker = engine.advance(path, "frame", "agent:lead")
+    assert fresh_marker["payload"]["review_seq"] == fresh_review["seq"]
+    assert fresh_marker["payload"]["snapshot"] == changed["snapshot"]
+    assert fresh_marker["seq"] != revised_marker["seq"]
     assert engine.gate(path, "frame")["accepted"]
 
 

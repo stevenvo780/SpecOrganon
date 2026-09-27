@@ -13,6 +13,7 @@ import math
 import os
 import re
 from decimal import Decimal, InvalidOperation
+from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
@@ -22,8 +23,17 @@ from .workflow import KIND_TO_PHASE, KINDS, PHASES, PHASE_BY_ID
 
 
 ITEM_ID = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,63}$")
+_RANGE_NUMBER = r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
+_CONTEXTUAL_RANGE = re.compile(rf"\s*({_RANGE_NUMBER})\s*[-–]\s*({_RANGE_NUMBER})\s*")
 VERDICTS = {"accept", "reject"}
 _PUT_MAX_RETRIES = 3
+# Keep exact rational comparisons bounded even for compact inputs such as
+# "1e1000000000"; accepted values still cover ordinary scientific measurements.
+_METRIC_MAX_TEXT = 1024
+_METRIC_MAX_DIGITS = 256
+_METRIC_MAX_EXPONENT = 512
+_PRODUCT_MAX_OPERANDS = 64
+_PRODUCT_MAX_SPAN = 2048
 
 
 class MethodError(LedgerError):
@@ -116,9 +126,9 @@ def _project(path: str | Path) -> dict[str, Any]:
                 "review_seq": payload.get("review_seq", review["seq"] if review else None),
             }
         elif kind == "phase_review":
-            state["phase_reviews"].append({"seq": seq, "actor": event["actor"], **payload})
+            state["phase_reviews"].append({"seq": seq, "actor": event["actor"], **payload, "_event": event})
         elif kind == "phase_advance":
-            state["advances"].append({"seq": seq, "actor": event["actor"], **payload})
+            state["advances"].append({"seq": seq, "actor": event["actor"], **payload, "_event": event})
         else:
             raise MethodError(f"unknown event type at sequence {seq}: {kind}")
     return state
@@ -217,17 +227,21 @@ def _automatic_conflicts(state: dict[str, Any], active_resolutions: set[int]) ->
             continue
         data = item["data"]
         if all(key in data for key in ("metric_key", "scope", "unit", "value")):
-            groups.setdefault((str(data["metric_key"]), str(data["scope"]), str(data["unit"])), []).append(item)
+            group = (str(data["metric_key"]), str(data["scope"]), _metric_comparison_unit(data["unit"]))
+            groups.setdefault(group, []).append(item)
     issues: dict[str, list[str]] = {}
     for group, members in groups.items():
         for i, left in enumerate(members):
             for right in members[i + 1 :]:
-                try:
-                    a, b = float(left["data"]["value"]), float(right["data"]["value"])
-                    tolerance = max(float(left["data"].get("tolerance", 0)), float(right["data"].get("tolerance", 0)))
-                except (TypeError, ValueError):
+                a, b = _metric_interval(left["data"]), _metric_interval(right["data"])
+                left_tolerance = _metric_numeric(left["data"].get("tolerance", 0))
+                right_tolerance = _metric_numeric(right["data"].get("tolerance", 0))
+                if (any(value is None for value in (a, b, left_tolerance, right_tolerance))
+                        or left_tolerance < 0 or right_tolerance < 0):
                     continue
-                if math.isfinite(a) and math.isfinite(b) and abs(a - b) > tolerance:
+                tolerance = max(left_tolerance, right_tolerance)
+                gap = max(Fraction(b[0]) - Fraction(a[1]), Fraction(a[0]) - Fraction(b[1]), Fraction(0))
+                if gap > Fraction(tolerance):
                     if frozenset((left["id"], right["id"])) in resolved_pairs:
                         continue
                     label = f"conflicting metric {group[0]} in {group[1]}: {left['id']} vs {right['id']}"
@@ -247,17 +261,27 @@ def _item_issues(item: dict[str, Any]) -> list[str]:
                 issues.append(f"evidence lacks {field}")
         if data.get("origin") == "observed" and not data.get("method"):
             issues.append("observed evidence lacks collection method")
+        if all(field in data for field in ("metric_key", "scope", "unit", "value")):
+            if _metric_interval(data) is None:
+                issues.append("evidence metric value must be a finite supported number")
+            tolerance = _metric_numeric(data.get("tolerance", 0))
+            if tolerance is None or tolerance < 0:
+                issues.append("evidence metric tolerance must be a nonnegative finite supported number")
         calc = data.get("calculation")
         if calc is not None:
             try:
-                if calc["operator"] != "product" or not isinstance(calc["operands"], list) or not calc["operands"]:
+                if (calc["operator"] != "product" or not isinstance(calc["operands"], list)
+                        or not 0 < len(calc["operands"]) <= _PRODUCT_MAX_OPERANDS):
                     raise ValueError("unsupported calculation")
-                expected = math.prod(float(value) for value in calc["operands"])
-                reported = float(data["value"])
-                tolerance = float(calc.get("tolerance", 0))
-                if not all(math.isfinite(v) for v in (expected, reported, tolerance)) or tolerance < 0:
-                    raise ValueError("non-finite calculation")
-                if abs(expected - reported) > tolerance:
+                operands = [_metric_numeric(value) for value in calc["operands"]]
+                reported = _metric_numeric(data["value"])
+                tolerance = _metric_numeric(calc.get("tolerance", 0))
+                if any(value is None for value in operands) or reported is None or tolerance is None or tolerance < 0:
+                    raise ValueError("invalid calculation number")
+                if sum(len(value.as_tuple().digits) + abs(value.as_tuple().exponent) for value in operands) > _PRODUCT_MAX_SPAN:
+                    raise ValueError("calculation exceeds exact arithmetic budget")
+                expected = math.prod((Fraction(value) for value in operands), start=Fraction(1))
+                if abs(expected - Fraction(reported)) > Fraction(tolerance):
                     issues.append(f"reported calculation {reported} differs from recomputed {expected}")
             except (KeyError, TypeError, ValueError, OverflowError):
                 issues.append("malformed or unsupported calculation")
@@ -300,6 +324,47 @@ def _numeric(value: Any) -> Decimal | None:
     except (InvalidOperation, ValueError):
         return None
     return number if number.is_finite() else None
+
+
+def _metric_numeric(value: Any) -> Decimal | None:
+    """Accept finite decimal values whose exact fraction is safe to construct."""
+    if isinstance(value, str) and len(value) > _METRIC_MAX_TEXT:
+        return None
+    number = _numeric(value)
+    if number is None:
+        return None
+    parts = number.as_tuple()
+    if len(parts.digits) > _METRIC_MAX_DIGITS or abs(parts.exponent) > _METRIC_MAX_EXPONENT:
+        return None
+    return number
+
+
+def _metric_interval(data: dict[str, Any]) -> tuple[Decimal, Decimal] | None:
+    """Use points for scalars and closed intervals for explicitly declared ranges."""
+    unit, value = data.get("unit"), data.get("value")
+    number = _metric_numeric(value)
+    if number is not None:
+        return number, number
+    if (not isinstance(unit, str) or not unit.strip().casefold().startswith(("rango ", "range "))
+            or not isinstance(value, str) or len(value) > _METRIC_MAX_TEXT):
+        return None
+    match = _CONTEXTUAL_RANGE.fullmatch(value)
+    if match is None:
+        return None
+    lower, upper = (_metric_numeric(part) for part in match.groups())
+    if lower is None or upper is None or lower > upper:
+        return None
+    return lower, upper
+
+
+def _metric_comparison_unit(unit: Any) -> str:
+    """Remove only the explicit range representation prefix from a unit."""
+    rendered = str(unit)
+    stripped = rendered.strip()
+    for prefix in ("rango ", "range "):
+        if stripped.casefold().startswith(prefix):
+            return stripped[len(prefix):].strip()
+    return rendered
 
 
 def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) -> list[str]:
@@ -965,19 +1030,48 @@ def gate(path: str | Path, phase: str) -> dict[str, Any]:
     return _phase_statuses(_project(path))[phase]
 
 
+def _matching_phase_review(state: dict[str, Any], payload: dict[str, Any], actor: str) -> dict[str, Any] | None:
+    for review in reversed(state["phase_reviews"]):
+        if review["phase"] == payload["phase"] and review["snapshot"] == payload["snapshot"]:
+            if review["actor"] == actor and all(review[key] == value for key, value in payload.items()):
+                return review["_event"]
+            break
+    return None
+
+
+def _active_phase_advance(state: dict[str, Any], advance_seq: int) -> dict[str, Any]:
+    return next(marker for marker in state["advances"] if marker["seq"] == advance_seq)
+
+
 def review_phase(path: str | Path, phase: str, verdict: str, reason: str, actor: str) -> dict[str, Any]:
     state = _project(path)
     if phase not in PHASE_BY_ID or verdict not in VERDICTS or not isinstance(reason, str) or not reason.strip():
         raise MethodError("phase review needs a known phase, accept/reject and reason")
+    if not isinstance(actor, str) or not actor.strip():
+        raise MethodError("phase review needs a nonempty actor")
     status = _phase_statuses(state)[phase]
     if verdict == "accept" and not status["ready"]:
         raise MethodError("phase cannot be accepted: " + "; ".join(status["blockers"]))
+    normalized_actor = actor.strip()
     authors = {item["author"] for item in state["items"].values() if KIND_TO_PHASE[item["kind"]] == phase}
-    payload = {"phase": phase, "verdict": verdict, "reason": reason.strip(), "snapshot": status["snapshot"], "independent": actor not in authors}
-    return append_event(path, "phase_review", payload, actor, expected_seq=state["revision"])
+    payload = {"phase": phase, "verdict": verdict, "reason": reason.strip(), "snapshot": status["snapshot"], "independent": normalized_actor not in authors}
+    if existing := _matching_phase_review(state, payload, normalized_actor):
+        return existing
+    try:
+        return append_event(path, "phase_review", payload, actor, expected_seq=state["revision"])
+    except ConflictError:
+        current = _project(path)
+        current_status = _phase_statuses(current)[phase]
+        if current_status["snapshot"] == status["snapshot"] and (verdict != "accept" or current_status["ready"]):
+            if existing := _matching_phase_review(current, payload, normalized_actor):
+                return existing
+        raise
 
 
 def advance(path: str | Path, phase: str, actor: str) -> dict[str, Any]:
+    if not isinstance(actor, str) or not actor.strip():
+        raise MethodError("phase advance needs a nonempty actor")
+    normalized_actor = actor.strip()
     state = _project(path)
     if phase not in PHASE_BY_ID:
         raise MethodError(f"unknown phase: {phase}")
@@ -989,7 +1083,22 @@ def advance(path: str | Path, phase: str, actor: str) -> dict[str, Any]:
         raise MethodError("phase needs an accepted review of its current snapshot")
     if phase == "validate" and not reviews[-1]["independent"]:
         raise MethodError("validation needs an independent review of its current snapshot")
-    return append_event(path, "phase_advance", {"phase": phase, "snapshot": status["snapshot"], "review_seq": reviews[-1]["seq"]}, actor, expected_seq=state["revision"])
+    if status["accepted"]:
+        marker = _active_phase_advance(state, status["advance_seq"])
+        if marker["actor"] != normalized_actor:
+            raise MethodError("phase already advanced by another actor")
+        return marker["_event"]
+    payload = {"phase": phase, "snapshot": status["snapshot"], "review_seq": reviews[-1]["seq"]}
+    try:
+        return append_event(path, "phase_advance", payload, actor, expected_seq=state["revision"])
+    except ConflictError:
+        current = _project(path)
+        current_status = _phase_statuses(current)[phase]
+        if current_status["accepted"] and current_status["snapshot"] == status["snapshot"]:
+            marker = _active_phase_advance(current, current_status["advance_seq"])
+            if marker["actor"] == normalized_actor and all(marker[key] == value for key, value in payload.items()):
+                return marker["_event"]
+        raise
 
 
 def trace(path: str | Path, id: str) -> dict[str, Any]:

@@ -224,6 +224,42 @@ def test_cli_and_real_stdio_mcp_share_state_and_gate(tmp_path):
     asyncio.run(exercise())
 
 
+def test_cli_and_mcp_retries_return_existing_phase_events_without_mutation(tmp_path):
+    case = tmp_path / "retry-case"
+    path = str(case)
+    cli("init", path, "--title", "Retry control", "--domain", "test", "--actor", "human:fixture",
+        "--approval-policy", "fixture")
+    cli("put", path, "p1", "--kind", "problem", "--text", "A problem", "--actor", "agent:writer")
+    cli("put", path, "a1", "--kind", "actor", "--text", "An actor", "--ref", "p1", "--actor", "agent:writer")
+    cli("put", path, "b1", "--kind", "boundary", "--text", "A boundary", "--ref", "p1",
+        "--actor", "agent:writer")
+    review = cli("review-phase", path, "frame", "--verdict", "accept", "--reason", "Fixture review",
+                 "--actor", "agent:reviewer")
+    marker = cli("advance", path, "frame", "--actor", "agent:writer")
+    before = (case / "organon.json").read_bytes()
+
+    async def exercise() -> None:
+        params = StdioServerParameters(command=str(MCP), cwd=str(tmp_path), env=os.environ.copy())
+        async with Client(params, mode="legacy") as client:
+            repeated_review = result_data(await client.call_tool("review_phase", {
+                "path": path, "phase": "frame", "verdict": "accept", "reason": "Fixture review",
+                "actor": "agent:reviewer",
+            }))
+            repeated_marker = result_data(await client.call_tool("advance", {
+                "path": path, "phase": "frame", "actor": "agent:writer",
+            }))
+            assert repeated_review == review
+            assert repeated_marker == marker
+            assert result_data(await client.call_tool("gate", {"path": path, "phase": "frame"}))["accepted"]
+
+    asyncio.run(exercise())
+    assert cli("review-phase", path, "frame", "--verdict", "accept", "--reason", "Fixture review",
+               "--actor", "agent:reviewer") == review
+    assert cli("advance", path, "frame", "--actor", "agent:writer") == marker
+    assert (case / "organon.json").read_bytes() == before
+    assert cli("gate", path, "frame")["advance_seq"] == marker["seq"]
+
+
 def test_bad_cli_json_preserves_case(tmp_path):
     case = tmp_path / "case"
     cli("init", str(case), "--title", "Case", "--domain", "test", "--actor", "human:fixture", "--approval-policy", "fixture")
