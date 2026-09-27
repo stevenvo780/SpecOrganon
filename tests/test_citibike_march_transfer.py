@@ -139,10 +139,16 @@ def test_included_march_ledger_keeps_approval_boundary() -> None:
         assert record[key] == hashlib.sha256(source.read_bytes()).hexdigest()
     assert record["source_parquet_sha256"] == archived["input_sha256"]
     assert record["criterion_5"] == "not_assessed"
-    assert state["phases"]["frame"]["accepted"]
-    assert state["phases"]["frame"]["independent_review"]
+    # The archived unsigned review remains readable but cannot satisfy the
+    # current signed-policy gate without external reviewer proof.
+    assert state["phases"]["frame"]["ready"]
+    assert not state["phases"]["frame"]["accepted"]
+    assert not state["phases"]["frame"]["independent_review"]
+    assert state["phases"]["frame"]["review_provenance"] == "legacy_unverified"
+    assert not state["phases"]["frame"]["review_signature_verified"]
     assert not state["phases"]["critique"]["accepted"]
     assert state["phases"]["critique"]["blockers"] == [
-        "n_scope requires a verified human approval"
+        "n_scope requires a verified human approval",
+        "previous phase is not currently accepted",
     ]
     assert not state["phases"]["observe"]["accepted"]

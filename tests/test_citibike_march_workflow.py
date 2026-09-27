@@ -46,7 +46,8 @@ def test_installed_cli_mcp_resume_and_replay_leave_real_ledgers_intact(tmp_path:
     }
     assert receipt["review"] == {
         "seq": 23, "actor": probe.REVIEWER, "independent": True,
-        "scope": "automated_actor_separation_only",
+        "signature_verified": True,
+        "scope": "synthetic_reviewer_identity_and_actor_separation_only",
     }
     assert {"run", "status", "trace", "gate"} <= set(receipt["mcp"]["discovered_tools"])
     assert receipt["mcp"]["resume"] == {

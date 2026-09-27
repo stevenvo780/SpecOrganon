@@ -6,7 +6,11 @@ import json
 import os
 import subprocess
 import sys
+import base64
 from pathlib import Path
+
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,7 +50,8 @@ def test_documented_citibike_revision_propagates_through_signed_case(
         item["text"] for item in seed["items"] if item["id"] == "s_proxy"
     )
 
-    # Keep this documentary replay independent of local approval and anchor settings.
+    # Start independent of local approval and anchor settings. The later synthetic
+    # reviewer gets a fresh external public-key registry for this disposable case.
     env = os.environ.copy()
     for key in (
         "ORGANON_APPROVERS_FILE",
@@ -141,6 +146,30 @@ def test_documented_citibike_revision_propagates_through_signed_case(
         item["id"] == "s_proxy" and item["version"] == 2 for item in trace["ancestors"]
     )
 
+    reviewer = "agent:citibike_reviewer"
+    reviewer_key = Ed25519PrivateKey.generate()
+    public_key = reviewer_key.public_key().public_bytes(
+        encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw,
+    )
+    registry = tmp_path / "synthetic-reviewer-registry.json"
+    registry.write_text(json.dumps({"schema": 2, "cases": {
+        state["project"]["case_id"]: {
+            "path": str(case.resolve(strict=True)),
+            "project_sha256": state["project_sha256"],
+            "approvers": {},
+            "phase_reviewers": {reviewer: base64.b64encode(public_key).decode("ascii")},
+        },
+    }}), encoding="utf-8")
+    env["ORGANON_APPROVERS_FILE"] = str(registry)
+    review_reason = "Independent review of documentary scope and corrected proxy"
+    challenge = _cli(
+        env, "phase-review-challenge", str(case), "frame", "--verdict", "accept",
+        "--reason", review_reason, "--actor", reviewer,
+    )
+    signature = base64.b64encode(reviewer_key.sign(
+        base64.b64decode(challenge["message_base64"], validate=True)
+    )).decode("ascii")
+
     review = _cli(
         env,
         "review-phase",
@@ -149,9 +178,11 @@ def test_documented_citibike_revision_propagates_through_signed_case(
         "--verdict",
         "accept",
         "--reason",
-        "Independent review of documentary scope and corrected proxy",
+        review_reason,
         "--actor",
-        "agent:citibike_reviewer",
+        reviewer,
+        "--signature",
+        signature,
     )
     assert review["payload"]["independent"] is True
     advance = _cli(

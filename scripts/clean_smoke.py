@@ -39,7 +39,8 @@ def main() -> None:
     parity_operations_seen: set[str] = set()
     expected_cli_commands = {
         "init", "put", "status", "review", "approve", "approval-challenge", "challenge",
-        "resolve-challenge", "gate", "review-phase", "advance", "trace", "next-task", "run",
+        "resolve-challenge", "gate", "review-phase", "phase-review-challenge",
+        "advance", "trace", "next-task", "run",
     }
     expected_mcp_tools = {name.replace("-", "_") for name in expected_cli_commands}
     published_mcp_tools = expected_mcp_tools | {
@@ -255,9 +256,14 @@ def main() -> None:
                 signed_actor = "human:synthetic-signer"
                 signed_reason = "Synthetic signature for the exact normative commitment"
                 signer = Ed25519PrivateKey.generate()
+                reviewer_signer = Ed25519PrivateKey.generate()
+                reviewer_actor = "agent:reviewer"
                 initial = command("init", signed_case, "--title", "Synthetic signed approval", "--domain", "fixture", "--actor", signed_actor)
                 assert initial["project"]["approval_policy"] == "signed"
                 public_key = signer.public_key().public_bytes(
+                    encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw,
+                )
+                reviewer_public_key = reviewer_signer.public_key().public_bytes(
                     encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw,
                 )
                 trust_file.write_text(json.dumps({
@@ -266,14 +272,39 @@ def main() -> None:
                         "path": str(signed_dir.resolve(strict=True)),
                         "project_sha256": initial["project_sha256"],
                         "approvers": {signed_actor: base64.b64encode(public_key).decode("ascii")},
+                        "phase_reviewers": {
+                            reviewer_actor: base64.b64encode(reviewer_public_key).decode("ascii")
+                        },
                     }},
                 }), encoding="utf-8")
                 assert command("status", signed_case)["approval_trust"] == "configured"
+
+                async def signed_phase_review(phase: str, reason: str) -> dict:
+                    arguments = {
+                        "path": signed_case, "phase": phase, "verdict": "accept",
+                        "reason": reason, "actor": reviewer_actor,
+                    }
+                    challenge = command(
+                        "phase-review-challenge", signed_case, phase, "--verdict", "accept",
+                        "--reason", reason, "--actor", reviewer_actor,
+                    )
+                    assert challenge == data(await call_tool("phase_review_challenge", arguments))
+                    parity_operations_seen.add("phase_review_challenge")
+                    raw = base64.b64decode(challenge["message_base64"], validate=True)
+                    assert hashlib.sha256(raw).hexdigest() == challenge["message_sha256"]
+                    signature = base64.b64encode(reviewer_signer.sign(raw)).decode("ascii")
+                    return command(
+                        "review-phase", signed_case, phase, "--verdict", "accept",
+                        "--reason", reason, "--actor", reviewer_actor,
+                        "--signature", signature,
+                    )
+
                 command("put", signed_case, "p1", "--kind", "problem", "--text", "Synthetic problem", "--actor", "agent:writer")
                 command("put", signed_case, "a1", "--kind", "actor", "--text", "Synthetic affected group", "--ref", "p1", "--actor", "agent:writer")
                 command("put", signed_case, "b1", "--kind", "boundary", "--text", "Synthetic boundary", "--ref", "p1", "--actor", "agent:writer")
-                command("review-phase", signed_case, "frame", "--verdict", "accept", "--reason", "Synthetic frame review", "--actor", "agent:reviewer")
+                await signed_phase_review("frame", "Synthetic frame review")
                 command("advance", signed_case, "frame", "--actor", "agent:runner")
+                assert command("gate", signed_case, "frame")["review_signature_verified"]
                 for item_id, kind, description in (
                     ("c1", "concept", "Synthetic concept"),
                     ("s1", "assumption", "Synthetic assumption"),
@@ -335,9 +366,10 @@ def main() -> None:
                 signed_gate = command("gate", signed_case, "critique")
                 assert signed_gate == data(await call_tool("gate", {"path": signed_case, "phase": "critique"}))
                 assert signed_gate["ready"] and not signed_gate["accepted"]
-                command("review-phase", signed_case, "critique", "--verdict", "accept", "--reason", "Synthetic independent review", "--actor", "agent:reviewer")
+                await signed_phase_review("critique", "Synthetic independent review")
                 command("advance", signed_case, "critique", "--actor", "agent:runner")
-                assert command("gate", signed_case, "critique")["accepted"]
+                accepted_critique = command("gate", signed_case, "critique")
+                assert accepted_critique["accepted"] and accepted_critique["review_signature_verified"]
 
                 approved_ledger = (signed_dir / "organon.json").read_bytes()
                 trust_file.write_text(json.dumps({"schema": 2, "cases": {}}), encoding="utf-8")

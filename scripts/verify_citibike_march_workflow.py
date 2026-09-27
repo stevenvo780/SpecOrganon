@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import base64
 import hashlib
 import json
 import os
@@ -20,6 +21,8 @@ from typing import Any
 
 from mcp.client import Client
 from mcp.client.stdio import StdioServerParameters
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -154,6 +157,20 @@ def run_probe() -> dict[str, Any]:
         )
         if initialized["project"]["approval_policy"] != "signed":
             raise AssertionError("temporary case did not use signed approval policy")
+        reviewer_key = Ed25519PrivateKey.generate()
+        public_key = reviewer_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw,
+        )
+        registry = work / "synthetic-reviewer-registry.json"
+        registry.write_text(json.dumps({"schema": 2, "cases": {
+            initialized["project"]["case_id"]: {
+                "path": str(case.resolve(strict=True)),
+                "project_sha256": initialized["project_sha256"],
+                "approvers": {},
+                "phase_reviewers": {REVIEWER: base64.b64encode(public_key).decode("ascii")},
+            },
+        }}), encoding="utf-8")
+        env["ORGANON_APPROVERS_FILE"] = str(registry)
         first = _cli(
             env, "run", str(case), "--manifest", str(manifest_path), "--actor", seed["actor"]
         )
@@ -165,10 +182,20 @@ def run_probe() -> dict[str, Any]:
         if before_review["revision"] != 22 or not before_review["phases"]["frame"]["ready"]:
             raise AssertionError("first checkpoint did not leave 22 items ready for frame review")
 
+        review_reason = (
+            "Automated actor-separation transport probe for historical sample frame; "
+            "no human or field assessment"
+        )
+        challenge = _cli(
+            env, "phase-review-challenge", str(case), "frame", "--verdict", "accept",
+            "--reason", review_reason, "--actor", REVIEWER,
+        )
+        signature = base64.b64encode(reviewer_key.sign(
+            base64.b64decode(challenge["message_base64"], validate=True)
+        )).decode("ascii")
         reviewed = _cli(
             env, "review-phase", str(case), "frame", "--verdict", "accept",
-            "--reason", "Automated actor-separation transport probe for historical sample frame; no human or field assessment",
-            "--actor", REVIEWER,
+            "--reason", review_reason, "--actor", REVIEWER, "--signature", signature,
         )
         if reviewed["actor"] == seed["actor"] or reviewed["payload"]["independent"] is not True:
             raise AssertionError("frame review was not independent of its author")
@@ -226,7 +253,8 @@ def run_probe() -> dict[str, Any]:
             or any(event["kind"] == "approval" for event in events)
         ):
             raise AssertionError("unapproved norm did not block critique")
-        if not cli_status["phases"]["frame"]["accepted"]:
+        if not (cli_status["phases"]["frame"]["accepted"]
+                and cli_status["phases"]["frame"]["review_signature_verified"]):
             raise AssertionError("frame did not advance")
 
         receipt = {
@@ -246,7 +274,8 @@ def run_probe() -> dict[str, Any]:
             "review": {
                 "seq": review_event["seq"], "actor": review_event["actor"],
                 "independent": review_event["payload"]["independent"],
-                "scope": "automated_actor_separation_only",
+                "signature_verified": cli_status["phases"]["frame"]["review_signature_verified"],
+                "scope": "synthetic_reviewer_identity_and_actor_separation_only",
             },
             "mcp": {
                 "discovered_tools": discovered,

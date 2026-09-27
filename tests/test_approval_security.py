@@ -60,6 +60,32 @@ def _register(case: Path, signer) -> None:
     trust_file.write_text(json.dumps(registry), encoding="utf-8")
 
 
+def _register_phase_reviewer(case: Path, signer, actor: str = "agent:reviewer") -> Ed25519PrivateKey:
+    """Add an independent synthetic reviewer key to this case's external registry."""
+    _, trust_file = signer
+    key = Ed25519PrivateKey.generate()
+    public_key = key.public_key().public_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PublicFormat.Raw,
+    )
+    registry = json.loads(trust_file.read_text(encoding="utf-8"))
+    case_id = read_project(case)["project"]["case_id"]
+    registry["cases"][case_id].setdefault("phase_reviewers", {})[actor] = (
+        base64.b64encode(public_key).decode("ascii")
+    )
+    trust_file.write_text(json.dumps(registry), encoding="utf-8")
+    return key
+
+
+def _signed_phase_review(
+    case: Path, key: Ed25519PrivateKey, phase: str, reason: str,
+    actor: str = "agent:reviewer",
+) -> dict:
+    challenge = engine.phase_review_challenge(case, phase, "accept", reason, actor)
+    return engine.review_phase(case, phase, "accept", reason, actor,
+                               signature=_sign(key, challenge))
+
+
 def _write_rehashed_ledger(case: Path, ledger: dict) -> None:
     prior = "0" * 64
     for seq, event in enumerate(ledger["events"], start=1):
@@ -280,8 +306,9 @@ def test_intervening_event_invalidates_old_challenge(tmp_path, signer):
 def test_removing_trust_reopens_an_accepted_phase(tmp_path, signer):
     key, trust_file = signer
     case = _case(tmp_path, signer)
+    reviewer_key = _register_phase_reviewer(case, signer)
     engine.put_item(case, "b1", "boundary", "Case boundary", ["p1"], {}, "agent:writer")
-    engine.review_phase(case, "frame", "accept", "Fixture review of framing", "agent:reviewer")
+    _signed_phase_review(case, reviewer_key, "frame", "Synthetic review of framing")
     engine.advance(case, "frame", "agent:lead")
     engine.put_item(case, "c1", "concept", "Relevant concept", ["p1"], {}, "agent:writer")
     engine.put_item(case, "s1", "assumption", "An explicit assumption", ["p1"], {}, "agent:writer")
@@ -290,7 +317,7 @@ def test_removing_trust_reopens_an_accepted_phase(tmp_path, signer):
     signature = _sign(key, _challenge(case))
     engine.approve(case, "n1", REASON, ACTOR, signature=signature)
     assert engine.gate(case, "critique")["ready"]
-    engine.review_phase(case, "critique", "accept", "Independent review", "agent:reviewer")
+    _signed_phase_review(case, reviewer_key, "critique", "Independent synthetic review")
     engine.advance(case, "critique", "agent:lead")
     assert engine.gate(case, "critique")["accepted"]
 
@@ -351,6 +378,7 @@ def _signed_field_case(tmp_path: Path, signer) -> tuple[Path, dict]:
     """Build all eight prior phases with explicitly synthetic, signed test records."""
     key, _ = signer
     case = _case(tmp_path, signer, "signed-field-claim")
+    reviewer_key = _register_phase_reviewer(case, signer)
 
     def put(item_id: str, kind: str, refs=(), data=None, text: str | None = None) -> None:
         engine.put_item(case, item_id, kind, text or item_id, list(refs), data or {}, "agent:writer")
@@ -358,7 +386,7 @@ def _signed_field_case(tmp_path: Path, signer) -> tuple[Path, dict]:
     def accept(phase: str) -> None:
         status = engine.gate(case, phase)
         assert status["ready"], (phase, status["blockers"])
-        engine.review_phase(case, phase, "accept", "Independent synthetic review", "agent:reviewer")
+        _signed_phase_review(case, reviewer_key, phase, "Independent synthetic review")
         engine.advance(case, phase, "agent:lead")
         assert engine.gate(case, phase)["accepted"]
 

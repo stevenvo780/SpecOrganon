@@ -171,8 +171,13 @@ def test_full_synthetic_workflow_and_late_evidence_revision(tmp_path):
     assert "e1" in {item["id"] for item in engine.trace(path, "req1")["ancestors"]}
 
 
-@pytest.mark.parametrize("case_name", ("mango", "citibike", "synthetic_multiagent"))
-def test_existing_ledgers_without_item_reviews_keep_accepted_frame(case_name):
+@pytest.mark.parametrize("case_name,accepted", (
+    ("mango", False), ("citibike", False), ("synthetic_multiagent", True),
+))
+def test_existing_ledgers_without_item_reviews_keep_historical_review_status(
+    case_name, accepted, monkeypatch,
+):
+    monkeypatch.delenv("ORGANON_APPROVERS_FILE", raising=False)
     path = Path(__file__).resolve().parents[1] / "cases" / case_name
     events = read_project(path)["events"]
     assert not any(event["kind"] == "item_review" for event in events)
@@ -181,7 +186,13 @@ def test_existing_ledgers_without_item_reviews_keep_accepted_frame(case_name):
 
     frame = engine.gate(path, "frame")
     assert frame["snapshot"] == recorded_review["payload"]["snapshot"]
-    assert frame["ready"] and frame["reviewed"] and frame["accepted"]
+    assert frame["ready"] and frame["accepted"] is accepted
+    if accepted:
+        assert frame["reviewed"] and frame["independent_review"]
+    else:
+        assert not frame["reviewed"] and not frame["independent_review"]
+        assert frame["review_provenance"] == "legacy_unverified"
+        assert not frame["review_signature_verified"]
 
 
 def test_committed_no_demostrado_ledger_remains_accepted_without_result_test_link():
@@ -1606,7 +1617,8 @@ def test_signed_field_success_rejects_self_declared_attestation(tmp_path, monkey
     monkeypatch.setattr(engine, "_project", lambda _path: signed_state)
     status = engine.gate(path, "validate")
     assert status["blockers"] == [
-        "ass1 decisive field verdict needs verified field effect analysis and source custody"
+        "ass1 decisive field verdict needs verified field effect analysis and source custody",
+        "previous phase is not currently accepted",
     ]
     assert not status["ready"] and not status["accepted"]
 
