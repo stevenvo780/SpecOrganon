@@ -1,7 +1,8 @@
 """Cooperative host-local release order for an unsealed candidate schedule.
 
 Every invoker must use the same private ``gate_root``. The registry records
-attempt 1 only. Its events and terminal evidence are locally declared bytes:
+attempt 1 and up to ten study-wide external-failure retries. Its events and
+terminal evidence are locally declared bytes:
 neither provider telemetry nor an external custodian is authenticated here.
 The effective UID can rewrite its own registry or move its directories, so
 this is a coordination aid, not a confirmatory release seal.
@@ -9,16 +10,24 @@ this is a coordination aid, not a confirmatory release seal.
 CLI::
 
     python scripts/local_block_release_gate.py terminal SCHEDULE RUN_ID GATE_ROOT \
-        completed TRACE_SHA256 EVIDENCE.json
-    python scripts/local_block_release_gate.py verify SCHEDULE RUN_ID GATE_ROOT RELEASE_DIR
+        completed TRACE_SHA256 EVIDENCE.json [--attempt-number N]
+    python scripts/local_block_release_gate.py verify SCHEDULE RUN_ID GATE_ROOT \
+        RELEASE_DIR [--attempt-number N]
+    python scripts/local_block_release_gate.py stop SCHEDULE RUN_ID GATE_ROOT \
+        REASON EVIDENCE.json [--attempt-number N]
 
 Terminal evidence is a strict JSON object containing schema=1,
-schedule_sha256, run_id, run_sha256, attempt_number=1, release_dir, status,
+schedule_sha256, run_id, run_sha256, attempt_number, release_dir, status,
 and trace_sha256. Additional receipt fields may be present. Its path and
 SHA-256 of its bytes are recorded and checked again before later releases.
 ``completed`` also declares artifact_sha256; ``external_failure`` declares
 incident_sha256. These digests are not checked against artifact or provider
 bytes by this local gate.
+
+An external failure keeps its block open until a retry resolves it or an
+explicit nonretryable stop is recorded. A stop is a local declaration backed
+by a strict reason record, not a provider-authenticated determination. Retry
+quota exhaustion never stops a block automatically.
 """
 
 from __future__ import annotations
@@ -51,6 +60,7 @@ SCHEMA = 1
 CLASSIFICATION = "development_local_block_release_gate_unsealed"
 CLAIM_CLASSIFICATION = "development_local_block_release_claim_unsealed"
 TERMINAL_CLASSIFICATION = "development_local_block_terminal_unsealed"
+STOPPED_CLASSIFICATION = "development_local_block_stop_unsealed"
 STATE_NAME = "state.json"
 PENDING_NAME = ".pending.json"
 MAX_STATE_BYTES = 8 * 1024 * 1024
@@ -76,11 +86,24 @@ TERMINAL_FIELDS = frozenset({
     "release_dir", "status", "trace_sha256", "evidence_path",
     "evidence_sha256", "previous_event_sha256", "event_sha256",
 })
+STOPPED_FIELDS = frozenset({
+    "kind", "sequence", "schedule_sha256", "run_id", "run_sha256",
+    "block_id", "release_block_order", "order_position", "attempt_number",
+    "release_dir", "terminal_sha256", "reason", "evidence_path",
+    "evidence_sha256", "previous_event_sha256", "event_sha256",
+})
+STOP_EVIDENCE_FIELDS = frozenset({
+    "schema", "classification", "decision", "schedule_sha256", "run_id",
+    "run_sha256", "block_id", "attempt_number", "release_dir",
+    "terminal_sha256", "incident_sha256", "reason",
+})
 STATE_FIELDS = frozenset({
     "schema", "classification", "schedule_sha256", "sequence",
     "head_sha256", "events", "state_sha256",
 })
 TERMINAL_STATUSES = frozenset({"completed", "truncated", "external_failure"})
+MAX_RETRY_SLOTS = 10
+AttemptKey = tuple[str, int]
 
 
 class BlockReleaseError(ValueError):
@@ -153,8 +176,9 @@ def _schedule(raw: Any) -> dict[str, Any]:
     try:
         snapshot = copy.deepcopy(raw)
         schedule, _, _ = _validate_schedule(snapshot)
-        if schedule["study_limits"]["max_simultaneous_runs"] != 4:
-            raise BlockReleaseError("schedule simultaneous release cap must be four")
+        if (schedule["study_limits"]["max_simultaneous_runs"] != 4
+            or schedule["study_limits"]["external_retry_slots_studywide"] != MAX_RETRY_SLOTS):
+            raise BlockReleaseError("schedule release caps must be four active and ten retries")
         return schedule
     except BlockReleaseError:
         raise
@@ -265,9 +289,72 @@ def _evidence(path: Path, expected: dict[str, Any], *, durable: bool = False) ->
     return _sha(data)
 
 
+def _stop_reason(value: str) -> str:
+    if (type(value) is not str or not 1 <= len(value) <= 1024
+        or value != value.strip() or any(ord(char) < 32 for char in value)):
+        raise BlockReleaseError("stop reason must be nonempty bounded single-line text")
+    return value
+
+
+def _incident_sha256(terminal: dict[str, Any]) -> str:
+    evidence_path = _absolute_path(terminal["evidence_path"], "terminal evidence")
+    item = _strict_json(_read_external_file(evidence_path, MAX_EVIDENCE_BYTES,
+                                            "terminal evidence"), "terminal evidence")
+    incident = item.get("incident_sha256")
+    if not _is_sha256(incident):
+        raise BlockReleaseError("stopped block lacks a terminal incident digest")
+    return incident
+
+
+def _stop_evidence(path: Path, expected: dict[str, Any], *, durable: bool = False) -> str:
+    data = _read_external_file(path, MAX_EVIDENCE_BYTES, "stop evidence", durable=durable)
+    item = _strict_json(data, "stop evidence")
+    if set(item) != STOP_EVIDENCE_FIELDS or data != _canonical(item):
+        raise BlockReleaseError("stop evidence must be a canonical exact-field object")
+    for key, value in expected.items():
+        if type(item.get(key)) is not type(value) or item.get(key) != value:
+            raise BlockReleaseError(f"stop evidence {key} differs from terminal")
+    return _sha(data)
+
+
 def _manifest_digest(release_dir: str) -> str:
     manifest = _absolute_path(Path(release_dir) / "manifest.json", "release manifest")
     return _sha(_read_external_file(manifest, MAX_MANIFEST_BYTES, "release manifest"))
+
+
+def _replay_publication(schedule: dict[str, Any], run: dict[str, Any],
+                        release_dir: str, attempt_number: int,
+                        manifest_sha256: str) -> None:
+    """Recheck published manifest meaning without rehashing every asset on replay."""
+    from verify_released_run import ReleaseVerificationError, _validate_manifest
+
+    path = _absolute_path(Path(release_dir) / "manifest.json", "release manifest")
+    data = _read_external_file(path, MAX_MANIFEST_BYTES, "release manifest")
+    if _sha(data) != manifest_sha256:
+        raise BlockReleaseError("published manifest bytes changed")
+    manifest = _strict_json(data, "release manifest")
+    try:
+        checked, _digests, actual_attempt = _validate_manifest(manifest, schedule)
+    except ReleaseVerificationError as exc:
+        raise BlockReleaseError("published manifest is semantically invalid") from exc
+    if (checked["run_id"] != run["run_id"]
+        or checked["run_sha256"] != run["run_sha256"]
+        or actual_attempt != attempt_number):
+        raise BlockReleaseError("verified release differs from publication claim or attempt")
+
+
+def _verified_release(schedule: dict[str, Any], run: dict[str, Any],
+                      release_dir: str, attempt_number: int, context: str) -> None:
+    from verify_released_run import ReleaseVerificationError, verify_release
+
+    try:
+        verified = verify_release(schedule, release_dir)
+    except ReleaseVerificationError as exc:
+        raise BlockReleaseError(f"release payload cannot be verified for {context}") from exc
+    if (verified["run_id"] != run["run_id"]
+        or verified["run_sha256"] != run["run_sha256"]
+        or verified["attempt_number"] != attempt_number):
+        raise BlockReleaseError(f"verified release differs from {context} claim or attempt")
 
 
 def _empty_state(schedule_sha256: str) -> dict[str, Any]:
@@ -290,37 +377,79 @@ def _append(state: dict[str, Any], event: dict[str, Any]) -> dict[str, Any]:
 
 
 def _event_body(run: dict[str, Any], schedule_sha256: str,
-                release_dir: str, state: dict[str, Any], kind: str) -> dict[str, Any]:
+                release_dir: str, state: dict[str, Any], kind: str,
+                attempt_number: int) -> dict[str, Any]:
     return {"kind": kind, "sequence": state["sequence"] + 1,
             "schedule_sha256": schedule_sha256,
             "run_id": run["run_id"], "run_sha256": run["run_sha256"],
             "block_id": run["block_id"],
             "release_block_order": run["release_block_order"],
-            "order_position": run["order_position"], "attempt_number": 1,
+            "order_position": run["order_position"], "attempt_number": attempt_number,
             "release_dir": release_dir,
             "previous_event_sha256": state["head_sha256"]}
 
 
-def _assert_claim_allowed(run: dict[str, Any], claims: dict[str, dict[str, Any]],
-                          publications: dict[str, dict[str, Any]],
-                          terminals: dict[str, dict[str, Any]],
+def _stop_expected(schedule: dict[str, Any], run: dict[str, Any],
+                   claim: dict[str, Any], terminal: dict[str, Any],
+                   reason: str) -> dict[str, Any]:
+    return {"schema": 1, "classification": STOPPED_CLASSIFICATION,
+            "decision": "nonretryable",
+            "schedule_sha256": schedule["schedule_sha256"],
+            "run_id": run["run_id"], "run_sha256": run["run_sha256"],
+            "block_id": run["block_id"],
+            "attempt_number": claim["attempt_number"],
+            "release_dir": claim["release_dir"],
+            "terminal_sha256": terminal["event_sha256"],
+            "incident_sha256": _incident_sha256(terminal), "reason": reason}
+
+
+def _attempt_number(value: int) -> int:
+    if type(value) is not int or value < 1:
+        raise BlockReleaseError("attempt number is invalid")
+    return value
+
+
+def _latest_attempt(run_id: str, claims: dict[AttemptKey, dict[str, Any]]) -> int:
+    return max((attempt for claimed_run, attempt in claims if claimed_run == run_id), default=0)
+
+
+def _assert_claim_allowed(run: dict[str, Any], attempt_number: int,
+                          claims: dict[AttemptKey, dict[str, Any]],
+                          publications: dict[AttemptKey, dict[str, Any]],
+                          terminals: dict[AttemptKey, dict[str, Any]],
+                          stops: dict[str, dict[str, Any]],
                           schedule: dict[str, Any]) -> None:
-    if run["run_id"] in claims:
+    if run["block_id"] in stops:
+        raise BlockReleaseError("block is stopped as nonretryable")
+    key = (run["run_id"], attempt_number)
+    if key in claims:
         raise BlockReleaseError("scheduled run already has a release claim")
-    if sum(run_id not in terminals for run_id in claims) >= 4:
+    latest = _latest_attempt(run["run_id"], claims)
+    if attempt_number == 1:
+        if latest:
+            raise BlockReleaseError("scheduled run already has a release claim")
+    else:
+        previous = (run["run_id"], attempt_number - 1)
+        if (attempt_number != latest + 1 or previous not in publications
+            or terminals.get(previous, {}).get("status") != "external_failure"):
+            raise BlockReleaseError("retry requires the previous published external_failure terminal")
+        if sum(attempt > 1 for _run_id, attempt in claims) >= MAX_RETRY_SLOTS:
+            raise BlockReleaseError("ten study-wide retry slots are exhausted")
+    if sum(key not in terminals for key in claims) >= 4:
         raise BlockReleaseError("four releases are already active")
-    if run["order_position"] == 1:
+    if run["order_position"] == 1 and attempt_number == 1:
         blocks: dict[str, dict[int, dict[str, Any]]] = {}
         for item in schedule["runs"]:
             blocks.setdefault(item["block_id"], {})[item["order_position"]] = item
         open_blocks = 0
         for positions in blocks.values():
-            if positions[1]["run_id"] not in claims:
+            if (positions[1]["run_id"], 1) not in claims:
                 continue
-            if any(terminals.get(item["run_id"], {}).get("status") == "external_failure"
-                   for item in positions.values()):
+            if positions[1]["block_id"] in stops:
                 continue
-            if terminals.get(positions[3]["run_id"], {}).get("status") in ("completed", "truncated"):
+            final_run_id = positions[3]["run_id"]
+            final_attempt = _latest_attempt(final_run_id, claims)
+            if terminals.get((final_run_id, final_attempt), {}).get("status") in ("completed", "truncated"):
                 continue
             open_blocks += 1
         if open_blocks >= 4:
@@ -328,31 +457,55 @@ def _assert_claim_allowed(run: dict[str, Any], claims: dict[str, dict[str, Any]]
         for previous in schedule["runs"]:
             if (previous["order_position"] == 1
                 and previous["release_block_order"] < run["release_block_order"]
-                and previous["run_id"] not in publications):
+                and (previous["run_id"], 1) not in publications):
                 raise BlockReleaseError("earlier block first release is not published")
-    else:
+    elif run["order_position"] != 1 and attempt_number == 1:
         prior = next(item for item in schedule["runs"]
                      if item["block_id"] == run["block_id"]
                      and item["order_position"] == run["order_position"] - 1)
-        terminal = terminals.get(prior["run_id"])
+        prior_attempt = _latest_attempt(prior["run_id"], claims)
+        terminal = terminals.get((prior["run_id"], prior_attempt))
         if terminal is None or terminal["status"] not in ("completed", "truncated"):
             raise BlockReleaseError("prior arm lacks a completed or truncated terminal")
 
 
+def _assert_stop_allowed(run: dict[str, Any], attempt_number: int,
+                         claims: dict[AttemptKey, dict[str, Any]],
+                         publications: dict[AttemptKey, dict[str, Any]],
+                         terminals: dict[AttemptKey, dict[str, Any]],
+                         stops: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:
+    key = (run["run_id"], attempt_number)
+    if run["block_id"] in stops:
+        raise BlockReleaseError("block already has a nonretryable stop")
+    claim = claims.get(key)
+    terminal = terminals.get(key)
+    if (claim is None or key not in publications or terminal is None
+        or terminal["status"] != "external_failure"
+        or _latest_attempt(run["run_id"], claims) != attempt_number):
+        raise BlockReleaseError("stop requires the latest published external_failure terminal")
+    if any(item["block_id"] == run["block_id"]
+           and item["order_position"] > run["order_position"]
+           for item in claims.values()):
+        raise BlockReleaseError("stop cannot close a block with a later claimed arm")
+    return claim, terminal
+
+
 def _replay(state: dict[str, Any], schedule: dict[str, Any]) -> tuple[
-    dict[str, dict[str, Any]], dict[str, dict[str, Any]], dict[str, dict[str, Any]]
+    dict[AttemptKey, dict[str, Any]], dict[AttemptKey, dict[str, Any]],
+    dict[AttemptKey, dict[str, Any]], dict[str, dict[str, Any]]
 ]:
-    claims: dict[str, dict[str, Any]] = {}
-    publications: dict[str, dict[str, Any]] = {}
-    terminals: dict[str, dict[str, Any]] = {}
+    claims: dict[AttemptKey, dict[str, Any]] = {}
+    publications: dict[AttemptKey, dict[str, Any]] = {}
+    terminals: dict[AttemptKey, dict[str, Any]] = {}
+    stops: dict[str, dict[str, Any]] = {}
     paths: set[str] = set()
     previous_sha = SHA256_ZERO
     by_run = {run["run_id"]: run for run in schedule["runs"]}
     for sequence, event in enumerate(state["events"], start=1):
-        if type(event) is not dict or event.get("kind") not in ("claim", "published", "terminal"):
+        if type(event) is not dict or event.get("kind") not in ("claim", "published", "terminal", "stopped"):
             raise BlockReleaseError("registry contains an unknown event")
         expected_keys = {"claim": CLAIM_FIELDS, "published": PUBLISHED_FIELDS,
-                         "terminal": TERMINAL_FIELDS}[event["kind"]]
+                         "terminal": TERMINAL_FIELDS, "stopped": STOPPED_FIELDS}[event["kind"]]
         if set(event) != expected_keys:
             raise BlockReleaseError("registry event fields are incomplete")
         if (type(event["sequence"]) is not int or event["sequence"] != sequence
@@ -376,29 +529,31 @@ def _replay(state: dict[str, Any], schedule: dict[str, Any]) -> tuple[
                 raise BlockReleaseError("registry event differs from schedule")
         if (event["schedule_sha256"] != schedule["schedule_sha256"]
             or type(event["attempt_number"]) is not int
-            or event["attempt_number"] != 1):
+            or event["attempt_number"] < 1):
             raise BlockReleaseError("registry event has wrong schedule or attempt")
+        key = (run["run_id"], event["attempt_number"])
         release_dir = str(_absolute_path(event["release_dir"], "release directory"))
         if event["kind"] == "claim":
-            _assert_claim_allowed(run, claims, publications, terminals, schedule)
+            _assert_claim_allowed(run, event["attempt_number"], claims, publications,
+                                  terminals, stops, schedule)
             if release_dir in paths:
                 raise BlockReleaseError("release directory is already claimed")
             paths.add(release_dir)
-            claims[run["run_id"]] = event
+            claims[key] = event
         elif event["kind"] == "published":
-            claim = claims.get(run["run_id"])
-            if claim is None or run["run_id"] in publications or run["run_id"] in terminals:
+            claim = claims.get(key)
+            if claim is None or key in publications or key in terminals:
                 raise BlockReleaseError("publication lacks one pending release claim")
             if release_dir != claim["release_dir"]:
                 raise BlockReleaseError("publication release directory differs from claim")
             if not _is_sha256(event["manifest_sha256"]):
                 raise BlockReleaseError("published manifest digest is invalid")
-            if _manifest_digest(release_dir) != event["manifest_sha256"]:
-                raise BlockReleaseError("published manifest bytes changed")
-            publications[run["run_id"]] = event
-        else:
-            claim = claims.get(run["run_id"])
-            if claim is None or run["run_id"] not in publications or run["run_id"] in terminals:
+            _replay_publication(schedule, run, release_dir, event["attempt_number"],
+                                event["manifest_sha256"])
+            publications[key] = event
+        elif event["kind"] == "terminal":
+            claim = claims.get(key)
+            if claim is None or key not in publications or key in terminals:
                 raise BlockReleaseError("terminal lacks one published active release claim")
             if release_dir != claim["release_dir"]:
                 raise BlockReleaseError("terminal release directory differs from claim")
@@ -411,24 +566,40 @@ def _replay(state: dict[str, Any], schedule: dict[str, Any]) -> tuple[
                 raise BlockReleaseError("terminal evidence digest is invalid")
             expected = {"schedule_sha256": schedule["schedule_sha256"],
                         "run_id": run["run_id"], "run_sha256": run["run_sha256"],
-                        "attempt_number": 1, "release_dir": release_dir,
+                        "attempt_number": event["attempt_number"], "release_dir": release_dir,
                         "status": event["status"], "trace_sha256": event["trace_sha256"]}
             if _evidence(evidence_path, expected) != event["evidence_sha256"]:
                 raise BlockReleaseError("terminal evidence bytes changed")
-            terminals[run["run_id"]] = event
+            terminals[key] = event
+        else:
+            _stop_reason(event["reason"])
+            claim, terminal = _assert_stop_allowed(run, event["attempt_number"],
+                                                   claims, publications, terminals, stops)
+            if release_dir != claim["release_dir"]:
+                raise BlockReleaseError("stopped block release directory differs from claim")
+            if event["terminal_sha256"] != terminal["event_sha256"]:
+                raise BlockReleaseError("stopped block terminal digest differs")
+            evidence_path = _absolute_path(event["evidence_path"], "stop evidence")
+            if not _is_sha256(event["evidence_sha256"]):
+                raise BlockReleaseError("stopped block evidence digest is invalid")
+            expected = _stop_expected(schedule, run, claim, terminal, event["reason"])
+            if _stop_evidence(evidence_path, expected) != event["evidence_sha256"]:
+                raise BlockReleaseError("stopped block evidence bytes changed")
+            stops[run["block_id"]] = event
     if state["sequence"] != len(state["events"]) or state["head_sha256"] != previous_sha:
         raise BlockReleaseError("registry head differs from events")
-    return claims, publications, terminals
+    return claims, publications, terminals, stops
 
 
 def _load_state(fd: int, schedule: dict[str, Any], *, allow_empty: bool) -> tuple[
-    dict[str, Any], dict[str, dict[str, Any]], dict[str, dict[str, Any]],
+    dict[str, Any], dict[AttemptKey, dict[str, Any]],
+    dict[AttemptKey, dict[str, Any]], dict[AttemptKey, dict[str, Any]],
     dict[str, dict[str, Any]]
 ]:
     entries = set(os.listdir(fd))
     if entries == set() and allow_empty:
         state = _empty_state(schedule["schedule_sha256"])
-        return state, {}, {}, {}
+        return state, {}, {}, {}, {}
     if entries != {STATE_NAME}:
         raise BlockReleaseError("registry is missing, pending, or has unexpected entries")
     data = _read_named_file(fd, STATE_NAME, MAX_STATE_BYTES, "registry state", private=True)
@@ -437,17 +608,19 @@ def _load_state(fd: int, schedule: dict[str, Any], *, allow_empty: bool) -> tupl
         or state["schema"] != SCHEMA or state["classification"] != CLASSIFICATION
         or state["schedule_sha256"] != schedule["schedule_sha256"]
         or type(state["sequence"]) is not int or state["sequence"] < 0
-        or type(state["events"]) is not list or len(state["events"]) > 3 * len(schedule["runs"])
+        or type(state["events"]) is not list
+        or len(state["events"]) > (3 * (len(schedule["runs"]) + MAX_RETRY_SLOTS)
+                                    + schedule["block_count"])
         or not _is_sha256(state["head_sha256"])
         or not _is_sha256(state["state_sha256"])):
         raise BlockReleaseError("registry state schema or schedule differs")
     body = {key: value for key, value in state.items() if key != "state_sha256"}
     if data != _canonical(state) or state["state_sha256"] != _digest(body):
         raise BlockReleaseError("registry state is noncanonical or has a wrong digest")
-    claims, publications, terminals = _replay(state, schedule)
+    claims, publications, terminals, stops = _replay(state, schedule)
     if set(os.listdir(fd)) != {STATE_NAME}:
         raise BlockReleaseError("registry entries changed while reading")
-    return state, claims, publications, terminals
+    return state, claims, publications, terminals, stops
 
 
 def _write_all(fd: int, data: bytes) -> None:
@@ -562,7 +735,8 @@ def _claim_result(event: dict[str, Any],
     result = {"schema": SCHEMA, "classification": CLAIM_CLASSIFICATION,
               "schedule_sha256": event["schedule_sha256"],
               "run_id": event["run_id"], "run_sha256": event["run_sha256"],
-              "release_dir": event["release_dir"], "attempt_number": 1,
+              "release_dir": event["release_dir"],
+              "attempt_number": event["attempt_number"],
               "sequence": event["sequence"], "claim_sha256": event["event_sha256"]}
     if publication is not None:
         result["publication_sha256"] = publication["event_sha256"]
@@ -571,8 +745,9 @@ def _claim_result(event: dict[str, Any],
 
 
 def claim_release(schedule: Any, run_id: str, gate_root: Path | str,
-                  release_dir: Path | str) -> dict[str, Any]:
+                  release_dir: Path | str, *, attempt_number: int = 1) -> dict[str, Any]:
     """Reserve one scheduled release durably before creating its output dir."""
+    attempt_number = _attempt_number(attempt_number)
     checked = _schedule(schedule)
     run = _run(checked, run_id)
     root = _gate_root(gate_root)
@@ -587,12 +762,14 @@ def claim_release(schedule: Any, run_id: str, gate_root: Path | str,
                 # rejected first request must not strand an empty root, while
                 # a crash during initialization leaves a pending marker.
                 _commit(fd, _empty_state(checked["schedule_sha256"]))
-            state, claims, publications, terminals = _load_state(fd, checked, allow_empty=False)
-            _assert_claim_allowed(run, claims, publications, terminals, checked)
+            state, claims, publications, terminals, stops = _load_state(fd, checked, allow_empty=False)
+            _assert_claim_allowed(run, attempt_number, claims, publications,
+                                  terminals, stops, checked)
             if str(output) in {event["release_dir"] for event in claims.values()}:
                 raise BlockReleaseError("release directory is already claimed")
             _validate_release_path(output, must_exist=False)
-            event = _event(_event_body(run, checked["schedule_sha256"], str(output), state, "claim"))
+            event = _event(_event_body(run, checked["schedule_sha256"], str(output),
+                                       state, "claim", attempt_number))
             _commit(fd, _append(state, event))
             return _claim_result(event)
     except BlockReleaseError:
@@ -602,8 +779,10 @@ def claim_release(schedule: Any, run_id: str, gate_root: Path | str,
 
 
 def mark_published(schedule: Any, run_id: str, gate_root: Path | str,
-                   release_dir: Path | str, manifest_sha256: str) -> dict[str, Any]:
+                   release_dir: Path | str, manifest_sha256: str,
+                   *, attempt_number: int = 1) -> dict[str, Any]:
     """Finish a claim only after a fully verified release is on disk."""
+    attempt_number = _attempt_number(attempt_number)
     checked = _schedule(schedule)
     run = _run(checked, run_id)
     root = _gate_root(gate_root)
@@ -613,33 +792,28 @@ def mark_published(schedule: Any, run_id: str, gate_root: Path | str,
     try:
         with _registry_root(root, create=False) as (fd, _created):
             fcntl.flock(fd, fcntl.LOCK_EX)
-            state, claims, publications, terminals = _load_state(fd, checked, allow_empty=False)
-            claim = claims.get(run["run_id"])
+            state, claims, publications, terminals, _stops = _load_state(fd, checked, allow_empty=False)
+            key = (run["run_id"], attempt_number)
+            claim = claims.get(key)
             if claim is None:
                 raise BlockReleaseError("publication lacks a release claim")
-            if run["run_id"] in publications or run["run_id"] in terminals:
+            if key in publications or key in terminals:
                 raise BlockReleaseError("release has already been published or closed")
             if claim["release_dir"] != str(output):
                 raise BlockReleaseError("release directory differs from claim")
             _validate_release_path(output, must_exist=True)
-            from verify_released_run import ReleaseVerificationError, verify_release
-
-            try:
-                verified = verify_release(checked, output)
-            except ReleaseVerificationError as exc:
-                raise BlockReleaseError("release payload cannot be verified for publication") from exc
-            if (verified["run_id"] != run["run_id"]
-                or verified["run_sha256"] != run["run_sha256"]
-                or _manifest_digest(str(output)) != manifest_sha256):
+            _verified_release(checked, run, str(output), attempt_number, "publication")
+            if _manifest_digest(str(output)) != manifest_sha256:
                 raise BlockReleaseError("published release differs from claim or manifest digest")
-            body = _event_body(run, checked["schedule_sha256"], str(output), state, "published")
+            body = _event_body(run, checked["schedule_sha256"], str(output),
+                               state, "published", attempt_number)
             body["manifest_sha256"] = manifest_sha256
             event = _event(body)
             _commit(fd, _append(state, event))
             return {"schema": SCHEMA, "classification": CLASSIFICATION,
                     "schedule_sha256": checked["schedule_sha256"],
                     "run_id": run["run_id"], "run_sha256": run["run_sha256"],
-                    "release_dir": str(output), "attempt_number": 1,
+                    "release_dir": str(output), "attempt_number": attempt_number,
                     "manifest_sha256": manifest_sha256,
                     "sequence": event["sequence"],
                     "publication_sha256": event["event_sha256"]}
@@ -649,38 +823,65 @@ def mark_published(schedule: Any, run_id: str, gate_root: Path | str,
         raise BlockReleaseError("release publication could not be durably recorded") from exc
 
 
-def verify_claim(schedule: Any, run_id: str, gate_root: Path | str,
-                 release_dir: Path | str) -> dict[str, Any]:
-    """Require an active published attempt-1 claim for this release."""
+@contextmanager
+def hold_claim(schedule: Any, run_id: str, gate_root: Path | str,
+               release_dir: Path | str, *, attempt_number: int = 1
+               ) -> Iterator[dict[str, Any]]:
+    """Hold the registry's shared lock while an active release is consumed.
+
+    A terminal writer needs the exclusive lock, so it cannot close this
+    attempt and unlock a successor until the caller leaves this context.
+    Record the terminal only after leaving this context.
+    """
+    attempt_number = _attempt_number(attempt_number)
     checked = _schedule(schedule)
     run = _run(checked, run_id)
     root = _gate_root(gate_root)
     output = _absolute_path(release_dir, "release directory")
+    entered_body = False
     try:
         with _registry_root(root, create=False) as (fd, _created):
             fcntl.flock(fd, fcntl.LOCK_SH)
-            _state, claims, publications, terminals = _load_state(fd, checked, allow_empty=False)
-            claim = claims.get(run["run_id"])
-            if claim is None:
-                raise BlockReleaseError("release claim is missing")
-            if run["run_id"] in terminals:
-                raise BlockReleaseError("release claim already has a terminal")
-            if run["run_id"] not in publications:
-                raise BlockReleaseError("release claim is pending publication")
-            if claim["release_dir"] != str(output):
-                raise BlockReleaseError("release directory differs from claim")
-            _validate_release_path(output, must_exist=True)
-            return _claim_result(claim, publications[run["run_id"]])
+            try:
+                _state, claims, publications, terminals, _stops = _load_state(
+                    fd, checked, allow_empty=False
+                )
+                key = (run["run_id"], attempt_number)
+                claim = claims.get(key)
+                if claim is None:
+                    raise BlockReleaseError("release claim is missing")
+                if key in terminals:
+                    raise BlockReleaseError("release claim already has a terminal")
+                if key not in publications:
+                    raise BlockReleaseError("release claim is pending publication")
+                if claim["release_dir"] != str(output):
+                    raise BlockReleaseError("release directory differs from claim")
+                _validate_release_path(output, must_exist=True)
+                entered_body = True
+                yield _claim_result(claim, publications[key])
+            finally:
+                fcntl.flock(fd, fcntl.LOCK_UN)
     except BlockReleaseError:
         raise
     except (OSError, AdmissionError, ToolPolicyError) as exc:
+        if entered_body:
+            raise
         raise BlockReleaseError("release claim could not be verified") from exc
+
+
+def verify_claim(schedule: Any, run_id: str, gate_root: Path | str,
+                 release_dir: Path | str, *, attempt_number: int = 1) -> dict[str, Any]:
+    """Check an active published claim at one instant without retaining its lock."""
+    with hold_claim(schedule, run_id, gate_root, release_dir,
+                    attempt_number=attempt_number) as result:
+        return result
 
 
 def record_terminal(schedule: Any, run_id: str, gate_root: Path | str,
                     status: str, trace_sha256: str,
-                    evidence_path: Path | str) -> dict[str, Any]:
-    """Record a locally declared terminal; external_failure stops v1 block."""
+                    evidence_path: Path | str, *, attempt_number: int = 1) -> dict[str, Any]:
+    """Record a locally declared terminal for one published attempt."""
+    attempt_number = _attempt_number(attempt_number)
     checked = _schedule(schedule)
     run = _run(checked, run_id)
     root = _gate_root(gate_root)
@@ -692,33 +893,26 @@ def record_terminal(schedule: Any, run_id: str, gate_root: Path | str,
     try:
         with _registry_root(root, create=False) as (fd, _created):
             fcntl.flock(fd, fcntl.LOCK_EX)
-            state, claims, publications, terminals = _load_state(fd, checked, allow_empty=False)
-            claim = claims.get(run["run_id"])
+            state, claims, publications, terminals, _stops = _load_state(fd, checked, allow_empty=False)
+            key = (run["run_id"], attempt_number)
+            claim = claims.get(key)
             if claim is None:
                 raise BlockReleaseError("terminal lacks a release claim")
-            if run["run_id"] in terminals:
+            if key in terminals:
                 raise BlockReleaseError("release already has a terminal")
-            if run["run_id"] not in publications:
+            if key not in publications:
                 raise BlockReleaseError("release claim is pending publication")
             _validate_release_path(Path(claim["release_dir"]), must_exist=True)
             # A partially copied release may have a directory but no verified
             # manifest. It cannot close an arm and unlock its successor.
-            from verify_released_run import ReleaseVerificationError, verify_release
-
-            try:
-                verified = verify_release(checked, claim["release_dir"])
-            except ReleaseVerificationError as exc:
-                raise BlockReleaseError("release payload cannot be verified for terminal") from exc
-            if (verified["run_id"] != run["run_id"]
-                or verified["run_sha256"] != run["run_sha256"]):
-                raise BlockReleaseError("verified release differs from terminal claim")
+            _verified_release(checked, run, claim["release_dir"], attempt_number, "terminal")
             expected = {"schedule_sha256": checked["schedule_sha256"],
                         "run_id": run["run_id"], "run_sha256": run["run_sha256"],
-                        "attempt_number": 1, "release_dir": claim["release_dir"],
+                        "attempt_number": attempt_number, "release_dir": claim["release_dir"],
                         "status": status, "trace_sha256": trace_sha256}
             evidence_sha256 = _evidence(evidence_file, expected, durable=True)
             body = _event_body(run, checked["schedule_sha256"], claim["release_dir"],
-                               state, "terminal")
+                               state, "terminal", attempt_number)
             body.update({"status": status, "trace_sha256": trace_sha256,
                          "evidence_path": str(evidence_file),
                          "evidence_sha256": evidence_sha256})
@@ -727,7 +921,7 @@ def record_terminal(schedule: Any, run_id: str, gate_root: Path | str,
             return {"schema": SCHEMA, "classification": TERMINAL_CLASSIFICATION,
                     "schedule_sha256": checked["schedule_sha256"],
                     "run_id": run["run_id"], "run_sha256": run["run_sha256"],
-                    "release_dir": claim["release_dir"], "attempt_number": 1,
+                    "release_dir": claim["release_dir"], "attempt_number": attempt_number,
                     "status": status, "trace_sha256": trace_sha256,
                     "evidence_path": str(evidence_file),
                     "evidence_sha256": evidence_sha256,
@@ -737,6 +931,54 @@ def record_terminal(schedule: Any, run_id: str, gate_root: Path | str,
         raise
     except (OSError, AdmissionError, ToolPolicyError) as exc:
         raise BlockReleaseError("terminal could not be durably recorded") from exc
+
+
+def stop_block(schedule: Any, run_id: str, gate_root: Path | str,
+               reason: str, evidence_path: Path | str,
+               *, attempt_number: int = 1) -> dict[str, Any]:
+    """Explicitly stop one block after its latest external failure.
+
+    This locally declared nonretryable decision releases the block's open
+    slot. It never grants a successor arm or refunds a claimed retry slot.
+    """
+    attempt_number = _attempt_number(attempt_number)
+    reason = _stop_reason(reason)
+    checked = _schedule(schedule)
+    run = _run(checked, run_id)
+    root = _gate_root(gate_root)
+    evidence_file = _absolute_path(evidence_path, "stop evidence")
+    try:
+        with _registry_root(root, create=False) as (fd, _created):
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            state, claims, publications, terminals, stops = _load_state(
+                fd, checked, allow_empty=False
+            )
+            claim, terminal = _assert_stop_allowed(run, attempt_number, claims,
+                                                   publications, terminals, stops)
+            expected = _stop_expected(checked, run, claim, terminal, reason)
+            evidence_sha256 = _stop_evidence(evidence_file, expected, durable=True)
+            body = _event_body(run, checked["schedule_sha256"], claim["release_dir"],
+                               state, "stopped", attempt_number)
+            body.update({"terminal_sha256": terminal["event_sha256"],
+                         "reason": reason, "evidence_path": str(evidence_file),
+                         "evidence_sha256": evidence_sha256})
+            event = _event(body)
+            _commit(fd, _append(state, event))
+            return {"schema": SCHEMA, "classification": STOPPED_CLASSIFICATION,
+                    "schedule_sha256": checked["schedule_sha256"],
+                    "run_id": run["run_id"], "run_sha256": run["run_sha256"],
+                    "block_id": run["block_id"],
+                    "attempt_number": attempt_number,
+                    "release_dir": claim["release_dir"],
+                    "terminal_sha256": terminal["event_sha256"],
+                    "reason": reason, "evidence_path": str(evidence_file),
+                    "evidence_sha256": evidence_sha256,
+                    "sequence": event["sequence"],
+                    "stop_sha256": event["event_sha256"]}
+    except BlockReleaseError:
+        raise
+    except (OSError, AdmissionError, ToolPolicyError) as exc:
+        raise BlockReleaseError("stopped block could not be durably recorded") from exc
 
 
 def _read_schedule(path: Path | str) -> dict[str, Any]:
@@ -758,19 +1000,37 @@ def main(argv: list[str] | None = None) -> int:
     terminal.add_argument("status", choices=sorted(TERMINAL_STATUSES))
     terminal.add_argument("trace_sha256")
     terminal.add_argument("evidence_path")
+    terminal.add_argument("--attempt", "--attempt-number", dest="attempt_number",
+                          type=int, default=1)
     verify = commands.add_parser("verify", help="verify an active release claim")
     verify.add_argument("schedule")
     verify.add_argument("run_id")
     verify.add_argument("gate_root")
     verify.add_argument("release_dir")
+    verify.add_argument("--attempt", "--attempt-number", dest="attempt_number",
+                        type=int, default=1)
+    stop = commands.add_parser("stop", help="declare one external failure nonretryable")
+    stop.add_argument("schedule")
+    stop.add_argument("run_id")
+    stop.add_argument("gate_root")
+    stop.add_argument("reason")
+    stop.add_argument("evidence_path")
+    stop.add_argument("--attempt", "--attempt-number", dest="attempt_number",
+                      type=int, default=1)
     args = parser.parse_args(argv)
     try:
         schedule = _read_schedule(args.schedule)
         if args.command == "terminal":
             result = record_terminal(schedule, args.run_id, args.gate_root,
-                                     args.status, args.trace_sha256, args.evidence_path)
+                                     args.status, args.trace_sha256, args.evidence_path,
+                                     attempt_number=args.attempt_number)
+        elif args.command == "verify":
+            result = verify_claim(schedule, args.run_id, args.gate_root, args.release_dir,
+                                  attempt_number=args.attempt_number)
         else:
-            result = verify_claim(schedule, args.run_id, args.gate_root, args.release_dir)
+            result = stop_block(schedule, args.run_id, args.gate_root,
+                                args.reason, args.evidence_path,
+                                attempt_number=args.attempt_number)
     except BlockReleaseError as exc:
         print(f"Local block release gate failed: {exc}", file=sys.stderr)
         return 2
