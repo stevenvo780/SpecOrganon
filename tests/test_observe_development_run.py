@@ -24,7 +24,7 @@ from run_development_arm import (  # noqa: E402
     run_development_arm,
 )
 import run_development_arm as runner  # noqa: E402
-from test_run_development_arm import FAKE_CLI, fake_t_setup  # noqa: E402
+from test_run_development_arm import FAKE_CLI, _usage_trace, fake_t_setup  # noqa: E402
 
 
 def _record(path: Path) -> dict[str, Any]:
@@ -586,6 +586,59 @@ def test_forged_usage_cannot_override_verified_stream(tmp_path: Path) -> None:
     result = _invoke(run_dir)
     assert result.returncode == 2
     assert "cli_usage differs" in result.stderr
+
+
+@pytest.mark.parametrize("provider", ["codex", "agy"])
+@pytest.mark.parametrize("defect", ["duplicate", "nonfinite", "invalid_utf8"])
+def test_observer_recomputes_strict_usage_from_recorded_jsonl(
+    tmp_path: Path, provider: str, defect: str,
+) -> None:
+    run_dir, summary = _pilot(tmp_path)
+    trace = run_dir / "cli.stdout.jsonl"
+    if provider == "codex":
+        usage = {"input_tokens": 20, "cached_input_tokens": 2,
+                 "cache_write_input_tokens": 0, "output_tokens": 8,
+                 "reasoning_output_tokens": 1}
+    else:
+        usage = {"input_tokens": 30, "output_tokens": 9, "thinking_tokens": 3,
+                 "cache_read_tokens": 1, "total_tokens": 39}
+    valid = _usage_trace(trace, provider, usage, usage if provider == "agy" else None)
+    summary["provider_cli"] = provider
+    summary["requested_model"] = "test-model"
+    summary["cli"]["stdout"] = _record(trace)
+    summary["cli_usage"] = _parse_usage(provider, trace, "test-model")
+    _write_summary(run_dir, summary)
+    accepted = _invoke(run_dir)
+    assert accepted.returncode == 0, accepted.stderr
+    assert json.loads(accepted.stdout)["cli_usage"]["complete"] is True
+
+    if defect == "invalid_utf8":
+        trace.write_bytes(b"\xff\n" + valid.encode("utf-8"))
+        error_fragment = "invalid UTF-8"
+    else:
+        original = f'"input_tokens": {usage["input_tokens"]}'
+        replacement = (
+            f'"input_tokens": 90000, {original}'
+            if defect == "duplicate" else '"input_tokens": NaN'
+        )
+        prefix, suffix = valid.rsplit(original, 1)
+        corrupted = prefix + replacement + suffix
+        assert corrupted != valid
+        trace.write_text(corrupted, encoding="utf-8")
+        error_fragment = "duplicate JSON key" if defect == "duplicate" else "nonfinite JSON number"
+    summary["cli"]["stdout"] = _record(trace)
+    _write_summary(run_dir, summary)
+    forged = _invoke(run_dir)
+    assert forged.returncode == 2
+    assert "cli_usage differs from the verified local CLI stream" in forged.stderr
+
+    summary["cli_usage"] = _parse_usage(provider, trace, "test-model")
+    summary["execution_status"] = "cli_internal_failure"
+    _write_summary(run_dir, summary)
+    observed = _invoke(run_dir)
+    assert observed.returncode == 0, observed.stderr
+    assert json.loads(observed.stdout)["cli_usage"]["terminal_success"] is False
+    assert any(error_fragment in error for error in summary["cli_usage"]["terminal_errors"])
 
 
 def test_successful_cli_cannot_claim_launch_failure(tmp_path: Path) -> None:

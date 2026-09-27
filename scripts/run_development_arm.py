@@ -11,6 +11,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -427,6 +428,39 @@ def _usage_subset_errors(
     return errors
 
 
+def _unique_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate JSON key")
+        result[key] = value
+    return result
+
+
+def _reject_json_constant(_value: str) -> None:
+    raise ValueError("nonfinite JSON number")
+
+
+def _finite_json_float(value: str) -> float:
+    parsed = float(value)
+    if not math.isfinite(parsed):
+        raise ValueError("nonfinite JSON number")
+    return parsed
+
+
+def _parse_jsonl_event(raw_line: bytes) -> Any:
+    """Decode a UTF-8 JSONL event without ambiguous keys or nonfinite constants."""
+    return json.loads(raw_line.decode("utf-8"), object_pairs_hook=_unique_json_pairs,
+                      parse_constant=_reject_json_constant, parse_float=_finite_json_float)
+
+
+def _jsonl_parse_error(exc: UnicodeError | ValueError | RecursionError) -> str:
+    detail = "invalid UTF-8" if isinstance(exc, UnicodeError) else str(exc)
+    if detail in {"invalid UTF-8", "duplicate JSON key", "nonfinite JSON number"}:
+        return f"invalid or ambiguous JSON ({detail})"
+    return "invalid or ambiguous JSON"
+
+
 def _parse_opencode_usage(stdout_path: Path) -> dict[str, Any]:
     """Read only the local OpenCode JSONL; it is not a provider or billing receipt."""
     terminal_errors: list[str] = []
@@ -446,27 +480,15 @@ def _parse_opencode_usage(stdout_path: Path) -> dict[str, Any]:
     event_count = 0
     completed_tools = 0
 
-    def unique_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
-        result: dict[str, Any] = {}
-        for key, value in pairs:
-            if key in result:
-                raise ValueError("duplicate JSON key")
-            result[key] = value
-        return result
-
-    def reject_constant(_value: str) -> None:
-        raise ValueError("nonfinite JSON number")
-
     with stdout_path.open("rb") as stream:
         for line_number, raw_line in enumerate(stream, start=1):
             if not raw_line.strip():
                 terminal_errors.append(f"line {line_number}: blank JSONL line")
                 continue
             try:
-                event = json.loads(raw_line.decode("utf-8"), object_pairs_hook=unique_pairs,
-                                   parse_constant=reject_constant)
-            except (UnicodeError, ValueError, RecursionError):
-                terminal_errors.append(f"line {line_number}: invalid or ambiguous JSON")
+                event = _parse_jsonl_event(raw_line)
+            except (UnicodeError, ValueError, RecursionError) as exc:
+                terminal_errors.append(f"line {line_number}: {_jsonl_parse_error(exc)}")
                 continue
             if type(event) is not dict or type(event.get("type")) is not str:
                 terminal_errors.append(f"line {line_number}: OpenCode event/type missing")
@@ -665,15 +687,15 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
     agy_agent_invalid_events = 0
     agy_agent_conflicting_events = 0
     agy_agent_subset_errors: set[str] = set()
-    with stdout_path.open("r", encoding="utf-8", errors="replace") as stream:
-        for line_number, line in enumerate(stream, start=1):
-            if not line.strip():
+    with stdout_path.open("rb") as stream:
+        for line_number, raw_line in enumerate(stream, start=1):
+            if not raw_line.strip():
                 terminal_errors.append(f"line {line_number}: blank JSONL line")
                 continue
             try:
-                event = json.loads(line)
-            except json.JSONDecodeError:
-                terminal_errors.append(f"line {line_number}: invalid JSON")
+                event = _parse_jsonl_event(raw_line)
+            except (UnicodeError, ValueError, RecursionError) as exc:
+                terminal_errors.append(f"line {line_number}: {_jsonl_parse_error(exc)}")
                 continue
             kind_key = "type" if provider == "codex" else "event"
             if type(event) is not dict or type(event.get(kind_key)) is not str:

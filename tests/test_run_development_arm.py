@@ -446,6 +446,70 @@ def test_usage_subsets_accept_equality_and_keep_raw_trace(
     assert trace_path.read_text(encoding="utf-8") == raw
 
 
+@pytest.mark.parametrize("provider", ["codex", "agy"])
+@pytest.mark.parametrize("replacement,error_fragment", [
+    ('"input_tokens": 90000, "input_tokens": {value}', "duplicate JSON key"),
+    ('"input_tokens": NaN', "nonfinite JSON number"),
+    ('"input_tokens": Infinity', "nonfinite JSON number"),
+    ('"input_tokens": -Infinity', "nonfinite JSON number"),
+    ('"input_tokens": 1e999', "nonfinite JSON number"),
+])
+def test_codex_and_agy_reject_ambiguous_or_nonfinite_usage_jsonl(
+    tmp_path: Path, provider: str, replacement: str, error_fragment: str,
+) -> None:
+    usage = {"input_tokens": 20, "output_tokens": 8}
+    if provider == "codex":
+        usage.update(cached_input_tokens=2, cache_write_input_tokens=0,
+                     reasoning_output_tokens=1)
+    else:
+        usage = {"input_tokens": 30, "output_tokens": 9, "thinking_tokens": 3,
+                 "cache_read_tokens": 1, "total_tokens": 39}
+    trace = tmp_path / "cli.stdout.jsonl"
+    valid = _usage_trace(trace, provider, usage, usage if provider == "agy" else None)
+    accepted = runner._parse_usage(provider, trace, "test-model")
+    assert accepted["terminal_success"] is True
+    assert accepted["complete"] is True
+    assert accepted["final_usage"] == usage
+
+    original = f'"input_tokens": {usage["input_tokens"]}'
+    prefix, suffix = valid.rsplit(original, 1)
+    corrupted = prefix + replacement.format(value=usage["input_tokens"]) + suffix
+    assert corrupted != valid
+    trace.write_text(corrupted, encoding="utf-8")
+    parsed = runner._parse_usage(provider, trace, "test-model")
+
+    line = 1 if provider == "codex" else 3
+    assert parsed["terminal_success"] is False
+    assert parsed["complete"] is False
+    assert any(f"line {line}: invalid or ambiguous JSON ({error_fragment})" == error
+               for error in parsed["terminal_errors"])
+    assert trace.read_text(encoding="utf-8") == corrupted
+
+
+@pytest.mark.parametrize("provider", ["codex", "agy"])
+def test_codex_and_agy_reject_invalid_utf8_without_replacing_it(
+    tmp_path: Path, provider: str,
+) -> None:
+    usage = {"input_tokens": 20, "output_tokens": 8}
+    if provider == "codex":
+        usage.update(cached_input_tokens=2, cache_write_input_tokens=0,
+                     reasoning_output_tokens=1)
+    else:
+        usage = {"input_tokens": 30, "output_tokens": 9, "thinking_tokens": 3,
+                 "cache_read_tokens": 1, "total_tokens": 39}
+    trace = tmp_path / "cli.stdout.jsonl"
+    valid = _usage_trace(trace, provider, usage, usage if provider == "agy" else None)
+    raw = b"\xff\n" + valid.encode("utf-8")
+    trace.write_bytes(raw)
+
+    parsed = runner._parse_usage(provider, trace, "test-model")
+
+    assert parsed["terminal_success"] is False
+    assert parsed["complete"] is False
+    assert "line 1: invalid or ambiguous JSON (invalid UTF-8)" in parsed["terminal_errors"]
+    assert trace.read_bytes() == raw
+
+
 @pytest.mark.parametrize(
     "provider,source,field,parent_field",
     [
