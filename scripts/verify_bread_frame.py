@@ -47,6 +47,34 @@ SOURCE_CLAIMS = {
     "e_household_est": ("source_lca.pdf", "tabla 7, consumer waste y nota de fuente", "consumer_bread_waste_estimate", "%_pan_entrante_sistema", "Table 7 consumer waste row and source note"),
     "e_survey_size": ("source_survey.pdf", "resumen y sección 3", "survey_respondents", "personas", "abstract and Table 1 total row"),
 }
+# These bounded text patterns bind each displayed quantitative claim to its
+# published value. The digests freeze the complete development-case wording,
+# including caveats that a single numeric pattern cannot interpret.
+TEXT_CLAIMS = {
+    "e_product_mass": (r"pieza de pan comercial de (\d+) g\b", "ec7d1289241ab19cdf91c636375e5cf7b20a18c88047451e539851a5413f4545"),
+    "e_wheat_origin": (r"en promedio (\d+) % del trigo procedía de Noruega", "15bd71d8367560057e9b993e5d719b0b1260e620da0972e76e998e7afb2f4777"),
+    "e_mill_energy": (r"consumo de (\d+) kWh de electricidad por tonelada", "33d274c5505cb493061da9bd69b69145e45c13af8d28f3c36a95985d4c932075"),
+    "e_mill_bran": (r"presenta (\d+(?:,\d+)?) % de salvado", "cb8cef02083a030a971594bc9ec7476e13bcb26f24d745d2b5596f13f8489595"),
+    "e_mill_transport": (r"informa (\d+) km de transporte del molino a la panadería", "a4a05c04c33c82d1b1c1b783c339dd6cc7480f8143eb4a6b7fce380c6f8b0c60"),
+    "e_baker_energy": (r"informó (\d+(?:,\d+)?) kWh de electricidad", "ed44eddf6e217fa0fe76e6018bead048b3f2671649e3d0ed2cea10a105449a07"),
+    "e_retail_waste": (r"informó (\d+(?:,\d+)?) % de pan desechado en comercio", "2414fe171e594215495ce5fdeb32651dcbf9de54e82e8d2e7c6179aa408af59c"),
+    "e_household_est": (r"El (\d+(?:,\d+)?) % de desperdicio doméstico", "0a59854cb4eee4b0925b1bf00077be0827f0679e5e6312bac3a8b9623ac5648c"),
+    "e_survey_size": (r"tuvo (\d{1,3}(?:\.\d{3})*) personas", "857045e9ac45c00de70b1a603e2f0408864fb3024a11b385146be1eb5d94b2d6"),
+}
+# Reviewed provenance classifications for this fixed case. These are not
+# inferred by the regex parser: changing any of them needs a new source review.
+FIXTURE_SCOPE = {
+    "e_product_mass": "pan_comercial_estudiado",
+    "e_wheat_origin": "promedio_historico_informado_por_molino_no_lote",
+    "e_mill_energy": "molino_informado_agregado",
+    "e_mill_bran": "fraccion_masica_publicada_molino",
+    "e_mill_transport": "parametro_informado_no_viajes_por_lote",
+    "e_baker_energy": "panaderia_informada_agregado",
+    "e_retail_waste": "agregado_informado_no_lote",
+    "e_household_est": "estimacion_externa_no_producto_observado",
+    "e_survey_size": "encuesta_pan_fresco_general_autoinforme",
+}
+FIXTURE_DATE = {"source_lca.pdf": "2018-12", "source_survey.pdf": "2018"}
 
 
 class SourceCheckError(ValueError):
@@ -71,6 +99,20 @@ def _number(text: str, pattern: str) -> Decimal:
     if len(matches) != 1:
         raise SourceCheckError(f"PDF numeric locator yielded {len(matches)} matches: {pattern}")
     return Decimal(matches[0])
+
+
+def _check_visible_claim(evidence_id: str, text: str, published: Decimal) -> None:
+    if not isinstance(text, str) or len(text.encode("utf-8")) > 2_000:
+        raise SourceCheckError(f"visible text invalid or too large: {evidence_id}")
+    pattern, expected_sha256 = TEXT_CLAIMS[evidence_id]
+    matches = re.findall(pattern, text)
+    if len(matches) != 1:
+        raise SourceCheckError(f"visible numeric claim missing or ambiguous: {evidence_id}")
+    numeric = matches[0].replace(".", "") if evidence_id == "e_survey_size" else matches[0].replace(",", ".")
+    if Decimal(numeric) != published:
+        raise SourceCheckError(f"published PDF value differs from visible text: {evidence_id}")
+    if hashlib.sha256(text.encode("utf-8")).hexdigest() != expected_sha256:
+        raise SourceCheckError(f"development-case visible text differs from reviewed fixture: {evidence_id}")
 
 
 def published_evidence_values(case: Path) -> dict[str, Decimal]:
@@ -142,13 +184,17 @@ def verify_source_transcription(manifest: dict, ledger: dict, case: Path) -> dic
     }
     if len(manifest_items) != len(ledger_items) or manifest_items.keys() != ledger_items.keys():
         raise SourceCheckError("manifest/ledger evidence sets differ")
-    if manifest_items.keys() != published.keys() or published.keys() != SOURCE_CLAIMS.keys():
+    if (manifest_items.keys() != published.keys() or published.keys() != SOURCE_CLAIMS.keys()
+            or published.keys() != TEXT_CLAIMS.keys() or published.keys() != FIXTURE_SCOPE.keys()):
         raise SourceCheckError("evidence ID set differs from pinned PDF claims")
     for evidence_id, value in published.items():
         manifest_data = manifest_items[evidence_id]["data"]
         ledger_data = ledger_items[evidence_id]["data"]
         if manifest_data != ledger_data:
             raise SourceCheckError(f"manifest/ledger evidence differs: {evidence_id}")
+        manifest_text = manifest_items[evidence_id]["text"]
+        if manifest_text != ledger_items[evidence_id]["text"]:
+            raise SourceCheckError(f"manifest/ledger visible text differs: {evidence_id}")
         archive, locator, metric_key, unit, _ = SOURCE_CLAIMS[evidence_id]
         if (
             manifest_data["archive"], manifest_data["locator"],
@@ -159,8 +205,13 @@ def verify_source_transcription(manifest: dict, ledger: dict, case: Path) -> dic
             raise SourceCheckError(f"PDF DOI differs: {evidence_id}")
         if manifest_data["source_sha256"] != SOURCE_PDFS[archive][1]:
             raise SourceCheckError(f"PDF digest differs: {evidence_id}")
+        if (manifest_data["origin"], manifest_data["scope"], manifest_data["date"]) != (
+            "published", FIXTURE_SCOPE[evidence_id], FIXTURE_DATE[archive]
+        ):
+            raise SourceCheckError(f"development-case provenance differs: {evidence_id}")
         if type(manifest_data["value"]) not in (int, float) or Decimal(str(manifest_data["value"])) != value:
             raise SourceCheckError(f"published PDF value differs from manifest/ledger: {evidence_id}")
+        _check_visible_claim(evidence_id, manifest_text, value)
     return published
 
 
@@ -268,7 +319,9 @@ def main() -> None:
             "method": "pdftotext -layout, fixed PDF SHA-256, anchored passage or table row",
             "values": {key: str(value) for key, value in sorted(published.items())},
             "verified_pdf_locations": {key: claim[4] for key, claim in sorted(SOURCE_CLAIMS.items())},
-            "scope": "nine published numbers only; no raw records or field impact verified",
+            "visible_text_check": "nine displayed numbers match PDFs; full current wording SHA-256 pinned",
+            "provenance_check": "reviewed origin, scope, and date pinned for all nine evidence claims",
+            "scope": "fixed development transcript and provenance only; no automatic semantic proof, raw records, or field impact verified",
             "dependency": "Poppler pdftotext; text layout may vary by version and ambiguous extraction fails",
         },
         "manifest_sha256": digest(manifest_path),

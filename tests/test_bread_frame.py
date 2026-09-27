@@ -76,6 +76,98 @@ def test_coherent_manifest_and_ledger_false_retail_value_is_rejected(
         verify_source_transcription(manifest, ledger, CASE)
 
 
+def test_coherent_false_visible_retail_claim_is_rejected(tmp_path: Path) -> None:
+    manifest, ledger = map(copy.deepcopy, _documents())
+    manifest_item = next(
+        step for step in manifest["steps"] if step.get("id") == "e_retail_waste"
+    )
+    ledger_item = next(
+        event["payload"]
+        for event in ledger["events"]
+        if event["kind"] == "item_put" and event["payload"]["id"] == "e_retail_waste"
+    )
+    for item in (manifest_item, ledger_item):
+        item["text"] = item["text"].replace("11,4 %", "99 %")
+    _rehash_events(ledger)
+    assert manifest_item["data"] == ledger_item["data"]
+    assert manifest_item["data"]["value"] == 11.4
+    assert manifest_item["text"] == ledger_item["text"]
+    (tmp_path / "organon.json").write_text(json.dumps(ledger), encoding="utf-8")
+    assert read_project(tmp_path, verify_external_anchor=False) == ledger
+
+    with pytest.raises(
+        SourceCheckError,
+        match="published PDF value differs from visible text: e_retail_waste",
+    ):
+        verify_source_transcription(manifest, ledger, CASE)
+
+
+def test_coherent_false_household_provenance_is_rejected(tmp_path: Path) -> None:
+    manifest, ledger = map(copy.deepcopy, _documents())
+    manifest_item = next(
+        step for step in manifest["steps"] if step.get("id") == "e_household_est"
+    )
+    ledger_item = next(
+        event["payload"]
+        for event in ledger["events"]
+        if event["kind"] == "item_put" and event["payload"]["id"] == "e_household_est"
+    )
+    for item in (manifest_item, ledger_item):
+        item["data"]["origin"] = "observed"
+        item["data"]["scope"] = "medicion_directa_hogares_del_producto"
+        item["text"] = (
+            "El 8,2 % de desperdicio doméstico se midió directamente en hogares del producto."
+        )
+    _rehash_events(ledger)
+    assert manifest_item["data"] == ledger_item["data"]
+    assert manifest_item["text"] == ledger_item["text"]
+    (tmp_path / "organon.json").write_text(json.dumps(ledger), encoding="utf-8")
+    assert read_project(tmp_path, verify_external_anchor=False) == ledger
+
+    with pytest.raises(
+        SourceCheckError, match="development-case provenance differs: e_household_est"
+    ):
+        verify_source_transcription(manifest, ledger, CASE)
+
+
+def test_false_household_interpretation_in_text_is_rejected() -> None:
+    manifest, ledger = map(copy.deepcopy, _documents())
+    manifest_item = next(
+        step for step in manifest["steps"] if step.get("id") == "e_household_est"
+    )
+    ledger_item = next(
+        event["payload"]
+        for event in ledger["events"]
+        if event["kind"] == "item_put" and event["payload"]["id"] == "e_household_est"
+    )
+    false_text = "El 8,2 % de desperdicio doméstico en la tabla 7 se midió directamente en hogares de este producto."
+    manifest_item["text"] = ledger_item["text"] = false_text
+    assert manifest_item["data"] == ledger_item["data"]
+    with pytest.raises(
+        SourceCheckError,
+        match="development-case visible text differs from reviewed fixture: e_household_est",
+    ):
+        verify_source_transcription(manifest, ledger, CASE)
+
+
+def test_coherent_false_publication_date_is_rejected() -> None:
+    manifest, ledger = map(copy.deepcopy, _documents())
+    manifest_item = next(
+        step for step in manifest["steps"] if step.get("id") == "e_retail_waste"
+    )
+    ledger_item = next(
+        event["payload"]
+        for event in ledger["events"]
+        if event["kind"] == "item_put" and event["payload"]["id"] == "e_retail_waste"
+    )
+    manifest_item["data"]["date"] = ledger_item["data"]["date"] = "2026-09"
+    assert manifest_item["data"] == ledger_item["data"]
+    with pytest.raises(
+        SourceCheckError, match="development-case provenance differs: e_retail_waste"
+    ):
+        verify_source_transcription(manifest, ledger, CASE)
+
+
 @pytest.mark.parametrize(
     ("field", "wrong"),
     [
