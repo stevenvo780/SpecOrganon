@@ -27,7 +27,7 @@ El estimador divide la suma de kg por la suma de comensales de los días elegibl
 
 La sensibilidad de 20 menús compartidos, con igual peso por menú y medias diarias internas, da diferencias de −3,804844 g/comensal para PW, −12,615255 para KSW y −16,476715 para total. Los rangos por menú incluyen valores positivos: PW −13,342612 a +2,817900, KSW −33,619071 a +11,795370 y total −41,962585 a +3,453752 g/comensal. Cinco menús de la línea base no aparecen en el período final. Esta comprobación descriptiva no resuelve estacionalidad, asistencia ni cambios simultáneos.
 
-La [sensibilidad temporal posterior](../../docs/sensibilidad_temporal_escuela.md) deja visibles las ventanas basales de 20 jornadas, los faltantes y los resultados semanales. Es una exploración adicional; no cambia el estimador ni el alcance causal del plan anterior.
+La [sensibilidad temporal posterior](../../docs/sensibilidad_temporal_escuela.md) deja visibles las ventanas basales de 20 jornadas, los faltantes y los resultados semanales. Un control negativo compara también mitades de 20 jornadas dentro de bloques enteramente basales: nueve de 78 cortes completos muestran caídas de PW+KSW al menos tan grandes como el contraste final frente a la última ventana basal. Son exploraciones posteriores a la observación; no cambian el estimador ni el alcance causal del plan anterior.
 
 ## Calidad y alcance
 

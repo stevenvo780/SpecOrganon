@@ -40,6 +40,18 @@ El período final menos la última ventana basal completa da **−2,123090** g/c
 
 KSW y total muestran variación semanal; la cuarta semana tiene el total más alto de las cuatro. Al retirar las filas discordantes, la semana 1 queda en cuatro jornadas con total **24,389423** g/comensal y la semana 4 en cuatro con **33,827660**. El período final de 18 jornadas da un contraste de total **−17,028893** g/comensal frente a la base original y de **−11,842463** frente a la última ventana basal completa. Frente a las 98 ventanas completas, su rango de contraste total es **−24,078031 a −6,292651** g/comensal. Esos cambios muestran sensibilidad a las dos fechas, no corrigen un error conocido en las masas fuente.
 
+## Cortes placebo dentro de la línea base
+
+El [control negativo adicional](../scripts/school_waste_placebo_cutoffs.py) examina una pregunta distinta: si caídas de tamaño similar ocurrieron **antes** de los cuatro conceptos del período final. Es un análisis posterior a la observación, sin umbral fijado en el plan previo. Forma los 96 bloques posibles de 40 jornadas basales registradas consecutivas y divide cada uno en 20 jornadas anteriores y 20 posteriores. Excluye el bloque completo cuando falta KSW en cualquiera de sus jornadas, de modo que PW, KSW y total usen los mismos días y denominadores. La fila 19 deja 18 bloques incompletos y **78 cortes completos**. El [JSON archivado](../experiments/development/school_placebo_cutoffs_2026-09-27.json) enumera fechas, filas, masas, comensales y diferencias de cada corte, además de los excluidos.
+
+```sh
+python3 scripts/school_waste_placebo_cutoffs.py > /tmp/school_waste_placebo_cutoffs.json
+python3 -m json.tool /tmp/school_waste_placebo_cutoffs.json > /dev/null
+cmp /tmp/school_waste_placebo_cutoffs.json experiments/development/school_placebo_cutoffs_2026-09-27.json
+```
+
+La comparación de referencia es el período final de 20 jornadas menos la última ventana basal completa de 20 jornadas: **−10,841032 g/comensal** de PW+KSW. En **9 de los 78 cortes basales completos**, la segunda mitad también presenta una caída al menos tan grande; ocho de esos nueve cortes son consecutivos y comparten casi todos sus días. Esto aporta un contraejemplo empírico a la idea de que el signo o tamaño de aquella caída, por sí solo, identifica un efecto de los conceptos. No estima cuántas caídas así cabría esperar sin intervención: los bloques se solapan, el corte real no se asignó al azar y pueden cambiar calendario, menú y asistencia. `9/78` es un recuento descriptivo, no un valor p ni un intervalo de incertidumbre.
+
 ## Inferencia y alcance
 
 No se estima un efecto de intervención. Hay un solo centro, períodos sucesivos sin comparador contemporáneo, asistencia variable, estacionalidad posible y cuatro conceptos semanales distintos. Tampoco hay datos de producción, almacenamiento, transporte, transformaciones, costes, inocuidad o perjuicios por actor. Estas comparaciones no establecen causalidad ni satisfacen el criterio 3 de [GOAL.md](../GOAL.md), que sigue **no demostrado**.
