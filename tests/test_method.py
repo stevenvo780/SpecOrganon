@@ -2003,6 +2003,57 @@ def test_decisive_indicator_rejects_missing_or_empty_evidence_scope(tmp_path, sc
     assert engine.gate(path, "validate")["ready"]
 
 
+@pytest.mark.parametrize("invalid_method", (" \t ", 17, {"instrument": "scale"}))
+@pytest.mark.parametrize("verdict", ("cumplido", "incumplido"))
+def test_observed_decisive_evidence_requires_textual_collection_method(
+    tmp_path, monkeypatch, invalid_method, verdict,
+):
+    path = tmp_path / "case"
+    _complete_synthetic_case(
+        path, e0_origin="observed", e0_metric_key="waste_mass", e0_unit="kg",
+        e0_value=10, e0_scope="one synthetic lot",
+        e0_data_extra={"method": "weighed synthetic fixture lots"},
+        e1_metric_key="temperature", e1_unit="C",
+        indicator_metric="waste_mass", indicator_unit="kg",
+    )
+    _record_decisive_simulation(path, verdict)
+    _accept(path, "validate")
+    recorded_hash = read_project(path)["events"][-1]["hash"]
+
+    # Inspect the same accepted ledger as if its evidence method were malformed;
+    # the projection is isolated so the ledger history and hashes stay intact.
+    state = engine._project(path)
+    state["items"]["e0"]["data"]["method"] = invalid_method
+    with monkeypatch.context() as patch:
+        patch.setattr(engine, "_project", lambda _path: state)
+        assert "e0: observed evidence lacks collection method" in engine.gate(path, "observe")["blockers"]
+        status = engine.gate(path, "validate")
+        claim = "success" if verdict == "cumplido" else "rejection"
+        assert f"ass1 {claim} needs current protocol-valid evidence measuring waste_mass/kg in indicator i1" in \
+            status["blockers"]
+        assert not status["ready"] and not status["accepted"]
+
+    assert read_project(path)["events"][-1]["hash"] == recorded_hash
+    _put(path, "ass1", "assessment", ["res1", "r1"],
+         {"verdict": "no_demostrado", "claim_scope": "simulation", "uncertainty": "synthetic interval",
+          "adverse_effects": "not measured", "cost": "not measured"})
+    assert engine.gate(path, "validate")["ready"]
+
+
+@pytest.mark.parametrize("invalid_method", (" \t ", 17, {"instrument": "scale"}))
+def test_observed_evidence_with_invalid_method_blocks_recorded_observation(tmp_path, invalid_method):
+    path = tmp_path / "case"
+    _complete_synthetic_case(
+        path, e0_origin="observed", e0_data_extra={"method": invalid_method},
+        stop_before_observe=True,
+    )
+    issue = "observed evidence lacks collection method"
+    assert issue in engine.get_state(path)["items"]["e0"]["issues"]
+    status = engine.gate(path, "observe")
+    assert f"e0: {issue}" in status["blockers"]
+    assert not status["ready"] and not status["accepted"]
+
+
 def test_decisive_indicator_needs_a_value_for_its_typed_measurement(tmp_path):
     path = tmp_path / "case"
     _complete_synthetic_case(

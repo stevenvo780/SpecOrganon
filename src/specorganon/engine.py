@@ -335,8 +335,10 @@ def _item_issues(item: dict[str, Any]) -> list[str]:
         for field in ("source", "date", "locator"):
             if not isinstance(data.get(field), str) or not data[field].strip():
                 issues.append(f"evidence lacks {field}")
-        if data.get("origin") == "observed" and not data.get("method"):
-            issues.append("observed evidence lacks collection method")
+        if data.get("origin") == "observed":
+            method = data.get("method")
+            if not isinstance(method, str) or not method.strip():
+                issues.append("observed evidence lacks collection method")
         if all(field in data for field in ("metric_key", "scope", "unit", "value")):
             if _metric_interval(data) is None:
                 issues.append("evidence metric value must be a finite supported number")
