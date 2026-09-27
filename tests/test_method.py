@@ -162,6 +162,15 @@ def test_existing_ledgers_without_item_reviews_keep_accepted_frame(case_name):
     assert frame["ready"] and frame["reviewed"] and frame["accepted"]
 
 
+def test_committed_no_demostrado_ledger_remains_accepted_without_result_test_link():
+    path = Path(__file__).resolve().parents[1] / "cases" / "synthetic_multiagent"
+    state = engine.get_state(path)
+    assert state["items"]["ass1"]["data"]["verdict"] == "no_demostrado"
+    assert not any(item["kind"] == "test" for item in engine.trace(path, "res1")["ancestors"])
+    assert engine.gate(path, "validate")["ready"]
+    assert state["phases"]["validate"]["accepted"]
+
+
 def test_rejected_item_review_revokes_dependent_phases_until_fresh_advances(tmp_path):
     path = tmp_path / "case"
     _complete_synthetic_case(path)
@@ -696,7 +705,7 @@ def test_field_rejection_requires_measured_failure_of_prior_rule(tmp_path, succe
                   "cost": "invented fixture"}
 
     def record_result():
-        _put(path, "res1", "result", ["base1", "crit1"],
+        _put(path, "res1", "result", ["base1", "crit1", "t1"],
              {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
               "effect": effect.copy()})
         _put(path, "ass1", "assessment", ["res1", "r1"], assessment.copy())
@@ -765,7 +774,7 @@ def test_overlapping_success_and_rejection_tests_block_both_verdicts(tmp_path):
     _put(path, "base1", "baseline", ["crit1"],
          {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
           "metric": "count", "value": 0.2, "unit": "count"})
-    _put(path, "res1", "result", ["base1", "crit1"],
+    _put(path, "res1", "result", ["base1", "crit1", "t1"],
          {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
           "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
                      "design": "randomized fixture", "comparator": "synthetic control",
@@ -802,7 +811,7 @@ def test_field_upper_bound_success_uses_lower_bound_for_rejection(tmp_path, succ
               "sample_size": 12, "unit": "count"}
 
     def record_result():
-        _put(path, "res1", "result", ["base1", "crit1"],
+        _put(path, "res1", "result", ["base1", "crit1", "t1"],
              {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
               "effect": effect.copy()})
         _put(path, "ass1", "assessment", ["res1", "r1"],
@@ -828,16 +837,144 @@ def test_structured_field_claim_checks_prior_threshold_mechanically(tmp_path):
     _put(path, "crit1", "criterion", ["req1", "i1"], {"metric": "count", "threshold": {"operator": ">=", "value": 0.1, "statistic": "lower_ci"}, "reject": "lower CI below 0.1"})
     _put(path, "t1", "test", ["impl1", "crit1"], {"passed": True, "command": "synthetic fixture; no external command run"})
     _put(path, "base1", "baseline", ["crit1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "metric": "count", "value": 0.2, "unit": "count"})
-    _put(path, "res1", "result", ["base1", "crit1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4], "design": "randomized fixture", "comparator": "synthetic control", "sample_size": 12, "unit": "count"}})
+    _put(path, "res1", "result", ["base1", "crit1", "t1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4], "design": "randomized fixture", "comparator": "synthetic control", "sample_size": 12, "unit": "count"}})
     _put(path, "ass1", "assessment", ["res1", "r1"], {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval", "adverse_effects": "invented fixture", "cost": "invented fixture"})
     _accept(path, "specify")
     _accept(path, "build")
     _accept(path, "validate")
-    _put(path, "res1", "result", ["base1", "crit1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "effect": {"metric": "count", "estimate": 0.3, "interval": [0.05, 0.4], "design": "randomized fixture", "comparator": "synthetic control", "sample_size": 12, "unit": "count"}})
+    _put(path, "res1", "result", ["base1", "crit1", "t1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "effect": {"metric": "count", "estimate": 0.3, "interval": [0.05, 0.4], "design": "randomized fixture", "comparator": "synthetic control", "sample_size": 12, "unit": "count"}})
     _put(path, "ass1", "assessment", ["res1", "r1"], {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval", "adverse_effects": "invented fixture", "cost": "invented fixture"})
     blockers = engine.gate(path, "validate")["blockers"]
     assert any("does not meet the prior threshold" in item for item in blockers)
     assert not engine.gate(path, "validate")["accepted"]
+
+
+@pytest.mark.parametrize("linked_tests", ((), ("t2",)))
+def test_decisive_result_needs_test_of_its_criterion_and_requirement(tmp_path, linked_tests):
+    # Invented measurements exercise lineage only; they do not establish field impact.
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _put(path, "req2", "requirement", ["d1"])
+    _put(path, "crit1", "criterion", ["req1", "i1"],
+         {"metric": "count", "threshold": {"operator": ">=", "value": 0.1,
+                                           "statistic": "lower_ci"}, "reject": "lower CI below 0.1"})
+    _put(path, "t1", "test", ["impl1", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
+    _put(path, "impl2", "implementation", ["req2"])
+    _put(path, "t2", "test", ["impl2", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
+    _put(path, "base1", "baseline", ["crit1"],
+         {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+          "metric": "count", "value": 0.2, "unit": "count"})
+    result_data = {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+                   "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
+                              "design": "randomized fixture", "comparator": "synthetic control",
+                              "sample_size": 12, "unit": "count"}}
+    assessment_data = {"verdict": "cumplido", "claim_scope": "field",
+                       "uncertainty": "synthetic interval", "adverse_effects": "invented fixture",
+                       "cost": "invented fixture"}
+    _put(path, "res1", "result", ["base1", "crit1", *linked_tests], result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
+    _accept(path, "specify")
+    _accept(path, "build")
+
+    missing_test = "ass1 success needs a current passed test linked to res1 for crit1 and implementation of req1"
+    status = engine.gate(path, "validate")
+    assert status["blockers"] == [missing_test]
+    assert not status["ready"] and not status["accepted"]
+
+    assessment_data["verdict"] = "no_demostrado"
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
+    assert engine.gate(path, "validate")["ready"]
+
+    assessment_data["verdict"] = "cumplido"
+    _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
+    _accept(path, "validate")
+
+
+def test_decisive_result_covers_every_requirement_of_criterion(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _put(path, "req2", "requirement", ["d1"])
+    _put(path, "crit1", "criterion", ["req1", "req2", "i1"],
+         {"metric": "count", "threshold": {"operator": ">=", "value": 0.1,
+                                           "statistic": "lower_ci"}, "reject": "lower CI below 0.1"})
+    _put(path, "t1", "test", ["impl1", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
+    _put(path, "impl2", "implementation", ["req2"])
+    _put(path, "t2", "test", ["impl2", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
+    _put(path, "base1", "baseline", ["crit1"],
+         {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+          "metric": "count", "value": 0.2, "unit": "count"})
+    result_data = {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+                   "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
+                              "design": "randomized fixture", "comparator": "synthetic control",
+                              "sample_size": 12, "unit": "count"}}
+    _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"],
+         {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
+          "adverse_effects": "invented fixture", "cost": "invented fixture"})
+    _accept(path, "specify")
+    _accept(path, "build")
+
+    assert engine.gate(path, "validate")["blockers"] == [
+        "ass1 success needs a current passed test linked to res1 for crit1 and implementation of req2"
+    ]
+    _put(path, "res1", "result", ["base1", "crit1", "t1", "t2"], result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"],
+         {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
+          "adverse_effects": "invented fixture", "cost": "invented fixture"})
+    _accept(path, "validate")
+
+
+@pytest.mark.parametrize("revised_kind", ("test", "implementation"))
+def test_decisive_result_loses_acceptance_after_linked_build_revision(tmp_path, revised_kind):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _put(path, "crit1", "criterion", ["req1", "i1"],
+         {"metric": "count", "threshold": {"operator": ">=", "value": 0.1,
+                                           "statistic": "lower_ci"}, "reject": "lower CI below 0.1"})
+    test_data = {"passed": True, "command": "synthetic fixture; no external command run"}
+    _put(path, "t1", "test", ["impl1", "crit1"], test_data)
+    _put(path, "base1", "baseline", ["crit1"],
+         {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+          "metric": "count", "value": 0.2, "unit": "count"})
+    result_data = {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+                   "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
+                              "design": "randomized fixture", "comparator": "synthetic control",
+                              "sample_size": 12, "unit": "count"}}
+    assessment_data = {"verdict": "cumplido", "claim_scope": "field",
+                       "uncertainty": "synthetic interval", "adverse_effects": "invented fixture",
+                       "cost": "invented fixture"}
+    _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
+    _accept(path, "specify")
+    _accept(path, "build")
+    _accept(path, "validate")
+
+    if revised_kind == "implementation":
+        _put(path, "impl1", "implementation", ["req1"], text="revised implementation")
+        assert engine.get_state(path)["items"]["t1"]["stale"]
+        _put(path, "t1", "test", ["impl1", "crit1"], test_data)
+    else:
+        _put(path, "t1", "test", ["impl1", "crit1"],
+             {**test_data, "command": "revised synthetic fixture; no external command run"})
+    state = engine.get_state(path)
+    assert state["items"]["res1"]["stale"]
+    assert not state["phases"]["validate"]["accepted"]
+    _accept(path, "build")
+    with pytest.raises(engine.MethodError, match="phase cannot be accepted"):
+        engine.review_phase(path, "validate", "accept", "stale result", "agent:reviewer")
+
+    _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
+    status = engine.gate(path, "validate")
+    assert status["ready"] and not status["accepted"]
+    with pytest.raises(engine.MethodError, match="accepted review of its current snapshot"):
+        engine.advance(path, "validate", "agent:lead")
+    _accept(path, "validate")
 
 
 def test_success_requires_effect_and_declared_baseline_units_to_match_indicator(tmp_path):
@@ -858,7 +995,7 @@ def test_success_requires_effect_and_declared_baseline_units_to_match_indicator(
                   "adverse_effects": "invented fixture", "cost": "invented fixture"}
 
     def record_result():
-        _put(path, "res1", "result", ["base1", "crit1"],
+        _put(path, "res1", "result", ["base1", "crit1", "t1"],
              {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
               "effect": effect.copy()})
         _put(path, "ass1", "assessment", ["res1", "r1"], assessment.copy())
@@ -918,7 +1055,7 @@ def test_success_checks_explicit_criterion_and_threshold_units(tmp_path):
         _put(path, "base1", "baseline", ["crit1"],
              {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
               "metric": "count", "value": 0.2, "unit": "count"})
-        _put(path, "res1", "result", ["base1", "crit1"],
+        _put(path, "res1", "result", ["base1", "crit1", "t1"],
              {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
               "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
                          "design": "randomized fixture", "comparator": "synthetic control",
@@ -950,10 +1087,12 @@ def test_success_rejects_missing_or_ambiguous_linked_indicator_units(tmp_path):
     _put(path, "crit1", "criterion", ["req1", "i1"],
          {"metric": "count", "threshold": {"operator": ">=", "value": 0.1, "statistic": "lower_ci"},
           "reject": "lower CI below 0.1"})
+    _put(path, "t1", "test", ["impl1", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
     _put(path, "base1", "baseline", ["crit1"],
          {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
           "metric": "count", "value": 0.2, "unit": "count"})
-    _put(path, "res1", "result", ["base1", "crit1"],
+    _put(path, "res1", "result", ["base1", "crit1", "t1"],
          {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
           "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
                      "design": "randomized fixture", "comparator": "synthetic control",

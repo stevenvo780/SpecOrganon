@@ -301,6 +301,26 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) ->
         issues.append(f"{assessment['id']} {scope} {claim} cannot use another evidence origin")
     if result["seq"] <= criterion["seq"]:
         issues.append(f"{assessment['id']} {claim} uses a criterion written after the result")
+    criterion_requirements = {
+        ref for ref in _ancestors(items, criterion["id"])
+        if items[ref]["kind"] == "requirement"
+    }
+    covered_requirements: set[str] = set()
+    for ref in _ancestors(items, result["id"]):
+        test = items[ref]
+        if test["kind"] != "test" or _stale(items, ref) or _item_issues(test):
+            continue
+        test_ancestors = _ancestors(items, ref)
+        if criterion["id"] not in test_ancestors:
+            continue
+        for ancestor in test_ancestors:
+            if items[ancestor]["kind"] == "implementation":
+                covered_requirements.update(criterion_requirements & _ancestors(items, ancestor))
+    for requirement in sorted(criterion_requirements - covered_requirements):
+        issues.append(
+            f"{assessment['id']} {claim} needs a current passed test linked to {result['id']} "
+            f"for {criterion['id']} and implementation of {requirement}"
+        )
     rejection_test = criterion["data"].get("reject_test")
     if verdict == "incumplido":
         rejection_rule = criterion["data"].get("reject")

@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "classification": "development_decisive_intervention_lineage_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "scope": "Structural lineage from a decisive assessment and result to a current passed test, implementation, and each requirement of the same criterion",
+  "false_green_before_fix": "A synthetic field assessment with verdict cumplido passed validate although its result linked only baseline and criterion, with no path to a test or implementation.",
+  "post_fix_controls": [
+    "cumplido and incumplido require a current passed test in the result ancestry for the same criterion and an implementation of every criterion requirement",
+    "a test of another requirement does not satisfy the criterion requirement",
+    "an absent test blocks a decisive verdict",
+    "a criterion with multiple requirements needs coverage of each requirement",
+    "revising a linked test or implementation invalidates the result and removes validate acceptance until current versions are linked and reviewed",
+    "no_demostrado remains available when the intervention cannot be substantiated"
+  ],
+  "checks": [
+    {
+      "command": "uv run pytest -q tests/test_method.py",
+      "result": "56 passed"
+    },
+    {
+      "command": "uv run pytest -q tests/test_runner.py tests/test_anchor_integration.py tests/test_interruption.py tests/test_approval_security.py tests/test_injection_bank.py tests/test_put_concurrency.py",
+      "result": "73 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "970 passed"
+    },
+    {
+      "command": "uv run --no-sync ruff check .",
+      "result": "All checks passed"
+    }
+  ],
+  "installed_wheel_probe": {
+    "script": "scripts/probe_installed_decisive_gate.py",
+    "wheel_sha256": "dfec83864909b89c704f2e08cca39403a49db5384f5298aebf948f4cad860cd9",
+    "build_and_install": "offline build; fresh CPython 3.11.15 and 3.12.3 environments; dependencies from the previously pinned local bundles",
+    "python_3_11": {
+      "missing_test_blocked_by_installed_cli": true,
+      "linked_test_accepted_by_installed_cli": true,
+      "final_revision": 51
+    },
+    "python_3_12": {
+      "missing_test_blocked_by_installed_cli": true,
+      "linked_test_accepted_by_installed_cli": true,
+      "final_revision": 51
+    },
+    "clean_smoke_each_interpreter": "9 phases, 29 items, 14 CLI commands, 14 real stdio MCP tools, offline uv pip check passed",
+    "fixture_policy": "ephemeral unregistered synthetic case with ORGANON_ALLOW_FIXTURES=1"
+  },
+  "historical_compatibility": "A persisted synthetic_multiagent ledger with no_demostrado remained readable and accepted; no committed ledger was rewritten.",
+  "independent_review": {
+    "verdict": "no material reproducible false green found in the bounded review",
+    "focused_joint_check": "92 passed across tests/test_method.py and tests/test_run_development_arm.py",
+    "reviewer": "native read-only development agent, not an external field evaluator"
+  },
+  "limitations": [
+    "A recorded passing command is a declaration, not proof that the command ran or that its result is authentic.",
+    "The graph link does not establish causal attribution, field measurement provenance, human authority, or food-chain impact.",
+    "Historical decisive ledgers without the new link may lose current gate acceptance; none of the committed historical cases required such a decisive claim."
+  ],
+  "criterion_2": "not_assessed",
+  "criterion_3": "not_assessed"
+}
