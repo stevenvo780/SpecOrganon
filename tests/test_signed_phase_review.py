@@ -18,6 +18,8 @@ from specorganon.ledger import read_project
 REVIEWER = "human:reviewer"
 AUTHOR = "human:author"
 REASON = "I reviewed the exact frame snapshot and its evidence"
+APPROVER_ONE = "human:approver-one"
+APPROVER_TWO = "human:approver-two"
 
 
 def _public(key: Ed25519PrivateKey) -> str:
@@ -30,12 +32,13 @@ def _sign(key: Ed25519PrivateKey, challenge: dict) -> str:
     return base64.b64encode(key.sign(raw)).decode("ascii")
 
 
-def _registry(case: Path, file: Path, reviewers: dict[str, str]) -> None:
+def _registry(case: Path, file: Path, reviewers: dict[str, str],
+              approvers: dict[str, str] | None = None) -> None:
     project = read_project(case)["project"]
     file.write_text(json.dumps({"schema": 2, "cases": {project["case_id"]: {
         "path": str(case.resolve(strict=True)),
         "project_sha256": approval.project_fingerprint(project),
-        "approvers": {},
+        "approvers": approvers if approvers is not None else {},
         "phase_reviewers": reviewers,
     }}}), encoding="utf-8")
 
@@ -160,6 +163,108 @@ def test_reviewer_key_revocation_reopens_accepted_phase(tmp_path, monkeypatch):
     assert (case / "organon.json").read_bytes() == before
 
 
+def test_new_normative_approval_requires_new_signed_review_and_advance(tmp_path, monkeypatch):
+    case, registry, reviewer_key = _case(tmp_path, monkeypatch)
+    engine.review_phase(case, "frame", "accept", REASON, REVIEWER,
+                        _sign(reviewer_key, _challenge(case)))
+    engine.advance(case, "frame", AUTHOR)
+    for item_id, kind, text, refs in (
+        ("c1", "concept", "A relevant concept", ["p1"]),
+        ("s1", "assumption", "An explicit assumption", ["p1"]),
+        ("f1", "frame_option", "First framing", ["p1"]),
+        ("f2", "frame_option", "Second framing", ["p1"]),
+        ("n1", "norm", "Protect the affected actor", ["p1", "a1"]),
+    ):
+        engine.put_item(case, item_id, kind, text, refs, {}, AUTHOR)
+
+    first_key = Ed25519PrivateKey.generate()
+    second_key = Ed25519PrivateKey.generate()
+    _registry(case, registry, {REVIEWER: _public(reviewer_key)},
+              {APPROVER_ONE: _public(first_key)})
+    first_reason = "First synthetic normative approval"
+    engine.approve(case, "n1", first_reason, APPROVER_ONE,
+                   _sign(first_key, engine.approval_challenge(case, "n1", first_reason, APPROVER_ONE)))
+    first_snapshot = engine.gate(case, "critique")["snapshot"]
+    critique_reason = "Independent synthetic critique review"
+    first_review_signature = _sign(reviewer_key, engine.phase_review_challenge(
+        case, "critique", "accept", critique_reason, REVIEWER))
+    first_review = engine.review_phase(case, "critique", "accept", critique_reason,
+                                       REVIEWER, first_review_signature)
+    first_advance = engine.advance(case, "critique", AUTHOR)
+    assert first_review["seq"] == 12 and first_advance["seq"] == 13
+    assert engine.gate(case, "critique")["accepted"]
+
+    unchanged = (case / "organon.json").read_bytes()
+    assert engine.review_phase(case, "critique", "accept", critique_reason,
+                               REVIEWER, first_review_signature) == first_review
+    assert engine.advance(case, "critique", AUTHOR) == first_advance
+    assert (case / "organon.json").read_bytes() == unchanged
+
+    _registry(case, registry, {REVIEWER: _public(reviewer_key)})
+    revoked = engine.gate(case, "critique")
+    assert not revoked["ready"] and not revoked["accepted"]
+    assert any("approval" in blocker for blocker in revoked["blockers"])
+
+    _registry(case, registry, {REVIEWER: _public(reviewer_key)},
+              {APPROVER_TWO: _public(second_key)})
+    second_reason = "Replacement approval with a different normative reason"
+    second_approval = engine.approve(case, "n1", second_reason, APPROVER_TWO,
+                                     _sign(second_key, engine.approval_challenge(
+                                         case, "n1", second_reason, APPROVER_TWO)))
+    assert second_approval["seq"] == 14
+    pending = engine.gate(case, "critique")
+    assert pending["ready"] and not pending["reviewed"] and not pending["accepted"]
+    assert pending["snapshot"] != first_snapshot
+    with pytest.raises(engine.MethodError, match="invalid or stale"):
+        engine.review_phase(case, "critique", "accept", critique_reason,
+                            REVIEWER, first_review_signature)
+    with pytest.raises(engine.MethodError, match="accepted review"):
+        engine.advance(case, "critique", AUTHOR)
+
+    second_review = engine.review_phase(case, "critique", "accept", critique_reason,
+                                        REVIEWER, _sign(reviewer_key, engine.phase_review_challenge(
+                                            case, "critique", "accept", critique_reason, REVIEWER)))
+    reviewed = engine.gate(case, "critique")
+    assert reviewed["reviewed"] and not reviewed["accepted"]
+    second_advance = engine.advance(case, "critique", AUTHOR)
+    assert second_review["seq"] > first_advance["seq"]
+    assert second_advance["payload"]["review_seq"] == second_review["seq"]
+    assert engine.gate(case, "critique")["accepted"]
+    assert {entry["seq"] for entry in engine.get_state(case)["phase_review_history"]} >= {
+        first_review["seq"], second_review["seq"],
+    }
+
+
+def test_invalid_later_approval_preserves_verified_provenance_and_unrelated_phase(tmp_path, monkeypatch):
+    case, registry, reviewer_key = _case(tmp_path, monkeypatch)
+    engine.review_phase(case, "frame", "accept", REASON, REVIEWER,
+                        _sign(reviewer_key, _challenge(case)))
+    engine.advance(case, "frame", AUTHOR)
+    frame = engine.gate(case, "frame")
+    assert frame["accepted"]
+
+    approver_key = Ed25519PrivateKey.generate()
+    _registry(case, registry, {REVIEWER: _public(reviewer_key)},
+              {APPROVER_ONE: _public(approver_key)})
+    engine.put_item(case, "n1", "norm", "A later normative commitment", ["p1", "a1"], {}, AUTHOR)
+    assert engine.gate(case, "frame") == frame
+    reason = "Verified synthetic approval"
+    valid = engine.approve(case, "n1", reason, APPROVER_ONE,
+                           _sign(approver_key, engine.approval_challenge(case, "n1", reason, APPROVER_ONE)))
+    critique_snapshot = engine.gate(case, "critique")["snapshot"]
+    assert engine.gate(case, "frame") == frame
+
+    invalid = engine.append_event(case, "approval", {
+        "id": "n1", "version": 1, "reason": "Forged later approval",
+        "signature": "not-base64", "key_sha256": approval.key_fingerprint(
+            base64.b64decode(_public(approver_key))),
+    }, APPROVER_ONE, expected_seq=valid["seq"])
+    assert invalid["seq"] == valid["seq"] + 1
+    assert engine.get_state(case)["items"]["n1"]["approval_status"] == "signed_verified"
+    assert engine.gate(case, "critique")["snapshot"] == critique_snapshot
+    assert engine.gate(case, "frame") == frame
+
+
 def test_reviewer_alias_key_collision_fails_closed(tmp_path, monkeypatch):
     case, registry, key = _case(tmp_path, monkeypatch)
     _registry(case, registry, {REVIEWER: _public(key), "human:alias": _public(key)})
@@ -191,6 +296,51 @@ def test_signed_self_review_cannot_claim_independence_even_with_a_valid_signatur
         engine.advance(case, "frame", AUTHOR)
     assert read_project(case)["events"][-1] == event
     assert registry.exists()
+
+
+def test_earlier_item_author_cannot_review_after_identical_republication(tmp_path, monkeypatch):
+    case, registry, reviewer_key = _case(tmp_path, monkeypatch, item_actor=REVIEWER)
+    for item_id, kind, text, refs in (
+        ("p1", "problem", "A stated problem", []),
+        ("a1", "actor", "The affected actor", ["p1"]),
+        ("b1", "boundary", "A defined boundary", ["p1"]),
+    ):
+        engine.put_item(case, item_id, kind, text, refs, {}, AUTHOR)
+    other_reviewer = "human:other-reviewer"
+    other_key = Ed25519PrivateKey.generate()
+    _registry(case, registry, {REVIEWER: _public(reviewer_key), other_reviewer: _public(other_key)})
+    assert engine.gate(case, "frame")["ready"]
+    before = (case / "organon.json").read_bytes()
+    with pytest.raises(engine.MethodError, match="independent"):
+        engine.phase_review_challenge(case, "frame", "accept", REASON, REVIEWER)
+    assert (case / "organon.json").read_bytes() == before
+
+    state = engine._project(case)
+    snapshot = engine.gate(case, "frame")["snapshot"]
+    signature = base64.b64encode(reviewer_key.sign(review_provenance.message(
+        state["project"], case, state["head_hash"], "frame", snapshot,
+        "accept", REASON, REVIEWER,
+    ))).decode("ascii")
+    forged = engine.append_event(case, "phase_review", {
+        "phase": "frame", "verdict": "accept", "reason": REASON,
+        "snapshot": snapshot, "independent": True, "signature": signature,
+        "key_sha256": approval.key_fingerprint(base64.b64decode(_public(reviewer_key))),
+    }, REVIEWER, expected_seq=state["revision"])
+    engine.append_event(case, "phase_advance", {
+        "phase": "frame", "snapshot": snapshot, "review_seq": forged["seq"],
+    }, AUTHOR, expected_seq=forged["seq"])
+    history = engine.get_state(case)["phase_review_history"][-1]
+    status = engine.gate(case, "frame")
+    assert history["signature_verified"] and not history["independent"]
+    assert status["review_signature_verified"] and not status["reviewed"]
+    assert not status["independent_review"] and not status["accepted"]
+
+    independent_reason = "Independent review by a distinct synthetic reviewer"
+    challenge = engine.phase_review_challenge(case, "frame", "accept", independent_reason, other_reviewer)
+    valid = engine.review_phase(case, "frame", "accept", independent_reason,
+                                other_reviewer, _sign(other_key, challenge))
+    assert engine.advance(case, "frame", AUTHOR)["payload"]["review_seq"] == valid["seq"]
+    assert engine.gate(case, "frame")["accepted"]
 
 
 def test_fixture_review_rejects_signature_and_reports_synthetic(tmp_path, monkeypatch):

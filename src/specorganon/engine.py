@@ -69,8 +69,10 @@ def _project(path: str | Path) -> dict[str, Any]:
         "revision": len(ledger["events"]),
         "head_hash": ledger["events"][-1]["hash"] if ledger["events"] else ZERO_HASH,
         "items": {},
+        "item_author_history": {},
         "approvals": set(),
         "approval_statuses": {},
+        "approval_provenance": {},
         "approval_trust": trust_status,
         "phase_review_trust": (
             "fixture" if trust_status == "fixture" else
@@ -106,6 +108,7 @@ def _project(path: str | Path) -> dict[str, Any]:
             item["seq"] = seq
             item["author"] = event["actor"]
             state["items"][item["id"]] = item
+            state["item_author_history"].setdefault(item["id"], set()).add(event["actor"])
         elif kind == "approval":
             item = state["items"].get(payload.get("id"))
             if item is None or item["version"] != payload.get("version") or item["kind"] not in {"norm", "decision"}:
@@ -126,6 +129,7 @@ def _project(path: str | Path) -> dict[str, Any]:
             if valid:
                 state["approval_statuses"][key] = status
                 state["approvals"].add(key)
+                state["approval_provenance"][key] = (seq, event["hash"])
             elif key not in state["approvals"]:
                 state["approval_statuses"][key] = status
         elif kind == "field_attestation":
@@ -172,8 +176,7 @@ def _project(path: str | Path) -> dict[str, Any]:
         elif kind == "phase_review":
             if not isinstance(payload, dict) or payload.get("phase") not in PHASE_BY_ID:
                 raise MethodError(f"invalid phase review at sequence {seq}")
-            authors = {item["author"] for item in state["items"].values()
-                       if KIND_TO_PHASE[item["kind"]] == payload["phase"]}
+            authors = _phase_authors(state, payload["phase"])
             independent = event["actor"] not in authors
             if project["approval_policy"] == "signed":
                 has_proof = isinstance(payload.get("signature"), str) and isinstance(payload.get("key_sha256"), str)
@@ -206,6 +209,14 @@ def _project(path: str | Path) -> dict[str, Any]:
         else:
             raise MethodError(f"unknown event type at sequence {seq}: {kind}")
     return state
+
+
+def _phase_authors(state: dict[str, Any], phase: str) -> set[str]:
+    """Keep earlier item-version authors in signed reviewer independence checks."""
+    phase_items = (item for item in state["items"].values() if KIND_TO_PHASE[item["kind"]] == phase)
+    if state["project"]["approval_policy"] == "signed":
+        return set().union(*(state["item_author_history"][item["id"]] for item in phase_items))
+    return {item["author"] for item in phase_items}
 
 
 def _ancestors(items: dict[str, dict], item_id: str) -> set[str]:
@@ -1047,6 +1058,15 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
         )
         snapshot_data = {"phase": phase.id, "items": items,
                          "previous_marker": previous_marker, "challenges": challenge_history}
+        if state["project"]["approval_policy"] == "signed":
+            normative_ids = sorted(item_id for item_id in relevant_ids
+                                   if state["items"][item_id]["kind"] in {"norm", "decision"})
+            if normative_ids:
+                snapshot_data["normative_approvals"] = [
+                    (item_id, state["items"][item_id]["version"],
+                     state["approval_provenance"].get((item_id, state["items"][item_id]["version"])))
+                    for item_id in normative_ids
+                ]
         # Existing ledgers recorded this payload without an item_reviews key.
         if item_reviews:
             snapshot_data["item_reviews"] = item_reviews
@@ -1398,7 +1418,7 @@ def _phase_review_target(
     if verdict == "accept" and not status["ready"]:
         raise MethodError("phase cannot be accepted: " + "; ".join(status["blockers"]))
     normalized_actor = actor.strip()
-    authors = {item["author"] for item in state["items"].values() if KIND_TO_PHASE[item["kind"]] == phase}
+    authors = _phase_authors(state, phase)
     if state["project"]["approval_policy"] == "fixture" and state["phase_review_trust"] != "fixture":
         raise MethodError("fixture phase reviews are disabled or conflict with a registered signed case")
     if state["project"]["approval_policy"] == "signed":
@@ -1432,8 +1452,7 @@ def review_phase(
 ) -> dict[str, Any]:
     state = _project(path)
     status, normalized_actor = _phase_review_target(state, phase, verdict, reason, actor)
-    authors = {item["author"] for item in state["items"].values()
-               if KIND_TO_PHASE[item["kind"]] == phase}
+    authors = _phase_authors(state, phase)
     payload = {"phase": phase, "verdict": verdict, "reason": reason.strip(), "snapshot": status["snapshot"], "independent": normalized_actor not in authors}
     if state["project"]["approval_policy"] == "fixture":
         if signature is not None:

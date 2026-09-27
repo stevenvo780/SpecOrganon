@@ -1,0 +1,37 @@
+{
+  "classification": "synthetic_signed_review_dependency_regression",
+  "date_utc": "2026-09-27",
+  "source_code_sha256": "39cae5224367d575b63a6e724dbef7f63895af00b6202afadd1bec8b9bb87726",
+  "test_code_sha256": "a5c25c2464e24a8690f4f9b46bfe42e47fb5717fc5c914aa791bdcfc43b2e882",
+  "focused_command": "uv run pytest -q tests/test_signed_phase_review.py tests/test_approval_security.py tests/test_signed_phase_review_interfaces.py tests/test_signed_full_workflow.py",
+  "focused_result": {
+    "passed": 32,
+    "failed": 0
+  },
+  "negative_controls": [
+    {
+      "scenario": "An earlier author republishes the same phase item through another actor, then submits a signed review as independent.",
+      "test": "test_earlier_item_author_cannot_review_after_identical_republication",
+      "observed": "The challenge API refuses the author; a directly appended signed review is visible but ineffective during replay."
+    },
+    {
+      "scenario": "The first verified normative approval is revoked and a second actor approves the same item version after critique was reviewed and advanced.",
+      "test": "test_new_normative_approval_requires_new_signed_review_and_advance",
+      "observed": "The old snapshot, review and advance become ineffective; a new review and advance restore acceptance."
+    },
+    {
+      "scenario": "A later invalid approval and an unrelated normative approval are appended.",
+      "test": "test_invalid_later_approval_preserves_verified_provenance_and_unrelated_phase",
+      "observed": "The last verified approval remains effective and an unrelated earlier phase stays accepted."
+    }
+  ],
+  "review_scope": "An independent read-only reviewer reproduced both original bypasses on the prior code and could not reproduce them after the fix; later invalid approval and unrelated-approval controls were also checked.",
+  "external_reviewer_identity_authenticated": false,
+  "external_approval_custody_verified": false,
+  "criterion_2": "not_assessed",
+  "limitations": [
+    "The cases, keys and actors in the regression are synthetic.",
+    "Ledger hashes alone do not protect event history from a writer who can replace the ledger and its external trust material together.",
+    "The fix does not authenticate the competence, personal independence or substantive judgment of a reviewer."
+  ]
+}
