@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import stat
@@ -15,7 +16,7 @@ SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 import run_development_arm as runner  # noqa: E402
 from run_development_arm import (  # noqa: E402
-    RunError, replay_run_dir, run_development_arm,
+    RunError, prepare_development_arm, replay_run_dir, run_development_arm,
 )
 
 
@@ -311,6 +312,246 @@ def fake_t_setup(
         "toolkit_files_fingerprint_sha256": runner._toolkit_fingerprint(work),
         "signed_policy_verified_in_local_probe": True,
     }
+
+
+@pytest.mark.parametrize("arm,provider,model,effort,no_command", [
+    ("N", "codex", "test-model", "medium", False),
+    ("S", "agy", "test-model", "high", True),
+    ("T", "opencode", "minimax/MiniMax-M3", "uncontrolled", False),
+])
+def test_prepare_only_pins_inputs_and_never_launches(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+    arm: str, provider: str, model: str, effort: str, no_command: bool,
+) -> None:
+    wheel = None
+    if arm == "T":
+        wheel = tmp_path / "specorganon-0.1.0-py3-none-any.whl"
+        wheel.write_bytes(b"offline fixture wheel\n")
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("prepare-only launched a command or toolkit setup")
+
+    monkeypatch.setattr(runner, "_capture", forbidden)
+    monkeypatch.setattr(runner, "_setup_toolkit", forbidden)
+    monkeypatch.setattr(runner, "_system_strace", forbidden)
+    monkeypatch.setenv("PRIVATE_ENV_SENTINEL", "never-write-this-environment-value")
+    run_dir, prepared = prepare_development_arm(
+        arm=arm, provider=provider, model=model, effort=effort,
+        output_root=tmp_path / "runs", timeout_seconds=11,
+        toolkit_wheel=wheel, agy_no_command_tool=no_command,
+    )
+
+    saved = (run_dir / "prepared.json").read_text(encoding="utf-8")
+    assert json.loads(saved) == prepared
+    assert "never-write-this-environment-value" not in saved
+    assert prepared["classification"] == "development_prompt_preparation_unsealed"
+    assert prepared["status"] == "no_go_for_provider_calls"
+    assert prepared["execution_status"] == "prepared_without_execution"
+    assert prepared["provider_calls"] == 0
+    for flag in ("execution_ready", "launch_ready", "tool_parity_verified",
+                 "human_review_verified", "controlled_comparison_eligible"):
+        assert prepared[flag] is False
+    assert prepared["cap_status"] == "unknown"
+    assert prepared["provider_command"] == str(fake_clis / provider)
+    assert prepared["provider_argv"][0] == prepared["provider_command"]
+    assert prepared["provider_command_resolved_on_path"] is True
+    assert prepared["packet"] == {
+        name: runner._file_record(run_dir / "work" / name) for name in runner.PUBLIC_FILES
+    }
+    assert prepared["prompt"]["common_sha256"] == runner._sha256(run_dir / "work/common.md")
+    assert prepared["prompt"]["arm_sha256"] == runner._sha256(run_dir / "work/arm.md")
+    prompt = (run_dir / "prompt.txt").read_text(encoding="utf-8")
+    assert prepared["prompt_file"] == runner._file_record(run_dir / "prompt.txt")
+    assert prepared["prompt"]["assembled_sha256"] == hashlib.sha256(prompt.encode()).hexdigest()
+    if provider == "agy":
+        assert prepared["prompt_transport"] == "argv"
+        assert prepared["provider_argv"][prepared["provider_argv"].index("--print") + 1] == prompt
+        assert prepared["stdin"] == {"mode": "devnull", "sha256": None, "bytes": 0}
+        assert "do not call run_command, RunCommand" in prompt
+    else:
+        assert prepared["prompt_transport"] == "stdin"
+        assert prepared["stdin"] == {
+            "mode": "pipe", "sha256": hashlib.sha256(prompt.encode()).hexdigest(),
+            "bytes": len(prompt.encode()),
+        }
+    if wheel is not None:
+        assert prepared["wheel"] == runner._file_record(wheel)
+        assert not (run_dir / "work" / wheel.name).exists()
+    else:
+        assert prepared["wheel"] is None
+    assert set(path.name for path in (run_dir / "work").iterdir()) == {
+        *runner.PUBLIC_FILES, "common.md", "arm.md",
+    }
+    assert stat.S_IMODE(run_dir.stat().st_mode) == 0o700
+    assert stat.S_IMODE((run_dir / "prepared.json").stat().st_mode) == 0o600
+    assert not (run_dir / "run.json").exists()
+    assert not (run_dir / "cli.stdout.jsonl").exists()
+    assert not (run_dir / "cli.stderr").exists()
+    assert not (run_dir / "work/fake_argv.json").exists()
+    with pytest.raises(RunError, match="run directory, summary or work directory"):
+        replay_run_dir(run_dir, "0" * 64)
+
+
+def test_prepare_only_works_without_provider_on_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    empty_path = tmp_path / "empty-bin"
+    empty_path.mkdir()
+    monkeypatch.setenv("PATH", str(empty_path))
+    run_dir, prepared = prepare_development_arm(
+        arm="N", provider="codex", model="test-model", effort="low",
+        output_root=tmp_path / "runs",
+    )
+    assert prepared["provider_command"] == "codex"
+    assert prepared["provider_command_resolved_on_path"] is False
+    assert prepared["execution_ready"] is False
+    assert (run_dir / "prepared.json").exists()
+
+
+@pytest.mark.parametrize("provider,model,effort", [
+    ("codex", "test-model", "medium"),
+    ("agy", "test-model", "medium"),
+    ("opencode", "minimax/MiniMax-M3", "uncontrolled"),
+])
+def test_prepare_only_argv_matches_real_runner_builder(
+    tmp_path: Path, fake_clis: Path, provider: str, model: str, effort: str,
+) -> None:
+    prepared_dir, prepared = prepare_development_arm(
+        arm="N", provider=provider, model=model, effort=effort,
+        output_root=tmp_path / "prepared", timeout_seconds=10,
+    )
+    run_dir, _ = run_development_arm(
+        arm="N", provider=provider, model=model, effort=effort,
+        output_root=tmp_path / "executed", timeout_seconds=10,
+    )
+    observed_argv = json.loads((run_dir / "work/fake_argv.json").read_text(encoding="utf-8"))
+    planned_argv = [
+        argument.replace(str(prepared_dir / "work"), str(run_dir / "work"))
+        for argument in prepared["provider_argv"][1:]
+    ]
+    assert planned_argv == observed_argv
+    assert (prepared_dir / "prompt.txt").read_bytes() == (run_dir / "prompt.txt").read_bytes()
+    assert not (prepared_dir / "work/fake_argv.json").exists()
+
+
+@pytest.mark.parametrize("source_name", [
+    "sample_first_complete_week.csv", "common.md", "arm_n.md",
+])
+def test_prepare_only_rejects_tampered_copies_before_positive_report(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+    source_name: str,
+) -> None:
+    original_copy = runner.shutil.copyfile
+
+    def tamper_copy(source: Path, destination: Path) -> str:
+        result = original_copy(source, destination)
+        if Path(source).name == source_name:
+            target = Path(destination)
+            target.write_bytes(target.read_bytes() + b"\nchanged during copy\n")
+        return result
+
+    monkeypatch.setattr(runner.shutil, "copyfile", tamper_copy)
+    with pytest.raises(RunError, match="(public packet changed|assigned prompt copies differ)"):
+        prepare_development_arm(
+            arm="N", provider="codex", model="test-model", effort="low",
+            output_root=tmp_path / "runs",
+        )
+    assert not list((tmp_path / "runs").glob("*/prepared.json"))
+    assert not list((tmp_path / "runs").glob("*/work/fake_argv.json"))
+
+
+def test_prepare_only_rejects_wheel_mutation_before_positive_report(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wheel = tmp_path / "specorganon-0.1.0-py3-none-any.whl"
+    wheel.write_bytes(b"original wheel bytes\n")
+    original_which = runner.shutil.which
+
+    def mutate_wheel(command: str) -> str | None:
+        wheel.write_bytes(b"changed wheel bytes\n")
+        return original_which(command)
+
+    monkeypatch.setattr(runner.shutil, "which", mutate_wheel)
+    with pytest.raises(RunError, match="prepared inputs changed"):
+        prepare_development_arm(
+            arm="T", provider="codex", model="test-model", effort="medium",
+            output_root=tmp_path / "runs", toolkit_wheel=wheel,
+        )
+    assert not list((tmp_path / "runs").glob("*/prepared.json"))
+    assert not list((tmp_path / "runs").glob("*/work/fake_argv.json"))
+
+
+def test_prepare_only_rejects_source_mutation_before_positive_report(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    prompts = tmp_path / "public-prompts"
+    prompts.mkdir()
+    for name in ("common.md", "arm_n.md"):
+        (prompts / name).write_bytes((runner.PROMPTS / name).read_bytes())
+    monkeypatch.setattr(runner, "PROMPTS", prompts)
+    original_builder = runner._provider_invocation
+
+    def mutate_source(*args: object, **kwargs: object) -> object:
+        common = prompts / "common.md"
+        common.write_bytes(common.read_bytes() + b"\nchanged after copy\n")
+        return original_builder(*args, **kwargs)
+
+    monkeypatch.setattr(runner, "_provider_invocation", mutate_source)
+    with pytest.raises(RunError, match="prepared inputs changed"):
+        prepare_development_arm(
+            arm="N", provider="codex", model="test-model", effort="low",
+            output_root=tmp_path / "runs",
+        )
+    assert not list((tmp_path / "runs").glob("*/prepared.json"))
+    assert not list((tmp_path / "runs").glob("*/work/fake_argv.json"))
+
+
+@pytest.mark.parametrize("overrides,error", [
+    ({"arm": "X"}, "arm must be N/S/T"),
+    ({"model": ""}, "model and effort"),
+    ({"effort": "uncontrolled"}, "effort must be"),
+    ({"timeout_seconds": 0}, "timeout values"),
+    ({"agy_no_command_tool": True}, "requires Agy N/S"),
+    ({"arm": "T"}, "requires --toolkit-wheel"),
+])
+def test_prepare_only_invalid_request_never_creates_positive_report(
+    tmp_path: Path, overrides: dict[str, object], error: str,
+) -> None:
+    options: dict[str, object] = {
+        "arm": "N", "provider": "codex", "model": "test-model", "effort": "low",
+        "output_root": tmp_path / "runs",
+    }
+    options.update(overrides)
+    with pytest.raises(RunError, match=error):
+        prepare_development_arm(**options)
+    assert not (tmp_path / "runs").exists()
+
+
+def test_prepare_only_cli_reports_private_location_and_no_go(
+    tmp_path: Path, fake_clis: Path,
+) -> None:
+    script = SCRIPTS / "run_development_arm.py"
+    help_result = subprocess.run(
+        [sys.executable, str(script), "--help"],
+        capture_output=True, text=True, check=True,
+    )
+    assert "--prepare-only" in help_result.stdout
+    assert "prepared.json" in help_result.stdout
+    result = subprocess.run([
+        sys.executable, str(script), "--prepare-only", "--arm", "S",
+        "--provider", "agy", "--model", "test-model", "--effort", "medium",
+        "--output-root", str(tmp_path / "runs"), "--agy-no-command-tool",
+    ], capture_output=True, text=True, check=True)
+    output = json.loads(result.stdout)
+    run_dir = Path(output["run_dir"])
+    assert output == {
+        "run_dir": str(run_dir), "prepared_record": str(run_dir / "prepared.json"),
+        "status": "no_go_for_provider_calls", "provider_calls": 0,
+        "execution_ready": False,
+    }
+    assert (run_dir / "prepared.json").exists()
+    assert not (run_dir / "work/fake_argv.json").exists()
+    assert "Development-only D-E execution" not in result.stdout
 
 
 def _usage_trace(

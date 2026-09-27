@@ -1,8 +1,9 @@
-"""Run one exposed D-E development arm with local Codex, Agy or OpenCode telemetry.
+"""Run or prepare one exposed D-E development arm with local Codex, Agy or OpenCode.
 
 This is an unsealed feasibility runner, not a confirmatory matrix executor or
 an authenticated provider receipt. Each invocation creates a private directory
 and never reuses another arm's workspace. Raw CLI streams stay there for audit.
+The offline preparation writes prepared.json and makes no model or toolkit call.
 """
 
 from __future__ import annotations
@@ -1051,6 +1052,18 @@ def _prompt(arm: str, work: Path, *, agy_no_command_tool: bool = False) -> tuple
                   "assembled_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest()}
 
 
+def _copy_prompt_inputs(arm: str, work: Path, prompt_hashes: dict[str, str]) -> None:
+    """Pin the assigned source files to the bytes used in the effective prompt."""
+    try:
+        shutil.copyfile(PROMPTS / "common.md", work / "common.md")
+        shutil.copyfile(PROMPTS / f"arm_{arm.lower()}.md", work / "arm.md")
+    except OSError as exc:
+        raise RunError("assigned prompt files could not be copied") from exc
+    if (_sha256(work / "common.md") != prompt_hashes["common_sha256"]
+            or _sha256(work / "arm.md") != prompt_hashes["arm_sha256"]):
+        raise RunError("assigned prompt copies differ from the bytes used to build the prompt")
+
+
 def _prepare_packet(work: Path) -> dict[str, dict[str, Any]]:
     manifest_path = PACKET / "source_manifest.json"
     if not all(_regular_file(PACKET / name) for name in PUBLIC_FILES):
@@ -1202,13 +1215,11 @@ def _inspect_t_ledger(work: Path, run_dir: Path, timeout_seconds: int,
     return result
 
 
-def run_development_arm(
-    *, arm: str, provider: str, model: str, effort: str, output_root: Path,
-    timeout_seconds: int = 600, replay_timeout_seconds: int = 90,
-    setup_timeout_seconds: int = 180, toolkit_wheel: Path | None = None,
-    agy_no_command_tool: bool = False,
-) -> tuple[Path, dict[str, Any]]:
-    """Execute exactly one arm and return its private run path and sanitized summary."""
+def _validate_arm_request(
+    arm: str, provider: str, model: str, effort: str, timeout_seconds: int,
+    replay_timeout_seconds: int, setup_timeout_seconds: int,
+    agy_no_command_tool: bool,
+) -> None:
     if arm not in {"N", "S", "T"} or provider not in {"codex", "agy", "opencode"}:
         raise RunError("arm must be N/S/T and provider must be codex/agy/opencode")
     if agy_no_command_tool and (provider != "agy" or arm == "T"):
@@ -1227,6 +1238,124 @@ def run_development_arm(
     if any(type(value) is not int or value < 1 for value in
            (timeout_seconds, replay_timeout_seconds, setup_timeout_seconds)):
         raise RunError("all timeout values must be positive integer seconds")
+
+
+def _provider_invocation(
+    provider: str, executable: str, model: str, effort: str,
+    timeout_seconds: int, work: Path, prompt: str,
+) -> tuple[list[str], str | None, dict[str, Any]]:
+    """Build the exact model CLI invocation without looking at the environment."""
+    if provider == "codex":
+        return ([executable, "exec", "--json", "--ephemeral", "--ignore-user-config",
+                 "--skip-git-repo-check", "-C", str(work), "-s", "workspace-write",
+                 "-m", model, "-c", f'model_reasoning_effort="{effort}"', "-"],
+                prompt, {"codex_sandbox": "workspace-write"})
+    if provider == "agy":
+        return ([executable, "--print", prompt, "--output-format", "stream-json",
+                 "--model", model, "--effort", effort, "--print-timeout",
+                 f"{timeout_seconds}s", "--new-project", "--sandbox", "--mode",
+                 "accept-edits", "--disable-slash-commands"],
+                None, {"agy_sandbox": True, "agy_mode": "accept-edits"})
+    if provider == "opencode":
+        return ([executable, "--pure", "run", "--format", "json", "--model", model,
+                 "--agent", "build", "--dir", str(work)],
+                prompt, {"opencode_format": "json", "opencode_pure": True,
+                         "opencode_agent": "build"})
+    raise RunError("provider must be codex/agy/opencode")
+
+
+def prepare_development_arm(
+    *, arm: str, provider: str, model: str, effort: str, output_root: Path,
+    timeout_seconds: int = 600, replay_timeout_seconds: int = 90,
+    setup_timeout_seconds: int = 180, toolkit_wheel: Path | None = None,
+    agy_no_command_tool: bool = False,
+) -> tuple[Path, dict[str, Any]]:
+    """Record public inputs and a planned CLI invocation without executing it."""
+    _validate_arm_request(arm, provider, model, effort, timeout_seconds,
+                          replay_timeout_seconds, setup_timeout_seconds,
+                          agy_no_command_tool)
+    if arm == "T" and (toolkit_wheel is None or not _regular_file(toolkit_wheel)
+                       or toolkit_wheel.suffix != ".whl"):
+        raise RunError("T requires --toolkit-wheel pointing to a regular .whl file")
+    output_root = output_root.expanduser().resolve()
+    if toolkit_wheel is not None:
+        toolkit_wheel = toolkit_wheel.expanduser().resolve()
+    previous_umask = os.umask(0o077)
+    try:
+        run_dir = _private_run_dir(output_root)
+        work = run_dir / "work"
+        work.mkdir(mode=0o700)
+        packet = _prepare_packet(work)
+        prompt, prompt_hashes = _prompt(arm, work, agy_no_command_tool=agy_no_command_tool)
+        prompt_path = run_dir / "prompt.txt"
+        prompt_path.write_text(prompt, encoding="utf-8")
+        _copy_prompt_inputs(arm, work, prompt_hashes)
+        prompt_record = _file_record(prompt_path)
+        if prompt_record is None or prompt_record["sha256"] != prompt_hashes["assembled_sha256"]:
+            raise RunError("effective prompt file differs from the assembled prompt")
+        wheel_record = _file_record(toolkit_wheel) if arm == "T" else None
+        if arm == "T" and wheel_record is None:
+            raise RunError("T toolkit wheel changed during preparation")
+        executable = shutil.which(provider)
+        argv, stdin_text, cli_mode = _provider_invocation(
+            provider, executable or provider, model, effort, timeout_seconds, work, prompt,
+        )
+        stdin_bytes = stdin_text.encode("utf-8") if stdin_text is not None else None
+        if (any(_file_record(work / name) != record
+                or _file_record(PACKET / name) != record for name, record in packet.items())
+                or _sha256(work / "common.md") != prompt_hashes["common_sha256"]
+                or _sha256(work / "arm.md") != prompt_hashes["arm_sha256"]
+                or _file_record(PROMPTS / "common.md") != _file_record(work / "common.md")
+                or _file_record(PROMPTS / f"arm_{arm.lower()}.md") != _file_record(work / "arm.md")
+                or _file_record(prompt_path) != prompt_record
+                or (arm == "T" and _file_record(toolkit_wheel) != wheel_record)):
+            raise RunError("prepared inputs changed before the record could be written")
+        prepared: dict[str, Any] = {
+            "schema": 1,
+            "classification": "development_prompt_preparation_unsealed",
+            "status": "no_go_for_provider_calls",
+            "execution_status": "prepared_without_execution",
+            "arm": arm, "provider_cli": provider, "requested_model": model,
+            "requested_effort": effort, "tool_policy": (
+                "no_command_tool" if agy_no_command_tool else "default"),
+            "timeout_seconds": timeout_seconds,
+            "replay_timeout_seconds": replay_timeout_seconds,
+            "setup_timeout_seconds": setup_timeout_seconds,
+            "packet": packet, "prompt": prompt_hashes, "prompt_file": prompt_record,
+            "wheel": wheel_record,
+            "provider_command": argv[0], "provider_argv": argv,
+            "provider_command_resolved_on_path": executable is not None,
+            "cli_mode": cli_mode,
+            "prompt_transport": "argv" if provider == "agy" else "stdin",
+            "stdin": ({"mode": "pipe", "sha256": hashlib.sha256(stdin_bytes).hexdigest(),
+                       "bytes": len(stdin_bytes)} if stdin_bytes is not None
+                      else {"mode": "devnull", "sha256": None, "bytes": 0}),
+            "provider_calls": 0, "execution_ready": False, "launch_ready": False,
+            "cap_status": "unknown", "tool_parity_verified": False,
+            "human_review_verified": False, "controlled_comparison_eligible": False,
+            "limitations": ["public D-E inputs only; no model or toolkit command was executed",
+                            "provider command resolution and any resource cap need live verification",
+                            "this preparation does not authorize provider calls or validate tool parity"],
+        }
+        if arm == "T":
+            prepared["limitations"].append(
+                "T wheel bytes are hashed only; wheel validity and installability were not checked")
+        _write_json(run_dir / "prepared.json", prepared)
+        return run_dir, prepared
+    finally:
+        os.umask(previous_umask)
+
+
+def run_development_arm(
+    *, arm: str, provider: str, model: str, effort: str, output_root: Path,
+    timeout_seconds: int = 600, replay_timeout_seconds: int = 90,
+    setup_timeout_seconds: int = 180, toolkit_wheel: Path | None = None,
+    agy_no_command_tool: bool = False,
+) -> tuple[Path, dict[str, Any]]:
+    """Execute exactly one arm and return its private run path and sanitized summary."""
+    _validate_arm_request(arm, provider, model, effort, timeout_seconds,
+                          replay_timeout_seconds, setup_timeout_seconds,
+                          agy_no_command_tool)
     executable = shutil.which(provider)
     if executable is None:
         raise RunError(f"{provider} executable is unavailable")
@@ -1280,38 +1409,13 @@ def run_development_arm(
         try:
             # The prompt hashes describe the bytes actually delivered to the model.
             # Copies must match them before any CLI or toolkit preparation starts.
-            try:
-                shutil.copyfile(PROMPTS / "common.md", work / "common.md")
-                shutil.copyfile(PROMPTS / f"arm_{arm.lower()}.md", work / "arm.md")
-            except OSError as exc:
-                raise RunError("assigned prompt files could not be copied") from exc
-            if (_sha256(work / "common.md") != prompt_hashes["common_sha256"]
-                    or _sha256(work / "arm.md") != prompt_hashes["arm_sha256"]):
-                raise RunError("assigned prompt copies differ from the bytes used to build the prompt")
+            _copy_prompt_inputs(arm, work, prompt_hashes)
             if arm == "T":
                 summary["toolkit"] = _setup_toolkit(work, run_dir, toolkit_wheel,
                                                     setup_timeout_seconds, env)
                 _write_json(run_dir / "run.json", summary)
-            if provider == "codex":
-                argv = [executable, "exec", "--json", "--ephemeral", "--ignore-user-config",
-                        "--skip-git-repo-check", "-C", str(work), "-s", "workspace-write",
-                        "-m", model, "-c", f'model_reasoning_effort="{effort}"', "-"]
-                stdin_text = prompt
-            elif provider == "agy":
-                argv = [executable, "--print", prompt, "--output-format", "stream-json",
-                        "--model", model, "--effort", effort, "--print-timeout",
-                        f"{timeout_seconds}s", "--new-project", "--sandbox", "--mode",
-                        "accept-edits", "--disable-slash-commands"]
-                stdin_text = None
-            else:
-                argv = [executable, "--pure", "run", "--format", "json", "--model", model,
-                        "--agent", "build", "--dir", str(work)]
-                stdin_text = prompt
-            summary["cli_mode"] = (
-                {"codex_sandbox": "workspace-write"} if provider == "codex"
-                else {"agy_sandbox": True, "agy_mode": "accept-edits"} if provider == "agy"
-                else {"opencode_format": "json", "opencode_pure": True,
-                      "opencode_agent": "build"}
+            argv, stdin_text, summary["cli_mode"] = _provider_invocation(
+                provider, executable, model, effort, timeout_seconds, work, prompt,
             )
             _write_json(run_dir / "run.json", summary)
             capture_argv = argv
@@ -1563,11 +1667,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--model")
     parser.add_argument("--effort")
     parser.add_argument("--output-root", type=Path,
-                        help="operator-selected private directory; raw CLI traces are written here")
+                        help="parent for a new private directory; --prepare-only writes prepared.json there")
+    parser.add_argument("--prepare-only", action="store_true",
+                        help="copy and pin public inputs and planned argv offline; no provider or toolkit call")
     parser.add_argument("--timeout-seconds", type=int, default=600)
     parser.add_argument("--replay-timeout-seconds", type=int, default=90)
     parser.add_argument("--setup-timeout-seconds", type=int, default=180)
-    parser.add_argument("--toolkit-wheel", type=Path, help="required for T; installed offline with dependencies")
+    parser.add_argument("--toolkit-wheel", type=Path,
+                        help="required for T; hashed only with --prepare-only, installed for a run")
     parser.add_argument("--agy-no-command-tool", action="store_true",
                         help="opt in to an N/S Agy prompt that forbids shell/command tools")
     parser.add_argument("--replay-run-dir", type=Path,
@@ -1579,6 +1686,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.replay_run_dir is not None:
+            if args.prepare_only:
+                raise RunError("--prepare-only cannot be combined with --replay-run-dir")
             if not args.expected_analysis_sha256:
                 raise RunError("replay requires --expected-analysis-sha256")
             if any(value is not None for value in
@@ -1595,8 +1704,9 @@ def main(argv: list[str] | None = None) -> int:
                 raise RunError("replay options require --replay-run-dir")
             if any(value is None for value in
                    (args.arm, args.provider, args.model, args.effort, args.output_root)):
-                raise RunError("a model run requires arm, provider, model, effort and output-root")
-            run_dir, summary = run_development_arm(
+                raise RunError("a run or preparation requires arm, provider, model, effort and output-root")
+            operation = prepare_development_arm if args.prepare_only else run_development_arm
+            run_dir, summary = operation(
                 arm=args.arm, provider=args.provider, model=args.model, effort=args.effort,
                 output_root=args.output_root, timeout_seconds=args.timeout_seconds,
                 replay_timeout_seconds=args.replay_timeout_seconds,
@@ -1606,6 +1716,11 @@ def main(argv: list[str] | None = None) -> int:
             )
     except (RunError, OSError) as exc:
         parser.exit(2, f"run_development_arm: {exc}\n")
+    if args.prepare_only:
+        print(json.dumps({"run_dir": str(run_dir), "prepared_record": str(run_dir / "prepared.json"),
+                          "status": summary["status"], "provider_calls": 0,
+                          "execution_ready": False}, ensure_ascii=False, sort_keys=True))
+        return 0
     print(json.dumps({"run_dir": str(run_dir), "status": summary["execution_status"],
                       "usage_complete": summary["cli_usage"]["complete"] if summary["cli_usage"] else False},
                      ensure_ascii=False, sort_keys=True))
