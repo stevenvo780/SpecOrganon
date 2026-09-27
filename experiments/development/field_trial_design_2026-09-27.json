@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "classification": "development_field_trial_design_preflight_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "scope": "Read-only structural comparison of a separate candidate field-trial plan with declared schema-3 food-chain observations and service rows",
+  "protocol_requirements_checked_structurally": [
+    "plan and observation study ID, exact group IDs, arms, strata and pre/post windows match",
+    "at least 12 groups, six or more in each arm, balanced total arms and both arms in every declared stratum",
+    "pre and post declared windows span at least four and eight weeks respectively",
+    "declared plan registration predates assignment and its evidence source",
+    "a registration after baseline observation begins requires a declared baseline first-access record dated after registration",
+    "the underlying schema-3 field graph and service rows pass audit_field_flows"
+  ],
+  "negative_controls": [
+    "the prior two-group synthetic field-flow fixture passes its graph preflight but is rejected as an inadequate trial design",
+    "plan/observation arm, group or window mismatch is rejected",
+    "missing service rows, short post window and a stratum with only one arm are rejected",
+    "duplicate JSON keys are rejected by the CLI without a success report",
+    "a late declared registration without a baseline release, an access time at or before registration, and an assignment source earlier than registration are rejected"
+  ],
+  "positive_control": "A generated 12-group synthetic schema-3 graph with six per arm and a matching candidate plan passes structural checks while criterion_3 remains not_assessed.",
+  "independent_review": {
+    "reviewer": "native read-only adversarial development agent, not a field custodian",
+    "initial_finding": "The first version accepted a registration date after the baseline window began, which could allow criteria to be chosen after baseline results were seen if those results were accessible.",
+    "qualification": "Observation date alone does not prove access; sealed baseline data could remain unopened until after registration.",
+    "follow_up_verdict": "Chronology issue closed within the declarative contract; no further reproduced false green in the reviewed scope.",
+    "reproductions": "late registration without release rejected; release at registration rejected; later declared release accepted with authentication false; assignment source before registration rejected"
+  },
+  "checks": [
+    {
+      "command": "uv run pytest -q tests/test_audit_field_trial_design.py",
+      "result": "14 passed"
+    },
+    {
+      "command": "uv run pytest -q",
+      "result": "985 passed in 70.76s"
+    },
+    {
+      "command": "uv run --no-sync ruff check scripts/audit_field_trial_design.py tests/test_audit_field_trial_design.py; python3 -m compileall -q scripts/audit_field_trial_design.py; git diff --check",
+      "result": "passed"
+    }
+  ],
+  "cli_behavior": "Reads and hashes the exact input bytes, reports a structural match, and leaves the supplied files unchanged; failure exits 2 without a success JSON report.",
+  "limitations": [
+    "The candidate plan, dates, allocation source and baseline release record can be fabricated together; no independent custody or timestamp authority is checked.",
+    "An allocation_record_sha256 or baseline_release.record_sha256 is syntactically checked but its referenced bytes are not inspected or authenticated.",
+    "Window length does not prove weekly measurement coverage, randomization, group independence, statistical power or prevention of contamination.",
+    "The service equivalence and field observations remain declarations; the script does not calculate V, G, a causal interval, harms or costs.",
+    "All test lots, sources, dates, approvals and outcomes are synthetic. No food-chain intervention or field impact was observed."
+  ],
+  "criterion_3": "not_assessed"
+}
