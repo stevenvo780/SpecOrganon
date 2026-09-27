@@ -582,7 +582,10 @@ def test_opencode_fake_cli_produces_local_arm_receipt(
         effort="uncontrolled", output_root=tmp_path / "runs", timeout_seconds=10,
         toolkit_wheel=wheel,
     )
-    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert summary["execution_status"] == (
+        "t_tool_execution_unverified" if arm == "T"
+        else "artifacts_ready_for_inspection"
+    )
     assert summary["controlled_comparison_eligible"] is False
     assert summary["provider_request_id"] is None
     assert summary["cost"] is None
@@ -610,6 +613,8 @@ def test_opencode_fake_cli_produces_local_arm_receipt(
     if arm == "T":
         assert summary["t_ledger"]["signed_policy"] is True
         assert summary["t_ledger"]["event_count"] == 1
+        assert summary["t_process_trace"]["tool_ledger_publish_count"] == 0
+        assert summary["t_process_trace"]["other_ledger_write_count"] >= 1
     else:
         assert summary["t_ledger"] is None
 
@@ -1160,3 +1165,128 @@ def test_t_rejects_missing_wheel_before_any_model_call(
             output_root=tmp_path / "runs", toolkit_wheel=None,
         )
     assert not (tmp_path / "runs").exists()
+
+
+def test_t_requires_local_tracer_before_model_call(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wheel = tmp_path / "specorganon-0.1.0-py3-none-any.whl"
+    wheel.write_bytes(b"synthetic wheel fixture\n")
+    monkeypatch.setattr(runner, "_system_strace", lambda: None)
+    with pytest.raises(RunError, match="requires an available strace"):
+        run_development_arm(
+            arm="T", provider="codex", model="test-model", effort="medium",
+            output_root=tmp_path / "runs", toolkit_wheel=wheel,
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+def test_t_process_trace_requires_installed_case_publications(tmp_path: Path) -> None:
+    work = tmp_path / "work"
+    case = work / "case"
+    cli = work / ".venv/bin/organon"
+    mcp = work / ".venv/bin/organon-mcp"
+    ledger = case / "organon.json"
+    def quoted(path: Path) -> str:
+        return json.dumps(str(path))
+    positive = "\n".join([
+        f"100 execve({quoted(cli)}, [\"organon\", \"init\"], 0x0) = 0",
+        f"100 rename({quoted(case / '.organon-init')}, {quoted(ledger)}) = 0",
+        f"101 execve({quoted(mcp)}, [\"organon-mcp\"], 0x0) = 0",
+        f"101 rename({quoted(case / '.organon-put')}, {quoted(ledger)}) = 0",
+    ]).encode()
+    observed = runner._parse_t_process_trace_bytes(positive, work)
+    assert observed == {
+        "organon_cli_execs": 1, "organon_mcp_execs": 1,
+        "tool_ledger_publish_count": 2, "other_ledger_write_count": 0,
+        "inspectable": True,
+    }
+
+    help_then_copy = "\n".join([
+        f"100 execve({quoted(cli)}, [\"organon\", \"--help\"], 0x0) = 0",
+        f"99 openat(AT_FDCWD, {quoted(ledger)}, O_WRONLY|O_CREAT|O_TRUNC, 0666) = 3",
+        f"100 rename({quoted(case / '.organon-unused')}, {quoted(ledger)}) = -1 ENOENT",
+    ]).encode()
+    observed = runner._parse_t_process_trace_bytes(help_then_copy, work)
+    assert observed["organon_cli_execs"] == 1
+    assert observed["tool_ledger_publish_count"] == 0
+    assert observed["other_ledger_write_count"] == 1
+
+    replaced_after_real_put = positive + (
+        f"\n99 rename({quoted(case / 'copied-ledger')}, {quoted(ledger)}) = 0\n"
+    ).encode()
+    observed = runner._parse_t_process_trace_bytes(replaced_after_real_put, work)
+    assert observed["tool_ledger_publish_count"] == 2
+    assert observed["other_ledger_write_count"] == 1
+
+    swapped_case = positive + (
+        f"\n99 rename({quoted(case)}, {quoted(work / 'original_case')}) = 0\n"
+        f"99 rename({quoted(work / 'copied_case')}, {quoted(case)}) = 0\n"
+    ).encode()
+    observed = runner._parse_t_process_trace_bytes(swapped_case, work)
+    assert observed["tool_ledger_publish_count"] == 2
+    assert observed["other_ledger_write_count"] == 2
+
+    linked_old_ledger = positive + (
+        f"\n99 unlink({quoted(ledger)}) = 0\n"
+        f"99 link({quoted(work / 'old_ledger.json')}, {quoted(ledger)}) = 0\n"
+    ).encode()
+    observed = runner._parse_t_process_trace_bytes(linked_old_ledger, work)
+    assert observed["tool_ledger_publish_count"] == 2
+    assert observed["other_ledger_write_count"] == 2
+
+    fd_relative_replace = positive + (
+        f"\n99 renameat(3<{work}>, \"old_ledger.json\", "
+        f"4<{case}>, \"organon.json\") = 0\n"
+    ).encode()
+    observed = runner._parse_t_process_trace_bytes(fd_relative_replace, work)
+    assert observed["tool_ledger_publish_count"] == 2
+    assert observed["other_ledger_write_count"] == 1
+
+    pinned_mcp = "\n".join([
+        f"101 execve({quoted(mcp)}, [\"organon-mcp\"], 0x0) = 0",
+        f"101 openat(AT_FDCWD, {quoted(case)}, O_PATH|O_DIRECTORY) = 11<{case}>",
+        "101 rename(\"/proc/self/fd/11/.organon-put\", "
+        "\"/proc/self/fd/11/organon.json\") = 0",
+        f"101 close(11<{case}>)  = 0",
+        "101 rename(\"/proc/self/fd/11/.organon-after-close\", "
+        "\"/proc/self/fd/11/organon.json\") = 0",
+    ]).encode()
+    observed = runner._parse_t_process_trace_bytes(pinned_mcp, work)
+    assert observed["organon_mcp_execs"] == 1
+    assert observed["tool_ledger_publish_count"] == 1
+    assert observed["other_ledger_write_count"] == 1
+
+    traced_thread = "\n".join([
+        f"101 execve({quoted(mcp)}, [{quoted(mcp)}], 0x0 <unfinished ...>",
+        "101 <... execve resumed>) = 0",
+        f"101 execve({quoted(work / '.venv/bin/python')}, "
+        f"[{quoted(work / '.venv/bin/python')}, {quoted(mcp)}], 0x0) = 0",
+        "101 clone(child_stack=NULL, flags=CLONE_THREAD) = 102",
+        f"102 openat(AT_FDCWD, {quoted(case)}, O_PATH|O_DIRECTORY) = 11<{case}>",
+        "102 rename(\"/proc/self/fd/11/.organon-put\", "
+        "\"/proc/self/fd/11/organon.json\") = 0",
+    ]).encode()
+    observed = runner._parse_t_process_trace_bytes(traced_thread, work)
+    assert observed["organon_mcp_execs"] == 1
+    assert observed["tool_ledger_publish_count"] == 1
+    assert observed["other_ledger_write_count"] == 0
+
+
+def test_t_replay_rejects_forged_green_without_tool_publications(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wheel = tmp_path / "specorganon-0.1.0-py3-none-any.whl"
+    wheel.write_bytes(b"synthetic wheel fixture\n")
+    monkeypatch.setattr(runner, "_setup_toolkit", fake_t_setup)
+    run_dir, summary = run_development_arm(
+        arm="T", provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs", timeout_seconds=10,
+        toolkit_wheel=wheel,
+    )
+    assert summary["execution_status"] == "t_tool_execution_unverified"
+    summary["execution_status"] = "artifacts_ready_for_inspection"
+    runner._write_json(run_dir / "run.json", summary)
+    with pytest.raises(RunError, match="T local tool execution cannot support replay"):
+        replay_run_dir(run_dir, summary["artifacts"]["analysis.py"]["sha256"])
+    assert not (run_dir / "analysis_replay.stdout").exists()

@@ -42,6 +42,17 @@ OPENCODE_USAGE_FIELDS = (
     "input_tokens", "output_tokens", "reasoning_tokens", "cache_read_tokens",
     "cache_write_tokens", "total_tokens",
 )
+T_TRACE_MAX_BYTES = 32 * 1024 * 1024
+T_TRACE_METHOD = "linux_strace_execve_case_publish"
+_T_TRACE_CALL = re.compile(
+    r"^\s*(\d+)\s+(execve|open|openat|openat2|creat|rename|renameat|renameat2|"
+    r"rmdir|unlink|unlinkat|link|linkat|symlink|symlinkat|mknod|mknodat|truncate|"
+    r"close|dup|dup2|dup3|clone|clone3|fork|vfork)"
+    r"\((.*)\)\s+= (.+)$"
+)
+_T_TRACE_QUOTED = re.compile(r'"(?:\\.|[^"\\])*"')
+_T_TRACE_UNFINISHED_EXEC = re.compile(r"^\s*(\d+)\s+execve\((.*)<unfinished \.\.\.>$")
+_T_TRACE_RESUMED_EXEC = re.compile(r"^\s*(\d+)\s+<\.\.\. execve resumed>\)\s+= (.+)$")
 
 
 class RunError(ValueError):
@@ -67,10 +78,237 @@ def _regular_file(path: Path) -> bool:
         return False
 
 
+def _system_strace() -> str | None:
+    """Use a fixed system tracer path, separate from the model CLI's PATH."""
+    path = Path("/usr/bin/strace")
+    return str(path) if _regular_file(path) and os.access(path, os.X_OK) else None
+
+
 def _file_record(path: Path) -> dict[str, Any] | None:
     if not _regular_file(path):
         return None
     return {"sha256": _sha256(path), "bytes": path.stat().st_size}
+
+
+def _parse_t_process_trace(path: Path, work: Path) -> dict[str, Any]:
+    """Summarize local process/file activity; this is not authenticated provenance."""
+    counts = {"organon_cli_execs": 0, "organon_mcp_execs": 0,
+              "tool_ledger_publish_count": 0, "other_ledger_write_count": 0,
+              "inspectable": False}
+    if not _regular_file(path) or path.stat().st_size > T_TRACE_MAX_BYTES:
+        return counts
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return counts
+    return _parse_t_process_trace_bytes(raw, work)
+
+
+def _parse_t_process_trace_bytes(raw: bytes, work: Path) -> dict[str, Any]:
+    """Parse only installed-tool publications into the current case ledger."""
+    counts = {"organon_cli_execs": 0, "organon_mcp_execs": 0,
+              "tool_ledger_publish_count": 0, "other_ledger_write_count": 0,
+              "inspectable": False}
+    if len(raw) > T_TRACE_MAX_BYTES:
+        return counts
+    try:
+        lines = raw.decode("utf-8").splitlines()
+    except UnicodeError:
+        return counts
+    case = work / "case"
+    ledger = case / "organon.json"
+    tools = {work / ".venv/bin/organon": "organon_cli_execs",
+             work / ".venv/bin/organon-mcp": "organon_mcp_execs"}
+    python = work / ".venv/bin/python"
+    tool_pids: set[int] = set()
+    case_fds: set[tuple[int, int]] = set()
+    unfinished_exec: dict[int, str] = {}
+    pending_publish: list[int] = []
+    pending_other_write: list[int] = []
+    observed_exec = False
+
+    def traced_path(raw: str, base: Path | None = work) -> Path | None:
+        try:
+            decoded = json.loads(raw)
+        except ValueError:
+            return None
+        if type(decoded) is not str or not decoded:
+            return None
+        candidate = Path(decoded)
+        if not candidate.is_absolute():
+            if base is None:
+                return None
+            candidate = base / candidate
+        return Path(os.path.normpath(candidate))
+
+    def dirfd_base(token: str, process: int) -> Path | None:
+        annotated = re.search(r"<(/[^>]*)>", token)
+        if annotated is not None:
+            return Path(annotated.group(1))
+        if "AT_FDCWD" in token:
+            return work
+        number = re.search(r"\b(\d+)\b", token)
+        if number is not None and (process, int(number.group(1))) in case_fds:
+            return case
+        return None
+
+    def unresolved_case_name(raw: str) -> bool:
+        try:
+            candidate = json.loads(raw)
+        except ValueError:
+            return False
+        return type(candidate) is str and Path(candidate).name in {"organon.json", "case"}
+
+    def case_path_from_proc(path: Path | None, process: int) -> Path | None:
+        if path is None:
+            return None
+        parts = path.parts
+        if len(parts) >= 5 and parts[:4] == ("/", "proc", "self", "fd"):
+            try:
+                fd = int(parts[4])
+            except ValueError:
+                return path
+            if (process, fd) in case_fds:
+                return case.joinpath(*parts[5:])
+        return path
+
+    def observe_exec(process: int, args: str) -> None:
+        nonlocal observed_exec
+        observed_exec = True
+        quoted_matches = list(_T_TRACE_QUOTED.finditer(args))
+        quoted = [item.group(0) for item in quoted_matches]
+        if not quoted:
+            tool_pids.discard(process)
+            return
+        target = traced_path(quoted[0])
+        installed_script = (
+            traced_path(quoted[2]) if target == python and len(quoted) >= 3 else target
+        )
+        tool_field = tools.get(installed_script)
+        if tool_field is None:
+            tool_pids.discard(process)
+        else:
+            if process not in tool_pids:
+                counts[tool_field] += 1
+            tool_pids.add(process)
+
+    for line in lines:
+        unfinished = _T_TRACE_UNFINISHED_EXEC.fullmatch(line)
+        if unfinished is not None:
+            unfinished_exec[int(unfinished.group(1))] = unfinished.group(2)
+            continue
+        resumed = _T_TRACE_RESUMED_EXEC.fullmatch(line)
+        if resumed is not None:
+            process = int(resumed.group(1))
+            args = unfinished_exec.pop(process, None)
+            if args is not None and resumed.group(2).split(" ", 1)[0] == "0":
+                observe_exec(process, args)
+            continue
+        match = _T_TRACE_CALL.fullmatch(line)
+        if match is None:
+            continue
+        pid, call, args, outcome = match.groups()
+        result_number = outcome.split("<", 1)[0].split(" ", 1)[0]
+        if not result_number.isdigit() or (call not in {"open", "openat", "openat2", "creat",
+                                                     "dup", "dup2", "dup3",
+                                                     "clone", "clone3", "fork", "vfork"}
+                                           and result_number != "0"):
+            continue
+        process = int(pid)
+        quoted_matches = list(_T_TRACE_QUOTED.finditer(args))
+        quoted = [item.group(0) for item in quoted_matches]
+        if call == "execve":
+            observe_exec(process, args)
+            continue
+        if call in {"clone", "clone3", "fork", "vfork"}:
+            child = int(result_number)
+            if process in tool_pids:
+                tool_pids.add(child)
+            case_fds.update((child, fd) for pid_fd, fd in tuple(case_fds) if pid_fd == process)
+            continue
+        if call in {"close", "dup", "dup2", "dup3"}:
+            source_match = re.match(r"^(\d+)", args)
+            if source_match is not None:
+                source_fd = int(source_match.group(1))
+                if call == "close":
+                    case_fds.discard((process, source_fd))
+                else:
+                    destination_fd = int(result_number)
+                    case_fds.discard((process, destination_fd))
+                    if (process, source_fd) in case_fds:
+                        case_fds.add((process, destination_fd))
+            continue
+        if call in {"open", "openat", "openat2", "creat"}:
+            opened_fd = int(result_number)
+            case_fds.discard((process, opened_fd))
+            annotation = outcome.split("<", 1)[1].rsplit(">", 1)[0] if "<" in outcome else ""
+            if annotation == str(case):
+                case_fds.add((process, opened_fd))
+        if call in {"rename", "renameat", "renameat2"} and len(quoted) >= 2:
+            if call == "rename":
+                source_base = destination_base = work
+            else:
+                source_base = dirfd_base(args[:quoted_matches[0].start()], process)
+                destination_base = dirfd_base(
+                    args[quoted_matches[0].end():quoted_matches[1].start()], process,
+                )
+            source = case_path_from_proc(traced_path(quoted[0], source_base), process)
+            destination = case_path_from_proc(
+                traced_path(quoted[1], destination_base), process,
+            )
+            if (source is None and unresolved_case_name(quoted[0])) or (
+                destination is None and unresolved_case_name(quoted[1])
+            ):
+                pending_other_write.append(process)
+                continue
+            if call == "rename" and (
+                (source not in {case, ledger} and unresolved_case_name(quoted[0]))
+                or (destination not in {case, ledger} and unresolved_case_name(quoted[1]))
+            ):
+                pending_other_write.append(process)
+                continue
+            if source == case or destination == case:
+                pending_other_write.append(process)
+                continue
+            if destination != ledger:
+                continue
+            if (process in tool_pids and source is not None
+                    and source.parent == case and source.name.startswith(".organon-")):
+                pending_publish.append(process)
+            else:
+                pending_other_write.append(process)
+        elif call in {"rmdir", "unlink", "unlinkat", "truncate"} and quoted:
+            base = (dirfd_base(args[:quoted_matches[0].start()], process)
+                    if call == "unlinkat" else work)
+            target = case_path_from_proc(traced_path(quoted[0], base), process)
+            if target in {case, ledger} or (target is None and unresolved_case_name(quoted[0])):
+                pending_other_write.append(process)
+        elif call in {"link", "linkat", "symlink", "symlinkat", "mknod", "mknodat"} and quoted:
+            base = work
+            if call in {"linkat", "symlinkat"} and len(quoted_matches) >= 2:
+                base = dirfd_base(
+                    args[quoted_matches[0].end():quoted_matches[1].start()], process,
+                )
+            elif call == "mknodat":
+                base = dirfd_base(args[:quoted_matches[0].start()], process)
+            target = case_path_from_proc(traced_path(quoted[-1], base), process)
+            if target in {case, ledger} or (target is None and unresolved_case_name(quoted[-1])):
+                pending_other_write.append(process)
+        elif call in {"open", "openat", "openat2", "creat"} and quoted:
+            base = (dirfd_base(args[:quoted_matches[0].start()], process)
+                    if call in {"openat", "openat2"} else work)
+            target = case_path_from_proc(traced_path(quoted[0], base), process)
+            if annotation == str(ledger):
+                target = ledger
+            if ((target == ledger or (target is None and unresolved_case_name(quoted[0])))
+                    and process not in tool_pids
+                    and (call == "creat" or any(flag in args for flag in
+                         ("O_WRONLY", "O_RDWR", "O_TRUNC", "O_CREAT")))):
+                pending_other_write.append(process)
+    counts["tool_ledger_publish_count"] = len(pending_publish)
+    counts["other_ledger_write_count"] = len(pending_other_write)
+    counts["inspectable"] = observed_exec
+    return counts
 
 
 def _toolkit_fingerprint(work: Path) -> str | None:
@@ -924,6 +1162,9 @@ def run_development_arm(
         raise RunError(f"{provider} executable is unavailable")
     if arm == "T" and (toolkit_wheel is None or not _regular_file(toolkit_wheel)):
         raise RunError("T requires a real toolkit wheel; no model call was made")
+    tracer = _system_strace() if arm == "T" else None
+    if arm == "T" and tracer is None:
+        raise RunError("T requires an available strace executable for local tool observation")
     output_root = output_root.expanduser().resolve()
     if toolkit_wheel is not None:
         toolkit_wheel = toolkit_wheel.expanduser().resolve()
@@ -945,6 +1186,7 @@ def run_development_arm(
             "packet_after": None, "packet_unchanged": None,
             "toolkit": None, "cli": None, "cli_usage": None,
             "artifacts": {}, "analysis_replay": None, "t_ledger": None,
+            "t_process_trace": None,
             "execution_status": "preparing",
             "controlled_comparison_eligible": False,
             "limitations": ["development case and prompts are exposed; no sealed assignment",
@@ -957,6 +1199,8 @@ def run_development_arm(
         if arm == "T":
             summary["limitations"].append(
                 "T toolkit fingerprint covers only the Organon entrypoint and package Python sources, not dependencies")
+            summary["limitations"].append(
+                "T process trace records local executable launches and case ledger replacement activity only; same-UID code can alter it, and it cannot authenticate model identity or prove final ledger bytes came from those writes")
         if agy_no_command_tool:
             summary["limitations"].append(
                 "No-command Agy pilot checks reported tool steps only; it does not enforce a provider or OS prohibition or detect unreported calls, and is not comparable with T CLI execution")
@@ -1000,10 +1244,23 @@ def run_development_arm(
                       "opencode_agent": "build"}
             )
             _write_json(run_dir / "run.json", summary)
-            result = _capture(argv, cwd=work, timeout_seconds=timeout_seconds,
+            capture_argv = argv
+            if arm == "T":
+                assert tracer is not None
+                capture_argv = [tracer, "-f", "-qq", "-yy", "-s", "4096", "-e",
+                                "trace=execve,open,openat,openat2,creat,rename,renameat,renameat2,rmdir,unlink,unlinkat,link,linkat,symlink,symlinkat,mknod,mknodat,truncate,close,dup,dup2,dup3,clone,clone3,fork,vfork",
+                                "-o", str(run_dir / "t_execve.log"), "--", *argv]
+            result = _capture(capture_argv, cwd=work, timeout_seconds=timeout_seconds,
                               stdout_path=run_dir / "cli.stdout.jsonl",
                               stderr_path=run_dir / "cli.stderr", stdin_text=stdin_text, env=env)
             summary["cli"] = result
+            if arm == "T":
+                trace_path = run_dir / "t_execve.log"
+                summary["t_process_trace"] = {
+                    "method": T_TRACE_METHOD,
+                    "record": _file_record(trace_path),
+                    **_parse_t_process_trace(trace_path, work),
+                }
             summary["cli_usage"] = _parse_usage(
                 provider, run_dir / "cli.stdout.jsonl", model,
                 agy_no_command_tool=agy_no_command_tool,
@@ -1034,6 +1291,13 @@ def run_development_arm(
                                  or summary["t_ledger"]["event_count"] < 1
                                  or not summary["t_ledger"]["toolkit_files_unchanged"]):
                 summary["execution_status"] = "t_signed_ledger_missing_or_invalid"
+            elif arm == "T" and (
+                not summary["t_process_trace"]["inspectable"]
+                or summary["t_process_trace"]["tool_ledger_publish_count"]
+                < summary["t_ledger"]["event_count"] + 1
+                or summary["t_process_trace"]["other_ledger_write_count"]
+            ):
+                summary["execution_status"] = "t_tool_execution_unverified"
             else:
                 summary["execution_status"] = "artifacts_ready_for_inspection"
             if not summary["cli_usage"]["complete"]:
@@ -1088,6 +1352,9 @@ def _material_mismatches(run_dir: Path, summary: dict[str, Any]) -> list[str]:
         wheel_name = next(work.glob("*.whl"), None)
         if wheel_name is None or _file_record(wheel_name) != toolkit.get("wheel"):
             mismatches.append("toolkit_wheel")
+        trace = summary.get("t_process_trace")
+        if type(trace) is not dict or _file_record(run_dir / "t_execve.log") != trace.get("record"):
+            mismatches.append("t_execve.log")
     return mismatches
 
 
@@ -1125,6 +1392,20 @@ def replay_run_dir(
         ledger = summary.get("t_ledger")
         if type(ledger) is not dict or not ledger.get("signed_policy"):
             raise RunError("T signed ledger was not verified in the model run")
+        trace = summary.get("t_process_trace")
+        trace_path = run_dir / "t_execve.log"
+        if (type(trace) is not dict or trace.get("method") != T_TRACE_METHOD
+                or not _regular_file(trace_path)
+                or _file_record(trace_path) != trace.get("record")):
+            raise RunError("T local tool execution trace is missing or changed")
+        observed = _parse_t_process_trace(trace_path, work)
+        if (any(trace.get(key) != value or type(trace.get(key)) is not type(value)
+                for key, value in observed.items())
+                or not observed["inspectable"]
+                or type(ledger.get("event_count")) is not int
+                or observed["tool_ledger_publish_count"] < ledger["event_count"] + 1
+                or observed["other_ledger_write_count"]):
+            raise RunError("T local tool execution cannot support replay")
     mismatches = _material_mismatches(run_dir, summary)
     if mismatches:
         raise RunError(f"{mismatches[0]} changed after the model run")

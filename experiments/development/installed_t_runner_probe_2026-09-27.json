@@ -1,0 +1,184 @@
+{
+  "before_fix_counterexample": {
+    "conclusion": "false acceptance before the local process-trace gate",
+    "control": "valid signed ledger copied from a prior run; fake model called no Organon CLI or MCP executable",
+    "date_utc": "2026-09-27",
+    "observer_sha256": "047343c1c534a8a9411650ca6c7eaa1af5bfcfa042b541901b6a0260ac47d533",
+    "observer_status": "artifacts_ready_for_inspection",
+    "runner_exit_code": 0,
+    "runner_sha256": "9f8dd637e26bda82d516a31e21b6064bba5782b18d34dd3653a980eaac9bb58f",
+    "runner_status": "artifacts_ready_for_inspection"
+  },
+  "built_wheel": {
+    "bytes": 86224,
+    "filename": "specorganon-0.1.0-py3-none-any.whl",
+    "sha256": "94f0d8e48c27da340694486788ea74fd034766615abebf335038dc217b1bdb18"
+  },
+  "classification": "synthetic_installed_t_runner_probe_unsealed_not_provider_evidence",
+  "commands": [
+    "uv build --offline --wheel --out-dir <temporary-wheel-dir>",
+    "python scripts/run_development_arm.py --arm T --provider codex --model local-fake-model-no-provider --effort low --toolkit-wheel <built-wheel> --output-root <private-run-root>",
+    "python scripts/run_development_arm.py --replay-run-dir <positive-run> --expected-analysis-sha256 <reviewed-digest>",
+    "python scripts/observe_development_run.py <each-run>"
+  ],
+  "criterion_4": "not_assessed",
+  "date_utc": "2026-09-27",
+  "environment": {
+    "offline_build": true,
+    "offline_runner_install": true,
+    "python": "3.11.15",
+    "temporary_runs_retained": false
+  },
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "limits": [
+    "The model executable and its JSONL usage counters are synthetic; no model provider or authenticated receipt was used.",
+    "The positive fake model made real installed CLI and MCP calls; the runner records local process activity, not authenticated provider attribution or cryptographic provenance.",
+    "The copied-ledger controls test two provenance forgeries; they do not prove that all possible unreported calls are detected.",
+    "The case UUID and timestamps vary, so ledger digests are checked within each run rather than fixed across independent invocations.",
+    "The case is exposed development data, the default analysis replay has no OS isolation, and no human approval or field effect was assessed.",
+    "No provider, model, effort, agent configuration, or N/S/T outcome comparison was tested; criterion 4 remains not assessed."
+  ],
+  "negative_copied_ledger_without_t_tool_use": {
+    "copied_ledger_sha256": "001ecf3e3d86ae5b1977ec1361450f4b64688f7287e3416ecad8010d2c4faec9",
+    "expected_rejection_observed": true,
+    "local_t_process_trace": {
+      "inspectable": true,
+      "method": "linux_strace_execve_case_publish",
+      "organon_cli_execs": 0,
+      "organon_mcp_execs": 0,
+      "other_ledger_write_count": 1,
+      "record": {
+        "bytes": 47477,
+        "sha256": "e04ba226bb0a75f9dc9254ac7e654024f5975a45b42c9e0602c00482c75ce7ba"
+      },
+      "tool_ledger_publish_count": 0
+    },
+    "model_invoked_installed_t_tools": false,
+    "observer_status": "t_tool_execution_unverified",
+    "probe_admitted": false,
+    "runner_exit_code": 1,
+    "runner_false_acceptance": false,
+    "runner_status": "t_tool_execution_unverified",
+    "same_artifact_bytes_as_positive": true,
+    "same_ledger_bytes_as_positive": true
+  },
+  "negative_omitted_t_tool_use": {
+    "case_ledger_present": false,
+    "observer_state": "recorded_materials_verified",
+    "observer_status": "t_signed_ledger_missing_or_invalid",
+    "runner_exit_code": 1,
+    "same_artifact_bytes_as_positive": true,
+    "status": "t_signed_ledger_missing_or_invalid"
+  },
+  "negative_read_only_tool_then_copied_ledger": {
+    "expected_rejection_observed": true,
+    "local_t_process_trace": {
+      "inspectable": true,
+      "method": "linux_strace_execve_case_publish",
+      "organon_cli_execs": 1,
+      "organon_mcp_execs": 0,
+      "other_ledger_write_count": 1,
+      "record": {
+        "bytes": 90616,
+        "sha256": "b8e2f20667d847c6f543951d3de13c592d4c9493b4a3d1c4565cdba8cb0bf44f"
+      },
+      "tool_ledger_publish_count": 0
+    },
+    "model_invoked_only_installed_cli_help": true,
+    "observer_status": "t_tool_execution_unverified",
+    "probe_admitted": false,
+    "runner_exit_code": 1,
+    "runner_false_acceptance": false,
+    "runner_status": "t_tool_execution_unverified",
+    "same_artifact_bytes_as_positive": true,
+    "same_ledger_bytes_as_positive": true
+  },
+  "positive": {
+    "artifacts": {
+      "analysis.py": {
+        "bytes": 260,
+        "sha256": "57097c6d0b96fffcc99ba821338243e59ade7c294ec56a3882e8ead6d1370586"
+      },
+      "report.md": {
+        "bytes": 137,
+        "sha256": "33b344aac3619ee002de511869db6e4f33fc3be47b67332b3cab4b0b4d2f1e27"
+      }
+    },
+    "cli_mcp_final_status_equal": true,
+    "cli_operations": [
+      "init",
+      "put",
+      "status"
+    ],
+    "initial_status": "artifacts_ready_for_inspection",
+    "installed_toolkit_fingerprint_sha256": "f5f47b8d6aff08215e69f8e0a761a14b14e17d5cb46087a7fe45eb9562eaf1f1",
+    "ledger": {
+      "approval_policy": "signed",
+      "bytes": 1328,
+      "event_count": 2,
+      "sha256": "001ecf3e3d86ae5b1977ec1361450f4b64688f7287e3416ecad8010d2c4faec9"
+    },
+    "local_cli_usage_complete": true,
+    "local_t_process_trace": {
+      "inspectable": true,
+      "method": "linux_strace_execve_case_publish",
+      "organon_cli_execs": 3,
+      "organon_mcp_execs": 1,
+      "other_ledger_write_count": 0,
+      "record": {
+        "bytes": 1719694,
+        "sha256": "587480a3619fdd5392cd66829a5373cb09856c92e0ac238fa9d8f8473cef5d79"
+      },
+      "tool_ledger_publish_count": 3
+    },
+    "mcp_client_discovered_tools": [
+      "advance",
+      "approval_challenge",
+      "approve",
+      "attest_field",
+      "challenge",
+      "field_attestation_challenge",
+      "gate",
+      "init",
+      "next_task",
+      "put",
+      "resolve_challenge",
+      "review",
+      "review_phase",
+      "run",
+      "status",
+      "trace"
+    ],
+    "mcp_operations": [
+      "status",
+      "put",
+      "status"
+    ],
+    "observer": {
+      "controlled_comparison_eligible": false,
+      "criterion_4": "not_assessed",
+      "final_status": "output_replayed",
+      "initial_status": "artifacts_ready_for_inspection",
+      "state": "recorded_materials_verified",
+      "verified_ledger_sha256": "001ecf3e3d86ae5b1977ec1361450f4b64688f7287e3416ecad8010d2c4faec9"
+    },
+    "replay_status": "output_replayed",
+    "replay_stdout": {
+      "bytes": 34,
+      "sha256": "97a82dc447a913932701f987314b8f5bdbc6beb2318e6192d8dc71983021babf"
+    },
+    "runner_exit_code": 0,
+    "toolkit_steps": {
+      "toolkit_init": 0,
+      "toolkit_install": 0,
+      "toolkit_status": 0,
+      "toolkit_venv": 0
+    }
+  },
+  "runner_provenance_gate_passed": true,
+  "schema": 1,
+  "source_sha256": {
+    "observer": "93f3fc1ec350e6975911b4bfc36eb1c408fd203632bd2c920af02df88d914bcd",
+    "runner": "97ab6fb2cd391ab7f9cf84b96895c9b3e0ca91b7a40d04441c8e3498f5f61468"
+  }
+}

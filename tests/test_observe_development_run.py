@@ -223,11 +223,15 @@ def test_observer_verifies_opencode_local_receipt_for_each_arm(
         effort="uncontrolled", output_root=tmp_path / "runs", timeout_seconds=10,
         toolkit_wheel=wheel,
     )
-    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    expected_status = (
+        "t_tool_execution_unverified" if arm == "T"
+        else "artifacts_ready_for_inspection"
+    )
+    assert summary["execution_status"] == expected_status
     result = _invoke(run_dir)
     assert result.returncode == 0, result.stderr
     observed = json.loads(result.stdout)
-    assert observed["execution_status"] == "artifacts_ready_for_inspection"
+    assert observed["execution_status"] == expected_status
     assert observed["provider_cli"] == "opencode"
     assert observed["requested_model"] == "minimax/MiniMax-M3"
     assert observed["requested_effort"] == "uncontrolled"
@@ -242,6 +246,14 @@ def test_observer_verifies_opencode_local_receipt_for_each_arm(
     assert "private-local-session-id" not in result.stdout
     if arm == "T":
         assert observed["verified_artifacts"]["work/case/organon.json"] is not None
+        assert observed["t_process_trace"]["tool_ledger_publish_count"] == 0
+        assert observed["t_process_trace"]["other_ledger_write_count"] >= 1
+        summary["t_process_trace"]["tool_ledger_publish_count"] = 2
+        summary["execution_status"] = "artifacts_ready_for_inspection"
+        _write_summary(run_dir, summary)
+        forged = _invoke(run_dir)
+        assert forged.returncode == 2
+        assert "T process trace counts differ" in forged.stderr
 
 
 def test_observer_preserves_opencode_absent_optional_total(
@@ -759,6 +771,7 @@ def test_t_observation_verifies_setup_streams_wheel_sources_and_ledger(
             "timed_out": False,
         },
     }
+    summary["execution_status"] = "t_tool_execution_unverified"
     (run_dir / "prompt.txt").write_text(
         _assembled_prompt("T", (work / "common.md").read_bytes(),
                           (work / "arm.md").read_bytes()),
@@ -769,6 +782,7 @@ def test_t_observation_verifies_setup_streams_wheel_sources_and_ledger(
     result = _invoke(run_dir)
     assert result.returncode == 0, result.stderr
     observation = json.loads(result.stdout)
+    assert observation["execution_status"] == "t_tool_execution_unverified"
     assert observation["verified_inputs"][f"work/{wheel.name}"] == _record(wheel)
     assert (
         observation["verified_artifacts"]["work/case/organon.json"]["sha256"]
@@ -782,6 +796,12 @@ def test_t_observation_verifies_setup_streams_wheel_sources_and_ledger(
         observation["verified_streams"]["toolkit_after_status.stdout"]
         == summary["t_ledger"]["independent_cli_status"]["stdout"]
     )
+    summary["execution_status"] = "artifacts_ready_for_inspection"
+    _write_summary(run_dir, summary)
+    old_green = _invoke(run_dir)
+    assert old_green.returncode == 2
+    assert "execution status contradicts" in old_green.stderr
+    summary["execution_status"] = "t_tool_execution_unverified"
     partial = json.loads(json.dumps(summary))
     partial.update(
         {

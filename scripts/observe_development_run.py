@@ -18,7 +18,10 @@ from contextlib import ExitStack, contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
-from run_development_arm import PUBLIC_FILES, _assembled_prompt, _parse_usage
+from run_development_arm import (
+    PUBLIC_FILES, T_TRACE_MAX_BYTES, T_TRACE_METHOD, _assembled_prompt,
+    _parse_t_process_trace_bytes, _parse_usage,
+)
 
 
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
@@ -46,6 +49,7 @@ RUN_STATUSES = (
             "public_packet_mutated",
             "required_artifact_missing",
             "t_signed_ledger_missing_or_invalid",
+            "t_tool_execution_unverified",
             "artifacts_ready_for_inspection",
         }
     )
@@ -406,6 +410,53 @@ def _verify_usage(
     }
 
 
+def _verify_t_process_trace(
+    run_fd: int, raw: Any, work: Path, streams: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Recompute the local T activity summary from byte-checked strace output."""
+    if raw is None:
+        if _exists(run_fd, "t_execve.log"):
+            raise ObservationError("T process trace exists without a record")
+        return _parse_t_process_trace_bytes(b"", work)
+    trace = _object(raw, "t_process_trace")
+    expected_keys = {"method", "record", "organon_cli_execs", "organon_mcp_execs",
+                     "tool_ledger_publish_count", "other_ledger_write_count", "inspectable"}
+    if set(trace) != expected_keys or trace.get("method") != T_TRACE_METHOD:
+        raise ObservationError("T process trace has an invalid method or fields")
+    record = trace.get("record")
+    if record is None:
+        _verify_optional(run_fd, "t_execve.log", None, "T process trace")
+        observed = _parse_t_process_trace_bytes(b"", work)
+    else:
+        expected = _expected_record(record, "T process trace")
+        fd = _open_regular(run_fd, "t_execve.log")
+        try:
+            before = _hash_fd(fd, "T process trace")
+            if before != expected:
+                raise ObservationError("T process trace differs from recorded bytes")
+            if expected["bytes"] > T_TRACE_MAX_BYTES:
+                observed = _parse_t_process_trace_bytes(b"", work)
+            else:
+                os.lseek(fd, 0, os.SEEK_SET)
+                chunks: list[bytes] = []
+                size = 0
+                while chunk := os.read(fd, 1024 * 1024):
+                    size += len(chunk)
+                    if size > T_TRACE_MAX_BYTES:
+                        raise ObservationError("T process trace grew during inspection")
+                    chunks.append(chunk)
+                observed = _parse_t_process_trace_bytes(b"".join(chunks), work)
+            if _hash_fd(fd, "T process trace") != before:
+                raise ObservationError("T process trace changed during inspection")
+        finally:
+            os.close(fd)
+        streams["t_execve.log"] = expected
+    if any(trace.get(key) != value or type(trace.get(key)) is not type(value)
+           for key, value in observed.items()):
+        raise ObservationError("T process trace counts differ from verified bytes")
+    return observed
+
+
 def _toolkit_fingerprint(work_fd: int) -> str:
     """Recompute the runner's limited Python-source fingerprint without symlinks."""
     files: list[tuple[str, str]] = []
@@ -563,6 +614,7 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
         verified_artifacts: dict[str, dict[str, Any]] = {}
         unavailable: list[str] = []
         unrecorded: list[str] = []
+        process_trace: dict[str, Any] | None = None
         partial = status in {"preparing", "preflight_failure"}
         with _directory(run_fd, "work") as work_fd:
             packet = _object(summary.get("packet"), "packet")
@@ -641,6 +693,10 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
                     raise ObservationError(
                         "partial run has a ledger record before CLI completion"
                     )
+                if summary.get("t_process_trace") is not None:
+                    raise ObservationError("partial run has a completed T process trace")
+                if _exists(run_fd, "t_execve.log"):
+                    unrecorded.append("t_execve.log")
                 for name in ("cli.stdout.jsonl", "cli.stderr"):
                     (unrecorded if _exists(run_fd, name) else unavailable).append(name)
                 for name in ARTIFACTS:
@@ -689,6 +745,13 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
                     verified_inputs[f"work/{wheel_name}"] = wheel_record
                 elif arm == "T":
                     raise ObservationError("T run lacks a toolkit record")
+                if arm == "T":
+                    process_trace = _verify_t_process_trace(
+                        run_fd, summary.get("t_process_trace"), path / "work",
+                        verified_streams,
+                    )
+                elif summary.get("t_process_trace") is not None or _exists(run_fd, "t_execve.log"):
+                    raise ObservationError("non-T arm has a T process trace")
                 ledger = summary.get("t_ledger")
                 ledger_valid = True
                 if arm == "T":
@@ -814,6 +877,14 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
                     initial_status = "required_artifact_missing"
                 elif arm == "T" and not ledger_valid:
                     initial_status = "t_signed_ledger_missing_or_invalid"
+                elif arm == "T" and (
+                    process_trace is None
+                    or not process_trace["inspectable"]
+                    or process_trace["tool_ledger_publish_count"]
+                    < ledger["event_count"] + 1
+                    or process_trace["other_ledger_write_count"]
+                ):
+                    initial_status = "t_tool_execution_unverified"
                 else:
                     initial_status = "artifacts_ready_for_inspection"
                 if status not in REPLAY_STATUSES and status != initial_status:
@@ -896,6 +967,7 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
             "requested_effort": effort,
             "tool_policy": tool_policy,
             "cli_usage": usage,
+            "t_process_trace": process_trace,
             "verified_inputs": verified_inputs,
             "verified_streams": verified_streams,
             "verified_artifacts": verified_artifacts,
