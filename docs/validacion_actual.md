@@ -2,7 +2,7 @@
 
 **Corte:** 2026-09-27 UTC. La [matriz prospectiva](protocolo_experimental.md#7-matriz-propuesta-antes-de-observar-resultados-confirmatorios) propone evidencias, procedimientos y umbrales antes de ensayos confirmatorios; sus decisiones normativas aún requieren aprobación humana y registro. Este archivo registra solo lo que se ejecutó; no modifica esos umbrales. `GOAL.md` permanece intacto.
 
-El gate global más reciente pasó **1165 pruebas** tras D-051. Los conteos menores en las filas y registros de hitos anteriores describen sus respectivos cortes históricos.
+El gate global más reciente terminó con **1180 pruebas aprobadas y 1 fallo esperado estricto** tras D-052. El [registro de rutas MCP](../experiments/development/mcp_case_path_hardening_2026-09-27.json) documenta que las sustituciones por enlaces estables o antes de abrir un directorio ya no importan ledgers ni crean locks externos, con cliente stdio real y wheel instalado en Python 3.11 y 3.12. También documenta el límite reproducido: un escritor local del mismo UID puede mover el inodo fijado fuera de la raíz o alterar enlaces físicos entre comprobaciones. El fallo esperado conserva ese contraejemplo; el gate verde no implica confinamiento absoluto. Los conteos menores en las filas y registros de hitos anteriores describen sus respectivos cortes históricos. Ningún criterio cambia de veredicto por este control técnico.
 
 | Criterio | Veredicto actual | Evidencia obtenida y límite decisivo |
 | --- | --- | --- |

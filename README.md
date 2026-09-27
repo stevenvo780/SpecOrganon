@@ -6,7 +6,7 @@ Metodología operativa y toolkit para formular un problema con sus actores y val
 
 ## Instalar y verificar
 
-Se requiere Python 3.11 o superior y [`uv`](https://docs.astral.sh/uv/). Desde la raíz del repositorio:
+La instalación verificada requiere Linux, Python 3.11 o superior y [`uv`](https://docs.astral.sh/uv/). El servidor MCP usa descriptores de directorio y `/proc/self/fd`; su límite de rutas requiere una raíz bajo control del operador, sin escritores locales no confiables con el mismo UID. Desde la raíz del repositorio:
 
 ```sh
 uv sync --locked --extra dev

@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "classification": "development_mcp_case_path_hardening_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "implementation_sha256": {
+    "src/specorganon/ledger.py": "4a72889401886064a81c137bca305963a2428e82828aaa71275944fbeee9778e",
+    "src/specorganon/runner.py": "5587f7e75d12338cc7baa77090b779b9b02a53ee1e23363fad017a7fa0e9eeee",
+    "src/specorganon/server.py": "683f09142af60cc33db3cbdb429ad2a18fe183288f8fa72a86daf792e764744b",
+    "scripts/probe_ledger_commit_crash.py": "c9e0a4bb9c76c247224f2c78cf5a43e57b1f3cb6a4ca616b666da1b8753d8298",
+    "tests/test_interfaces.py": "b2cb5f1b89dc28720d1cad75f8e820b2a690fca9b12b26f22d1595cf7fcf19be",
+    "tests/test_ledger.py": "aca8fdbd408c75f17fcaea9d506f1d4918978ad47da5264676b731ec7eb9b460",
+    "tests/test_server_case_pin.py": "e14514ca5ac25fb5e1f311eaec463afe84c8f665bb6547f76368f912f8fe15ed"
+  },
+  "wheel_sha256": "7bd26d96e89ffe938371ad9a9136cb622ddee56348bcbc9e2af745299adc73aa",
+  "prior_reproductions": [
+    "With ORGANON_ROOT set to a private root, a real MCP stdio status call followed root/case/organon.json as a symlink to an external ledger and returned its external item.",
+    "A real MCP stdio run call imported an item from that external ledger into the internal case.",
+    "Symlinked .organon.lock and .organon.runner.lock let MCP init and run create external files.",
+    "Replacing a case or canonical ancestor with an external symlink after the initial path check could redirect the operation."
+  ],
+  "change": [
+    "MCP resolves stable aliases to a canonical path under ORGANON_ROOT and opens root and case components by no-follow directory descriptors before invoking the engine through a live Linux procfs fd path.",
+    "Ledger and lock files open without following the final symlink, reject nonregular files and stable hardlinks, and do not block on FIFO files.",
+    "The installed-wheel crash hook recognizes the canonical parent of the pinned fd path while retaining its exact replacement and SIGKILL controls."
+  ],
+  "positive_and_negative_controls": [
+    "A real MCP stdio client still initializes, reads and runs a normal case; an internal symbolic alias to a case and an internal root alias work.",
+    "The real client rejects external ledger, initialization-lock and runner-lock symlinks and stable hardlinks without changing the external files.",
+    "Deterministic swaps before opening an ancestor are rejected; replacing the name of an already opened case with an external symlink does not redirect the pinned inode.",
+    "Invalid init arguments and an enabled ledger anchor do not create nested case directories.",
+    "A strict expected-failure test records that relocating the pinned case inode outside the root with the same UID still permits a write there. A future rejection without the outside write becomes XPASS and fails the gate.",
+    "Independent review also reproduced a same-UID hardlink race by removing and restoring the external name across fstat. A single st_nlink check is not a continuous exclusivity guarantee."
+  ],
+  "independent_review": {
+    "stable_symlink_or_hardlink_bypass_found_after_change": false,
+    "remaining_path_boundary": "A directory descriptor pins inode identity, not continuing membership in a mutable root. A concurrent local writer allowed to rename the root, an ancestor or the case can move that inode outside ORGANON_ROOT after it opens. A signed case with an external anchor was also readable after such a relocation; signatures and anchors do not enforce this path boundary.",
+    "remaining_hardlink_boundary": "A local writer able to alter both names can make st_nlink equal one only during fstat, then restore the external hardlink.",
+    "operational_assumption": "The operator controls the root and ancestors and excludes untrusted local writers sharing the server UID; these fd checks are not an OS sandbox."
+  },
+  "gates": [
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "1180 passed, 1 xfailed in 121.01s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_server_case_pin.py",
+      "result": "11 passed, 1 xfailed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_probe_ledger_commit_crash.py",
+      "result": "1 passed in 24.85s, including installed CLI and MCP, both crash windows and missing-hook controls"
+    },
+    {
+      "command": "ruff check affected Python files; python -m compileall affected modules; git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": "uv build --wheel --offline; offline install from local bundles into new CPython 3.11.15 and 3.12.3 venvs; uv pip check",
+      "result": "wheel built; 29 packages installed and compatible in each venv"
+    },
+    {
+      "command": "UV_OFFLINE=1 PIP_NO_INDEX=1 <fresh-venv-python> scripts/clean_smoke.py /workspace/SpecOrganon",
+      "result": "passed in both Python versions from site-packages: nine accepted phases, 29 items, revision 49, 14 CLI commands, 14 MCP tools, signed synthetic approval, SIGKILL recovery and replay"
+    }
+  ],
+  "limits": [
+    "The xfail is an intentional, still reproducible boundary; the suite exit code does not mean absolute root confinement.",
+    "No adversarial same-UID filesystem isolation, different-UID confinement, power-loss durability, provider execution, field observation or human approval was established.",
+    "The wheel installation and smoke are local development checks. Criterion 1 and the other GOAL.md criteria remain not assessed or not demonstrated."
+  ]
+}
