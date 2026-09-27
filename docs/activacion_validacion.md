@@ -1,0 +1,37 @@
+# Distancia hasta la validación de GOAL
+
+**Corte:** 2026-09-27 UTC. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). No cambia los umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
+
+| Criterio de GOAL | Evidencia actual | Puerta pendiente |
+| --- | --- | --- |
+| 1. Funcionamiento completo | Wheel instalado en Python 3.11 y 3.12; CLI y cliente MCP reales, interrupciones y reanudación probadas en escenarios de desarrollo. | Demostrar el recorrido completo con revisión sustantiva y coordinación de agentes bajo las condiciones de aceptación, incluidas las decisiones humanas que bloquean un caso real. |
+| 2. Integridad metodológica | Controles de contradicción, fuentes, dependencias e invalidación, con negativos reproducibles. | Evaluación independiente de que las decisiones, requisitos e indicadores de un caso completo tienen fundamento empírico y normativo real. |
+| 3. Resolución alimentaria | Fuentes públicas y preflights declarativos; no hay ensayo de intervención. | Sitio autorizado, decisiones de valor aprobadas, diseño con potencia y cobertura defendibles, originales custodiados y resultados causales observados. |
+| 4. Aporte frente a N y SDD | Runner y análisis de desarrollo; pilotos expuestos y parciales. | Panel y reserva congelados, límites comparables aplicados, ejecuciones independientes, telemetría y costes autenticados, jueces ciegos y ablaciones. |
+| 5. Generalización | Aplicación retrospectiva de movilidad expuesta, con invalidación y reanudación. | Nuevo caso real de otro dominio, reservado y evaluado sin rehacer el método ni reutilizar el expediente expuesto. |
+
+**Veredicto actual: 0 de 5 criterios demostrados.** La capacidad técnica de desarrollo está avanzada; los tres últimos criterios dependen además de recursos y evidencia externos. No hay una fracción porcentual o fecha de término defendible a partir del número de pruebas locales.
+
+## Puerta A: ensayo alimentario
+
+Antes de asignar grupos, el operador y un custodio independiente deben fijar un sitio elegible sin mirar desenlaces, permiso de intervención y acceso a originales, grupos separables, control e intervención, estratos, seguimiento hasta consumo y contaminación posible. Los actores competentes deben aprobar las equivalencias que definen el servicio inocuo y útil `V` y los perjuicios, fuentes, unidades, márgenes y reglas de parada por actor y etapa; una firma sobre declaraciones locales no autentica su autoridad ni la observación física. La [preparación de campo](preparacion_campo.md) define las entradas y límites de los auditores.
+
+Se necesitan datos **previos del sitio** de varios grupos con series semanales, volumen basal, fuentes originales y custodia para estimar dispersión y correlación. La [enmienda abierta](enmiendas_protocolo.md#2026-09-27--cuesti%C3%B3n-estad%C3%ADstica-abierta-del-ensayo-alimentario) distingue dos eventos: 80 % de potencia para detectar `G = 0,10` frente a cero y éxito solo cuando el límite inferior del IC 95 % alcanza `0,10`. Un responsable estadístico y los actores competentes deben aprobar el evento de dimensionamiento, un efecto verdadero supuesto y la simulación de cobertura y potencia del análisis previsto antes de asignar. El mínimo técnico de dos grupos por celda brazo × estrato permite intentar el remuestreo; **no garantiza** potencia ni cobertura del intervalo.
+
+**GO para asignar:** registro previo custodiado y aprobado, potencia/cobertura defendibles para el sitio, equivalencias y perjuicios aprobados, permisos y plan de captura/custodia de fuentes. Hasta entonces, `decision_ready:false` y criterio 3 `no demostrado`.
+
+## Puerta B: comparación entre modelos
+
+Un siguiente ensayo de factibilidad puede prepararse **sin llamadas ni gasto** sobre el caso público D-E: dos familias candidatas × brazos N, S y T, con un agente por corrida. El [dossier offline inicial](../experiments/development/energy_pilot/activation_dossier_2026-09-27.json) fija los hashes de los insumos, prompts, rúbrica y wheel actuales, enumera seis celdas sin inventar modelos y deja `no_go_for_provider_calls`. Antes de cualquier llamada hay que fijar **un mismo ID, versión, esfuerzo efectivo y demás parámetros de modelo para N/S/T dentro de cada familia**, herramientas genéricas iguales, servicio humano equivalente, aislamiento, topes de tiempo/tokens/herramientas, telemetría por solicitud, tarifa, techo de gasto y regla de parada. T mantiene política `signed`; la ausencia de una decisión competente deja su compuerta bloqueada. Los fallos se conservan y no se sustituyen según el resultado.
+
+El [runner D-E](../scripts/run_development_arm.py) y su [observador](../scripts/observe_development_run.py) comprueban bytes y trazas locales, pero no autentican identidad de proveedor, versión, factura o todos los agentes, ni aplican el límite global de recursos de la [sección 3 del protocolo](protocolo_experimental.md#3-brazos-panel-y-comparabilidad). La presencia de ejecutables locales no demuestra acceso. El [panel preliminar](panel_modelos_preliminar.md) tampoco congela modelos: en MiniMax el ajuste bajo/alto documentado para M3 no cambia la profundidad efectiva, de modo que Gemini + MiniMax no satisface por sí solo el contraste de esfuerzo por familia. Antes de un piloto facturable hay que comprobar acceso, parámetros, telemetría y precios actuales y pedir autorización separada para **seis corridas de brazo como máximo**, con topes adicionales para solicitudes al proveedor, tokens facturables y gasto total. Una corrida puede hacer múltiples solicitudes facturables. Aun si pasa, ese piloto sigue siendo **exploratorio** y no satisface el criterio 4.
+
+**GO confirmatorio:** candidato y 24 ejecuciones de desarrollo exigidas por el protocolo cerrados; cuatro modelos de dos familias con al menos un contraste bajo/alto efectivo por familia; tres casos nuevos reservados bajo custodia; configuraciones solo/trío, réplicas, ablaciones, límites globales aplicados, recibos y costes autenticados, revisiones humanas equivalentes y jueces independientes ciegos. El [presupuesto máximo propuesto](protocolo_experimental.md#8-presupuesto-parada-y-publicaci%C3%B3n) no es autorización de gasto. Mientras falte cualquiera de estas condiciones, criterio 4 `no demostrado`.
+
+## Insumos externos que desbloquean la siguiente fase
+
+1. Un operador de cadena alimentaria dispuesto a evaluar una intervención, con permiso para usar datos previos custodiados de varios grupos y seguir resultados hasta consumo.
+2. Personas competentes para aprobar equivalencias y daños, un responsable estadístico del sitio y custodia independiente de fuentes, asignación y decisiones.
+3. Para modelos, acceso verificable a dos familias y a la telemetría necesaria; evaluadores externos y un presupuesto explícito después de revisar el dossier y las tarifas actuales.
+
+Esos insumos permiten preparar planes concretos; no convierten por sí mismos ninguno de los cinco veredictos en `cumplido`.

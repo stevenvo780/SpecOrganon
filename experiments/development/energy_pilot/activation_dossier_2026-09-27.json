@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "classification": "offline_exploratory_pilot_preflight_no_provider_calls",
+  "date_utc": "2026-09-27",
+  "case": "D-E public building-energy development case; exposed before this dossier",
+  "status": "no_go_for_provider_calls",
+  "proposed_scope": {
+    "families": 2,
+    "arms_per_family": ["N", "S", "T"],
+    "agent_configuration": "one_model_agent_per_run",
+    "maximum_arm_runs_if_separately_authorized": 6,
+    "maximum_provider_requests": null,
+    "maximum_billable_tokens": null,
+    "maximum_spend_usd": null,
+    "confirmatory_evidence": false
+  },
+  "fixed_local_assets_sha256": {
+    "cases/building_energy/task.md": "f6fed29bc6ce18631cff30710b25f30b9662e04f889f336cccda2869f0789b64",
+    "cases/building_energy/source_manifest.json": "0e18340d130c495201e68c1c869bc2c6f49b35663176040aebb0d0d7d7bd1ee1",
+    "cases/building_energy/sample_first_complete_week.csv": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba",
+    "experiments/development/energy_pilot/common.md": "2784d2b85b0412bfeb7bd13fe822019d5576cb1364c0571f01e182ac4e9506b7",
+    "experiments/development/energy_pilot/arm_n.md": "370d8be595da512857d319608a776e87c78b603dc10595eb3877071f6727d542",
+    "experiments/development/energy_pilot/arm_s.md": "e5e3189ada2970ab4ab8b269ce3cbdde5881b36703088b20d49097dd8676e61f",
+    "experiments/development/energy_pilot/arm_t.md": "e1a1a4584da70c040ab19a14a74754e064e00b2322c6f2be18d45e6bebf3a142",
+    "experiments/development/energy_pilot/rubric.md": "1c1c02e7944a3967db432c0e249d2828181b2aab616ba4e529cba34dd9e8a085",
+    "dist/specorganon-0.1.0-py3-none-any.whl": "b65e13d602c3b7d83556af1897d817c26e44a8d61b47008f9a5128e1462d40f3"
+  },
+  "asset_checks": [
+    "sha256sum on all listed local assets matched this record.",
+    "The case source manifest's sample_sha256 equals the SHA-256 of the listed CSV.",
+    "The local T wheel was rebuilt offline from the current source and installed in clean Python 3.11.15 and 3.12.3 environments; CLI/MCP clean smoke passed, as recorded in experiments/development/field_cell_preflight_2026-09-27.json."
+  ],
+  "family_configs_shared_by_all_three_arms": {
+    "A": {"model_id": null, "model_version": null, "effective_effort": null, "other_parameters": null},
+    "B": {"model_id": null, "model_version": null, "effective_effort": null, "other_parameters": null}
+  },
+  "planned_cells": [
+    {"family_slot": "A", "arm": "N"},
+    {"family_slot": "A", "arm": "S"},
+    {"family_slot": "A", "arm": "T"},
+    {"family_slot": "B", "arm": "N"},
+    {"family_slot": "B", "arm": "S"},
+    {"family_slot": "B", "arm": "T"}
+  ],
+  "no_go_reasons": [
+    "Two independent provider/model identities, effective effort parameters, access and quotas have not been verified for this pilot.",
+    "Within each family slot, N, S and T must inherit the exact same model ID, version, effective effort and other model parameters; the shared configurations above remain unset.",
+    "Equal generic tool access and equivalent human review for N, S and T have not been implemented and checked in the development runner.",
+    "One arm run may issue multiple billable provider requests; the runner does not enforce cumulative provider-request, token, tool-use or monetary caps or authenticate provider receipts and prices.",
+    "A signed normative decision for T must remain blocked until an authorized competent human supplies it; fixtures cannot replace it.",
+    "The wheel is a local ignored dist artifact, not a custody-controlled released bundle.",
+    "No monetary ceiling or provider calls have been authorized."
+  ],
+  "next_reviewable_gate": "Verify provider identities, access, telemetry, comparable tools and human service; fix enforcement and price separate limits for six arm runs, provider requests, billable tokens and total spend before requesting authorization.",
+  "provider_requests_made_for_this_dossier": 0,
+  "spend_authorized_usd": 0,
+  "criterion_4": "not_assessed"
+}
