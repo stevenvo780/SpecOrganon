@@ -201,6 +201,10 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
     no_command_allowed_steps: set[int] = set()
     no_command_violating_steps: set[int] = set()
     failed_codex_items = 0
+    codex_open_items: dict[str, str] = {}
+    codex_closed_items: set[str] = set()
+    codex_malformed_item_events = 0
+    codex_conflicting_item_events = 0
     failed_agy_steps: set[int] = set()
     agy_step_types: dict[int, str] = {}
     agy_colliding_indices: set[int] = set()
@@ -233,16 +237,45 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
             last_type = kind
             if provider == "codex" and kind == "turn.completed":
                 final_events.append((line_number, event))
-            elif provider == "codex" and kind in {"item.failed", "turn.failed"}:
+            elif provider == "codex" and kind == "turn.failed":
                 failed_codex_items += 1
-            elif provider == "codex" and kind == "item.completed":
+            elif provider == "codex" and kind in {"item.started", "item.completed", "item.failed"}:
                 item = event.get("item")
-                if type(item) is dict:
+                if kind == "item.failed":
+                    failed_codex_items += 1
+                if type(item) is not dict:
+                    codex_malformed_item_events += 1
+                    continue
+                if kind == "item.completed":
                     exit_code = item.get("exit_code")
-                    if (item.get("status") in {"failed", "error"}
+                    status = item.get("status")
+                    if ((type(status) is str and status in {"failed", "error"})
                             or (item.get("type") == "command_execution" and type(exit_code) is int
                                 and exit_code != 0)):
                         failed_codex_items += 1
+                item_id = item.get("id")
+                item_type = item.get("type")
+                if type(item_type) is not str or not item_type:
+                    codex_malformed_item_events += 1
+                    continue
+                if type(item_id) is not str or not item_id.strip():
+                    # Older local traces can contain a completed item without an ID.
+                    # An unidentifiable start cannot prove that it was ever closed.
+                    if kind == "item.started":
+                        codex_malformed_item_events += 1
+                    continue
+                if kind == "item.started":
+                    if item_id in codex_open_items or item_id in codex_closed_items:
+                        codex_conflicting_item_events += 1
+                    else:
+                        codex_open_items[item_id] = item_type
+                else:
+                    started_type = codex_open_items.pop(item_id, None)
+                    if item_id in codex_closed_items or (
+                        started_type is not None and started_type != item_type
+                    ):
+                        codex_conflicting_item_events += 1
+                    codex_closed_items.add(item_id)
             elif provider == "agy" and kind == "result":
                 final_events.append((line_number, event))
             elif provider == "agy" and kind == "init":
@@ -318,6 +351,15 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
         terminal_errors.append("agy init.model missing, duplicated or different from requested model")
     if failed_codex_items:
         terminal_errors.append(f"Codex stream contains {failed_codex_items} failed item/turn events")
+    if codex_malformed_item_events:
+        terminal_errors.append(
+            f"Codex stream contains {codex_malformed_item_events} malformed item events")
+    if codex_conflicting_item_events:
+        terminal_errors.append(
+            f"Codex stream contains {codex_conflicting_item_events} contradictory item ID/type transitions")
+    if codex_open_items:
+        terminal_errors.append(
+            f"Codex stream contains {len(codex_open_items)} started items without completion/failure")
     if failed_agy_steps:
         terminal_errors.append(f"agy stream contains {len(failed_agy_steps)} failed tool steps")
     no_command_uninspectable = (agy_malformed_step_events + len(agy_colliding_indices)

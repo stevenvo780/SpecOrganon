@@ -202,6 +202,39 @@ def test_observes_directory_emitted_by_real_runner_with_existing_fake_cli(
     assert not (run_dir / "analysis_replay.stdout").exists()
 
 
+def test_observer_rejects_old_green_claim_for_open_codex_item(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    executable = fake_bin / "codex"
+    executable.write_text(FAKE_CLI, encoding="utf-8")
+    executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
+    monkeypatch.setenv("FAKE_SCENARIO", "codex_open_item")
+    run_dir, summary = run_development_arm(
+        arm="N", provider="codex", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["execution_status"] == "cli_internal_failure"
+    observed = _invoke(run_dir)
+    assert observed.returncode == 0, observed.stderr
+    observation = json.loads(observed.stdout)
+    assert observation["execution_status"] == "cli_internal_failure"
+    assert observation["cli_usage"]["terminal_success"] is False
+    assert observation["cli_usage"]["complete"] is False
+
+    # Reproduce the old parser's false green while preserving the stream byte record.
+    summary["execution_status"] = "artifacts_ready_for_inspection"
+    summary["cli_usage"].update(
+        terminal_success=True, complete=True, terminal_errors=[], errors=[]
+    )
+    _write_summary(run_dir, summary)
+    rejected = _invoke(run_dir)
+    assert rejected.returncode == 2
+    assert "cli_usage differs from the verified local CLI stream" in rejected.stderr
+
+
 @pytest.mark.parametrize("scenario,violating,uninspectable", [
     ("agy_command_tool", 1, 0),
     ("agy_tool_name_missing", 1, 0),

@@ -64,6 +64,9 @@ if provider == "codex":
             {"type": "file_change", "status": "failed"},
         ):
             print(json.dumps({"type": "item.completed", "item": item}))
+    elif scenario == "codex_open_item":
+        print(json.dumps({"type": "item.started", "item": {
+            "id": "item-1", "type": "command_execution"}}))
     else:
         print(json.dumps({"type": "item.completed", "item": {"type": "command_execution"}}))
     usage = None if scenario == "missing_usage" else {
@@ -183,6 +186,78 @@ def _usage_trace(
     raw = "".join(json.dumps(event) + "\n" for event in events)
     path.write_text(raw, encoding="utf-8")
     return raw
+
+
+def _codex_item_trace(path: Path, item_events: list[dict[str, object]]) -> dict[str, object]:
+    usage = {
+        "input_tokens": 20,
+        "cached_input_tokens": 2,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 8,
+        "reasoning_output_tokens": 1,
+    }
+    events = [*item_events, {"type": "turn.completed", "usage": usage}]
+    path.write_text("".join(json.dumps(event) + "\n" for event in events), encoding="utf-8")
+    return usage
+
+
+def test_codex_complete_item_pair_and_legacy_unpaired_completion(
+    tmp_path: Path,
+) -> None:
+    trace = tmp_path / "codex.jsonl"
+    usage = _codex_item_trace(trace, [
+        {"type": "item.started", "item": {"id": "item-1", "type": "command_execution"}},
+        {"type": "item.completed", "item": {"id": "item-1", "type": "command_execution"}},
+    ])
+    parsed = runner._parse_usage("codex", trace, "test-model")
+    assert parsed["terminal_success"] is True
+    assert parsed["complete"] is True
+    assert parsed["final_usage"] == usage
+
+    for item in ({"id": "legacy-1", "type": "command_execution"},
+                 {"type": "command_execution"}):
+        _codex_item_trace(trace, [{"type": "item.completed", "item": item}])
+        legacy = runner._parse_usage("codex", trace, "test-model")
+        assert legacy["terminal_success"] is True
+        assert legacy["complete"] is True
+
+
+@pytest.mark.parametrize("item_events,error_fragment", [
+    ([{"type": "item.started", "item": {"id": "item-1", "type": "command_execution"}}],
+     "started items without completion/failure"),
+    ([{"type": "item.started", "item": {"type": "command_execution"}},
+      {"type": "item.completed", "item": {"type": "command_execution"}}],
+     "malformed item events"),
+    ([{"type": "item.started", "item": {"id": "item-1", "type": "command_execution"}},
+      {"type": "item.completed", "item": {"id": "item-2", "type": "command_execution"}}],
+     "started items without completion/failure"),
+    ([{"type": "item.started", "item": {"id": "item-1", "type": "command_execution"}},
+      {"type": "item.completed", "item": {"type": "command_execution"}}],
+     "started items without completion/failure"),
+    ([{"type": "item.started", "item": {"id": "item-1", "type": "command_execution"}},
+      {"type": "item.completed", "item": {"id": "item-1", "type": "file_change"}}],
+     "contradictory item ID/type transitions"),
+    ([{"type": "item.started", "item": {"id": "item-1", "type": "command_execution"}},
+      {"type": "item.started", "item": {"id": "item-1", "type": "file_change"}},
+      {"type": "item.completed", "item": {"id": "item-1", "type": "command_execution"}}],
+     "contradictory item ID/type transitions"),
+    ([{"type": "item.started", "item": {"id": "item-1", "type": "command_execution"}},
+      {"type": "item.failed", "item": {"id": "item-1", "type": "command_execution"}}],
+     "failed item/turn events"),
+    ([{"type": "item.completed", "item": {"id": "item-1", "type": "command_execution"}},
+      {"type": "item.completed", "item": {"id": "item-1", "type": "command_execution"}}],
+     "contradictory item ID/type transitions"),
+])
+def test_codex_item_trace_rejects_open_failed_or_contradictory_items(
+    tmp_path: Path, item_events: list[dict[str, object]], error_fragment: str,
+) -> None:
+    trace = tmp_path / "codex.jsonl"
+    usage = _codex_item_trace(trace, item_events)
+    parsed = runner._parse_usage("codex", trace, "test-model")
+    assert parsed["final_usage"] == usage
+    assert parsed["terminal_success"] is False
+    assert parsed["complete"] is False
+    assert any(error_fragment in error for error in parsed["terminal_errors"])
 
 
 @pytest.mark.parametrize("provider", ["codex", "agy"])
@@ -547,6 +622,23 @@ def test_zero_exit_with_artifacts_but_internal_failure_is_not_ready(
         assert summary["cli_usage"]["final_status"] == "FAILURE"
     with pytest.raises(RunError, match="not in artifacts_ready"):
         replay_run_dir(run_dir, summary["artifacts"]["analysis.py"]["sha256"])
+
+
+def test_codex_open_item_with_valid_final_usage_is_internal_failure(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", "codex_open_item")
+    run_dir, summary = run_development_arm(
+        arm="N", provider="codex", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["cli"]["exit_code"] == 0
+    assert all(summary["artifacts"].values())
+    assert summary["cli_usage"]["final_usage"]["input_tokens"] == 20
+    assert summary["cli_usage"]["terminal_success"] is False
+    assert summary["cli_usage"]["complete"] is False
+    assert summary["execution_status"] == "cli_internal_failure"
+    assert "item.started" in (run_dir / "cli.stdout.jsonl").read_text(encoding="utf-8")
 
 
 def test_agy_denied_actions_rejects_success_with_artifacts_without_leaking_details(
