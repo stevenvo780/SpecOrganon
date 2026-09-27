@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "classification": "development_bread_published_pdf_content_binding",
+  "date_utc": "2026-09-27",
+  "goal_sha256_unchanged": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "case": "cases/bread_norway",
+  "code_sha256": {
+    "scripts/verify_bread_frame.py": "d61ea347642885907b30a1b63582d3d0ba66f516e80eb6fb8b8a0eff10dc1215",
+    "tests/test_bread_frame.py": "b4e64cdff7d285dc3b597949ae04410e1de714ef5d4a65b429ea53ec99e990b1"
+  },
+  "case_sha256": {
+    "frame_manifest.json": "3fe514c94e304bef768abdb471a1adbec0f22c8c26703daf2be1624417062ead",
+    "organon.json": "1c2795bc3a31ebf828991d8e87518028c340f303db5f3acc3b11fab04b88de23",
+    "source_lca.pdf": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+    "source_survey.pdf": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee"
+  },
+  "source_check": {
+    "command": "uv run python scripts/verify_bread_frame.py",
+    "exit_code": 0,
+    "receipt_sha256": "68616ff3d1b39e33ca645749922a5cdb5570fee92d93981a3c343e9bd0c9cb31",
+    "pdf_text_tool": "Poppler pdftotext 24.02.0 -layout",
+    "published_values": {
+      "e_baker_energy": "0.297",
+      "e_household_est": "8.2",
+      "e_mill_bran": "19.1",
+      "e_mill_energy": "129",
+      "e_mill_transport": "438",
+      "e_product_mass": "736",
+      "e_retail_waste": "11.4",
+      "e_survey_size": "1000",
+      "e_wheat_origin": "65"
+    },
+    "case_events": {
+      "item_put": 19,
+      "phase_review": 1,
+      "phase_advance": 1
+    },
+    "mcp_tools_discovered": 16,
+    "cli_mcp_parity_and_replay": true,
+    "critique_blocker": "n_bread_harm requires a verified human approval"
+  },
+  "negative_controls": [
+    "The retail value 99 in both manifest and a ledger with a valid rebuilt hash chain is rejected against the PDF value 11.4.",
+    "A false visible retail claim of 99 percent with structured value 11.4 is rejected.",
+    "A false household claim of direct product-linked measurement is rejected in visible text and in origin/scope metadata.",
+    "An extra field_observed_and_lot_linked:true key in the household data is rejected even with a valid rebuilt ledger hash chain.",
+    "Additional top-level fields or dependencies, altered version, duplicate evidence, wrong DOI, locator, unit or PDF bytes are rejected."
+  ],
+  "checks": [
+    {
+      "command": "uv run pytest -q",
+      "result": "1644 passed in 293.11s; no expected failures"
+    },
+    {
+      "command": "uv run pytest -q tests/test_bread_frame.py tests/test_analyze_bread_survey.py",
+      "result": "31 passed"
+    },
+    {
+      "command": "uv run ruff check .",
+      "result": "all checks passed"
+    },
+    {
+      "command": "independent read-only adversarial recheck of the final nine-evidence contract",
+      "result": "15 focused tests passed; reproduced prior false greens now rejected; no additional concrete false green found within the nine fixed evidence items"
+    }
+  ],
+  "limits": [
+    "The nine numbers are extracted from fixed published PDF passages, but the full wording and provenance checks are a reviewed contract for this archived case, not general automatic semantic validation of arbitrary documents.",
+    "Text extraction depends on Poppler layout; missing or ambiguous passages fail this probe and require manual review.",
+    "Two historical locators additionally cite Table 1 although the product mass and wheat-origin values occur in sections 4.2 and 4.3; the parser uses those passages and the archived ledger is not rewritten.",
+    "The PDFs contain published aggregates, reported company figures, modeled values and survey self-report, not linked raw records from production to consumption.",
+    "No prospective intervention, authentic human approval, causal comparison or field impact was verified."
+  ],
+  "criterion_3": "not_assessed"
+}

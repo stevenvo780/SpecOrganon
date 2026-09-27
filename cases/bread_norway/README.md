@@ -14,8 +14,11 @@ El [manifiesto fijado](frame_manifest.json) registra nueve datos de los PDF arch
 
 La [sonda reproducible](../../scripts/verify_bread_frame.py) coteja los SHA-256 de los PDF con el manifiesto y compara CLI con un cliente MCP real en `status`, `gate`, `trace`, `next_task` y replay. Comprueba además que un manifiesto inválido no cambia el ledger. Su [recibo](../../experiments/development/bread_frame_cli_mcp_2026-09-27.json) conserva hashes, revisión, recuentos y el bloqueo pendiente. Para repetir la verificación local:
 
+El [cotejo documental posterior](../../experiments/development/bread_pdf_content_binding_2026-09-27.json) extrae con Poppler `pdftotext -layout` las nueve cifras de pasajes o filas concretos de los PDF archivados y las compara con manifiesto y ledger. También fija texto visible, alcance, fecha, fuente, unidad y forma de esos nueve ítems: una transcripción comercial de 99 % con hashes de ledger válidos, una atribución doméstica falsa como observación directa y una clave adicional que afirma vínculo por lote se rechazan. Este contrato específico del expediente requiere Poppler y no interpreta automáticamente cualquier PDF ni verifica microdatos. Los locators históricos de masa y origen del trigo citan además la tabla 1; sus cifras aparecen en las secciones 4.2 y 4.3 usadas por la extracción.
+
 ```sh
 uv run python scripts/verify_bread_frame.py
+uv run pytest -q tests/test_bread_frame.py
 ```
 
 La revisión de `frame` no aprueba los valores propuestos ni convierte porcentajes históricos en una línea base de campo. Las fases posteriores, el ensayo y el criterio 3 siguen pendientes.
