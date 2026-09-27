@@ -219,6 +219,216 @@ def test_invalid_identity_or_usage_rejected(schedule: dict[str, Any], change: st
         audit_receipts(schedule, receipts)
 
 
+@pytest.mark.parametrize("status", ["completed", "truncated"])
+def test_each_terminal_provider_call_needs_positive_input(
+    schedule: dict[str, Any],
+    status: str,
+) -> None:
+    attempt = _attempt(schedule["runs"][0], status=status)
+    calls = attempt["agent_usage"][0]["provider_calls"]
+    calls.append(
+        {
+            "request_id": "second-call-with-no-input",
+            "input_total": 0,
+            "cached_input": 0,
+            "output_total": 0,
+            "reasoning_output": 0,
+        }
+    )
+
+    with pytest.raises(
+        ReceiptError, match=r"provider_calls\[1\]\.input_total must be positive"
+    ):
+        audit_receipts(schedule, _receipts(schedule, [attempt]))
+
+
+@pytest.mark.parametrize("inactive_index", [0, 1, 2])
+def test_completed_trio_requires_a_call_from_every_agent(
+    schedule: dict[str, Any],
+    inactive_index: int,
+) -> None:
+    run = next(item for item in schedule["runs"] if item["agents"] == "trio")
+    attempt = _attempt(run, status="completed")
+    attempt["agent_usage"][inactive_index]["provider_calls"] = []
+    attempt["agent_usage"][inactive_index]["tool_calls"] = 0
+
+    with pytest.raises(
+        ReceiptError,
+        match=rf"agent_usage\[{inactive_index}\]\.provider_calls requires a positive-input call",
+    ):
+        audit_receipts(schedule, _receipts(schedule, [attempt]))
+
+
+def test_truncated_trio_may_stop_before_other_agents_start(
+    schedule: dict[str, Any],
+) -> None:
+    run = next(item for item in schedule["runs"] if item["agents"] == "trio")
+    attempt = _attempt(run, status="truncated")
+    attempt["agent_usage"][0]["provider_calls"][0].update(
+        input_total=80_000, cached_input=0, output_total=0, reasoning_output=0
+    )
+    for agent in attempt["agent_usage"][1:]:
+        agent["provider_calls"] = []
+        agent["tool_calls"] = 0
+
+    report = audit_receipts(schedule, _receipts(schedule, [attempt]))
+    run_report = next(
+        item for item in report["runs"] if item["run_id"] == run["run_id"]
+    )
+
+    assert run_report["outcome"] == "truncated"
+    assert run_report["provider_calls"] == 1
+    assert run_report["measured_tokens"] == 80_000
+    assert report["violations"] == []
+    assert report["criterion_4"]["status"] == "not_assessed"
+
+
+def test_one_input_token_is_valid_terminal_boundary(
+    schedule: dict[str, Any],
+) -> None:
+    solo_run = next(item for item in schedule["runs"] if item["agents"] == "solo")
+    attempt = _attempt(solo_run, status="completed")
+    attempt["agent_usage"][0]["provider_calls"][0].update(
+        {
+            "input_total": 1,
+            "cached_input": 1,
+            "output_total": 0,
+            "reasoning_output": 0,
+        }
+    )
+
+    report = audit_receipts(schedule, _receipts(schedule, [attempt]))
+
+    run_report = next(
+        item for item in report["runs"] if item["run_id"] == solo_run["run_id"]
+    )
+    assert run_report["measured_tokens"] == 1
+    assert report["violations"] == []
+    assert report["criterion_4"]["status"] == "not_assessed"
+
+
+def test_undercap_truncation_preserves_receipt_and_reports_violation(
+    schedule: dict[str, Any],
+) -> None:
+    run = next(item for item in schedule["runs"] if item["agents"] == "solo")
+    attempt = _attempt(run, status="truncated")
+    attempt["agent_usage"][0]["provider_calls"][0].update(
+        input_total=79_999, cached_input=0, output_total=0, reasoning_output=0
+    )
+    attempt["agent_usage"][0]["tool_calls"] = 99
+    attempt["active_seconds"] = 5_399
+    attempt["ended_at_utc"] = (
+        (
+            datetime.fromisoformat(attempt["started_at_utc"].replace("Z", "+00:00"))
+            + timedelta(seconds=5_401)
+        )
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
+
+    report = audit_receipts(schedule, _receipts(schedule, [attempt]))
+    run_report = next(
+        item for item in report["runs"] if item["run_id"] == run["run_id"]
+    )
+
+    assert report["matrix_receipts_complete"] is False
+    assert report["violations"] == [
+        {
+            "code": "truncation_without_exhausted_limit",
+            "run_id": run["run_id"],
+            "attempt_number": 1,
+            "actual": {
+                "measured_tokens": 79_999,
+                "active_seconds": 5_399,
+                "tool_calls": 99,
+            },
+            "limits": {
+                "measured_tokens": 80_000,
+                "active_seconds": 5_400,
+                "tool_calls": 100,
+            },
+        }
+    ]
+    assert run_report["outcome"] == "truncated"
+    assert run_report["attempt_count"] == 1
+    assert run_report["attempts"][0]["status"] == "truncated"
+    assert run_report["attempts"][0]["measured_tokens"] == 79_999
+
+
+@pytest.mark.parametrize(
+    "exhausted", ["measured_tokens", "active_seconds", "tool_calls"]
+)
+def test_truncation_at_any_limit_is_valid_boundary(
+    schedule: dict[str, Any],
+    exhausted: str,
+) -> None:
+    run = next(item for item in schedule["runs"] if item["agents"] == "solo")
+    attempt = _attempt(run, status="truncated")
+    if exhausted == "measured_tokens":
+        attempt["agent_usage"][0]["provider_calls"][0].update(
+            input_total=80_000, cached_input=0, output_total=0, reasoning_output=0
+        )
+    elif exhausted == "active_seconds":
+        attempt["active_seconds"] = 5_400
+        attempt["ended_at_utc"] = (
+            (
+                datetime.fromisoformat(attempt["started_at_utc"].replace("Z", "+00:00"))
+                + timedelta(seconds=5_402)
+            )
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
+    else:
+        attempt["agent_usage"][0]["tool_calls"] = 100
+
+    report = audit_receipts(schedule, _receipts(schedule, [attempt]))
+
+    assert report["violations"] == []
+    assert report["counts"]["truncated_runs"] == 1
+
+
+def test_documented_external_failure_may_have_zero_usage(
+    schedule: dict[str, Any],
+) -> None:
+    attempt = _attempt(schedule["runs"][0], status="external_failure")
+    attempt["agent_usage"][0]["provider_calls"][0].update(
+        {
+            "input_total": 0,
+            "cached_input": 0,
+            "output_total": 0,
+            "reasoning_output": 0,
+        }
+    )
+
+    report = audit_receipts(schedule, _receipts(schedule, [attempt]))
+
+    assert report["runs"][0]["measured_tokens"] == 0
+    assert report["counts"]["external_failures"] == 1
+    assert report["violations"] == []
+    assert report["criterion_4"]["status"] == "not_assessed"
+
+
+def test_documented_trio_external_failure_may_have_no_agent_calls(
+    schedule: dict[str, Any],
+) -> None:
+    run = next(item for item in schedule["runs"] if item["agents"] == "trio")
+    attempt = _attempt(run, status="external_failure")
+    for agent in attempt["agent_usage"]:
+        agent["provider_calls"] = []
+        agent["tool_calls"] = 0
+
+    report = audit_receipts(schedule, _receipts(schedule, [attempt]))
+    run_report = next(
+        item for item in report["runs"] if item["run_id"] == run["run_id"]
+    )
+
+    assert run_report["provider_calls"] == 0
+    assert run_report["measured_tokens"] == 0
+    assert report["counts"]["external_failures"] == 1
+    assert report["violations"] == []
+    assert report["criterion_4"]["status"] == "not_assessed"
+
+
 def test_budget_violations_keep_all_attempt_records(schedule: dict[str, Any]) -> None:
     run = next(item for item in schedule["runs"] if item["agents"] == "trio")
     attempt = _attempt(run)
@@ -327,6 +537,8 @@ def test_next_arm_waits_for_valid_external_retry_terminal(
     runs = _first_block_by_position(schedule)
     first_failure = _attempt(runs[1], 1, "external_failure")
     first_terminal = _attempt(runs[1], 2, terminal_status)
+    if terminal_status == "truncated":
+        first_terminal["agent_usage"][0]["tool_calls"] = schedule["per_run_limits"]["tool_calls"]
     second = _attempt(runs[2])
     third = _attempt(runs[3])
     _shift_attempt(second, -270)  # Begins exactly when retry terminates.

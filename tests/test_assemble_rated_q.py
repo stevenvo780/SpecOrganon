@@ -108,6 +108,22 @@ def _attempt(
     return row
 
 
+def _reach_measured_token_cap(attempt: dict[str, Any]) -> None:
+    first_call = attempt["agent_usage"][0]["provider_calls"][0]
+    other_tokens = sum(
+        call["input_total"] + call["output_total"]
+        for agent in attempt["agent_usage"]
+        for call in agent["provider_calls"]
+        if call is not first_call
+    )
+    first_call.update(
+        input_total=80_000 - other_tokens,
+        cached_input=0,
+        output_total=0,
+        reasoning_output=0,
+    )
+
+
 def _failure(label: str, code: str = "false_test") -> dict[str, str]:
     return {"incident_id": _hash("incident-" + label)[:32], "code": code}
 
@@ -473,6 +489,10 @@ def test_missing_and_truncated_are_explicit_and_truncated_artifact_can_be_scored
             _attempt(bare_truncated, "truncated", artifact=False),
         ],
     )
+    for attempt in bundle[1]["attempts"]:
+        if attempt["status"] == "truncated":
+            _reach_measured_token_cap(attempt)
+    bundle[4]["receipts_sha256"] = _digest(bundle[1])
 
     result = assemble_rated_q(*bundle)
     rows = _rows(result)
@@ -690,6 +710,8 @@ def test_mapping_cannot_claim_missing_terminal_or_truncated_without_artifact(
         bundle = list(_bundle(schedule, [{"run": run, "qs": (60, 60)}]))
         receipts, mapping = bundle[1], bundle[4]
         receipts["attempts"][0] = _attempt(run, status, artifact=artifact)
+        if status == "truncated":
+            _reach_measured_token_cap(receipts["attempts"][0])
         mapping["receipts_sha256"] = _digest(receipts)
         with pytest.raises(AssemblyError, match=message):
             assemble_rated_q(*bundle)

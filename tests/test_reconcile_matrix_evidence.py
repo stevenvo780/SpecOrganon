@@ -15,6 +15,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 sys.path.insert(0, str(SCRIPTS))
+from audit_run_receipts import ReceiptError  # noqa: E402
 from plan_confirmatory import compile_schedule  # noqa: E402
 from reconcile_matrix_evidence import reconcile  # noqa: E402
 
@@ -102,6 +103,166 @@ def test_full_synthetic_declarations_are_concordant_but_unsealed(schedule: dict[
     assert report["criterion_4"]["status"] == "not_assessed"
 
 
+def test_zero_input_completed_calls_cannot_pass_reconciliation(
+    schedule: dict[str, Any],
+    tmp_path: Path,
+) -> None:
+    receipts, evaluations = _inputs(schedule)
+    for attempt in receipts["attempts"]:
+        for agent in attempt["agent_usage"]:
+            for call in agent["provider_calls"]:
+                call.update(
+                    input_total=0, cached_input=0, output_total=0, reasoning_output=0
+                )
+
+    with pytest.raises(ReceiptError, match="input_total must be positive"):
+        reconcile(schedule, receipts, evaluations)
+
+    paths = [
+        tmp_path / name
+        for name in ("schedule.json", "receipts.json", "evaluations.json")
+    ]
+    for path, value in zip(paths, (schedule, receipts, evaluations)):
+        path.write_text(json.dumps(value), encoding="utf-8")
+    process = subprocess.run(
+        [
+            sys.executable,
+            "-B",
+            str(SCRIPTS / "reconcile_matrix_evidence.py"),
+            *(str(path) for path in paths),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert process.returncode == 2
+    assert "input_total must be positive" in json.loads(process.stdout)["error"]
+
+
+def test_inactive_trio_roles_cannot_pass_reconciliation(
+    schedule: dict[str, Any],
+    tmp_path: Path,
+) -> None:
+    receipts, evaluations = _inputs(schedule)
+    trio_count = 0
+    for attempt in receipts["attempts"]:
+        if attempt["agents"] != "trio":
+            continue
+        trio_count += 1
+        for agent in attempt["agent_usage"][1:]:
+            agent["provider_calls"] = []
+            agent["tool_calls"] = 0
+
+    assert trio_count == 162
+    with pytest.raises(
+        ReceiptError,
+        match=r"agent_usage\[1\]\.provider_calls requires a positive-input call",
+    ):
+        reconcile(schedule, receipts, evaluations)
+
+    paths = [
+        tmp_path / name
+        for name in ("schedule.json", "receipts.json", "evaluations.json")
+    ]
+    for path, value in zip(paths, (schedule, receipts, evaluations)):
+        path.write_text(json.dumps(value), encoding="utf-8")
+    process = subprocess.run(
+        [
+            sys.executable,
+            "-B",
+            str(SCRIPTS / "reconcile_matrix_evidence.py"),
+            *(str(path) for path in paths),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert process.returncode == 2
+    assert (
+        "provider_calls requires a positive-input call"
+        in json.loads(process.stdout)["error"]
+    )
+
+
+def test_truncated_trio_at_cap_can_reconcile_with_inactive_roles(
+    schedule: dict[str, Any],
+) -> None:
+    receipts, evaluations = _inputs(schedule)
+    attempt = next(item for item in receipts["attempts"] if item["agents"] == "trio")
+    attempt["status"] = "truncated"
+    attempt["agent_usage"][0]["provider_calls"][0].update(
+        input_total=80_000, cached_input=0, output_total=0, reasoning_output=0
+    )
+    for agent in attempt["agent_usage"][1:]:
+        agent["provider_calls"] = []
+        agent["tool_calls"] = 0
+    evaluation = next(
+        row for row in evaluations["runs"] if row["run_id"] == attempt["run_id"]
+    )
+    evaluation["status"] = "truncated"
+
+    report = reconcile(schedule, receipts, evaluations)
+
+    assert report["declared_joint_coverage_complete"] is True
+    assert report["counts"]["receipt_violations"] == 0
+    assert report["criterion_4"]["status"] == "not_assessed"
+
+
+def test_full_matrix_undercap_trios_cannot_claim_declared_coverage(
+    schedule: dict[str, Any],
+    tmp_path: Path,
+) -> None:
+    receipts, evaluations = _inputs(schedule)
+    evaluations_by_run = {row["run_id"]: row for row in evaluations["runs"]}
+    trio_count = 0
+    for attempt in receipts["attempts"]:
+        if attempt["agents"] != "trio":
+            continue
+        trio_count += 1
+        attempt["status"] = "truncated"
+        for agent in attempt["agent_usage"][1:]:
+            agent["provider_calls"] = []
+            agent["tool_calls"] = 0
+        evaluations_by_run[attempt["run_id"]]["status"] = "truncated"
+
+    assert trio_count == 162
+    report = reconcile(schedule, receipts, evaluations)
+
+    assert report["declared_joint_coverage_complete"] is False
+    assert report["counts"]["scheduled_runs"] == 324
+    assert report["counts"]["scored_runs"] == 324
+    assert report["counts"]["concordant_scored_runs"] == 324
+    assert report["counts"]["missing_terminal_runs"] == 0
+    assert report["counts"]["receipt_violations"] == 162
+    assert report["counts"]["reconciliation_issues"] == 0
+    assert {row["code"] for row in report["receipt_violations"]} == {
+        "truncation_without_exhausted_limit"
+    }
+    assert report["criterion_4"]["status"] == "not_assessed"
+
+    paths = [
+        tmp_path / name
+        for name in ("schedule.json", "receipts.json", "evaluations.json")
+    ]
+    for path, value in zip(paths, (schedule, receipts, evaluations)):
+        path.write_text(json.dumps(value), encoding="utf-8")
+    process = subprocess.run(
+        [
+            sys.executable,
+            "-B",
+            str(SCRIPTS / "reconcile_matrix_evidence.py"),
+            *(str(path) for path in paths),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert process.returncode == 0
+    cli_report = json.loads(process.stdout)
+    assert cli_report["declared_joint_coverage_complete"] is False
+    assert cli_report["counts"]["receipt_violations"] == 162
+
+
 def test_scores_without_any_receipts_cannot_look_jointly_complete(schedule: dict[str, Any]) -> None:
     receipts, evaluations = _inputs(schedule)
     receipts["attempts"] = []
@@ -135,6 +296,9 @@ def test_terminal_without_rating_is_visible(schedule: dict[str, Any]) -> None:
 def test_truncated_artifacts_control_whether_q_can_be_bound(schedule: dict[str, Any], artifact: bool) -> None:
     receipts, evaluations = _inputs(schedule)
     receipts["attempts"][0] = _attempt(schedule["runs"][0], status="truncated", artifact=artifact)
+    receipts["attempts"][0]["agent_usage"][0]["provider_calls"][0].update(
+        input_total=80_000, cached_input=0, output_total=0, reasoning_output=0
+    )
     evaluations["runs"][0]["status"] = "truncated"
     report = reconcile(schedule, receipts, evaluations)
     assert report["declared_joint_coverage_complete"] is artifact

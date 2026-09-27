@@ -152,7 +152,15 @@ def _limits(schedule: dict[str, Any]) -> int:
     return limits["tool_calls"]
 
 
-def _agent_usage(value: Any, label: str, expected_agents: str, request_ids: set[str]) -> tuple[int, int, int]:
+def _agent_usage(
+    value: Any,
+    label: str,
+    expected_agents: str,
+    request_ids: set[str],
+    *,
+    require_positive_input: bool,
+    require_trio_participation: bool,
+) -> tuple[int, int, int]:
     count = 1 if expected_agents == "solo" else 3
     if type(value) is not list or len(value) != count:
         raise ReceiptError(f"{label} must contain exactly {count} agents")
@@ -172,6 +180,10 @@ def _agent_usage(value: Any, label: str, expected_agents: str, request_ids: set[
         rows = agent["provider_calls"]
         if type(rows) is not list:
             raise ReceiptError(f"{agent_label}.provider_calls must be an array")
+        if require_trio_participation and expected_agents == "trio" and not rows:
+            raise ReceiptError(
+                f"{agent_label}.provider_calls requires a positive-input call for a completed trio"
+            )
         for call_index, raw_call in enumerate(rows):
             call_label = f"{agent_label}.provider_calls[{call_index}]"
             call = _object(raw_call, call_label, required=CALL_FIELDS)
@@ -181,8 +193,17 @@ def _agent_usage(value: Any, label: str, expected_agents: str, request_ids: set[
             request_ids.add(request_id)
             measured = {
                 key: _integer(call[key], f"{call_label}.{key}")
-                for key in ("input_total", "cached_input", "output_total", "reasoning_output")
+                for key in (
+                    "input_total",
+                    "cached_input",
+                    "output_total",
+                    "reasoning_output",
+                )
             }
+            if require_positive_input and measured["input_total"] == 0:
+                raise ReceiptError(
+                    f"{call_label}.input_total must be positive for a terminal attempt"
+                )
             if measured["cached_input"] > measured["input_total"]:
                 raise ReceiptError(f"{call_label}.cached_input exceeds input_total")
             if measured["reasoning_output"] > measured["output_total"]:
@@ -240,7 +261,12 @@ def _validate_attempt(
         if status == "completed" or "artifact_sha256" in attempt:
             _sha256(attempt.get("artifact_sha256"), f"{label}.artifact_sha256")
     tokens, calls, tool_calls = _agent_usage(
-        attempt["agent_usage"], f"{label}.agent_usage", run["agents"], request_ids
+        attempt["agent_usage"],
+        f"{label}.agent_usage",
+        run["agents"],
+        request_ids,
+        require_positive_input=status in ("completed", "truncated"),
+        require_trio_participation=status == "completed",
     )
     if status in ("completed", "truncated") and calls == 0:
         raise ReceiptError(f"{label} terminal attempt requires a declared provider call")
@@ -319,18 +345,46 @@ def audit_receipts(raw_schedule: Any, raw_receipts: Any) -> dict[str, Any]:
         human_wait_seconds += run_wait
         for item in attempts:
             if item["provider_calls"] and item["active_seconds"] == 0:
-                violations.append({"code": "zero_active_time_with_provider_call",
-                                   "run_id": run_id, "attempt_number": item["attempt_number"],
-                                   "provider_calls": item["provider_calls"]})
-            for metric, actual, limit in (
+                violations.append(
+                    {
+                        "code": "zero_active_time_with_provider_call",
+                        "run_id": run_id,
+                        "attempt_number": item["attempt_number"],
+                        "provider_calls": item["provider_calls"],
+                    }
+                )
+            attempt_limits = (
                 ("measured_tokens", item["measured_tokens"], TOKEN_CAP),
                 ("active_seconds", item["active_seconds"], ACTIVE_SECONDS_CAP),
                 ("tool_calls", item["tool_calls"], tool_cap),
-            ):
+            )
+            for metric, actual, limit in attempt_limits:
                 if actual > limit:
-                    violations.append({"code": f"{metric}_over_cap", "run_id": run_id,
-                                       "attempt_number": item["attempt_number"],
-                                       "actual": actual, "limit": limit})
+                    violations.append(
+                        {
+                            "code": f"{metric}_over_cap",
+                            "run_id": run_id,
+                            "attempt_number": item["attempt_number"],
+                            "actual": actual,
+                            "limit": limit,
+                        }
+                    )
+            if item["status"] == "truncated" and all(
+                actual < limit for _, actual, limit in attempt_limits
+            ):
+                violations.append(
+                    {
+                        "code": "truncation_without_exhausted_limit",
+                        "run_id": run_id,
+                        "attempt_number": item["attempt_number"],
+                        "actual": {
+                            metric: actual for metric, actual, _ in attempt_limits
+                        },
+                        "limits": {
+                            metric: limit for metric, _, limit in attempt_limits
+                        },
+                    }
+                )
         outcome = attempts[-1]["status"] if attempts else "missing"
         if outcome == "completed":
             completed += 1
