@@ -15,6 +15,7 @@ import os
 import signal
 import subprocess
 import sys
+import sysconfig
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -31,9 +32,22 @@ def main() -> None:
     bin_dir = Path(sys.executable).parent
     cli = bin_dir / "organon"
     mcp = bin_dir / "organon-mcp"
+    for entry_point in (cli, mcp):
+        shebang = entry_point.open("rb").readline().strip()
+        assert shebang.startswith(b"#!")
+        assert Path(os.fsdecode(shebang[2:])).resolve() == Path(sys.executable).resolve()
     smoke_env = {key: value for key, value in os.environ.items()
-                 if key not in {"ORGANON_APPROVERS_FILE", "ORGANON_LEDGER_ANCHORS_FILE"}}
+                 if not key.startswith("ORGANON_")
+                 and key not in {"PYTHONPATH", "PYTHONHOME", "PYTHONUSERBASE"}}
+    smoke_env["PYTHONNOUSERSITE"] = "1"
     smoke_env["ORGANON_ALLOW_FIXTURES"] = "1"
+    origin = subprocess.run(
+        [sys.executable, "-c", "import specorganon; print(specorganon.__file__)"],
+        cwd=bin_dir, env=smoke_env, text=True, capture_output=True, check=True,
+    )
+    assert Path(origin.stdout.strip()).resolve().is_relative_to(
+        Path(sysconfig.get_paths()["purelib"]).resolve()
+    ), "smoke must exercise the wheel installed in this interpreter"
     cli_commands_seen: set[str] = set()
     mcp_tools_seen: set[str] = set()
     parity_operations_seen: set[str] = set()
@@ -738,6 +752,7 @@ def main() -> None:
                         "mcp_tools_seen": sorted(mcp_tools_seen),
                         "mcp_tools_discovered": len(discovered_tools),
                         "mcp_tools_discovered_names": sorted(discovered_tools),
+                        "installed_package_from_site_packages": True,
                         "guarded_put": True,
                         "sigkill_mcp_resume": True, "sigkill_checkpoint_events": checkpoint,
                         "paired_cli_writers_preserved_items": True,

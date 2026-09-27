@@ -609,6 +609,9 @@ def test_synthetic_attestation_report_cannot_authorize_field_success(
     tmp_path, signer, monkeypatch,
 ):
     """A synthetic report denying field attribution cannot prove a field verdict."""
+    for key in ("PYTHONPATH", "PYTHONHOME", "PYTHONUSERBASE"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("PYTHONNOUSERSITE", "1")
     _, approval_registry = signer
     case, _ = _signed_field_case(tmp_path, signer)
     state = engine.get_state(case)
