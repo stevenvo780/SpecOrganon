@@ -44,3 +44,14 @@ uv run pytest -q tests/test_ratio_audit.py
 ```
 
 La auditoría rechaza una afirmación que cambie unidad, población o período frente al contrato fijado. Si un mismo operador reescribe contrato y pin, puede reetiquetar las mismas cifras; el JSON tampoco verifica por sí solo el Parquet o la pertenencia de cada fila. El [recálculo previo desde Parquet](../../experiments/development/citibike_march_source_recalculation_2026-09-27.json) documenta esa fuente histórica por separado. El contrato se formuló después de ver la muestra y el criterio 5 sigue **no demostrado**.
+
+## Impugnación de un denominador adversarial
+
+La [sonda D-084](../../scripts/probe_citibike_march_challenge.py) copia este ledger histórico y la semilla a un directorio temporal. Introduce una inferencia **sintética y falsa** que usa las 1.812.548 filas brutas como denominador de servicio, la impugna manualmente frente a las 1.809.036 elegibles y ejecuta por la CLI instalada el bloqueo, la síntesis revisada, la reparación de descendientes, la resolución y la reapertura tras una nueva versión de `e_eligible`. El [recibo](../../experiments/development/citibike_march_challenge_2026-09-27.json) conserva los estados y hashes de esa corrida de desarrollo, y su [ledger derivado](../../experiments/development/citibike_march_challenge_case/README.md) permite inspeccionar los eventos. Una nueva ejecución tendrá otras marcas de tiempo y hashes de ledger, pero debe conservar las propiedades verificadas.
+
+```sh
+uv run python scripts/probe_citibike_march_challenge.py
+uv run --locked --extra dev python -m pytest -q tests/test_probe_citibike_march_challenge.py
+```
+
+El error semántico se detecta mediante un cotejo explícito del JSON publicado y una impugnación manual: el motor no interpreta el texto por sí solo. Las etiquetas de autor, revisor y challenger proceden de un mismo script y solo ensayan separación de actores de la API. Esta sonda no reprocesa el Parquet, no modifica los casos versionados, no aprueba `n_scope` ni convierte el caso expuesto en reserva o intervención evaluada. Criterio 5: **no demostrado**.
