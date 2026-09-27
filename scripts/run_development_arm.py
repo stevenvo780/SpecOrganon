@@ -20,6 +20,7 @@ import signal
 import stat
 import subprocess
 import sys
+import threading
 import time
 import uuid
 from datetime import datetime, timezone
@@ -84,6 +85,26 @@ _T_TRACE_RESUMED_EXEC = re.compile(r"^\s*(\d+)\s+<\.\.\. execve resumed>\)\s+= (
 
 class RunError(ValueError):
     """A run cannot be prepared without violating its recorded contract."""
+
+
+MAX_ACTIVE_BUDGET_SECONDS = 5400
+T_SETUP_STEPS = ("toolkit_venv", "toolkit_install", "toolkit_init", "toolkit_status")
+
+
+class RunTimeBudgetExhausted(RunError):
+    """The local invocation cannot start another stage within its active deadline."""
+
+    def __init__(self, stage: str, *, toolkit: dict[str, Any] | None = None,
+                 t_ledger: dict[str, Any] | None = None) -> None:
+        super().__init__(f"local active run time budget exhausted at {stage}")
+        self.stage = stage
+        self.toolkit = toolkit
+        self.t_ledger = t_ledger
+
+
+def _require_active_time(deadline: float, stage: str) -> None:
+    if time.monotonic() >= deadline:
+        raise RunTimeBudgetExhausted(stage)
 
 
 def _utc_now() -> str:
@@ -375,15 +396,29 @@ def _private_run_dir(output_root: Path) -> Path:
 
 
 def _capture(
-    argv: list[str], *, cwd: Path, timeout_seconds: int, stdout_path: Path,
+    argv: list[str], *, cwd: Path, timeout_seconds: int | float, stdout_path: Path,
     stderr_path: Path, stdin_text: str | None = None, env: dict[str, str] | None = None,
+    active_deadline: float | None = None, stage: str = "capture",
 ) -> dict[str, Any]:
     """Save raw streams and terminate the entire child group at a wall deadline."""
+    remaining = (active_deadline - time.monotonic()
+                 if active_deadline is not None else None)
+    if remaining is not None and remaining <= 0:
+        raise RunTimeBudgetExhausted(stage)
+    effective_timeout = min(timeout_seconds, remaining) if remaining is not None else timeout_seconds
+    timeout_cap = ("run_budget" if remaining is not None and remaining <= timeout_seconds
+                   else "stage")
     started = _utc_now()
     before = time.monotonic()
     result: dict[str, Any] = {"started_at_utc": started, "exit_code": None,
-                              "timed_out": False, "launch_error": None}
+                              "timed_out": False, "launch_error": None,
+                              "timeout_seconds": effective_timeout,
+                              "timeout_cap": timeout_cap}
     with stdout_path.open("xb") as stdout, stderr_path.open("xb") as stderr:
+        if active_deadline is not None and time.monotonic() >= active_deadline:
+            stdout_path.unlink()
+            stderr_path.unlink()
+            raise RunTimeBudgetExhausted(stage)
         try:
             process = subprocess.Popen(
                 argv, cwd=cwd, stdin=subprocess.PIPE if stdin_text is not None else subprocess.DEVNULL,
@@ -392,17 +427,55 @@ def _capture(
         except OSError as exc:
             result["launch_error"] = f"{type(exc).__name__}: {exc}"
         else:
+            if active_deadline is not None:
+                wait_remaining = max(0.0, active_deadline - time.monotonic())
+                result["timeout_seconds"] = min(timeout_seconds, wait_remaining)
+                result["timeout_cap"] = (
+                    "run_budget" if wait_remaining <= timeout_seconds else "stage"
+                )
             try:
                 process.communicate(input=stdin_text.encode("utf-8") if stdin_text is not None else None,
-                                    timeout=timeout_seconds)
+                                    timeout=result["timeout_seconds"])
             except subprocess.TimeoutExpired:
                 result["timed_out"] = True
-                os.killpg(process.pid, signal.SIGTERM)
                 try:
-                    process.communicate(timeout=3)
-                except subprocess.TimeoutExpired:
-                    os.killpg(process.pid, signal.SIGKILL)
-                    process.communicate()
+                    os.killpg(process.pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
+                grace = (min(3.0, max(0.0, active_deadline - time.monotonic()))
+                         if active_deadline is not None else 3.0)
+                grace_end = time.monotonic() + grace
+                # WNOWAIT observes exit without reaping the group leader. Its
+                # PID keeps the process-group ID reserved while descendants
+                # that ignored SIGTERM are signalled below.
+                group_id_reserved = True
+                while True:
+                    try:
+                        child_exit = os.waitid(
+                            os.P_PID, process.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+                    except InterruptedError:
+                        continue
+                    except ChildProcessError:
+                        group_id_reserved = False
+                        break
+                    if child_exit is not None:
+                        break
+                    grace_remaining = grace_end - time.monotonic()
+                    if grace_remaining <= 0:
+                        break
+                    time.sleep(min(0.01, grace_remaining))
+                if group_id_reserved:
+                    try:
+                        os.killpg(process.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                try:
+                    process.wait(timeout=1.0)
+                except subprocess.TimeoutExpired as exc:
+                    # A task stuck in uninterruptible kernel sleep cannot be
+                    # synchronously reaped within a finite wall deadline.
+                    threading.Thread(target=process.wait, daemon=True).start()
+                    raise RunError("child group did not reap within one second of SIGKILL") from exc
             result["exit_code"] = process.returncode
     result["ended_at_utc"] = _utc_now()
     result["wall_seconds"] = round(time.monotonic() - before, 3)
@@ -1138,7 +1211,10 @@ def _prepare_packet(work: Path) -> dict[str, dict[str, Any]]:
 
 def _setup_toolkit(work: Path, run_dir: Path, wheel: Path | None, timeout_seconds: int,
                    env: dict[str, str], *, expected_wheel_sha256: str | None = None,
+                   active_deadline: float | None = None,
                    ) -> dict[str, Any]:
+    if active_deadline is not None:
+        _require_active_time(active_deadline, "toolkit_copy")
     if wheel is None or not _regular_file(wheel) or wheel.suffix != ".whl":
         raise RunError("T requires --toolkit-wheel pointing to a regular .whl file")
     uv = shutil.which("uv")
@@ -1159,10 +1235,18 @@ def _setup_toolkit(work: Path, run_dir: Path, wheel: Path | None, timeout_second
     ]
     result: dict[str, Any] = {"wheel": copied_record, "steps": {}}
     for name, argv in commands:
-        step = _capture(argv, cwd=work, timeout_seconds=timeout_seconds,
-                        stdout_path=run_dir / f"{name}.stdout",
-                        stderr_path=run_dir / f"{name}.stderr", env=env)
+        try:
+            step = _capture(argv, cwd=work, timeout_seconds=timeout_seconds,
+                            stdout_path=run_dir / f"{name}.stdout",
+                            stderr_path=run_dir / f"{name}.stderr", env=env,
+                            active_deadline=active_deadline, stage=name)
+        except RunTimeBudgetExhausted as exc:
+            raise RunTimeBudgetExhausted(exc.stage, toolkit=result) from exc
         result["steps"][name] = step
+        if (step["timed_out"] and step["timeout_cap"] == "run_budget") or (
+            active_deadline is not None and time.monotonic() >= active_deadline
+        ):
+            raise RunTimeBudgetExhausted(name, toolkit=result)
         if step["timed_out"] or step["exit_code"] != 0:
             raise RunError(f"T toolkit {name} failed; see private raw streams")
     cli = venv / "bin" / "organon"
@@ -1175,10 +1259,18 @@ def _setup_toolkit(work: Path, run_dir: Path, wheel: Path | None, timeout_second
                           "--approval-policy", "signed"]),
         ("toolkit_status", [str(cli), "status", str(probe)]),
     ):
-        step = _capture(argv, cwd=work, timeout_seconds=timeout_seconds,
-                        stdout_path=run_dir / f"{name}.stdout",
-                        stderr_path=run_dir / f"{name}.stderr", env=env)
+        try:
+            step = _capture(argv, cwd=work, timeout_seconds=timeout_seconds,
+                            stdout_path=run_dir / f"{name}.stdout",
+                            stderr_path=run_dir / f"{name}.stderr", env=env,
+                            active_deadline=active_deadline, stage=name)
+        except RunTimeBudgetExhausted as exc:
+            raise RunTimeBudgetExhausted(exc.stage, toolkit=result) from exc
         result["steps"][name] = step
+        if (step["timed_out"] and step["timeout_cap"] == "run_budget") or (
+            active_deadline is not None and time.monotonic() >= active_deadline
+        ):
+            raise RunTimeBudgetExhausted(name, toolkit=result)
         if step["timed_out"] or step["exit_code"] != 0:
             raise RunError(f"T toolkit {name} failed; see private raw streams")
     try:
@@ -1196,7 +1288,8 @@ def _setup_toolkit(work: Path, run_dir: Path, wheel: Path | None, timeout_second
 
 
 def _inspect_t_ledger(work: Path, run_dir: Path, timeout_seconds: int,
-                      env: dict[str, str], expected_toolkit_fingerprint: str) -> dict[str, Any]:
+                      env: dict[str, str], expected_toolkit_fingerprint: str,
+                      *, active_deadline: float | None = None) -> dict[str, Any]:
     case = work / "case"
     ledger = case / "organon.json"
     result: dict[str, Any] = {"present": False, "signed_policy": False,
@@ -1225,10 +1318,14 @@ def _inspect_t_ledger(work: Path, run_dir: Path, timeout_seconds: int,
     if type(events) is list:
         result["event_count"] = len(events)
     cli = work / ".venv" / "bin" / "organon"
-    status = _capture([str(cli), "status", str(case)], cwd=work,
-                      timeout_seconds=timeout_seconds,
-                      stdout_path=run_dir / "toolkit_after_status.stdout",
-                      stderr_path=run_dir / "toolkit_after_status.stderr", env=env)
+    try:
+        status = _capture([str(cli), "status", str(case)], cwd=work,
+                          timeout_seconds=timeout_seconds,
+                          stdout_path=run_dir / "toolkit_after_status.stdout",
+                          stderr_path=run_dir / "toolkit_after_status.stderr", env=env,
+                          active_deadline=active_deadline, stage="toolkit_after_status")
+    except RunTimeBudgetExhausted as exc:
+        raise RunTimeBudgetExhausted(exc.stage, t_ledger=result) from exc
     result["independent_cli_status"] = status
     if status["exit_code"] == 0 and not status["timed_out"]:
         try:
@@ -1242,13 +1339,17 @@ def _inspect_t_ledger(work: Path, run_dir: Path, timeout_seconds: int,
                                        and observed["project"].get("approval_policy") == "signed")
     else:
         result["signed_policy"] = False
+    if (status["timed_out"] and status["timeout_cap"] == "run_budget") or (
+        active_deadline is not None and time.monotonic() >= active_deadline
+    ):
+        raise RunTimeBudgetExhausted("toolkit_after_status", t_ledger=result)
     return result
 
 
 def _validate_arm_request(
     arm: str, provider: str, model: str, effort: str, timeout_seconds: int,
     replay_timeout_seconds: int, setup_timeout_seconds: int,
-    agy_no_command_tool: bool,
+    agy_no_command_tool: bool, active_budget_seconds: int = MAX_ACTIVE_BUDGET_SECONDS,
 ) -> None:
     if arm not in {"N", "S", "T"} or provider not in {"codex", "agy", "opencode"}:
         raise RunError("arm must be N/S/T and provider must be codex/agy/opencode")
@@ -1268,6 +1369,9 @@ def _validate_arm_request(
     if any(type(value) is not int or value < 1 for value in
            (timeout_seconds, replay_timeout_seconds, setup_timeout_seconds)):
         raise RunError("all timeout values must be positive integer seconds")
+    if (type(active_budget_seconds) is not int or active_budget_seconds < 1
+            or active_budget_seconds > MAX_ACTIVE_BUDGET_SECONDS):
+        raise RunError("active_budget_seconds must be an integer from 1 to 5400")
 
 
 def _provider_invocation(
@@ -1528,6 +1632,7 @@ def prepare_development_arm(
     *, arm: str, provider: str, model: str, effort: str, output_root: Path,
     timeout_seconds: int = 600, replay_timeout_seconds: int = 90,
     setup_timeout_seconds: int = 180, toolkit_wheel: Path | None = None,
+    active_budget_seconds: int = MAX_ACTIVE_BUDGET_SECONDS,
     agy_no_command_tool: bool = False,
     activation_dossier: Path | None = None, activation_dossier_sha256: str | None = None,
     family_slot: str | None = None,
@@ -1535,7 +1640,7 @@ def prepare_development_arm(
     """Record public inputs and a planned CLI invocation without executing it."""
     _validate_arm_request(arm, provider, model, effort, timeout_seconds,
                           replay_timeout_seconds, setup_timeout_seconds,
-                          agy_no_command_tool)
+                          agy_no_command_tool, active_budget_seconds)
     if arm == "T" and (toolkit_wheel is None or not _regular_file(toolkit_wheel)
                        or toolkit_wheel.suffix != ".whl"):
         raise RunError("T requires --toolkit-wheel pointing to a regular .whl file")
@@ -1615,6 +1720,7 @@ def prepare_development_arm(
             "timeout_seconds": timeout_seconds,
             "replay_timeout_seconds": replay_timeout_seconds,
             "setup_timeout_seconds": setup_timeout_seconds,
+            "active_budget_seconds": active_budget_seconds,
             "packet": packet, "prompt": prompt_hashes, "prompt_file": prompt_record,
             "wheel": wheel_record,
             "provider_command": argv[0], "provider_argv": argv,
@@ -1650,15 +1756,19 @@ def run_development_arm(
     *, arm: str, provider: str, model: str, effort: str, output_root: Path,
     timeout_seconds: int = 600, replay_timeout_seconds: int = 90,
     setup_timeout_seconds: int = 180, toolkit_wheel: Path | None = None,
+    active_budget_seconds: int = MAX_ACTIVE_BUDGET_SECONDS,
     agy_no_command_tool: bool = False,
     pilot_triplet_plan: Path | None = None, pilot_triplet_plan_sha256: str | None = None,
     activation_dossier: Path | None = None, activation_dossier_sha256: str | None = None,
     family_slot: str | None = None,
 ) -> tuple[Path, dict[str, Any]]:
     """Execute one exposed arm; a pilot plan binds requested local configuration only."""
+    started_monotonic = time.monotonic()
+    budget_started_at_utc = _utc_now()
     _validate_arm_request(arm, provider, model, effort, timeout_seconds,
                           replay_timeout_seconds, setup_timeout_seconds,
-                          agy_no_command_tool)
+                          agy_no_command_tool, active_budget_seconds)
+    active_deadline = started_monotonic + active_budget_seconds
     pilot_options = (pilot_triplet_plan, pilot_triplet_plan_sha256, activation_dossier,
                      activation_dossier_sha256, family_slot)
     if any(option is not None for option in pilot_options) and not all(
@@ -1685,6 +1795,7 @@ def run_development_arm(
     tracer = _system_strace() if arm == "T" else None
     if arm == "T" and tracer is None:
         raise RunError("T requires an available strace executable for local tool observation")
+    _require_active_time(active_deadline, "prelaunch")
     output_root = output_root.expanduser().resolve()
     if toolkit_wheel is not None:
         toolkit_wheel = toolkit_wheel.expanduser().resolve()
@@ -1720,6 +1831,14 @@ def run_development_arm(
             "requested_effort": effort, "packet": packet, "prompt": prompt_hashes,
             "tool_policy": "no_command_tool" if agy_no_command_tool else "default",
             "timeout_seconds": timeout_seconds, "replay_timeout_seconds": replay_timeout_seconds,
+            "setup_timeout_seconds": setup_timeout_seconds,
+            "active_budget_seconds": active_budget_seconds,
+            "run_time_budget": {
+                "scope": "single_local_invocation_no_agent_or_retry_accounting",
+                "started_at_utc": budget_started_at_utc,
+                "elapsed_seconds": None,
+                "exhausted_stage": None,
+            },
             "packet_after": None, "packet_unchanged": None,
             "toolkit": None, "cli": None, "cli_usage": None,
             "artifacts": {}, "analysis_replay": None, "t_ledger": None,
@@ -1731,6 +1850,7 @@ def run_development_arm(
             "limitations": ["development case and prompts are exposed; no sealed assignment",
                             "local CLI telemetry is not an authenticated provider receipt",
                             "no OS file-access isolation or global tool/token budget is proven",
+                            "active run time budget is a local invocation limit; it does not prove equal N/S/T budgets, account for human pauses or coordinate agents and retries",
                             "generated analysis replay requires a later hash-bound opt-in; default replay is not filesystem/network isolated"],
             "provider_request_id": None, "price": None, "cost": None,
         }
@@ -1756,6 +1876,7 @@ def run_development_arm(
             summary["limitations"].append(
                 "OpenCode JSONL does not authenticate the executed model, provider usage, cost, or child-agent usage; effort is uncontrolled")
         try:
+            _require_active_time(active_deadline, "prelaunch")
             # The prompt hashes describe the bytes actually delivered to the model.
             # Copies must match them before any CLI or toolkit preparation starts.
             _copy_prompt_inputs(arm, work, prompt_hashes)
@@ -1781,6 +1902,7 @@ def run_development_arm(
             if arm == "T":
                 summary["toolkit"] = _setup_toolkit(work, run_dir, toolkit_wheel,
                                                     setup_timeout_seconds, env,
+                                                    active_deadline=active_deadline,
                                                     expected_wheel_sha256=(
                                                         pilot_preflight[2]["dist/specorganon-0.1.0-py3-none-any.whl"]
                                                         if pilot_preflight is not None else None
@@ -1808,7 +1930,8 @@ def run_development_arm(
                                 "-o", str(run_dir / "t_execve.log"), "--", *argv]
             result = _capture(capture_argv, cwd=work, timeout_seconds=timeout_seconds,
                               stdout_path=run_dir / "cli.stdout.jsonl",
-                              stderr_path=run_dir / "cli.stderr", stdin_text=stdin_text, env=env)
+                              stderr_path=run_dir / "cli.stderr", stdin_text=stdin_text, env=env,
+                              active_deadline=active_deadline, stage="cli")
             summary["cli"] = result
             if arm == "T":
                 trace_path = run_dir / "t_execve.log"
@@ -1827,10 +1950,14 @@ def run_development_arm(
             summary["packet_unchanged"] = summary["packet_after"] == packet
             for name in ("analysis.py", "report.md"):
                 summary["artifacts"][name] = _file_record(work / name)
+            if result["timed_out"] and result["timeout_cap"] == "run_budget":
+                raise RunTimeBudgetExhausted("cli")
+            _require_active_time(active_deadline, "post_cli")
             if arm == "T":
                 summary["t_ledger"] = _inspect_t_ledger(
                     work, run_dir, setup_timeout_seconds, env,
-                    summary["toolkit"]["toolkit_files_fingerprint_sha256"])
+                    summary["toolkit"]["toolkit_files_fingerprint_sha256"],
+                    active_deadline=active_deadline)
             if result["timed_out"]:
                 summary["execution_status"] = "cli_timeout"
             elif result["exit_code"] != 0:
@@ -1863,10 +1990,24 @@ def run_development_arm(
                 )
             if summary["cli_usage"]["observed_failed_codex_items_partial"]:
                 summary["limitations"].append("local Codex stream contains failed items")
+        except RunTimeBudgetExhausted as exc:
+            if exc.toolkit is not None:
+                summary["toolkit"] = exc.toolkit
+            if exc.t_ledger is not None:
+                summary["t_ledger"] = exc.t_ledger
+            summary["execution_status"] = "run_time_budget_exhausted"
+            summary["run_time_budget"]["exhausted_stage"] = exc.stage
         except RunError as exc:
             summary["execution_status"] = "preflight_failure"
             summary["preflight_error"] = str(exc)
         finally:
+            if (summary["execution_status"] != "preflight_failure"
+                    and time.monotonic() >= active_deadline):
+                summary["execution_status"] = "run_time_budget_exhausted"
+                if summary["run_time_budget"]["exhausted_stage"] is None:
+                    summary["run_time_budget"]["exhausted_stage"] = "finalize"
+            summary["run_time_budget"]["elapsed_seconds"] = round(
+                time.monotonic() - started_monotonic, 3)
             _write_json(run_dir / "run.json", summary)
         return run_dir, summary
     finally:
@@ -2098,6 +2239,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--timeout-seconds", type=int, default=600)
     parser.add_argument("--replay-timeout-seconds", type=int, default=90)
     parser.add_argument("--setup-timeout-seconds", type=int, default=180)
+    parser.add_argument("--active-budget-seconds", type=int, default=MAX_ACTIVE_BUDGET_SECONDS,
+                        help="local accumulated wall time for one live invocation, at most 5400 seconds")
     parser.add_argument("--toolkit-wheel", type=Path,
                         help="required for T; hashed only with --prepare-only, installed for a run")
     parser.add_argument("--agy-no-command-tool", action="store_true",
@@ -2110,6 +2253,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="enforce local Linux Landlock/seccomp/rlimit limits on replay")
     args = parser.parse_args(argv)
     try:
+        if not 1 <= args.active_budget_seconds <= MAX_ACTIVE_BUDGET_SECONDS:
+            raise RunError("active_budget_seconds must be an integer from 1 to 5400")
         dossier_options = (args.activation_dossier, args.activation_dossier_sha256, args.family_slot)
         plan_options = (args.pilot_triplet_plan, args.pilot_triplet_plan_sha256)
         if args.prepare_only and any(option is not None for option in plan_options):
@@ -2157,6 +2302,7 @@ def main(argv: list[str] | None = None) -> int:
                 output_root=args.output_root, timeout_seconds=args.timeout_seconds,
                 replay_timeout_seconds=args.replay_timeout_seconds,
                 setup_timeout_seconds=args.setup_timeout_seconds,
+                active_budget_seconds=args.active_budget_seconds,
                 toolkit_wheel=args.toolkit_wheel,
                 agy_no_command_tool=args.agy_no_command_tool,
                 **dossier_kwargs,

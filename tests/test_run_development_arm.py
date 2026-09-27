@@ -8,6 +8,7 @@ import os
 import stat
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -329,6 +330,7 @@ def activation_dossier_fixture(
 def fake_t_setup(
     work: Path, run_dir: Path, wheel: Path | None, _timeout_seconds: int,
     _env: dict[str, str], *, expected_wheel_sha256: str | None = None,
+    active_deadline: float | None = None,
 ) -> dict[str, object]:
     """Provide verifiable local T fixture files, without installing a wheel."""
     assert wheel is not None
@@ -350,6 +352,8 @@ def fake_t_setup(
     (package / "__init__.py").write_text("VERSION = 1\n", encoding="utf-8")
     steps: dict[str, dict[str, object]] = {}
     for name in ("toolkit_venv", "toolkit_install", "toolkit_init", "toolkit_status"):
+        remaining = (max(0.0, active_deadline - time.monotonic())
+                     if active_deadline is not None else None)
         for suffix in ("stdout", "stderr"):
             content = ('{"project":{"approval_policy":"signed"}}\n'
                        if name == "toolkit_status" and suffix == "stdout"
@@ -360,6 +364,11 @@ def fake_t_setup(
             "stderr": runner._file_record(run_dir / f"{name}.stderr"),
             "exit_code": 0,
             "timed_out": False,
+            "wall_seconds": 0.0,
+            "timeout_seconds": (min(_timeout_seconds, remaining)
+                                if remaining is not None else _timeout_seconds),
+            "timeout_cap": ("run_budget" if remaining is not None
+                            and remaining <= _timeout_seconds else "stage"),
         }
     return {
         "wheel": runner._file_record(copied),
@@ -1096,10 +1105,12 @@ def test_pilot_t_rechecks_copied_wheel_after_setup_before_provider_cli(
     def mutate_after_fake_setup(
         work: Path, run_dir: Path, source: Path | None, timeout_seconds: int,
         env: dict[str, str], *, expected_wheel_sha256: str | None = None,
+        active_deadline: float | None = None,
     ) -> dict[str, object]:
         result = fake_t_setup(
             work, run_dir, source, timeout_seconds, env,
             expected_wheel_sha256=expected_wheel_sha256,
+            active_deadline=active_deadline,
         )
         (work / wheel.name).write_bytes(b"changed after setup\n")
         return result
@@ -2081,8 +2092,333 @@ def test_wall_timeout_terminates_cli_and_retains_partial_trace(
     )
     assert summary["execution_status"] == "cli_timeout"
     assert summary["cli"]["timed_out"] is True
+    assert summary["cli"]["timeout_cap"] == "stage"
     assert (run_dir / "cli.stdout.jsonl").exists()
     assert summary["controlled_comparison_eligible"] is False
+
+
+@pytest.mark.parametrize("invalid", [0, 5401, True])
+def test_active_budget_rejects_values_outside_one_local_invocation(
+    tmp_path: Path, invalid: int,
+) -> None:
+    with pytest.raises(RunError, match="active_budget_seconds"):
+        run_development_arm(
+            arm="N", provider="codex", model="test-model", effort="medium",
+            output_root=tmp_path / "runs", active_budget_seconds=invalid,
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+def test_cli_rejects_active_budget_above_5400_before_provider_lookup(tmp_path: Path) -> None:
+    result = subprocess.run(
+        [sys.executable, str(SCRIPTS / "run_development_arm.py"),
+         "--arm", "N", "--provider", "codex", "--model", "test-model",
+         "--effort", "medium", "--output-root", str(tmp_path / "runs"),
+         "--active-budget-seconds", "5401"],
+        capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 2
+    assert "active_budget_seconds must be an integer from 1 to 5400" in result.stderr
+    assert not (tmp_path / "runs").exists()
+
+
+def test_active_budget_exhausts_during_t_setup_and_retains_partial_streams(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wheel = tmp_path / "fake-0.1-py3-none-any.whl"
+    wheel.write_bytes(b"offline fake wheel\n")
+    real_capture = runner._capture
+    launched: list[str] = []
+
+    def setup_capture(argv: list[str], **kwargs: object) -> dict[str, object]:
+        stage = kwargs["stage"]
+        assert isinstance(stage, str) and stage in runner.T_SETUP_STEPS
+        launched.append(stage)
+        code = ("print('setup partial', flush=True); import time; "
+                + ("time.sleep(3)" if stage == "toolkit_install"
+                   else "time.sleep(0.05)"))
+        return real_capture([sys.executable, "-u", "-c", code], **kwargs)
+
+    monkeypatch.setattr(runner, "_capture", setup_capture)
+    run_dir, summary = run_development_arm(
+        arm="T", provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs",
+        toolkit_wheel=wheel, timeout_seconds=10, setup_timeout_seconds=10,
+        active_budget_seconds=1,
+    )
+    assert launched == ["toolkit_venv", "toolkit_install"]
+    assert summary["execution_status"] == "run_time_budget_exhausted"
+    assert summary["run_time_budget"]["exhausted_stage"] == "toolkit_install"
+    assert summary["toolkit"]["steps"]["toolkit_install"]["timed_out"] is True
+    assert summary["toolkit"]["steps"]["toolkit_install"]["timeout_cap"] == "run_budget"
+    assert summary["toolkit"]["steps"]["toolkit_install"]["stdout"] == runner._file_record(
+        run_dir / "toolkit_install.stdout")
+    assert "setup partial" in (run_dir / "toolkit_install.stdout").read_text()
+    assert summary["cli"] is None
+    assert not (run_dir / "toolkit_init.stdout").exists()
+    assert not (run_dir / "cli.stdout.jsonl").exists()
+    assert summary["controlled_comparison_eligible"] is False
+    observer = SCRIPTS / "observe_development_run.py"
+    observed = subprocess.run([sys.executable, str(observer), str(run_dir)],
+                              capture_output=True, text=True, check=False)
+    assert observed.returncode == 0, observed.stderr
+    observed_json = json.loads(observed.stdout)
+    assert observed_json["observation_state"] == "partial"
+    assert observed_json["verified_streams"]["toolkit_install.stdout"] == (
+        summary["toolkit"]["steps"]["toolkit_install"]["stdout"])
+    assert observed_json["cap_status"] == "unknown"
+    forged_elapsed = json.loads(json.dumps(summary))
+    forged_elapsed["run_time_budget"]["elapsed_seconds"] = (
+        summary["toolkit"]["steps"]["toolkit_install"]["wall_seconds"] + 0.01)
+    runner._write_json(run_dir / "run.json", forged_elapsed)
+    too_short = subprocess.run([sys.executable, str(observer), str(run_dir)],
+                               capture_output=True, text=True, check=False)
+    assert too_short.returncode == 2
+    assert "shorter than verified capture wall time" in too_short.stderr
+    runner._write_json(run_dir / "run.json", summary)
+    (run_dir / "toolkit_install.stdout").write_text("changed setup stream\n")
+    changed = subprocess.run([sys.executable, str(observer), str(run_dir)],
+                             capture_output=True, text=True, check=False)
+    assert changed.returncode == 2
+    assert "differs from its recorded bytes" in changed.stderr
+
+
+def test_active_budget_exhausts_in_provider_cli_before_stage_timeout(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", "sleep")
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="low",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        active_budget_seconds=1,
+    )
+    assert summary["execution_status"] == "run_time_budget_exhausted"
+    assert summary["run_time_budget"]["exhausted_stage"] == "cli"
+    assert summary["cli"]["timed_out"] is True
+    assert summary["cli"]["timeout_cap"] == "run_budget"
+    assert summary["cli"]["timeout_seconds"] <= 1
+    assert summary["cli"]["stdout"] == runner._file_record(run_dir / "cli.stdout.jsonl")
+    assert summary["controlled_comparison_eligible"] is False
+
+
+def test_active_budget_after_fourth_t_setup_capture_is_observable(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wheel = tmp_path / "fake-0.1-py3-none-any.whl"
+    wheel.write_bytes(b"offline fake wheel\n")
+    real_capture = runner._capture
+
+    def finish_setup_at_deadline(argv: list[str], **kwargs: object) -> dict[str, object]:
+        stage = kwargs["stage"]
+        assert isinstance(stage, str) and stage in runner.T_SETUP_STEPS
+        code = ("print('{\"project\":{\"approval_policy\":\"signed\"}}')"
+                if stage == "toolkit_status" else "print('setup step')")
+        result = real_capture([sys.executable, "-u", "-c", code], **kwargs)
+        if stage == "toolkit_install":
+            # The runner's work directory is the capture cwd.
+            work = kwargs["cwd"]
+            assert isinstance(work, Path)
+            executable = work / ".venv/bin/organon"
+            executable.parent.mkdir(parents=True, exist_ok=True)
+            executable.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+            executable.chmod(0o755)
+        if stage == "toolkit_status":
+            time.sleep(1.1)
+        return result
+
+    monkeypatch.setattr(runner, "_capture", finish_setup_at_deadline)
+    run_dir, summary = run_development_arm(
+        arm="T", provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs",
+        toolkit_wheel=wheel, timeout_seconds=10, setup_timeout_seconds=10,
+        active_budget_seconds=1,
+    )
+    assert summary["execution_status"] == "run_time_budget_exhausted"
+    assert summary["run_time_budget"]["exhausted_stage"] == "toolkit_status"
+    assert set(summary["toolkit"]["steps"]) == set(runner.T_SETUP_STEPS)
+    assert "signed_policy_verified_in_local_probe" not in summary["toolkit"]
+    observer = SCRIPTS / "observe_development_run.py"
+    observed = subprocess.run([sys.executable, str(observer), str(run_dir)],
+                              capture_output=True, text=True, check=False)
+    assert observed.returncode == 0, observed.stderr
+    assert json.loads(observed.stdout)["observation_state"] == "partial"
+
+
+def test_active_budget_exhausts_before_t_status_without_launching_it(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wheel = tmp_path / "fake-0.1-py3-none-any.whl"
+    wheel.write_bytes(b"offline fake wheel\n")
+    monkeypatch.setattr(runner, "_setup_toolkit", fake_t_setup)
+    real_capture = runner._capture
+
+    def consume_after_cli(argv: list[str], **kwargs: object) -> dict[str, object]:
+        result = real_capture(argv, **kwargs)
+        if kwargs.get("stage") == "cli":
+            time.sleep(1.1)
+        return result
+
+    def forbidden_status(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("T status launched after active budget was exhausted")
+
+    monkeypatch.setattr(runner, "_capture", consume_after_cli)
+    monkeypatch.setattr(runner, "_inspect_t_ledger", forbidden_status)
+    run_dir, summary = run_development_arm(
+        arm="T", provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs",
+        toolkit_wheel=wheel, timeout_seconds=10, active_budget_seconds=1,
+    )
+    assert summary["execution_status"] == "run_time_budget_exhausted"
+    assert summary["run_time_budget"]["exhausted_stage"] == "post_cli"
+    assert summary["cli"]["exit_code"] == 0
+    assert summary["t_ledger"] is None
+    assert not (run_dir / "toolkit_after_status.stdout").exists()
+    observer = SCRIPTS / "observe_development_run.py"
+    observed = subprocess.run([sys.executable, str(observer), str(run_dir)],
+                              capture_output=True, text=True, check=False)
+    assert observed.returncode == 0, observed.stderr
+    assert json.loads(observed.stdout)["execution_status"] == "run_time_budget_exhausted"
+    summary["execution_status"] = "artifacts_ready_for_inspection"
+    summary["run_time_budget"]["exhausted_stage"] = None
+    summary["run_time_budget"]["elapsed_seconds"] = 0.1
+    runner._write_json(run_dir / "run.json", summary)
+    forged = subprocess.run([sys.executable, str(observer), str(run_dir)],
+                            capture_output=True, text=True, check=False)
+    assert forged.returncode == 2
+
+
+def test_active_budget_is_shared_with_t_status_capture(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wheel = tmp_path / "fake-0.1-py3-none-any.whl"
+    wheel.write_bytes(b"offline fake wheel\n")
+    monkeypatch.setattr(runner, "_setup_toolkit", fake_t_setup)
+    real_capture = runner._capture
+    launched: list[str] = []
+
+    def slow_status(argv: list[str], **kwargs: object) -> dict[str, object]:
+        stage = kwargs.get("stage")
+        if stage == "toolkit_after_status":
+            launched.append(stage)
+            argv = [sys.executable, "-u", "-c",
+                    "print('partial status', flush=True); import time; time.sleep(3)"]
+        return real_capture(argv, **kwargs)
+
+    monkeypatch.setattr(runner, "_capture", slow_status)
+    run_dir, summary = run_development_arm(
+        arm="T", provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs",
+        toolkit_wheel=wheel, timeout_seconds=10, setup_timeout_seconds=10,
+        active_budget_seconds=1,
+    )
+    assert launched == ["toolkit_after_status"]
+    assert summary["execution_status"] == "run_time_budget_exhausted"
+    assert summary["run_time_budget"]["exhausted_stage"] == "toolkit_after_status"
+    capture = summary["t_ledger"]["independent_cli_status"]
+    assert capture["timed_out"] is True
+    assert capture["timeout_cap"] == "run_budget"
+    assert capture["stdout"] == runner._file_record(run_dir / "toolkit_after_status.stdout")
+    observer = SCRIPTS / "observe_development_run.py"
+    observed = subprocess.run([sys.executable, str(observer), str(run_dir)],
+                              capture_output=True, text=True, check=False)
+    assert observed.returncode == 0, observed.stderr
+    assert json.loads(observed.stdout)["verified_streams"]["toolkit_after_status.stdout"] == (
+        capture["stdout"])
+    forged_elapsed = json.loads(json.dumps(summary))
+    forged_elapsed["run_time_budget"]["elapsed_seconds"] = (
+        capture["wall_seconds"] + 0.01)
+    runner._write_json(run_dir / "run.json", forged_elapsed)
+    too_short = subprocess.run([sys.executable, str(observer), str(run_dir)],
+                               capture_output=True, text=True, check=False)
+    assert too_short.returncode == 2
+    assert "shorter than verified capture wall time" in too_short.stderr
+
+
+def test_active_budget_expires_before_run_directory_without_provider_launch(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    real_which = runner.shutil.which
+
+    def delayed_which(name: str) -> str | None:
+        if name == "codex":
+            time.sleep(1.1)
+        return real_which(name)
+
+    monkeypatch.setattr(runner.shutil, "which", delayed_which)
+    with pytest.raises(RunError, match="active run time budget exhausted at prelaunch"):
+        run_development_arm(
+            arm="N", provider="codex", model="test-model", effort="medium",
+            output_root=tmp_path / "runs", active_budget_seconds=1,
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+def test_active_budget_sigkill_grace_does_not_add_three_seconds(
+    tmp_path: Path,
+) -> None:
+    result = runner._capture(
+        [sys.executable, "-u", "-c",
+         "import signal,time; signal.signal(signal.SIGTERM, signal.SIG_IGN); "
+         "print('partial', flush=True); time.sleep(5)"],
+        cwd=tmp_path, timeout_seconds=10,
+        stdout_path=tmp_path / "stdout", stderr_path=tmp_path / "stderr",
+        active_deadline=time.monotonic() + 1, stage="cli",
+    )
+    assert result["timed_out"] is True
+    assert result["timeout_cap"] == "run_budget"
+    assert result["wall_seconds"] < 2
+    assert (tmp_path / "stdout").read_text().strip() == "partial"
+
+
+def test_timeout_signals_descendants_before_reaping_group_leader(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    parent_code = (
+        "import subprocess,sys,time\n"
+        "from pathlib import Path\n"
+        "child = subprocess.Popen([sys.executable, '-u', '-c', "
+        "\"import signal,time; from pathlib import Path; "
+        "signal.signal(signal.SIGTERM, signal.SIG_IGN); "
+        "Path('child_ready').write_text('ready'); time.sleep(30)\"])\n"
+        "while not Path('child_ready').exists(): time.sleep(0.01)\n"
+        "Path('child.pid').write_text(str(child.pid))\n"
+        "print('parent ready', flush=True)\n"
+        "time.sleep(30)\n"
+    )
+    real_killpg = runner.os.killpg
+    signals: list[int] = []
+
+    def checked_killpg(group_id: int, sent_signal: int) -> None:
+        if sent_signal == runner.signal.SIGKILL:
+            try:
+                # WNOWAIT leaves the leader reserved. ECHILD would mean that
+                # the final group signal targets a reusable process-group ID.
+                os.waitid(os.P_PID, group_id,
+                          os.WEXITED | os.WNOHANG | os.WNOWAIT)
+            except ChildProcessError as exc:
+                raise AssertionError("SIGKILL was sent after leader reap") from exc
+        signals.append(sent_signal)
+        real_killpg(group_id, sent_signal)
+
+    monkeypatch.setattr(runner.os, "killpg", checked_killpg)
+    result = runner._capture(
+        [sys.executable, "-u", "-c", parent_code], cwd=tmp_path,
+        timeout_seconds=0.5, stdout_path=tmp_path / "stdout",
+        stderr_path=tmp_path / "stderr",
+    )
+    assert result["timed_out"] is True
+    assert signals == [runner.signal.SIGTERM, runner.signal.SIGKILL]
+    assert (tmp_path / "stdout").read_text().strip() == "parent ready"
+    child_pid = int((tmp_path / "child.pid").read_text())
+
+    def child_running() -> bool:
+        stat_file = Path(f"/proc/{child_pid}/stat")
+        return stat_file.exists() and stat_file.read_text().split()[2] not in {"Z", "X"}
+
+    stopped_by = time.monotonic() + 1
+    while child_running() and time.monotonic() < stopped_by:
+        time.sleep(0.01)
+    assert not child_running(), "SIGTERM-resistant descendant survived group SIGKILL"
 
 
 def test_mutated_public_packet_is_rejected_even_with_outputs(

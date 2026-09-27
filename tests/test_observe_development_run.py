@@ -175,6 +175,50 @@ def test_complete_observation_checks_bytes_and_keeps_claims_local(
     assert not (run_dir / "work" / "generated_code_was_run").exists()
 
 
+def test_observer_rejects_forged_success_after_local_cli_budget_expiry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    executable = fake_bin / "agy"
+    executable.write_text(FAKE_CLI, encoding="utf-8")
+    executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
+    monkeypatch.setenv("FAKE_SCENARIO", "sleep")
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        active_budget_seconds=1,
+    )
+    assert summary["execution_status"] == "run_time_budget_exhausted"
+    observed_result = _invoke(run_dir)
+    assert observed_result.returncode == 0, observed_result.stderr
+    observed = json.loads(observed_result.stdout)
+    assert observed["run_time_budget"]["origin"] == (
+        "local_monotonic_declaration_not_authenticated")
+    assert observed["run_time_budget"]["active_budget_seconds"] == 1
+    assert observed["execution_status"] == "run_time_budget_exhausted"
+    assert observed["verified_streams"]["cli.stdout.jsonl"] == summary["cli"]["stdout"]
+    assert observed["cap_status"] == "unknown"
+    assert observed["controlled_comparison_eligible"] is False
+
+    forged = json.loads(json.dumps(summary))
+    forged["execution_status"] = "artifacts_ready_for_inspection"
+    forged["run_time_budget"]["exhausted_stage"] = None
+    forged["run_time_budget"]["elapsed_seconds"] = 0.1
+    _write_summary(run_dir, forged)
+    rejection = _invoke(run_dir)
+    assert rejection.returncode == 2
+    assert "execution status contradicts the verified run records" in rejection.stderr
+
+    forged_elapsed = json.loads(json.dumps(summary))
+    forged_elapsed["run_time_budget"]["elapsed_seconds"] = 0.0
+    _write_summary(run_dir, forged_elapsed)
+    too_short = _invoke(run_dir)
+    assert too_short.returncode == 2
+    assert "shorter than verified capture wall time" in too_short.stderr
+
+
 def test_observer_rechecks_copied_pilot_plan_dossier_and_run_metadata(
     tmp_path: Path, pilot_activation_dossier: tuple[Path, Path, dict[str, object]],
     monkeypatch: pytest.MonkeyPatch,
