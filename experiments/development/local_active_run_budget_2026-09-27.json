@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "classification": "development_synthetic_local_active_run_budget",
+  "date_utc": "2026-09-27",
+  "baseline_head": "8b2cd0a",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "file_sha256": {
+    "scripts/run_development_arm.py": "0d9292e10e3668e5979b3da5200ed25e32e00f094e7d9f6c69e7487584a348a2",
+    "scripts/observe_development_run.py": "239cdc2ccd46a108731489822a484f8efc1344f26b5e95897e1aac139f3f5d2a",
+    "tests/test_run_development_arm.py": "b74d92cfd037e45680a40427c5778417f1ad764aab367ced6cc4c00e41187bbf",
+    "tests/test_observe_development_run.py": "e2448134ff61c938596ad352d6548d55ec2129139fb9c8472d312ebd14419792"
+  },
+  "gates": {
+    "focused_command": "pytest -q tests/test_run_development_arm.py tests/test_observe_development_run.py",
+    "focused_result": "253 passed",
+    "global_command": ".venv/bin/pytest -q",
+    "global_result": "1886 passed",
+    "ruff_command": "uv run ruff check .",
+    "ruff_result": "All checks passed!",
+    "git_diff_check": "passed"
+  },
+  "local_contract": {
+    "active_budget_seconds_range_inclusive": [1, 5400],
+    "default_active_budget_seconds": 5400,
+    "clock": "monotonic from run_development_arm invocation entry",
+    "shared_stages": [
+      "T offline toolkit setup",
+      "provider CLI subprocess",
+      "T post-CLI status subprocess"
+    ],
+    "terminal_status": "run_time_budget_exhausted",
+    "partial_captures_preserved": true,
+    "observer_rechecks_captured_streams_and_declared_time_sum": true
+  },
+  "synthetic_negative_controls": [
+    "A one-second budget expires during T setup, preserves completed setup streams and prevents the provider CLI launch.",
+    "A one-second budget expires during the provider CLI before its per-stage timeout and preserves the raw CLI stream.",
+    "Expiry before T post-CLI status prevents that subprocess from launching; expiry during status retains its partial capture.",
+    "A forged ready status contradicted by a captured CLI timeout is rejected by the observer.",
+    "A forged total elapsed shorter than the sum of verified setup, CLI and T status capture durations is rejected.",
+    "A timed-out child that responds to SIGTERM and one with a resistant descendant are signalled while the process-group leader is still reserved, before reaping."
+  ],
+  "independent_read_only_review": {
+    "initial_findings": [
+      "The observer accepted a ready status with total elapsed shorter than a captured CLI duration.",
+      "The timeout handler sent SIGKILL after the process-group leader had already been reaped."
+    ],
+    "recheck": "Both local inconsistencies were reproduced, corrected and rechecked with fake CLIs; the elapsed forgery now exits 2 and the second group signal precedes reaping.",
+    "remaining_counterexample": "A same-UID writer can rewrite unsealed run.json after post_cli expiry (or remove new fields to mimic a legacy run) and make the local observer report artifacts_ready_for_inspection; no independent capture proves the post-CLI delay. Coherent rewriting of wall_seconds can also evade the local sum."
+  },
+  "scope": {
+    "new_real_provider_calls": 0,
+    "human_wait_excluded_from_active_time": false,
+    "budget_equal_across_N_S_T_bound_by_pilot_plan_v1": false,
+    "agents_and_retries_share_budget": false,
+    "provider_usage_or_cost_authenticated": false,
+    "local_run_metadata_authenticated": false,
+    "global_protocol_budget_proven": false,
+    "cap_status": "unknown",
+    "controlled_comparison_eligible": false,
+    "criterion_4": "not_assessed",
+    "goal_criteria_demonstrated": 0
+  }
+}
