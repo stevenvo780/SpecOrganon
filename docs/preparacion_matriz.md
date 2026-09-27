@@ -1,6 +1,16 @@
 # Preparación ejecutable de la matriz N/SDD/toolkit
 
-Los scripts de esta página preparan y comprueban **candidatos de desarrollo** para el diseño de [protocolo_experimental.md](protocolo_experimental.md). No contienen casos reservados, no ejecutan modelos, no cobran, no sellan un registro y no reemplazan evaluadores independientes. El [panel de modelos](panel_modelos_preliminar.md) sigue sin congelar.
+Los comandos de preparación de esta página producen y comprueban **candidatos de desarrollo** para el diseño de [protocolo_experimental.md](protocolo_experimental.md). No contienen casos reservados, no ejecutan modelos, no cobran, no sellan un registro y no reemplazan evaluadores independientes. El runner D-E también tiene un modo normal que sí invoca proveedores; aquí se usa solo su opción `--prepare-only`. El [panel de modelos](panel_modelos_preliminar.md) sigue sin congelar.
+
+## Preparación offline de un brazo D-E expuesto
+
+El [runner de desarrollo](../scripts/run_development_arm.py) admite `--prepare-only` para copiar el paquete público D-E y los dos archivos de prompt del brazo a un directorio privado nuevo, guardar `prompt.txt` y emitir `prepared.json` con hashes y el comando planeado. La misma función construye `argv` y transporte del prompt para preparación y ejecución normal. Este modo termina **antes** de instalar T, usar `strace` o invocar Codex, Agy u OpenCode. T requiere indicar un wheel regular, pero solo registra su hash; no prueba que se pueda instalar. No crea `run.json` ni streams de modelo, y el observador de corridas no acepta la carpeta como ejecución.
+
+```sh
+python3 scripts/run_development_arm.py --prepare-only --arm T --provider codex --model gpt-6-sol --effort low --toolkit-wheel dist/specorganon-0.1.0-py3-none-any.whl --output-root /ruta-privada/preparaciones
+```
+
+El ejemplo usa un **ID documental candidato**, no verifica acceso, versión efectiva ni autorización de llamada. `prepared.json` conserva `status: no_go_for_provider_calls`, `provider_calls: 0`, `launch_ready: false`, `cap_status: unknown`, paridad de herramientas y revisión humana sin verificar, y elegibilidad comparativa falsa. Un código de salida 0 solo indica que la instantánea local se preparó. Quien quiera usar el [dossier de seis celdas](../experiments/development/energy_pilot/activation_dossier_2026-09-27.json) debe cotejar **por separado** los hashes del registro preparado con los hashes fijados allí: el modo genérico no impone ese dossier. La [sonda offline de seis celdas](../experiments/development/energy_pilot/offline_preparation_probe_2026-09-27.json) hizo ese cotejo en directorios temporales y mantuvo NO-GO; una futura corrida deberá revalidar los bytes y no hereda autorización ni límites de este paso.
 
 ## Calendario candidato
 

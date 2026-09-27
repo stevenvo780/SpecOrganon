@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "classification": "development_offline_six_cell_preparation_not_model_comparison",
+  "date_utc": "2026-09-27",
+  "source_commit": "1512239edc2384bd38049b6f75a5f80284eeae54",
+  "runner_sha256": "388e3984c71729c4d5af595cb32957ae8212d51285ba310b143b4a6c6bd9f9c7",
+  "activation_dossier_sha256": "bdc7aeb95d21e33356d5eea7c14753444fbfb72ef656bad73f63ba825481e095",
+  "procedure": "For each of A/B x N/S/T, call python3 scripts/run_development_arm.py --prepare-only with one family candidate, low effort, a new temporary private output root and --toolkit-wheel dist/specorganon-0.1.0-py3-none-any.whl only for T; open each prepared.json and prompt.txt; compare packet, common, arm and wheel SHA-256 to the activation dossier; assert NO-GO fields and no run.json, .venv or CLI streams; discard private directories after deriving this receipt.",
+  "model_ids_documented_by_provider_on_date": [
+    {"family_slot": "A", "provider_cli": "codex", "requested_model": "gpt-6-sol", "requested_effort": "low", "official_model_documentation": "https://developers.openai.com/api/docs/models/gpt-6-sol"},
+    {"family_slot": "B", "provider_cli": "agy", "requested_model": "gemini-3.8-flash", "requested_effort": "low", "official_model_documentation": "https://ai.google.dev/gemini-api/docs/latest-model"}
+  ],
+  "rows": [
+    {"family_slot": "A", "arm": "N", "assembled_prompt_sha256": "b403ee5ba8a648ad6fc7aa2926d0cea0c02eca6f7b5f21d96a58497bf9bab740", "status": "no_go_for_provider_calls"},
+    {"family_slot": "A", "arm": "S", "assembled_prompt_sha256": "9657b5b7bbf0a23bcc570580867468a2411c0548163de35193b69735a5a2f49e", "status": "no_go_for_provider_calls"},
+    {"family_slot": "A", "arm": "T", "assembled_prompt_sha256": "a110fb227e4e3e4d7e44fc6f81fd041a24e4bd7f17fa86431416db6d0a06f4e8", "status": "no_go_for_provider_calls"},
+    {"family_slot": "B", "arm": "N", "assembled_prompt_sha256": "b403ee5ba8a648ad6fc7aa2926d0cea0c02eca6f7b5f21d96a58497bf9bab740", "status": "no_go_for_provider_calls"},
+    {"family_slot": "B", "arm": "S", "assembled_prompt_sha256": "9657b5b7bbf0a23bcc570580867468a2411c0548163de35193b69735a5a2f49e", "status": "no_go_for_provider_calls"},
+    {"family_slot": "B", "arm": "T", "assembled_prompt_sha256": "a110fb227e4e3e4d7e44fc6f81fd041a24e4bd7f17fa86431416db6d0a06f4e8", "status": "no_go_for_provider_calls"}
+  ],
+  "checks": {
+    "all_six_cells_unique": true,
+    "same_requested_model_and_effort_within_family": true,
+    "case_and_prompt_hashes_match_activation_dossier": true,
+    "t_wheel_sha256_matches_activation_dossier": "b65e13d602c3b7d83556af1897d817c26e44a8d61b47008f9a5128e1462d40f3",
+    "same_assembled_prompt_per_arm_across_family_slots": true,
+    "provider_calls": 0,
+    "toolkit_installs": 0,
+    "run_json_created": false,
+    "launch_ready": false,
+    "cap_status": "unknown",
+    "tool_parity_verified": false,
+    "human_review_verified": false,
+    "controlled_comparison_eligible": false
+  },
+  "verification": [
+    "uv run pytest -q: 1746 passed in 231.47s",
+    "uv run ruff check .: All checks passed!",
+    "Independent read-only review found no accidental launch or execution-record confusion and reproduced a dossier-divergence limit."
+  ],
+  "limits": [
+    "The documented model IDs and low-effort settings are exploratory candidates. Their availability, mapping through Codex/Agy, actual model version and effective effort were not verified by provider calls.",
+    "The --prepare-only mode snapshots current local inputs but does not itself enforce equality with the activation dossier; this probe compared the six outputs to that dossier separately. A later run must recheck bytes and cannot inherit a GO from this receipt.",
+    "The equal prompt hashes do not prove equal generic tool access, isolation, human review, token or provider-request caps, pricing, billing or receipt authenticity.",
+    "The T wheel was hashed but not installed by --prepare-only; the local dist file is not under independent custody.",
+    "The six private preparation directories were temporary and are not archived. The source files, runner commit, dossier hashes and this procedure allow a new offline preparation, but this receipt does not preserve executable environments."
+  ],
+  "provider_requests_made": 0,
+  "spend_authorized_usd": 0,
+  "criterion_4": "not_assessed"
+}
