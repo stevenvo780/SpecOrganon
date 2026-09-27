@@ -45,6 +45,7 @@ def main() -> None:
     expected_mcp_tools = {name.replace("-", "_") for name in expected_cli_commands}
     published_mcp_tools = expected_mcp_tools | {
         "field_attestation_challenge", "attest_field",
+        "test_execution_challenge", "record_test_execution",
     }
 
     def command(*args: str) -> dict:

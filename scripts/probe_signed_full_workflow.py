@@ -14,6 +14,7 @@ import base64
 import hashlib
 import json
 import os
+import shlex
 import subprocess
 import sys
 import sysconfig
@@ -38,7 +39,10 @@ APPROVALS = {"n1", "d1"}
 RUNNER = "agent:synthetic-runner"
 APPROVER = "human:synthetic-approver-key"
 REVIEWER = "human:synthetic-reviewer-key"
+EXECUTOR = "executor:synthetic"
 ZERO_HASH = "0" * 64
+TEST_OUTPUT = b"synthetic count=10\n"
+TEST_ARTIFACT = "t1-artifact.txt"
 
 
 def _require(condition: bool, message: str) -> None:
@@ -63,12 +67,14 @@ def _public(key: Ed25519PrivateKey) -> str:
 def _registry(
     file: Path, case: Path, project: dict[str, Any],
     project_sha256: str, approver_public: str, reviewer_public: str | None,
+    executor_public: str | None,
 ) -> None:
     entry = {
         "path": str(case.resolve(strict=True)),
         "project_sha256": project_sha256,
         "approvers": {APPROVER: approver_public},
         "phase_reviewers": {REVIEWER: reviewer_public} if reviewer_public else {},
+        "test_executors": {EXECUTOR: executor_public} if executor_public else {},
     }
     file.write_text(json.dumps({"schema": 2, "cases": {project["case_id"]: entry}}), encoding="utf-8")
     file.chmod(0o600)
@@ -129,6 +135,32 @@ def _message(challenge: dict[str, Any], expected: dict[str, Any]) -> bytes:
     return raw
 
 
+def _execute_test(work: Path, env: dict[str, str], argv: list[str]) -> dict[str, Any]:
+    artifact = work / TEST_ARTIFACT
+    _require(not artifact.exists(), "synthetic test artifact already exists")
+    result = subprocess.run(
+        argv, cwd=work, env=env, capture_output=True, timeout=30, check=False,
+    )
+    _require(result.returncode == 0 and result.stdout == TEST_OUTPUT and result.stderr == b"",
+             "local synthetic command did not produce its declared bytes and exit code")
+    _require(artifact.is_file() and artifact.read_bytes() == TEST_OUTPUT,
+             "local synthetic command did not produce its declared artifact bytes")
+    report = {
+        "schema": 1,
+        "argv": argv,
+        "exit_code": result.returncode,
+        "timed_out": False,
+        "stdout_sha256": _sha256(result.stdout),
+        "stderr_sha256": _sha256(result.stderr),
+        "artifacts": [{"path": TEST_ARTIFACT, "sha256": _sha256(artifact.read_bytes())}],
+    }
+    _require(report["stdout_sha256"] == _sha256(TEST_OUTPUT)
+             and report["stderr_sha256"] == _sha256(b"")
+             and report["artifacts"][0]["sha256"] == _sha256(TEST_OUTPUT),
+             "synthetic test report digests do not match local bytes")
+    return report
+
+
 async def probe(repo: Path) -> dict[str, Any]:
     module_path = Path(specorganon.__file__).resolve()
     site_packages = Path(sysconfig.get_path("purelib")).resolve()
@@ -137,8 +169,8 @@ async def probe(repo: Path) -> dict[str, Any]:
              and not module_path.is_relative_to(repo / "src"),
              "specorganon must be loaded from a wheel installed in this virtual environment")
     probe_sha256 = _sha256(Path(__file__).read_bytes())
-    manifest_path = repo / "workflows" / "synthetic_full.json"
-    manifest_raw = manifest_path.read_bytes()
+    source_manifest_path = repo / "workflows" / "synthetic_full.json"
+    manifest_raw = source_manifest_path.read_bytes()
     manifest = json.loads(manifest_raw)
     steps = manifest["steps"]
     item_steps = [step for step in steps if step["op"] == "put"]
@@ -172,6 +204,21 @@ async def probe(repo: Path) -> dict[str, Any]:
             "ORGANON_APPROVERS_FILE": str(registry),
             "ORGANON_ROOT": str(work),
         }
+        test_code = (
+            "from pathlib import Path; "
+            f"Path({TEST_ARTIFACT!r}).write_bytes({TEST_OUTPUT!r}); "
+            "print('synthetic count=10')"
+        )
+        test_argv = [str(sys.executable), "-c", test_code]
+        test_step = next(step for step in item_steps if step["id"] == "t1")
+        test_step["data"] = {
+            "passed": True,
+            "argv": test_argv,
+            "command": shlex.join(test_argv),
+        }
+        manifest_path = work / "signed-full-manifest.json"
+        derived_manifest_raw = _canonical(manifest)
+        manifest_path.write_bytes(derived_manifest_raw)
         created = _cli(cli, env, work, "init", path, "--title", "Synthetic signed full workflow",
                        "--domain", "synthetic mechanics only", "--actor", RUNNER,
                        "--approval-policy", "signed")
@@ -179,10 +226,12 @@ async def probe(repo: Path) -> dict[str, Any]:
         _require(project["approval_policy"] == "signed", "temporary case was not signed")
         approver_key = Ed25519PrivateKey.generate()
         reviewer_key = Ed25519PrivateKey.generate()
+        executor_key = Ed25519PrivateKey.generate()
         approver_public = _public(approver_key)
         reviewer_public = _public(reviewer_key)
+        executor_public = _public(executor_key)
         _registry(registry, case, project, created["project_sha256"],
-                  approver_public, reviewer_public)
+                  approver_public, reviewer_public, executor_public)
         params = StdioServerParameters(command=str(mcp), cwd=str(work), env=env)
         run_transports: list[str] = []
         decisions: list[dict[str, Any]] = []
@@ -191,7 +240,8 @@ async def probe(repo: Path) -> dict[str, Any]:
         async with Client(params, mode="legacy") as client:
             discovered = {tool.name for tool in (await client.list_tools()).tools}
             required = {"run", "status", "approval_challenge", "approve",
-                        "phase_review_challenge", "review_phase"}
+                        "phase_review_challenge", "review_phase",
+                        "test_execution_challenge", "record_test_execution"}
             _require(required <= discovered, "installed MCP server lacks required signed workflow tools")
 
             async def call(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
@@ -281,6 +331,67 @@ async def probe(repo: Path) -> dict[str, Any]:
                              "signed normative approval did not append its event")
                     decisions.append({"kind": "approval", "target": item_id,
                                       "transport": decision_transport, "seq": event["seq"]})
+                elif action == "execute_test":
+                    _require(phase == "build", "runner requested test execution outside build")
+                    state = await status_pair()
+                    test_item = state["items"].get("t1")
+                    _require(test_item is not None and test_item["kind"] == "test"
+                             and test_item["data"]["argv"] == test_argv,
+                             "runner requested an unexpected test execution")
+                    _require(task["test_execution_targets"] == [{
+                        "id": "t1", "version": test_item["version"],
+                        "argv": test_argv, "command": shlex.join(test_argv),
+                    }] and task["omitted_test_execution_targets"] == 0,
+                             "runner did not expose the exact pending test command")
+                    report = _execute_test(work, env, test_argv)
+                    report_json = _canonical(report).decode("utf-8")
+                    cli_challenge = _cli(
+                        cli, env, work, "test-execution-challenge", path, "t1",
+                        "--report", report_json, "--actor", EXECUTOR,
+                    )
+                    mcp_challenge = await call("test_execution_challenge", {
+                        "path": path, "id": "t1", "report": report, "actor": EXECUTOR,
+                    })
+                    _require(cli_challenge == mcp_challenge,
+                             "CLI and MCP test execution challenges differ")
+                    _require((case / "organon.json").read_bytes() == before,
+                             "test execution challenge changed the ledger")
+                    message = _message(cli_challenge, {
+                        **binding, "schema": 1, "purpose": "specorganon.test_execution",
+                        "actor": EXECUTOR, "report": report, "item_id": "t1",
+                        "item_version": test_item["version"],
+                        "item_sha256": cli_challenge["item_sha256"],
+                        "item_deps": test_item["deps"],
+                    })
+                    _cli_rejected(
+                        cli, env, work, "record-test-execution", path, "t1",
+                        "--report", report_json, "--actor", EXECUTOR,
+                    )
+                    _require((case / "organon.json").read_bytes() == before,
+                             "unsigned test execution changed the ledger")
+                    negative["unsigned_test_execution_cli_no_write"] = True
+                    wrong_signature = base64.b64encode(
+                        Ed25519PrivateKey.generate().sign(message)
+                    ).decode("ascii")
+                    rejected = await client.call_tool("record_test_execution", {
+                        "path": path, "id": "t1", "report": report,
+                        "actor": EXECUTOR, "signature": wrong_signature,
+                    })
+                    _require(rejected.is_error and (case / "organon.json").read_bytes() == before,
+                             "invalid test execution signature changed the ledger")
+                    negative["invalid_test_execution_mcp_no_write"] = True
+                    signature = base64.b64encode(executor_key.sign(message)).decode("ascii")
+                    event = _cli(
+                        cli, env, work, "record-test-execution", path, "t1",
+                        "--report", report_json, "--actor", EXECUTOR,
+                        "--signature", signature,
+                    )
+                    _require(event["kind"] == "test_execution"
+                             and event["payload"]["id"] == "t1"
+                             and event["payload"]["report"] == report,
+                             "signed test execution did not append its bound report")
+                    decisions.append({"kind": "test_execution", "target": "t1",
+                                      "transport": "cli", "seq": event["seq"]})
                 elif action == "review_phase":
                     reason = f"Synthetic key review of {phase}; no human or field assessment"
                     challenge = await challenge_pair("phase", phase, reason, REVIEWER)
@@ -327,7 +438,8 @@ async def probe(repo: Path) -> dict[str, Any]:
                 result = await run(transport)
                 state = await status_pair()
                 _require(state["approval_trust"] == "configured"
-                         and state["phase_review_trust"] == "configured",
+                         and state["phase_review_trust"] == "configured"
+                         and state["test_execution_trust"] == "configured",
                          "registered signed case lost its trust context")
                 if action == "review_phase":
                     _require(state["phases"][phase]["accepted"],
@@ -341,11 +453,13 @@ async def probe(repo: Path) -> dict[str, Any]:
                 raise AssertionError("signed workflow exceeded its 20-decision bound")
             _require(result["status"] == "complete" and result["cursor"] == len(steps),
                      "signed workflow did not complete its manifest")
+            _require(source_manifest_path.read_bytes() == manifest_raw,
+                     "historical synthetic fixture changed during the probe")
             _require([entry["target"] for entry in decisions if entry["kind"] == "phase_review"] == list(PHASES),
                      "signed phase reviews did not cover each phase in order")
             _require({entry["target"] for entry in decisions if entry["kind"] == "approval"} == APPROVALS,
                      "signed normative approvals did not cover both decisions")
-            _require(len(decisions) == 11 and len(run_transports) == 12,
+            _require(len(decisions) == 12 and len(run_transports) == 13,
                      "signed workflow used an unexpected number of pauses")
             _require(all(run_transports[index] != run_transports[index - 1]
                          for index in range(1, len(run_transports))),
@@ -353,11 +467,13 @@ async def probe(repo: Path) -> dict[str, Any]:
             _require(negative == {
                 "unsigned_normative_mcp_no_write": True,
                 "unsigned_phase_cli_no_write": True,
+                "unsigned_test_execution_cli_no_write": True,
+                "invalid_test_execution_mcp_no_write": True,
             }, "missing-signature negative controls were not observed")
 
             final = await status_pair()
             _require(final["project"]["approval_policy"] == "signed"
-                     and final["revision"] == 49,
+                     and final["revision"] == 50,
                      "signed case has an unexpected final policy or revision")
             _require(set(final["items"]) == {step["id"] for step in item_steps},
                      "final signed case item set differs from the manifest")
@@ -381,17 +497,26 @@ async def probe(repo: Path) -> dict[str, Any]:
             _require(final["items"]["ass1"]["data"]["claim_scope"] == "field",
                      "synthetic assessment changed its declared field scope")
             _require(final["items"]["t1"]["data"]["passed"] is True
-                     and final["items"]["t1"]["data"]["command"].startswith("fixture-only:"),
-                     "synthetic test artifact changed its invented command declaration")
+                     and final["items"]["t1"]["data"]["argv"] == test_argv
+                     and final["items"]["t1"]["data"]["command"] == shlex.join(test_argv)
+                     and final["items"]["t1"]["test_execution_status"] == "signed_passed"
+                     and final["items"]["t1"]["test_execution_actor"] == EXECUTOR,
+                     "synthetic test artifact differs from its executed command")
+            _require(len(final["test_execution_history"]) == 1
+                     and final["test_execution_history"][0]["signature_verified"]
+                     and final["test_execution_history"][0]["passed"],
+                     "synthetic test receipt did not verify on replay")
 
             ledger, final_raw = _ledger(case)
             counts = dict(sorted(Counter(event["kind"] for event in ledger["events"]).items()))
             _require(counts == {
-                "approval": 2, "item_put": 29, "phase_advance": 9, "phase_review": 9,
+                "approval": 2, "item_put": 29, "phase_advance": 9,
+                "phase_review": 9, "test_execution": 1,
             }, "ledger event classes differ from the full signed workflow")
             reviews = [event for event in ledger["events"] if event["kind"] == "phase_review"]
             advances = [event for event in ledger["events"] if event["kind"] == "phase_advance"]
             approvals = [event for event in ledger["events"] if event["kind"] == "approval"]
+            executions = [event for event in ledger["events"] if event["kind"] == "test_execution"]
             _require([event["payload"]["phase"] for event in reviews] == list(PHASES),
                      "ledger phase review order changed")
             _require([event["payload"]["phase"] for event in advances] == list(PHASES),
@@ -410,6 +535,10 @@ async def probe(repo: Path) -> dict[str, Any]:
                      and all(event["actor"] == APPROVER and event["payload"].get("signature")
                              for event in approvals),
                      "normative approval events lack signed provenance")
+            _require(len(executions) == 1 and executions[0]["actor"] == EXECUTOR
+                     and executions[0]["payload"]["report"] == report
+                     and isinstance(executions[0]["payload"].get("signature"), str),
+                     "synthetic test execution lacks its signed report")
             _require(len(final["phase_review_history"]) == 9
                      and all(entry["signature_verified"] and entry["provenance"] == "signed_verified"
                              for entry in final["phase_review_history"]),
@@ -424,7 +553,26 @@ async def probe(repo: Path) -> dict[str, Any]:
                      "CLI/MCP replay mutated the signed ledger")
             _require(await status_pair() == final, "replay changed effective signed status")
 
-            _registry(registry, case, project, created["project_sha256"], approver_public, None)
+            _registry(registry, case, project, created["project_sha256"],
+                      approver_public, reviewer_public, None)
+            executor_revoked = await status_pair()
+            _require(all(not executor_revoked["phases"][phase]["accepted"]
+                         for phase in ("build", "validate"))
+                     and executor_revoked["phases"]["specify"]["accepted"]
+                     and executor_revoked["test_execution_trust"] == "unavailable"
+                     and executor_revoked["items"]["t1"]["test_execution_status"] == "unverified"
+                     and not executor_revoked["test_execution_history"][0]["signature_verified"],
+                     "executor revocation did not reopen build and downstream only")
+            _require((case / "organon.json").read_bytes() == final_raw,
+                     "executor revocation changed ledger bytes")
+            _registry(registry, case, project, created["project_sha256"],
+                      approver_public, reviewer_public, executor_public)
+            _require(await status_pair() == final
+                     and (case / "organon.json").read_bytes() == final_raw,
+                     "restoring trusted executor key did not restore the same signed status")
+
+            _registry(registry, case, project, created["project_sha256"],
+                      approver_public, None, executor_public)
             revoked = await status_pair()
             _require(revoked["approval_trust"] == "configured"
                      and revoked["phase_review_trust"] == "unavailable",
@@ -438,7 +586,7 @@ async def probe(repo: Path) -> dict[str, Any]:
             _require((case / "organon.json").read_bytes() == final_raw,
                      "reviewer revocation changed ledger bytes")
             _registry(registry, case, project, created["project_sha256"],
-                      approver_public, reviewer_public)
+                      approver_public, reviewer_public, executor_public)
             restored = await status_pair()
             _require(restored == final and (case / "organon.json").read_bytes() == final_raw,
                      "restoring trusted reviewer key did not restore the same signed status")
@@ -449,8 +597,9 @@ async def probe(repo: Path) -> dict[str, Any]:
                 "receipt_kind": "rerunnable_summary_not_detached_attestation",
                 "probe_sha256": probe_sha256,
                 "manifest_sha256": _sha256(manifest_raw),
+                "executed_manifest_sha256": _sha256(derived_manifest_raw),
                 "child_environment_keys": sorted(env),
-                "transport": {"run_sequence": run_transports[:12],
+                "transport": {"run_sequence": run_transports[:13],
                               "cli_mcp_status_equal": True, "stdio_mcp_real": True,
                               "wheel_module_under_site_packages": True},
                 "decisions": decisions,
@@ -460,6 +609,8 @@ async def probe(repo: Path) -> dict[str, Any]:
                           "accepted_phases": list(PHASES),
                           "signed_approvals": sorted(APPROVALS),
                           "signed_reviews": len(reviews),
+                          "signed_test_executions": len(executions),
+                          "test_report": report,
                           "phase_snapshots": {
                               phase: final["phases"][phase]["snapshot"] for phase in PHASES
                           },
@@ -473,12 +624,16 @@ async def probe(repo: Path) -> dict[str, Any]:
                 "reviewer_key_revocation": {"all_phases_reopened": True,
                                              "ledger_byte_identical": True,
                                              "restoration_recovered_status": True},
+                "executor_key_revocation": {"build_and_downstream_reopened": True,
+                                             "ledger_byte_identical": True,
+                                             "restoration_recovered_status": True},
                 "scope": {
                     "human_identity_authenticated": False,
                     "independent_human_judgment_tested": False,
                     "field_impact_tested": False,
-                    "t1_passed_is_invented_manifest_data": True,
-                    "t1_command_executed_or_authenticated": False,
+                    "t1_command_executed_locally": True,
+                    "t1_report_signed_by_synthetic_executor": True,
+                    "t1_execution_independently_verified": False,
                     "content_is_synthetic": True,
                     "private_keys_written_to_disk": False,
                 },

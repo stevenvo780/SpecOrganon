@@ -85,8 +85,10 @@ def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(tmp_path: Pat
     assert receipt["manifest_sha256"] == hashlib.sha256(
         (ROOT / "workflows" / "synthetic_full.json").read_bytes()
     ).hexdigest()
+    assert len(receipt["executed_manifest_sha256"]) == 64
+    assert receipt["executed_manifest_sha256"] != receipt["manifest_sha256"]
     assert receipt["transport"] == {
-        "run_sequence": ["cli", "mcp"] * 6,
+        "run_sequence": ["cli", "mcp"] * 6 + ["cli"],
         "cli_mcp_status_equal": True,
         "stdio_mcp_real": True,
         "wheel_module_under_site_packages": True,
@@ -94,13 +96,28 @@ def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(tmp_path: Pat
     decisions = receipt["decisions"]
     assert [entry["target"] for entry in decisions if entry["kind"] == "phase_review"] == PHASES
     assert {entry["target"] for entry in decisions if entry["kind"] == "approval"} == {"n1", "d1"}
-    assert len({entry["seq"] for entry in decisions}) == 11
-    assert receipt["final"]["revision"] == 49
+    executions = [entry for entry in decisions if entry["kind"] == "test_execution"]
+    assert len(executions) == 1
+    assert executions[0]["target"] == "t1" and executions[0]["transport"] == "cli"
+    assert len({entry["seq"] for entry in decisions}) == 12
+    assert receipt["final"]["revision"] == 50
     assert receipt["final"]["event_counts"] == {
-        "approval": 2, "item_put": 29, "phase_advance": 9, "phase_review": 9,
+        "approval": 2, "item_put": 29, "phase_advance": 9,
+        "phase_review": 9, "test_execution": 1,
     }
     assert receipt["final"]["artifact_count"] == 29
     assert receipt["final"]["accepted_phases"] == PHASES
+    assert receipt["final"]["signed_test_executions"] == 1
+    report = receipt["final"]["test_report"]
+    assert report["schema"] == 1
+    assert report["argv"][1] == "-c"
+    assert report["exit_code"] == 0 and report["timed_out"] is False
+    assert report["stdout_sha256"] == hashlib.sha256(b"synthetic count=10\n").hexdigest()
+    assert report["stderr_sha256"] == hashlib.sha256(b"").hexdigest()
+    assert report["artifacts"] == [{
+        "path": "t1-artifact.txt",
+        "sha256": hashlib.sha256(b"synthetic count=10\n").hexdigest(),
+    }]
     snapshots = receipt["final"]["phase_snapshots"]
     assert set(snapshots) == set(PHASES)
     assert all(len(value) == 64 and set(value) <= set("0123456789abcdef")
@@ -110,6 +127,8 @@ def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(tmp_path: Pat
     assert receipt["negative_controls"] == {
         "unsigned_normative_mcp_no_write": True,
         "unsigned_phase_cli_no_write": True,
+        "unsigned_test_execution_cli_no_write": True,
+        "invalid_test_execution_mcp_no_write": True,
     }
     assert receipt["replay"] == {
         "cli_applied": 0, "mcp_applied": 0, "ledger_byte_identical": True,
@@ -119,12 +138,18 @@ def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(tmp_path: Pat
         "ledger_byte_identical": True,
         "restoration_recovered_status": True,
     }
+    assert receipt["executor_key_revocation"] == {
+        "build_and_downstream_reopened": True,
+        "ledger_byte_identical": True,
+        "restoration_recovered_status": True,
+    }
     assert receipt["scope"] == {
         "human_identity_authenticated": False,
         "independent_human_judgment_tested": False,
         "field_impact_tested": False,
-        "t1_passed_is_invented_manifest_data": True,
-        "t1_command_executed_or_authenticated": False,
+        "t1_command_executed_locally": True,
+        "t1_report_signed_by_synthetic_executor": True,
+        "t1_execution_independently_verified": False,
         "content_is_synthetic": True,
         "private_keys_written_to_disk": False,
     }

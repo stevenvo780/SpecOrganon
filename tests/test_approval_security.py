@@ -6,6 +6,7 @@ import asyncio
 import base64
 import hashlib
 import json
+import shlex
 import shutil
 import subprocess
 import sys
@@ -27,6 +28,7 @@ CLI = BIN / "organon"
 MCP = BIN / "organon-mcp"
 ACTOR = "human:owner"
 REASON = "I authorize this exact normative commitment"
+EXECUTOR = "executor:synthetic"
 
 
 @pytest.fixture
@@ -71,6 +73,23 @@ def _register_phase_reviewer(case: Path, signer, actor: str = "agent:reviewer") 
     registry = json.loads(trust_file.read_text(encoding="utf-8"))
     case_id = read_project(case)["project"]["case_id"]
     registry["cases"][case_id].setdefault("phase_reviewers", {})[actor] = (
+        base64.b64encode(public_key).decode("ascii")
+    )
+    trust_file.write_text(json.dumps(registry), encoding="utf-8")
+    return key
+
+
+def _register_test_executor(case: Path, signer) -> Ed25519PrivateKey:
+    """Register an ephemeral synthetic executor outside the case ledger."""
+    _, trust_file = signer
+    key = Ed25519PrivateKey.generate()
+    public_key = key.public_key().public_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PublicFormat.Raw,
+    )
+    registry = json.loads(trust_file.read_text(encoding="utf-8"))
+    case_id = read_project(case)["project"]["case_id"]
+    registry["cases"][case_id].setdefault("test_executors", {})[EXECUTOR] = (
         base64.b64encode(public_key).decode("ascii")
     )
     trust_file.write_text(json.dumps(registry), encoding="utf-8")
@@ -375,10 +394,11 @@ def test_signed_cli_and_mcp_share_challenge_and_rejection(tmp_path, signer):
 
 
 def _signed_field_case(tmp_path: Path, signer) -> tuple[Path, dict]:
-    """Build all eight prior phases with explicitly synthetic, signed test records."""
+    """Build eight phases with a locally executed synthetic test and signed receipt."""
     key, _ = signer
     case = _case(tmp_path, signer, "signed-field-claim")
     reviewer_key = _register_phase_reviewer(case, signer)
+    executor_key = _register_test_executor(case, signer)
 
     def put(item_id: str, kind: str, refs=(), data=None, text: str | None = None) -> None:
         engine.put_item(case, item_id, kind, text or item_id, list(refs), data or {}, "agent:writer")
@@ -443,9 +463,46 @@ def _signed_field_case(tmp_path: Path, signer) -> tuple[Path, dict]:
     ))
     accept("specify")
     put("impl1", "implementation", ["req1"])
+    test_output = b"synthetic count=10\n"
+    artifact_name = "field-t1-artifact.txt"
+    test_code = (
+        "from pathlib import Path; "
+        f"Path({artifact_name!r}).write_bytes({test_output!r}); "
+        "print('synthetic count=10')"
+    )
+    test_argv = [sys.executable, "-c", test_code]
     put("t1", "test", ["impl1", "crit1"], {
-        "passed": True, "command": "synthetic fixture; no external command run",
+        "passed": True, "argv": test_argv, "command": shlex.join(test_argv),
     })
+    assert not engine.gate(case, "build")["ready"]
+    executed = subprocess.run(
+        test_argv, cwd=tmp_path, capture_output=True, timeout=30, check=False,
+    )
+    artifact = tmp_path / artifact_name
+    assert executed.returncode == 0
+    assert executed.stdout == test_output and executed.stderr == b""
+    assert artifact.is_file() and artifact.read_bytes() == test_output
+    report = {
+        "schema": 1,
+        "argv": test_argv,
+        "exit_code": executed.returncode,
+        "timed_out": False,
+        "stdout_sha256": hashlib.sha256(executed.stdout).hexdigest(),
+        "stderr_sha256": hashlib.sha256(executed.stderr).hexdigest(),
+        "artifacts": [{
+            "path": artifact_name,
+            "sha256": hashlib.sha256(artifact.read_bytes()).hexdigest(),
+        }],
+    }
+    before = (case / "organon.json").read_bytes()
+    challenge = engine.test_execution_challenge(case, "t1", report, EXECUTOR)
+    assert (case / "organon.json").read_bytes() == before
+    message = json.loads(base64.b64decode(challenge["message_base64"], validate=True))
+    assert message["report"] == report and message["item_id"] == "t1"
+    assert message["actor"] == EXECUTOR
+    engine.record_test_execution(case, "t1", report, EXECUTOR, _sign(executor_key, challenge))
+    assert engine.get_state(case)["items"]["t1"]["test_execution_status"] == "signed_passed"
+    assert engine.gate(case, "build")["ready"]
     accept("build")
 
     put("base1", "baseline", ["crit1"], {
