@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "classification": "development_strict_offline_dossier_preparation_no_go",
+  "date_utc": "2026-09-27",
+  "source_commit": "cd5f08cfdac4c40bbcc0ff90528be75d34efcd8a",
+  "runner_sha256": "7c2ed00c7271bbe4214ae83c68381da60e1c4c11f5e3f4a360813dacf8c0ba3a",
+  "activation_dossier_sha256": "bdc7aeb95d21e33356d5eea7c14753444fbfb72ef656bad73f63ba825481e095",
+  "procedure": "For A/B x N/S/T, invoke python3 scripts/run_development_arm.py --prepare-only with --activation-dossier experiments/development/energy_pilot/activation_dossier_2026-09-27.json --activation-dossier-sha256 set to the digest above and --family-slot A or B; use one temporary private output root, documented model candidate and low effort per family, and the pinned local wheel only for T. Read each prepared.json, verify dossier_assets_match, NO-GO and absence of run.json/.venv; discard temporary directories.",
+  "cells": [
+    {"family_slot": "A", "arm": "N", "assembled_prompt_sha256": "b403ee5ba8a648ad6fc7aa2926d0cea0c02eca6f7b5f21d96a58497bf9bab740"},
+    {"family_slot": "A", "arm": "S", "assembled_prompt_sha256": "9657b5b7bbf0a23bcc570580867468a2411c0548163de35193b69735a5a2f49e"},
+    {"family_slot": "A", "arm": "T", "assembled_prompt_sha256": "a110fb227e4e3e4d7e44fc6f81fd041a24e4bd7f17fa86431416db6d0a06f4e8"},
+    {"family_slot": "B", "arm": "N", "assembled_prompt_sha256": "b403ee5ba8a648ad6fc7aa2926d0cea0c02eca6f7b5f21d96a58497bf9bab740"},
+    {"family_slot": "B", "arm": "S", "assembled_prompt_sha256": "9657b5b7bbf0a23bcc570580867468a2411c0548163de35193b69735a5a2f49e"},
+    {"family_slot": "B", "arm": "T", "assembled_prompt_sha256": "a110fb227e4e3e4d7e44fc6f81fd041a24e4bd7f17fa86431416db6d0a06f4e8"}
+  ],
+  "checks": {
+    "six_unique_cells": true,
+    "all_nine_dossier_assets_matched": true,
+    "t_wheel_sha256": "b65e13d602c3b7d83556af1897d817c26e44a8d61b47008f9a5128e1462d40f3",
+    "dossier_assets_match_in_each_prepared_record": true,
+    "provider_calls": 0,
+    "toolkit_installs": 0,
+    "run_json_created": false,
+    "launch_ready": false,
+    "controlled_comparison_eligible": false,
+    "criterion_4": "not_assessed"
+  },
+  "independent_review": {
+    "strict_focused_tests_passed": 28,
+    "symlink_and_mutation_negatives_reproduced": true,
+    "finding": "No actionable false green in the declared offline NO-GO contract; a modified dossier with a caller-supplied new digest can also match, so this is concordance, not independent custody."
+  },
+  "verification": [
+    "uv run pytest -q: 1793 passed in 134.76s after all current changes",
+    "uv run ruff check .: All checks passed!",
+    "The six strict CLI preparations completed in temporary private directories, then those directories were removed; no provider or toolkit command ran."
+  ],
+  "limits": [
+    "The expected dossier digest is supplied by the invoker and is not held by an independent custodian. A modified asset and modified dossier with a new digest can pass this local concordance check.",
+    "The record is an unsealed snapshot. Path-based rechecks do not prevent subsequent mutation or all same-UID races; any future run must revalidate under a controlled execution boundary.",
+    "Provider identity, effective model and effort, generic tool parity, human review, per-request/token/spend caps and billable receipts remain unverified."
+  ]
+}
