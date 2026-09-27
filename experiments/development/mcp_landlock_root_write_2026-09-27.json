@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "classification": "development_mcp_explicit_root_write_confinement_probe",
+  "date_utc": "2026-09-27",
+  "goal_sha256_unchanged": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "code_sha256": {
+    "server.py": "bfbd0b43b373c371c54bbb3ad40dc73b3cb2727f06b696dbf8a19452e149d122",
+    "test_server_case_pin.py": "01c18daa41cfd502d014ff0c77dfdf3e99b7ee54583accf786320f7f95fe053e"
+  },
+  "wheel_sha256": "353fe0e9d24be2d5d7be7e2c3f0b49d700d6b14e19f5a808acd2435b1626b864",
+  "host_landlock_abi_observed": 9,
+  "minimum_required_abi": 5,
+  "scope": "New path-based filesystem writes from an MCP stdio process started with explicit ORGANON_ROOT on supported Linux",
+  "negative_control": {
+    "test": "tests/test_server_case_pin.py::test_real_stdio_mcp_blocks_write_after_peer_moves_pinned_case",
+    "setup": "A real MCP stdio client first invokes init, put, run and status within the explicit root; a separate same-UID test process then moves the pinned case directory outside the root before another put.",
+    "observed": "The relocated put returns an MCP error and the outside ledger bytes remain identical to the pre-move snapshot."
+  },
+  "missing_capability_control": {
+    "test": "tests/test_server_case_pin.py::test_explicit_root_fails_closed_if_landlock_cannot_be_installed",
+    "observed": "A simulated ENOSYS during Landlock setup ends server startup with nonzero status before a request or case mutation."
+  },
+  "checks": [
+    {
+      "command": "uv run pytest -q",
+      "result": "1629 passed in 242.17s; no expected failures remain"
+    },
+    {
+      "command": "uv run pytest -q tests/test_server_case_pin.py tests/test_citibike_march_workflow.py",
+      "result": "15 passed during read-only independent review"
+    },
+    {
+      "command": "uv run ruff check .; git diff --check",
+      "result": "Both passed"
+    },
+    {
+      "command": "uv build --wheel --offline; offline install and uv pip check in fresh Python 3.11.15 and 3.12.3 environments; installed MCP workflow probe",
+      "result": "Wheel and both installed probes passed with explicit ORGANON_ROOT"
+    }
+  ],
+  "independent_review": "A read-only reviewer found no concrete regression in the new policy and reproduced the focused tests. The evidence supports only the case-relocation rejection tested here.",
+  "limits": [
+    "Without explicit ORGANON_ROOT, historical development mode retains descriptor pinning but does not install this Landlock write policy.",
+    "The policy does not revoke writable file descriptors opened before restriction.",
+    "A peer with the same UID remains unrestricted and can alter root topology; moving the root itself is not proven safe.",
+    "In-root hardlinks and concurrent hardlink changes remain a separate path and content integrity limit.",
+    "This does not authenticate case evidence, approvals, external anchors or real-world impact."
+  ],
+  "kernel_reference": "https://docs.kernel.org/userspace-api/landlock.html",
+  "criterion_1": "not_assessed"
+}
