@@ -92,6 +92,12 @@ python3 scripts/stage_released_run.py calendario-candidato.json /ruta-privada/en
 
 El [registro de preparación](../experiments/development/staged_visible_run_2026-09-27.json) incluye N/S/T sintéticos y una T que transportó byte por byte el bundle real CPython 3.11. La revisión adversarial detectó y cerró sustitución temporal del ZIP de caso, alteración del árbol extraído, reemplazo de `work` por un enlace simbólico y mutación del calendario de la API que antes desalineaba los límites publicados; `stage.json` se publica con un renombrado final tras las comprobaciones. El reporte conserva `execution_ready: false`, `runtime_enforced: false`, `provider_receipts_checked: false` y `custody_verified: false`. Una copia preparada es un insumo para un futuro ejecutor aislado, no una corrida confirmatoria; deberá revalidarse inmediatamente antes de usarla. Un proceso hostil con el mismo UID puede correr contra estas comprobaciones puntuales y no se ensayó un backend de aislamiento en este host.
 
+[`scripts/verify_staged_run.py`](../scripts/verify_staged_run.py) vuelve a leer una preparación existente contra el calendario candidato suministrado por separado y el `run_id`. Rechaza entradas, árbol extraído, manifiesto, permisos y estructura visibles que ya no concuerden. Inspecciona ZIP de caso desde su descriptor abierto, y política y toolkit desde los mismos bytes fijados para los hashes; una revisión adversarial reprodujo un falso verde cuando la primera versión inspeccionaba por ruta durante una sustitución temporal del ancestro. El verificador es de solo lectura y devuelve `stage_verified_at_read: true` únicamente para el instante inspeccionado; conserva `execution_ready: false`. Una verificación posterior no autoriza por sí sola al ejecutor ni aplica aislamiento o límites.
+
+```sh
+python3 scripts/verify_staged_run.py calendario-candidato.json RUN_ID /ruta-privada/stage-existente
+```
+
 ## Firma offline del diseño candidato
 
 [`scripts/check_study_signature.py`](../scripts/check_study_signature.py) vuelve a verificar los 15 archivos, exige el SHA-256 original de `GOAL.md` y que los bytes del protocolo coincidan con el digest del calendario. `challenge` produce los bytes canónicos en base64 para una firma Ed25519 externa; el mensaje liga propósito, GOAL, protocolo, calendario y roles/digests de activos. No incluye rutas ni contenido de los casos. La herramienta no genera ni lee claves privadas.
