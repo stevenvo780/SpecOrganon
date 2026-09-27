@@ -11,6 +11,7 @@ import hashlib
 import json
 import math
 import os
+import stat
 import tempfile
 import uuid
 from decimal import Decimal, InvalidOperation
@@ -81,6 +82,21 @@ def project_file(directory: str | Path) -> Path:
     return Path(directory) / FILE_NAME
 
 
+def _open_regular_file(path: Path, flags: int) -> int:
+    """Open one private regular case file without following links or blocking on a FIFO."""
+    fd = os.open(path, flags | os.O_NOFOLLOW | os.O_NONBLOCK, 0o666)
+    try:
+        opened = os.fstat(fd)
+        if not stat.S_ISREG(opened.st_mode):
+            raise LedgerError(f"not a regular file: {path}")
+        if opened.st_nlink != 1:
+            raise LedgerError(f"hard-linked file is not allowed: {path}")
+    except Exception:
+        os.close(fd)
+        raise
+    return fd
+
+
 def _atomic_write(path: Path, data: dict[str, Any]) -> None:
     try:
         payload = json.dumps(data, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n"
@@ -108,12 +124,15 @@ def _atomic_write(path: Path, data: dict[str, Any]) -> None:
 @contextmanager
 def _locked(directory: Path) -> Iterator[None]:
     directory.mkdir(parents=True, exist_ok=True)
-    with (directory / ".organon.lock").open("a+") as lock:
-        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+    fd = _open_regular_file(directory / ".organon.lock", os.O_RDWR | os.O_CREAT | os.O_APPEND)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
         try:
             yield
         finally:
-            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+            fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
 
 
 def init_project(directory: str | Path, title: str, domain: str, actor: str, approval_policy: str = "signed") -> dict[str, Any]:
@@ -125,7 +144,7 @@ def init_project(directory: str | Path, title: str, domain: str, actor: str, app
     directory = Path(directory)
     with _locked(directory):
         target = project_file(directory)
-        if target.exists():
+        if os.path.lexists(target):
             raise LedgerError(f"project already exists: {target}")
         data = {
             "schema": SCHEMA_VERSION,
@@ -140,7 +159,8 @@ def init_project(directory: str | Path, title: str, domain: str, actor: str, app
 def read_project(directory: str | Path, *, verify_external_anchor: bool = True) -> dict[str, Any]:
     target = project_file(directory)
     try:
-        data = strict_json_loads(target.read_text(encoding="utf-8"))
+        with os.fdopen(_open_regular_file(target, os.O_RDONLY), "r", encoding="utf-8") as source:
+            data = strict_json_loads(source.read())
     except FileNotFoundError as exc:
         raise LedgerError(f"project not found: {target}") from exc
     except (OSError, ValueError) as exc:

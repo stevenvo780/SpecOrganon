@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import os
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
@@ -12,28 +13,84 @@ from mcp.server.mcpserver.exceptions import ToolError
 from specorganon.cli import invoke
 
 
-def _case_path(path: str) -> str:
-    """Resolve a case path under the server root, including existing symlinks."""
+_DIR_FLAGS = os.O_PATH | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC
+
+
+def _root_directory() -> tuple[str, int]:
+    """Open the configured root one directory at a time, without symlink ancestors."""
     configured_root = os.environ.get("ORGANON_ROOT")
     if configured_root == "":
         raise ValueError("ORGANON_ROOT must name an existing directory")
-    root = Path(configured_root if configured_root is not None else os.getcwd()).resolve(strict=True)
-    if not root.is_dir():
-        raise ValueError("ORGANON_ROOT must name an existing directory")
-    candidate = Path(path)
-    if not candidate.is_absolute():
-        candidate = root / candidate
-    resolved = candidate.resolve()
-    if not resolved.is_relative_to(root):
-        raise ValueError("case path is outside the Organon server root")
-    return str(resolved)
+    root = str(Path(configured_root if configured_root is not None else os.getcwd()).resolve(strict=True))
+    fd = os.open("/", _DIR_FLAGS)
+    try:
+        for component in Path(root).parts[1:]:
+            next_fd = os.open(component, _DIR_FLAGS, dir_fd=fd)
+            os.close(fd)
+            fd = next_fd
+    except BaseException:
+        os.close(fd)
+        raise
+    return root, fd
+
+
+@contextmanager
+def _case_path(path: str, *, create: bool = False) -> Iterator[str]:
+    """Pin the canonical in-root case inode throughout a single operation.
+
+    An existing symlink alias may resolve to a directory inside the root. The
+    canonical components are then opened relative to the pinned root with
+    O_NOFOLLOW, so a replacement between resolution and open cannot redirect
+    the operation. Linux procfs lets the engine use the pinned directory while
+    this context keeps its descriptor alive. A peer with permission to rename
+    that inode can still move the pinned directory itself after it is opened.
+    """
+    root, root_fd = _root_directory()
+    case_fd: int | None = None
+    try:
+        case_fd = os.dup(root_fd)
+        candidate = Path(path)
+        if not candidate.is_absolute():
+            candidate = Path(root) / candidate
+        resolved = candidate.resolve()
+        if not resolved.is_relative_to(root):
+            raise ValueError("case path is outside the Organon server root")
+        for component in resolved.relative_to(root).parts:
+            if create:
+                try:
+                    os.mkdir(component, dir_fd=case_fd)
+                except FileExistsError:
+                    pass
+            next_fd = os.open(component, _DIR_FLAGS, dir_fd=case_fd)
+            os.close(case_fd)
+            case_fd = next_fd
+        yield f"/proc/self/fd/{case_fd}"
+    finally:
+        if case_fd is not None:
+            os.close(case_fd)
+        os.close(root_fd)
+
+
+def _validate_init(kwargs: dict[str, Any]) -> None:
+    if "ORGANON_LEDGER_ANCHORS_FILE" in os.environ:
+        raise ValueError(
+            "initialize a case before enabling ORGANON_LEDGER_ANCHORS_FILE; "
+            "then register its sequence-zero head"
+        )
+    if not all(isinstance(kwargs.get(key), str) and kwargs[key].strip() for key in ("title", "domain", "actor")):
+        raise ValueError("title, domain and actor must be nonempty strings")
+    if kwargs.get("approval_policy", "signed") not in {"signed", "fixture"}:
+        raise ValueError("approval_policy must be signed or fixture")
 
 
 def _invoke(operation: str, **kwargs: Any) -> dict[str, Any]:
     try:
-        kwargs["path"] = _case_path(kwargs["path"])
-        return invoke(operation, **kwargs)
-    except (ValueError, OSError, TypeError) as exc:
+        if operation == "init":
+            _validate_init(kwargs)
+        with _case_path(kwargs["path"], create=operation == "init") as pinned_path:
+            kwargs["path"] = pinned_path
+            return invoke(operation, **kwargs)
+    except (ValueError, OSError, TypeError, RuntimeError) as exc:
         raise ToolError(str(exc)) from exc
 
 

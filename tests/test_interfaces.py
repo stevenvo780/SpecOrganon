@@ -447,3 +447,180 @@ def test_mcp_auto_mode_confines_cases_to_explicit_root(tmp_path):
             assert result_data(await client.call_tool("status", {"path": "alias"})) == cli("status", str(root / "case"))
 
     asyncio.run(exercise())
+
+
+def test_mcp_rejects_symlinked_case_files_without_importing_external_state(tmp_path):
+    root = tmp_path / "private-root"
+    launch = tmp_path / "launch"
+    root.mkdir(mode=0o700)
+    launch.mkdir()
+    outside = tmp_path / "outside-case"
+    cli("init", str(outside), "--title", "External", "--domain", "test", "--actor", "human:fixture", "--approval-policy", "fixture")
+    cli("put", str(outside), "external_only", "--kind", "problem", "--text", "External data", "--actor", "agent:outside")
+    external_file = outside / "organon.json"
+    external_bytes = external_file.read_bytes()
+    external_inode = external_file.stat().st_ino
+
+    linked_case = root / "linked-case"
+    linked_case.mkdir()
+    linked_ledger = linked_case / "organon.json"
+    linked_ledger.symlink_to(external_file)
+
+    manifest = {"schema": 1, "steps": [
+        {"op": "put", "id": "local_problem", "kind": "problem", "text": "Local data", "refs": [], "data": {}},
+    ]}
+
+    async def exercise() -> None:
+        params = StdioServerParameters(
+            command=str(MCP), cwd=str(launch), env={**os.environ, "ORGANON_ROOT": str(root)}
+        )
+        async with Client(params, mode="auto") as client:
+            result_data(await client.call_tool("init", {
+                "path": "normal-case", "title": "Local", "domain": "test",
+                "actor": "human:fixture", "approval_policy": "fixture",
+            }))
+            normal = root / "normal-case"
+            assert result_data(await client.call_tool("status", {"path": "normal-case"}))["project"]["title"] == "Local"
+            normal_run = result_data(await client.call_tool(
+                "run", {"path": "normal-case", "manifest": manifest, "actor": "agent:writer"}
+            ))
+            assert normal_run["applied"] == 1
+            assert "local_problem" in result_data(await client.call_tool("status", {"path": "normal-case"}))["items"]
+
+            (root / "normal-alias").symlink_to(normal, target_is_directory=True)
+            assert "local_problem" in result_data(await client.call_tool("status", {"path": "normal-alias"}))["items"]
+
+            rejected_status = await client.call_tool("status", {"path": "linked-case"})
+            assert rejected_status.is_error
+            assert "external_only" not in str(rejected_status.content)
+            rejected_run = await client.call_tool(
+                "run", {"path": "linked-case", "manifest": manifest, "actor": "agent:writer"}
+            )
+            assert rejected_run.is_error
+            assert linked_ledger.is_symlink()
+            assert not (linked_case / ".organon.runner.lock").exists()
+            assert external_file.read_bytes() == external_bytes
+            assert external_file.stat().st_ino == external_inode
+
+            blocked_init = root / "blocked-init"
+            blocked_init.mkdir()
+            external_init_lock = tmp_path / "external-init-lock"
+            init_lock = blocked_init / ".organon.lock"
+            init_lock.symlink_to(external_init_lock)
+            rejected_init = await client.call_tool("init", {
+                "path": "blocked-init", "title": "Blocked", "domain": "test",
+                "actor": "human:fixture", "approval_policy": "fixture",
+            })
+            assert rejected_init.is_error
+            assert init_lock.is_symlink()
+            assert not external_init_lock.exists()
+            assert not (blocked_init / "organon.json").exists()
+
+            runner_case = root / "blocked-run"
+            result_data(await client.call_tool("init", {
+                "path": "blocked-run", "title": "Blocked run", "domain": "test",
+                "actor": "human:fixture", "approval_policy": "fixture",
+            }))
+            before_run = (runner_case / "organon.json").read_bytes()
+            external_runner_lock = tmp_path / "external-runner-lock"
+            runner_lock = runner_case / ".organon.runner.lock"
+            runner_lock.symlink_to(external_runner_lock)
+            rejected_locked_run = await client.call_tool(
+                "run", {"path": "blocked-run", "manifest": manifest, "actor": "agent:writer"}
+            )
+            assert rejected_locked_run.is_error
+            assert runner_lock.is_symlink()
+            assert not external_runner_lock.exists()
+            assert (runner_case / "organon.json").read_bytes() == before_run
+
+    asyncio.run(exercise())
+
+
+def test_mcp_rejects_hardlinked_case_files_without_importing_external_state(tmp_path):
+    root = tmp_path / "private-root"
+    launch = tmp_path / "launch"
+    root.mkdir(mode=0o700)
+    launch.mkdir()
+    outside = tmp_path / "outside-case"
+    cli("init", str(outside), "--title", "External", "--domain", "test", "--actor", "human:fixture", "--approval-policy", "fixture")
+    cli("put", str(outside), "external_only", "--kind", "problem", "--text", "External data", "--actor", "agent:outside")
+    external_file = outside / "organon.json"
+    external_bytes = external_file.read_bytes()
+    external_inode = external_file.stat().st_ino
+
+    def link_or_skip(source: Path, target: Path) -> None:
+        try:
+            os.link(source, target)
+        except OSError as exc:
+            pytest.skip(f"filesystem does not allow hardlinks: {exc}")
+
+    hardlinked_case = root / "hardlinked-case"
+    hardlinked_case.mkdir()
+    hardlinked_ledger = hardlinked_case / "organon.json"
+    link_or_skip(external_file, hardlinked_ledger)
+
+    external_init_lock = tmp_path / "external-init-lock"
+    external_init_lock.write_bytes(b"external lock stays intact")
+    blocked_init = root / "blocked-init"
+    blocked_init.mkdir()
+    init_lock = blocked_init / ".organon.lock"
+    link_or_skip(external_init_lock, init_lock)
+
+    manifest = {"schema": 1, "steps": [
+        {"op": "put", "id": "local_problem", "kind": "problem", "text": "Local data", "refs": [], "data": {}},
+    ]}
+
+    async def exercise() -> None:
+        params = StdioServerParameters(
+            command=str(MCP), cwd=str(launch), env={**os.environ, "ORGANON_ROOT": str(root)}
+        )
+        async with Client(params, mode="auto") as client:
+            result_data(await client.call_tool("init", {
+                "path": "normal-case", "title": "Local", "domain": "test",
+                "actor": "human:fixture", "approval_policy": "fixture",
+            }))
+            normal_run = result_data(await client.call_tool(
+                "run", {"path": "normal-case", "manifest": manifest, "actor": "agent:writer"}
+            ))
+            assert normal_run["applied"] == 1
+            assert "local_problem" in result_data(await client.call_tool("status", {"path": "normal-case"}))["items"]
+
+            rejected_status = await client.call_tool("status", {"path": "hardlinked-case"})
+            assert rejected_status.is_error
+            assert "external_only" not in str(rejected_status.content)
+            rejected_run = await client.call_tool(
+                "run", {"path": "hardlinked-case", "manifest": manifest, "actor": "agent:writer"}
+            )
+            assert rejected_run.is_error
+            assert hardlinked_ledger.stat().st_ino == external_inode
+            assert not (hardlinked_case / ".organon.runner.lock").exists()
+            assert external_file.read_bytes() == external_bytes
+
+            rejected_init = await client.call_tool("init", {
+                "path": "blocked-init", "title": "Blocked", "domain": "test",
+                "actor": "human:fixture", "approval_policy": "fixture",
+            })
+            assert rejected_init.is_error
+            assert init_lock.stat().st_ino == external_init_lock.stat().st_ino
+            assert external_init_lock.read_bytes() == b"external lock stays intact"
+            assert not (blocked_init / "organon.json").exists()
+
+            runner_case = root / "blocked-run"
+            result_data(await client.call_tool("init", {
+                "path": "blocked-run", "title": "Blocked run", "domain": "test",
+                "actor": "human:fixture", "approval_policy": "fixture",
+            }))
+            before_run = (runner_case / "organon.json").read_bytes()
+            external_runner_lock = tmp_path / "external-runner-lock"
+            external_runner_lock.write_bytes(b"external runner lock stays intact")
+            runner_lock = runner_case / ".organon.runner.lock"
+            link_or_skip(external_runner_lock, runner_lock)
+            rejected_locked_run = await client.call_tool(
+                "run", {"path": "blocked-run", "manifest": manifest, "actor": "agent:writer"}
+            )
+            assert rejected_locked_run.is_error
+            assert runner_lock.stat().st_ino == external_runner_lock.stat().st_ino
+            assert external_runner_lock.read_bytes() == b"external runner lock stays intact"
+            assert (runner_case / "organon.json").read_bytes() == before_run
+
+    asyncio.run(exercise())

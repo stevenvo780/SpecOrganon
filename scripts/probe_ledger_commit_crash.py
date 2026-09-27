@@ -46,7 +46,8 @@ original_replace = os.replace
 def intercepted_replace(source, destination):
     if Path(destination).resolve() != target:
         return original_replace(source, destination)
-    if Path(source).parent != target.parent or not Path(source).name.startswith(".organon-"):
+    # MCP pins the case directory via /proc/self/fd; compare the actual parent.
+    if Path(source).parent.resolve(strict=True) != target.parent or not Path(source).name.startswith(".organon-"):
         raise AssertionError("unexpected ledger replacement source")
     candidate = Path(source).read_bytes()
     document = ledger.strict_json_loads(candidate.decode("utf-8"))

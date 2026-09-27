@@ -1,4 +1,5 @@
 import json
+import os
 from decimal import Decimal
 
 import pytest
@@ -81,3 +82,24 @@ def test_failed_atomic_replace_keeps_previous_revision(tmp_path, monkeypatch):
     with pytest.raises(OSError, match="simulated interruption"):
         ledger.append_event(project, "note", {"value": 1}, "agent", expected_seq=0)
     assert ledger.read_project(project)["events"] == []
+
+
+def test_read_rejects_fifo_ledger_without_blocking(tmp_path):
+    project = tmp_path / "project"
+    project.mkdir()
+    os.mkfifo(ledger.project_file(project))
+
+    with pytest.raises(ledger.LedgerError, match="not a regular file"):
+        ledger.read_project(project)
+
+
+def test_init_rejects_dangling_symlinked_ledger(tmp_path):
+    project = tmp_path / "project"
+    project.mkdir()
+    target = ledger.project_file(project)
+    target.symlink_to(tmp_path / "absent-external-ledger")
+
+    with pytest.raises(ledger.LedgerError, match="project already exists"):
+        ledger.init_project(project, "Case", "domain", "human")
+    assert target.is_symlink()
+    assert not (tmp_path / "absent-external-ledger").exists()

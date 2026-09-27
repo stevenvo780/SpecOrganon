@@ -9,12 +9,13 @@ from __future__ import annotations
 
 import fcntl
 import json
+import os
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
 from . import engine
-from .ledger import ConflictError
+from .ledger import ConflictError, _open_regular_file
 from .workflow import KIND_TO_PHASE, KINDS, PHASES, PHASE_BY_ID
 
 
@@ -282,12 +283,15 @@ def _pending_reason(task: dict[str, Any]) -> str:
 @contextmanager
 def _run_lock(path: str | Path) -> Iterator[None]:
     """Serialize all manifest executions for a case without changing the ledger."""
-    with (Path(path) / ".organon.runner.lock").open("a+") as lock:
-        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+    fd = _open_regular_file(Path(path) / ".organon.runner.lock", os.O_RDWR | os.O_CREAT | os.O_APPEND)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
         try:
             yield
         finally:
-            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+            fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
 
 
 def run_manifest(path: str | Path, manifest: dict[str, Any], actor: str) -> dict[str, Any]:
