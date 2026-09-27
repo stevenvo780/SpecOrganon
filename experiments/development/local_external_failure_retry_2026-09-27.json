@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "classification": "development_local_external_failure_retry_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "implementation_sha256": {
+    "scripts/local_block_release_gate.py": "774dfbb9eb67a5d70dbad86a080db5ad9f29d9c35ccc5740debef31d9dd94ad6",
+    "scripts/local_run_admission.py": "74749dd39432d5f7672a35b164be5ea7fdcad39f7f74d7ffe85af6c8814ee253",
+    "scripts/preflight_assets.py": "87fa753e07593282d315a53c7d4af6d4031b3eae21703b8154111f8f2fed5a53",
+    "scripts/verify_released_run.py": "e25d2b381bd2a8fc331960038d0db0266d9744860d8277436e9bbcee647a8a38",
+    "scripts/inspect_released_payload.py": "e5443487fddabb880a779c6c41002536a12e98ce59740c1b246654ef81597dbf",
+    "scripts/stage_released_run.py": "6bc33108ca707bd0943c0678e7d86110b0581fd0629fad46c9acdc5be4bdcfd0",
+    "scripts/verify_staged_run.py": "e9e9825c3dcbdb33434467d74cfbef3b50c0e1e98a06d22e293ce2d7e9bbc389",
+    "scripts/run_staged_local_tool.py": "fd7263f97239ba8eb95128ba8256faf7f6e6b61be5114504fde7329332cddf2c",
+    "scripts/staged_tool_session.py": "657a993051e6839076a137a51a6188cabd67df2d70cab97d80d4b4f91a41272e",
+    "tests/test_local_block_release_gate.py": "283fcaf37075931bf88b66e2786ca29c0e30873351a5c646460a55e2344757e6",
+    "tests/test_local_run_admission.py": "97ccf27b9a45e9f1db6b3510832a2afd9286e1d244e03cb9ff82f8be469076d3",
+    "tests/test_preflight_assets.py": "003ec57b0fa9dd68fabb46ba6039a3b2d138e8b5f1a346ed464510265750e3ff",
+    "tests/test_verify_released_run.py": "f3ccd27a5d32d6fc7cdaa467359c50d0896634987818c2f2702da7977989cdca",
+    "tests/test_inspect_released_payload.py": "e1296da41732abf7b8c0a9d6dbe806ee5bedee4e04a2cd07ff9dfcb766ae2db4",
+    "tests/test_stage_released_run.py": "7b1107bf2ed8b68915929212a677e94b55b6306a1b03a4b4c8e5beb360adb133",
+    "tests/test_verify_staged_run.py": "ab7744e8f24e0cc5bd93aa1e26b64c3bc7c1ca617a16d1e78d2ac6902044f061",
+    "tests/test_staged_tool_session.py": "323347b726ba2c7123aadb5b26f71758946adf9e2468596f9dc42aa38590458a"
+  },
+  "initial_gap": "The local block gate and admission registry supported attempt 1 only. An external_failure permanently blocked that arm; release, stage, and both local runners lacked attempt-specific identity.",
+  "local_contract": {
+    "scope": "cooperating processes on one host, one UID and one private gate root for one candidate schedule",
+    "retry_eligibility": "immediately previous attempt has a published external_failure terminal for the same scheduled run",
+    "retry_slots": "ten study-wide additional claims, reserved durably when claimed",
+    "next_arm_waits_for": "completed or truncated terminal of the final attempt of the preceding arm",
+    "nonretryable_stop": "explicit durable stopped event after latest external_failure; frees an open-block slot but never authorizes a successor arm or refunds a retry slot",
+    "max_open_blocks": 4,
+    "max_active_releases": 4,
+    "attempt_one_compatibility": "schema-1 release and stage bytes and admission key are preserved",
+    "retry_release_and_stage": "schema 2 records attempt_number; retry stage also records release_dir, claim_sha256 and publication_sha256",
+    "runtime_binding": "retry one-shot and session verify active claim and stage provenance; hold a shared gate lock during local sandbox execution",
+    "global_provider_limits_enforced": false,
+    "criterion_4": "not_assessed"
+  },
+  "adversarial_reproductions_and_repairs": [
+    "A schema-1 attempt-1 manifest was initially publishable and closable as attempt 2. Publication, terminal and replay now require the verified manifest attempt to equal the requested attempt; retry fixtures use schema 2.",
+    "Four blocks with external_failure terminals could indefinitely occupy every open-block slot even when a retry was unavailable. A strict stop event can now close such a block while keeping its pending arms missing.",
+    "The retry runners initially released the gate lock between active-claim verification and sandbox launch. They now hold a shared lock across the sandbox call; a concurrent terminal writer waits.",
+    "A copied retry stage without a gate root, with altered claim digests, or after terminal closure is rejected before a local launch.",
+    "The stop event binds the latest terminal and incident digests, reason and exact canonical evidence bytes; replay rejects changes and a stopped block forbids later claims."
+  ],
+  "gates": [
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "1249 passed, 1 xfailed in 120.88s",
+      "note": "The full suite began before a one-line fix to an unreachable allow_empty tuple branch; the final gate-focused run below used the final bytes."
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_local_block_release_gate.py tests/test_preflight_assets.py tests/test_stage_released_run.py tests/test_verify_released_run.py tests/test_verify_staged_run.py tests/test_inspect_released_payload.py tests/test_local_run_admission.py tests/test_run_staged_local_tool.py tests/test_staged_tool_session.py",
+      "result": "247 passed in 44.66s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_local_block_release_gate.py tests/test_preflight_assets.py tests/test_stage_released_run.py tests/test_staged_tool_session.py",
+      "result": "113 passed in 21.58s on final implementation bytes"
+    },
+    {
+      "command": "ruff check scripts tests; git diff --check",
+      "result": "passed"
+    }
+  ],
+  "independent_review": {
+    "result": "Two high-severity findings were reproduced and closed. The reviewer found no new high-severity bypass in replay or stop-block order after the repairs.",
+    "remaining_race": "The retry lock is released after the sandbox returns, before output inventory and durable local receipt publication. A locally declared terminal can be recorded in that interval.",
+    "attempt_one_limit": "A schema-1 stage does not record whether or where it was gated; the local runners cannot retain that gate during attempt-1 execution. Its terminal timing still depends on cooperating operator discipline."
+  },
+  "limits": [
+    "Terminal incident, trace and artifact digests and the nonretryable reason are local declarations. No provider failure or result bytes are authenticated.",
+    "The common gate, admission and clocks are controlled by one UID on one host; another root, UID or host has a separate accounting domain.",
+    "The local sandbox has no verified runtime image or aggregate provider token, time and cost enforcement. These tests are synthetic and do not run the model matrix or establish criterion 4.",
+    "The prior MCP same-UID relocation boundary remains the one strict expected failure in the global suite and is unrelated to retry admission."
+  ]
+}
