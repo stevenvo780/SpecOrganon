@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "classification": "development_synthetic_field_power_sensitivity_not_site_power",
+  "date_utc": "2026-09-27",
+  "source_commit": "62c927e697225d44b84dc19c2f0527a5515e3f14",
+  "input_file": "input.json",
+  "input_sha256": "812d59b172abf5063f0e464e1bfcb499387149621ce5928a59f7d358072df096",
+  "simulator_sha256": "aa973e17ee4df24c8ba4b9a181967a92216cf9be24d7d36e08c8363beaee7e4e",
+  "adjusted_estimator_sha256": "88a70560fbe0907ad1e3cb3a2e25dabb7fc0c02eaa42db6f6cda3cad2178971c",
+  "reproduce": "python3 scripts/analyze_field_power_sensitivity.py experiments/development/field_power_sensitivity_synthetic_2026-09-27/input.json",
+  "stdout_sha256_including_newline": "02a1ef000c03232a7894114c6ed1e310d2cf14a189236e4f066e3ac8dc3343e5",
+  "fixture": {
+    "kind": "invented_development_profiles",
+    "profile_groups": 12,
+    "strata": 2,
+    "planned_groups": 12,
+    "outer_draws": 40,
+    "bootstrap_draws_per_outer_draw_and_scenario": 400,
+    "scenarios_true_g": [0, 0.1, 0.2]
+  },
+  "summary_all_outer_draws_denominator_40": [
+    {"true_g": "0", "defined_intervals": 40, "ci_lower_gt_zero": 3, "ci_lower_ge_0_10": 0, "ci_covers_true_g": 34},
+    {"true_g": "0.1", "defined_intervals": 40, "ci_lower_gt_zero": 40, "ci_lower_ge_0_10": 1, "ci_covers_true_g": 38},
+    {"true_g": "0.2", "defined_intervals": 40, "ci_lower_gt_zero": 40, "ci_lower_ge_0_10": 40, "ci_covers_true_g": 40}
+  ],
+  "checks": {
+    "legacy_adjusted_candidate_report_sha256_unchanged": "312fb76d5a550725fdde31d694a79ba8865e15ea3e2a0d14c991401f2d512f14",
+    "all_failures_and_undefined_intervals_remain_in_outer_denominator": true,
+    "impossible_post_v_is_not_clamped": true,
+    "site_power_validated": false,
+    "assignment_ready": false,
+    "source_authenticity": false,
+    "criterion_3": "not_assessed"
+  },
+  "independent_review": {
+    "legacy_reports_compared_for_five_bootstrap_draw_counts": true,
+    "adversarial_out_of_range_shift_counted_as_failure": true,
+    "adversarial_200_group_50_stratum_budget_rejected_before_simulation": true
+  },
+  "verification": [
+    "uv run pytest -q: 1793 passed in 134.76s after the weighted-budget fix",
+    "uv run ruff check .: All checks passed!",
+    "An offline current-source wheel with SHA-256 3bdb7f4218e1fe63eac44e28fff45d95b88d879834e9394199f2f8d0db9d6913 included the new module; clean Python 3.11 and 3.12 virtual environments installed it offline, passed uv pip check, and imported the module.",
+    "The frozen D-E wheel with SHA-256 b65e13d602c3b7d83556af1897d817c26e44a8d61b47008f9a5128e1462d40f3 was unchanged."
+  ],
+  "limits": [
+    "The 12 profiles are invented and do not represent a food-chain site; these frequencies do not estimate site power or confidence-interval coverage.",
+    "The model assumes stable paired untreated profiles, independent groups, a constant effect, no attrition, contamination or additional measurement error; none is authenticated here.",
+    "The percentile interval is nominal and may have poor coverage with few clusters. The work-unit cap is a heuristic, not a wall-time guarantee.",
+    "A competent statistician and site actors must approve the event, effect assumption, data and design before assigning any real group."
+  ]
+}

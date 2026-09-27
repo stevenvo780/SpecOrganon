@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "classification": "field_power_sensitivity_inputs_development",
+  "profiles": [
+    {"group_id": "A0", "stratum": "A", "pre_v": 0.4, "post_v_no_treatment": 0.38, "baseline_input_volume": 90},
+    {"group_id": "A1", "stratum": "A", "pre_v": 0.425, "post_v_no_treatment": 0.415, "baseline_input_volume": 105},
+    {"group_id": "A2", "stratum": "A", "pre_v": 0.45, "post_v_no_treatment": 0.45, "baseline_input_volume": 120},
+    {"group_id": "A3", "stratum": "A", "pre_v": 0.475, "post_v_no_treatment": 0.485, "baseline_input_volume": 135},
+    {"group_id": "A4", "stratum": "A", "pre_v": 0.5, "post_v_no_treatment": 0.52, "baseline_input_volume": 150},
+    {"group_id": "A5", "stratum": "A", "pre_v": 0.525, "post_v_no_treatment": 0.555, "baseline_input_volume": 165},
+    {"group_id": "B0", "stratum": "B", "pre_v": 0.4, "post_v_no_treatment": 0.395, "baseline_input_volume": 100},
+    {"group_id": "B1", "stratum": "B", "pre_v": 0.425, "post_v_no_treatment": 0.43, "baseline_input_volume": 115},
+    {"group_id": "B2", "stratum": "B", "pre_v": 0.45, "post_v_no_treatment": 0.465, "baseline_input_volume": 130},
+    {"group_id": "B3", "stratum": "B", "pre_v": 0.475, "post_v_no_treatment": 0.5, "baseline_input_volume": 145},
+    {"group_id": "B4", "stratum": "B", "pre_v": 0.5, "post_v_no_treatment": 0.535, "baseline_input_volume": 160},
+    {"group_id": "B5", "stratum": "B", "pre_v": 0.525, "post_v_no_treatment": 0.57, "baseline_input_volume": 175}
+  ],
+  "planned_cells": [
+    {"arm": "control", "stratum": "A", "groups": 3},
+    {"arm": "intervention", "stratum": "A", "groups": 3},
+    {"arm": "control", "stratum": "B", "groups": 3},
+    {"arm": "intervention", "stratum": "B", "groups": 3}
+  ],
+  "scenarios_true_g": [0, 0.1, 0.2],
+  "simulation": {"outer_draws": 40, "outer_seed": 719, "bootstrap_draws": 400, "bootstrap_seed": 3201}
+}
