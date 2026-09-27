@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "classification": "exposed_development_text_only_manual_method_ablation",
+  "frozen_at_utc": "2026-09-27",
+  "case": "school_waste_summary",
+  "source_files": {
+    "cases/school_waste/README.md": "46a3f2569a187acf147cd9917e9c9dff142fda6b45bc4fa2abed0402d525bf55",
+    "docs/sensibilidad_temporal_escuela.md": "628b0e52b46582140d3f6d6c5b2b67fae9f4571fe42658f080fe6c4e95e390ea",
+    "cases/school_waste/source.xlsx": "2ffad746b7ed5d536a0c99c37d8e249230d95d5fb2d041d85d01b69499f99624",
+    "docs/plan_escuela_residuos.md": "49ce977aebb5fa6ddbd26bc008b9ffa4e094a4d81e4fe5f4785ee3e3895e9f66"
+  },
+  "protocol_files": {
+    "README.md": "b742ef992c20522da3ce76214e91ffa024011f18cd5ad36fd4fe7a2afbbd5f3a",
+    "common_task.md": "62b7c6468ab8cfdac0f23eb03c33168d7816faf810bf749bce7d7c0ae1fad4d4",
+    "prompt_n.md": "cf65311d73bf90044b748337c871e836042fb4a97e5c23282ead6ed2bc3913f7",
+    "prompt_s.md": "3c682649b458db687b266d62739081312fce6949ec6a39592e8b373f6d49ef67",
+    "prompt_am.md": "968f5b2da2bd7d3c5b50c7855bfb5e5799c6699c6eebc93620a390c0c36549da",
+    "rubric.md": "c0e301a85284530d91c9fcf1862948f21fa35c5a0e3a688bed400d8a0a8ca1e9"
+  },
+  "runner": {
+    "tool": "cloud-offload.delegar_a_cloud",
+    "access": "text",
+    "timeout_seconds_per_call": 120,
+    "max_calls": 9,
+    "effort_argument": null,
+    "system_argument": null,
+    "output_word_limit_requested": 900,
+    "output_limit_enforced": false,
+    "token_limit_enforced": false,
+    "cost_limit_enforced": false,
+    "provider_usage_receipt_available": false
+  },
+  "models": [
+    {
+      "block": 1,
+      "requested_route": "gemini/gemini-3.8-flash-low",
+      "catalog_display": "Gemini 3.8 Flash (Low)",
+      "arm_order": [
+        "N",
+        "S",
+        "A-M"
+      ]
+    },
+    {
+      "block": 2,
+      "requested_route": "minimax/MiniMax-M3",
+      "catalog_display": "MiniMax-M3",
+      "arm_order": [
+        "S",
+        "A-M",
+        "N"
+      ]
+    },
+    {
+      "block": 3,
+      "requested_route": "gemini/gemini-3.8-flash-high",
+      "catalog_display": "Gemini 3.8 Flash (High)",
+      "arm_order": [
+        "A-M",
+        "N",
+        "S"
+      ]
+    }
+  ],
+  "candidate_runtime_routes_verified_by": [
+    "agy models",
+    "opencode models minimax"
+  ],
+  "cells": [
+    {
+      "id": "g38l_n",
+      "block": 1,
+      "arm": "N",
+      "prompt": "prompt_n.md"
+    },
+    {
+      "id": "g38l_s",
+      "block": 1,
+      "arm": "S",
+      "prompt": "prompt_s.md"
+    },
+    {
+      "id": "g38l_am",
+      "block": 1,
+      "arm": "A-M",
+      "prompt": "prompt_am.md"
+    },
+    {
+      "id": "m3_s",
+      "block": 2,
+      "arm": "S",
+      "prompt": "prompt_s.md"
+    },
+    {
+      "id": "m3_am",
+      "block": 2,
+      "arm": "A-M",
+      "prompt": "prompt_am.md"
+    },
+    {
+      "id": "m3_n",
+      "block": 2,
+      "arm": "N",
+      "prompt": "prompt_n.md"
+    },
+    {
+      "id": "g38h_am",
+      "block": 3,
+      "arm": "A-M",
+      "prompt": "prompt_am.md"
+    },
+    {
+      "id": "g38h_n",
+      "block": 3,
+      "arm": "N",
+      "prompt": "prompt_n.md"
+    },
+    {
+      "id": "g38h_s",
+      "block": 3,
+      "arm": "S",
+      "prompt": "prompt_s.md"
+    }
+  ],
+  "limitations": [
+    "Route catalog presence does not prove actual execution; failed cells will not be substituted or retried.",
+    "No toolkit, CLI or MCP access is given to models; A-M is a manual-method ablation and is not T.",
+    "One exposed case and one attempt per cell cannot estimate run variability or field effects.",
+    "Cloud bridge provides no authenticated usage/cost receipt or enforced token/output budget."
+  ]
+}
