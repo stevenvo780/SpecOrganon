@@ -17,7 +17,7 @@ from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
-from . import approval, field_attestation
+from . import approval, field_attestation, review_provenance
 from .ledger import ZERO_HASH, ConflictError, LedgerError, append_event, init_project, read_project
 from .workflow import KIND_TO_PHASE, KINDS, PHASES, PHASE_BY_ID
 
@@ -49,9 +49,10 @@ def _project(path: str | Path) -> dict[str, Any]:
     project = dict(ledger["project"])
     project.setdefault("approval_policy", "signed")
     try:
-        approvers, trust_status = approval.trust_context(project, path)
+        approvers, phase_reviewers, trust_status = approval.trust_contexts(project, path)
     except ValueError:
         approvers = {}
+        phase_reviewers = {}
         trust_status = "unavailable"
     if project["approval_policy"] == "signed":
         try:
@@ -71,6 +72,11 @@ def _project(path: str | Path) -> dict[str, Any]:
         "approvals": set(),
         "approval_statuses": {},
         "approval_trust": trust_status,
+        "phase_review_trust": (
+            "fixture" if trust_status == "fixture" else
+            "configured" if trust_status == "configured" and phase_reviewers else "unavailable"
+        ),
+        "phase_reviewers": phase_reviewers,
         "field_attestation_trust": field_trust_status,
         "field_attestations": [],
         "item_reviews": {},
@@ -164,7 +170,37 @@ def _project(path: str | Path) -> dict[str, Any]:
                 "review_seq": payload.get("review_seq", review["seq"] if review else None),
             }
         elif kind == "phase_review":
-            state["phase_reviews"].append({"seq": seq, "actor": event["actor"], **payload, "_event": event})
+            if not isinstance(payload, dict) or payload.get("phase") not in PHASE_BY_ID:
+                raise MethodError(f"invalid phase review at sequence {seq}")
+            authors = {item["author"] for item in state["items"].values()
+                       if KIND_TO_PHASE[item["kind"]] == payload["phase"]}
+            independent = event["actor"] not in authors
+            if project["approval_policy"] == "signed":
+                has_proof = isinstance(payload.get("signature"), str) and isinstance(payload.get("key_sha256"), str)
+                try:
+                    current_snapshot = _phase_statuses(state)[payload["phase"]]["snapshot"]
+                    verified = bool(
+                        has_proof and trust_status == "configured"
+                        and payload.get("snapshot") == current_snapshot
+                        and review_provenance.verify(
+                            project, path, event["prev_hash"], payload["phase"], payload["snapshot"],
+                            payload.get("verdict"), payload.get("reason"), event["actor"],
+                            payload["signature"], payload["key_sha256"], phase_reviewers,
+                        )
+                    )
+                except (KeyError, TypeError, ValueError):
+                    verified = False
+                provenance = "signed_verified" if verified else (
+                    "legacy_unverified" if not has_proof else "signature_unverified"
+                )
+            else:
+                verified = False
+                provenance = "synthetic_fixture" if trust_status == "fixture" else "fixture_unavailable"
+            state["phase_reviews"].append({
+                "seq": seq, "actor": event["actor"], **payload,
+                "independent": independent, "signature_verified": verified,
+                "provenance": provenance, "_event": event,
+            })
         elif kind == "phase_advance":
             state["advances"].append({"seq": seq, "actor": event["actor"], **payload, "_event": event})
         else:
@@ -1021,18 +1057,40 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
             ]
         snapshot = _hash(snapshot_data)
         blockers = _phase_blockers(state, phase.id, previous_accepted, flags)
+        if (state["project"]["approval_policy"] == "fixture"
+                and state["phase_review_trust"] != "fixture"):
+            blockers.insert(0, "fixture policy is unavailable or conflicts with a registered signed case")
         reviews = [review for review in state["phase_reviews"] if review["phase"] == phase.id and review["snapshot"] == snapshot]
         review = reviews[-1] if reviews else None
-        advances = [marker for marker in state["advances"] if marker["phase"] == phase.id and marker["snapshot"] == snapshot and review and review["verdict"] == "accept" and marker["review_seq"] == review["seq"] and marker["seq"] > review["seq"]]
+        if state["project"]["approval_policy"] == "signed":
+            review_effective = bool(
+                review and review["verdict"] == "accept"
+                and review["signature_verified"] and review["independent"]
+            )
+        else:
+            review_effective = bool(
+                state["phase_review_trust"] == "fixture"
+                and review and review["verdict"] == "accept"
+            )
+        advances = [marker for marker in state["advances"] if marker["phase"] == phase.id and marker["snapshot"] == snapshot and review_effective and marker["review_seq"] == review["seq"] and marker["seq"] > review["seq"]]
         marker = advances[-1] if advances else None
-        accepted = not blockers and marker is not None and (phase.id != "validate" or bool(review and review["independent"]))
+        accepted = not blockers and marker is not None and (
+            state["project"]["approval_policy"] == "signed"
+            or phase.id != "validate" or bool(review and review["independent"])
+        )
         statuses[phase.id] = {
             "phase": phase.id,
             "front": phase.front,
             "ready": not blockers,
             "accepted": accepted,
-            "reviewed": review is not None and review["verdict"] == "accept",
-            "independent_review": bool(review and review["independent"]),
+            "reviewed": review_effective,
+            "independent_review": bool(review and review["independent"] and (
+                (state["project"]["approval_policy"] == "fixture"
+                 and state["phase_review_trust"] == "fixture")
+                or review["signature_verified"]
+            )),
+            "review_signature_verified": bool(review and review["signature_verified"]),
+            "review_provenance": review["provenance"] if review else "none",
             "blockers": blockers,
             "snapshot": snapshot,
             "advance_seq": marker["seq"] if marker else None,
@@ -1282,6 +1340,15 @@ def get_state(path: str | Path) -> dict[str, Any]:
     open_challenges = [challenge for seq, challenge in state["challenges"].items() if seq not in active_resolutions]
     return {"project": state["project"], "project_sha256": approval.project_fingerprint(state["project"]),
             "revision": state["revision"], "approval_trust": state["approval_trust"],
+            "phase_review_trust": state["phase_review_trust"],
+            "phase_review_history": [
+                {"seq": entry["seq"], "phase": entry["phase"],
+                 "verdict": entry.get("verdict"), "actor": entry["actor"],
+                 "snapshot": entry.get("snapshot"), "provenance": entry["provenance"],
+                 "signature_verified": entry["signature_verified"],
+                 "independent": entry["independent"]}
+                for entry in state["phase_reviews"]
+            ],
             "field_attestation_trust": state["field_attestation_trust"],
             "field_attestations": [
                 {"seq": entry["seq"], "actor": entry["actor"],
@@ -1308,7 +1375,9 @@ def gate(path: str | Path, phase: str) -> dict[str, Any]:
 def _matching_phase_review(state: dict[str, Any], payload: dict[str, Any], actor: str) -> dict[str, Any] | None:
     for review in reversed(state["phase_reviews"]):
         if review["phase"] == payload["phase"] and review["snapshot"] == payload["snapshot"]:
-            if review["actor"] == actor and all(review[key] == value for key, value in payload.items()):
+            if (review["actor"] == actor
+                    and (state["project"]["approval_policy"] == "fixture" or review["signature_verified"])
+                    and all(review.get(key) == value for key, value in payload.items())):
                 return review["_event"]
             break
     return None
@@ -1318,8 +1387,9 @@ def _active_phase_advance(state: dict[str, Any], advance_seq: int) -> dict[str, 
     return next(marker for marker in state["advances"] if marker["seq"] == advance_seq)
 
 
-def review_phase(path: str | Path, phase: str, verdict: str, reason: str, actor: str) -> dict[str, Any]:
-    state = _project(path)
+def _phase_review_target(
+    state: dict[str, Any], phase: str, verdict: str, reason: str, actor: str,
+) -> tuple[dict[str, Any], str]:
     if phase not in PHASE_BY_ID or verdict not in VERDICTS or not isinstance(reason, str) or not reason.strip():
         raise MethodError("phase review needs a known phase, accept/reject and reason")
     if not isinstance(actor, str) or not actor.strip():
@@ -1329,11 +1399,60 @@ def review_phase(path: str | Path, phase: str, verdict: str, reason: str, actor:
         raise MethodError("phase cannot be accepted: " + "; ".join(status["blockers"]))
     normalized_actor = actor.strip()
     authors = {item["author"] for item in state["items"].values() if KIND_TO_PHASE[item["kind"]] == phase}
+    if state["project"]["approval_policy"] == "fixture" and state["phase_review_trust"] != "fixture":
+        raise MethodError("fixture phase reviews are disabled or conflict with a registered signed case")
+    if state["project"]["approval_policy"] == "signed":
+        if normalized_actor != actor:
+            raise MethodError("signed phase reviewer actor must not contain surrounding whitespace")
+        if state["phase_review_trust"] != "configured":
+            raise MethodError("signed phase review requires a trusted reviewer registry")
+        if normalized_actor not in state["phase_reviewers"]:
+            raise MethodError("phase reviewer actor has no trusted public key")
+        if verdict == "accept" and normalized_actor in authors:
+            raise MethodError("accepted phase review must be independent of phase authors")
+    return status, normalized_actor
+
+
+def phase_review_challenge(
+    path: str | Path, phase: str, verdict: str, reason: str, actor: str,
+) -> dict[str, Any]:
+    state = _project(path)
+    if state["project"]["approval_policy"] != "signed":
+        raise MethodError("fixture cases do not need signed phase review challenges")
+    status, normalized_actor = _phase_review_target(state, phase, verdict, reason, actor)
+    return review_provenance.challenge(
+        state["project"], path, state["head_hash"], phase, status["snapshot"],
+        verdict, reason.strip(), normalized_actor,
+    )
+
+
+def review_phase(
+    path: str | Path, phase: str, verdict: str, reason: str, actor: str,
+    signature: str | None = None,
+) -> dict[str, Any]:
+    state = _project(path)
+    status, normalized_actor = _phase_review_target(state, phase, verdict, reason, actor)
+    authors = {item["author"] for item in state["items"].values()
+               if KIND_TO_PHASE[item["kind"]] == phase}
     payload = {"phase": phase, "verdict": verdict, "reason": reason.strip(), "snapshot": status["snapshot"], "independent": normalized_actor not in authors}
+    if state["project"]["approval_policy"] == "fixture":
+        if signature is not None:
+            raise MethodError("fixture phase review must not have a signature")
+    else:
+        if not isinstance(signature, str) or not signature:
+            raise MethodError("signed phase review requires an Ed25519 signature")
+        key = state["phase_reviewers"][normalized_actor]
+        fingerprint = approval.key_fingerprint(key)
+        payload.update({"signature": signature, "key_sha256": fingerprint})
     if existing := _matching_phase_review(state, payload, normalized_actor):
         return existing
+    if state["project"]["approval_policy"] == "signed" and not review_provenance.verify(
+        state["project"], path, state["head_hash"], phase, status["snapshot"], verdict,
+        reason.strip(), normalized_actor, signature, fingerprint, state["phase_reviewers"],
+    ):
+        raise MethodError("phase review signature is invalid or stale for this case, snapshot or actor")
     try:
-        return append_event(path, "phase_review", payload, actor, expected_seq=state["revision"])
+        return append_event(path, "phase_review", payload, normalized_actor, expected_seq=state["revision"])
     except ConflictError:
         current = _project(path)
         current_status = _phase_statuses(current)[phase]
@@ -1354,7 +1473,7 @@ def advance(path: str | Path, phase: str, actor: str) -> dict[str, Any]:
     if not status["ready"]:
         raise MethodError("phase cannot advance: " + "; ".join(status["blockers"]))
     reviews = [review for review in state["phase_reviews"] if review["phase"] == phase and review["snapshot"] == status["snapshot"]]
-    if not reviews or reviews[-1]["verdict"] != "accept":
+    if not reviews or not status["reviewed"]:
         raise MethodError("phase needs an accepted review of its current snapshot")
     if phase == "validate" and not reviews[-1]["independent"]:
         raise MethodError("validation needs an independent review of its current snapshot")

@@ -64,7 +64,9 @@ def _registry() -> dict[str, Any] | None:
     return data["cases"]
 
 
-def trust_context(project: dict[str, Any], path: str | Path) -> tuple[dict[str, bytes], str]:
+def trust_contexts(
+    project: dict[str, Any], path: str | Path,
+) -> tuple[dict[str, bytes], dict[str, bytes], str]:
     """Resolve effective approval mode from external registration and fixture flag.
 
     A registered path can never be downgraded to an unsigned fixture by editing
@@ -89,7 +91,7 @@ def trust_context(project: dict[str, Any], path: str | Path) -> tuple[dict[str, 
             raise ValueError("registered signed case cannot become a fixture")
         if os.environ.get("ORGANON_ALLOW_FIXTURES") != "1":
             raise ValueError("fixture approvals disabled; set ORGANON_ALLOW_FIXTURES=1 only in synthetic runs")
-        return {}, "fixture"
+        return {}, {}, "fixture"
     if project.get("approval_policy") != "signed" or cases is None:
         raise ValueError("signed case requires a trusted case registry")
     case_id = project.get("case_id")
@@ -107,7 +109,32 @@ def trust_context(project: dict[str, Any], path: str | Path) -> tuple[dict[str, 
         if not isinstance(actor, str) or not actor.startswith("human:") or key is None:
             raise ValueError("malformed trusted approver entry")
         result[actor] = key
-    return result, "configured"
+    raw_reviewers = entry.get("phase_reviewers", {})
+    if not isinstance(raw_reviewers, dict):
+        raise ValueError("malformed trusted phase reviewers")
+    reviewers: dict[str, bytes] = {}
+    key_owners: dict[bytes, str] = {}
+    for actor, key in result.items():
+        owner = key_owners.get(key)
+        if owner is not None and owner != actor:
+            raise ValueError("trusted public key is registered under multiple actors")
+        key_owners[key] = actor
+    for actor, encoded in raw_reviewers.items():
+        key = _decode(encoded, 32)
+        if (not isinstance(actor, str) or not actor or actor != actor.strip()
+                or key is None):
+            raise ValueError("malformed trusted phase reviewer entry")
+        owner = key_owners.get(key)
+        if owner is not None and owner != actor:
+            raise ValueError("trusted public key is registered under multiple actors")
+        key_owners[key] = actor
+        reviewers[actor] = key
+    return result, reviewers, "configured"
+
+
+def trust_context(project: dict[str, Any], path: str | Path) -> tuple[dict[str, bytes], str]:
+    approvers, _, status = trust_contexts(project, path)
+    return approvers, status
 
 
 def message(
