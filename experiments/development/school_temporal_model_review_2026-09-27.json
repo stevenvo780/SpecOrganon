@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "classification": "exploratory_development_review_not_field_validation",
+  "date_utc": "2026-09-27",
+  "case": "school_waste",
+  "source_xlsx_sha256": "2ffad746b7ed5d536a0c99c37d8e249230d95d5fb2d041d85d01b69499f99624",
+  "prior_plan_sha256": "49ce977aebb5fa6ddbd26bc008b9ffa4e094a4d81e4fe5f4785ee3e3895e9f66",
+  "prompt": "Eres revisor metodológico independiente de un análisis de campo alimentario exploratorio. Responde en español, JSON válido con claves \"fallos_materiales\" (máximo 5 objetos con \"hallazgo\",\"por_que_importa\",\"comprobacion\"), \"analisis_adicionales\" (máximo 3), \"veredicto_causal\" (una frase). No tienes acceso a archivos ni herramientas; no inventes resultados ni fuentes. Evalúa el diseño, no la calidad de redacción.\n\nResumen factual autocontenido: un conjunto real CC BY 4.0 de una sola escuela registra 155 días lectivos, 135 en baseline y los últimos 20 tras cambios semanales no homogéneos. Variable: gramos por comensal de desperdicio emplatado PW más cocina KSW, ponderados por número de comensales y calculados como 1000 * suma(kg PW + kg KSW) / suma(comensales). Hay faltantes KSW en el baseline. La tasa de los últimos 20 días es 29.068510 g/comensal. Entre 98 ventanas consecutivas de 20 días basales con PW y KSW completos, las tasas van de 34.359730 a 52.145109; ninguna es <= 29.068510. La última ventana basal elegible tiene 39.909542. Las cuatro semanas de 5 días post tienen 27.258982, 27.807551, 27.237204 y 34.615886. Dos filas post con columnas derivadas discordantes pero masas originales aparentemente intactas (índices 137 y 152) pueden excluirse: la tasa post queda 28.067079. El análisis de ventanas se eligió después de ver los datos. No hay escuela control simultánea, aleatorización, evaluación de consumo real/ingesta, costes por actor, ni observaciones enlazadas de producción-almacenamiento-transporte-transformación-consumo. ¿Qué afirmaciones permiten y cuáles no estos resultados?",
+  "attempts": [
+    {
+      "requested_model": "gemini/gemini-3.8-flash",
+      "requested_effort": "high",
+      "result": "route_rejected",
+      "error": "Delegación fallida: Modelo no permitido: 'gemini/gemini-3.8-flash'. Rutas habilitadas: claude/fable, claude/haiku, claude/opus, claude/sonnet, codex/gpt-5.3-codex-spark, codex/gpt-5.6-luna, codex/gpt-5.6-sol, codex/gpt-5.6-terra, codex/gpt-6-astra, codex/gpt-6-luna, codex/gpt-6-sol, gemini/3.1-pro, gemini/3.7-flash, gemini/flash, gemini/pro, grok/4.5, grok/4.6, grok/grok-4.5, grok/grok-4.6, minimax/MiniMax-M2.7, minimax/MiniMax-M3. También se acepta gemini/<nombre exacto del catálogo `agy models`>."
+    },
+    {
+      "requested_model": "gemini/3.7-flash",
+      "requested_effort": "high",
+      "result": "runtime_rejected",
+      "error": "agy invalid model selection: mapped to Gemini 3.8 Flash (Medium), which does not support --effort high"
+    },
+    {
+      "requested_model": "minimax/MiniMax-M3",
+      "requested_effort": "medium",
+      "result": "response",
+      "access": "text",
+      "duration_seconds_reported": 34.8,
+      "answer": {
+        "fallos_materiales": [
+          {
+            "hallazgo": "La ventana analítica (20 días post, 98 ventanas basales de 20 días) y el conjunto de referencia se eligieron tras inspeccionar los datos.",
+            "por_que_importa": "Invalida cualquier lectura inferencial: el contraste es condicional a decisiones tomadas a la vista del resultado (garden of forking paths). El hecho de que ningún valor basal caiga por debajo del post es consecuencia, en parte, de cómo se construyó la referencia.",
+            "comprobacion": "Solicitar el plan de análisis pre-registado (tamaño de ventana, criterio de elegibilidad, regla de tratamiento de faltantes y de filas discordantes) y verificar que ninguno de esos parámetros fue ajustado tras ver las tasas."
+          },
+          {
+            "hallazgo": "Diseño de un solo brazo, sin escuela control concurrente, sin aleatorización y con cambios semanales no homogéneos.",
+            "por_que_importa": "Cualquier diferencia post-basal es potencialmente atribuible a estacionalidad, calendario escolar, cohorte, personal, menú base, festividades o absentismo; los 'cambios' no son un tratamiento definido, por lo que el decremento no puede adscribirse a intervención alguna.",
+            "comprobacion": "Construir un contrefactual (pre-periodo paralelo, tendencia previa, serie sintética de la misma escuela) y comprobar si la pendiente esperada sin intervención ya anticipa el nivel observado; replicar el protocolo en al menos otra escuela con calendario y menú comparables."
+          },
+          {
+            "hallazgo": "Las 98 ventanas basales son consecutivas y solapadas (comparten 19 de 20 días), por lo que no son cuasi-réplicas independientes.",
+            "por_que_importa": "El rango 34.36–52.15 subestima la variabilidad real del proceso; cualquier contraste frente a los 20 días post carece de grados de libertad efectivos claros y los intervalos o p-valores derivados son espurios.",
+            "comprobacion": "Recalcular con ventanas disjuntas (p. ej., 6 bloques de 20 dentro de 135 días) o mediante bootstrap por bloques para obtener un IC honesto del percentil 0 del baseline."
+          },
+          {
+            "hallazgo": "Exclusión post-hoc de las filas 137 y 152 guiada por discordancia en columnas derivadas, con masas originales aparentemente intactas.",
+            "por_que_importa": "Aplicar una regla de limpieza decidida después de observar el efecto, sobre campos derivados, infla artificialmente el descenso (29.07 → 28.07) y compromete la trazabilidad del dato crudo.",
+            "comprobacion": "Auditar la cadena de derivación, reportar el resultado con y sin esas filas, y comprobar la sensibilidad bajo reglas alternativas (p. ej., excluir todo día con cualquier columna derivada NaN/negativa)."
+          },
+          {
+            "hallazgo": "Faltantes de KSW en el baseline sin diagnóstico del mecanismo de missingness.",
+            "por_que_importa": "Si los faltantes se concentran en días concretos (festivos, ciertos menús, cierta persona que registra), el baseline queda sesgado y la comparación pierde validez; además, el hecho de exigir PW+KSW completos introduce un filtro estructural no aleatorio sobre la ventana basal.",
+            "comprobacion": "Tabular días faltantes por fecha, menú, turno y persona; imputar bajo escenarios plausibles (media, vecino más próximo, cota inferior/superior) y verificar que la cota inferior del baseline sigue siendo superior a la tasa post."
+          }
+        ],
+        "analisis_adicionales": [
+          {
+            "hallazgo": "PW + KSW mide residuo del sistema, no consumo real ni desperdicio alimentario en sentido FAO; no se evalúa ingesta ni se enlazan observaciones de producción, almacenamiento, transporte, transformación y consumo.",
+            "por_que_importa": "Un descenso del residuo emplatado y de cocina puede coexistir con mayor generación aguas arriba (más compra, más mermas en transporte) o con menor consumo real; sin métricas de flujo completo no es legítimo hablar de 'mejora' del sistema.",
+            "comprobacion": "Incorporar al menos un indicador de generación (kg comprados / comensal) y, si es viable, de ingesta (comensales × ración − PW) para triangular el balance."
+          },
+          {
+            "hallazgo": "155 días lectivos abarcan varios ciclos de menú y posibles efectos estacionales (frío/calor, exámenes, festivos); el contraste es post vs ventanas pre simétricas, no frente a una tendencia modelada.",
+            "por_que_importa": "Si el baseline contiene un tramo de mayor desperdicio y los últimos 20 días coinciden con un ciclo de menú más eficiente, el 'cambio aparente' refleja calendario, no intervención.",
+            "comprobacion": "Ajustar un modelo de tendencia/estacionalidad sobre los 135 días basales y comparar el post observado con la predicción extrapolada, en lugar de con la distribución empírica de ventanas."
+          },
+          {
+            "hallazgo": "La validez externa es nula: una sola escuela, un único contexto operativo, sin réplica.",
+            "por_que_importa": "Incluso si el efecto fuese causal dentro de este centro, no es generalizable a otros colegios, municipios ni cadenas de suministro.",
+            "comprobacion": "Reportar de forma explícita el alcance del hallazgo como 'descriptivo de un caso' y exigir replicación independiente antes de cualquier traslación de política o de práctica."
+          }
+        ],
+        "veredicto_causal": "Los datos sólo permiten afirmar que, en una única escuela y bajo un conjunto de cambios semanales no homogéneos, los últimos 20 días lectivos presentan una tasa de desperdicio emplatado más cocina por comensal inferior a la de cualquier ventana basal de 20 días; no permiten sostener atribución causal alguna, inferencia poblacional ni afirmación de 'mejora' del sistema alimentario."
+      }
+    },
+    {
+      "requested_model": "gemini/flash",
+      "requested_effort": null,
+      "result": "response",
+      "access": "text",
+      "runtime_model_reported": "Gemini 3.7 Flash (Medium)",
+      "duration_seconds_reported": 15,
+      "answer": {
+        "fallos_materiales": [
+          {
+            "hallazgo": "Análisis de ventanas móviles de 20 días definido post-hoc tras inspeccionar los datos.",
+            "por_que_importa": "Incurre en riesgo de sobreajuste ('data snooping' / HARKing), seleccionando la métrica y agregación temporal que maximiza artificialmente la separación entre baseline e intervención.",
+            "comprobacion": "Verificar la robustez del contraste variando sistemáticamente el ancho de ventana (p. ej. 5, 10, 15 días) y aplicando correcciones por comparaciones múltiples."
+          },
+          {
+            "hallazgo": "Ausencia de grupo de control contemporáneo y aleatorización en un diseño de centro único (N=1).",
+            "por_que_importa": "Impide aislar la intervención de factores de confusión temporales (estacionalidad del menú, calendario escolar, temperatura o efecto Hawthorne).",
+            "comprobacion": "Evaluar la presencia de tendencias temporales previas en los 135 días de baseline mediante modelos de series temporales interrumpidas."
+          },
+          {
+            "hallazgo": "Intervenciones semanales heterogéneas acumuladas en solo 20 días lectivos (4 semanas distintas).",
+            "por_que_importa": "Existe confusión entre los componentes específicos de la intervención; no es posible atribuir el cambio a una acción concreta ni evaluar efectos residuales entre semanas.",
+            "comprobacion": "Comparar la dispersión y medias entre las 4 semanas post (donde la semana 4 salta a 34.62 g/comensal) frente a la variabilidad basal intrínseca."
+          },
+          {
+            "hallazgo": "Datos faltantes en desperdicio de cocina (KSW) durante el período baseline.",
+            "por_que_importa": "El filtrado restrictivo a ventanas con datos completos puede introducir sesgo de selección si la omisión de registros no fue aleatoria (MCAR).",
+            "comprobacion": "Realizar análisis de sensibilidad mediante imputación múltiple y escenarios de peor/mejor caso para los días sin registro de KSW."
+          },
+          {
+            "hallazgo": "Falta de medición de ingesta real, consumo calórico/nutricional o gramaje servido.",
+            "por_que_importa": "La reducción de desperdicio agregado podría reflejar un sub-servicio de raciones o menor consumo nutricional infantil en lugar de una mejora de eficiencia.",
+            "comprobacion": "Cruzar los datos de asistencia con registros de raciones preparadas vs. prescripciones dietéticas teóricas de la escuela."
+          }
+        ],
+        "analisis_adicionales": [
+          "Modelo de series de tiempo interrumpidas (ITS/ARIMA) diario controlando por día de la semana, número de comensales y autocorrelación serial.",
+          "Descomposición separada de métricas para desperdicio de plato (PW) y de cocina (KSW) para evaluar dinámicas operativas independientes.",
+          "Prueba de permutación o remuestreo en bloques temporales sobre el baseline para estimar la probabilidad empírica de observar 4 semanas consecutivas por debajo de 30 g/comensal sin intervención."
+        ],
+        "veredicto_causal": "Los resultados evidencian una reducción empírica asociada en el desperdicio por comensal en esta escuela, pero el diseño pre-post no aleatorizado y sin control contemporáneo impide establecer una atribución causal estricta a intervenciones específicas."
+      }
+    }
+  ],
+  "assessment": {
+    "accepted_checks": [
+      "Expose every eligible and excluded baseline window, rather than treating 98 overlaps as replications.",
+      "Show the single missing KSW day and report PW, KSW and total with their own denominators.",
+      "Show all four post weeks and the whole-row exclusion of two dates with discordant derived columns.",
+      "Keep the temporal comparison descriptive; no untreated contemporary group, homogeneous treatment or full-chain observations exist."
+    ],
+    "not_adopted": [
+      "No p-value, bootstrap confidence interval or multiplicity adjustment was added: these post-hoc overlapping windows cannot identify an intervention effect.",
+      "No ARIMA or interrupted time-series model was fitted: a model of one school's pre/post series without concurrent control would not remove unmeasured temporal confounding.",
+      "Neither review's claims about external validity or food-waste definitions were treated as verified source facts."
+    ]
+  },
+  "limitations": [
+    "Both successful models received the same summary rather than source bytes; neither inspected data or code.",
+    "No authenticated token/cost receipts or independent domain expert.",
+    "Suggestions are unverified and do not estimate a treatment effect or criterion 4."
+  ]
+}
