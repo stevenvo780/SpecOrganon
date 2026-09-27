@@ -18,6 +18,8 @@ ENGINE_OPERATIONS = {
     "review": "review_item",
     "approve": "approve",
     "approval_challenge": "approval_challenge",
+    "field_attestation_challenge": "field_attestation_challenge",
+    "attest_field": "attest_field",
     "challenge": "challenge",
     "resolve_challenge": "resolve_challenge",
     "gate": "gate",
@@ -114,6 +116,25 @@ def build_parser() -> argparse.ArgumentParser:
     approval_challenge.add_argument("id")
     approval_challenge.add_argument("--reason", required=True)
     approval_challenge.add_argument("--actor", required=True)
+
+    field_attestation_challenge = commands.add_parser(
+        "field-attestation-challenge", help="Prepare case and source hashes for an assessor signature"
+    )
+    field_attestation_challenge.add_argument("path")
+    field_attestation_challenge.add_argument("id")
+    field_attestation_challenge.add_argument("--reason", required=True)
+    field_attestation_challenge.add_argument("--actor", required=True)
+    field_attestation_challenge.add_argument("--source-manifest-path", required=True)
+    field_attestation_challenge.add_argument("--report-path", required=True)
+
+    attest_field = commands.add_parser("attest-field", help="Record a signed assessor statement; field verdict stays blocked")
+    attest_field.add_argument("path")
+    attest_field.add_argument("id")
+    attest_field.add_argument("--reason", required=True)
+    attest_field.add_argument("--actor", required=True)
+    attest_field.add_argument("--source-manifest-path", required=True)
+    attest_field.add_argument("--report-path", required=True)
+    attest_field.add_argument("--signature", required=True)
 
     challenge = commands.add_parser("challenge", help="Record a contradiction between items")
     challenge.add_argument("path")

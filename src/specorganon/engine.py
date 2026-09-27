@@ -17,7 +17,7 @@ from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
-from . import approval
+from . import approval, field_attestation
 from .ledger import ZERO_HASH, ConflictError, LedgerError, append_event, init_project, read_project
 from .workflow import KIND_TO_PHASE, KINDS, PHASES, PHASE_BY_ID
 
@@ -53,14 +53,26 @@ def _project(path: str | Path) -> dict[str, Any]:
     except ValueError:
         approvers = {}
         trust_status = "unavailable"
+    if project["approval_policy"] == "signed":
+        try:
+            field_assessors, field_trust_status = field_attestation.trust_context(project, path)
+        except ValueError:
+            field_assessors = {}
+            field_trust_status = "unavailable"
+    else:
+        field_assessors = {}
+        field_trust_status = "not_applicable"
     state: dict[str, Any] = {
         "project": project,
+        "case_path": approval.case_path(path),
         "revision": len(ledger["events"]),
         "head_hash": ledger["events"][-1]["hash"] if ledger["events"] else ZERO_HASH,
         "items": {},
         "approvals": set(),
         "approval_statuses": {},
         "approval_trust": trust_status,
+        "field_attestation_trust": field_trust_status,
+        "field_attestations": [],
         "item_reviews": {},
         "challenges": {},
         "resolutions": {},
@@ -110,6 +122,32 @@ def _project(path: str | Path) -> dict[str, Any]:
                 state["approvals"].add(key)
             elif key not in state["approvals"]:
                 state["approval_statuses"][key] = status
+        elif kind == "field_attestation":
+            valid = False
+            if isinstance(payload, dict) and project["approval_policy"] == "signed":
+                try:
+                    binding = payload["binding"]
+                    materials = payload["materials"]
+                    assessment = state["items"].get(binding["assessment_id"])
+                    valid = bool(
+                        field_trust_status == "configured"
+                        and assessment is not None
+                        and event["actor"] != assessment["author"]
+                        and field_assessors.get(event["actor"]) not in approvers.values()
+                        and binding == _field_binding(state["items"], assessment)
+                        and field_attestation.verify(
+                            project, path, binding, materials, event["actor"],
+                            payload["reason"], event["prev_hash"], payload["signature"],
+                            payload["key_sha256"], field_assessors,
+                        )
+                    )
+                except (KeyError, TypeError, ValueError):
+                    valid = False
+            state["field_attestations"].append({
+                "seq": seq, "actor": event["actor"], "verified": valid,
+                "binding": payload.get("binding") if isinstance(payload, dict) else None,
+                "materials": payload.get("materials") if isinstance(payload, dict) else None,
+            })
         elif kind == "item_review":
             state["item_reviews"][(payload["id"], payload["version"])] = {
                 "seq": seq, "actor": event["actor"], **payload
@@ -144,6 +182,44 @@ def _ancestors(items: dict[str, dict], item_id: str) -> set[str]:
         found.add(current)
         pending.extend(items[current]["deps"])
     return found
+
+
+def _field_binding(items: dict[str, dict], assessment: dict[str, Any]) -> dict[str, Any]:
+    """Bind an assessor to every current item revision behind one field verdict."""
+    if (assessment["kind"] != "assessment"
+            or assessment["data"].get("claim_scope") != "field"
+            or assessment["data"].get("verdict") not in {"cumplido", "incumplido"}):
+        raise MethodError("attestation requires a decisive field assessment")
+    ancestors = _ancestors(items, assessment["id"])
+    for kind in ("result", "baseline", "criterion"):
+        if sum(items[item_id]["kind"] == kind for item_id in ancestors) != 1:
+            raise MethodError(f"field attestation requires exactly one linked {kind}")
+    return {
+        "assessment_id": assessment["id"],
+        "assessment_version": assessment["version"],
+        "verdict": assessment["data"]["verdict"],
+        "items": [
+            {"id": item_id, "kind": items[item_id]["kind"],
+             "version": items[item_id]["version"], "sha256": _hash(items[item_id])}
+            for item_id in sorted(ancestors)
+        ],
+    }
+
+
+def _field_statement_binding_current(state: dict[str, Any], entry: dict[str, Any]) -> bool:
+    binding = entry["binding"]
+    if not isinstance(binding, dict):
+        return False
+    assessment_id = binding.get("assessment_id")
+    if not isinstance(assessment_id, str):
+        return False
+    assessment = state["items"].get(assessment_id)
+    if assessment is None:
+        return False
+    try:
+        return binding == _field_binding(state["items"], assessment)
+    except MethodError:
+        return False
 
 
 def _implementation_requirements(
@@ -394,7 +470,8 @@ def _structured_field_outcome(value: Any) -> bool:
 
 
 def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any],
-                          approval_policy: str) -> list[str]:
+                          approval_policy: str, *,
+                          skip_field_evidence_blocker: bool = False) -> list[str]:
     """Check that a decisive verdict is numerically and procedurally auditable.
 
     Rejections use the declared reject_test predicate, not the reject prose.
@@ -412,13 +489,14 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any],
         for field in ("adverse_effects", "cost"):
             if not _structured_field_outcome(data.get(field)):
                 issues.append(f"{assessment['id']} field success lacks structured measured {field} evidence")
-    if scope == "field" and approval_policy == "signed":
-        # Both success and rejection are decisive field claims. The separate
-        # preflight checks declarations only; its report or a self-declared
-        # flag cannot prove review of source custody, margins or impact.
+    if scope == "field" and approval_policy == "signed" and not skip_field_evidence_blocker:
+        # A valid assessor signature authenticates a statement and source
+        # hashes, but the current bundle does not recompute the protocol's
+        # adjusted G/interval or authenticate primary records and margins.
+        # Never turn that statement into a decisive field verdict.
         issues.append(
-            f"{assessment['id']} decisive field verdict needs an independently "
-            "verified field attestation (not yet supported)"
+            f"{assessment['id']} decisive field verdict needs verified field effect "
+            "analysis and source custody"
         )
     ancestors = [items[key] for key in _ancestors(items, assessment["id"])]
     results = [item for item in ancestors if item["kind"] == "result"]
@@ -837,7 +915,7 @@ def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: boo
                 if not refs_of(item, {"result", "risk"}):
                     blockers.append(f"{item['id']} must link result and risk")
                 blockers.extend(_success_claim_issues(
-                    items, item, state["project"]["approval_policy"]
+                    items, item, state["project"]["approval_policy"],
                 ))
     return sorted(set(blockers))
 
@@ -872,6 +950,11 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
         # Existing ledgers recorded this payload without an item_reviews key.
         if item_reviews:
             snapshot_data["item_reviews"] = item_reviews
+        if phase.id == "validate" and state["field_attestations"]:
+            snapshot_data["field_attestations"] = [
+                (entry["seq"], entry["verified"])
+                for entry in state["field_attestations"]
+            ]
         snapshot = _hash(snapshot_data)
         blockers = _phase_blockers(state, phase.id, previous_accepted, flags)
         reviews = [review for review in state["phase_reviews"] if review["phase"] == phase.id and review["snapshot"] == snapshot]
@@ -1026,6 +1109,78 @@ def approve(path: str | Path, id: str, reason: str, actor: str, signature: str |
     return append_event(path, "approval", payload, actor, expected_seq=state["revision"])
 
 
+def _field_attestation_target(state: dict[str, Any], id: str, reason: str,
+                              actor: str) -> tuple[dict[str, Any], dict[str, Any], bytes]:
+    if state["project"]["approval_policy"] != "signed":
+        raise MethodError("field attestation is available only for signed cases")
+    item = state["items"].get(id)
+    if item is None:
+        raise MethodError("field attestation needs a current assessment")
+    binding = _field_binding(state["items"], item)
+    if (not isinstance(actor, str) or not actor.startswith("assessor:")
+            or len(actor) <= len("assessor:") or actor == item["author"]):
+        raise MethodError("field assessor must be distinct from the assessment author")
+    if not isinstance(reason, str) or not reason.strip():
+        raise MethodError("field attestation needs an explicit assessor reason")
+    if state["field_attestation_trust"] != "configured":
+        raise MethodError("field assessor trust registry is unavailable")
+    assessors, _ = field_attestation.trust_context(state["project"], state["case_path"])
+    key = assessors.get(actor)
+    if key is None:
+        raise MethodError("field assessor has no trusted public key")
+    approvers, _ = approval.trust_context(state["project"], state["case_path"])
+    if key in approvers.values():
+        raise MethodError("field assessor key must differ from normative approver keys")
+    problems = _success_claim_issues(
+        state["items"], item, "signed", skip_field_evidence_blocker=True,
+    )
+    if problems:
+        raise MethodError("field assessment fails prior structural checks: " + "; ".join(problems))
+    return item, binding, key
+
+
+def field_attestation_challenge(
+    path: str | Path, id: str, reason: str, actor: str,
+    source_manifest_path: str, report_path: str,
+) -> dict[str, Any]:
+    """Return exact bytes for a separately trusted evaluator to sign offline."""
+    state = _project(path)
+    item, binding, _ = _field_attestation_target(state, id, reason, actor)
+    materials = field_attestation.inspect_materials(
+        state["project"], id, item["version"], item["data"]["verdict"],
+        source_manifest_path, report_path,
+    )
+    return field_attestation.challenge(
+        state["project"], path, binding, materials, actor, reason.strip(), state["head_hash"],
+    )
+
+
+def attest_field(
+    path: str | Path, id: str, reason: str, actor: str,
+    source_manifest_path: str, report_path: str, signature: str,
+) -> dict[str, Any]:
+    """Record an independently signed field assessment without copying source data."""
+    if not isinstance(signature, str) or not signature:
+        raise MethodError("field attestation requires an Ed25519 signature")
+    state = _project(path)
+    item, binding, key = _field_attestation_target(state, id, reason, actor)
+    materials = field_attestation.inspect_materials(
+        state["project"], id, item["version"], item["data"]["verdict"],
+        source_manifest_path, report_path,
+    )
+    fingerprint = approval.key_fingerprint(key)
+    if not field_attestation.verify(
+        state["project"], path, binding, materials, actor, reason.strip(), state["head_hash"],
+        signature, fingerprint, {actor: key},
+    ):
+        raise MethodError("field attestation signature is invalid for current case, evidence or assessor")
+    payload = {
+        "binding": binding, "materials": materials, "reason": reason.strip(),
+        "signature": signature, "key_sha256": fingerprint,
+    }
+    return append_event(path, "field_attestation", payload, actor, expected_seq=state["revision"])
+
+
 def challenge(path: str | Path, left: str, right: str, reason: str, actor: str) -> dict[str, Any]:
     state = _project(path)
     if left == right or left not in state["items"] or right not in state["items"]:
@@ -1063,6 +1218,15 @@ def get_state(path: str | Path) -> dict[str, Any]:
     open_challenges = [challenge for seq, challenge in state["challenges"].items() if seq not in active_resolutions]
     return {"project": state["project"], "project_sha256": approval.project_fingerprint(state["project"]),
             "revision": state["revision"], "approval_trust": state["approval_trust"],
+            "field_attestation_trust": state["field_attestation_trust"],
+            "field_attestations": [
+                {"seq": entry["seq"], "actor": entry["actor"],
+                 "signature_verified": entry["verified"],
+                 "binding_current": _field_statement_binding_current(state, entry),
+                 "assessment_id": entry["binding"].get("assessment_id")
+                 if isinstance(entry["binding"], dict) else None}
+                for entry in state["field_attestations"]
+            ],
             "items": items, "phases": phases, "open_challenges": open_challenges}
 
 

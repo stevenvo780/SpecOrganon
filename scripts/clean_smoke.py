@@ -42,6 +42,9 @@ def main() -> None:
         "resolve-challenge", "gate", "review-phase", "advance", "trace", "next-task", "run",
     }
     expected_mcp_tools = {name.replace("-", "_") for name in expected_cli_commands}
+    published_mcp_tools = expected_mcp_tools | {
+        "field_attestation_challenge", "attest_field",
+    }
 
     def command(*args: str) -> dict:
         result = subprocess.run([str(cli), *args], text=True, capture_output=True, check=True, env=smoke_env)
@@ -73,7 +76,7 @@ def main() -> None:
                     return result
 
                 discovered_tools = {tool.name for tool in (await client.list_tools()).tools}
-                assert discovered_tools == expected_mcp_tools
+                assert discovered_tools == published_mcp_tools
                 data(await call_tool("init", {
                     "path": path, "title": "Synthetic clean install fixture", "domain": "fixture", "actor": "human:fixture", "approval_policy": "fixture",
                 }))
@@ -698,6 +701,7 @@ def main() -> None:
                         "nonfinite_json_rejected": True,
                         "idempotent_replay": True, "cli_commands_exercised": len(cli_commands_seen),
                         "mcp_tools_exercised": len(mcp_tools_seen),
+                        "mcp_tools_discovered": len(discovered_tools),
                         "guarded_put": True,
                         "sigkill_mcp_resume": True, "sigkill_checkpoint_events": checkpoint,
                         "paired_cli_writers_preserved_items": True,

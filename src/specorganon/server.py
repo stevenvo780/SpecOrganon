@@ -413,6 +413,33 @@ def approve(
     )
 
 
+@server.tool(
+    description="Prepare case, item and source hashes for an independent field assessor's Ed25519 signature."
+)
+def field_attestation_challenge(
+    path: str, id: str, reason: str, actor: str,
+    source_manifest_path: str, report_path: str,
+) -> dict[str, Any]:
+    return _invoke(
+        "field_attestation_challenge", path=path, id=id, reason=reason, actor=actor,
+        source_manifest_path=source_manifest_path, report_path=report_path,
+    )
+
+
+@server.tool(
+    description="Record a signed assessor statement. It does not unblock a decisive field verdict."
+)
+def attest_field(
+    path: str, id: str, reason: str, actor: str,
+    source_manifest_path: str, report_path: str, signature: str,
+) -> dict[str, Any]:
+    return _invoke(
+        "attest_field", path=path, id=id, reason=reason, actor=actor,
+        source_manifest_path=source_manifest_path, report_path=report_path,
+        signature=signature,
+    )
+
+
 @server.tool(description="Record a contradiction between two items.")
 def challenge(
     path: str, left: str, right: str, reason: str, actor: str

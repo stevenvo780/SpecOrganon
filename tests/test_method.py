@@ -1597,7 +1597,7 @@ def test_signed_field_success_rejects_self_declared_attestation(tmp_path, monkey
     monkeypatch.setattr(engine, "_project", lambda _path: signed_state)
     status = engine.gate(path, "validate")
     assert status["blockers"] == [
-        "ass1 decisive field verdict needs an independently verified field attestation (not yet supported)"
+        "ass1 decisive field verdict needs verified field effect analysis and source custody"
     ]
     assert not status["ready"] and not status["accepted"]
 

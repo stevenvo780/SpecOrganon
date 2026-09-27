@@ -19,6 +19,7 @@ from mcp.client.stdio import StdioServerParameters
 
 from specorganon import engine
 from specorganon.ledger import LedgerError, read_project
+from test_field_attestation import _bundle
 
 
 BIN = Path(sys.executable).parent
@@ -346,11 +347,9 @@ def test_signed_cli_and_mcp_share_challenge_and_rejection(tmp_path, signer):
     asyncio.run(exercise())
 
 
-def test_signed_field_success_stays_blocked_with_measured_records_and_claimed_guardrails(
-    tmp_path, signer,
-):
-    """A real signed ledger cannot turn synthetic field claims into an accepted verdict."""
-    key, trust_file = signer
+def _signed_field_case(tmp_path: Path, signer) -> tuple[Path, dict]:
+    """Build all eight prior phases with explicitly synthetic, signed test records."""
+    key, _ = signer
     case = _case(tmp_path, signer, "signed-field-claim")
 
     def put(item_id: str, kind: str, refs=(), data=None, text: str | None = None) -> None:
@@ -447,6 +446,19 @@ def test_signed_field_success_stays_blocked_with_measured_records_and_claimed_gu
         },
     }
     put("ass1", "assessment", ["res1", "r1"], assessment)
+    return case, assessment
+
+
+def test_signed_field_success_stays_blocked_with_measured_records_and_claimed_guardrails(
+    tmp_path, signer,
+):
+    """A signed ledger cannot turn self-declared synthetic field claims into a verdict."""
+    _, trust_file = signer
+    case, assessment = _signed_field_case(tmp_path, signer)
+
+    def put(item_id: str, kind: str, refs=(), data=None, text: str | None = None) -> None:
+        engine.put_item(case, item_id, kind, text or item_id, list(refs), data or {}, "agent:writer")
+
     state = engine.get_state(case)
     assert state["project"]["approval_policy"] == "signed"
     assert state["approval_trust"] == "configured"
@@ -456,8 +468,7 @@ def test_signed_field_success_stays_blocked_with_measured_records_and_claimed_gu
         "frame", "critique", "study", "observe", "explain", "compare", "specify", "build"
     ))
     blocker = (
-        "ass1 decisive field verdict needs an independently verified field "
-        "attestation (not yet supported)"
+        "ass1 decisive field verdict needs verified field effect analysis and source custody"
     )
     assert engine.gate(case, "validate")["blockers"] == [blocker]
 
@@ -507,3 +518,103 @@ def test_signed_field_success_stays_blocked_with_measured_records_and_claimed_gu
     inconclusive_gate = engine.gate(case, "validate")
     assert inconclusive_gate["ready"], inconclusive_gate["blockers"]
     assert not inconclusive_gate["accepted"]
+
+
+def test_synthetic_attestation_report_cannot_authorize_field_success(
+    tmp_path, signer, monkeypatch,
+):
+    """A synthetic report denying field attribution cannot prove a field verdict."""
+    _, approval_registry = signer
+    case, _ = _signed_field_case(tmp_path, signer)
+    state = engine.get_state(case)
+    assert all(state["phases"][phase]["accepted"] for phase in (
+        "frame", "critique", "study", "observe", "explain", "compare", "specify", "build"
+    ))
+    assert state["items"]["n1"]["approval_status"] == "signed_verified"
+    assert state["items"]["d1"]["approval_status"] == "signed_verified"
+
+    assessor = "assessor:independent"
+    assessor_key = Ed25519PrivateKey.generate()
+    public = assessor_key.public_key().public_bytes(
+        encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw,
+    )
+    registry_path = tmp_path / "independent-assessors.json"
+    registry_path.write_bytes(_canonical({"schema": 1, "cases": {
+        state["project"]["case_id"]: {
+            "path": str(case.resolve(strict=True)),
+            "project_sha256": state["project_sha256"],
+            "assessors": {assessor: base64.b64encode(public).decode("ascii")},
+        },
+    }}))
+    monkeypatch.setenv("ORGANON_FIELD_ASSESSORS_FILE", str(registry_path))
+    assert engine.get_state(case)["field_attestation_trust"] == "configured"
+
+    bundle_dir = tmp_path / "synthetic-field-bundle"
+    bundle_dir.mkdir()
+    manifest_path, report_path, report = _bundle(bundle_dir, state["project"])
+    assert "no causal attribution" in report["causal_attribution"].lower()
+    assert "does not establish a real value measure" in report["value_metric"].lower()
+    assert "no person, field record" in report["limitations"].lower()
+    field_args = {
+        "path": str(case), "id": "ass1",
+        "reason": "Synthetic test signature; no real field effect established",
+        "actor": assessor, "source_manifest_path": manifest_path,
+        "report_path": report_path,
+    }
+    before = (case / "organon.json").read_bytes()
+    challenge = engine.field_attestation_challenge(**field_args)
+    cli_args = (
+        str(case), "ass1", "--reason", field_args["reason"],
+        "--actor", assessor, "--source-manifest-path", manifest_path,
+        "--report-path", report_path,
+    )
+    assert _cli("field-attestation-challenge", *cli_args) == challenge
+    assert (case / "organon.json").read_bytes() == before
+    with pytest.raises(engine.MethodError, match="signature is invalid"):
+        engine.attest_field(
+            **field_args, signature=_sign(Ed25519PrivateKey.generate(), challenge),
+        )
+    assert (case / "organon.json").read_bytes() == before
+    signature = _sign(assessor_key, challenge)
+    _cli("attest-field", *cli_args, "--signature", signature)
+    statements = engine.get_state(case)["field_attestations"]
+    assert len(statements) == 1 and statements[0]["signature_verified"] is True
+    assert statements[0]["binding_current"] is True
+    gate = engine.gate(case, "validate")
+    blocker = "ass1 decisive field verdict needs verified field effect analysis and source custody"
+    assert gate["blockers"] == [blocker]
+    assert not gate["ready"] and not gate["accepted"]
+    assert _cli("gate", str(case), "validate") == gate
+
+    async def inspect_mcp_gate() -> None:
+        params = StdioServerParameters(
+            command=str(MCP), cwd=str(tmp_path),
+            env={
+                "ORGANON_ROOT": str(tmp_path),
+                "ORGANON_APPROVERS_FILE": str(approval_registry),
+                "ORGANON_FIELD_ASSESSORS_FILE": str(registry_path),
+            },
+        )
+        async with Client(params, mode="legacy") as client:
+            next_challenge = _mcp_data(await client.call_tool(
+                "field_attestation_challenge", field_args,
+            ))
+            assert next_challenge == engine.field_attestation_challenge(**field_args)
+            next_signature = _sign(assessor_key, next_challenge)
+            _mcp_data(await client.call_tool(
+                "attest_field", {**field_args, "signature": next_signature},
+            ))
+            assert _mcp_data(await client.call_tool(
+                "gate", {"path": str(case), "phase": "validate"},
+            )) == engine.gate(case, "validate")
+
+    asyncio.run(inspect_mcp_gate())
+    assert len(engine.get_state(case)["field_attestations"]) == 2
+    assert engine.gate(case, "validate")["blockers"] == [blocker]
+    registry_path.write_bytes(_canonical({"schema": 1, "cases": {}}))
+    revoked = engine.get_state(case)
+    assert revoked["field_attestation_trust"] == "unavailable"
+    assert [entry["signature_verified"] for entry in revoked["field_attestations"]] == [False, False]
+    assert [entry["binding_current"] for entry in revoked["field_attestations"]] == [True, True]
+    assert engine.gate(case, "validate")["blockers"] == [blocker]
+    assert (case / "organon.json").read_bytes() != before
