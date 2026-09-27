@@ -23,7 +23,8 @@ from run_development_arm import (  # noqa: E402
     _toolkit_fingerprint,
     run_development_arm,
 )
-from test_run_development_arm import FAKE_CLI  # noqa: E402
+import run_development_arm as runner  # noqa: E402
+from test_run_development_arm import FAKE_CLI, fake_t_setup  # noqa: E402
 
 
 def _record(path: Path) -> dict[str, Any]:
@@ -200,6 +201,114 @@ def test_observes_directory_emitted_by_real_runner_with_existing_fake_cli(
     )
     assert observation["verified_streams"]["cli.stderr"] == summary["cli"]["stderr"]
     assert not (run_dir / "analysis_replay.stdout").exists()
+
+
+@pytest.mark.parametrize("arm", ["N", "S", "T"])
+def test_observer_verifies_opencode_local_receipt_for_each_arm(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, arm: str,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    executable = fake_bin / "opencode"
+    executable.write_text(FAKE_CLI, encoding="utf-8")
+    executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
+    wheel = None
+    if arm == "T":
+        wheel = tmp_path / "specorganon-0.1.0-py3-none-any.whl"
+        wheel.write_bytes(b"synthetic wheel fixture, not installed\n")
+        monkeypatch.setattr(runner, "_setup_toolkit", fake_t_setup)
+    run_dir, summary = run_development_arm(
+        arm=arm, provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs", timeout_seconds=10,
+        toolkit_wheel=wheel,
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    result = _invoke(run_dir)
+    assert result.returncode == 0, result.stderr
+    observed = json.loads(result.stdout)
+    assert observed["execution_status"] == "artifacts_ready_for_inspection"
+    assert observed["provider_cli"] == "opencode"
+    assert observed["requested_model"] == "minimax/MiniMax-M3"
+    assert observed["requested_effort"] == "uncontrolled"
+    assert observed["cli_usage"]["complete"] is True
+    assert observed["cli_usage"]["final_usage"] == summary["cli_usage"]["final_usage"]
+    assert observed["verified_streams"]["cli.stdout.jsonl"] == summary["cli"]["stdout"]
+    assert observed["provider_request_ids"] is None
+    assert observed["authenticated_model_id"] is None
+    assert observed["authenticated_cost_usd"] is None
+    assert observed["controlled_comparison_eligible"] is False
+    assert observed["criterion_4"] == "not_assessed"
+    assert "private-local-session-id" not in result.stdout
+    if arm == "T":
+        assert observed["verified_artifacts"]["work/case/organon.json"] is not None
+
+
+def test_observer_preserves_opencode_absent_optional_total(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    executable = fake_bin / "opencode"
+    executable.write_text(FAKE_CLI, encoding="utf-8")
+    executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
+    monkeypatch.setenv("FAKE_SCENARIO", "opencode_missing_usage")
+    run_dir, summary = run_development_arm(
+        arm="N", provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    result = _invoke(run_dir)
+    assert result.returncode == 0, result.stderr
+    observed = json.loads(result.stdout)
+    assert observed["cli_usage"]["terminal_success"] is True
+    assert observed["cli_usage"]["complete"] is False
+    assert observed["cli_usage"]["final_usage"]["total_tokens"] is None
+    assert observed["cli_usage"]["final_usage"]["input_tokens"] == 30
+    assert observed["controlled_comparison_eligible"] is False
+
+
+@pytest.mark.parametrize("scenario", [
+    "opencode_open_step", "opencode_tool_calls_no_tool", "opencode_overlapping_steps",
+])
+def test_observer_rejects_forged_opencode_green_and_model_claim(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, scenario: str,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    executable = fake_bin / "opencode"
+    executable.write_text(FAKE_CLI, encoding="utf-8")
+    executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
+    monkeypatch.setenv("FAKE_SCENARIO", scenario)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["execution_status"] == "cli_internal_failure"
+    honest = _invoke(run_dir)
+    assert honest.returncode == 0, honest.stderr
+    assert json.loads(honest.stdout)["cli_usage"]["terminal_success"] is False
+
+    summary["execution_status"] = "artifacts_ready_for_inspection"
+    summary["cli_usage"].update(
+        terminal_success=True, complete=True, terminal_errors=[], errors=[],
+    )
+    _write_summary(run_dir, summary)
+    forged = _invoke(run_dir)
+    assert forged.returncode == 2
+    assert "cli_usage differs from the verified local CLI stream" in forged.stderr
+
+    summary["execution_status"] = "cli_internal_failure"
+    summary["cli_usage"] = _parse_usage(
+        "opencode", run_dir / "cli.stdout.jsonl", "minimax/MiniMax-M3"
+    )
+    summary["cli_usage"]["observed_model"] = "minimax/MiniMax-M3"
+    _write_summary(run_dir, summary)
+    forged_model = _invoke(run_dir)
+    assert forged_model.returncode == 2
+    assert "cli_usage differs from the verified local CLI stream" in forged_model.stderr
 
 
 def test_observer_rejects_old_green_claim_for_open_codex_item(

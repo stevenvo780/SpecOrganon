@@ -521,7 +521,7 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
         arm, provider = summary.get("arm"), summary.get("provider_cli")
         model, effort = summary.get("requested_model"), summary.get("requested_effort")
         status = summary.get("execution_status")
-        if arm not in ("N", "S", "T") or provider not in ("codex", "agy"):
+        if arm not in ("N", "S", "T") or provider not in ("codex", "agy", "opencode"):
             raise ObservationError("run.json has an invalid arm or provider")
         tool_policy = summary.get("tool_policy")
         if tool_policy not in {"default", "no_command_tool"}:
@@ -532,6 +532,13 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
             type(value) is not str or not value.strip() for value in (model, effort)
         ):
             raise ObservationError("run.json has no requested model or effort")
+        if provider == "opencode":
+            if re.fullmatch(r"minimax/[A-Za-z0-9._:-]+", model) is None or effort != "uncontrolled":
+                raise ObservationError("OpenCode run has an unsupported model route or effort")
+            if summary.get("cli_mode") != {
+                "opencode_format": "json", "opencode_pure": True, "opencode_agent": "build",
+            }:
+                raise ObservationError("OpenCode run has an inconsistent CLI mode")
         if type(status) is not str or status not in RUN_STATUSES | {
             "preparing",
             "preflight_failure",

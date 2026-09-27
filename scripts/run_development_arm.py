@@ -1,4 +1,4 @@
-"""Run one exposed D-E development arm with local Codex or agy telemetry.
+"""Run one exposed D-E development arm with local Codex, Agy or OpenCode telemetry.
 
 This is an unsealed feasibility runner, not a confirmatory matrix executor or
 an authenticated provider receipt. Each invocation creates a private directory
@@ -38,6 +38,10 @@ USAGE_FIELDS = {
 # The exposed Agy pilot asks for file writes only. This is a local JSONL
 # allowlist, not a provider-side or operating-system command prohibition.
 AGY_NO_COMMAND_ALLOWED_TOOLS = frozenset({"write_to_file"})
+OPENCODE_USAGE_FIELDS = (
+    "input_tokens", "output_tokens", "reasoning_tokens", "cache_read_tokens",
+    "cache_write_tokens", "total_tokens",
+)
 
 
 class RunError(ValueError):
@@ -185,11 +189,216 @@ def _usage_subset_errors(
     return errors
 
 
+def _parse_opencode_usage(stdout_path: Path) -> dict[str, Any]:
+    """Read only the local OpenCode JSONL; it is not a provider or billing receipt."""
+    terminal_errors: list[str] = []
+    usage_errors: list[str] = []
+    session_id: str | None = None
+    started: set[str] = set()
+    finished: set[str] = set()
+    active_message_id: str | None = None
+    tool_call_steps: set[str] = set()
+    completed_tool_messages: set[str] = set()
+    part_ids: dict[str, tuple[str, str]] = {}
+    tool_ids: set[str] = set()
+    attached_message_ids: set[str] = set()
+    step_usage: dict[str, dict[str, int | None]] = {}
+    last_finish_reason: str | None = None
+    saw_stop = False
+    event_count = 0
+    completed_tools = 0
+
+    def unique_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate JSON key")
+            result[key] = value
+        return result
+
+    def reject_constant(_value: str) -> None:
+        raise ValueError("nonfinite JSON number")
+
+    with stdout_path.open("rb") as stream:
+        for line_number, raw_line in enumerate(stream, start=1):
+            if not raw_line.strip():
+                terminal_errors.append(f"line {line_number}: blank JSONL line")
+                continue
+            try:
+                event = json.loads(raw_line.decode("utf-8"), object_pairs_hook=unique_pairs,
+                                   parse_constant=reject_constant)
+            except (UnicodeError, ValueError, RecursionError):
+                terminal_errors.append(f"line {line_number}: invalid or ambiguous JSON")
+                continue
+            if type(event) is not dict or type(event.get("type")) is not str:
+                terminal_errors.append(f"line {line_number}: OpenCode event/type missing")
+                continue
+            event_count += 1
+            kind = event["type"]
+            event_session = event.get("sessionID")
+            if type(event_session) is not str or not event_session.strip():
+                terminal_errors.append(f"line {line_number}: OpenCode sessionID missing")
+                continue
+            if session_id is None:
+                session_id = event_session
+            elif event_session != session_id:
+                terminal_errors.append(f"line {line_number}: OpenCode sessionID changed")
+                continue
+            if kind == "error":
+                terminal_errors.append(f"line {line_number}: OpenCode reported an error")
+                continue
+            if kind not in {"step_start", "step_finish", "tool_use", "text", "reasoning"}:
+                terminal_errors.append(f"line {line_number}: unknown OpenCode event type")
+                continue
+            part = event.get("part")
+            expected_part_type = {"step_start": "step-start", "step_finish": "step-finish",
+                                  "tool_use": "tool", "text": "text", "reasoning": "reasoning"}[kind]
+            if (type(part) is not dict or part.get("type") != expected_part_type
+                    or part.get("sessionID") != session_id
+                    or type(part.get("id")) is not str or not part["id"].strip()
+                    or type(part.get("messageID")) is not str
+                    or not part["messageID"].strip()):
+                terminal_errors.append(f"line {line_number}: malformed OpenCode {kind} part")
+                continue
+            message_id = part["messageID"]
+            part_id = part["id"]
+            identity = (kind, message_id)
+            if part_id in part_ids and part_ids[part_id] != identity:
+                terminal_errors.append(f"line {line_number}: OpenCode part ID changed type or messageID")
+                continue
+            part_ids[part_id] = identity
+            if saw_stop:
+                terminal_errors.append(f"line {line_number}: OpenCode event after terminal stop")
+            if kind == "step_start":
+                if message_id in started or message_id in finished:
+                    terminal_errors.append(f"line {line_number}: duplicate OpenCode step_start messageID")
+                else:
+                    started.add(message_id)
+                    if active_message_id is not None:
+                        terminal_errors.append(f"line {line_number}: overlapping OpenCode model steps")
+                    else:
+                        active_message_id = message_id
+            elif kind == "step_finish":
+                if message_id not in started or message_id in finished:
+                    terminal_errors.append(f"line {line_number}: unmatched OpenCode step_finish messageID")
+                    continue
+                if active_message_id != message_id:
+                    terminal_errors.append(f"line {line_number}: out-of-order OpenCode step_finish messageID")
+                    continue
+                finished.add(message_id)
+                active_message_id = None
+                reason = part.get("reason")
+                if type(reason) is not str or reason not in {"stop", "tool-calls"}:
+                    terminal_errors.append(f"line {line_number}: invalid OpenCode step_finish reason")
+                else:
+                    last_finish_reason = reason
+                    saw_stop = reason == "stop"
+                    if reason == "tool-calls":
+                        tool_call_steps.add(message_id)
+                tokens = part.get("tokens")
+                cache = tokens.get("cache") if type(tokens) is dict else None
+                fields = {
+                    "input_tokens": tokens.get("input") if type(tokens) is dict else None,
+                    "output_tokens": tokens.get("output") if type(tokens) is dict else None,
+                    "reasoning_tokens": tokens.get("reasoning") if type(tokens) is dict else None,
+                    "cache_read_tokens": cache.get("read") if type(cache) is dict else None,
+                    "cache_write_tokens": cache.get("write") if type(cache) is dict else None,
+                    "total_tokens": tokens.get("total") if type(tokens) is dict else None,
+                }
+                parsed: dict[str, int | None] = {}
+                for field, value in fields.items():
+                    if type(value) is int and value >= 0:
+                        parsed[field] = value
+                    elif field == "total_tokens" and type(tokens) is dict and "total" not in tokens:
+                        parsed[field] = None
+                    else:
+                        parsed[field] = None
+                        usage_errors.append(
+                            f"line {line_number}: OpenCode step usage missing or invalid: {field}")
+                # OpenCode takes total from provider usage and adjusts components separately.
+                # The local JSONL does not prove an arithmetic identity between those values.
+                step_usage[message_id] = parsed
+            elif kind == "tool_use":
+                attached_message_ids.add(message_id)
+                if message_id not in started:
+                    terminal_errors.append(f"line {line_number}: OpenCode tool_use precedes model step")
+                if type(part.get("tool")) is not str or not part["tool"].strip():
+                    terminal_errors.append(f"line {line_number}: OpenCode tool name missing")
+                duplicate_tool = part_id in tool_ids
+                if duplicate_tool:
+                    terminal_errors.append(f"line {line_number}: duplicate OpenCode tool part ID")
+                else:
+                    tool_ids.add(part_id)
+                state = part.get("state")
+                status = state.get("status") if type(state) is dict else None
+                if status == "error":
+                    terminal_errors.append(f"line {line_number}: OpenCode tool failed")
+                elif status == "completed":
+                    if not duplicate_tool:
+                        completed_tools += 1
+                        completed_tool_messages.add(message_id)
+                else:
+                    terminal_errors.append(f"line {line_number}: OpenCode tool has no completed state")
+                if part.get("tool") == "task":
+                    terminal_errors.append(
+                        f"line {line_number}: OpenCode task child usage is absent from parent JSONL")
+            else:
+                attached_message_ids.add(message_id)
+
+    if not session_id:
+        terminal_errors.append("OpenCode stream has no sessionID")
+    if not finished:
+        terminal_errors.append("OpenCode stream has no completed model step")
+    if started - finished:
+        terminal_errors.append(f"OpenCode stream has {len(started - finished)} unfinished model steps")
+    if attached_message_ids - started:
+        terminal_errors.append("OpenCode stream has parts without a model step messageID")
+    if tool_call_steps - completed_tool_messages:
+        terminal_errors.append("OpenCode tool-calls step has no completed tool_use for its messageID")
+    if last_finish_reason != "stop":
+        terminal_errors.append("OpenCode stream has no terminal stop step_finish")
+    if len(step_usage) != len(finished):
+        usage_errors.append("OpenCode step usage does not cover every completed step")
+    values: dict[str, int | None] = {field: None for field in OPENCODE_USAGE_FIELDS}
+    if finished and len(step_usage) == len(finished):
+        for field in OPENCODE_USAGE_FIELDS:
+            entries = [step[field] for step in step_usage.values()]
+            if all(value is not None for value in entries):
+                values[field] = sum(value for value in entries if value is not None)
+    valid_usage_steps = sum(all(value is not None for value in step.values())
+                            for step in step_usage.values())
+    return {
+        "origin": "local_cli_jsonl_not_authenticated_provider_receipt",
+        "observed_model": None,
+        "final_status": None,
+        "denied_action_count": None,
+        "event_count": event_count,
+        "observed_completed_tool_steps": completed_tools,
+        "observed_unfinished_tool_steps": None,
+        "observed_failed_agy_steps": None,
+        "observed_failed_codex_items_partial": None,
+        "final_usage": values,
+        "preterminal_step_usage": {
+            "origin": "local_opencode_step_finish_parts_not_authenticated_provider_receipts",
+            "completed_steps": len(finished),
+            "steps_with_valid_usage": valid_usage_steps,
+            "usage_covers_completed_steps": valid_usage_steps == len(finished) and bool(finished),
+        },
+        "terminal_success": not terminal_errors and not usage_errors,
+        "terminal_errors": terminal_errors,
+        "complete": not terminal_errors and not usage_errors
+                    and all(value is not None for value in values.values()),
+        "errors": terminal_errors + usage_errors,
+    }
+
+
 def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
                  *, agy_no_command_tool: bool = False) -> dict[str, Any]:
     """Separate terminal execution evidence from optional token-field completeness."""
     if agy_no_command_tool and provider != "agy":
         raise ValueError("no-command trace check requires Agy")
+    if provider == "opencode":
+        return _parse_opencode_usage(stdout_path)
     final_events: list[tuple[int, dict[str, Any]]] = []
     init_models: list[str] = []
     terminal_errors: list[str] = []
@@ -692,22 +901,25 @@ def run_development_arm(
     agy_no_command_tool: bool = False,
 ) -> tuple[Path, dict[str, Any]]:
     """Execute exactly one arm and return its private run path and sanitized summary."""
-    if arm not in {"N", "S", "T"} or provider not in {"codex", "agy"}:
-        raise RunError("arm must be N/S/T and provider must be codex/agy")
+    if arm not in {"N", "S", "T"} or provider not in {"codex", "agy", "opencode"}:
+        raise RunError("arm must be N/S/T and provider must be codex/agy/opencode")
     if agy_no_command_tool and (provider != "agy" or arm == "T"):
         raise RunError("--agy-no-command-tool requires Agy N/S")
     if not model.strip() or not effort.strip():
         raise RunError("model and effort must both be explicit nonempty values")
     if re.fullmatch(r"[A-Za-z0-9._:/-]+", model) is None:
         raise RunError("model must be a simple CLI model identifier")
+    if provider == "opencode" and not re.fullmatch(r"minimax/[A-Za-z0-9._:-]+", model):
+        raise RunError("OpenCode development runs require an explicit minimax/<model> route")
     valid_efforts = ({"low", "medium", "high", "xhigh", "max", "ultra"}
-                     if provider == "codex" else {"low", "medium", "high", "max"})
+                     if provider == "codex" else {"uncontrolled"} if provider == "opencode"
+                     else {"low", "medium", "high", "max"})
     if effort not in valid_efforts:
         raise RunError(f"effort must be one of {sorted(valid_efforts)} for {provider}")
     if any(type(value) is not int or value < 1 for value in
            (timeout_seconds, replay_timeout_seconds, setup_timeout_seconds)):
         raise RunError("all timeout values must be positive integer seconds")
-    executable = shutil.which("codex" if provider == "codex" else "agy")
+    executable = shutil.which(provider)
     if executable is None:
         raise RunError(f"{provider} executable is unavailable")
     if arm == "T" and (toolkit_wheel is None or not _regular_file(toolkit_wheel)):
@@ -748,6 +960,9 @@ def run_development_arm(
         if agy_no_command_tool:
             summary["limitations"].append(
                 "No-command Agy pilot checks reported tool steps only; it does not enforce a provider or OS prohibition or detect unreported calls, and is not comparable with T CLI execution")
+        if provider == "opencode":
+            summary["limitations"].append(
+                "OpenCode JSONL does not authenticate the executed model, provider usage, cost, or child-agent usage; effort is uncontrolled")
         try:
             # The prompt hashes describe the bytes actually delivered to the model.
             # Copies must match them before any CLI or toolkit preparation starts.
@@ -768,14 +983,22 @@ def run_development_arm(
                         "--skip-git-repo-check", "-C", str(work), "-s", "workspace-write",
                         "-m", model, "-c", f'model_reasoning_effort="{effort}"', "-"]
                 stdin_text = prompt
-            else:
+            elif provider == "agy":
                 argv = [executable, "--print", prompt, "--output-format", "stream-json",
                         "--model", model, "--effort", effort, "--print-timeout",
                         f"{timeout_seconds}s", "--new-project", "--sandbox", "--mode",
                         "accept-edits", "--disable-slash-commands"]
                 stdin_text = None
-            summary["cli_mode"] = ({"codex_sandbox": "workspace-write"} if provider == "codex"
-                                   else {"agy_sandbox": True, "agy_mode": "accept-edits"})
+            else:
+                argv = [executable, "--pure", "run", "--format", "json", "--model", model,
+                        "--agent", "build", "--dir", str(work)]
+                stdin_text = prompt
+            summary["cli_mode"] = (
+                {"codex_sandbox": "workspace-write"} if provider == "codex"
+                else {"agy_sandbox": True, "agy_mode": "accept-edits"} if provider == "agy"
+                else {"opencode_format": "json", "opencode_pure": True,
+                      "opencode_agent": "build"}
+            )
             _write_json(run_dir / "run.json", summary)
             result = _capture(argv, cwd=work, timeout_seconds=timeout_seconds,
                               stdout_path=run_dir / "cli.stdout.jsonl",
@@ -814,7 +1037,10 @@ def run_development_arm(
             else:
                 summary["execution_status"] = "artifacts_ready_for_inspection"
             if not summary["cli_usage"]["complete"]:
-                summary["limitations"].append("final local CLI usage is missing or malformed")
+                summary["limitations"].append(
+                    "OpenCode local JSONL trace or usage is incomplete or inconsistent"
+                    if provider == "opencode" else "final local CLI usage is missing or malformed"
+                )
             if summary["cli_usage"]["observed_failed_codex_items_partial"]:
                 summary["limitations"].append("local Codex stream contains failed items")
         except RunError as exc:
@@ -982,7 +1208,7 @@ def replay_run_dir(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arm", choices=("N", "S", "T"))
-    parser.add_argument("--provider", choices=("codex", "agy"))
+    parser.add_argument("--provider", choices=("codex", "agy", "opencode"))
     parser.add_argument("--model")
     parser.add_argument("--effort")
     parser.add_argument("--output-root", type=Path,

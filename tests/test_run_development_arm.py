@@ -29,7 +29,7 @@ from pathlib import Path
 scenario = os.environ.get("FAKE_SCENARIO", "ok")
 provider = Path(sys.argv[0]).name
 Path("fake_argv.json").write_text(json.dumps(sys.argv[1:]), encoding="utf-8")
-if provider == "codex":
+if provider in {"codex", "opencode"}:
     prompt = sys.stdin.read()
 else:
     prompt = sys.argv[sys.argv.index("--print") + 1]
@@ -74,6 +74,91 @@ if provider == "codex":
         "cache_write_input_tokens": 0, "output_tokens": 8,
         "reasoning_output_tokens": 1}
     print(json.dumps({"type": "turn.completed", "usage": usage}))
+elif provider == "opencode":
+    session_id = "private-local-session-id"
+    def emit(kind, part=None):
+        event = {"type": kind, "sessionID": session_id}
+        if part is not None:
+            event["part"] = part
+        print(json.dumps(event))
+    def part(part_id, message_id, kind, **extra):
+        return {"id": part_id, "messageID": message_id, "sessionID": session_id,
+                "type": kind, **extra}
+    if Path(".venv/bin/organon").exists():
+        case = Path("case")
+        case.mkdir()
+        (case / "organon.json").write_text(
+            '{"project":{"approval_policy":"signed"},"events":[{}]}\n',
+            encoding="utf-8")
+    emit("step_start", part("part-start-1", "message-1", "step-start"))
+    first_tokens = {"input": 10, "output": 4, "reasoning": 1,
+                    "cache": {"read": 2, "write": 0}, "total": 17}
+    if scenario == "opencode_nonadditive_total":
+        first_tokens["total"] = 99
+    elif scenario == "opencode_bad_usage":
+        first_tokens["total"] = -1
+    elif scenario == "opencode_null_total":
+        first_tokens["total"] = None
+    elif scenario == "opencode_missing_usage":
+        del first_tokens["total"]
+    elif scenario == "opencode_bool_usage":
+        first_tokens["input"] = True
+    elif scenario == "opencode_float_usage":
+        first_tokens["output"] = 4.0
+    if scenario == "opencode_overlapping_steps":
+        emit("step_start", part("part-start-2", "message-2", "step-start"))
+    if scenario not in {"opencode_open_step", "opencode_wrong_message"}:
+        emit("step_finish", part("part-finish-1", "message-1", "step-finish",
+                                 reason="tool-calls", tokens=first_tokens, cost=0))
+    elif scenario == "opencode_wrong_message":
+        emit("step_finish", part("part-finish-1", "message-2", "step-finish",
+                                 reason="tool-calls", tokens=first_tokens, cost=0))
+    if scenario == "opencode_open_step":
+        sys.exit(0)
+    tool = part("part-tool-1",
+                "unattached-message" if scenario == "opencode_unattached_tool" else
+                "message-2" if scenario == "opencode_tool_wrong_step" else "message-1",
+                "tool", state={"status": "error" if scenario == "opencode_tool_error"
+                               else "completed"})
+    if scenario != "opencode_missing_tool_name":
+        tool["tool"] = "task" if scenario == "opencode_child_task" else "write"
+    if scenario not in {"opencode_tool_calls_no_tool", "opencode_tool_wrong_step"}:
+        emit("tool_use", tool)
+    if scenario == "opencode_duplicate_tool":
+        emit("tool_use", tool)
+    if scenario == "opencode_session_changed":
+        session_id = "another-private-session-id"
+    if scenario != "opencode_overlapping_steps":
+        emit("step_start", part("part-tool-1" if scenario == "opencode_part_id_reused"
+                                else "part-start-2", "message-2", "step-start"))
+    if scenario == "opencode_tool_wrong_step":
+        emit("tool_use", tool)
+    emit("text", part("part-text-2", "message-2", "text", text="private model answer"))
+    second_tokens = {"input": 20, "output": 5, "reasoning": 2,
+                     "cache": {"read": 1, "write": 1}, "total": 29}
+    emit("step_finish", part("part-finish-2", "message-2", "step-finish",
+                             reason="tool-calls" if scenario in {"opencode_no_stop",
+                                                                  "opencode_multiple_tool_steps"}
+                             else "stop",
+                             tokens=second_tokens, cost=0))
+    if scenario == "opencode_multiple_tool_steps":
+        emit("tool_use", part("part-tool-2", "message-2", "tool", tool="write",
+                              state={"status": "completed"}))
+        emit("step_start", part("part-start-3", "message-3", "step-start"))
+        emit("text", part("part-text-3", "message-3", "text", text="private final answer"))
+        emit("step_finish", part("part-finish-3", "message-3", "step-finish",
+                                 reason="stop", tokens={"input": 7, "output": 3,
+                                                        "reasoning": 0,
+                                                        "cache": {"read": 0, "write": 0},
+                                                        "total": 10}, cost=0))
+    if scenario == "opencode_duplicate_finish":
+        emit("step_finish", part("part-finish-2", "message-2", "step-finish",
+                                 reason="stop", tokens=second_tokens, cost=0))
+    if scenario == "opencode_error":
+        emit("error", {"name": "LocalError"})
+    if scenario == "opencode_invalid_utf8":
+        sys.stdout.flush()
+        sys.stdout.buffer.write(b"\xff\n")
 else:
     model = sys.argv[sys.argv.index("--model") + 1]
     print(json.dumps({"event": "init", "conversation_id": "local-conversation-id",
@@ -145,12 +230,53 @@ else:
 def fake_clis(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
-    for name in ("codex", "agy"):
+    for name in ("codex", "agy", "opencode"):
         executable = bin_dir / name
         executable.write_text(FAKE_CLI, encoding="utf-8")
         executable.chmod(0o755)
     monkeypatch.setenv("PATH", str(bin_dir) + os.pathsep + os.environ["PATH"])
     return bin_dir
+
+
+def fake_t_setup(
+    work: Path, run_dir: Path, wheel: Path | None, _timeout_seconds: int,
+    _env: dict[str, str],
+) -> dict[str, object]:
+    """Provide verifiable local T fixture files, without installing a wheel."""
+    assert wheel is not None
+    copied = work / wheel.name
+    copied.write_bytes(wheel.read_bytes())
+    executable = work / ".venv" / "bin" / "organon"
+    executable.parent.mkdir(parents=True)
+    executable.write_text(
+        "#!/usr/bin/env python3\n"
+        "import json\n"
+        "print(json.dumps({'project': {'approval_policy': 'signed'}}))\n",
+        encoding="utf-8",
+    )
+    executable.chmod(0o755)
+    package = work / ".venv" / "lib" / "python3.11" / "site-packages" / "specorganon"
+    package.mkdir(parents=True)
+    (package / "__init__.py").write_text("VERSION = 1\n", encoding="utf-8")
+    steps: dict[str, dict[str, object]] = {}
+    for name in ("toolkit_venv", "toolkit_install", "toolkit_init", "toolkit_status"):
+        for suffix in ("stdout", "stderr"):
+            content = ('{"project":{"approval_policy":"signed"}}\n'
+                       if name == "toolkit_status" and suffix == "stdout"
+                       else f"{name} {suffix}\n")
+            (run_dir / f"{name}.{suffix}").write_text(content, encoding="utf-8")
+        steps[name] = {
+            "stdout": runner._file_record(run_dir / f"{name}.stdout"),
+            "stderr": runner._file_record(run_dir / f"{name}.stderr"),
+            "exit_code": 0,
+            "timed_out": False,
+        }
+    return {
+        "wheel": runner._file_record(copied),
+        "steps": steps,
+        "toolkit_files_fingerprint_sha256": runner._toolkit_fingerprint(work),
+        "signed_policy_verified_in_local_probe": True,
+    }
 
 
 def _usage_trace(
@@ -440,6 +566,160 @@ def test_run_copies_only_assigned_packet_preserves_streams_and_replays(
         assert "workspace-write" in argv
         assert summary["cli_usage"]["preterminal_step_usage"] is None
         assert "local-thread-id" not in (run_dir / "run.json").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("arm", ["N", "S", "T"])
+def test_opencode_fake_cli_produces_local_arm_receipt(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch, arm: str,
+) -> None:
+    wheel = None
+    if arm == "T":
+        wheel = tmp_path / "specorganon-0.1.0-py3-none-any.whl"
+        wheel.write_bytes(b"synthetic wheel fixture, not installed\n")
+        monkeypatch.setattr(runner, "_setup_toolkit", fake_t_setup)
+    run_dir, summary = run_development_arm(
+        arm=arm, provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs", timeout_seconds=10,
+        toolkit_wheel=wheel,
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert summary["controlled_comparison_eligible"] is False
+    assert summary["provider_request_id"] is None
+    assert summary["cost"] is None
+    assert summary["price"] is None
+    assert summary["cli_usage"]["observed_model"] is None
+    assert summary["cli_usage"]["terminal_success"] is True
+    assert summary["cli_usage"]["complete"] is True
+    assert summary["cli_usage"]["final_usage"] == {
+        "input_tokens": 30, "output_tokens": 9, "reasoning_tokens": 3,
+        "cache_read_tokens": 3, "cache_write_tokens": 1, "total_tokens": 46,
+    }
+    assert summary["cli_usage"]["preterminal_step_usage"]["completed_steps"] == 2
+    assert summary["cli_usage"]["observed_completed_tool_steps"] == 1
+    assert summary["cli_mode"] == {
+        "opencode_format": "json", "opencode_pure": True, "opencode_agent": "build",
+    }
+    assert "private-local-session-id" not in (run_dir / "run.json").read_text(encoding="utf-8")
+    argv = json.loads((run_dir / "work" / "fake_argv.json").read_text(encoding="utf-8"))
+    assert argv == [
+        "--pure", "run", "--format", "json", "--model", "minimax/MiniMax-M3",
+        "--agent", "build", "--dir", str(run_dir / "work"),
+    ]
+    assert (run_dir / "work" / "fake_prompt.txt").read_text(encoding="utf-8") == (
+        run_dir / "prompt.txt").read_text(encoding="utf-8")
+    if arm == "T":
+        assert summary["t_ledger"]["signed_policy"] is True
+        assert summary["t_ledger"]["event_count"] == 1
+    else:
+        assert summary["t_ledger"] is None
+
+
+def test_opencode_retains_separately_reported_numeric_total(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", "opencode_nonadditive_total")
+    _, summary = run_development_arm(
+        arm="N", provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert summary["cli_usage"]["origin"] == "local_cli_jsonl_not_authenticated_provider_receipt"
+    assert summary["cli_usage"]["final_usage"]["total_tokens"] == 128
+    assert summary["cli_usage"]["final_usage"]["input_tokens"] == 30
+    assert summary["cost"] is None
+
+
+def test_opencode_multiple_model_steps_pair_with_their_tools(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", "opencode_multiple_tool_steps")
+    _, summary = run_development_arm(
+        arm="N", provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert summary["cli_usage"]["terminal_success"] is True
+    assert summary["cli_usage"]["complete"] is True
+    assert summary["cli_usage"]["preterminal_step_usage"]["completed_steps"] == 3
+    assert summary["cli_usage"]["observed_completed_tool_steps"] == 2
+    assert summary["cli_usage"]["final_usage"] == {
+        "input_tokens": 37, "output_tokens": 12, "reasoning_tokens": 3,
+        "cache_read_tokens": 3, "cache_write_tokens": 1, "total_tokens": 56,
+    }
+
+
+def test_opencode_absent_optional_total_preserves_valid_terminal_stop(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", "opencode_missing_usage")
+    _, summary = run_development_arm(
+        arm="N", provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert summary["controlled_comparison_eligible"] is False
+    usage = summary["cli_usage"]
+    assert usage["terminal_success"] is True
+    assert usage["complete"] is False
+    assert usage["final_usage"]["total_tokens"] is None
+    assert usage["final_usage"]["input_tokens"] == 30
+    assert usage["preterminal_step_usage"]["steps_with_valid_usage"] == 1
+    assert usage["errors"] == []
+
+
+@pytest.mark.parametrize("scenario,error_fragment", [
+    ("opencode_open_step", "unfinished model steps"),
+    ("opencode_wrong_message", "unmatched OpenCode step_finish messageID"),
+    ("opencode_session_changed", "sessionID changed"),
+    ("opencode_bad_usage", "step usage missing or invalid"),
+    ("opencode_null_total", "step usage missing or invalid"),
+    ("opencode_bool_usage", "step usage missing or invalid"),
+    ("opencode_float_usage", "step usage missing or invalid"),
+    ("opencode_tool_calls_no_tool", "tool-calls step has no completed tool_use"),
+    ("opencode_tool_wrong_step", "tool-calls step has no completed tool_use"),
+    ("opencode_overlapping_steps", "overlapping OpenCode model steps"),
+    ("opencode_tool_error", "OpenCode tool failed"),
+    ("opencode_missing_tool_name", "OpenCode tool name missing"),
+    ("opencode_duplicate_tool", "duplicate OpenCode tool part ID"),
+    ("opencode_unattached_tool", "parts without a model step messageID"),
+    ("opencode_part_id_reused", "part ID changed type or messageID"),
+    ("opencode_child_task", "task child usage is absent"),
+    ("opencode_no_stop", "no terminal stop"),
+    ("opencode_duplicate_finish", "event after terminal stop"),
+    ("opencode_error", "OpenCode reported an error"),
+    ("opencode_invalid_utf8", "invalid or ambiguous JSON"),
+])
+def test_opencode_fake_cli_rejects_incomplete_or_contradictory_jsonl(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+    scenario: str, error_fragment: str,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", scenario)
+    _, summary = run_development_arm(
+        arm="N", provider="opencode", model="minimax/MiniMax-M3",
+        effort="uncontrolled", output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["cli"]["exit_code"] == 0
+    assert all(summary["artifacts"].values())
+    assert summary["execution_status"] == "cli_internal_failure"
+    assert summary["cli_usage"]["terminal_success"] is False
+    assert summary["cli_usage"]["complete"] is False
+    assert any(error_fragment in error for error in summary["cli_usage"]["errors"])
+
+
+@pytest.mark.parametrize("model,effort", [
+    ("minimax/MiniMax-M3", "low"),
+    ("minimax/MiniMax-M3", "high"),
+    ("other/model", "uncontrolled"),
+])
+def test_opencode_rejects_unproven_effort_or_non_minimax_route_before_capture(
+    tmp_path: Path, fake_clis: Path, model: str, effort: str,
+) -> None:
+    with pytest.raises(RunError):
+        run_development_arm(
+            arm="N", provider="opencode", model=model, effort=effort,
+            output_root=tmp_path / "runs", timeout_seconds=10,
+        )
+    assert not (tmp_path / "runs").exists()
 
 
 def test_explicit_sandboxed_replay_records_local_enforcement(
