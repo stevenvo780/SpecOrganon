@@ -74,6 +74,13 @@ def trust_contexts(
 def trust_contexts_with_executors(
     project: dict[str, Any], path: str | Path,
 ) -> tuple[dict[str, bytes], dict[str, bytes], dict[str, bytes], str]:
+    approvers, reviewers, executors, _, status = trust_contexts_with_observers(project, path)
+    return approvers, reviewers, executors, status
+
+
+def trust_contexts_with_observers(
+    project: dict[str, Any], path: str | Path,
+) -> tuple[dict[str, bytes], dict[str, bytes], dict[str, bytes], dict[str, bytes], str]:
     """Resolve effective approval mode from external registration and fixture flag.
 
     A registered path can never be downgraded to an unsigned fixture by editing
@@ -98,7 +105,7 @@ def trust_contexts_with_executors(
             raise ValueError("registered signed case cannot become a fixture")
         if os.environ.get("ORGANON_ALLOW_FIXTURES") != "1":
             raise ValueError("fixture approvals disabled; set ORGANON_ALLOW_FIXTURES=1 only in synthetic runs")
-        return {}, {}, {}, "fixture"
+        return {}, {}, {}, {}, "fixture"
     if project.get("approval_policy") != "signed" or cases is None:
         raise ValueError("signed case requires a trusted case registry")
     case_id = project.get("case_id")
@@ -122,8 +129,12 @@ def trust_contexts_with_executors(
     raw_executors = entry.get("test_executors", {})
     if not isinstance(raw_executors, dict):
         raise ValueError("malformed trusted test executors")
+    raw_observers = entry.get("test_observers", {})
+    if not isinstance(raw_observers, dict):
+        raise ValueError("malformed trusted test observers")
     reviewers: dict[str, bytes] = {}
     executors: dict[str, bytes] = {}
+    observers: dict[str, bytes] = {}
     key_owners: dict[bytes, str] = {}
     for actor, key in result.items():
         owner = key_owners.get(key)
@@ -150,7 +161,17 @@ def trust_contexts_with_executors(
             raise ValueError("trusted test executor overlaps another actor or public key")
         key_owners[key] = actor
         executors[actor] = key
-    return result, reviewers, executors, "configured"
+    for actor, encoded in raw_observers.items():
+        key = _decode(encoded, 32)
+        if (not isinstance(actor, str) or not actor.startswith("observer:")
+                or not actor.removeprefix("observer:").strip() or actor != actor.strip()
+                or key is None):
+            raise ValueError("malformed trusted test observer entry")
+        if actor in result or actor in reviewers or actor in executors or key in key_owners:
+            raise ValueError("trusted test observer overlaps another actor or public key")
+        key_owners[key] = actor
+        observers[actor] = key
+    return result, reviewers, executors, observers, "configured"
 
 
 def trust_context(project: dict[str, Any], path: str | Path) -> tuple[dict[str, bytes], str]:
