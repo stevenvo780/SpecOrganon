@@ -21,6 +21,7 @@ sys.path.insert(0, str(SCRIPTS))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import stage_released_run as staging  # noqa: E402
 import plan_confirmatory  # noqa: E402
+import preflight_assets  # noqa: E402
 import test_inspect_released_payload as fixture  # noqa: E402
 import test_stage_released_run as stage_fixture  # noqa: E402
 import verify_staged_run as verifier  # noqa: E402
@@ -104,6 +105,35 @@ def test_verifies_bundle_stage_without_installing(tmp_path: Path) -> None:
         is True
     )
     assert list((stage / "work").iterdir()) == []
+
+
+def test_verifies_gated_attempt_one_with_claim_provenance(tmp_path: Path) -> None:
+    schedule, assets, schedule_path, _ = fixture._fixture(tmp_path)
+    run = schedule["runs"][0]
+    release = tmp_path / "release"
+    gate_root = tmp_path / "gate"
+    preflight_assets.preflight(
+        schedule, assets, run_id=run["run_id"], output_dir=release,
+        gate_root=gate_root,
+    )
+    stage = tmp_path / "stage"
+    manifest = staging.stage_released_run(
+        schedule, release, stage, gate_root=gate_root,
+    )
+    result = verifier.verify_stage(schedule, run["run_id"], stage)
+    assert manifest["schema"] == 2
+    assert manifest["attempt_number"] == result["attempt_number"] == 1
+    assert manifest["release_dir"] == result["release_dir"] == str(release)
+    assert result["claim_sha256"] == manifest["claim_sha256"]
+    assert result["publication_sha256"] == manifest["publication_sha256"]
+    process = subprocess.run(
+        [sys.executable, "-B", str(SCRIPT), str(schedule_path), run["run_id"], str(stage)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert process.returncode == 0, process.stderr
+    assert json.loads(process.stdout) == result
 
 
 def test_verifies_retry_stage_with_normalized_identity(tmp_path: Path) -> None:

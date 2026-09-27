@@ -322,6 +322,12 @@ def preflight(
             raise PreflightError("run_id is absent from schedule")
         if not Path(output_dir).is_absolute():
             raise PreflightError("output_dir must be absolute")
+        if gate_root is not None:
+            try:
+                if Path(output_dir).resolve().is_relative_to(Path(gate_root).resolve()):
+                    raise PreflightError("output_dir must be outside the gate registry")
+            except (OSError, RuntimeError) as exc:
+                raise PreflightError("output_dir and gate root cannot be resolved") from exc
 
     with ExitStack() as stack:
         opened = _open_verified_assets(paths, digests, stack)

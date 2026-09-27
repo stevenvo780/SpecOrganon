@@ -450,6 +450,13 @@ def test_gate_binds_stage_to_claimed_run_and_release(tmp_path: Path) -> None:
     claim = gate.verify_claim(schedule, run["run_id"], gate_root, release)
     assert claim["run_id"] == run["run_id"]
 
+    with pytest.raises(staging.StageError, match="outside the gate registry"):
+        staging.stage_released_run(
+            schedule, release, gate_root / "stage", gate_root=gate_root,
+        )
+    assert not (gate_root / "stage").exists()
+    assert gate.verify_claim(schedule, run["run_id"], gate_root, release) == claim
+
     other_release = tmp_path / "other-release"
     shutil.copytree(release, other_release)
     rejected_stage = tmp_path / "rejected-stage"
@@ -478,7 +485,12 @@ def test_gate_binds_stage_to_claimed_run_and_release(tmp_path: Path) -> None:
     assert process.returncode == 0, process.stderr
     report = json.loads(process.stdout)
     assert report["run_id"] == run["run_id"]
-    assert (stage / "stage.json").is_file()
+    assert report["schema"] == 2
+    assert report["attempt_number"] == 1
+    assert report["release_dir"] == str(release)
+    assert report["claim_sha256"] == claim["claim_sha256"]
+    assert report["publication_sha256"] == claim["publication_sha256"]
+    assert json.loads((stage / "stage.json").read_text()) == report
 
 
 def test_api_rejects_ambiguous_stage_mode(tmp_path: Path) -> None:

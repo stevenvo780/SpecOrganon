@@ -290,6 +290,12 @@ def stage_released_run(
         raise StageError("visible inspection unexpectedly claimed execution readiness")
     if not Path(output_dir).is_absolute():
         raise StageError("output_dir must be absolute")
+    if gate_root is not None:
+        try:
+            if Path(output_dir).resolve().is_relative_to(Path(gate_root).resolve()):
+                raise StageError("output_dir must be outside the gate registry")
+        except (OSError, RuntimeError) as exc:
+            raise StageError("output_dir and gate root cannot be resolved") from exc
     claim = None
     if gate_root is not None:
         try:
@@ -426,9 +432,7 @@ def stage_released_run(
                 "provider_receipts_checked": False,
                 "custody_verified": False,
             }
-            if attempt_number > 1:
-                if claim is None:
-                    raise StageError("retry stage lacks a verified release claim")
+            if claim is not None:
                 manifest.update(
                     schema=2,
                     attempt_number=attempt_number,

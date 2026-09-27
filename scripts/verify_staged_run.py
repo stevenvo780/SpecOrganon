@@ -100,7 +100,7 @@ STAGE_FIELDS = frozenset(
         "custody_verified",
     }
 )
-RETRY_STAGE_FIELDS = STAGE_FIELDS | frozenset(
+GATED_STAGE_FIELDS = STAGE_FIELDS | frozenset(
     {"attempt_number", "release_dir", "claim_sha256", "publication_sha256"}
 )
 TEXT_ROLES = frozenset({"task_contract", "common_prompt", "arm_prompt", "sdd_guide"})
@@ -145,15 +145,15 @@ def _validate_manifest(
     if schema not in (1, 2):
         raise StageVerificationError("stage.json schema is invalid")
     manifest = _exact_object(
-        raw, STAGE_FIELDS if schema == 1 else RETRY_STAGE_FIELDS, "stage.json"
+        raw, STAGE_FIELDS if schema == 1 else GATED_STAGE_FIELDS, "stage.json"
     )
     if schema == 2:
         attempt_number = manifest["attempt_number"]
         release_dir = manifest["release_dir"]
-        if type(attempt_number) is not int or attempt_number <= 1:
-            raise StageVerificationError("retry stage attempt_number is invalid")
+        if type(attempt_number) is not int or attempt_number < 1:
+            raise StageVerificationError("gated stage attempt_number is invalid")
         if type(release_dir) is not str or not release_dir.startswith("/"):
-            raise StageVerificationError("retry stage release_dir must be absolute")
+            raise StageVerificationError("gated stage release_dir must be absolute")
         for field in ("claim_sha256", "publication_sha256"):
             digest = manifest[field]
             if (
@@ -161,7 +161,7 @@ def _validate_manifest(
                 or len(digest) != 64
                 or any(character not in "0123456789abcdef" for character in digest)
             ):
-                raise StageVerificationError(f"retry stage {field} is invalid")
+                raise StageVerificationError(f"gated stage {field} is invalid")
     if (
         type(manifest["classification"]) is not str
         or manifest["classification"] != STAGE_CLASSIFICATION
@@ -467,7 +467,7 @@ def verify_stage(
                     or release["attempt_number"] != manifest["attempt_number"]
                 ):
                     raise StageVerificationError(
-                        "retry stage release identity differs from stage manifest"
+                        "gated stage release identity differs from stage manifest"
                     )
             expected_root = {"case", "inputs", "work", "stage.json"}
             if set(os.listdir(root_fd)) != expected_root:

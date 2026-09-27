@@ -407,6 +407,21 @@ def test_gated_existing_output_is_rejected_before_claim(tmp_path: Path) -> None:
     assert marker.read_bytes() == b"preserved"
 
 
+@pytest.mark.parametrize("suffix", [Path("."), Path("nested-release")])
+def test_gated_release_cannot_write_inside_gate_registry(
+    tmp_path: Path, suffix: Path,
+) -> None:
+    schedule, assets, _, _ = _fixture(tmp_path)
+    gate = tmp_path / "gate"
+    output = gate / suffix
+    with pytest.raises(preflight_assets.PreflightError, match="outside the gate registry"):
+        preflight_assets.preflight(
+            schedule, assets, run_id=schedule["runs"][0]["run_id"],
+            output_dir=output, gate_root=gate,
+        )
+    assert not gate.exists()
+
+
 def test_gated_copy_failure_leaves_active_claim_and_untrusted_partial_directory(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
