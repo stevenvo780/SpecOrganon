@@ -687,6 +687,10 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
     agy_agent_invalid_events = 0
     agy_agent_conflicting_events = 0
     agy_agent_subset_errors: set[str] = set()
+    agy_conversation_id: str | None = None
+    agy_init_id_seen = False
+    agy_result_id_seen = False
+    agy_identity_invalid = False
     with stdout_path.open("rb") as stream:
         for line_number, raw_line in enumerate(stream, start=1):
             if not raw_line.strip():
@@ -704,6 +708,29 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
             event_count += 1
             kind = event[kind_key]
             last_type = kind
+            if provider == "agy" and kind in {"init", "result", "step_update"}:
+                # Agy emits the init ID on the event and the result ID inside
+                # its payload. Check either location when an event supplies it.
+                payload = event.get(kind)
+                for holder in (event, payload):
+                    if type(holder) is not dict or "conversation_id" not in holder:
+                        continue
+                    conversation_id = holder["conversation_id"]
+                    if type(conversation_id) is not str or not conversation_id.strip():
+                        terminal_errors.append(
+                            f"line {line_number}: agy {kind} conversation_id is malformed")
+                        agy_identity_invalid = True
+                        continue
+                    if kind == "init":
+                        agy_init_id_seen = True
+                    elif kind == "result":
+                        agy_result_id_seen = True
+                    if agy_conversation_id is None:
+                        agy_conversation_id = conversation_id
+                    elif conversation_id != agy_conversation_id:
+                        terminal_errors.append(
+                            f"line {line_number}: agy {kind} conversation_id changed")
+                        agy_identity_invalid = True
             if provider == "codex" and kind == "turn.completed":
                 final_events.append((line_number, event))
             elif provider == "codex" and kind == "turn.failed":
@@ -934,6 +961,11 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
     return {
         "origin": "local_cli_jsonl_not_authenticated_provider_receipt",
         "observed_model": init_models[0] if provider == "agy" and len(init_models) == 1 else None,
+        **({"conversation_identity": (
+            "local_ids_invalid" if agy_identity_invalid else
+            "local_ids_consistent" if agy_init_id_seen and agy_result_id_seen else
+            "local_identity_unverified"
+        )} if provider == "agy" else {}),
         "final_status": final_status,
         "denied_action_count": denied_action_count,
         "event_count": event_count,

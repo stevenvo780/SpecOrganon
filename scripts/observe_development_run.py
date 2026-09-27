@@ -393,17 +393,22 @@ def _verify_usage(
     finally:
         os.close(fd)
     if observed != declared:
-        # Pre-check no-command pilots stored the same aggregate parser fields
-        # without this new trace summary. Recompute the gate before accepting
-        # that historical shape; an observed command still changes terminal_success.
+        # Historical Agy summaries can omit the local identity state and the
+        # no-command trace summary. Recompute both from the verified stream;
+        # contradictory IDs and observed commands still change terminal_success.
         legacy_observed = dict(observed)
-        legacy_observed.pop("no_command_tool_trace", None)
-        if not agy_no_command_tool or legacy_observed != declared:
+        if provider == "agy" and "conversation_identity" not in declared:
+            legacy_observed.pop("conversation_identity", None)
+        if agy_no_command_tool and "no_command_tool_trace" not in declared:
+            legacy_observed.pop("no_command_tool_trace", None)
+        if legacy_observed != declared:
             raise ObservationError("cli_usage differs from the verified local CLI stream")
     return {
         "origin": observed["origin"],
         "complete": observed["complete"],
         "terminal_success": observed["terminal_success"],
+        **({"conversation_identity": observed["conversation_identity"]}
+           if provider == "agy" else {}),
         "final_usage": observed["final_usage"],
         "preterminal_step_usage": observed["preterminal_step_usage"],
         "no_command_tool_trace": observed.get("no_command_tool_trace"),

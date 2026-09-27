@@ -192,6 +192,8 @@ def test_observes_directory_emitted_by_real_runner_with_existing_fake_cli(
     assert result.returncode == 0, result.stderr
     observation = json.loads(result.stdout)
     assert observation["execution_status"] == summary["execution_status"]
+    if provider == "agy":
+        assert observation["cli_usage"]["conversation_identity"] == "local_ids_consistent"
     assert (
         observation["cli_usage"]["final_usage"] == summary["cli_usage"]["final_usage"]
     )
@@ -354,6 +356,89 @@ def test_observer_rejects_old_green_claim_for_open_codex_item(
     rejected = _invoke(run_dir)
     assert rejected.returncode == 2
     assert "cli_usage differs from the verified local CLI stream" in rejected.stderr
+
+
+@pytest.mark.parametrize("scenario", [
+    "agy_result_id_mismatch", "agy_step_nested_id_mismatch", "agy_result_id_malformed",
+])
+def test_observer_rejects_forged_green_agy_conversation_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, scenario: str,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    executable = fake_bin / "agy"
+    executable.write_text(FAKE_CLI, encoding="utf-8")
+    executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
+    monkeypatch.setenv("FAKE_SCENARIO", scenario)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["execution_status"] == "cli_internal_failure"
+    honest = _invoke(run_dir)
+    assert honest.returncode == 0, honest.stderr
+    honest_usage = json.loads(honest.stdout)["cli_usage"]
+    assert honest_usage["terminal_success"] is False
+    assert honest_usage["conversation_identity"] == "local_ids_invalid"
+    assert "local-conversation-id" not in honest.stdout
+    assert "another-private-conversation-id" not in honest.stdout
+
+    summary["execution_status"] = "artifacts_ready_for_inspection"
+    summary["cli_usage"].update(
+        terminal_success=True, complete=True, terminal_errors=[], errors=[],
+        conversation_identity="local_ids_consistent",
+    )
+    _write_summary(run_dir, summary)
+    forged = _invoke(run_dir)
+    assert forged.returncode == 2
+    assert forged.stdout == ""
+    assert "cli_usage differs from the verified local CLI stream" in forged.stderr
+
+    # The legacy summary shape also cannot turn a contradictory stream green.
+    summary["cli_usage"].pop("conversation_identity")
+    _write_summary(run_dir, summary)
+    forged_legacy = _invoke(run_dir)
+    assert forged_legacy.returncode == 2
+    assert "cli_usage differs from the verified local CLI stream" in forged_legacy.stderr
+
+    summary["cli_usage"] = _parse_usage("agy", run_dir / "cli.stdout.jsonl", "test-model")
+    _write_summary(run_dir, summary)
+    forged_status = _invoke(run_dir)
+    assert forged_status.returncode == 2
+    assert "execution status contradicts the verified run records" in forged_status.stderr
+
+
+def test_observer_accepts_legacy_agy_jsonl_without_conversation_ids(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    executable = fake_bin / "agy"
+    executable.write_text(FAKE_CLI, encoding="utf-8")
+    executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
+    monkeypatch.setenv("FAKE_SCENARIO", "agy_ids_absent")
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["cli_usage"]["conversation_identity"] == "local_identity_unverified"
+    observed = _invoke(run_dir)
+    assert observed.returncode == 0, observed.stderr
+    observation = json.loads(observed.stdout)
+    assert observation["execution_status"] == "artifacts_ready_for_inspection"
+    assert observation["cli_usage"]["terminal_success"] is True
+    assert observation["cli_usage"]["complete"] is True
+    assert observation["cli_usage"]["conversation_identity"] == "local_identity_unverified"
+    assert observation["authenticated_model_id"] is None
+
+    summary["cli_usage"].pop("conversation_identity")
+    _write_summary(run_dir, summary)
+    legacy = _invoke(run_dir)
+    assert legacy.returncode == 0, legacy.stderr
+    assert json.loads(legacy.stdout)["cli_usage"]["conversation_identity"] == (
+        "local_identity_unverified")
 
 
 @pytest.mark.parametrize("scenario,violating,uninspectable", [

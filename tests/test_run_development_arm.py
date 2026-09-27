@@ -161,8 +161,11 @@ elif provider == "opencode":
         sys.stdout.buffer.write(b"\xff\n")
 else:
     model = sys.argv[sys.argv.index("--model") + 1]
-    print(json.dumps({"event": "init", "conversation_id": "local-conversation-id",
-                      "init": {"model": model, "cwd": str(Path.cwd())}}))
+    init_event = {"event": "init", "init": {"model": model, "cwd": str(Path.cwd())}}
+    if scenario not in {"agy_ids_absent", "agy_result_id_only"}:
+        init_event["conversation_id"] = (
+            42 if scenario == "agy_init_id_malformed" else "local-conversation-id")
+    print(json.dumps(init_event))
     for state in (() if scenario == "agy_no_tool_step" else ("ACTIVE", "DONE")):
         tool_index = "2" if scenario == "agy_tool_index_string" and state == "DONE" else 2
         tool_state = 123 if scenario == "agy_tool_state_malformed" and state == "DONE" else state
@@ -175,7 +178,18 @@ else:
                 else "RunCommand" if scenario == "agy_command_tool"
                 else "write_to_file"
             )
-        print(json.dumps({"event": "step_update", "step_update": tool_update}))
+        tool_event = {"event": "step_update", "step_update": tool_update}
+        if state == "ACTIVE":
+            if scenario == "agy_step_ids_match":
+                tool_event["conversation_id"] = "local-conversation-id"
+                tool_update["conversation_id"] = "local-conversation-id"
+            elif scenario == "agy_step_outer_id_mismatch":
+                tool_event["conversation_id"] = "another-private-conversation-id"
+            elif scenario == "agy_step_nested_id_mismatch":
+                tool_update["conversation_id"] = "another-private-conversation-id"
+            elif scenario == "agy_step_id_malformed":
+                tool_update["conversation_id"] = []
+        print(json.dumps(tool_event))
     if scenario == "agy_unknown_command_step":
         print(json.dumps({"event": "step_update", "step_update": {
             "step_index": 9, "step_type": "tool_call", "tool_name": "RunCommand",
@@ -218,11 +232,18 @@ else:
         usage = dict(step_usages[0])
     elif scenario == "agy_bad_final_arithmetic":
         usage["total_tokens"] = 99
-    print(json.dumps({"event": "result", "result": {
+    final_result = {
         "status": "FAILURE" if scenario == "agy_final_failure" else "SUCCESS",
-        "usage": usage, "conversation_id": "local-conversation-id",
+        "usage": usage,
         "denied_actions": [{"action": "command", "secret_parameter": "do-not-copy"}]
-                          if scenario == "agy_denied_actions" else []}}))
+                          if scenario == "agy_denied_actions" else []}
+    if scenario not in {"agy_ids_absent", "agy_init_id_only"}:
+        final_result["conversation_id"] = (
+            "another-private-conversation-id" if scenario == "agy_result_id_mismatch"
+            else " " if scenario == "agy_result_id_blank"
+            else {"private": "id"} if scenario == "agy_result_id_malformed"
+            else "local-conversation-id")
+    print(json.dumps({"event": "result", "result": final_result}))
 '''
 
 
@@ -579,6 +600,8 @@ def test_reported_success_with_both_usage_subsets_invalid_is_not_complete(
     assert parsed["terminal_success"] is True
     assert parsed["complete"] is False
     assert len([error for error in parsed["errors"] if "exceeds" in error]) >= 2
+    if provider == "agy":
+        assert parsed["conversation_identity"] == "local_identity_unverified"
     assert trace_path.read_text(encoding="utf-8") == raw
 
 
@@ -618,6 +641,7 @@ def test_run_copies_only_assigned_packet_preserves_streams_and_replays(
     argv = json.loads((run_dir / "work/fake_argv.json").read_text(encoding="utf-8"))
     assert "test-model" in argv and "medium" in " ".join(argv)
     if provider == "agy":
+        assert summary["cli_usage"]["conversation_identity"] == "local_ids_consistent"
         assert summary["cli_usage"]["observed_completed_tool_steps"] == 1
         assert summary["cli_usage"]["observed_unfinished_tool_steps"] == 0
         assert summary["cli_usage"]["preterminal_step_usage"]["unique_steps_with_valid_usage"] == 2
@@ -630,6 +654,72 @@ def test_run_copies_only_assigned_packet_preserves_streams_and_replays(
         assert "workspace-write" in argv
         assert summary["cli_usage"]["preterminal_step_usage"] is None
         assert "local-thread-id" not in (run_dir / "run.json").read_text(encoding="utf-8")
+
+
+def test_agy_matching_ids_in_step_update_remain_local_evidence(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", "agy_step_ids_match")
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert summary["cli_usage"]["terminal_success"] is True
+    assert summary["cli_usage"]["complete"] is True
+    assert summary["cli_usage"]["conversation_identity"] == "local_ids_consistent"
+    assert summary["provider_request_id"] is None
+    assert summary["controlled_comparison_eligible"] is False
+    assert "local-conversation-id" not in (run_dir / "run.json").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("scenario", [
+    "agy_ids_absent", "agy_init_id_only", "agy_result_id_only",
+])
+def test_agy_missing_ids_preserve_legacy_valid_stream_as_unverified(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch, scenario: str,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", scenario)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert summary["cli_usage"]["terminal_success"] is True
+    assert summary["cli_usage"]["complete"] is True
+    assert summary["cli_usage"]["conversation_identity"] == "local_identity_unverified"
+    assert "local-conversation-id" not in (run_dir / "run.json").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("scenario,line,fragment", [
+    ("agy_result_id_mismatch", 6, "agy result conversation_id changed"),
+    ("agy_step_outer_id_mismatch", 2, "agy step_update conversation_id changed"),
+    ("agy_step_nested_id_mismatch", 2, "agy step_update conversation_id changed"),
+    ("agy_init_id_malformed", 1, "agy init conversation_id is malformed"),
+    ("agy_result_id_malformed", 6, "agy result conversation_id is malformed"),
+    ("agy_result_id_blank", 6, "agy result conversation_id is malformed"),
+    ("agy_step_id_malformed", 2, "agy step_update conversation_id is malformed"),
+])
+def test_agy_conversation_identity_error_rejects_zero_exit_with_artifacts(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+    scenario: str, line: int, fragment: str,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", scenario)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    usage = summary["cli_usage"]
+    assert summary["cli"]["exit_code"] == 0
+    assert all(summary["artifacts"].values())
+    assert summary["execution_status"] == "cli_internal_failure"
+    assert usage["terminal_success"] is False
+    assert usage["complete"] is False
+    assert usage["conversation_identity"] == "local_ids_invalid"
+    assert f"line {line}: {fragment}" in usage["terminal_errors"]
+    public_summary = (run_dir / "run.json").read_text(encoding="utf-8")
+    assert "local-conversation-id" not in public_summary
+    assert "another-private-conversation-id" not in public_summary
 
 
 @pytest.mark.parametrize("arm", ["N", "S", "T"])
