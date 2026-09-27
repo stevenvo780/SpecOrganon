@@ -70,7 +70,18 @@ def probe(repo: Path) -> dict[str, Any]:
                 break
             if step["op"] == "put":
                 item = dict(step)
-                if item["id"] == "crit1":
+                if item["id"] == "e0":
+                    # The decisive claim needs a typed measurement on i1's own
+                    # current protocol path. All values remain invented fixtures.
+                    item["text"] = "Invented predeclared count measurement for the indicator."
+                    item["data"] = {
+                        **item["data"],
+                        "metric_key": "count",
+                        "scope": "fixture",
+                        "unit": "count",
+                        "value": 10,
+                    }
+                elif item["id"] == "crit1":
                     item["data"] = {
                         "metric": "count",
                         "threshold": {
@@ -138,12 +149,12 @@ def probe(repo: Path) -> dict[str, Any]:
 
         missing = _cli_gate(case)
         expected = (
-            "needs a current passed test linked to res1 for crit1 "
+            "ass1 success needs a current passed test linked to res1 for crit1 "
             "and implementation of req1"
         )
         _require(
             not missing["ready"]
-            and any(expected in blocker for blocker in missing["blockers"]),
+            and missing["blockers"] == [expected],
             f"missing-test result passed or failed for another reason: {missing}",
         )
         engine.put_item(
@@ -171,7 +182,10 @@ def probe(repo: Path) -> dict[str, Any]:
         )
         engine.advance(case, "validate", "agent:lead")
         accepted = _cli_gate(case)
-        _require(accepted["accepted"], "linked synthetic result was not accepted")
+        _require(
+            accepted["ready"] and accepted["accepted"] and not accepted["blockers"],
+            "linked synthetic result was not accepted",
+        )
         return {
             "schema": 1,
             "classification": CLASSIFICATION,
