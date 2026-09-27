@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "classification": "development_mobility_case_with_published_retrospective_evidence",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "case": "cases/citibike_march2024",
+  "seed_sha256": "c63ffec48253ba21f9754a8fcc099a4f302525cfdb7b680acc47078eb90a0723",
+  "ledger_sha256": "af6b95cc40c3b6b44c04c47b713fa8db4ff2339a2b1fffefdce53a720688ddc4",
+  "june_2026_ledger_sha256_unchanged": "204b8094474113a52f2d271f5ae10e174979c66628e1753dc5df8e2b1e682678",
+  "source_parquet_sha256": "661221e1f6fc01ba6475cee61597e432fc0858689195b6c12255a6c005b52fc4",
+  "derived_result_sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+  "analysis_script_sha256": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+  "execution": {
+    "command": "uv run python scripts/seed_case.py cases/citibike_march2024/seed.json cases/citibike_march2024",
+    "items": 22,
+    "revision_after_seed": 22,
+    "revision_after_frame_review_and_advance": 24,
+    "approval_policy": "signed",
+    "frame": "accepted after independent native-agent read-only review of problem, actors and boundary",
+    "critique": "blocked: n_scope requires a verified human approval",
+    "observe": "not accepted: prior phases are not accepted",
+    "derived_evidence_trace": "e_rental -> pr_reanalysis -> h_distinct -> q_rows -> p_access; also links e_archive and e_eligible",
+    "stale_or_invalid_items": 0,
+    "human_approvals": 0
+  },
+  "checks": [
+    "A fresh temporary case seeded from the same file produced 22 valid items and only frame ready before review.",
+    "The public CLI status, trace and gate commands inspected the included case after frame review and advance.",
+    "The historical June 2026 ledger retained its SHA-256, and its replay test passed alongside the new March transfer test.",
+    "The derived counts and source/script hashes were compared with the archived analysis; the raw Parquet is not redistributed.",
+    "The three focused transfer tests and the complete 987-test suite passed."
+  ],
+  "limits": [
+    "The protocol was recorded after the sample had already been analyzed. It is a retrospective development analysis, not a preregistered or reserved case.",
+    "A native agent's independent review checks framing but does not establish a competent human decision or externally authenticated identity.",
+    "The ledger binds declared hashes and counts; it does not authenticate the publisher, physical station states, rider attempts or continuous coverage.",
+    "No intervention, causal comparison, model-method matrix or field impact was executed."
+  ],
+  "criterion_5": "not_assessed"
+}
