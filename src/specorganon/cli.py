@@ -20,6 +20,8 @@ ENGINE_OPERATIONS = {
     "approval_challenge": "approval_challenge",
     "test_execution_challenge": "test_execution_challenge",
     "record_test_execution": "record_test_execution",
+    "test_observation_challenge": "test_observation_challenge",
+    "record_test_observation": "record_test_observation",
     "field_attestation_challenge": "field_attestation_challenge",
     "attest_field": "attest_field",
     "challenge": "challenge",
@@ -74,6 +76,10 @@ def _json_report(raw: str) -> dict[str, Any]:
     return _strict_object(raw, "--report")
 
 
+def _json_receipt(raw: str) -> dict[str, Any]:
+    return _strict_object(raw, "--receipt")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="organon",
@@ -88,6 +94,8 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("--actor", required=True)
     init.add_argument("--approval-policy", choices=("signed", "fixture"), default="signed",
                       help="signed for real cases; fixture for explicitly synthetic tests")
+    init.add_argument("--test-gate-policy", choices=("signed_report", "signed_observed"),
+                      default="signed_report", help="Require a signed report or a signed report plus observation")
 
     put = commands.add_parser("put", help="Add or revise a case item")
     put.add_argument("path")
@@ -140,6 +148,23 @@ def build_parser() -> argparse.ArgumentParser:
     record_test_execution.add_argument("--report", type=_json_report, required=True)
     record_test_execution.add_argument("--actor", required=True)
     record_test_execution.add_argument("--signature", required=True)
+
+    test_observation_challenge = commands.add_parser(
+        "test-observation-challenge", help="Prepare exact bytes for offline signing of a test observation receipt"
+    )
+    test_observation_challenge.add_argument("path")
+    test_observation_challenge.add_argument("id")
+    test_observation_challenge.add_argument("--receipt", type=_json_receipt, required=True)
+    test_observation_challenge.add_argument("--actor", required=True)
+
+    record_test_observation = commands.add_parser(
+        "record-test-observation", help="Record a signed observation of an external test execution"
+    )
+    record_test_observation.add_argument("path")
+    record_test_observation.add_argument("id")
+    record_test_observation.add_argument("--receipt", type=_json_receipt, required=True)
+    record_test_observation.add_argument("--actor", required=True)
+    record_test_observation.add_argument("--signature", required=True)
 
     field_attestation_challenge = commands.add_parser(
         "field-attestation-challenge", help="Prepare case and source hashes for an assessor signature"

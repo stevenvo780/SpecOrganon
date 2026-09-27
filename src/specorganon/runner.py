@@ -25,6 +25,7 @@ ROLE_LABELS = {
     "reviewer": "revisor",
     "human": "aprobador humano",
     "executor": "ejecutor externo",
+    "observer": "observador externo",
 }
 PHASE_INPUT_KINDS = {
     "frame": (),
@@ -85,7 +86,9 @@ def _validate_roles(roles: dict[str, str] | None) -> dict[str, str]:
         key not in ROLE_LABELS or not isinstance(value, str) or not value.strip()
         for key, value in roles.items()
     ):
-        raise ManifestError("roles must map analyst, specialist, reviewer, human or executor to nonempty actor names")
+        raise ManifestError(
+            "roles must map analyst, specialist, reviewer, human, executor or observer to nonempty actor names"
+        )
     return {key: value.strip() for key, value in roles.items()}
 
 
@@ -142,13 +145,30 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
         "signed test needs a current successful signed execution receipt",
         "latest signed test execution failed or timed out",
     }
+    observation_issues = {
+        "signed test needs a current successful observed repeat receipt",
+        "latest signed observed repeat failed or its bundle is unavailable",
+    }
     execution_targets = [
         item for item in troubled
         if item["kind"] == "test" and not item["stale"] and not item["contested"]
-        and len(item["issues"]) == 1 and item["issues"][0] in execution_issues
+        and any(issue in execution_issues for issue in item["issues"])
+        and set(item["issues"]) <= execution_issues | observation_issues
+    ]
+    observation_targets = [
+        item for item in troubled
+        if state["project"].get("test_gate_policy", "signed_report") == "signed_observed"
+        and item["kind"] == "test" and not item["stale"] and not item["contested"]
+        and item.get("test_execution_status") == "signed_passed"
+        and item.get("test_observation_status") != "observed_passed"
+        and bool(item["issues"]) and set(item["issues"]) <= observation_issues
     ]
     only_execution_pending = bool(execution_targets) and len(execution_targets) == len(troubled) and all(
         entry["kind"] == "test" for entry in missing
+    )
+    only_observation_pending = (
+        bool(observation_targets) and len(observation_targets) == len(troubled)
+        and all(entry["kind"] == "test" for entry in missing)
     )
     challenges = state["open_challenges"]
     base_role = "analyst" if phase.front == "philosophy" else "specialist"
@@ -158,6 +178,12 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
         action, role, task = (
             "execute_test", "executor",
             "Ejecutar externamente el argv declarado; registrar el reporte y la firma Ed25519 del ejecutor."
+        )
+    elif only_observation_pending:
+        action, role, task = (
+            "observe_test", "observer",
+            "Repetir externamente la ejecución firmada con los insumos fijados; "
+            "registrar el recibo de observación y la firma Ed25519 del observador."
         )
     elif troubled:
         action, role, task = "repair_artifacts", base_role, "Corregir artefactos inválidos o referencias a versiones anteriores."
@@ -197,6 +223,7 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
         "task": task,
         "phase_review_trust": state["phase_review_trust"],
         "test_execution_trust": state["test_execution_trust"],
+        "test_observation_trust": state.get("test_observation_trust"),
         "inputs_description": phase.inputs,
         "inputs": _limited(prior),
         "artifacts": _limited(current),
@@ -209,6 +236,13 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
             for item in execution_targets[:CONTEXT_LIMIT]
         ],
         "omitted_test_execution_targets": max(0, len(execution_targets) - CONTEXT_LIMIT),
+        "test_observation_targets": [
+            {"id": item["id"], "version": item["version"],
+             "report_provenance": item.get("test_execution_provenance"),
+             "observation_status": item.get("test_observation_status")}
+            for item in observation_targets[:CONTEXT_LIMIT]
+        ],
+        "omitted_test_observation_targets": max(0, len(observation_targets) - CONTEXT_LIMIT),
         "criteria": {"exit": phase.exit_rule, "review": phase.review, "stop": phase.stop_rule},
         "gate": {key: status[key] for key in (
             "ready", "reviewed", "independent_review", "review_signature_verified",
@@ -316,6 +350,7 @@ def _pending_reason(task: dict[str, Any]) -> str:
         "repair_artifacts": "invalid_or_stale_artifact",
         "human_approval": "human_approval_required",
         "execute_test": "signed_test_execution_required",
+        "observe_test": "signed_test_observation_required",
         "review_phase": "independent_review_required",
     }.get(task["action"], "manifest_exhausted")
 

@@ -187,6 +187,12 @@ def _validate_raw_tool_arguments(message: Any) -> None:
     ):
         raise ValueError("test execution report must be a JSON object")
     elif (
+        params.get("name") in {"test_observation_challenge", "record_test_observation"}
+        and "receipt" in arguments
+        and type(arguments["receipt"]) is not dict
+    ):
+        raise ValueError("test observation receipt must be a JSON object")
+    elif (
         params.get("name") == "resolve_challenge"
         and type(arguments.get("challenge_seq")) is bool
     ):
@@ -399,6 +405,8 @@ def _validate_init(kwargs: dict[str, Any]) -> None:
         raise ValueError("title, domain and actor must be nonempty strings")
     if kwargs.get("approval_policy", "signed") not in {"signed", "fixture"}:
         raise ValueError("approval_policy must be signed or fixture")
+    if kwargs.get("test_gate_policy", "signed_report") not in {"signed_report", "signed_observed"}:
+        raise ValueError("test_gate_policy must be signed_report or signed_observed")
 
 
 def _invoke(operation: str, **kwargs: Any) -> dict[str, Any]:
@@ -425,7 +433,8 @@ server = _StrictStdioMCPServer(
 
 @server.tool(description="Create a case at path with a title, domain and actor label.")
 def init(
-    path: str, title: str, domain: str, actor: str, approval_policy: str = "signed"
+    path: str, title: str, domain: str, actor: str, approval_policy: str = "signed",
+    test_gate_policy: str = "signed_report",
 ) -> dict[str, Any]:
     return _invoke(
         "init",
@@ -434,6 +443,7 @@ def init(
         domain=domain,
         actor=actor,
         approval_policy=approval_policy,
+        test_gate_policy=test_gate_policy,
     )
 
 
@@ -514,6 +524,29 @@ def record_test_execution(
 ) -> dict[str, Any]:
     return _invoke(
         "record_test_execution", path=path, id=id, report=report,
+        actor=actor, signature=signature,
+    )
+
+
+@server.tool(
+    description="Return canonical bytes for offline Ed25519 signing of an external test observation receipt. No command is run."
+)
+def test_observation_challenge(
+    path: str, id: str, receipt: dict[str, Any], actor: str,
+) -> dict[str, Any]:
+    return _invoke(
+        "test_observation_challenge", path=path, id=id, receipt=receipt, actor=actor,
+    )
+
+
+@server.tool(
+    description="Record a signed external observation for the current test execution. No command is run."
+)
+def record_test_observation(
+    path: str, id: str, receipt: dict[str, Any], actor: str, signature: str,
+) -> dict[str, Any]:
+    return _invoke(
+        "record_test_observation", path=path, id=id, receipt=receipt,
         actor=actor, signature=signature,
     )
 
