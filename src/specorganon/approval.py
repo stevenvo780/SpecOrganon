@@ -38,6 +38,15 @@ def case_path(path: str | Path) -> str:
     return str(Path(path).resolve(strict=True))
 
 
+def _unique_registry_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate key in trusted case registry")
+        result[key] = value
+    return result
+
+
 def _registry() -> dict[str, Any] | None:
     """Read the operator-controlled case registry outside the ledger."""
     configured = os.environ.get("ORGANON_APPROVERS_FILE")
@@ -46,7 +55,8 @@ def _registry() -> dict[str, Any] | None:
     if not configured or not Path(configured).is_absolute():
         raise ValueError("ORGANON_APPROVERS_FILE must be an absolute path to a trusted case registry")
     try:
-        data = json.loads(Path(configured).read_text(encoding="utf-8"))
+        data = json.loads(Path(configured).read_text(encoding="utf-8"),
+                          object_pairs_hook=_unique_registry_keys)
     except (OSError, json.JSONDecodeError) as exc:
         raise ValueError("cannot read trusted case registry") from exc
     if not isinstance(data, dict) or data.get("schema") != 2 or not isinstance(data.get("cases"), dict):

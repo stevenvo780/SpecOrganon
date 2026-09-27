@@ -49,6 +49,37 @@ def result_data(result) -> dict:
     return json.loads(result.content[0].text)
 
 
+def test_cli_rejects_duplicate_json_keys_without_changing_ledger(tmp_path):
+    case = tmp_path / "duplicate-json-case"
+    cli("init", str(case), "--title", "Duplicate JSON", "--domain", "test",
+        "--actor", "human:fixture", "--approval-policy", "fixture")
+    ledger = case / "organon.json"
+    original = ledger.read_bytes()
+
+    bad_data = subprocess.run(
+        [str(CLI), "put", str(case), "p1", "--kind", "problem", "--text", "Ambiguous threshold",
+         "--data", '{"threshold":{"value":0.1,"value":0.9}}', "--actor", "agent:writer"],
+        text=True, capture_output=True, check=False,
+    )
+    assert bad_data.returncode != 0
+    assert "duplicate" in bad_data.stderr.lower()
+    assert ledger.read_bytes() == original
+
+    manifest = tmp_path / "duplicate-manifest.json"
+    manifest.write_text(
+        '{"schema":1,"steps":[{"op":"put","id":"p1","kind":"problem",'
+        '"text":"Ambiguous threshold","refs":[],"data":{"threshold":'
+        '{"value":0.1,"value":0.9}}}]}', encoding="utf-8",
+    )
+    bad_manifest = subprocess.run(
+        [str(CLI), "run", str(case), "--manifest", str(manifest), "--actor", "agent:writer"],
+        text=True, capture_output=True, check=False,
+    )
+    assert bad_manifest.returncode != 0
+    assert "duplicate" in bad_manifest.stderr.lower()
+    assert ledger.read_bytes() == original
+
+
 def test_cli_and_real_stdio_mcp_share_state_and_gate(tmp_path):
     case = tmp_path / "case"
     path = str(case)

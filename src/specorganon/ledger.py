@@ -57,9 +57,23 @@ def _finite_float(raw: str) -> float:
     return value
 
 
+def _object_without_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate key in JSON object")
+        result[key] = value
+    return result
+
+
 def strict_json_loads(raw: str) -> Any:
-    """Parse JSON without nonfinite numbers or visible decimal value loss."""
-    return json.loads(raw, parse_constant=_reject_nonfinite, parse_float=_finite_float)
+    """Parse JSON without duplicate keys, nonfinite numbers, or decimal value loss."""
+    return json.loads(
+        raw,
+        object_pairs_hook=_object_without_duplicate_keys,
+        parse_constant=_reject_nonfinite,
+        parse_float=_finite_float,
+    )
 
 
 def _canonical(value: Any) -> bytes:

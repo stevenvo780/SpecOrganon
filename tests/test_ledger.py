@@ -13,6 +13,16 @@ def test_strict_json_preserves_common_decimal_values_and_explicit_zero():
         assert Decimal(str(value)) == Decimal(literal)
 
 
+@pytest.mark.parametrize("raw", (
+    '{"value":1,"value":2}',
+    '{"nested":{"value":1,"value":2}}',
+    '{"value":1,"\\u0076alue":2}',
+))
+def test_strict_json_rejects_duplicate_object_keys(raw):
+    with pytest.raises(ValueError, match="duplicate key in JSON object"):
+        ledger.strict_json_loads(raw)
+
+
 def test_rejects_stale_writer_and_preserves_recoverable_state(tmp_path):
     project = tmp_path / "project"
     ledger.init_project(project, "Case", "domain", "human")
@@ -69,6 +79,26 @@ def test_read_rejects_underflow_literal_before_verifying_event_hash(tmp_path):
 
     with pytest.raises(ledger.LedgerError, match="JSON number underflows to zero"):
         ledger.read_project(project)
+
+
+def test_read_and_append_reject_duplicate_nested_ledger_keys_without_writing(tmp_path):
+    project = tmp_path / "project"
+    ledger.init_project(project, "Case", "domain", "human")
+    ledger.append_event(project, "observation", {"nested": {"value": "measured"}}, "agent")
+    path = ledger.project_file(project)
+    original = path.read_text(encoding="utf-8")
+    # Last-wins parsing would preserve the original digest and silently hide
+    # the forged first value, so this must fail before hash verification.
+    poisoned = original.replace('"value": "measured"', '"value": "forged", "value": "measured"', 1)
+    assert poisoned != original
+    path.write_text(poisoned, encoding="utf-8")
+    before = path.read_bytes()
+
+    with pytest.raises(ledger.LedgerError, match="duplicate key in JSON object"):
+        ledger.read_project(project)
+    with pytest.raises(ledger.LedgerError, match="duplicate key in JSON object"):
+        ledger.append_event(project, "observation", {"value": "later"}, "agent")
+    assert path.read_bytes() == before
 
 
 def test_failed_atomic_replace_keeps_previous_revision(tmp_path, monkeypatch):

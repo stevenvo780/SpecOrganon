@@ -154,6 +154,24 @@ def test_valid_signature_approves_exact_item_and_records_proof(tmp_path, signer)
     assert read_project(case)["events"][-1]["kind"] == "approval"
 
 
+def test_duplicate_trusted_approver_key_rejects_signed_approval(tmp_path, signer):
+    key, trust_file = signer
+    case = _case(tmp_path, signer)
+    signature = _sign(key, _challenge(case))
+    registry = json.loads(trust_file.read_text(encoding="utf-8"))
+    encoded = registry["cases"][read_project(case)["project"]["case_id"]]["approvers"][ACTOR]
+    needle = f'"{ACTOR}":'
+    raw = trust_file.read_text(encoding="utf-8")
+    assert raw.count(needle) == 1
+    trust_file.write_text(raw.replace(needle, f'{needle} "{encoded}", {needle}', 1), encoding="utf-8")
+    before = (case / "organon.json").read_bytes()
+
+    with pytest.raises(engine.MethodError, match="duplicate"):
+        engine.approve(case, "n1", REASON, ACTOR, signature=signature)
+    assert (case / "organon.json").read_bytes() == before
+    assert not engine.get_state(case)["items"]["n1"]["approved"]
+
+
 def test_wrong_key_reason_item_and_version_never_append_approval(tmp_path, signer):
     key, _ = signer
     case = _case(tmp_path, signer)
