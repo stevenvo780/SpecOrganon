@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "classification": "development_synthetic_six_cell_local_audit",
+  "date_utc": "2026-09-27",
+  "baseline_head": "413d1b1313fb6cd5a08a303d674102d85b64298f",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "pilot_plan_template_v2_sha256": "94af09326a5aadeecf9eccdcd2bb8843ddf08f985a224c12c83a9cd8f96cdd54",
+  "activation_dossier_sha256": "bdc7aeb95d21e33356d5eea7c14753444fbfb72ef656bad73f63ba825481e095",
+  "file_sha256": {
+    "scripts/audit_development_triplet.py": "c9262513399fe3df307ac2144f76ed34082fcbfac910e4b7bb7a3725dc47b5e2",
+    "tests/test_audit_development_triplet.py": "963c7e1a3c76eeaece020cbfac03f582f8604151c1856308e9feedea005dd007",
+    "scripts/observe_development_run.py": "a0016efe150559351fee5e4c9566c2d4aee793cd92af6631f7feb493a4221331",
+    "scripts/run_development_arm.py": "14fc9a4d33b0495c829774d187323eade29b9cf251e8dd4a0aee6a3a99263ecb"
+  },
+  "gates": {
+    "focused_command": ".venv/bin/pytest -q tests/test_audit_development_triplet.py",
+    "focused_result": "22 passed",
+    "global_command": ".venv/bin/pytest -q",
+    "global_result": "1934 passed in 168.60s",
+    "ruff_command": "uv run ruff check .",
+    "ruff_result": "All checks passed!",
+    "git_diff_check": "passed"
+  },
+  "local_contract": {
+    "expected_schema_2_plan_sha256_supplied_by_caller": true,
+    "six_unique_A_B_by_N_S_T_cells_required": true,
+    "individual_runs_verified_by_observe_run_dir": true,
+    "shared_dossier_inputs_and_requested_budget_compared": true,
+    "requested_provider_model_effort_compared_within_family": true,
+    "failed_or_partial_cells_preserved_without_replacement": true,
+    "missing_local_usage_reported_as_null": true,
+    "signed_toolkit_workflow_verified": false,
+    "controlled_comparison_eligible": false
+  },
+  "synthetic_controls": [
+    "Six real observer calls over fake-CLI A/B by N/S/T runs yield six_cell_recorded_local_completion true and controlled_comparison_eligible false.",
+    "The T fake tool publishes a synthetic ledger declaring signed policy and one event, with two locally traced publications; it does not produce or verify Ed25519 signatures.",
+    "A copied run cannot fill a missing cell; a different plan or dossier and mismatched common inputs or requested settings are identified.",
+    "Tampering with copied plan bytes makes the observer reject the run; tampering with the T ledger digest also turns local completion false.",
+    "A partial or failed run keeps its cell with local_usage null; the auditor does not select a favorable replacement.",
+    "The real CLI emits JSON and exits 1 for an incomplete valid audit, 0 only for six locally complete cells, and 2 for invalid arguments."
+  ],
+  "independent_read_only_review": {
+    "initial_finding": "The first real six-run test only established cell presence; its T fake ledgers left completion false, while the only completion-positive test used a stub observer.",
+    "repair_and_recheck": "A synthetic policy-only T tool now publishes a traceable ledger and the real observer-backed six-cell test reaches local completion; the reviewer reproduced completion true-to-false after changing a T ledger byte.",
+    "post_review_cli_finding_and_recheck": "A direct CLI smoke found that zero folders originally emitted incomplete JSON but exited 0. The CLI now exits 1 for an incomplete valid audit, 0 for locally complete six-cell records and 2 for invalid arguments; the independent reviewer rechecked the exit behavior.",
+    "remaining_limit": "Signed policy and event count do not verify cryptographic signatures or a complete signed workflow; same-UID coherent rewrites and provider behavior are not authenticated."
+  },
+  "scope": {
+    "new_real_provider_calls": 0,
+    "prelaunch_plan_custody_authenticated": false,
+    "effective_tool_parity_proven": false,
+    "provider_tokens_or_cost_authenticated": false,
+    "signed_toolkit_workflow_verified": false,
+    "controlled_comparison_eligible": false,
+    "criterion_4": "not_assessed",
+    "goal_criteria_demonstrated": 0
+  }
+}

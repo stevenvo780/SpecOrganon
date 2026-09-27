@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "classification": "development_synthetic_local_signed_test_repeat_audit",
+  "date_utc": "2026-09-27",
+  "baseline_head": "413d1b1313fb6cd5a08a303d674102d85b64298f",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "file_sha256": {
+    "scripts/audit_signed_test_execution.py": "e75ec51a99e09219db775b8e7c524b5464e0534eaf9022432608b25aabf23d38",
+    "tests/test_audit_signed_test_execution.py": "74f833e4a603e68dfde7cd6c3cda621f4fb59c947ae249c56b6e9e1835a733ca",
+    "scripts/local_replay_sandbox.py": "6dc4c2c4b6abb1b0fea3a0af76d20f034c297bcb96df4bbb6da6557dbbdb1d32",
+    "src/specorganon/engine.py": "e01d6b37090f2949872b1894d62b8cfd612aefa9a6affa9ca69e8714cafd7034",
+    "src/specorganon/test_execution.py": "3e576c9062fdaa10e4d01933a085cabe124cb4ca8fdf674cbcc4509824f670f7"
+  },
+  "gates": {
+    "focused_command": "uv run --offline pytest -q tests/test_audit_signed_test_execution.py tests/test_signed_test_execution.py tests/test_local_replay_sandbox.py",
+    "focused_result": "37 passed",
+    "global_command": ".venv/bin/pytest -q",
+    "global_result": "1934 passed in 168.60s",
+    "ruff_command": "uv run ruff check .",
+    "ruff_result": "All checks passed!",
+    "git_diff_check": "passed"
+  },
+  "capability_probe": {
+    "sandbox_available_on_this_host": true,
+    "landlock_abi": 9
+  },
+  "local_contract": {
+    "new_private_run_directory_required": true,
+    "current_signed_report_selected_from_verified_ledger": true,
+    "executable_sha256_pinned_and_sealed": true,
+    "argv0_exactly_reproduced": false,
+    "stdout_stderr_and_declared_artifacts_rechecked_from_bounded_bytes": true,
+    "case_ledger_modified_by_auditor": false,
+    "engine_signed_gate_changed": false
+  },
+  "synthetic_controls": [
+    "A valid signature over fabricated stdout and artifact digests still leaves the existing engine signed_passed, but the local repeat audit reports observed_locally false and exits 1.",
+    "A deterministic command writes a declared artifact; the repeat audit matches exit code, timeout, stdout, stderr and artifact bytes and reports observed_passed true.",
+    "Absent, altered and symlinked artifacts fail the byte check; executable pin or signed argv changes fail before a successful audit.",
+    "A signed nonzero result can match the local observation while observed_passed stays false; timeout and unavailable sandbox do not pass.",
+    "Run directory symlinks in ancestor or final components are rejected."
+  ],
+  "independent_read_only_review": {
+    "finding": "No blocking false green within the declared local-repeat scope; the reviewer noticed ancestor symlinks were initially accepted by the path check.",
+    "repair_and_recheck": "Component-wise O_NOFOLLOW directory opens reject ancestor and final symlinks; the 11 auditor-file tests passed on recheck.",
+    "remaining_limit": "Same-UID races remain outside the claim; a local repeat cannot prove historical execution or independent key custody."
+  },
+  "scope": {
+    "new_real_provider_calls": 0,
+    "historical_execution_authenticated": false,
+    "independent_executor_custody": false,
+    "exact_argv0_reproduced": false,
+    "only_declared_artifacts_checked": true,
+    "criterion_1": "not_demonstrated",
+    "goal_criteria_demonstrated": 0
+  }
+}
