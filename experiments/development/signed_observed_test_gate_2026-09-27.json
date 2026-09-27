@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "classification": "development_synthetic_signed_observed_test_gate",
+  "date_utc": "2026-09-27",
+  "baseline_head": "6c1817e69dee209b782a519b500be773856068a0",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "wheel_sha256": "b0a7691a29c2033fca29a2d727c9095b08ac7f9f2dad6b259f8b78df593b4b17",
+  "file_sha256": {
+    "src/specorganon/engine.py": "ed19a9ed48262c34c19f7429bc0f2bedc2f1a2ed5bea05d4b1921febac26f0f0",
+    "src/specorganon/test_observation.py": "02e5a316e44f90e67f75797624fd6f243b6516df4be3c9aa3b11974f6b2af5a0",
+    "src/specorganon/runner.py": "24582016305fc9b7c415922808a43b93f79fac9a2d419d470984dd5975cb2681",
+    "scripts/audit_signed_test_execution.py": "0a86f352713c4be8362230f058d93f6e108830d714ceb936f381b720665f30e5",
+    "tests/test_observed_test_gate.py": "c11dcf5b8e78d2ba3e48cee3ecab5924cb5532750886acd092c93ec675971ca3",
+    "tests/test_test_observation_module.py": "7110d4f8bdec6e5e0efa322621b1c8fb0299bc1e7f53dedb0e9f0b9d1e8db75f",
+    "tests/test_test_observation_transport.py": "d19f0b1c96faf2c10246fdc57c5c73ef5ab2632bff36ab9c662f6eed21e4fb28"
+  },
+  "gates": {
+    "focused_command": "uv run --locked --extra dev python -m pytest -q tests/test_observed_test_gate.py tests/test_test_observation_module.py tests/test_test_observation_transport.py tests/test_audit_signed_test_execution.py tests/test_signed_test_execution_transport.py tests/test_runner.py",
+    "focused_result": "52 passed in 6.42s",
+    "global_command": "uv run --locked --extra dev python -m pytest -q",
+    "global_result": "1963 passed in 182.80s",
+    "ruff_command": "uv run --locked --extra dev ruff check .",
+    "ruff_result": "All checks passed!",
+    "git_diff_check": "passed"
+  },
+  "clean_install": {
+    "python_versions": ["3.11.15", "3.12.3"],
+    "installation": "offline wheel with dev extra in separate fresh virtual environments",
+    "pip_check": "34 compatible packages in each environment",
+    "smoke": "nine phases, 29 items, 49 events, 21 MCP tools discovered and 15 CLI/MCP operations exercised in each environment",
+    "additional_installed_tests": "19 passed in each environment: approval security, signed execution transport, observed execution transport",
+    "all_public_operations_invoked_across_smoke_and_installed_tests": true,
+    "installed_package_from_site_packages": true
+  },
+  "local_contract": {
+    "policy_opt_in_at_new_case_creation": true,
+    "legacy_project_fingerprint_unchanged": true,
+    "input_and_executable_pins_before_report": true,
+    "current_signed_report_required": true,
+    "observer_signature_and_current_bundle_bytes_required": true,
+    "negative_observation_supersedes_positive": true,
+    "missing_negative_bundle_cannot_restore_older_positive": true,
+    "new_report_or_item_version_requires_new_observation": true,
+    "revoked_observer_key_blocks": true,
+    "phase_snapshot_includes_observation_provenance": true,
+    "mcp_or_gate_executes_test_command": false,
+    "sandbox_available_on_this_host": true,
+    "landlock_abi_on_this_host": 9
+  },
+  "adversarial_review": {
+    "finding_1": "A direct signed event by the current test author bypassed API actor separation; replay now rejects it.",
+    "finding_2": "The runner did not route failed or unavailable observations to observe_test; it now does.",
+    "finding_3": "An author of an older test revision could sign a later observation; API and replay now consult author history.",
+    "remaining_confirmed_p1_p2": 0
+  },
+  "limitations": {
+    "historical_execution_authenticated": false,
+    "observer_independence_authenticated": false,
+    "observer_key_or_registry_under_external_custody": false,
+    "same_uid_transient_race_excluded": false,
+    "only_declared_artifacts_checked": true,
+    "provider_or_field_impact_tested": false,
+    "goal_criteria_demonstrated": 0
+  }
+}
