@@ -367,6 +367,32 @@ def _metric_comparison_unit(unit: Any) -> str:
     return rendered
 
 
+def _structured_field_outcome(value: Any) -> bool:
+    """Check a declared measurement record, not source authenticity or actor coverage."""
+    if not isinstance(value, dict) or value.get("status") != "measured":
+        return False
+    if any(not isinstance(value.get(field), str) or not value[field].strip()
+           for field in ("source", "date")):
+        return False
+    measurements = value.get("measurements")
+    if not isinstance(measurements, list) or not measurements:
+        return False
+    for measure in measurements:
+        if not isinstance(measure, dict):
+            return False
+        if any(not isinstance(measure.get(field), str) or not measure[field].strip()
+               for field in ("metric", "unit")):
+            return False
+        number = measure.get("value")
+        if (isinstance(number, bool) or not isinstance(number, (int, float))
+                or (isinstance(number, float) and not math.isfinite(number))):
+            return False
+        sample_size = measure.get("sample_size")
+        if not isinstance(sample_size, int) or isinstance(sample_size, bool) or sample_size < 1:
+            return False
+    return True
+
+
 def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) -> list[str]:
     """Check that a decisive verdict is numerically and procedurally auditable.
 
@@ -374,19 +400,24 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) ->
     This does not establish source authenticity or causal identification; an
     independent evaluator must still judge those.
     """
-    verdict = assessment["data"].get("verdict")
+    data = assessment["data"]
+    verdict = data.get("verdict")
     if verdict not in {"cumplido", "incumplido"}:
         return []
     claim = "success" if verdict == "cumplido" else "rejection"
     issues: list[str] = []
+    scope = data.get("claim_scope")
+    if verdict == "cumplido" and scope == "field":
+        for field in ("adverse_effects", "cost"):
+            if not _structured_field_outcome(data.get(field)):
+                issues.append(f"{assessment['id']} field success lacks structured measured {field} evidence")
     ancestors = [items[key] for key in _ancestors(items, assessment["id"])]
     results = [item for item in ancestors if item["kind"] == "result"]
     baselines = [item for item in ancestors if item["kind"] == "baseline"]
     criteria = [item for item in ancestors if item["kind"] == "criterion"]
     if len(results) != 1 or len(baselines) != 1 or len(criteria) != 1:
-        return [f"{assessment['id']} {claim} needs exactly one linked result, baseline and criterion"]
+        return issues + [f"{assessment['id']} {claim} needs exactly one linked result, baseline and criterion"]
     result, baseline, criterion = results[0], baselines[0], criteria[0]
-    scope = assessment["data"].get("claim_scope")
     if result["data"].get("origin") != scope or baseline["data"].get("origin") != scope:
         issues.append(f"{assessment['id']} {scope} {claim} cannot use another evidence origin")
     if result["seq"] <= criterion["seq"]:

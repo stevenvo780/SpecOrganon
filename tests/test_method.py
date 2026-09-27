@@ -25,6 +25,20 @@ def _accept(path, phase):
     assert engine.gate(path, phase)["accepted"]
 
 
+def _synthetic_measured_outcome(metric, unit, value=0):
+    return {
+        "status": "measured", "source": "invented fixture", "date": "2026-09-27",
+        "measurements": [{"metric": metric, "unit": unit, "value": value, "sample_size": 12}],
+    }
+
+
+def _synthetic_measured_outcomes():
+    return {
+        "adverse_effects": _synthetic_measured_outcome("adverse events", "count"),
+        "cost": _synthetic_measured_outcome("cost", "synthetic units", 2),
+    }
+
+
 def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1"),
                              e0_refs=("pr1",), e0_origin="simulated", e0_metric_key=None, e0_unit=None,
                              e1_refs=("pr1",), e1_origin="simulated", e1_value=10,
@@ -1082,7 +1096,7 @@ def test_overlapping_success_and_rejection_tests_block_both_verdicts(tmp_path):
     for verdict in ("incumplido", "cumplido"):
         _put(path, "ass1", "assessment", ["res1", "r1"],
              {"verdict": verdict, "claim_scope": "field", "uncertainty": "synthetic interval",
-              "adverse_effects": "invented fixture", "cost": "invented fixture"})
+              **_synthetic_measured_outcomes()})
         status = engine.gate(path, "validate")
         assert not status["ready"] and not status["accepted"]
         assert "ass1 success and rejection tests both hold for the measured effect" in \
@@ -1135,12 +1149,16 @@ def test_structured_field_claim_checks_prior_threshold_mechanically(tmp_path):
     _put(path, "t1", "test", ["impl1", "crit1"], {"passed": True, "command": "synthetic fixture; no external command run"})
     _put(path, "base1", "baseline", ["crit1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "metric": "count", "value": 0.2, "unit": "count"})
     _put(path, "res1", "result", ["base1", "crit1", "t1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4], "design": "randomized fixture", "comparator": "synthetic control", "sample_size": 12, "unit": "count"}})
-    _put(path, "ass1", "assessment", ["res1", "r1"], {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval", "adverse_effects": "invented fixture", "cost": "invented fixture"})
+    _put(path, "ass1", "assessment", ["res1", "r1"],
+         {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
+          **_synthetic_measured_outcomes()})
     _accept(path, "specify")
     _accept(path, "build")
     _accept(path, "validate")
     _put(path, "res1", "result", ["base1", "crit1", "t1"], {"origin": "field", "source": "invented fixture", "date": "2026-09-26", "effect": {"metric": "count", "estimate": 0.3, "interval": [0.05, 0.4], "design": "randomized fixture", "comparator": "synthetic control", "sample_size": 12, "unit": "count"}})
-    _put(path, "ass1", "assessment", ["res1", "r1"], {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval", "adverse_effects": "invented fixture", "cost": "invented fixture"})
+    _put(path, "ass1", "assessment", ["res1", "r1"],
+         {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
+          **_synthetic_measured_outcomes()})
     blockers = engine.gate(path, "validate")["blockers"]
     assert any("does not meet the prior threshold" in item for item in blockers)
     assert not engine.gate(path, "validate")["accepted"]
@@ -1168,8 +1186,7 @@ def test_decisive_result_needs_test_of_its_criterion_and_requirement(tmp_path, l
                               "design": "randomized fixture", "comparator": "synthetic control",
                               "sample_size": 12, "unit": "count"}}
     assessment_data = {"verdict": "cumplido", "claim_scope": "field",
-                       "uncertainty": "synthetic interval", "adverse_effects": "invented fixture",
-                       "cost": "invented fixture"}
+                       "uncertainty": "synthetic interval", **_synthetic_measured_outcomes()}
     _put(path, "res1", "result", ["base1", "crit1", *linked_tests], result_data)
     _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
     _accept(path, "specify")
@@ -1212,7 +1229,7 @@ def test_decisive_result_covers_every_requirement_of_criterion(tmp_path):
     _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
     _put(path, "ass1", "assessment", ["res1", "r1"],
          {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
-          "adverse_effects": "invented fixture", "cost": "invented fixture"})
+          **_synthetic_measured_outcomes()})
     _accept(path, "specify")
     _accept(path, "build")
 
@@ -1222,7 +1239,7 @@ def test_decisive_result_covers_every_requirement_of_criterion(tmp_path):
     _put(path, "res1", "result", ["base1", "crit1", "t1", "t2"], result_data)
     _put(path, "ass1", "assessment", ["res1", "r1"],
          {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
-          "adverse_effects": "invented fixture", "cost": "invented fixture"})
+          **_synthetic_measured_outcomes()})
     _accept(path, "validate")
 
 
@@ -1293,8 +1310,7 @@ def test_decisive_result_requires_test_link_to_each_implementation(
         "verdict": verdict,
         "claim_scope": "field",
         "uncertainty": "synthetic interval",
-        "adverse_effects": "invented fixture",
-        "cost": "invented fixture",
+        **_synthetic_measured_outcomes(),
     }
     _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
     _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
@@ -1387,8 +1403,7 @@ def test_decisive_result_requires_implementation_to_name_each_requirement(
         "verdict": verdict,
         "claim_scope": "field",
         "uncertainty": "synthetic interval",
-        "adverse_effects": "invented fixture",
-        "cost": "invented fixture",
+        **_synthetic_measured_outcomes(),
     }
     _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
     _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
@@ -1422,6 +1437,7 @@ def _decisive_lineage_fixture(
     tested_implementation,
     baseline_refs,
     result_refs,
+    scope="field",
 ):
     _complete_synthetic_case(path)
     if tested_implementation == "impl2":
@@ -1451,7 +1467,7 @@ def _decisive_lineage_fixture(
         "baseline",
         baseline_refs,
         {
-            "origin": "field",
+            "origin": scope,
             "source": "invented fixture",
             "date": "2026-09-27",
             "metric": "count",
@@ -1463,7 +1479,7 @@ def _decisive_lineage_fixture(
         (0.3, [0.15, 0.4]) if verdict == "cumplido" else (0.03, [0.01, 0.05])
     )
     result_data = {
-        "origin": "field",
+        "origin": scope,
         "source": "invented fixture",
         "date": "2026-09-27",
         "effect": {
@@ -1478,16 +1494,116 @@ def _decisive_lineage_fixture(
     }
     assessment_data = {
         "verdict": verdict,
-        "claim_scope": "field",
+        "claim_scope": scope,
         "uncertainty": "synthetic interval",
-        "adverse_effects": "invented fixture",
-        "cost": "invented fixture",
+        **_synthetic_measured_outcomes(),
     }
     _put(path, "res1", "result", result_refs, result_data)
     _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
     _accept(path, "specify")
     _accept(path, "build")
     return result_data, assessment_data
+
+
+def test_field_success_requires_structured_adverse_effects_and_cost(tmp_path):
+    # All values and the field label are synthetic; this checks schema, not observation.
+    path = tmp_path / "case"
+    _, assessment = _decisive_lineage_fixture(
+        path, "cumplido", tested_implementation="impl1",
+        baseline_refs=["crit1"], result_refs=["base1", "crit1", "t1"],
+    )
+    assessment["cost"] = _synthetic_measured_outcome("cost", "USD", 0)
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment)
+    assert engine.gate(path, "validate")["ready"]
+    assert assessment["adverse_effects"]["measurements"][0]["value"] == 0
+    assert assessment["cost"]["measurements"][0]["value"] == 0
+
+    for field in ("adverse_effects", "cost"):
+        record = assessment[field]
+        measure = record["measurements"][0]
+        invalid_records = (
+            "Adverse effects not measured", "Cost not measured",
+            "No medido todavía", "not measured; no data",
+            # The apparent meaning of this prose is irrelevant: it is not a record.
+            "Sin datos faltantes; costo medido: 2 USD",
+            "", " \t\n ", None, [], {},
+            {**record, "status": "unknown"}, {**record, "status": "unmeasured"},
+            {key: value for key, value in record.items() if key != "source"},
+            {**record, "source": "  "}, {**record, "date": ""},
+            {**record, "measurements": []},
+            {**record, "measurements": ["measured"]},
+            {**record, "measurements": [{**measure, "metric": " "}]},
+            {**record, "measurements": [{**measure, "unit": ""}]},
+            {**record, "measurements": [
+                {key: value for key, value in measure.items() if key != "value"},
+            ]},
+            {**record, "measurements": [{**measure, "value": "0"}]},
+            {**record, "measurements": [{**measure, "value": True}]},
+            {**record, "measurements": [{**measure, "sample_size": 0}]},
+            {**record, "measurements": [{**measure, "sample_size": 1.0}]},
+            {**record, "measurements": [{**measure, "sample_size": True}]},
+            {**record, "measurements": [measure, {**measure, "sample_size": 0}]},
+        )
+        for invalid in invalid_records:
+            _put(path, "ass1", "assessment", ["res1", "r1"],
+                 {**assessment, field: invalid})
+            status = engine.gate(path, "validate")
+            assert status["blockers"] == [f"ass1 field success lacks structured measured {field} evidence"]
+            assert not status["ready"] and not status["accepted"]
+        missing = {key: value for key, value in assessment.items() if key != field}
+        _put(path, "ass1", "assessment", ["res1", "r1"], missing)
+        assert f"ass1 field success lacks structured measured {field} evidence" in \
+            engine.gate(path, "validate")["blockers"]
+
+    _put(path, "ass1", "assessment", ["res1", "r1"],
+         {**assessment, "adverse_effects": "Adverse effects not measured",
+          "cost": "Cost not measured"})
+    assert engine.gate(path, "validate")["blockers"] == [
+        "ass1 field success lacks structured measured adverse_effects evidence",
+        "ass1 field success lacks structured measured cost evidence",
+    ]
+    with pytest.raises(engine.MethodError, match="phase cannot advance"):
+        engine.advance(path, "validate", "agent:lead")
+
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment)
+    _accept(path, "validate")
+
+    # The ledger rejects nonfinite JSON before a gate; the validator also rejects it.
+    record = assessment["cost"]
+    measure = record["measurements"][0]
+    for nonfinite in (float("nan"), float("inf"), float("-inf")):
+        assert not engine._structured_field_outcome(
+            {**record, "measurements": [{**measure, "value": nonfinite}]}
+        )
+
+
+@pytest.mark.parametrize("scope", ("simulation", "technical"))
+def test_unmeasured_outcome_placeholders_do_not_change_non_field_success(tmp_path, scope):
+    path = tmp_path / "case"
+    _, assessment = _decisive_lineage_fixture(
+        path, "cumplido", tested_implementation="impl1",
+        baseline_refs=["crit1"], result_refs=["base1", "crit1", "t1"], scope=scope,
+    )
+    assessment.update({"adverse_effects": {"status": "not measured"},
+                       "cost": "sin datos (pendiente)"})
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment)
+    assert engine.gate(path, "validate")["ready"]
+
+
+def test_unmeasured_outcome_placeholders_do_not_change_non_success_verdicts(tmp_path):
+    path = tmp_path / "case"
+    _, assessment = _decisive_lineage_fixture(
+        path, "incumplido", tested_implementation="impl1",
+        baseline_refs=["crit1"], result_refs=["base1", "crit1", "t1"],
+    )
+    assessment.update({"adverse_effects": [{"status": "unknown"}],
+                       "cost": "sin datos (pendiente)"})
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment)
+    assert engine.gate(path, "validate")["ready"]
+
+    assessment["verdict"] = "no_demostrado"
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment)
+    assert engine.gate(path, "validate")["ready"]
 
 
 @pytest.mark.parametrize("verdict", ("cumplido", "incumplido"))
@@ -1553,8 +1669,7 @@ def test_decisive_result_loses_acceptance_after_linked_build_revision(tmp_path, 
                               "design": "randomized fixture", "comparator": "synthetic control",
                               "sample_size": 12, "unit": "count"}}
     assessment_data = {"verdict": "cumplido", "claim_scope": "field",
-                       "uncertainty": "synthetic interval", "adverse_effects": "invented fixture",
-                       "cost": "invented fixture"}
+                       "uncertainty": "synthetic interval", **_synthetic_measured_outcomes()}
     _put(path, "res1", "result", ["base1", "crit1", "t1"], result_data)
     _put(path, "ass1", "assessment", ["res1", "r1"], assessment_data)
     _accept(path, "specify")
@@ -1599,7 +1714,7 @@ def test_success_requires_effect_and_declared_baseline_units_to_match_indicator(
               "design": "randomized fixture", "comparator": "synthetic control",
               "sample_size": 12, "unit": "fraction"}
     assessment = {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
-                  "adverse_effects": "invented fixture", "cost": "invented fixture"}
+                  **_synthetic_measured_outcomes()}
 
     def record_result():
         _put(path, "res1", "result", ["base1", "crit1", "t1"],
@@ -1669,7 +1784,7 @@ def test_success_checks_explicit_criterion_and_threshold_units(tmp_path):
                          "sample_size": 12, "unit": "count"}})
         _put(path, "ass1", "assessment", ["res1", "r1"],
              {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
-              "adverse_effects": "invented fixture", "cost": "invented fixture"})
+              **_synthetic_measured_outcomes()})
         _accept(path, "specify")
         _accept(path, "build")
         return engine.gate(path, "validate")
@@ -1713,7 +1828,7 @@ def test_decisive_threshold_preserves_large_integer_precision(tmp_path):
                          "sample_size": 12, "unit": "count"}})
         _put(path, "ass1", "assessment", ["res1", "r1"],
              {"verdict": verdict, "claim_scope": "field", "uncertainty": "invented interval",
-              "adverse_effects": "not measured", "cost": "not measured"})
+              **_synthetic_measured_outcomes()})
         return engine.gate(path, "validate")
 
     record_claim(below, "cumplido")
@@ -1745,7 +1860,7 @@ def test_success_rejects_missing_or_ambiguous_linked_indicator_units(tmp_path):
                      "sample_size": 12, "unit": "count"}})
     _put(path, "ass1", "assessment", ["res1", "r1"],
          {"verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
-          "adverse_effects": "invented fixture", "cost": "invented fixture"})
+          **_synthetic_measured_outcomes()})
 
     # Exercise the success guard directly for malformed graph states that an
     # earlier study gate would already reject.

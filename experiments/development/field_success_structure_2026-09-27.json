@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "scope": "synthetic_method_gate_regression",
+  "question": "Can a declared field success pass while adverse effects or costs are explicitly unmeasured?",
+  "pre_change_observation": "A synthetic cumplido/field assessment with unmeasured adverse_effects and cost passed the validate gate; independent review reproduced acceptance with an object status and annotated text.",
+  "rejected_design": "Free-text placeholder matching had both misses (absence phrased elsewhere in the sentence) and false positives (measured outcomes mentioning no missing data). It was removed rather than used as evidence of measurement.",
+  "implemented_contract": {
+    "applies_to": "assessment verdict=cumplido and claim_scope=field",
+    "fields": ["adverse_effects", "cost"],
+    "required_per_field": ["object", "status=measured", "nonempty source", "nonempty date", "nonempty measurements list"],
+    "required_per_measurement": ["nonempty metric", "nonempty unit", "finite numeric value", "positive integer sample_size"],
+    "zero_value_allowed": true
+  },
+  "negative_controls": [
+    "unmeasured text in English and Spanish, including mid-sentence text",
+    "empty or unmeasured structured outcome",
+    "missing source, date, measurements, metric, unit, value or positive sample size",
+    "boolean or string values and nonfinite float values",
+    "one incomplete measurement appended after a complete one"
+  ],
+  "positive_controls": [
+    "structured synthetic zero adverse events and zero cost",
+    "unchanged non-field success and non-success verdict behavior",
+    "committed historical no_demostrado ledger"
+  ],
+  "legacy_behavior": "An older ledger with accepted free-text field success remains readable but its validate acceptance is withdrawn until a new structured assessment version and current review are recorded. No versioned case contains such a success claim.",
+  "verification": {
+    "focused": "122 passed in tests/test_method.py and tests/test_injection_bank.py",
+    "global": "1351 passed, 1 xfailed with uv run pytest -q",
+    "ruff": "passed",
+    "wheel_build": "passed",
+    "clean_install": "offline installation and uv pip check passed on Python 3.11.15 and 3.12.3",
+    "installed_smoke_each_python": "9 phases, 14 CLI commands and 14 MCP tools",
+    "bread_case_each_python": "revision 21 and 7 CLI/MCP parity checks"
+  },
+  "limitations": [
+    "The gate validates declared structure, not source authenticity, observation or causal identification.",
+    "One declared measurement does not establish coverage of every actor, stage, harm or approved margin.",
+    "All test outcomes are invented fixtures, not field observations."
+  ],
+  "criterion_3": "not_assessed"
+}
