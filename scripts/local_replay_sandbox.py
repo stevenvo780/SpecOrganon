@@ -37,6 +37,8 @@ from __future__ import annotations
 import ctypes
 import ctypes.util
 import errno
+import fcntl
+import hashlib
 import json
 import math
 import os
@@ -75,6 +77,15 @@ _WRITE_DIR = (_READ_DIR | _FS_WRITE_FILE | _FS_REMOVE_DIR | _FS_REMOVE_FILE |
 _SCMP_ACT_ALLOW = 0x7FFF0000
 _SCMP_ACT_ERRNO = 0x00050000 | errno.EPERM
 _MAX_CONFIG_BYTES = 65536
+_MAX_SEALED_EXECUTABLE_BYTES = 16 * 1024 * 1024
+# Linux UAPI values. Python 3.11 builds may omit these fcntl names even when
+# the running kernel supports file sealing. probe_sandbox limits us to Linux.
+_F_ADD_SEALS = getattr(fcntl, "F_ADD_SEALS", 1033)
+_F_GET_SEALS = getattr(fcntl, "F_GET_SEALS", 1034)
+_F_SEAL_SEAL = getattr(fcntl, "F_SEAL_SEAL", 0x01)
+_F_SEAL_SHRINK = getattr(fcntl, "F_SEAL_SHRINK", 0x02)
+_F_SEAL_GROW = getattr(fcntl, "F_SEAL_GROW", 0x04)
+_F_SEAL_WRITE = getattr(fcntl, "F_SEAL_WRITE", 0x08)
 _ALLOWED_ENV = frozenset({"HOME", "TMPDIR", "PATH", "LANG", "LC_ALL",
                           "PYTHONDONTWRITEBYTECODE", "PYTHONNOUSERSITE"})
 
@@ -130,6 +141,7 @@ class SandboxResult:
     launch_error: str | None
     landlock_abi: int | None
     duration_seconds: float
+    sealed_executable_sha256: str | None = None
 
 
 class _RulesetAttr(ctypes.Structure):
@@ -328,6 +340,51 @@ def _apply_seccomp(library: ctypes.CDLL) -> None:
         library.seccomp_release(context)
 
 
+def _sealed_executable_fd(contents: bytes, expected_sha256: str) -> int:
+    """Make an immutable executable copy and authenticate the bytes on the FD."""
+    try:
+        flags = os.MFD_CLOEXEC | os.MFD_ALLOW_SEALING
+        required_seals = (_F_SEAL_WRITE | _F_SEAL_GROW |
+                          _F_SEAL_SHRINK | _F_SEAL_SEAL)
+        fd = os.memfd_create("local-replay-executable", flags)
+    except (AttributeError, OSError) as exc:
+        raise SandboxUnavailable("sealed memfd execution unavailable") from exc
+    try:
+        remaining = memoryview(contents)
+        while remaining:
+            written = os.write(fd, remaining)
+            if written <= 0:
+                raise OSError(errno.EIO, "memfd write did not advance")
+            remaining = remaining[written:]
+
+        def digest_on_fd() -> str:
+            digest = hashlib.sha256()
+            offset = 0
+            while offset < len(contents):
+                chunk = os.pread(fd, min(1024 * 1024, len(contents) - offset), offset)
+                if not chunk:
+                    raise OSError(errno.EIO, "memfd read ended early")
+                digest.update(chunk)
+                offset += len(chunk)
+            if os.fstat(fd).st_size != len(contents):
+                raise OSError(errno.EIO, "memfd size changed")
+            return digest.hexdigest()
+
+        if digest_on_fd() != expected_sha256:
+            raise SandboxError("sealed executable digest mismatch")
+        fcntl.fcntl(fd, _F_ADD_SEALS, required_seals)
+        if fcntl.fcntl(fd, _F_GET_SEALS) & required_seals != required_seals:
+            raise SandboxUnavailable("sealed memfd seals unavailable")
+        if digest_on_fd() != expected_sha256:
+            raise SandboxError("sealed executable digest mismatch after sealing")
+        return fd
+    except BaseException as exc:
+        os.close(fd)
+        if isinstance(exc, OSError):
+            raise SandboxUnavailable("sealed memfd preparation failed") from exc
+        raise
+
+
 def _child_main(status_fd: int) -> None:
     stage = "configuration"
     try:
@@ -348,10 +405,20 @@ def _child_main(status_fd: int) -> None:
                         config["runtime_roots"])
         stage = "seccomp"
         _apply_seccomp(library)
+        sealed_fd = config.get("sealed_executable_fd")
+        if sealed_fd is not None:
+            # A shebang interpreter reopens this path after execve. Keep only
+            # this executable FD inherited; status_fd still closes on exec.
+            os.set_inheritable(sealed_fd, True)
         os.write(status_fd, b"READY\n")
         os.set_inheritable(status_fd, False)
         stage = "exec"
-        os.execve(config["argv"][0], config["argv"], config["env"])
+        if sealed_fd is None:
+            os.execve(config["argv"][0], config["argv"], config["env"])
+        else:
+            os.execve(f"/proc/self/fd/{sealed_fd}",
+                      [f"/proc/self/fd/{sealed_fd}", *config["argv"][1:]],
+                      config["env"])
     except BaseException as exc:
         code = exc.errno if isinstance(exc, OSError) else None
         # Do not send exception text, arguments, paths, or environment values.
@@ -381,10 +448,15 @@ def run_sandboxed(
     cpu_seconds: int = 10, address_space_bytes: int = 512 * 1024 * 1024,
     file_bytes_per_file: int = 16 * 1024 * 1024,
     env: Mapping[str, str] | None = None,
+    sealed_executable_bytes: bytes | None = None,
+    sealed_executable_sha256: str | None = None,
 ) -> SandboxResult:
     """Run one process; fail closed if restrictions cannot be installed.
 
-    ``argv[0]`` must be an absolute executable.  Neither streams nor setup
+    ``argv[0]`` must be an absolute executable (or the original absolute name
+    of a supplied sealed executable). In sealed mode, the parent copies at
+    most 16 MiB into a sealed memfd and the child executes that FD after
+    restrictions. Neither streams nor setup
     errors are returned as raw text; streams are private new files at the
     requested paths.  The caller must keep them private and inspect them as
     untrusted output.  A wall deadline kills the child's process group.
@@ -395,6 +467,15 @@ def run_sandboxed(
     if (not argv or any(type(part) is not str or "\0" in part for part in argv)
             or not Path(argv[0]).is_absolute()):
         raise SandboxError("argv requires an absolute executable and string arguments")
+    if sealed_executable_bytes is None:
+        if sealed_executable_sha256 is not None:
+            raise SandboxError("sealed executable bytes and digest must be supplied together")
+    elif (type(sealed_executable_bytes) is not bytes or
+          not 0 < len(sealed_executable_bytes) <= _MAX_SEALED_EXECUTABLE_BYTES or
+          type(sealed_executable_sha256) is not str or
+          len(sealed_executable_sha256) != 64 or
+          any(char not in "0123456789abcdef" for char in sealed_executable_sha256)):
+        raise SandboxError("invalid sealed executable bytes or SHA-256 digest")
     if (not math.isfinite(timeout_seconds) or timeout_seconds <= 0 or
             type(cpu_seconds) is not int or cpu_seconds < 1 or
             type(address_space_bytes) is not int or
@@ -420,25 +501,47 @@ def run_sandboxed(
               "cpu_seconds": cpu_seconds,
               "address_space_bytes": address_space_bytes,
               "file_bytes_per_file": file_bytes_per_file}
-    encoded = json.dumps(config, separators=(",", ":")).encode("utf-8")
-    if len(encoded) > _MAX_CONFIG_BYTES:
-        raise SandboxError("sandbox configuration too large")
+    executable_fd = -1
+    if sealed_executable_bytes is not None:
+        assert sealed_executable_sha256 is not None
+        executable_fd = _sealed_executable_fd(sealed_executable_bytes,
+                                               sealed_executable_sha256)
+        config["sealed_executable_fd"] = executable_fd
+    try:
+        encoded = json.dumps(config, separators=(",", ":")).encode("utf-8")
+        if len(encoded) > _MAX_CONFIG_BYTES:
+            raise SandboxError("sandbox configuration too large")
+    except BaseException:
+        if executable_fd >= 0:
+            os.close(executable_fd)
+        raise
     stdout_path = Path(stdout_path)
     stderr_path = Path(stderr_path)
     if stdout_path == stderr_path or not stdout_path.is_absolute() or not stderr_path.is_absolute():
+        if executable_fd >= 0:
+            os.close(executable_fd)
         raise SandboxError("distinct absolute stdout and stderr paths are required")
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC
-    stdout_fd = os.open(stdout_path, flags, 0o600)
+    try:
+        stdout_fd = os.open(stdout_path, flags, 0o600)
+    except BaseException:
+        if executable_fd >= 0:
+            os.close(executable_fd)
+        raise
     try:
         stderr_fd = os.open(stderr_path, flags, 0o600)
     except BaseException:
         os.close(stdout_fd)
+        if executable_fd >= 0:
+            os.close(executable_fd)
         raise
     try:
         read_fd, status_fd = os.pipe2(os.O_CLOEXEC)
     except BaseException:
         os.close(stdout_fd)
         os.close(stderr_fd)
+        if executable_fd >= 0:
+            os.close(executable_fd)
         raise
     process: subprocess.Popen[bytes] | None = None
     started = time.monotonic()
@@ -449,7 +552,8 @@ def run_sandboxed(
                  "--child", str(status_fd)],
                 cwd=cwd_path, env=child_env, stdin=subprocess.PIPE,
                 stdout=stdout, stderr=stderr, close_fds=True,
-                pass_fds=(status_fd,), start_new_session=True,
+                pass_fds=((status_fd, executable_fd) if executable_fd >= 0
+                          else (status_fd,)), start_new_session=True,
             )
             os.close(status_fd)
             status_fd = -1
@@ -479,7 +583,7 @@ def run_sandboxed(
                 return SandboxResult(None, True, "sandbox setup timed out",
                                      capability.landlock_abi,
                                      time.monotonic() - started)
-            if not status.startswith(b"READY\n") or b"ERROR " in status:
+            if status != b"READY\n":
                 try:
                     process.wait(timeout=max(0.01, deadline - time.monotonic()))
                 except subprocess.TimeoutExpired:
@@ -492,9 +596,11 @@ def run_sandboxed(
             except subprocess.TimeoutExpired:
                 _terminate_group(process)
                 return SandboxResult(None, True, None, capability.landlock_abi,
-                                     time.monotonic() - started)
+                                     time.monotonic() - started,
+                                     sealed_executable_sha256)
             return SandboxResult(exit_code, False, None, capability.landlock_abi,
-                                 time.monotonic() - started)
+                                 time.monotonic() - started,
+                                 sealed_executable_sha256)
     except BaseException:
         if process is not None and process.poll() is None:
             _terminate_group(process)
@@ -503,6 +609,8 @@ def run_sandboxed(
         os.close(read_fd)
         if status_fd >= 0:
             os.close(status_fd)
+        if executable_fd >= 0:
+            os.close(executable_fd)
 
 
 if __name__ == "__main__" and len(sys.argv) == 3 and sys.argv[1] == "--child":

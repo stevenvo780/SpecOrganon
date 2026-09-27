@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 import subprocess
 import sys
@@ -264,3 +265,140 @@ def test_write_root_cannot_contain_read_only_work(
             timeout_seconds=1,
         )
     assert not (paths["work"].parent / "run.stdout").exists()
+
+
+def _run_sealed(paths: dict[str, Path], payload: bytes, *,
+                source: Path | None = None, name: str = "sealed",
+                expected_sha256: str | None = None) -> sandbox.SandboxResult:
+    original = source or paths["work"] / "original-tool.py"
+    return sandbox.run_sandboxed(
+        argv=[str(original), "argument"], cwd=paths["work"],
+        read_roots=[paths["work"]],
+        write_roots=[paths["output"], paths["temporary"]],
+        runtime_roots=sandbox.default_python_runtime_roots(),
+        stdout_path=paths["work"].parent / f"{name}.stdout",
+        stderr_path=paths["work"].parent / f"{name}.stderr",
+        timeout_seconds=3,
+        env={"HOME": str(paths["output"]), "TMPDIR": str(paths["temporary"])},
+        sealed_executable_bytes=payload,
+        sealed_executable_sha256=(expected_sha256 or hashlib.sha256(payload).hexdigest()),
+    )
+
+
+def test_sealed_shebang_executes_authenticated_bytes(
+    replay_layout: dict[str, Path], available_sandbox: None,
+) -> None:
+    paths = replay_layout
+    script = (f"#!{sys.executable} -I\n"
+              "import sys\n"
+              "from pathlib import Path\n"
+              "assert sys.argv[1] == 'argument'\n"
+              "assert Path('packet.txt').read_text() == 'packet\\n'\n"
+              "try:\n"
+              "    Path('/proc/self/environ').read_bytes()\n"
+              "except OSError:\n"
+              "    pass\n"
+              "else:\n"
+              "    raise AssertionError('general procfs read succeeded')\n"
+              "print('sealed script')\n").encode()
+    result = _run_sealed(paths, script)
+    assert result.exit_code == 0, (paths["work"].parent / "sealed.stderr").read_text()
+    assert result.launch_error is None
+    assert result.sealed_executable_sha256 == hashlib.sha256(script).hexdigest()
+    assert (paths["work"].parent / "sealed.stdout").read_text() == "sealed script\n"
+    assert not (paths["work"] / "original-tool.py").exists()
+
+
+def test_sealed_elf_executes_authenticated_bytes(
+    replay_layout: dict[str, Path], available_sandbox: None,
+) -> None:
+    executable = Path("/bin/echo")
+    if not executable.is_file():
+        pytest.skip("/bin/echo is unavailable")
+    payload = executable.read_bytes()
+    paths = replay_layout
+    result = _run_sealed(paths, payload, source=executable, name="sealed-elf")
+    assert result.exit_code == 0, (paths["work"].parent / "sealed-elf.stderr").read_text()
+    assert result.sealed_executable_sha256 == hashlib.sha256(payload).hexdigest()
+    assert (paths["work"].parent / "sealed-elf.stdout").read_text() == "argument\n"
+
+
+def test_sealed_digest_mismatch_fails_before_streams(
+    replay_layout: dict[str, Path], available_sandbox: None,
+) -> None:
+    paths = replay_layout
+    script = f"#!{sys.executable} -I\nprint('must not run')\n".encode()
+    with pytest.raises(sandbox.SandboxError, match="digest mismatch"):
+        _run_sealed(paths, script, expected_sha256="0" * 64)
+    assert not (paths["work"].parent / "sealed.stdout").exists()
+    assert not (paths["work"].parent / "sealed.stderr").exists()
+
+
+def test_sealed_exec_failure_has_no_launch_digest(
+    replay_layout: dict[str, Path], available_sandbox: None,
+) -> None:
+    paths = replay_layout
+    result = _run_sealed(paths, b"not an ELF or shebang executable\n")
+    assert result.exit_code is None
+    assert result.launch_error is not None and "ERROR exec" in result.launch_error
+    assert result.sealed_executable_sha256 is None
+
+
+def test_sealed_missing_seal_support_fails_closed(
+    replay_layout: dict[str, Path], available_sandbox: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    paths = replay_layout
+    actual_fcntl = sandbox.fcntl.fcntl
+
+    def reject_seal(fd: int, operation: int, *args: object) -> int:
+        if operation == sandbox._F_ADD_SEALS:
+            raise OSError("seals unavailable")
+        return actual_fcntl(fd, operation, *args)
+
+    monkeypatch.setattr(sandbox.fcntl, "fcntl", reject_seal)
+    script = f"#!{sys.executable} -I\nprint('must not run')\n".encode()
+    with pytest.raises(sandbox.SandboxUnavailable, match="sealed memfd preparation failed"):
+        _run_sealed(paths, script)
+    assert not (paths["work"].parent / "sealed.stdout").exists()
+    assert not (paths["work"].parent / "sealed.stderr").exists()
+
+
+def test_sealed_source_swap_does_not_change_executed_bytes(
+    replay_layout: dict[str, Path], available_sandbox: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    paths = replay_layout
+    source = paths["work"] / "tool.py"
+    original = f"#!{sys.executable} -I\nprint('original')\n".encode()
+    replacement = f"#!{sys.executable} -I\nprint('swapped')\n".encode()
+    source.write_bytes(original)
+    create_sealed_fd = sandbox._sealed_executable_fd
+
+    def swap_after_sealing(contents: bytes, expected_sha256: str) -> int:
+        fd = create_sealed_fd(contents, expected_sha256)
+        source.write_bytes(replacement)
+        return fd
+
+    monkeypatch.setattr(sandbox, "_sealed_executable_fd", swap_after_sealing)
+    result = _run_sealed(paths, original, source=source)
+    assert result.exit_code == 0, (paths["work"].parent / "sealed.stderr").read_text()
+    assert result.sealed_executable_sha256 == hashlib.sha256(original).hexdigest()
+    assert (paths["work"].parent / "sealed.stdout").read_text() == "original\n"
+    assert source.read_bytes() == replacement
+
+
+@pytest.mark.parametrize("payload,digest", [
+    (b"", "0" * 64),
+    (b"x", "not-a-digest"),
+    (b"x", "A" * 64),
+    (b"x" * (16 * 1024 * 1024 + 1), "0" * 64),
+])
+def test_sealed_input_bounds_rejected_before_streams(
+    replay_layout: dict[str, Path], available_sandbox: None,
+    payload: bytes, digest: str,
+) -> None:
+    paths = replay_layout
+    with pytest.raises(sandbox.SandboxError, match="invalid sealed executable"):
+        _run_sealed(paths, payload, expected_sha256=digest)
+    assert not (paths["work"].parent / "sealed.stdout").exists()
