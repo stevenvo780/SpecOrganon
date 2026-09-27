@@ -1,0 +1,50 @@
+{
+  "classification": "local_signed_ratio_integration_gate_development",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "source_code_sha256": {
+    "src/specorganon/engine.py": "39cae5224367d575b63a6e724dbef7f63895af00b6202afadd1bec8b9bb87726",
+    "src/specorganon/ratio_audit.py": "55bf8b9174d49985ce69b503b113541bc313f992ca4fced9532fb0f0201121d1"
+  },
+  "global_test_command": "uv run pytest -q",
+  "global_test_result": {
+    "passed": 1867,
+    "failed": 0,
+    "duration_seconds": 136.97
+  },
+  "lint_command": "uv run ruff check .",
+  "lint_result": "All checks passed!",
+  "new_files_format_command": "uv run ruff format --check src/specorganon/ratio_audit.py scripts/audit_derived_ratio.py tests/test_ratio_audit.py",
+  "new_files_format_result": "3 files already formatted",
+  "wheel_build_command": "uv build --wheel --offline --out-dir TEMP_DIR/wheel",
+  "wheel_sha256": "63a2eef1844a3ad58e2921793b2efda5f23185a01c5512244c8fceb4aca97852",
+  "offline_installation": [
+    {
+      "python": "3.11.15",
+      "uv_pip_check": "29 packages compatible",
+      "module_loaded_from": "temporary_venv_site_packages",
+      "rental_exact_ratio": "431312/452259",
+      "return_exact_ratio": "841193/904518",
+      "wrong_contract_pin_exit_code": 2
+    },
+    {
+      "python": "3.12.3",
+      "uv_pip_check": "29 packages compatible",
+      "module_loaded_from": "temporary_venv_site_packages",
+      "rental_exact_ratio": "431312/452259",
+      "return_exact_ratio": "841193/904518",
+      "wrong_contract_pin_exit_code": 2
+    }
+  ],
+  "adversarial_ratio_cli_result": "A 64 MiB sparse source under a 64 MiB memory limit was rejected with exit 2 and no traceback from a newly installed wheel.",
+  "criterion_1": "not_assessed",
+  "criterion_2": "not_assessed",
+  "criterion_3": "not_assessed",
+  "criterion_4": "not_assessed",
+  "criterion_5": "not_assessed",
+  "limitations": [
+    "The complete signed workflow still takes test.passed:true from its fixture without executing that declared command.",
+    "The review keys and actors are synthetic and there is no external custody of the metric contract pin.",
+    "No field intervention, reserved second case, controlled model comparison or new provider call was performed."
+  ]
+}
