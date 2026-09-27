@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "classification": "development_citibike_march_cli_mcp_workflow_replay",
+  "date_utc": "2026-09-27",
+  "goal_sha256_unchanged": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "code_sha256": {
+    "verify_citibike_march_workflow.py": "8ac854c4db221984ec264ae55fcaafd3638eb346c4cd84ad5605f7d04edbae45",
+    "test_citibike_march_workflow.py": "d3af9ad33283099784b3c17909318c486df1ba902737c064e9dd522cafd2985c",
+    "server.py": "bfbd0b43b373c371c54bbb3ad40dc73b3cb2727f06b696dbf8a19452e149d122"
+  },
+  "wheel_sha256": "353fe0e9d24be2d5d7be7e2c3f0b49d700d6b14e19f5a808acd2435b1626b864",
+  "installed_python_versions": [
+    "3.11.15",
+    "3.12.3"
+  ],
+  "shared_receipt": {
+    "case": "citibike_march2024",
+    "criterion_5": "not_assessed",
+    "final": {
+      "critique": {
+        "accepted": false,
+        "blockers": [
+          "n_scope requires a verified human approval"
+        ],
+        "ready": false
+      },
+      "event_kinds": {
+        "item_put": 22,
+        "phase_advance": 1,
+        "phase_review": 1
+      },
+      "evidence_ancestors": {
+        "e_eligible": [
+          "a_riders",
+          "b_sample",
+          "c_service",
+          "e_archive",
+          "h_distinct",
+          "p_access",
+          "pr_reanalysis",
+          "q_rows",
+          "s_flags"
+        ],
+        "e_excluded": [
+          "a_riders",
+          "b_sample",
+          "c_service",
+          "e_archive",
+          "h_distinct",
+          "p_access",
+          "pr_reanalysis",
+          "q_rows",
+          "s_flags"
+        ],
+        "e_gaps": [
+          "a_riders",
+          "b_sample",
+          "c_service",
+          "e_archive",
+          "h_distinct",
+          "p_access",
+          "pr_reanalysis",
+          "q_rows",
+          "s_flags"
+        ],
+        "e_rental": [
+          "a_riders",
+          "b_sample",
+          "c_service",
+          "e_archive",
+          "e_eligible",
+          "h_distinct",
+          "p_access",
+          "pr_reanalysis",
+          "q_rows",
+          "s_flags"
+        ],
+        "e_return": [
+          "a_riders",
+          "b_sample",
+          "c_service",
+          "e_archive",
+          "e_eligible",
+          "h_distinct",
+          "p_access",
+          "pr_reanalysis",
+          "q_rows",
+          "s_flags"
+        ]
+      },
+      "frame_accepted": true,
+      "norm_approved": false,
+      "revision": 24
+    },
+    "first": {
+      "applied": 22,
+      "cursor": 22,
+      "reason": "independent_review_required",
+      "skipped": 0,
+      "status": "waiting"
+    },
+    "mcp": {
+      "discovered_tools": [
+        "advance",
+        "approval_challenge",
+        "approve",
+        "attest_field",
+        "challenge",
+        "field_attestation_challenge",
+        "gate",
+        "init",
+        "next_task",
+        "put",
+        "resolve_challenge",
+        "review",
+        "review_phase",
+        "run",
+        "status",
+        "trace"
+      ],
+      "resume": {
+        "applied": 1,
+        "cursor": 23,
+        "reason": "human_approval_required",
+        "skipped": 22,
+        "status": "waiting"
+      },
+      "status_equal_to_cli": true
+    },
+    "real_ledgers_unchanged": true,
+    "retry": {
+      "applied": 0,
+      "cursor": 23,
+      "reason": "human_approval_required",
+      "skipped": 23,
+      "status": "waiting"
+    },
+    "review": {
+      "actor": "agent:march_workflow_reviewer",
+      "independent": true,
+      "scope": "automated_actor_separation_only",
+      "seq": 23
+    },
+    "schema": 1,
+    "sha256": {
+      "analysis_script": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+      "manifest": "27bc567d7435b5a0accbe9e3653f817323e7925c160f7a88d223f40dc6f04244",
+      "published_result": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+      "seed": "c63ffec48253ba21f9754a8fcc099a4f302525cfdb7b680acc47078eb90a0723",
+      "source_parquet_declared": "661221e1f6fc01ba6475cee61597e432fc0858689195b6c12255a6c005b52fc4"
+    },
+    "steps": {
+      "advance": 1,
+      "put": 22,
+      "total": 23
+    },
+    "transport": {
+      "first": "installed_cli",
+      "resume": "stdio_mcp",
+      "retry": "installed_cli"
+    }
+  },
+  "temporary_ledger_sha256_by_python": {
+    "python_3_11_15": "78c02fbd36fe05ec4b574cb6d8b755da1e7d2a4d3f784f27c6a691ace1e520ef",
+    "python_3_12_3": "e851c3e7477627694edeaf705ac6a4364061f8a377e42cc65f25f83768373917"
+  },
+  "checks": [
+    {
+      "command": "uv run pytest -q",
+      "result": "1629 passed in 242.17s"
+    },
+    {
+      "command": "uv run pytest -q tests/test_server_case_pin.py tests/test_citibike_march_workflow.py",
+      "result": "15 passed in independent review"
+    },
+    {
+      "command": "uv build --wheel --offline; offline install in fresh Python 3.11.15 and 3.12.3 environments; uv pip check; installed CLI to real stdio MCP to CLI probe",
+      "result": "both installations and replays passed; 29 installed packages compatible in each"
+    }
+  ],
+  "limits": [
+    "The same script authored the separate review actor label; this checks workflow separation, not substantive independent evaluation or human identity.",
+    "The probe checks the committed derived JSON, its hash, the analysis script hash and numeric locators; it does not reopen or recalculate the Parquet.",
+    "The source Parquet digest is declared from an earlier analysis, not reverified in this probe.",
+    "The temporary case is a retrospective development replay. No intervention, field effect, costs or user access outcomes were measured."
+  ],
+  "criterion_5": "not_assessed"
+}

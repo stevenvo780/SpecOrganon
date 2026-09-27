@@ -17,3 +17,10 @@ uv run pytest -q tests/test_citibike_march_transfer.py
 ```
 
 Un caso nuevo se puede sembrar con `uv run python scripts/seed_case.py cases/citibike_march2024/seed.json /ruta/nueva`. La siembra produce solo los 22 ítems: no reproduce automáticamente la revisión y el avance de `frame`. El [expediente de junio de 2026](../citibike/organon.json) permanece separado e intacto.
+
+El [probe de workflow](../../scripts/verify_citibike_march_workflow.py) construye de forma determinista un manifiesto de 23 pasos desde esa semilla y lo ejecuta en un caso temporal con CLI instalada, cliente MCP stdio real y reintento CLI. Detiene `frame` para una revisión emitida por el mismo script con otra etiqueta de actor, reanuda el avance por MCP, comprueba eventos y trazas y deja `critique` bloqueada por la aprobación humana ausente de `n_scope`. El [registro](../../experiments/development/citibike_march_workflow_replay_2026-09-27.json) contiene hashes, cursores y resultados instalados en Python 3.11.15 y 3.12.3. El probe compara el JSON derivado y sus locators con la semilla, pero no vuelve a procesar el Parquet ni evalúa sustantivamente el problema. No modifica los ledgers archivados y el criterio 5 sigue **no demostrado**.
+
+```sh
+uv run python scripts/verify_citibike_march_workflow.py
+uv run pytest -q tests/test_citibike_march_workflow.py
+```
