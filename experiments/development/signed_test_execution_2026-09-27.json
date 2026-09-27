@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "classification": "development_synthetic_signed_test_execution_gate",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "source_sha256": {
+    "src/specorganon/engine.py": "e01d6b37090f2949872b1894d62b8cfd612aefa9a6affa9ca69e8714cafd7034",
+    "src/specorganon/test_execution.py": "3e576c9062fdaa10e4d01933a085cabe124cb4ca8fdf674cbcc4509824f670f7",
+    "scripts/clean_smoke.py": "194452bf0960bfcb25ae161af8a392884df1b2bef3341069e628bc61f960bec3",
+    "scripts/probe_signed_full_workflow.py": "8aa04bb0ebcec2986d7d6460778f3f5816a0261f687ed6654740615e5951b2f7",
+    "tests/test_signed_test_execution.py": "3e3adbd7ff6174954921b2310c2408277bb126f84371e52b4e300d8a887c3059",
+    "tests/test_signed_full_workflow.py": "16ccdc0b0433222b20f17ba90deb8bec2bf797f9bb40b7cf3340ee41aec58492"
+  },
+  "global_gate": {
+    "command": ".venv/bin/pytest -q",
+    "passed": 1872,
+    "failed": 0,
+    "ruff_check": "passed",
+    "git_diff_check": "passed"
+  },
+  "wheel": {
+    "sha256": "97b22b717c59a8332307f4993229e13c741f40d8304ecd8480bf0887d7107d80",
+    "build": "uv build --offline --wheel --out-dir TEMP .",
+    "installation": "uv pip install --offline --python CLEAN_VENV/bin/python WHEEL",
+    "python": {
+      "3.11.15": {
+        "offline_install": true,
+        "uv_pip_check": "passed",
+        "installed_fixture_smoke": "passed; 9 phases, 19 MCP tools discovered, 15 CLI/MCP operations exercised",
+        "installed_cli_and_stdio_mcp_probe": "passed",
+        "probe_output_sha256": "e0dc8ebfe1bf57313561aeda2b8c18394e3709e5495b9b8b4ec2ab38927ec470"
+      },
+      "3.12.3": {
+        "offline_install": true,
+        "uv_pip_check": "passed",
+        "installed_fixture_smoke": "passed; 9 phases, 19 MCP tools discovered, 15 CLI/MCP operations exercised",
+        "installed_cli_and_stdio_mcp_probe": "passed",
+        "probe_output_sha256": "aa35e44de298feca69ef5a0dbf3110bf4db73c82ee3b5e86146909076c62aaf9"
+      }
+    }
+  },
+  "installed_probe_observations": {
+    "case_policy": "signed",
+    "manifest_original_unchanged": true,
+    "t1_local_subprocess_no_shell": true,
+    "t1_report_signed_by_ephemeral_executor_key": true,
+    "t1_stdout_sha256": "d867700666eb780c245d75aa486d930856cf8bdc1c51c4c33cf033b8e7f33e94",
+    "t1_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "t1_artifact_path": "t1-artifact.txt",
+    "t1_artifact_sha256": "d867700666eb780c245d75aa486d930856cf8bdc1c51c4c33cf033b8e7f33e94",
+    "t1_exit_code": 0,
+    "t1_timed_out": false,
+    "event_counts": {
+      "item_put": 29,
+      "approval": 2,
+      "test_execution": 1,
+      "phase_review": 9,
+      "phase_advance": 9
+    },
+    "revision": 50,
+    "cli_mcp_status_equal": true,
+    "replay_added_events": 0,
+    "replay_ledger_byte_identical": true,
+    "reviewer_key_revocation_reopened_all_phases": true,
+    "executor_key_revocation_reopened_build_and_downstream": true,
+    "key_restoration_recovered_status": true
+  },
+  "negative_controls": [
+    "a signed test with only passed:true or without argv stays readable but cannot enable build",
+    "an unsigned CLI test report does not write an event",
+    "an invalid MCP test signature does not write an event",
+    "a stale challenge after another ledger event is rejected",
+    "a valid later failed report replaces an earlier passing report",
+    "a later invalid signature does not replace the last valid report",
+    "changing the test version or revoking its executor key blocks the old receipt",
+    "a decisive verdict cannot treat a manifest-only passed:true as a passed signed test"
+  ],
+  "adversarial_review": {
+    "scope": "read-only public path review of the receipt format, binding, replay, gates, snapshots and CLI/MCP parity",
+    "open_p1_p2_findings": 0,
+    "limitation_found": "the motor verifies a signed external declaration, not the actual process or the reported output bytes"
+  },
+  "scope": {
+    "content_is_synthetic": true,
+    "private_keys_written_to_disk": false,
+    "human_identity_authenticated": false,
+    "independent_executor_custody_verified": false,
+    "executor_honesty_or_host_integrity_verified": false,
+    "test_semantic_validity_verified": false,
+    "field_impact_tested": false,
+    "provider_calls": 0
+  },
+  "criterion_1": "not_assessed",
+  "criterion_2": "not_assessed",
+  "criterion_3": "not_assessed",
+  "criterion_4": "not_assessed",
+  "criterion_5": "not_assessed"
+}
