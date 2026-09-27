@@ -136,6 +136,14 @@ def test_known_effect_with_volume_imbalance_and_reproducible_bootstrap() -> None
     assert raw_contrast > float(report["candidate_point"]["tau_adjusted_change"]) + 0.01
 
 
+def test_exact_legacy_report_bytes_survive_shared_core_extraction() -> None:
+    encoded = json.dumps(analyze_field_adjusted_candidate(*_case()), ensure_ascii=False,
+                         sort_keys=True, separators=(",", ":")).encode("utf-8")
+    assert hashlib.sha256(encoded).hexdigest() == (
+        "312fb76d5a550725fdde31d694a79ba8865e15ea3e2a0d14c991401f2d512f14"
+    )
+
+
 def test_bootstrap_and_point_are_invariant_to_all_input_row_orders() -> None:
     case = _case()
     baseline = analyze_field_adjusted_candidate(*case)

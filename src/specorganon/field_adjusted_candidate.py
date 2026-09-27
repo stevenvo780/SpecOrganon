@@ -94,6 +94,26 @@ class _Group:
     volume: Decimal
 
 
+@dataclass(frozen=True)
+class _GroupCalculation:
+    """Pure adjusted estimator and bootstrap, shared by field preflight and simulations."""
+
+    strata: list[str]
+    cells: dict[tuple[str, str], list[_Group]]
+    tau: float
+    log_center: float
+    rss: float
+    min_pivot: float
+    denominator: Fraction
+    g_value: float
+    valid: list[float]
+    singular_draws: list[int]
+    zero_denominator_draws: list[int]
+    nonfinite_draws: list[int]
+    invalid: list[int]
+    bounds: list[str] | None
+
+
 def _decimal_text(value: float) -> str:
     if not math.isfinite(value):
         raise FieldAdjustedCandidateError("computed value is not finite")
@@ -287,6 +307,69 @@ def _percentile(values: list[float], proportion: float) -> float:
     return ordered[lower] + (ordered[upper] - ordered[lower]) * (location - lower)
 
 
+def _calculate_groups(groups: list[_Group], seed: int, draws: int) -> _GroupCalculation:
+    """Compute the exact development candidate without inspecting plan or source claims."""
+    strata = sorted({g.stratum for g in groups})
+    cells: dict[tuple[str, str], list[_Group]] = {}
+    for group in groups:
+        cells.setdefault((group.arm, group.stratum), []).append(group)
+    for (arm, stratum), cell in sorted(cells.items()):
+        if len(cell) < 2:
+            raise FieldAdjustedCandidateError(
+                f"cannot bootstrap singleton arm-stratum cell: {arm}/{stratum}"
+            )
+    try:
+        tau, log_center, rss, min_pivot = _fit(groups, strata)
+    except _SingularFit as exc:
+        raise FieldAdjustedCandidateError(
+            "original adjusted group-level OLS fit is nonidentifiable or numerically singular"
+        ) from exc
+    denominator = _denominator(groups)
+    if denominator <= 0:
+        raise FieldAdjustedCandidateError(
+            "original G denominator is zero; intervention pre V has no initial loss"
+        )
+    g_value = tau / float(denominator)
+    if not math.isfinite(g_value):
+        raise FieldAdjustedCandidateError("original adjusted G is not finite")
+
+    rng = random.Random(seed)
+    valid: list[float] = []
+    singular_draws: list[int] = []
+    zero_denominator_draws: list[int] = []
+    nonfinite_draws: list[int] = []
+    for draw in range(draws):
+        sample: list[_Group] = []
+        for cell in sorted(cells):
+            members_in_cell = cells[cell]
+            count = len(members_in_cell)
+            sample.extend(members_in_cell[math.floor(rng.random() * count)]
+                          for _ in range(count))
+        sampled_denominator = _denominator(sample)
+        if sampled_denominator <= 0:
+            zero_denominator_draws.append(draw)
+        try:
+            sampled_tau, _center, _rss, _pivot = _fit(sample, strata)
+        except _SingularFit:
+            singular_draws.append(draw)
+            continue
+        if sampled_denominator <= 0:
+            continue
+        sampled_g = sampled_tau / float(sampled_denominator)
+        if not math.isfinite(sampled_g):
+            nonfinite_draws.append(draw)
+            continue
+        valid.append(sampled_g)
+    invalid = sorted(set(singular_draws) | set(zero_denominator_draws) | set(nonfinite_draws))
+    enough_draws = len(valid) >= MIN_VALID_BOOTSTRAP_DRAWS
+    bounds = ([_decimal_text(_percentile(valid, 0.025)),
+               _decimal_text(_percentile(valid, 0.975))] if enough_draws else None)
+    return _GroupCalculation(
+        strata, cells, tau, log_center, rss, min_pivot, denominator, g_value, valid,
+        singular_draws, zero_denominator_draws, nonfinite_draws, invalid, bounds,
+    )
+
+
 def analyze_field_adjusted_candidate(
     plan: Any, field: Any, candidate_spec: Any, baseline_input_volume_manifest: Any,
 ) -> dict[str, Any]:
@@ -305,57 +388,18 @@ def analyze_field_adjusted_candidate(
         groups = [_Group(g["id"], g["arm"], g["stratum"],
                          service[(g["id"], "pre")], service[(g["id"], "post")], volumes[g["id"]])
                   for g in members]
-        strata = sorted({g.stratum for g in groups})
-        cells: dict[tuple[str, str], list[_Group]] = {}
-        for group in groups:
-            cells.setdefault((group.arm, group.stratum), []).append(group)
-        for (arm, stratum), cell in sorted(cells.items()):
-            if len(cell) < 2:
-                raise FieldAdjustedCandidateError(
-                    f"cannot bootstrap singleton arm-stratum cell: {arm}/{stratum}"
-                )
-        try:
-            tau, log_center, rss, min_pivot = _fit(groups, strata)
-        except _SingularFit as exc:
-            raise FieldAdjustedCandidateError("original adjusted group-level OLS fit is nonidentifiable or numerically singular") from exc
-        denominator = _denominator(groups)
-        if denominator <= 0:
-            raise FieldAdjustedCandidateError("original G denominator is zero; intervention pre V has no initial loss")
-        g_value = tau / float(denominator)
-        if not math.isfinite(g_value):
-            raise FieldAdjustedCandidateError("original adjusted G is not finite")
-
-        rng = random.Random(seed)
-        valid: list[float] = []
-        singular_draws: list[int] = []
-        zero_denominator_draws: list[int] = []
-        nonfinite_draws: list[int] = []
-        for draw in range(draws):
-            sample: list[_Group] = []
-            for cell in sorted(cells):
-                members_in_cell = cells[cell]
-                count = len(members_in_cell)
-                sample.extend(members_in_cell[math.floor(rng.random() * count)]
-                              for _ in range(count))
-            sampled_denominator = _denominator(sample)
-            if sampled_denominator <= 0:
-                zero_denominator_draws.append(draw)
-            try:
-                sampled_tau, _center, _rss, _pivot = _fit(sample, strata)
-            except _SingularFit:
-                singular_draws.append(draw)
-                continue
-            if sampled_denominator <= 0:
-                continue
-            sampled_g = sampled_tau / float(sampled_denominator)
-            if not math.isfinite(sampled_g):
-                nonfinite_draws.append(draw)
-                continue
-            valid.append(sampled_g)
-        invalid = sorted(set(singular_draws) | set(zero_denominator_draws) | set(nonfinite_draws))
-        enough_draws = len(valid) >= MIN_VALID_BOOTSTRAP_DRAWS
-        bounds = ([_decimal_text(_percentile(valid, 0.025)),
-                   _decimal_text(_percentile(valid, 0.975))] if enough_draws else None)
+        calculation = _calculate_groups(groups, seed, draws)
+        strata, cells = calculation.strata, calculation.cells
+        tau, log_center, rss, min_pivot = (
+            calculation.tau, calculation.log_center, calculation.rss, calculation.min_pivot
+        )
+        denominator, g_value = calculation.denominator, calculation.g_value
+        valid = calculation.valid
+        singular_draws = calculation.singular_draws
+        zero_denominator_draws = calculation.zero_denominator_draws
+        nonfinite_draws, invalid, bounds = (
+            calculation.nonfinite_draws, calculation.invalid, calculation.bounds
+        )
     except (FieldFlowError, FieldTrialDesignError, FieldGuardrailError) as exc:
         raise FieldAdjustedCandidateError(f"field adjusted candidate preflight failed: {exc}") from exc
 
