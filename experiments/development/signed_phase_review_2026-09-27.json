@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "classification": "development_signed_phase_review_not_human_identity_or_append_only_custody",
+  "date_utc": "2026-09-27",
+  "decision": "D-072",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "problem": "A signed-policy phase could advance on an unsigned phase_review whose only independence evidence was a different actor label.",
+  "contract": {
+    "registry": "ORGANON_APPROVERS_FILE schema 2 cases[case_id].phase_reviewers maps actors to base64 Ed25519 public keys and remains external to the case ledger.",
+    "challenge_binding": [
+      "purpose and schema",
+      "case UUID, canonical path and project fingerprint",
+      "previous ledger head",
+      "phase and exact phase snapshot",
+      "verdict, reason and reviewer actor"
+    ],
+    "accepted_signed_phase_requires": [
+      "a verified signature under the currently registered reviewer key",
+      "a reviewer actor distinct from phase item authors",
+      "a current gate and an advance referencing that review"
+    ],
+    "legacy_unsigned_signed_review": "Ledger event retained and exposed as legacy_unverified; it cannot make the phase accepted.",
+    "fixture_without_opt_in": "Readable but phase acceptance and new reviews fail closed."
+  },
+  "versioned_signed_ledgers_read_only_replay": [
+    {"case": "mango", "revision": 30, "frame_review_events": 2, "frame_review_provenance": "legacy_unverified", "frame_accepted": false},
+    {"case": "citibike", "revision": 33, "frame_review_events": 1, "frame_review_provenance": "legacy_unverified", "frame_accepted": false},
+    {"case": "citibike_march2024", "revision": 24, "frame_review_events": 1, "frame_review_provenance": "legacy_unverified", "frame_accepted": false},
+    {"case": "citibike_march2024_lineage", "revision": 42, "frame_review_events": 1, "frame_review_provenance": "legacy_unverified", "frame_accepted": false},
+    {"case": "bread_norway", "revision": 21, "frame_review_events": 1, "frame_review_provenance": "legacy_unverified", "frame_accepted": false}
+  ],
+  "adversarial_review": {
+    "found_and_closed": "Changing a registered signed case's project approval_policy to fixture and rehashing the ledger previously let an unsigned review and advance pass with unavailable trust. After correction, both API writes fail and even directly appended unsigned events leave accepted=false and provenance=fixture_unavailable.",
+    "negative_controls": [
+      "wrong reviewer actor, reason, verdict or snapshot",
+      "stale challenge after a new event",
+      "rotated or revoked reviewer key",
+      "duplicate reviewer key under another actor",
+      "self-review signed with a valid key",
+      "fixture opt-in removed after historical acceptance"
+    ],
+    "reviewer_result": "Read-only independent rerun confirmed the signed-to-fixture downgrade rejection on two disposable cases and the message/key negative controls."
+  },
+  "verification": {
+    "global_command": "uv run pytest -q",
+    "global_result": "1806 passed in 130.58s",
+    "lint_command": "uv run ruff check .",
+    "lint_result": "All checks passed!",
+    "diff_check": "git diff --check passed",
+    "wheel_sha256": "94762482eb54c4d42b41a712103bdb97df5a856c87d601e025f8c2c9746d2509",
+    "wheel_install": {
+      "python_versions": ["3.11.15", "3.12.3"],
+      "method": "uv build --wheel to a temporary directory; uv pip install --offline into new virtual environments",
+      "pip_check": "29 installed packages compatible in each environment",
+      "clean_smoke": "Both installed-wheel runs passed: nine synthetic phases, 29 items, 49 events, 17 MCP tools discovered, 15 CLI commands and 15 MCP tools exercised, real stdio client, signed synthetic approval and phase-review challenge, invalid inputs, SIGKILL checkpoint and resume."
+    },
+    "installed_decisive_probe": "Passed in both clean Python environments after its synthetic evidence was typed under the current protocol: final_revision=51, missing_test_blocked=true, linked_test_accepted=true, field_impact_tested=false, test_command_execution_authenticated=false.",
+    "versioned_case_ledgers_modified": false
+  },
+  "limits": [
+    "All signing keys in tests were ephemeral; no real person or decision was authenticated.",
+    "The signature authenticates review content and control of the configured key, not reviewer identity, competence, personal independence or source truth.",
+    "The phase_review event timestamp and phase_advance actor are not signed. A writer with direct ledger access can alter them or add an advance after a valid review and recalculate local hashes unless each transition is externally anchored or independently stored.",
+    "No provider call, spending, field intervention, observed effect or confirmatory model comparison occurred in this work."
+  ],
+  "criterion_1": "not_demonstrated",
+  "criterion_2": "not_demonstrated",
+  "criterion_3": "not_demonstrated",
+  "criterion_4": "not_demonstrated",
+  "criterion_5": "not_demonstrated"
+}

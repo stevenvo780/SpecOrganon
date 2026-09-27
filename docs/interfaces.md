@@ -4,7 +4,7 @@ Ambas interfaces llaman las mismas funciones de `specorganon.engine` y `specorga
 
 ## CLI
 
-Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 16 operaciones públicas:
+Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 17 operaciones públicas:
 
 | CLI | MCP | Función |
 | --- | --- | --- |
@@ -19,7 +19,8 @@ Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <coman
 | `challenge` | `challenge` | Registrar una contradicción. |
 | `resolve-challenge` | `resolve_challenge` | Resolver una contradicción. |
 | `gate` | `gate` | Consultar una compuerta sin avanzar. |
-| `review-phase` | `review_phase` | Revisar una fase. |
+| `phase-review-challenge` | `phase_review_challenge` | Obtener los bytes exactos de una revisión de fase para firma offline. |
+| `review-phase` | `review_phase` | Revisar una fase; en un caso firmado exige `--signature`. |
 | `advance` | `advance` | Avanzar una fase si la compuerta lo permite. |
 | `trace` | `trace` | Recorrer dependencias de un ítem. |
 | `next-task` | `next_task` | Pedir el siguiente encargo acotado. |
@@ -58,13 +59,16 @@ Al crear el caso, `init` guarda un `case_id` UUID y devuelve `project_sha256`, e
       "project_sha256": "SHA256_HEX_DE_METADATA_CANONICA",
       "approvers": {
         "human:responsable": "BASE64_DE_32_BYTES_DE_CLAVE_PUBLICA"
+      },
+      "phase_reviewers": {
+        "agent:revisor": "BASE64_DE_32_BYTES_DE_OTRA_CLAVE_PUBLICA"
       }
     }
   }
 }
 ```
 
-Todos los marcadores se reemplazan por el UUID, la ruta canónica absoluta, el digest de 64 caracteres hexadecimales y la clave pública real del caso. El operador protege la integridad de ese archivo y verifica por un proceso externo la identidad, custodia de clave y facultad de decisión de cada actor. Un registro para otro UUID, otra ruta o metadatos distintos no da confianza a la aprobación. No se guardan claves privadas en el caso, el repositorio, comandos, logs ni solicitudes MCP.
+Todos los marcadores se reemplazan por el UUID, la ruta canónica absoluta, el digest de 64 caracteres hexadecimales y las claves públicas reales del caso. `phase_reviewers` es opcional para leer un expediente antiguo, pero sin un revisor registrado ninguna fase `signed` puede obtener una nueva aceptación. El operador protege la integridad de ese archivo y verifica por un proceso externo la identidad, custodia de clave, competencia y separación de cada revisor, así como la facultad de decisión de cada aprobador. Un registro para otro UUID, otra ruta o metadatos distintos no da confianza a las firmas. No se guardan claves privadas en el caso, el repositorio, comandos, logs ni solicitudes MCP.
 
 1. Tras revisar la versión vigente de la norma o decisión, solicita el desafío con el actor y el motivo exactos:
 
@@ -83,6 +87,12 @@ Todos los marcadores se reemplazan por el UUID, la ruta canónica absoluta, el d
 
 La firma prueba control de la clave configurada para ese actor. No prueba por sí sola quién sostuvo la clave, si recibió toda la información ni si tenía competencia para decidir. Esas verificaciones y el registro de autorización pertenecen al proceso humano externo.
 
+### Revisión firmada de una fase
+
+En un caso `signed`, una revisión que permita avanzar requiere la clave pública del actor en `phase_reviewers` y un actor distinto de los autores de los ítems de esa fase. Tras comprobar el contenido y la instantánea, el revisor pide `phase-review-challenge RUTA FASE --verdict accept --reason MOTIVO --actor ACTOR`. El resultado incluye `message_base64` y `message_sha256`. El revisor comprueba el mensaje canónico y firma **sus bytes decodificados** fuera del entorno del agente; incluye propósito, UUID, ruta, metadatos, cabeza previa del ledger, fase, hash de la instantánea, veredicto, motivo y actor. Después registra `review-phase RUTA FASE --verdict accept --reason MOTIVO --actor ACTOR --signature FIRMA_BASE64` y comprueba `gate` antes de `advance`. CLI y MCP usan el mismo contrato.
+
+Una nueva escritura entre el desafío y la revisión cambia la cabeza y exige otro desafío. Una firma inválida, ausente o retirada se rechaza al escribir o queda `review_signature_verified:false` al releer; los eventos de revisión antiguos sin firma permanecen visibles como `review_provenance:legacy_unverified`, pero no habilitan `advance` ni mantienen aceptada una fase. Una clave puede demostrar control criptográfico del actor configurado; la diferencia de etiquetas y claves no demuestra independencia real de personas o competencia para evaluar. La firma tampoco valida el juicio ni las fuentes. La política `fixture` admite revisiones sin firma solo para pruebas sintéticas.
+
 ### Declaración firmada de fuentes de campo
 
 `field-attestation-challenge` y `attest-field` registran una **declaración**, vinculada a los bytes de un manifiesto, cinco fuentes mínimas, un reporte y las revisiones vigentes de la evaluación y sus antecedentes. `ORGANON_FIELD_ASSESSORS_FILE` apunta a un JSON externo de esquema 1: `cases[case_id]` contiene `path`, `project_sha256` y `assessors`, mapa de actores `assessor:<nombre>` a claves públicas Ed25519 crudas de 32 bytes en base64. El archivo y cada fuente deben tener ruta absoluta canónica, sin enlace simbólico y con un solo enlace físico. El evaluador debe ser distinto del autor de la evaluación y su clave debe diferir de las claves de aprobación normativa. Retirar su clave hace que la firma histórica aparezca sin verificar al releer el caso.
@@ -95,7 +105,7 @@ Una declaración firmada queda visible en `status.field_attestations` con `signa
 
 `status.field_attestations[].baseline_volume_input_byte_bound` solo es `true` cuando la firma se verifica y los materiales firmados incluyen explícitamente `baseline_volume_input_byte_bound:true`. Una atestación anterior de esquema 2 puede conservar `signature_verified:true` y mostrar `baseline_volume_input_byte_bound:false`; su firma sigue siendo criptográficamente válida para lo que declaró entonces, sin adquirir retroactivamente el cotejo de volumen. El estado no vuelve a abrir las fuentes ni convierte ese indicador en prueba de custodia o de impacto.
 
-La firma cubre la cabeza del ledger **anterior** a la aprobación. Los hashes de eventos detectan roturas de la cadena, pero no hacen al archivo resistente a escritura maliciosa: quien puede editarlo directamente puede borrar eventos posteriores o añadir falsas revisiones y avances de fase, y recalcular los hashes. La firma protege la decisión y el prefijo previo; los actores de `review` y `review-phase` siguen siendo etiquetas autodeclaradas. Para auditar producción, registra fuera del caso la secuencia y cabeza de **cada transición autorizada**, o usa almacenamiento append-only bajo custodia independiente. Protege también el archivo de confianza, cuyo cambio altera la verificación de aprobaciones históricas.
+Las firmas cubren la cabeza del ledger **anterior** a cada aprobación o revisión de fase firmada. Los hashes de eventos detectan roturas de la cadena, pero no hacen al archivo resistente a escritura maliciosa: quien puede editarlo directamente puede borrar eventos o restaurar un prefijo firmado válido y recalcular los hashes. El campo `at` del evento de revisión y el actor del evento `phase_advance` no forman parte del mensaje firmado; tras una revisión válida, un escritor directo también puede añadir un avance y rehacer la cadena local. Por eso `accepted` acredita que hay una revisión de contenido firmada y una secuencia local compatible, no custodia autónoma de la fecha o del avance. Las claves registradas autentican el control de los actores configurados; el evento `review` de un ítem todavía usa una etiqueta autodeclarada. Para auditar producción, registra fuera del caso la secuencia y cabeza de **cada transición autorizada**, o usa almacenamiento append-only bajo custodia independiente. Protege también el archivo de confianza, cuyo cambio altera la verificación histórica.
 
 ### Ancla externa opcional del ledger
 
@@ -123,7 +133,7 @@ Para pruebas sintéticas se exige crear el caso explícitamente con `--approval-
 
 ## MCP por stdio
 
-El ejecutable es `.venv/bin/organon-mcp` (o `uv run organon-mcp`). Configúralo como servidor MCP con transporte `stdio`. Publica las 16 herramientas de la tabla. Los parámetros tienen los mismos nombres que las funciones del motor: `init` acepta `approval_policy`, `approval_challenge` devuelve el mensaje canónico y `approve` acepta `signature`. `refs` es una lista de IDs y `data` es un objeto JSON. En MCP, `run` recibe el objeto JSON `manifest` directamente, mientras que la CLI lo lee de `--manifest`. El servidor usa los mismos registros externos de aprobación y evaluación que la CLI para comprobar firmas; el cliente MCP no debe recibir una clave privada.
+El ejecutable es `.venv/bin/organon-mcp` (o `uv run organon-mcp`). Configúralo como servidor MCP con transporte `stdio`. Publica las 17 herramientas de la tabla. Los parámetros tienen los mismos nombres que las funciones del motor: `init` acepta `approval_policy`, `approval_challenge` y `phase_review_challenge` devuelven mensajes canónicos y `approve` y `review_phase` aceptan `signature`. `refs` es una lista de IDs y `data` es un objeto JSON. En MCP, `run` recibe el objeto JSON `manifest` directamente, mientras que la CLI lo lee de `--manifest`. El servidor usa los mismos registros externos de aprobación y evaluación que la CLI para comprobar firmas; el cliente MCP no debe recibir una clave privada.
 
 El [control de frontera stdio](../experiments/development/mcp_strict_wire_2026-09-27.json) lee cada línea en bytes, con un límite de 8 MiB, y rechaza UTF-8 inválido, claves duplicadas incluso anidadas o escapadas, valores no finitos, subdesbordamiento y pérdida decimal antes del parser del SDK. Comprueba la forma del sobre JSON-RPC y rechaza solicitudes que mezclen `method` con campos de respuesta, lotes, IDs inválidos y campos de sobre extra. En `tools/call`, `put.data`, `put.expected_deps`, `run.manifest` y `next_task.roles` deben llegar como objetos reales, y `put.refs` como lista; las versiones y `challenge_seq` requieren enteros reales, sin conversión de booleanos. Los rechazos se envían como errores JSON-RPC y no ejecutan la herramienta; una línea inválida no impide una petición válida posterior. Los valores de texto dentro de `data` siguen siendo contenido del caso y no se vuelven a interpretar como JSON. El control usa partes internas de `mcp==2.2.0`, versión fijada en el paquete y comprobada con cliente real y wheel instalado en Python 3.11 y 3.12. No autentica el origen del mensaje ni la evidencia que contiene.
 
