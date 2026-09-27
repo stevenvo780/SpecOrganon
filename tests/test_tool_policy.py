@@ -76,6 +76,22 @@ def test_valid_policy_matches_expected_limits_and_reports_unenforced(
     assert path.read_bytes() == data
 
 
+def test_validated_policy_bytes_expose_tool_declarations_without_execution(
+    tmp_path: Path,
+) -> None:
+    policy = _policy()
+    data = _write_policy(tmp_path / "tool_policy", policy)
+    parsed = inspector.validate_tool_policy_bytes(
+        data, expected_limits=policy["limits"]
+    )
+    assert parsed == policy
+    assert parsed is not policy
+    with pytest.raises(inspector.ToolPolicyError, match="limits differ"):
+        inspector.validate_tool_policy_bytes(
+            data, expected_limits={**policy["limits"], "tool_calls": 1}
+        )
+
+
 def test_pinned_policy_bytes_share_path_validation_and_bounds(tmp_path: Path) -> None:
     policy = _policy()
     path = tmp_path / "tool_policy"

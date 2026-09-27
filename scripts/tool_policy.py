@@ -234,7 +234,16 @@ def _validate_policy(raw: Any) -> dict[str, Any]:
     return policy
 
 
-def _inspect_policy_data(data: bytes, expected: dict[str, int]) -> dict[str, Any]:
+def validate_tool_policy_bytes(
+    data: bytes, *, expected_limits: dict[str, Any]
+) -> dict[str, Any]:
+    """Return strict policy declarations after matching independently known caps.
+
+    The returned tool IDs and digests are declarations. A caller that executes
+    a tool must separately bind an executable path to its bytes and enforce
+    the runtime restrictions; this function does neither.
+    """
+    expected = _limits(expected_limits, "expected limits")
     if type(data) is not bytes or len(data) > MAX_POLICY_BYTES:
         raise ToolPolicyError("tool policy bytes must be bounded bytes")
     policy = _validate_policy(_parse_json(data, "tool policy"))
@@ -242,6 +251,11 @@ def _inspect_policy_data(data: bytes, expected: dict[str, int]) -> dict[str, Any
         raise ToolPolicyError(
             "tool policy limits differ from release or expected limits"
         )
+    return policy
+
+
+def _inspect_policy_data(data: bytes, expected: dict[str, int]) -> dict[str, Any]:
+    policy = validate_tool_policy_bytes(data, expected_limits=expected)
     return {
         "schema": 1,
         "classification": INSPECTION_CLASSIFICATION,
