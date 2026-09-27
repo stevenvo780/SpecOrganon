@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "classification": "development_secondary_source_bytes_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "implementation_sha256": {
+    "scripts/verify_secondary_sources.py": "c842cd5f2dc3942892711a4a53cbef1ccb8b371df5045ce7451457125086f43d",
+    "tests/test_verify_secondary_sources.py": "e9559847dde3a1bec347196904394ff965e6e1c8a76e743a6c9beebc84dcb20a"
+  },
+  "initial_gap": "The secondary analyzer accepted model costs supported only by syntactically valid, even nonexistent, invoice and rate-card digests. It also did not open audit, reference, injection, human-event, or wall-event source bytes.",
+  "reproduced_false_green": {
+    "fixture_runs": 378,
+    "same_nonexistent_invoice_digest": "64 zero hex characters",
+    "T_cost_usd_1000_P_T_over_S": "19.6078 approximately",
+    "T_cost_usd_0_01_P_T_over_S": "0.000196 approximately",
+    "criterion_4_in_both": "not_assessed"
+  },
+  "local_contract": {
+    "inputs": "existing schedule, receipts, Q assembly, secondary JSON and private content-addressed blobs directory",
+    "source_bytes": "reference, audit, injection when recovery is measured, human events, wall event and invoice for each measured run, plus the rate card",
+    "model_cost": "one exact invoice line per declared provider request including external retries, Decimal token-pricing calculation against a supplied model/version rate card, exact comparison with declared model and total USD",
+    "nonmodel_cost": "nonzero tool and human charges rejected by this narrow profile",
+    "limits": "64 MiB per JSON input and blob, 4096 distinct blobs, 512 MiB aggregate blob bytes",
+    "provider_or_custody_authenticated": false,
+    "criterion_4": "not_assessed"
+  },
+  "synthetic_positive": {
+    "measured_runs": 2,
+    "agents": ["solo", "trio"],
+    "model_invoice_lines": 4,
+    "model_usd_per_call": "0.00019",
+    "extra_unused_rate_accepted": true,
+    "retry_adds_invoice_line": true,
+    "cli_positive": true
+  },
+  "negative_controls": [
+    "rehashed invoice with false amount despite byte-hash match",
+    "declared total lower than receipt-derived model amount",
+    "external-failure retry with unbilled provider request",
+    "missing, altered, extra or symlink source blob",
+    "nonzero tool charge outside narrow profile",
+    "caller mutation of receipts during blob read cannot rebind invoice to unvalidated data",
+    "oversize or symlink input JSON"
+  ],
+  "gates": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_verify_secondary_sources.py",
+      "result": "12 passed in 2.28s"
+    },
+    {
+      "command": "ruff check scripts/verify_secondary_sources.py tests/test_verify_secondary_sources.py",
+      "result": "passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "1331 passed, 1 xfailed in 129.75s after the source and MCP changes"
+    }
+  ],
+  "independent_review": {
+    "initial_findings": [
+      "API input mutation between validation and calculation could rebind invoice to unvalidated request IDs",
+      "exact rate-card model set falsely rejected extra unused rates",
+      "CLI JSON input had no preparse size limit"
+    ],
+    "final_reproductions": "All three cases were closed: mutating caller input fails, unused rate succeeds, exact input size passes and excess fails. Reviewer found no other actionable local cost/retry issue and reported 106 related tests passing."
+  },
+  "limits": [
+    "Opened reference, audit, injection, human and wall bytes are not interpreted or compared with their claimed metric contents.",
+    "The supplied receipt usage, rate authority, invoice origin, zero tool/human expense and external custody are not authenticated.",
+    "The profile assumes one price per model/version and does not cover effort, time or other provider charges.",
+    "Jointly forged receipts, rates and invoice extracts can pass this local arithmetic check.",
+    "The supplied directory can change after its final scan; no independent immutable source or confirmatory matrix was used."
+  ]
+}

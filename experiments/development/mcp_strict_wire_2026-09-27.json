@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "classification": "development_mcp_strict_wire_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "implementation_sha256": {
+    "src/specorganon/server.py": "a2ca2402b50e53459b0f4332364c02667f257503e0ec87456825cf15c361f4df",
+    "tests/test_mcp_strict_json_boundary.py": "c27093cc69032821a2310d4c59f895f3fd8017be4b2780c5f7bed5cea8fd8da4",
+    "pyproject.toml": "94795ff3b3635a14291f08f0c94379218bbaf58a2bc274b7ae4385d78ee57eaa",
+    "uv.lock": "4ce6a8280881287f43ddecd3a617b4387f4392432269c94c359c72d81c495c46"
+  },
+  "initial_gap": "The pinned SDK parsed stdio JSON-RPC before local handlers. It accepted duplicate keys, nonfinite and underflowing numbers, boolean-to-integer and JSON-string-to-object coercions, request envelopes carrying response fields, and invalid UTF-8 replaced with U+FFFD. Some malformed frames could mutate the case.",
+  "local_contract": {
+    "sdk": "mcp==2.2.0 pinned because the wrapper uses internal stdin fd claim and low-level server interfaces",
+    "line_limit_bytes": 8388608,
+    "pre_sdk_validation": "bounded binary line read, strict UTF-8, strict JSON without duplicate/nonfinite/underflow/decimal-loss values, request/response envelope and raw tool argument shape checks",
+    "integer_fields": "expected_version, expected_deps values, challenge_seq use strict integer validation",
+    "on_reject": "JSON-RPC error before tool dispatch; oversized line drained in bounded chunks; later valid frame continues",
+    "criterion_1_or_2_complete": false
+  },
+  "negative_controls": [
+    "nested and escaped duplicate keys, duplicate root id",
+    "NaN, Infinity and numeric underflow",
+    "boolean expected_version, expected_deps value and challenge_seq",
+    "JSON-string data, refs, expected_deps, manifest and roles that the SDK could preparse",
+    "tools/call request mixed with result or error and extra envelope field",
+    "batch, boolean or null request id, invalid params shape",
+    "invalid UTF-8 byte in a would-be mutating tool call",
+    "oversized raw line drained before a valid next message"
+  ],
+  "wire_observation": "Each malformed mutating frame returned a parse, invalid-request or invalid-params error, left ledger bytes unchanged and allowed a subsequent valid status; a valid guarded put with object/list arguments still wrote exactly one expected event.",
+  "gates": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_mcp_strict_json_boundary.py tests/test_interfaces.py tests/test_server_case_pin.py",
+      "result": "30 passed, 1 xfailed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "1331 passed, 1 xfailed in 129.75s"
+    },
+    {
+      "command": "ruff check scripts tests src; ruff format --check scripts/verify_secondary_sources.py tests/test_verify_secondary_sources.py src/specorganon/server.py tests/test_mcp_strict_json_boundary.py; git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": "uv build --wheel --offline; clean wheel installs with uv pip check and scripts/clean_smoke.py",
+      "result": "passed in isolated Python 3.11.15 and 3.12.3 environments; 14 CLI commands and 14 MCP tools, nine phases, 29 items, 49 events in each smoke"
+    },
+    {
+      "command": "uv lock --check --offline",
+      "result": "passed"
+    }
+  ],
+  "independent_review": {
+    "findings_closed": [
+      "JSON strings were still converted by SDK pre_parse_json after initial raw JSON check",
+      "request with method and result was accepted and wrote a case event",
+      "invalid UTF-8 was replaced and could write changed text",
+      "unbounded line read could exhaust memory",
+      "private SDK interface was not covered by the original broad 2.x dependency constraint"
+    ],
+    "final_verdict": "Independent wire probes rejected all identified malformed frames without ledger mutation; a valid follow-up and client smoke passed. No remaining bypass found in the bounded scope."
+  },
+  "limits": [
+    "The filter depends on private interfaces of pinned MCP 2.2.0 and its tested dependency resolution; other SDK versions need a new compatibility review.",
+    "The wrapper checks input syntax and shape, not client identity, source truth, human authority or all possible application semantics.",
+    "The full GOAL acceptance criteria still need independently custodied transitions, real intervention evidence and confirmatory model runs."
+  ]
+}
