@@ -18,6 +18,8 @@ ENGINE_OPERATIONS = {
     "review": "review_item",
     "approve": "approve",
     "approval_challenge": "approval_challenge",
+    "test_execution_challenge": "test_execution_challenge",
+    "record_test_execution": "record_test_execution",
     "field_attestation_challenge": "field_attestation_challenge",
     "attest_field": "attest_field",
     "challenge": "challenge",
@@ -66,6 +68,10 @@ def _json_roles(raw: str) -> dict[str, Any]:
 
 def _json_expected_deps(raw: str) -> dict[str, Any]:
     return _strict_object(raw, "--expected-deps")
+
+
+def _json_report(raw: str) -> dict[str, Any]:
+    return _strict_object(raw, "--report")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -117,6 +123,23 @@ def build_parser() -> argparse.ArgumentParser:
     approval_challenge.add_argument("id")
     approval_challenge.add_argument("--reason", required=True)
     approval_challenge.add_argument("--actor", required=True)
+
+    test_execution_challenge = commands.add_parser(
+        "test-execution-challenge", help="Prepare exact bytes for offline signing of an external test report"
+    )
+    test_execution_challenge.add_argument("path")
+    test_execution_challenge.add_argument("id")
+    test_execution_challenge.add_argument("--report", type=_json_report, required=True)
+    test_execution_challenge.add_argument("--actor", required=True)
+
+    record_test_execution = commands.add_parser(
+        "record-test-execution", help="Record a signed external test execution report"
+    )
+    record_test_execution.add_argument("path")
+    record_test_execution.add_argument("id")
+    record_test_execution.add_argument("--report", type=_json_report, required=True)
+    record_test_execution.add_argument("--actor", required=True)
+    record_test_execution.add_argument("--signature", required=True)
 
     field_attestation_challenge = commands.add_parser(
         "field-attestation-challenge", help="Prepare case and source hashes for an assessor signature"

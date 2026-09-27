@@ -1618,6 +1618,7 @@ def test_signed_field_success_rejects_self_declared_attestation(tmp_path, monkey
     status = engine.gate(path, "validate")
     assert status["blockers"] == [
         "ass1 decisive field verdict needs verified field effect analysis and source custody",
+        "ass1 success needs a current passed test linked to res1 for crit1 and implementation of req1",
         "previous phase is not currently accepted",
     ]
     assert not status["ready"] and not status["accepted"]

@@ -17,7 +17,7 @@ from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
-from . import approval, field_attestation, review_provenance
+from . import approval, field_attestation, review_provenance, test_execution
 from .ledger import ZERO_HASH, ConflictError, LedgerError, append_event, init_project, read_project
 from .workflow import KIND_TO_PHASE, KINDS, PHASES, PHASE_BY_ID
 
@@ -49,10 +49,11 @@ def _project(path: str | Path) -> dict[str, Any]:
     project = dict(ledger["project"])
     project.setdefault("approval_policy", "signed")
     try:
-        approvers, phase_reviewers, trust_status = approval.trust_contexts(project, path)
+        approvers, phase_reviewers, test_executors, trust_status = approval.trust_contexts_with_executors(project, path)
     except ValueError:
         approvers = {}
         phase_reviewers = {}
+        test_executors = {}
         trust_status = "unavailable"
     if project["approval_policy"] == "signed":
         try:
@@ -79,6 +80,13 @@ def _project(path: str | Path) -> dict[str, Any]:
             "configured" if trust_status == "configured" and phase_reviewers else "unavailable"
         ),
         "phase_reviewers": phase_reviewers,
+        "test_execution_trust": (
+            "fixture" if trust_status == "fixture" else
+            "configured" if trust_status == "configured" and test_executors else "unavailable"
+        ),
+        "test_executors": test_executors,
+        "test_executions": {},
+        "test_execution_history": [],
         "field_attestation_trust": field_trust_status,
         "field_attestations": [],
         "item_reviews": {},
@@ -132,6 +140,35 @@ def _project(path: str | Path) -> dict[str, Any]:
                 state["approval_provenance"][key] = (seq, event["hash"])
             elif key not in state["approvals"]:
                 state["approval_statuses"][key] = status
+        elif kind == "test_execution":
+            item = state["items"].get(payload.get("id")) if isinstance(payload, dict) else None
+            valid = False
+            report = payload.get("report") if isinstance(payload, dict) else None
+            if (project["approval_policy"] == "signed" and item is not None
+                    and item["kind"] == "test" and type(payload.get("version")) is int
+                    and item["version"] == payload["version"]
+                    and not test_execution.item_issues(item)
+                    and isinstance(event["actor"], str) and isinstance(report, dict)):
+                try:
+                    test_execution.validate_report(report)
+                    valid = bool(
+                        report["argv"] == item["data"]["argv"]
+                        and test_execution.verify(
+                            project, item, report, event["actor"], payload.get("signature"),
+                            payload.get("key_sha256"), test_executors, path, event["prev_hash"],
+                        )
+                    )
+                except (KeyError, TypeError, ValueError):
+                    valid = False
+            record = {
+                "seq": seq, "hash": event["hash"], "id": payload.get("id") if isinstance(payload, dict) else None,
+                "version": payload.get("version") if isinstance(payload, dict) else None,
+                "actor": event["actor"], "signature_verified": valid,
+                "passed": bool(valid and report["exit_code"] == 0 and not report["timed_out"]),
+            }
+            state["test_execution_history"].append(record)
+            if valid:
+                state["test_executions"][(item["id"], item["version"])] = record
         elif kind == "field_attestation":
             valid = False
             if isinstance(payload, dict) and project["approval_policy"] == "signed":
@@ -605,7 +642,10 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any],
         # provide the full current flags, including unresolved challenges.
         flags = {
             item_id: {"stale": _stale(items, item_id), "contested": False,
-                      "issues": _item_issues(item)}
+                      "issues": (
+                          test_execution.item_issues(item) + ["signed test needs a current successful signed execution receipt"]
+                          if approval_policy == "signed" and item["kind"] == "test" else _item_issues(item)
+                      )}
             for item_id, item in items.items()
         }
     for indicator_id in sorted(_ancestors(items, criterion["id"])):
@@ -628,7 +668,12 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any],
     # A baseline may cite a test without the result using that test.
     for ref in result["deps"]:
         test = items[ref]
-        if test["kind"] != "test" or _stale(items, ref) or _item_issues(test):
+        if test["kind"] != "test":
+            continue
+        if approval_policy == "signed":
+            if any(flags[ref][field] for field in ("stale", "contested", "issues")):
+                continue
+        elif _stale(items, ref) or _item_issues(test):
             continue
         if criterion["id"] not in test["deps"]:
             continue
@@ -775,16 +820,38 @@ def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
                 issue = ("latest item review rejected this version" if dependent_id == item_id
                          else f"depends on rejected item review of {item_id}")
                 review_issues.setdefault(dependent_id, []).append(issue)
-    return {
-        item_id: {
+    flags: dict[str, dict[str, Any]] = {}
+    for item_id, item in items.items():
+        issues = (_item_issues(item) if state["project"]["approval_policy"] == "fixture" or item["kind"] != "test"
+                  else test_execution.item_issues(item))
+        flag = {
             "stale": _stale(items, item_id),
             "contested": item_id in contested,
-            "issues": _item_issues(item) + automatic.get(item_id, []) + review_issues.get(item_id, []),
+            "issues": issues + automatic.get(item_id, []) + review_issues.get(item_id, []),
             "approved": (item_id, item["version"]) in state["approvals"],
             "approval_status": state["approval_statuses"].get((item_id, item["version"]), "missing"),
         }
-        for item_id, item in items.items()
-    }
+        if state["project"]["approval_policy"] == "signed" and item["kind"] == "test":
+            receipt = state["test_executions"].get((item_id, item["version"]))
+            seen_unverified = any(
+                entry["id"] == item_id and entry["version"] == item["version"]
+                for entry in state["test_execution_history"]
+            )
+            status = ("signed_passed" if receipt["passed"] else "signed_failed") if receipt else (
+                "unverified" if seen_unverified else "missing"
+            )
+            flag["test_execution_status"] = status
+            flag["test_execution_provenance"] = (
+                (receipt["seq"], receipt["hash"]) if receipt else None
+            )
+            flag["test_execution_actor"] = receipt["actor"] if receipt else None
+            if status != "signed_passed":
+                flag["issues"].append(
+                    "latest signed test execution failed or timed out" if status == "signed_failed"
+                    else "signed test needs a current successful signed execution receipt"
+                )
+        flags[item_id] = flag
+    return flags
 
 
 def _has_path(items: dict[str, dict], item_id: str, kinds: set[str]) -> bool:
@@ -1067,6 +1134,14 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
                      state["approval_provenance"].get((item_id, state["items"][item_id]["version"])))
                     for item_id in normative_ids
                 ]
+            test_ids = sorted(item_id for item_id in relevant_ids
+                              if state["items"][item_id]["kind"] == "test")
+            if test_ids:
+                snapshot_data["test_executions"] = [
+                    (item_id, state["items"][item_id]["version"],
+                     flags[item_id]["test_execution_provenance"])
+                    for item_id in test_ids
+                ]
         # Existing ledgers recorded this payload without an item_reviews key.
         if item_reviews:
             snapshot_data["item_reviews"] = item_reviews
@@ -1251,6 +1326,59 @@ def approve(path: str | Path, id: str, reason: str, actor: str, signature: str |
     return append_event(path, "approval", payload, actor, expected_seq=state["revision"])
 
 
+def _test_execution_target(
+    state: dict[str, Any], id: str, report: dict[str, Any], actor: str,
+) -> dict[str, Any]:
+    if state["project"]["approval_policy"] != "signed":
+        raise MethodError("test execution receipts are available only for signed cases")
+    item = state["items"].get(id)
+    if item is None or item["kind"] != "test":
+        raise MethodError("test execution requires a current test item")
+    problems = test_execution.item_issues(item)
+    if problems:
+        raise MethodError("; ".join(problems))
+    if not isinstance(actor, str) or not actor.startswith("executor:") or actor != actor.strip():
+        raise MethodError("test executor actor must be executor:<name>")
+    if state["test_execution_trust"] != "configured" or actor not in state["test_executors"]:
+        raise MethodError("test executor actor has no trusted public key")
+    try:
+        test_execution.validate_report(report)
+    except ValueError as exc:
+        raise MethodError(str(exc)) from exc
+    if report["argv"] != item["data"]["argv"]:
+        raise MethodError("test execution report argv differs from the current test declaration")
+    return item
+
+
+def test_execution_challenge(
+    path: str | Path, id: str, report: dict[str, Any], actor: str,
+) -> dict[str, Any]:
+    state = _project(path)
+    item = _test_execution_target(state, id, report, actor)
+    return test_execution.challenge(state["project"], item, report, actor, path, state["head_hash"])
+
+
+def record_test_execution(
+    path: str | Path, id: str, report: dict[str, Any], actor: str, signature: str,
+) -> dict[str, Any]:
+    state = _project(path)
+    item = _test_execution_target(state, id, report, actor)
+    if not isinstance(signature, str) or not signature:
+        raise MethodError("test execution requires an Ed25519 signature")
+    key = state["test_executors"][actor]
+    fingerprint = approval.key_fingerprint(key)
+    if not test_execution.verify(
+        state["project"], item, report, actor, signature, fingerprint,
+        state["test_executors"], path, state["head_hash"],
+    ):
+        raise MethodError("test execution signature is invalid or stale for this case, test or report")
+    payload = {
+        "id": id, "version": item["version"], "report": report,
+        "signature": signature, "key_sha256": fingerprint,
+    }
+    return append_event(path, "test_execution", payload, actor, expected_seq=state["revision"])
+
+
 def _field_attestation_target(state: dict[str, Any], id: str, reason: str,
                               actor: str) -> tuple[dict[str, Any], dict[str, Any], bytes]:
     if state["project"]["approval_policy"] != "signed":
@@ -1361,6 +1489,8 @@ def get_state(path: str | Path) -> dict[str, Any]:
     return {"project": state["project"], "project_sha256": approval.project_fingerprint(state["project"]),
             "revision": state["revision"], "approval_trust": state["approval_trust"],
             "phase_review_trust": state["phase_review_trust"],
+            "test_execution_trust": state["test_execution_trust"],
+            "test_execution_history": state["test_execution_history"],
             "phase_review_history": [
                 {"seq": entry["seq"], "phase": entry["phase"],
                  "verdict": entry.get("verdict"), "actor": entry["actor"],

@@ -24,6 +24,7 @@ ROLE_LABELS = {
     "specialist": "especialista",
     "reviewer": "revisor",
     "human": "aprobador humano",
+    "executor": "ejecutor externo",
 }
 PHASE_INPUT_KINDS = {
     "frame": (),
@@ -84,7 +85,7 @@ def _validate_roles(roles: dict[str, str] | None) -> dict[str, str]:
         key not in ROLE_LABELS or not isinstance(value, str) or not value.strip()
         for key, value in roles.items()
     ):
-        raise ManifestError("roles must map analyst, specialist, reviewer or human to nonempty actor names")
+        raise ManifestError("roles must map analyst, specialist, reviewer, human or executor to nonempty actor names")
     return {key: value.strip() for key, value in roles.items()}
 
 
@@ -137,10 +138,27 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
     ))
     approvals = [item for item in current if item["kind"] in {"norm", "decision"} and not item["approved"]]
     troubled = [item for item in current if item["stale"] or item["contested"] or item["issues"]]
+    execution_issues = {
+        "signed test needs a current successful signed execution receipt",
+        "latest signed test execution failed or timed out",
+    }
+    execution_targets = [
+        item for item in troubled
+        if item["kind"] == "test" and not item["stale"] and not item["contested"]
+        and len(item["issues"]) == 1 and item["issues"][0] in execution_issues
+    ]
+    only_execution_pending = bool(execution_targets) and len(execution_targets) == len(troubled) and all(
+        entry["kind"] == "test" for entry in missing
+    )
     challenges = state["open_challenges"]
     base_role = "analyst" if phase.front == "philosophy" else "specialist"
     if any(item["contested"] for item in troubled):
         action, role, task = "resolve_contradiction", "reviewer", "Investigar contradicciones; registrar síntesis y revisión independiente antes de continuar."
+    elif only_execution_pending:
+        action, role, task = (
+            "execute_test", "executor",
+            "Ejecutar externamente el argv declarado; registrar el reporte y la firma Ed25519 del ejecutor."
+        )
     elif troubled:
         action, role, task = "repair_artifacts", base_role, "Corregir artefactos inválidos o referencias a versiones anteriores."
     elif approvals:
@@ -178,12 +196,19 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
         "action": action,
         "task": task,
         "phase_review_trust": state["phase_review_trust"],
+        "test_execution_trust": state["test_execution_trust"],
         "inputs_description": phase.inputs,
         "inputs": _limited(prior),
         "artifacts": _limited(current),
         "missing": missing,
         "approval_targets": [{"id": item["id"], "version": item["version"]} for item in approvals[:CONTEXT_LIMIT]],
         "omitted_approval_targets": max(0, len(approvals) - CONTEXT_LIMIT),
+        "test_execution_targets": [
+            {"id": item["id"], "version": item["version"], "argv": item["data"]["argv"],
+             "command": item["data"]["command"]}
+            for item in execution_targets[:CONTEXT_LIMIT]
+        ],
+        "omitted_test_execution_targets": max(0, len(execution_targets) - CONTEXT_LIMIT),
         "criteria": {"exit": phase.exit_rule, "review": phase.review, "stop": phase.stop_rule},
         "gate": {key: status[key] for key in (
             "ready", "reviewed", "independent_review", "review_signature_verified",
@@ -290,6 +315,7 @@ def _pending_reason(task: dict[str, Any]) -> str:
         "resolve_contradiction": "contradiction",
         "repair_artifacts": "invalid_or_stale_artifact",
         "human_approval": "human_approval_required",
+        "execute_test": "signed_test_execution_required",
         "review_phase": "independent_review_required",
     }.get(task["action"], "manifest_exhausted")
 

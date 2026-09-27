@@ -181,6 +181,12 @@ def _validate_raw_tool_arguments(message: Any) -> None:
         ):
             raise ValueError("expected_deps values must be integers, not booleans")
     elif (
+        params.get("name") in {"test_execution_challenge", "record_test_execution"}
+        and "report" in arguments
+        and type(arguments["report"]) is not dict
+    ):
+        raise ValueError("test execution report must be a JSON object")
+    elif (
         params.get("name") == "resolve_challenge"
         and type(arguments.get("challenge_seq")) is bool
     ):
@@ -486,6 +492,29 @@ def approve(
 ) -> dict[str, Any]:
     return _invoke(
         "approve", path=path, id=id, reason=reason, actor=actor, signature=signature
+    )
+
+
+@server.tool(
+    description="Return canonical bytes for offline Ed25519 signing of an external test execution report. No command is run."
+)
+def test_execution_challenge(
+    path: str, id: str, report: dict[str, Any], actor: str,
+) -> dict[str, Any]:
+    return _invoke(
+        "test_execution_challenge", path=path, id=id, report=report, actor=actor,
+    )
+
+
+@server.tool(
+    description="Record a signed external test report for the current test revision. No command is run."
+)
+def record_test_execution(
+    path: str, id: str, report: dict[str, Any], actor: str, signature: str,
+) -> dict[str, Any]:
+    return _invoke(
+        "record_test_execution", path=path, id=id, report=report,
+        actor=actor, signature=signature,
     )
 
 
