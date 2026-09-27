@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "classification": "development_exact_decisive_threshold_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "scope": "Exact comparison of declared numeric thresholds, effect estimates and uncertainty bounds in decisive validate verdicts",
+  "false_green_before_fix": {
+    "test": "tests/test_method.py::test_decisive_threshold_preserves_large_integer_precision",
+    "declared_success_rule": "lower_ci >= 9007199254740993",
+    "declared_effect": "estimate and interval both 9007199254740992",
+    "observed_gate": "validate blockers was empty and ready was true because float converted both integers to 9007199254740992",
+    "negative_test_result": "1 failed; assertion expected ass1 measured lower_ci does not meet the prior threshold, but blockers was []"
+  },
+  "change": "The internal numeric gate uses finite Decimal values parsed from the persisted int, float or string representation instead of converting large integers to float.",
+  "post_fix_controls": [
+    "The below-threshold large integer blocks cumplido.",
+    "Equality at the exact threshold permits cumplido.",
+    "Equality at the exact threshold blocks a strict upper_ci < threshold rejection.",
+    "The below-threshold large integer permits the declared strict rejection."
+  ],
+  "checks": [
+    {
+      "command": "uv run pytest -q tests/test_method.py",
+      "result": "57 passed"
+    },
+    {
+      "command": "uv run pytest -q",
+      "result": "971 passed in 69.30s"
+    },
+    {
+      "command": "uv run --no-sync ruff check src/specorganon/engine.py tests/test_method.py; python3 -m compileall -q src/specorganon/engine.py; git diff --check",
+      "result": "passed"
+    }
+  ],
+  "installed_wheel": {
+    "sha256": "facbf02e0e0f3ac3157167d23124a4c9e8ca73bbb1c11151e63863addf9558bb",
+    "installation": "Fresh CPython 3.11.15 and 3.12.3 virtual environments installed 29 packages offline from the current wheel and dependencies in previously pinned local bundles; uv pip check passed in each.",
+    "installed_numeric_check": "Both environments imported specorganon.engine from their own site-packages and preserved 9007199254740992 < 9007199254740993.",
+    "clean_smoke_each_interpreter": "Nine phases, 29 synthetic items, 14 CLI commands, 14 MCP tools through a real stdio client, transport parity, signed fixture, SIGKILL resume and idempotent replay passed."
+  },
+  "limitations": [
+    "All assessment numbers, field labels and approvals in the regression are synthetic declarations.",
+    "The installed numeric check exercised the installed helper; the public validate gate was exercised in the source regression, while the installed clean smoke covered the wider CLI/MCP workflow.",
+    "Exact comparison does not authenticate measurements, justify a success threshold, identify causal effects or establish food-chain impact."
+  ],
+  "criterion_2": "not_assessed",
+  "criterion_3": "not_assessed"
+}

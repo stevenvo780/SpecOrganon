@@ -12,6 +12,7 @@ import json
 import math
 import os
 import re
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -267,14 +268,14 @@ def _item_issues(item: dict[str, Any]) -> list[str]:
     return issues
 
 
-def _numeric(value: Any) -> float | None:
-    if isinstance(value, bool):
+def _numeric(value: Any) -> Decimal | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
         return None
     try:
-        number = float(value)
-    except (TypeError, ValueError, OverflowError):
+        number = Decimal(str(value))
+    except (InvalidOperation, ValueError):
         return None
-    return number if math.isfinite(number) else None
+    return number if number.is_finite() else None
 
 
 def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) -> list[str]:

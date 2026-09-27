@@ -1081,6 +1081,45 @@ def test_success_checks_explicit_criterion_and_threshold_units(tmp_path):
     _accept(path, "validate")
 
 
+def test_decisive_threshold_preserves_large_integer_precision(tmp_path):
+    # These field-labelled values are invented; only exact gate arithmetic is tested.
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    below = 2**53
+    threshold = below + 1
+    _put(path, "crit1", "criterion", ["req1", "i1"],
+         {"metric": "count", "threshold": {"operator": ">=", "value": threshold,
+                                           "statistic": "lower_ci"},
+          "reject": "upper CI below threshold",
+          "reject_test": {"operator": "<", "value": threshold, "statistic": "upper_ci"}})
+    _put(path, "t1", "test", ["impl1", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
+    _put(path, "base1", "baseline", ["crit1"],
+         {"origin": "field", "source": "invented fixture", "date": "2026-09-27",
+          "metric": "count", "value": below, "unit": "count"})
+
+    def record_claim(value, verdict):
+        _put(path, "res1", "result", ["base1", "crit1", "t1"],
+             {"origin": "field", "source": "invented fixture", "date": "2026-09-27",
+              "effect": {"metric": "count", "estimate": value, "interval": [value, value],
+                         "design": "synthetic comparison", "comparator": "invented control",
+                         "sample_size": 12, "unit": "count"}})
+        _put(path, "ass1", "assessment", ["res1", "r1"],
+             {"verdict": verdict, "claim_scope": "field", "uncertainty": "invented interval",
+              "adverse_effects": "not measured", "cost": "not measured"})
+        return engine.gate(path, "validate")
+
+    record_claim(below, "cumplido")
+    _accept(path, "specify")
+    _accept(path, "build")
+    assert "ass1 measured lower_ci does not meet the prior threshold" in \
+        engine.gate(path, "validate")["blockers"]
+    assert record_claim(threshold, "cumplido")["ready"]
+    assert "ass1 measured upper_ci does not meet the prior rejection test" in \
+        record_claim(threshold, "incumplido")["blockers"]
+    assert record_claim(below, "incumplido")["ready"]
+
+
 def test_success_rejects_missing_or_ambiguous_linked_indicator_units(tmp_path):
     path = tmp_path / "case"
     _complete_synthetic_case(path)
