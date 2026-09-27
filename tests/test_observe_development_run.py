@@ -24,7 +24,17 @@ from run_development_arm import (  # noqa: E402
     run_development_arm,
 )
 import run_development_arm as runner  # noqa: E402
-from test_run_development_arm import FAKE_CLI, _usage_trace, fake_t_setup  # noqa: E402
+from test_run_development_arm import (  # noqa: E402
+    FAKE_CLI, _usage_trace, _write_pilot_triplet_plan, activation_dossier_fixture,
+    fake_t_setup,
+)
+
+
+@pytest.fixture(name="pilot_activation_dossier")
+def _pilot_activation_dossier(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> tuple[Path, Path, dict[str, object]]:
+    return activation_dossier_fixture.__wrapped__(tmp_path, monkeypatch)
 
 
 def _record(path: Path) -> dict[str, Any]:
@@ -163,6 +173,138 @@ def test_complete_observation_checks_bytes_and_keeps_claims_local(
     assert "private-thread-id" not in result.stdout
     assert "private report body" not in result.stdout
     assert not (run_dir / "work" / "generated_code_was_run").exists()
+
+
+def test_observer_rechecks_copied_pilot_plan_dossier_and_run_metadata(
+    tmp_path: Path, pilot_activation_dossier: tuple[Path, Path, dict[str, object]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, dossier_path, _ = pilot_activation_dossier
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    executable = fake_bin / "codex"
+    executable.write_text(FAKE_CLI, encoding="utf-8")
+    executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v1.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="codex", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        pilot_triplet_plan=plan_path, pilot_triplet_plan_sha256=plan_sha,
+        activation_dossier=dossier_path, activation_dossier_sha256=dossier_sha,
+        family_slot="A",
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    # Observation must use the durable copies, even if the original input paths disappear.
+    moved_plan = plan_path.rename(tmp_path / "source-plan-moved.json")
+    dossier_path.rename(tmp_path / "source-dossier-moved.json")
+    observed_result = _invoke(run_dir)
+    assert observed_result.returncode == 0, observed_result.stderr
+    observed = json.loads(observed_result.stdout)
+    binding = observed["pilot_triplet_binding"]
+    assert binding["plan_sha256"] == plan_sha
+    assert binding["activation_dossier_sha256"] == dossier_sha
+    assert binding["cell"] == {"family_slot": "A", "arm": "N"}
+    assert binding["effective_model_and_effort_verified"] is False
+    assert binding["all_dossier_assets_available_locally"] is False
+    assert binding["prelaunch_binding_authenticated"] is False
+    assert observed["prelaunch_binding_authenticated"] is False
+    assert observed["observation_state"] == "recorded_materials_verified_prelaunch_unproven"
+    assert observed["controlled_comparison_eligible"] is False
+    assert observed["criterion_4"] == "not_assessed"
+    assert observed["verified_inputs"]["pilot_triplet_plan.json"] == summary["pilot_triplet_binding"]["plan_record"]
+    assert observed["verified_inputs"]["activation_dossier.json"] == summary["pilot_triplet_binding"]["dossier_record"]
+
+    for key, altered in (("requested_model", "different-model"),
+                         ("requested_effort", "high")):
+        forged = json.loads(json.dumps(summary))
+        forged[key] = altered
+        _write_summary(run_dir, forged)
+        rejected = _invoke(run_dir)
+        assert rejected.returncode == 2
+        assert "pilot triplet local binding differs" in rejected.stderr
+    forged = json.loads(json.dumps(summary))
+    forged["pilot_triplet_binding"]["plan_sha256"] = "0" * 64
+    _write_summary(run_dir, forged)
+    rejected_digest = _invoke(run_dir)
+    assert rejected_digest.returncode == 2
+    assert "pilot triplet plan or dossier digest differs" in rejected_digest.stderr
+    _write_summary(run_dir, summary)
+    copied_plan = run_dir / "pilot_triplet_plan.json"
+    copied_plan.write_bytes(copied_plan.read_bytes() + b"\n")
+    rejected_copy = _invoke(run_dir)
+    assert rejected_copy.returncode == 2
+    assert "pilot triplet plan differs from its recorded bytes" in rejected_copy.stderr
+
+    duplicate = moved_plan.read_text(encoding="utf-8")
+    assert '"schema": 1' in duplicate
+    copied_plan.write_text(
+        duplicate.replace('"schema": 1', '"schema": 1, "schema": 1', 1),
+        encoding="utf-8",
+    )
+    forged = json.loads(json.dumps(summary))
+    forged["pilot_triplet_binding"]["plan_record"] = _record(copied_plan)
+    forged["pilot_triplet_binding"]["plan_sha256"] = _record(copied_plan)["sha256"]
+    _write_summary(run_dir, forged)
+    rejected_duplicate = _invoke(run_dir)
+    assert rejected_duplicate.returncode == 2
+    assert "pilot triplet plan: duplicate JSON key" in rejected_duplicate.stderr
+
+
+def test_posthoc_pilot_binding_is_structurally_flagged_and_never_authenticated(
+    tmp_path: Path, pilot_activation_dossier: tuple[Path, Path, dict[str, object]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, dossier_path, _ = pilot_activation_dossier
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    executable = fake_bin / "codex"
+    executable.write_text(FAKE_CLI, encoding="utf-8")
+    executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin) + os.pathsep + os.environ["PATH"])
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v1.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="codex", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert summary["pilot_mode"] == "generic_exploratory"
+    assert summary["pilot_triplet_binding"] is None
+
+    # An actor with write access to the run can add self-consistent local files
+    # after the fake CLI completed; hashes alone cannot establish chronology.
+    copied_plan = run_dir / "pilot_triplet_plan.json"
+    copied_dossier = run_dir / "activation_dossier.json"
+    copied_plan.write_bytes(plan_path.read_bytes())
+    copied_dossier.write_bytes(dossier_path.read_bytes())
+    binding = {
+        "schema": 1, "scope": "local_requested_configuration_only",
+        "plan_sha256": plan_sha, "activation_dossier_sha256": dossier_sha,
+        "plan_record": _record(copied_plan), "dossier_record": _record(copied_dossier),
+        "cell": {"family_slot": "A", "arm": "N"},
+        "declared_model_version": "declared-test-version",
+        "other_model_parameters": {},
+    }
+    summary["pilot_triplet_binding"] = binding
+    _write_summary(run_dir, summary)
+    inconsistent = _invoke(run_dir)
+    assert inconsistent.returncode == 2
+    assert "pilot mode and triplet binding are inconsistent" in inconsistent.stderr
+
+    summary["pilot_mode"] = "explicit_triplet"
+    _write_summary(run_dir, summary)
+    result = _invoke(run_dir)
+    assert result.returncode == 0, result.stderr
+    observed = json.loads(result.stdout)
+    assert observed["pilot_triplet_binding"]["plan_sha256"] == plan_sha
+    assert observed["prelaunch_binding_authenticated"] is False
+    assert observed["pilot_triplet_binding"]["prelaunch_binding_authenticated"] is False
+    assert observed["observation_state"] == "recorded_materials_verified_prelaunch_unproven"
+    assert observed["controlled_comparison_eligible"] is False
 
 
 @pytest.mark.parametrize("provider", ["agy", "codex"])

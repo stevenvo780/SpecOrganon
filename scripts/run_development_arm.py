@@ -46,6 +46,15 @@ DOSSIER_KEYS = frozenset({
     "next_reviewable_gate", "provider_requests_made_for_this_dossier",
     "spend_authorized_usd", "criterion_4",
 })
+PILOT_PLAN_KEYS = frozenset({
+    "schema", "classification", "status", "activation_dossier_sha256",
+    "family_slots", "planned_cells", "limitations",
+})
+PILOT_SLOT_KEYS = frozenset({
+    "provider_cli", "requested_model", "requested_effort", "model_version",
+    "other_model_parameters",
+})
+PILOT_CELLS = {(slot, arm) for slot in ("A", "B") for arm in ("N", "S", "T")}
 USAGE_FIELDS = {
     "codex": ("input_tokens", "cached_input_tokens", "cache_write_input_tokens",
               "output_tokens", "reasoning_output_tokens"),
@@ -1128,7 +1137,8 @@ def _prepare_packet(work: Path) -> dict[str, dict[str, Any]]:
 
 
 def _setup_toolkit(work: Path, run_dir: Path, wheel: Path | None, timeout_seconds: int,
-                   env: dict[str, str]) -> dict[str, Any]:
+                   env: dict[str, str], *, expected_wheel_sha256: str | None = None,
+                   ) -> dict[str, Any]:
     if wheel is None or not _regular_file(wheel) or wheel.suffix != ".whl":
         raise RunError("T requires --toolkit-wheel pointing to a regular .whl file")
     uv = shutil.which("uv")
@@ -1136,13 +1146,18 @@ def _setup_toolkit(work: Path, run_dir: Path, wheel: Path | None, timeout_second
         raise RunError("T requires uv for offline installation with dependencies")
     copied = work / wheel.name
     shutil.copyfile(wheel, copied)
+    copied_record = _file_record(copied)
+    if expected_wheel_sha256 is not None and (
+        copied_record is None or copied_record["sha256"] != expected_wheel_sha256
+    ):
+        raise RunError("T copied wheel differs from the activation dossier before toolkit install")
     venv = work / ".venv"
     commands = [
         ("toolkit_venv", [sys.executable, "-m", "venv", str(venv)]),
         ("toolkit_install", [uv, "pip", "install", "--offline", "--python", str(venv / "bin/python"),
                              str(copied)]),
     ]
-    result: dict[str, Any] = {"wheel": _file_record(copied), "steps": {}}
+    result: dict[str, Any] = {"wheel": copied_record, "steps": {}}
     for name, argv in commands:
         step = _capture(argv, cwd=work, timeout_seconds=timeout_seconds,
                         stdout_path=run_dir / f"{name}.stdout",
@@ -1399,6 +1414,116 @@ def _activation_dossier_assets(
     return assets
 
 
+def _unique_pilot_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise RunError(f"pilot triplet plan has a duplicate JSON key: {key}")
+        result[key] = value
+    return result
+
+
+def _validate_pilot_triplet_plan(
+    plan: Any, dossier_sha256: str, family_slot: str, arm: str,
+    provider: str, model: str, effort: str,
+) -> dict[str, Any]:
+    """Bind local requested CLI arguments to one six-cell, unsealed plan."""
+    if type(plan) is not dict or set(plan) != PILOT_PLAN_KEYS or type(plan.get("schema")) is not int \
+            or plan["schema"] != 1 or plan["classification"] != "offline_exploratory_triplet_plan_unsealed":
+        raise RunError("pilot triplet plan has an unexpected schema")
+    if plan["status"] != "configuration_declared_not_authorization":
+        raise RunError("pilot triplet plan is a NO-GO template or has an invalid status")
+    if plan["activation_dossier_sha256"] != dossier_sha256:
+        raise RunError("pilot triplet plan does not link the exact activation dossier SHA-256")
+    limitations = plan["limitations"]
+    if type(limitations) is not list or not limitations or any(
+        type(item) is not str or not item.strip() for item in limitations
+    ):
+        raise RunError("pilot triplet plan has invalid limitations")
+    cells = plan["planned_cells"]
+    if type(cells) is not list or len(cells) != 6 or any(
+        type(cell) is not dict or set(cell) != {"family_slot", "arm"}
+        or type(cell["family_slot"]) is not str or type(cell["arm"]) is not str
+        for cell in cells
+    ) or {(cell["family_slot"], cell["arm"]) for cell in cells} != PILOT_CELLS:
+        raise RunError("pilot triplet plan must contain exactly the six A/B N/S/T cells")
+    slots = plan["family_slots"]
+    if type(slots) is not dict or set(slots) != {"A", "B"}:
+        raise RunError("pilot triplet plan must declare family slots A and B")
+    for slot, declaration in slots.items():
+        if type(declaration) is not dict or set(declaration) != PILOT_SLOT_KEYS:
+            raise RunError(f"pilot triplet plan has incomplete slot {slot}")
+        p, m, e = (declaration[key] for key in (
+            "provider_cli", "requested_model", "requested_effort"
+        ))
+        if any(type(value) is not str for value in (p, m, e)):
+            raise RunError(f"pilot triplet plan has an unbound slot {slot}")
+        try:
+            _validate_arm_request("N", p, m, e, 1, 1, 1, False)
+        except RunError as exc:
+            raise RunError(f"pilot triplet plan has invalid slot {slot}: {exc}") from exc
+        version = declaration["model_version"]
+        if type(version) is not str or not version.strip():
+            raise RunError(f"pilot triplet plan has invalid declared model version in slot {slot}")
+        # The runner exposes no extra model-parameter switches. Accepting values
+        # here would claim that the runner applied settings which it cannot apply.
+        if declaration["other_model_parameters"] != {}:
+            raise RunError(f"pilot triplet plan cannot enforce other model parameters in slot {slot}")
+    if tuple(slots["A"][key] for key in ("provider_cli", "requested_model")) == tuple(
+        slots["B"][key] for key in ("provider_cli", "requested_model")
+    ):
+        raise RunError("pilot triplet family slots must declare different requested model routes")
+    if family_slot not in slots or (family_slot, arm) not in PILOT_CELLS:
+        raise RunError("pilot triplet plan does not contain the requested cell")
+    selected = slots[family_slot]
+    if (provider, model, effort) != tuple(selected[key] for key in (
+        "provider_cli", "requested_model", "requested_effort"
+    )):
+        raise RunError("pilot triplet plan cell differs from requested CLI/model/effort")
+    return selected
+
+
+def _pilot_triplet_preflight(
+    plan_path: Path, plan_sha256: str, dossier_path: Path, dossier_sha256: str,
+    family_slot: str, arm: str, provider: str, model: str, effort: str,
+    toolkit_wheel: Path | None, agy_no_command_tool: bool,
+) -> tuple[bytes, bytes, dict[str, str], dict[str, Any]]:
+    """Complete the local SHA and cell checks before a run directory exists."""
+    if type(plan_sha256) is not str or re.fullmatch(r"[0-9a-f]{64}", plan_sha256) is None:
+        raise RunError("--pilot-triplet-plan-sha256 must be a lowercase SHA-256 digest")
+    if agy_no_command_tool:
+        raise RunError("pilot triplet mode requires the same default tool policy for N/S/T")
+    assets = _activation_dossier_assets(dossier_path, dossier_sha256, family_slot, arm)
+    if not _regular_file(plan_path):
+        raise RunError("pilot triplet plan must be a regular file")
+    plan_raw = plan_path.read_bytes()
+    if hashlib.sha256(plan_raw).hexdigest() != plan_sha256:
+        raise RunError("pilot triplet plan SHA-256 differs from the requested digest")
+    if len(plan_raw) > 1024 * 1024:
+        raise RunError("pilot triplet plan exceeds the size limit")
+    try:
+        plan = json.loads(plan_raw.decode("utf-8"), object_pairs_hook=_unique_pilot_json_pairs)
+    except RunError:
+        raise
+    except (UnicodeError, ValueError, RecursionError) as exc:
+        raise RunError("pilot triplet plan is not valid unique-key UTF-8 JSON") from exc
+    selected = _validate_pilot_triplet_plan(
+        plan, dossier_sha256, family_slot, arm, provider, model, effort,
+    )
+    if arm == "T":
+        pinned_wheel = _dossier_asset_path("dist/specorganon-0.1.0-py3-none-any.whl")
+        if toolkit_wheel is None or toolkit_wheel.expanduser().resolve() != pinned_wheel:
+            raise RunError("T toolkit wheel path differs from the activation dossier asset")
+    elif toolkit_wheel is not None:
+        raise RunError("N/S pilot triplet runs do not accept --toolkit-wheel")
+    if not _regular_file(dossier_path):
+        raise RunError("activation dossier changed during pilot preflight")
+    dossier_raw = dossier_path.read_bytes()
+    if hashlib.sha256(dossier_raw).hexdigest() != dossier_sha256:
+        raise RunError("activation dossier changed during pilot preflight")
+    return plan_raw, dossier_raw, assets, selected
+
+
 def prepare_development_arm(
     *, arm: str, provider: str, model: str, effort: str, output_root: Path,
     timeout_seconds: int = 600, replay_timeout_seconds: int = 90,
@@ -1526,11 +1651,32 @@ def run_development_arm(
     timeout_seconds: int = 600, replay_timeout_seconds: int = 90,
     setup_timeout_seconds: int = 180, toolkit_wheel: Path | None = None,
     agy_no_command_tool: bool = False,
+    pilot_triplet_plan: Path | None = None, pilot_triplet_plan_sha256: str | None = None,
+    activation_dossier: Path | None = None, activation_dossier_sha256: str | None = None,
+    family_slot: str | None = None,
 ) -> tuple[Path, dict[str, Any]]:
-    """Execute exactly one arm and return its private run path and sanitized summary."""
+    """Execute one exposed arm; a pilot plan binds requested local configuration only."""
     _validate_arm_request(arm, provider, model, effort, timeout_seconds,
                           replay_timeout_seconds, setup_timeout_seconds,
                           agy_no_command_tool)
+    pilot_options = (pilot_triplet_plan, pilot_triplet_plan_sha256, activation_dossier,
+                     activation_dossier_sha256, family_slot)
+    if any(option is not None for option in pilot_options) and not all(
+        option is not None for option in pilot_options
+    ):
+        raise RunError("pilot triplet mode requires plan, plan SHA-256, dossier, dossier SHA-256 and family slot")
+    pilot_preflight: tuple[bytes, bytes, dict[str, str], dict[str, Any]] | None = None
+    if pilot_triplet_plan is not None:
+        assert pilot_triplet_plan_sha256 is not None and activation_dossier is not None
+        assert activation_dossier_sha256 is not None and family_slot is not None
+        pilot_triplet_plan = pilot_triplet_plan.expanduser()
+        activation_dossier = activation_dossier.expanduser()
+        pilot_preflight = _pilot_triplet_preflight(
+            pilot_triplet_plan, pilot_triplet_plan_sha256,
+            activation_dossier, activation_dossier_sha256,
+            family_slot, arm, provider, model, effort, toolkit_wheel,
+            agy_no_command_tool,
+        )
     executable = shutil.which(provider)
     if executable is None:
         raise RunError(f"{provider} executable is unavailable")
@@ -1545,6 +1691,23 @@ def run_development_arm(
     previous_umask = os.umask(0o077)
     try:
         run_dir = _private_run_dir(output_root)
+        pilot_binding: dict[str, Any] | None = None
+        if pilot_preflight is not None:
+            assert pilot_triplet_plan_sha256 is not None and activation_dossier_sha256 is not None
+            assert family_slot is not None
+            plan_raw, dossier_raw, _, selected = pilot_preflight
+            (run_dir / "pilot_triplet_plan.json").write_bytes(plan_raw)
+            (run_dir / "activation_dossier.json").write_bytes(dossier_raw)
+            pilot_binding = {
+                "schema": 1, "scope": "local_requested_configuration_only",
+                "plan_sha256": pilot_triplet_plan_sha256,
+                "activation_dossier_sha256": activation_dossier_sha256,
+                "plan_record": _file_record(run_dir / "pilot_triplet_plan.json"),
+                "dossier_record": _file_record(run_dir / "activation_dossier.json"),
+                "cell": {"family_slot": family_slot, "arm": arm},
+                "declared_model_version": selected["model_version"],
+                "other_model_parameters": selected["other_model_parameters"],
+            }
         work = run_dir / "work"
         work.mkdir(mode=0o700)
         packet = _prepare_packet(work)
@@ -1563,18 +1726,29 @@ def run_development_arm(
             "t_process_trace": None,
             "execution_status": "preparing",
             "controlled_comparison_eligible": False,
+            "pilot_mode": "explicit_triplet" if pilot_binding is not None else "generic_exploratory",
+            "pilot_triplet_binding": pilot_binding,
             "limitations": ["development case and prompts are exposed; no sealed assignment",
                             "local CLI telemetry is not an authenticated provider receipt",
                             "no OS file-access isolation or global tool/token budget is proven",
                             "generated analysis replay requires a later hash-bound opt-in; default replay is not filesystem/network isolated"],
             "provider_request_id": None, "price": None, "cost": None,
         }
+        if pilot_binding is not None:
+            summary["limitations"].append(
+                "pilot plan binds requested CLI/model/effort and local input bytes only; external human authorization, provider defaults, effective model/version/effort, provider identity, budget caps and cost are unverified")
+        else:
+            summary["limitations"].append(
+                "exploratory live run has no cross-arm pilot triplet plan binding")
         _write_json(run_dir / "run.json", summary)
         if arm == "T":
             summary["limitations"].append(
                 "T toolkit fingerprint covers only the Organon entrypoint and package Python sources, not dependencies")
             summary["limitations"].append(
                 "T process trace records local executable launches and case ledger replacement activity only; same-UID code can alter it, and it cannot authenticate model identity or prove final ledger bytes came from those writes")
+            if pilot_binding is not None:
+                summary["limitations"].append(
+                    "T wheel copy is checked before installation and after setup; same-UID mutation during installation is not excluded without stronger custody or isolation")
         if agy_no_command_tool:
             summary["limitations"].append(
                 "No-command Agy pilot checks reported tool steps only; it does not enforce a provider or OS prohibition or detect unreported calls, and is not comparable with T CLI execution")
@@ -1585,9 +1759,42 @@ def run_development_arm(
             # The prompt hashes describe the bytes actually delivered to the model.
             # Copies must match them before any CLI or toolkit preparation starts.
             _copy_prompt_inputs(arm, work, prompt_hashes)
+            if pilot_preflight is not None:
+                assert pilot_triplet_plan is not None and activation_dossier is not None
+                assert pilot_triplet_plan_sha256 is not None and activation_dossier_sha256 is not None
+                plan_raw, dossier_raw, assets, _ = pilot_preflight
+                if (not _regular_file(pilot_triplet_plan)
+                        or _sha256(pilot_triplet_plan) != pilot_triplet_plan_sha256
+                        or not _regular_file(activation_dossier)
+                        or _sha256(activation_dossier) != activation_dossier_sha256
+                        or (run_dir / "pilot_triplet_plan.json").read_bytes() != plan_raw
+                        or (run_dir / "activation_dossier.json").read_bytes() != dossier_raw):
+                    raise RunError("pilot triplet plan or dossier changed before launch")
+                _assert_dossier_assets(assets)
+                copied = {
+                    **{f"cases/building_energy/{name}": work / name for name in PUBLIC_FILES},
+                    "experiments/development/energy_pilot/common.md": work / "common.md",
+                    f"experiments/development/energy_pilot/arm_{arm.lower()}.md": work / "arm.md",
+                }
+                if any(_sha256(path) != assets[relative] for relative, path in copied.items()):
+                    raise RunError("pilot triplet copied inputs differ from the activation dossier")
             if arm == "T":
                 summary["toolkit"] = _setup_toolkit(work, run_dir, toolkit_wheel,
-                                                    setup_timeout_seconds, env)
+                                                    setup_timeout_seconds, env,
+                                                    expected_wheel_sha256=(
+                                                        pilot_preflight[2]["dist/specorganon-0.1.0-py3-none-any.whl"]
+                                                        if pilot_preflight is not None else None
+                                                    ))
+                if pilot_preflight is not None:
+                    assert toolkit_wheel is not None
+                    copied_record = _file_record(work / toolkit_wheel.name)
+                    expected_wheel_sha = pilot_preflight[2][
+                        "dist/specorganon-0.1.0-py3-none-any.whl"
+                    ]
+                    if (copied_record != summary["toolkit"]["wheel"]
+                            or copied_record is None
+                            or copied_record["sha256"] != expected_wheel_sha):
+                        raise RunError("T copied wheel changed after toolkit setup before provider launch")
                 _write_json(run_dir / "run.json", summary)
             argv, stdin_text, summary["cli_mode"] = _provider_invocation(
                 provider, executable, model, effort, timeout_seconds, work, prompt,
@@ -1684,6 +1891,39 @@ def _material_mismatches(run_dir: Path, summary: dict[str, Any]) -> list[str]:
     ):
         if not _regular_file(path) or _sha256(path) != expected:
             mismatches.append(path.name)
+    binding = summary.get("pilot_triplet_binding")
+    pilot_mode = summary.get("pilot_mode", "generic_exploratory")
+    if type(pilot_mode) is not str or pilot_mode not in {"generic_exploratory", "explicit_triplet"} or (
+        (pilot_mode == "explicit_triplet") != (binding is not None)
+    ):
+        mismatches.append("pilot_triplet_binding")
+    if binding is not None:
+        try:
+            if type(binding) is not dict:
+                raise RunError("invalid pilot binding")
+            plan_path = run_dir / "pilot_triplet_plan.json"
+            dossier_path = run_dir / "activation_dossier.json"
+            if (_file_record(plan_path) != binding.get("plan_record")
+                    or _file_record(dossier_path) != binding.get("dossier_record")
+                    or binding["plan_record"]["sha256"] != binding["plan_sha256"]
+                    or binding["dossier_record"]["sha256"] != binding["activation_dossier_sha256"]):
+                raise RunError("pilot copy digest differs")
+            plan = json.loads(plan_path.read_text(encoding="utf-8"),
+                              object_pairs_hook=_unique_pilot_json_pairs)
+            cell = binding["cell"]
+            selected = _validate_pilot_triplet_plan(
+                plan, binding["activation_dossier_sha256"], cell["family_slot"],
+                summary["arm"], summary["provider_cli"], summary["requested_model"],
+                summary["requested_effort"],
+            )
+            if (cell["arm"] != summary["arm"]
+                    or selected["model_version"] != binding["declared_model_version"]
+                    or selected["other_model_parameters"] != binding["other_model_parameters"]):
+                raise RunError("pilot cell differs")
+        except (KeyError, OSError, TypeError, UnicodeError, ValueError):
+            mismatches.append("pilot_triplet_binding")
+    elif (run_dir / "pilot_triplet_plan.json").exists() or (run_dir / "activation_dossier.json").exists():
+        mismatches.append("pilot_triplet_binding")
     cli = summary.get("cli", {})
     for name, key in (("cli.stdout.jsonl", "stdout"), ("cli.stderr", "stderr")):
         if _file_record(run_dir / name) != cli.get(key):
@@ -1846,11 +2086,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--prepare-only", action="store_true",
                         help="copy and pin public inputs and planned argv offline; no provider or toolkit call")
     parser.add_argument("--activation-dossier", type=Path,
-                        help="with --prepare-only, enforce the version-one offline activation dossier")
+                        help="with --prepare-only or explicit pilot triplet mode, pin the version-one offline dossier; this does not authorize a provider call")
     parser.add_argument("--activation-dossier-sha256",
                         help="expected SHA-256 of the exact activation dossier bytes")
     parser.add_argument("--family-slot", choices=("A", "B"),
                         help="planned family slot in the activation dossier")
+    parser.add_argument("--pilot-triplet-plan", type=Path,
+                        help="explicit live pilot mode: bind local CLI/model/effort to a separately reviewed plan; authorization is external")
+    parser.add_argument("--pilot-triplet-plan-sha256",
+                        help="expected SHA-256 of the exact pilot triplet plan bytes")
     parser.add_argument("--timeout-seconds", type=int, default=600)
     parser.add_argument("--replay-timeout-seconds", type=int, default=90)
     parser.add_argument("--setup-timeout-seconds", type=int, default=180)
@@ -1867,7 +2111,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         dossier_options = (args.activation_dossier, args.activation_dossier_sha256, args.family_slot)
-        if any(option is not None for option in dossier_options) and not args.prepare_only:
+        plan_options = (args.pilot_triplet_plan, args.pilot_triplet_plan_sha256)
+        if args.prepare_only and any(option is not None for option in plan_options):
+            raise RunError("pilot triplet plan options require a live run")
+        if any(option is not None for option in dossier_options) and not (
+            args.prepare_only or any(option is not None for option in plan_options)
+        ):
             raise RunError("activation dossier options require --prepare-only")
         if args.replay_run_dir is not None:
             if args.prepare_only:
@@ -1875,7 +2124,9 @@ def main(argv: list[str] | None = None) -> int:
             if not args.expected_analysis_sha256:
                 raise RunError("replay requires --expected-analysis-sha256")
             if any(value is not None for value in
-                   (args.arm, args.provider, args.model, args.effort, args.output_root, args.toolkit_wheel)) \
+                   (args.arm, args.provider, args.model, args.effort, args.output_root,
+                    args.toolkit_wheel, args.activation_dossier, args.activation_dossier_sha256,
+                    args.family_slot, args.pilot_triplet_plan, args.pilot_triplet_plan_sha256)) \
                     or args.agy_no_command_tool:
                 raise RunError("replay accepts only run directory and reviewed analysis digest")
             run_dir = args.replay_run_dir
@@ -1894,7 +2145,13 @@ def main(argv: list[str] | None = None) -> int:
                 "activation_dossier": args.activation_dossier,
                 "activation_dossier_sha256": args.activation_dossier_sha256,
                 "family_slot": args.family_slot,
-            } if args.prepare_only else {})
+            } if args.prepare_only else {
+                "pilot_triplet_plan": args.pilot_triplet_plan,
+                "pilot_triplet_plan_sha256": args.pilot_triplet_plan_sha256,
+                "activation_dossier": args.activation_dossier,
+                "activation_dossier_sha256": args.activation_dossier_sha256,
+                "family_slot": args.family_slot,
+            })
             run_dir, summary = operation(
                 arm=args.arm, provider=args.provider, model=args.model, effort=args.effort,
                 output_root=args.output_root, timeout_seconds=args.timeout_seconds,

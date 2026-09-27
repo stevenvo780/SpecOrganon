@@ -278,6 +278,29 @@ def _write_activation_dossier(path: Path, data: dict[str, object]) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _write_pilot_triplet_plan(path: Path, dossier_sha256: str) -> str:
+    plan = {
+        "schema": 1,
+        "classification": "offline_exploratory_triplet_plan_unsealed",
+        "status": "configuration_declared_not_authorization",
+        "activation_dossier_sha256": dossier_sha256,
+        "family_slots": {
+            "A": {"provider_cli": "codex", "requested_model": "test-model",
+                  "requested_effort": "medium", "model_version": "declared-test-version",
+                  "other_model_parameters": {}},
+            "B": {"provider_cli": "agy", "requested_model": "test-model-b",
+                  "requested_effort": "high", "model_version": "declared-test-version-b",
+                  "other_model_parameters": {}},
+        },
+        "planned_cells": [
+            {"family_slot": slot, "arm": arm}
+            for slot in ("A", "B") for arm in ("N", "S", "T")
+        ],
+        "limitations": ["Synthetic requested configuration only; no provider authorization."],
+    }
+    return _write_activation_dossier(path, plan)
+
+
 @pytest.fixture
 def activation_dossier_fixture(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
@@ -305,12 +328,14 @@ def activation_dossier_fixture(
 
 def fake_t_setup(
     work: Path, run_dir: Path, wheel: Path | None, _timeout_seconds: int,
-    _env: dict[str, str],
+    _env: dict[str, str], *, expected_wheel_sha256: str | None = None,
 ) -> dict[str, object]:
     """Provide verifiable local T fixture files, without installing a wheel."""
     assert wheel is not None
     copied = work / wheel.name
     copied.write_bytes(wheel.read_bytes())
+    if expected_wheel_sha256 is not None:
+        assert runner._sha256(copied) == expected_wheel_sha256
     executable = work / ".venv" / "bin" / "organon"
     executable.parent.mkdir(parents=True)
     executable.write_text(
@@ -827,6 +852,274 @@ def test_strict_dossier_cli_options_require_prepare_only(
     assert result.returncode == 2
     assert "activation dossier options require --prepare-only" in result.stderr
     assert not (tmp_path / "runs").exists()
+
+
+def test_unbound_pilot_template_is_no_go_before_run_directory(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    fake_clis: Path,
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    template = SCRIPTS.parent / "experiments/development/energy_pilot/pilot_triplet_plan_template_v1.json"
+    with pytest.raises(RunError, match="NO-GO template"):
+        run_development_arm(
+            arm="N", provider="codex", model="test-model", effort="medium",
+            output_root=tmp_path / "runs", pilot_triplet_plan=template,
+            pilot_triplet_plan_sha256=runner._sha256(template),
+            activation_dossier=dossier_path,
+            activation_dossier_sha256=runner._sha256(dossier_path), family_slot="A",
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+@pytest.mark.parametrize("arm", ["N", "S"])
+def test_pilot_triplet_a_inherits_exact_requested_tuple_and_copies_plan(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    fake_clis: Path, arm: str,
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v1.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+    run_dir, summary = run_development_arm(
+        arm=arm, provider="codex", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        pilot_triplet_plan=plan_path, pilot_triplet_plan_sha256=plan_sha,
+        activation_dossier=dossier_path, activation_dossier_sha256=dossier_sha,
+        family_slot="A",
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    assert summary["controlled_comparison_eligible"] is False
+    assert summary["classification"] == "exposed_development_unsealed"
+    binding = summary["pilot_triplet_binding"]
+    assert binding["plan_sha256"] == plan_sha
+    assert binding["activation_dossier_sha256"] == dossier_sha
+    assert binding["cell"] == {"family_slot": "A", "arm": arm}
+    assert binding["declared_model_version"] == "declared-test-version"
+    assert (run_dir / "pilot_triplet_plan.json").read_bytes() == plan_path.read_bytes()
+    assert (run_dir / "activation_dossier.json").read_bytes() == dossier_path.read_bytes()
+    assert (run_dir / "work/fake_argv.json").exists()
+
+
+def test_one_pilot_plan_digest_binds_all_six_fake_cli_cells(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, dossier_path, _ = activation_dossier_fixture
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v1.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+    monkeypatch.setattr(runner, "_setup_toolkit", fake_t_setup)
+    matrix = {
+        "A": ("codex", "test-model", "medium"),
+        "B": ("agy", "test-model-b", "high"),
+    }
+    seen: set[tuple[str, str]] = set()
+    for slot, (provider, model, effort) in matrix.items():
+        for arm in ("N", "S", "T"):
+            run_dir, summary = run_development_arm(
+                arm=arm, provider=provider, model=model, effort=effort,
+                output_root=tmp_path / "runs", timeout_seconds=10,
+                toolkit_wheel=(root / "dist/specorganon-0.1.0-py3-none-any.whl"
+                               if arm == "T" else None),
+                pilot_triplet_plan=plan_path, pilot_triplet_plan_sha256=plan_sha,
+                activation_dossier=dossier_path, activation_dossier_sha256=dossier_sha,
+                family_slot=slot,
+            )
+            seen.add((slot, arm))
+            assert summary["execution_status"] != "preflight_failure"
+            assert summary["pilot_triplet_binding"]["plan_sha256"] == plan_sha
+            assert summary["pilot_triplet_binding"]["cell"] == {
+                "family_slot": slot, "arm": arm,
+            }
+            assert (summary["provider_cli"], summary["requested_model"],
+                    summary["requested_effort"]) == matrix[slot]
+            argv = json.loads((run_dir / "work/fake_argv.json").read_text(encoding="utf-8"))
+            if provider == "codex":
+                assert argv[argv.index("-m") + 1] == model
+                assert f'model_reasoning_effort="{effort}"' in argv
+            else:
+                assert argv[argv.index("--model") + 1] == model
+                assert argv[argv.index("--effort") + 1] == effort
+            assert summary["controlled_comparison_eligible"] is False
+    assert seen == runner.PILOT_CELLS
+
+
+def test_explicit_pilot_cli_parses_plan_and_keeps_run_unsealed(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    fake_clis: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v1.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+    assert runner.main([
+        "--arm", "N", "--provider", "codex", "--model", "test-model",
+        "--effort", "medium", "--output-root", str(tmp_path / "runs"),
+        "--pilot-triplet-plan", str(plan_path),
+        "--pilot-triplet-plan-sha256", plan_sha,
+        "--activation-dossier", str(dossier_path),
+        "--activation-dossier-sha256", dossier_sha,
+        "--family-slot", "A", "--timeout-seconds", "10",
+    ]) == 0
+    response = json.loads(capsys.readouterr().out)
+    summary = json.loads((Path(response["run_dir"]) / "run.json").read_text(encoding="utf-8"))
+    assert summary["pilot_triplet_binding"]["plan_sha256"] == plan_sha
+    assert summary["controlled_comparison_eligible"] is False
+
+
+@pytest.mark.parametrize("changed", [
+    {"model": "different-model", "effort": "medium"},
+    {"model": "test-model", "effort": "high"},
+])
+def test_pilot_triplet_a_s_rejects_model_or_effort_change_before_cli(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    fake_clis: Path, changed: dict[str, str], monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v1.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("a mismatched pilot started a CLI or toolkit subprocess")
+
+    monkeypatch.setattr(runner, "_capture", forbidden)
+    monkeypatch.setattr(runner, "_setup_toolkit", forbidden)
+    with pytest.raises(RunError, match="cell differs from requested CLI/model/effort"):
+        run_development_arm(
+            arm="S", provider="codex", model=changed["model"], effort=changed["effort"],
+            output_root=tmp_path / "runs", timeout_seconds=10,
+            pilot_triplet_plan=plan_path, pilot_triplet_plan_sha256=plan_sha,
+            activation_dossier=dossier_path, activation_dossier_sha256=dossier_sha,
+            family_slot="A",
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+def test_pilot_triplet_rejects_dossier_asset_mutation_before_run_directory(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    fake_clis: Path,
+) -> None:
+    root, dossier_path, _ = activation_dossier_fixture
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v1.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+    rubric = root / "experiments/development/energy_pilot/rubric.md"
+    rubric.write_bytes(rubric.read_bytes() + b"\nchanged\n")
+    with pytest.raises(RunError, match="activation dossier asset hash differs"):
+        run_development_arm(
+            arm="N", provider="codex", model="test-model", effort="medium",
+            output_root=tmp_path / "runs", pilot_triplet_plan=plan_path,
+            pilot_triplet_plan_sha256=plan_sha, activation_dossier=dossier_path,
+            activation_dossier_sha256=dossier_sha, family_slot="A",
+        )
+    assert not (tmp_path / "runs").exists()
+
+
+def test_pilot_replay_rejects_changed_binding_before_generated_code_runs(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, dossier_path, _ = activation_dossier_fixture
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v1.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="codex", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        pilot_triplet_plan=plan_path, pilot_triplet_plan_sha256=plan_sha,
+        activation_dossier=dossier_path, activation_dossier_sha256=dossier_sha,
+        family_slot="A",
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+    summary["pilot_triplet_binding"]["plan_sha256"] = "0" * 64
+    runner._write_json(run_dir / "run.json", summary)
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("replay executed generated code after pilot binding changed")
+
+    monkeypatch.setattr(runner, "_capture", forbidden)
+    with pytest.raises(RunError, match="pilot_triplet_binding changed after the model run"):
+        replay_run_dir(run_dir, summary["artifacts"]["analysis.py"]["sha256"])
+    assert not (run_dir / "analysis_replay.stdout").exists()
+
+
+def test_pilot_t_rejects_wheel_swapped_during_copy_before_any_subprocess(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, dossier_path, _ = activation_dossier_fixture
+    wheel = root / "dist/specorganon-0.1.0-py3-none-any.whl"
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v1.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+    original_copy = runner.shutil.copyfile
+    swapped = False
+
+    def swap_at_wheel_copy(src: object, dst: object, *args: object, **kwargs: object) -> object:
+        nonlocal swapped
+        if Path(src) == wheel and Path(dst).parent.name == "work":
+            wheel.write_bytes(b"substituted wheel bytes\n")
+            swapped = True
+        return original_copy(src, dst, *args, **kwargs)
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("a toolkit or provider subprocess was invoked after wheel substitution")
+
+    monkeypatch.setattr(runner.shutil, "copyfile", swap_at_wheel_copy)
+    monkeypatch.setattr(runner, "_capture", forbidden)
+    run_dir, summary = run_development_arm(
+        arm="T", provider="codex", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        toolkit_wheel=wheel, pilot_triplet_plan=plan_path,
+        pilot_triplet_plan_sha256=plan_sha, activation_dossier=dossier_path,
+        activation_dossier_sha256=dossier_sha, family_slot="A",
+    )
+    assert swapped is True
+    assert summary["execution_status"] == "preflight_failure"
+    assert "T copied wheel differs from the activation dossier" in summary["preflight_error"]
+    assert not (run_dir / "work/fake_argv.json").exists()
+    assert not (run_dir / "toolkit_venv.stdout").exists()
+    assert not (run_dir / "cli.stdout.jsonl").exists()
+
+
+def test_pilot_t_rechecks_copied_wheel_after_setup_before_provider_cli(
+    tmp_path: Path, activation_dossier_fixture: tuple[Path, Path, dict[str, object]],
+    fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, dossier_path, _ = activation_dossier_fixture
+    wheel = root / "dist/specorganon-0.1.0-py3-none-any.whl"
+    dossier_sha = runner._sha256(dossier_path)
+    plan_path = tmp_path / "triplet-plan-v1.json"
+    plan_sha = _write_pilot_triplet_plan(plan_path, dossier_sha)
+
+    def mutate_after_fake_setup(
+        work: Path, run_dir: Path, source: Path | None, timeout_seconds: int,
+        env: dict[str, str], *, expected_wheel_sha256: str | None = None,
+    ) -> dict[str, object]:
+        result = fake_t_setup(
+            work, run_dir, source, timeout_seconds, env,
+            expected_wheel_sha256=expected_wheel_sha256,
+        )
+        (work / wheel.name).write_bytes(b"changed after setup\n")
+        return result
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("provider CLI was invoked after T wheel changed")
+
+    monkeypatch.setattr(runner, "_setup_toolkit", mutate_after_fake_setup)
+    monkeypatch.setattr(runner, "_capture", forbidden)
+    run_dir, summary = run_development_arm(
+        arm="T", provider="codex", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+        toolkit_wheel=wheel, pilot_triplet_plan=plan_path,
+        pilot_triplet_plan_sha256=plan_sha, activation_dossier=dossier_path,
+        activation_dossier_sha256=dossier_sha, family_slot="A",
+    )
+    assert summary["execution_status"] == "preflight_failure"
+    assert "T copied wheel changed after toolkit setup" in summary["preflight_error"]
+    assert not (run_dir / "work/fake_argv.json").exists()
+    assert not (run_dir / "cli.stdout.jsonl").exists()
 
 
 def _usage_trace(

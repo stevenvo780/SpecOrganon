@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "classification": "development_synthetic_local_pilot_triplet_binding",
+  "date_utc": "2026-09-27",
+  "baseline_head": "bd5ea34",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "frozen_activation_dossier_sha256": "bdc7aeb95d21e33356d5eea7c14753444fbfb72ef656bad73f63ba825481e095",
+  "file_sha256": {
+    "scripts/run_development_arm.py": "02efd31f5ec4c3b7c6f7f775cc7ea9ef5219991d4a777750f3341566a83068b8",
+    "scripts/observe_development_run.py": "118709fcb97fa0796929a74e318f7faee8157f79e4d80dccb3e1f69f50e35955",
+    "experiments/development/energy_pilot/pilot_triplet_plan_template_v1.json": "9e043205553576090d3526d783be97b70328b197cc985b163f615e6dbcd28160",
+    "tests/test_run_development_arm.py": "5a483c6e8fb35e4064690f682467c54a69448f741bb45ee465bdda0d3bce8a9a",
+    "tests/test_observe_development_run.py": "ff7fff8288430bad96caab08fe2287f73d5c0a76d885cda6cdb4b9fcbd5c764f"
+  },
+  "gates": {
+    "focused_command": "uv run pytest -q tests/test_run_development_arm.py tests/test_observe_development_run.py",
+    "focused_result": "240 passed",
+    "global_command": "uv run pytest -q",
+    "global_result": "1847 passed",
+    "ruff_command": "uv run ruff check .",
+    "ruff_result": "passed",
+    "git_diff_check": "passed"
+  },
+  "synthetic_positive": "Six A/B by N/S/T cells used fake CLIs with one requested CLI/model/effort tuple per family; the runner copied the versioned plan and frozen dossier into each run directory.",
+  "synthetic_negative_controls": [
+    "A/S with a changed requested model or effort is rejected before the run directory or fake CLI.",
+    "A mutated frozen dossier asset is rejected before the run directory.",
+    "A T wheel changed during source-to-work copy fails before toolkit installation or fake provider CLI.",
+    "A T wheel changed after local setup fails before the fake provider CLI.",
+    "A copied plan with duplicate JSON keys or forged local digest is rejected by the observer.",
+    "A posthoc pilot binding added to a generic run is rejected unless the same-UID writer also rewrites its local mode; even then the observer reports prelaunch binding unauthenticated."
+  ],
+  "independent_read_only_review": "Initial review reproduced a T wheel copy race and a posthoc local binding. Both were corrected or classified honestly; repeated adversarial probes found no controlled-comparison false approval.",
+  "scope": {
+    "provider_calls": 0,
+    "real_model_triplets_executed": 0,
+    "template_status": "no_go_missing_bindings",
+    "effective_provider_model_version_or_effort_verified": false,
+    "prelaunch_binding_authenticated": false,
+    "same_uid_mutation_during_installation_excluded": false,
+    "global_budgets_or_provider_costs_verified": false,
+    "independent_human_judgment_performed": false,
+    "controlled_comparison_eligible": false,
+    "criterion_4": "not_assessed"
+  }
+}

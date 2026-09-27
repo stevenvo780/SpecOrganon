@@ -1,8 +1,9 @@
 """Read-only byte-checked observation of one exposed D-E pilot directory.
 
 Usage: ``python scripts/observe_development_run.py /absolute/run/directory``.
-This exports local evidence only. It is neither a provider receipt nor a
-confirmatory or criterion-4 result, and it never runs generated code.
+This exports local evidence only. Same-UID local files cannot authenticate
+that a pilot plan existed before a CLI call. This is neither a provider receipt
+nor a confirmatory or criterion-4 result, and it never runs generated code.
 """
 
 from __future__ import annotations
@@ -19,8 +20,9 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from run_development_arm import (
-    PUBLIC_FILES, T_TRACE_MAX_BYTES, T_TRACE_METHOD, _assembled_prompt,
-    _parse_t_process_trace_bytes, _parse_usage,
+    DOSSIER_ASSET_PATHS, PUBLIC_FILES, RunError, T_TRACE_MAX_BYTES, T_TRACE_METHOD,
+    _assembled_prompt, _parse_t_process_trace_bytes, _parse_usage,
+    _validate_pilot_triplet_plan,
 )
 
 
@@ -614,7 +616,86 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
                 "run.json claims unsupported provider or cost evidence"
             )
 
+        pilot_binding = summary.get("pilot_triplet_binding")
+        pilot_mode = summary.get("pilot_mode", "generic_exploratory")
+        if type(pilot_mode) is not str or pilot_mode not in {"generic_exploratory", "explicit_triplet"}:
+            raise ObservationError("run.json has an invalid pilot mode")
+        if (pilot_mode == "explicit_triplet") is not (pilot_binding is not None):
+            raise ObservationError("pilot mode and triplet binding are inconsistent")
+        pilot_assets: dict[str, str] | None = None
+        observed_binding: dict[str, Any] | None = None
+        pilot_copies: dict[str, dict[str, Any]] = {}
+        if pilot_binding is None:
+            if _exists(run_fd, "pilot_triplet_plan.json") or _exists(run_fd, "activation_dossier.json"):
+                raise ObservationError("pilot triplet copies exist without a run.json binding")
+        else:
+            binding = _object(pilot_binding, "pilot triplet binding")
+            if set(binding) != {
+                "schema", "scope", "plan_sha256", "activation_dossier_sha256",
+                "plan_record", "dossier_record", "cell", "declared_model_version",
+                "other_model_parameters",
+            } or type(binding["schema"]) is not int or binding["schema"] != 1 \
+                    or binding["scope"] != "local_requested_configuration_only":
+                raise ObservationError("pilot triplet binding has invalid fields")
+            plan_sha = _digest(binding["plan_sha256"], "pilot triplet plan")
+            dossier_sha = _digest(binding["activation_dossier_sha256"], "activation dossier")
+            plan_record = _expected_record(binding["plan_record"], "pilot triplet plan")
+            dossier_record = _expected_record(binding["dossier_record"], "activation dossier")
+            if plan_record["sha256"] != plan_sha or dossier_record["sha256"] != dossier_sha:
+                raise ObservationError("pilot triplet plan or dossier digest differs from run.json binding")
+            cell = _object(binding["cell"], "pilot triplet cell")
+            if (set(cell) != {"family_slot", "arm"} or cell["arm"] != arm
+                    or type(cell["family_slot"]) is not str
+                    or cell["family_slot"] not in {"A", "B"}):
+                raise ObservationError("pilot triplet cell differs from run.json arm")
+            plan = _read_recorded_json(
+                run_fd, "pilot_triplet_plan.json", plan_record, "pilot triplet plan",
+            )
+            dossier = _read_recorded_json(
+                run_fd, "activation_dossier.json", dossier_record, "activation dossier",
+            )
+            pilot_copies = {
+                "pilot_triplet_plan.json": plan_record,
+                "activation_dossier.json": dossier_record,
+            }
+            dossier = _object(dossier, "activation dossier")
+            if (type(dossier.get("schema")) is not int or dossier["schema"] != 1
+                    or dossier.get("classification") != "offline_exploratory_pilot_preflight_no_provider_calls"
+                    or dossier.get("status") != "no_go_for_provider_calls"
+                    or dossier.get("criterion_4") != "not_assessed"
+                    or dossier.get("provider_requests_made_for_this_dossier") != 0
+                    or dossier.get("spend_authorized_usd") != 0):
+                raise ObservationError("copied activation dossier is not the offline NO-GO dossier")
+            assets = _object(dossier.get("fixed_local_assets_sha256"), "dossier assets")
+            if set(assets) != DOSSIER_ASSET_PATHS or any(
+                type(value) is not str or SHA256.fullmatch(value) is None
+                for value in assets.values()
+            ):
+                raise ObservationError("copied activation dossier has invalid asset hashes")
+            try:
+                selected = _validate_pilot_triplet_plan(
+                    plan, dossier_sha, cell["family_slot"], arm, provider, model, effort,
+                )
+            except RunError as exc:
+                raise ObservationError(f"pilot triplet local binding differs: {exc}") from exc
+            if (binding["declared_model_version"] != selected["model_version"]
+                    or binding["other_model_parameters"] != selected["other_model_parameters"]):
+                raise ObservationError("pilot triplet declared parameters differ from the copied plan")
+            pilot_assets = assets
+            observed_binding = {
+                "scope": "local_requested_configuration_only",
+                "plan_sha256": plan_sha,
+                "activation_dossier_sha256": dossier_sha,
+                "cell": cell,
+                "declared_model_version": selected["model_version"],
+                "other_model_parameters": selected["other_model_parameters"],
+                "effective_model_and_effort_verified": False,
+                "all_dossier_assets_available_locally": False,
+                "prelaunch_binding_authenticated": False,
+            }
+
         verified_inputs: dict[str, dict[str, Any]] = {}
+        verified_inputs.update(pilot_copies)
         verified_streams: dict[str, dict[str, Any]] = {}
         verified_artifacts: dict[str, dict[str, Any]] = {}
         unavailable: list[str] = []
@@ -635,6 +716,10 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
             verified_inputs["prompt.txt"] = _verify_hash(
                 run_fd, "prompt.txt", prompt["assembled_sha256"], "prompt.txt"
             )
+            if pilot_assets is not None:
+                for name in PUBLIC_FILES:
+                    if verified_inputs[f"work/{name}"]["sha256"] != pilot_assets[f"cases/building_energy/{name}"]:
+                        raise ObservationError(f"pilot dossier differs from copied packet: {name}")
             for filename, key in (
                 ("common.md", "common_sha256"),
                 ("arm.md", "arm_sha256"),
@@ -650,6 +735,11 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
                     unavailable.append(f"work/{filename}")
                 else:
                     verified_inputs[f"work/{filename}"] = checked
+                    if pilot_assets is not None:
+                        source_name = ("common.md" if filename == "common.md"
+                                       else f"arm_{arm.lower()}.md")
+                        if checked["sha256"] != pilot_assets[f"experiments/development/energy_pilot/{source_name}"]:
+                            raise ObservationError(f"pilot dossier differs from copied prompt: {filename}")
             if not partial:
                 common_bytes = _read_hashed_prompt_component(
                     work_fd, "common.md", prompt["common_sha256"]
@@ -954,6 +1044,15 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
                 elif status in REPLAY_STATUSES:
                     raise ObservationError("replay status lacks replay stream records")
 
+        if pilot_assets is not None and arm == "T":
+            wheel = verified_inputs.get("work/specorganon-0.1.0-py3-none-any.whl")
+            if wheel is None:
+                if partial:
+                    unavailable.append("work/specorganon-0.1.0-py3-none-any.whl")
+                else:
+                    raise ObservationError("pilot T wheel is unavailable for local dossier verification")
+            elif wheel["sha256"] != pilot_assets["dist/specorganon-0.1.0-py3-none-any.whl"]:
+                raise ObservationError("pilot T wheel differs from the copied dossier")
         if _read_summary(run_fd)[1] != summary_sha:
             raise ObservationError("run.json changed during observation")
         return {
@@ -964,13 +1063,18 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
             "observation_state": (
                 "partial"
                 if partial or unavailable or unrecorded
+                else "recorded_materials_verified_prelaunch_unproven"
+                if observed_binding is not None
                 else "recorded_materials_verified"
             ),
             "arm": arm,
+            "pilot_mode": pilot_mode,
             "provider_cli": provider,
             "requested_model": model,
             "requested_effort": effort,
             "tool_policy": tool_policy,
+            "pilot_triplet_binding": observed_binding,
+            "prelaunch_binding_authenticated": False,
             "cli_usage": usage,
             "t_process_trace": process_trace,
             "verified_inputs": verified_inputs,

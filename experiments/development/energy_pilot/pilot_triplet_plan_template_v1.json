@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "classification": "offline_exploratory_triplet_plan_unsealed",
+  "status": "no_go_missing_bindings",
+  "activation_dossier_sha256": "bdc7aeb95d21e33356d5eea7c14753444fbfb72ef656bad73f63ba825481e095",
+  "family_slots": {
+    "A": {
+      "provider_cli": null,
+      "requested_model": null,
+      "requested_effort": null,
+      "model_version": null,
+      "other_model_parameters": {}
+    },
+    "B": {
+      "provider_cli": null,
+      "requested_model": null,
+      "requested_effort": null,
+      "model_version": null,
+      "other_model_parameters": {}
+    }
+  },
+  "planned_cells": [
+    {"family_slot": "A", "arm": "N"},
+    {"family_slot": "A", "arm": "S"},
+    {"family_slot": "A", "arm": "T"},
+    {"family_slot": "B", "arm": "N"},
+    {"family_slot": "B", "arm": "S"},
+    {"family_slot": "B", "arm": "T"}
+  ],
+  "limitations": [
+    "NO-GO template: model, provider CLI and requested effort are unverified and unset; a separately reviewed plan must declare each family slot before a pilot run.",
+    "A configured plan binds only local requested CLI/model/effort and declared model version/other parameters across N, S and T. It does not authorize provider calls or prove effective settings, provider identity, caps, cost, tool parity or criterion 4."
+  ]
+}
