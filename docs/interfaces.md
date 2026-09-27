@@ -4,7 +4,7 @@ Ambas interfaces llaman las mismas funciones de `specorganon.engine` y `specorga
 
 ## CLI
 
-Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 14 operaciones públicas:
+Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 16 operaciones públicas:
 
 | CLI | MCP | Función |
 | --- | --- | --- |
@@ -14,6 +14,8 @@ Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <coman
 | `review` | `review` | Revisar un ítem. |
 | `approval-challenge` | `approval_challenge` | Obtener el mensaje exacto para una firma offline. |
 | `approve` | `approve` | Registrar una aprobación normativa verificada. |
+| `field-attestation-challenge` | `field_attestation_challenge` | Preparar los bytes de una declaración de evaluador externo sobre fuentes de campo. |
+| `attest-field` | `attest_field` | Registrar esa declaración firmada; no habilita un veredicto decisivo de campo. |
 | `challenge` | `challenge` | Registrar una contradicción. |
 | `resolve-challenge` | `resolve_challenge` | Resolver una contradicción. |
 | `gate` | `gate` | Consultar una compuerta sin avanzar. |
@@ -81,6 +83,14 @@ Todos los marcadores se reemplazan por el UUID, la ruta canónica absoluta, el d
 
 La firma prueba control de la clave configurada para ese actor. No prueba por sí sola quién sostuvo la clave, si recibió toda la información ni si tenía competencia para decidir. Esas verificaciones y el registro de autorización pertenecen al proceso humano externo.
 
+### Declaración firmada de fuentes de campo
+
+`field-attestation-challenge` y `attest-field` registran una **declaración**, vinculada a los bytes de un manifiesto, cinco fuentes mínimas, un reporte y las revisiones vigentes de la evaluación y sus antecedentes. `ORGANON_FIELD_ASSESSORS_FILE` apunta a un JSON externo de esquema 1: `cases[case_id]` contiene `path`, `project_sha256` y `assessors`, mapa de actores `assessor:<nombre>` a claves públicas Ed25519 crudas de 32 bytes en base64. El archivo y cada fuente deben tener ruta absoluta canónica, sin enlace simbólico y con un solo enlace físico. El evaluador debe ser distinto del autor de la evaluación y su clave debe diferir de las claves de aprobación normativa. Retirar su clave hace que la firma histórica aparezca sin verificar al releer el caso.
+
+El manifiesto JSON usa `schema:1`, `classification:"field_attestation_sources"` y `sources`, lista de `{role,path,sha256}`. Debe contener exactamente un `plan`, `field`, `registry`, `measurements` y `analysis`; también puede incluir `source_record` y `approval_record`. El motor coteja hashes de bytes y vuelve a ejecutar el preflight estructural de perjuicios sobre los primeros cuatro JSON. El `analysis` debe cumplir el esquema cerrado de [`field_effect_analysis.py`](../src/specorganon/field_effect_analysis.py): el auditor recalcula cada `V` declarado, el `G` **sin ajuste**, y comparaciones descriptivas por celda con márgenes numéricos tipados. Rechaza una declaración vacía, faltantes y cifras incoherentes; su salida conserva `decision_ready:false`. **Todavía no coteja los registros primarios citados por las mediciones ni reproduce el estimador ajustado, el IC por remuestreo, la aprobación de márgenes o condiciones de parada.** El reporte JSON usa `schema:1`, `classification:"independent_field_assessment"`, `case_id`, `assessment_id`, `assessment_version`, `verdict`, `source_manifest_sha256`, `preflight_sha256`, `analysis_sha256` y los campos textuales `source_custody`, `causal_attribution`, `value_metric`, `harms_by_actor_stage`, `costs`, `uncertainty`, `limitations` y `conclusion`. Se comprueban el vínculo de hashes y la presencia de esos campos, no la verdad ni coherencia semántica de su texto.
+
+Una declaración firmada queda visible en `status.field_attestations` con `signature_verified` y `binding_current`. El primero se refiere exclusivamente a la firma; el segundo coteja las versiones actuales de los ítems, sin autenticar los archivos fuente actuales. El gate de `validate` de un caso `signed` **sigue bloqueando** `field/cumplido` y `field/incumplido`, incluso si ambos son verdaderos. El protocolo exige antes un análisis reproducible del efecto ajustado, intervalo y daños, fuentes bajo custodia y aprobación prospectiva de los márgenes; una fixture o un reporte del evaluador no los suplen. `field/no_demostrado` permanece disponible.
+
 La firma cubre la cabeza del ledger **anterior** a la aprobación. Los hashes de eventos detectan roturas de la cadena, pero no hacen al archivo resistente a escritura maliciosa: quien puede editarlo directamente puede borrar eventos posteriores o añadir falsas revisiones y avances de fase, y recalcular los hashes. La firma protege la decisión y el prefijo previo; los actores de `review` y `review-phase` siguen siendo etiquetas autodeclaradas. Para auditar producción, registra fuera del caso la secuencia y cabeza de **cada transición autorizada**, o usa almacenamiento append-only bajo custodia independiente. Protege también el archivo de confianza, cuyo cambio altera la verificación de aprobaciones históricas.
 
 ### Ancla externa opcional del ledger
@@ -109,7 +119,7 @@ Para pruebas sintéticas se exige crear el caso explícitamente con `--approval-
 
 ## MCP por stdio
 
-El ejecutable es `.venv/bin/organon-mcp` (o `uv run organon-mcp`). Configúralo como servidor MCP con transporte `stdio`. Publica las 14 herramientas de la tabla. Los parámetros tienen los mismos nombres que las funciones del motor: `init` acepta `approval_policy`, `approval_challenge` devuelve el mensaje canónico y `approve` acepta `signature`. `refs` es una lista de IDs y `data` es un objeto JSON. En MCP, `run` recibe el objeto JSON `manifest` directamente, mientras que la CLI lo lee de `--manifest`. El servidor usa el mismo `ORGANON_APPROVERS_FILE` externo que la CLI para comprobar firmas; el cliente MCP no debe recibir una clave privada.
+El ejecutable es `.venv/bin/organon-mcp` (o `uv run organon-mcp`). Configúralo como servidor MCP con transporte `stdio`. Publica las 16 herramientas de la tabla. Los parámetros tienen los mismos nombres que las funciones del motor: `init` acepta `approval_policy`, `approval_challenge` devuelve el mensaje canónico y `approve` acepta `signature`. `refs` es una lista de IDs y `data` es un objeto JSON. En MCP, `run` recibe el objeto JSON `manifest` directamente, mientras que la CLI lo lee de `--manifest`. El servidor usa los mismos registros externos de aprobación y evaluación que la CLI para comprobar firmas; el cliente MCP no debe recibir una clave privada.
 
 El [control de frontera stdio](../experiments/development/mcp_strict_wire_2026-09-27.json) lee cada línea en bytes, con un límite de 8 MiB, y rechaza UTF-8 inválido, claves duplicadas incluso anidadas o escapadas, valores no finitos, subdesbordamiento y pérdida decimal antes del parser del SDK. Comprueba la forma del sobre JSON-RPC y rechaza solicitudes que mezclen `method` con campos de respuesta, lotes, IDs inválidos y campos de sobre extra. En `tools/call`, `put.data`, `put.expected_deps`, `run.manifest` y `next_task.roles` deben llegar como objetos reales, y `put.refs` como lista; las versiones y `challenge_seq` requieren enteros reales, sin conversión de booleanos. Los rechazos se envían como errores JSON-RPC y no ejecutan la herramienta; una línea inválida no impide una petición válida posterior. Los valores de texto dentro de `data` siguen siendo contenido del caso y no se vuelven a interpretar como JSON. El control usa partes internas de `mcp==2.2.0`, versión fijada en el paquete y comprobada con cliente real y wheel instalado en Python 3.11 y 3.12. No autentica el origen del mensaje ni la evidencia que contiene.
 
