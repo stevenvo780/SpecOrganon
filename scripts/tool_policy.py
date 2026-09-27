@@ -234,6 +234,30 @@ def _validate_policy(raw: Any) -> dict[str, Any]:
     return policy
 
 
+def _inspect_policy_data(data: bytes, expected: dict[str, int]) -> dict[str, Any]:
+    if type(data) is not bytes or len(data) > MAX_POLICY_BYTES:
+        raise ToolPolicyError("tool policy bytes must be bounded bytes")
+    policy = _validate_policy(_parse_json(data, "tool policy"))
+    if policy["limits"] != expected:
+        raise ToolPolicyError(
+            "tool policy limits differ from release or expected limits"
+        )
+    return {
+        "schema": 1,
+        "classification": INSPECTION_CLASSIFICATION,
+        "notice": INSPECTION_NOTICE,
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "limits": dict(policy["limits"]),
+    }
+
+
+def inspect_tool_policy_bytes(
+    data: bytes, *, expected_limits: dict[str, Any]
+) -> dict[str, Any]:
+    """Inspect already pinned policy bytes against independently known caps."""
+    return _inspect_policy_data(data, _limits(expected_limits, "expected limits"))
+
+
 def inspect_tool_policy(
     policy_path: Path | str,
     *,
@@ -263,18 +287,7 @@ def inspect_tool_policy(
         expected = _limits(expected_limits, "expected limits")
 
     data = _read_bounded_file(policy_path, "tool policy", MAX_POLICY_BYTES)
-    policy = _validate_policy(_parse_json(data, "tool policy"))
-    if policy["limits"] != expected:
-        raise ToolPolicyError(
-            "tool policy limits differ from release or expected limits"
-        )
-    return {
-        "schema": 1,
-        "classification": INSPECTION_CLASSIFICATION,
-        "notice": INSPECTION_NOTICE,
-        "sha256": hashlib.sha256(data).hexdigest(),
-        "limits": dict(policy["limits"]),
-    }
+    return _inspect_policy_data(data, expected)
 
 
 def main(argv: list[str] | None = None) -> int:

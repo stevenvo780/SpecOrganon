@@ -318,6 +318,47 @@ def test_independent_regular_zip_and_bogus_format(tmp_path: Path) -> None:
     _reject_before_destination(bogus, tmp_path / "bogus-out")
 
 
+def test_inspect_pinned_fd_survives_path_replacement_and_preserves_offset(
+    tmp_path: Path,
+) -> None:
+    source, manifest = _source(tmp_path)
+    package = tmp_path / "case.zip"
+    _zip(
+        package,
+        (source / "case.json").read_bytes(),
+        {name: (source / name).read_bytes() for name in ("task.md", "data.csv")},
+    )
+    fd = os.open(package, os.O_RDONLY)
+    try:
+        os.lseek(fd, 7, os.SEEK_SET)
+        package.rename(tmp_path / "original.zip")
+        package.write_bytes(b"replacement is not a case package")
+        assert case_package.inspect_package_fd(fd, expected_case_id="R-F") == manifest
+        assert os.lseek(fd, 0, os.SEEK_CUR) == 7
+        with pytest.raises(case_package.CasePackageError, match="case_id differs"):
+            case_package.inspect_package_fd(fd, expected_case_id="D-E")
+        with pytest.raises(case_package.CasePackageError):
+            case_package.inspect_package(package)
+    finally:
+        os.close(fd)
+
+
+def test_inspect_pinned_fd_rejects_corrupt_member(tmp_path: Path) -> None:
+    source, _ = _source(tmp_path)
+    package = tmp_path / "corrupt.zip"
+    _zip(
+        package,
+        (source / "case.json").read_bytes(),
+        {"task.md": (source / "task.md").read_bytes(), "data.csv": b"forged"},
+    )
+    fd = os.open(package, os.O_RDONLY)
+    try:
+        with pytest.raises(case_package.CasePackageError):
+            case_package.inspect_package_fd(fd, expected_case_id="R-F")
+    finally:
+        os.close(fd)
+
+
 def test_duplicate_zip_member_rejected(tmp_path: Path) -> None:
     source, _ = _source(tmp_path)
     package = tmp_path / "duplicate.zip"

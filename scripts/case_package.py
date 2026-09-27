@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import math
 import os
@@ -336,6 +337,55 @@ def _read_at(file: BinaryIO, offset: int, size: int) -> bytes:
     return data
 
 
+class _PreadFile(io.RawIOBase):
+    """Give ZipFile an independent cursor over a caller-pinned descriptor."""
+
+    def __init__(self, fd: int, size: int) -> None:
+        self._fd = fd
+        self._size = size
+        self._position = 0
+
+    def fileno(self) -> int:
+        return self._fd
+
+    def readable(self) -> bool:
+        return True
+
+    def seekable(self) -> bool:
+        return True
+
+    def tell(self) -> int:
+        return self._position
+
+    def seek(self, offset: int, whence: int = os.SEEK_SET) -> int:
+        base = (
+            0
+            if whence == os.SEEK_SET
+            else self._position
+            if whence == os.SEEK_CUR
+            else self._size
+        )
+        if whence not in (os.SEEK_SET, os.SEEK_CUR, os.SEEK_END):
+            raise ValueError("invalid seek mode")
+        position = base + offset
+        if position < 0:
+            raise ValueError("negative seek position")
+        self._position = position
+        return position
+
+    def readinto(self, buffer: bytearray | memoryview) -> int:
+        view = memoryview(buffer)
+        count = 0
+        while count < len(view):
+            chunk = os.pread(self._fd, len(view) - count, self._position)
+            if not chunk:
+                break
+            view[count : count + len(chunk)] = chunk
+            count += len(chunk)
+            self._position += len(chunk)
+        return count
+
+
 def _verify_structure(
     file: BinaryIO, archive: zipfile.ZipFile
 ) -> dict[str, zipfile.ZipInfo]:
@@ -543,7 +593,12 @@ def _open_package(
     parent_fd, name = _open_parent_chain(archive_path, stack)
     fd = os.open(name, FILE_FLAGS, dir_fd=parent_fd)
     file = stack.enter_context(os.fdopen(fd, "rb"))
-    source = os.fstat(fd)
+    archive = _open_package_file(file, stack)
+    return file, archive
+
+
+def _open_package_file(file: BinaryIO, stack: ExitStack) -> zipfile.ZipFile:
+    source = os.fstat(file.fileno())
     if (
         not stat.S_ISREG(source.st_mode)
         or not END_RECORD.size <= source.st_size <= MAX_ARCHIVE_BYTES
@@ -573,8 +628,7 @@ def _open_package(
         or central_start + central_size != source.st_size - END_RECORD.size
     ):
         raise CasePackageError("ZIP end record is invalid or exceeds package bounds")
-    archive = stack.enter_context(zipfile.ZipFile(file, "r"))
-    return file, archive
+    return stack.enter_context(zipfile.ZipFile(file, "r"))
 
 
 def inspect_package(
@@ -584,6 +638,24 @@ def inspect_package(
     try:
         with ExitStack() as stack:
             file, archive = _open_package(archive_path, stack)
+            manifest, _, _ = _inspect_open(file, archive, expected_case_id)
+            return manifest
+    except CasePackageError:
+        raise
+    except (OSError, zipfile.BadZipFile, RuntimeError, ValueError, UnicodeError) as exc:
+        raise CasePackageError("archive is not a valid visible case package") from exc
+
+
+def inspect_package_fd(fd: int, expected_case_id: str | None = None) -> dict[str, Any]:
+    """Inspect a pinned, readable regular-file FD without closing or seeking it."""
+    try:
+        if type(fd) is not int:
+            raise CasePackageError("archive descriptor must be an integer")
+        with ExitStack() as stack:
+            owned_fd = os.dup(fd)
+            stack.callback(os.close, owned_fd)
+            file = _PreadFile(owned_fd, os.fstat(owned_fd).st_size)
+            archive = _open_package_file(file, stack)
             manifest, _, _ = _inspect_open(file, archive, expected_case_id)
             return manifest
     except CasePackageError:

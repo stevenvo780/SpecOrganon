@@ -76,6 +76,37 @@ def test_valid_policy_matches_expected_limits_and_reports_unenforced(
     assert path.read_bytes() == data
 
 
+def test_pinned_policy_bytes_share_path_validation_and_bounds(tmp_path: Path) -> None:
+    policy = _policy()
+    path = tmp_path / "tool_policy"
+    data = _write_policy(path, policy)
+    assert inspector.inspect_tool_policy_bytes(
+        data, expected_limits=policy["limits"]
+    ) == inspector.inspect_tool_policy(path, expected_limits=policy["limits"])
+
+    path.write_bytes(b"replacement")
+    assert (
+        inspector.inspect_tool_policy_bytes(data, expected_limits=policy["limits"])[
+            "sha256"
+        ]
+        == hashlib.sha256(data).hexdigest()
+    )
+    with pytest.raises(inspector.ToolPolicyError, match="limits differ"):
+        inspector.inspect_tool_policy_bytes(
+            data, expected_limits={**policy["limits"], "tool_calls": 121}
+        )
+    with pytest.raises(inspector.ToolPolicyError, match="duplicate JSON object key"):
+        inspector.inspect_tool_policy_bytes(
+            data.replace(b'"schema":1', b'"schema":1,"schema":1'),
+            expected_limits=policy["limits"],
+        )
+    with pytest.raises(inspector.ToolPolicyError, match="bounded bytes"):
+        inspector.inspect_tool_policy_bytes(
+            b" " * (inspector.MAX_POLICY_BYTES + 1),
+            expected_limits=policy["limits"],
+        )
+
+
 def test_cli_accepts_release_manifest_and_expected_limits(tmp_path: Path) -> None:
     policy = _policy()
     path = tmp_path / "tool_policy"

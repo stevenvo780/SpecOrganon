@@ -165,6 +165,18 @@ def test_pack_inspect_extract_and_determinism(tmp_path: Path) -> None:
     assert (extracted / "wheels" / ROOT).read_bytes() == (wheel_dir / ROOT).read_bytes()
 
 
+def test_pinned_bundle_bytes_share_path_validation(tmp_path: Path) -> None:
+    _, _, output, packed = _pack(tmp_path)
+    data = output.read_bytes()
+    assert bundle.inspect_toolkit_bundle_bytes(data) == packed
+    output.write_bytes(b"replacement")
+    assert bundle.inspect_toolkit_bundle_bytes(data) == packed
+    with pytest.raises(bundle.ToolkitBundleError):
+        bundle.inspect_toolkit_bundle_bytes(data + b"trailer")
+    with pytest.raises(bundle.ToolkitBundleError):
+        bundle.inspect_toolkit_bundle_bytes(b" " * (bundle.MAX_BUNDLE_BYTES + 1))
+
+
 def test_root_only_minimal_lock_is_static_but_never_install_ready(
     tmp_path: Path,
 ) -> None:

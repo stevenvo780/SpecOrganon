@@ -562,7 +562,14 @@ def _inspect_bytes(data: bytes) -> tuple[dict[str, Any], dict[str, bytes]]:
 
 def inspect_toolkit_bundle(path: Path | str) -> dict[str, Any]:
     """Inspect a released bundle without extraction, import, or installation."""
-    result, _entries = _inspect_bytes(_read_bundle(path))
+    return inspect_toolkit_bundle_bytes(_read_bundle(path))
+
+
+def inspect_toolkit_bundle_bytes(data: bytes) -> dict[str, Any]:
+    """Inspect already pinned bundle bytes with the same strict ZIP checks."""
+    if type(data) is not bytes:
+        raise ToolkitBundleError("bundle must be bytes")
+    result, _entries = _inspect_bytes(data)
     return result
 
 
