@@ -10,9 +10,11 @@ import asyncio
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 from collections import Counter
+from decimal import Decimal
 from pathlib import Path
 
 from mcp.client import Client
@@ -23,10 +25,143 @@ ROOT = Path(__file__).resolve().parents[1]
 CASE = ROOT / "cases" / "bread_norway"
 CLI = Path(sys.executable).parent / "organon"
 MCP = Path(sys.executable).parent / "organon-mcp"
+SOURCE_PDFS = {
+    "source_lca.pdf": (2_212_666, "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32"),
+    "source_survey.pdf": (526_604, "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee"),
+}
+SOURCE_DOI = {
+    "source_lca.pdf": "https://doi.org/10.3390/su11010043",
+    "source_survey.pdf": "https://doi.org/10.3390/su10072251",
+}
+# Identity and meaning are fixed independently of the manifest/ledger. The PDF
+# passage used for extraction is reported separately: two historic locator
+# labels additionally mention Table 1, which does not itself contain the number.
+SOURCE_CLAIMS = {
+    "e_product_mass": ("source_lca.pdf", "secciones 3.2.1 y 4.2; tabla 1", "piece_mass", "g/pieza", "section 4.2 paragraph"),
+    "e_wheat_origin": ("source_lca.pdf", "sección 4.3 y tabla 1", "norway_wheat_share", "%", "section 4.3 paragraph"),
+    "e_mill_energy": ("source_lca.pdf", "tabla 2", "mill_electricity", "kWh/t_harina", "Table 2 mill energy row"),
+    "e_mill_bran": ("source_lca.pdf", "tabla 3, balance másico de productos del trigo", "wheat_bran_output", "%", "Table 3 wheat flour row"),
+    "e_mill_transport": ("source_lca.pdf", "tabla 5", "mill_to_baker_distance", "km", "Table 5 transport row"),
+    "e_baker_energy": ("source_lca.pdf", "tabla 5", "bakery_electricity", "kWh/pieza", "Table 5 baker energy row"),
+    "e_retail_waste": ("source_lca.pdf", "tabla 7, retail waste", "retail_bread_waste", "%_pan_entrante_sistema", "Table 7 retail waste row"),
+    "e_household_est": ("source_lca.pdf", "tabla 7, consumer waste y nota de fuente", "consumer_bread_waste_estimate", "%_pan_entrante_sistema", "Table 7 consumer waste row and source note"),
+    "e_survey_size": ("source_survey.pdf", "resumen y sección 3", "survey_respondents", "personas", "abstract and Table 1 total row"),
+}
+
+
+class SourceCheckError(ValueError):
+    """A bread evidence claim is unsupported by its pinned PDF passage."""
 
 
 def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _section(text: str, start: str, end: str) -> str:
+    if text.count(start) != 1:
+        raise SourceCheckError(f"PDF locator not unique: {start}")
+    tail = text.split(start, 1)[1]
+    if end not in tail:
+        raise SourceCheckError(f"PDF locator missing: {end}")
+    return tail.split(end, 1)[0]
+
+
+def _number(text: str, pattern: str) -> Decimal:
+    matches = re.findall(pattern, text, flags=re.MULTILINE)
+    if len(matches) != 1:
+        raise SourceCheckError(f"PDF numeric locator yielded {len(matches)} matches: {pattern}")
+    return Decimal(matches[0])
+
+
+def published_evidence_values(case: Path) -> dict[str, Decimal]:
+    """Extract the nine claimed numbers from anchored passages in the fixed PDFs.
+
+    Poppler's ``pdftotext`` is required. These are published aggregates and
+    estimates, not a reconstruction of the underlying company or survey data.
+    """
+    texts = {}
+    for archive, (size, expected_sha256) in SOURCE_PDFS.items():
+        path = case / archive
+        if path.stat().st_size != size:
+            raise SourceCheckError(f"archived PDF size changed: {archive}")
+        if digest(path) != expected_sha256:
+            raise SourceCheckError(f"archived PDF SHA-256 changed: {archive}")
+        try:
+            result = subprocess.run(
+                ["pdftotext", "-layout", str(path), "-"],
+                text=True,
+                capture_output=True,
+                check=True,
+                timeout=20,
+            )
+        except FileNotFoundError as exc:
+            raise RuntimeError("Poppler pdftotext is required for the bread PDF content check") from exc
+        if len(result.stdout) >= 2_000_000:
+            raise SourceCheckError(f"extracted PDF text too large: {archive}")
+        texts[archive] = result.stdout
+
+    lca = texts["source_lca.pdf"]
+    survey = texts["source_survey.pdf"]
+    composition = _section(lca, "4.2. Composition of Bread", "4.3. Cultivation")
+    cultivation = _section(lca, "4.3. Cultivation and Transport", "4.4. Processing")
+    mill = _section(lca, "Table 2. Processing data.", "Table 3. Data for allocation")
+    flour = _section(lca, "Table 3. Data for allocation", "4.5. Packaging")
+    bakery = _section(lca, "Table 5. Data on bread production", "4.7. Retail")
+    waste = _section(lca, "Table 7. Data on bread waste", "4.10. Waste Management")
+    abstract = _section(survey, "Abstract:", "Keywords:")
+    survey_table = _section(survey, "Table 1. Frequency distribution", "The data was analyzed")
+
+    values = {
+        "e_product_mass": _number(composition, r"total mass of the bread itself was\s+(\d+)\s+grams"),
+        "e_wheat_origin": _number(cultivation, r"average of\s+(\d+)% of the wheat has been coming from Norway"),
+        "e_mill_energy": _number(mill, r"Mill energy consumption\s+(\d+) kWh electricity per ton of flour"),
+        "e_mill_bran": _number(flour, r"Wheat flour products \(% w/w\).*?\b(\d+\.\d+)% bran\."),
+        "e_mill_transport": _number(bakery, r"Transport from mill to baker\s+(\d+) km on >32 tonne truck"),
+        "e_baker_energy": _number(bakery, r"Baker energy consumption\s+(\d+\.\d+) kWh electricity and"),
+        "e_retail_waste": _number(waste, r"^\s*Retail waste\s+(\d+\.\d+)\s+"),
+        "e_household_est": _number(waste, r"^\s*Consumer waste\s+(\d+\.\d+)\s*$"),
+        "e_survey_size": _number(abstract, r"web-based questionnaire has been employed, with\s+(\d+) respondents"),
+    }
+    if values["e_survey_size"] != _number(survey_table, r"^\s*Total\s+(\d+)\s+100\.0\s*$"):
+        raise SourceCheckError("survey abstract and Table 1 respondent totals differ")
+    if "Calculated from consumption data in Reference" not in waste:
+        raise SourceCheckError("consumer waste source note missing")
+    return values
+
+
+def verify_source_transcription(manifest: dict, ledger: dict, case: Path) -> dict[str, Decimal]:
+    """Reject a false numeric transcription even if manifest and ledger agree."""
+    published = published_evidence_values(case)
+    manifest_items = {
+        step["id"]: step for step in manifest["steps"]
+        if step["op"] == "put" and step["kind"] == "evidence"
+    }
+    ledger_items = {
+        event["payload"]["id"]: event["payload"] for event in ledger["events"]
+        if event["kind"] == "item_put" and event["payload"]["kind"] == "evidence"
+    }
+    if len(manifest_items) != len(ledger_items) or manifest_items.keys() != ledger_items.keys():
+        raise SourceCheckError("manifest/ledger evidence sets differ")
+    if manifest_items.keys() != published.keys() or published.keys() != SOURCE_CLAIMS.keys():
+        raise SourceCheckError("evidence ID set differs from pinned PDF claims")
+    for evidence_id, value in published.items():
+        manifest_data = manifest_items[evidence_id]["data"]
+        ledger_data = ledger_items[evidence_id]["data"]
+        if manifest_data != ledger_data:
+            raise SourceCheckError(f"manifest/ledger evidence differs: {evidence_id}")
+        archive, locator, metric_key, unit, _ = SOURCE_CLAIMS[evidence_id]
+        if (
+            manifest_data["archive"], manifest_data["locator"],
+            manifest_data["metric_key"], manifest_data["unit"],
+        ) != (archive, locator, metric_key, unit):
+            raise SourceCheckError(f"PDF claim identity differs: {evidence_id}")
+        if manifest_data["source"] != SOURCE_DOI[archive]:
+            raise SourceCheckError(f"PDF DOI differs: {evidence_id}")
+        if manifest_data["source_sha256"] != SOURCE_PDFS[archive][1]:
+            raise SourceCheckError(f"PDF digest differs: {evidence_id}")
+        if type(manifest_data["value"]) not in (int, float) or Decimal(str(manifest_data["value"])) != value:
+            raise SourceCheckError(f"published PDF value differs from manifest/ledger: {evidence_id}")
+    return published
 
 
 def cli(*args: str) -> dict:
@@ -95,6 +230,7 @@ def main() -> None:
     ledger_path = CASE / "organon.json"
     original_hash = digest(ledger_path)
     ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    published = verify_source_transcription(manifest, ledger, CASE)
     events = Counter(event["kind"] for event in ledger["events"])
     assert events == {"item_put": 19, "phase_review": 1, "phase_advance": 1}
     review = next(event for event in ledger["events"] if event["kind"] == "phase_review")
@@ -128,6 +264,13 @@ def main() -> None:
         "case": "cases/bread_norway",
         "scope": "documentary_development_frame_only",
         "source_sha256": dict(sorted(source_hashes.items())),
+        "source_content_check": {
+            "method": "pdftotext -layout, fixed PDF SHA-256, anchored passage or table row",
+            "values": {key: str(value) for key, value in sorted(published.items())},
+            "verified_pdf_locations": {key: claim[4] for key, claim in sorted(SOURCE_CLAIMS.items())},
+            "scope": "nine published numbers only; no raw records or field impact verified",
+            "dependency": "Poppler pdftotext; text layout may vary by version and ambiguous extraction fails",
+        },
         "manifest_sha256": digest(manifest_path),
         "ledger_sha256": original_hash,
         "ledger_revision": status["revision"],
