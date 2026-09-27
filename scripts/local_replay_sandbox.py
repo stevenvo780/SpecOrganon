@@ -450,6 +450,7 @@ def run_sandboxed(
     env: Mapping[str, str] | None = None,
     sealed_executable_bytes: bytes | None = None,
     sealed_executable_sha256: str | None = None,
+    launch_deadline_utc_ns: int | None = None,
 ) -> SandboxResult:
     """Run one process; fail closed if restrictions cannot be installed.
 
@@ -459,7 +460,9 @@ def run_sandboxed(
     restrictions. Neither streams nor setup
     errors are returned as raw text; streams are private new files at the
     requested paths.  The caller must keep them private and inspect them as
-    untrusted output.  A wall deadline kills the child's process group.
+    untrusted output.  A wall deadline kills the child's process group.  An
+    optional host-UTC launch deadline rejects a call immediately before Popen;
+    it is not an attested clock and does not include later child setup time.
     """
     capability = probe_sandbox()
     if not capability.available:
@@ -482,6 +485,9 @@ def run_sandboxed(
             address_space_bytes < 64 * 1024 * 1024 or
             type(file_bytes_per_file) is not int or file_bytes_per_file < 4096):
         raise SandboxError("invalid wall or resource limit")
+    if (launch_deadline_utc_ns is not None
+        and (type(launch_deadline_utc_ns) is not int or launch_deadline_utc_ns < 0)):
+        raise SandboxError("invalid UTC launch deadline")
     cwd_path = Path(cwd).expanduser()
     if not cwd_path.is_absolute() or cwd_path.is_symlink() or not cwd_path.is_dir():
         raise SandboxError("cwd must be an absolute, existing, non-symlink directory")
@@ -547,6 +553,9 @@ def run_sandboxed(
     started = time.monotonic()
     try:
         with os.fdopen(stdout_fd, "wb") as stdout, os.fdopen(stderr_fd, "wb") as stderr:
+            if (launch_deadline_utc_ns is not None
+                and time.time_ns() >= launch_deadline_utc_ns):
+                raise SandboxError("UTC launch deadline expired before process creation")
             process = subprocess.Popen(
                 [sys.executable, "-I", "-S", str(Path(__file__).resolve()),
                  "--child", str(status_fd)],

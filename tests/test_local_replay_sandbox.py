@@ -6,6 +6,7 @@ import hashlib
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -269,7 +270,8 @@ def test_write_root_cannot_contain_read_only_work(
 
 def _run_sealed(paths: dict[str, Path], payload: bytes, *,
                 source: Path | None = None, name: str = "sealed",
-                expected_sha256: str | None = None) -> sandbox.SandboxResult:
+                expected_sha256: str | None = None,
+                launch_deadline_utc_ns: int | None = None) -> sandbox.SandboxResult:
     original = source or paths["work"] / "original-tool.py"
     return sandbox.run_sandboxed(
         argv=[str(original), "argument"], cwd=paths["work"],
@@ -282,6 +284,7 @@ def _run_sealed(paths: dict[str, Path], payload: bytes, *,
         env={"HOME": str(paths["output"]), "TMPDIR": str(paths["temporary"])},
         sealed_executable_bytes=payload,
         sealed_executable_sha256=(expected_sha256 or hashlib.sha256(payload).hexdigest()),
+        launch_deadline_utc_ns=launch_deadline_utc_ns,
     )
 
 
@@ -386,6 +389,29 @@ def test_sealed_source_swap_does_not_change_executed_bytes(
     assert result.sealed_executable_sha256 == hashlib.sha256(original).hexdigest()
     assert (paths["work"].parent / "sealed.stdout").read_text() == "original\n"
     assert source.read_bytes() == replacement
+
+
+def test_launch_deadline_rechecked_immediately_before_popen(
+    replay_layout: dict[str, Path], available_sandbox: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    paths = replay_layout
+    script = (f"#!{sys.executable} -I\n"
+              "import os\n"
+              "from pathlib import Path\n"
+              "(Path(os.environ['HOME']) / 'effect.txt').write_text('ran')\n").encode()
+    original = sandbox._sealed_executable_fd
+
+    def delay_after_sealing(contents: bytes, expected_sha256: str) -> int:
+        fd = original(contents, expected_sha256)
+        time.sleep(0.3)
+        return fd
+
+    monkeypatch.setattr(sandbox, "_sealed_executable_fd", delay_after_sealing)
+    with pytest.raises(sandbox.SandboxError, match="UTC launch deadline expired"):
+        _run_sealed(paths, script, name="deadline",
+                    launch_deadline_utc_ns=time.time_ns() + 150_000_000)
+    assert not (paths["output"] / "effect.txt").exists()
 
 
 @pytest.mark.parametrize("payload,digest", [
