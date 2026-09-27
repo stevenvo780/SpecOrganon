@@ -82,6 +82,16 @@ UV_OFFLINE=1 PIP_NO_INDEX=1 /ruta-privada/venv-nuevo/bin/python scripts/clean_sm
 
 Los registros de las copias T liberadas para [CPython 3.11](../experiments/development/released_toolkit_bundle_py311_2026-09-26.json) y [CPython 3.12](../experiments/development/released_toolkit_bundle_py312_2026-09-26.json) guardan hashes, instalación y smoke sintético. Para 3.12 se selecciona `python3.12` en la descarga y creación del entorno, y `--python-version 3.12` al empaquetar; omitir esa opción conserva 3.12 por compatibilidad. Este procedimiento ejecuta el código del wheel local en un entorno de desarrollo sin aislamiento de sistema operativo; no se debe confundir con una corrida de proveedor ni con aprobación de contenido o custodia externa.
 
+### Preparación privada de una entrega visible
+
+[`scripts/stage_released_run.py`](../scripts/stage_released_run.py) recibe un calendario candidato por una ruta independiente y una sola entrega N, S o T. Toma un snapshot privado del calendario al comenzar, verifica la entrega y su contenido contra ese snapshot, copia únicamente los roles visibles de ese brazo a `inputs/`, extrae el caso verificado en `case/` y crea `work/` vacío, todo bajo un directorio privado nuevo. `stage.json` se publica al final con identificadores, límites declarados, nombres y SHA-256 de insumos; excluye el calendario completo, referencias ocultas y rúbrica. La copia de T queda como archivo opaco: no se instala ni ejecuta. Una carrera o error puede dejar archivos parciales sin `stage.json`; se descartan como no confiables.
+
+```sh
+python3 scripts/stage_released_run.py calendario-candidato.json /ruta-privada/entrega /ruta-privada/stage-nuevo
+```
+
+El [registro de preparación](../experiments/development/staged_visible_run_2026-09-27.json) incluye N/S/T sintéticos y una T que transportó byte por byte el bundle real CPython 3.11. La revisión adversarial detectó y cerró sustitución temporal del ZIP de caso, alteración del árbol extraído, reemplazo de `work` por un enlace simbólico y mutación del calendario de la API que antes desalineaba los límites publicados; `stage.json` se publica con un renombrado final tras las comprobaciones. El reporte conserva `execution_ready: false`, `runtime_enforced: false`, `provider_receipts_checked: false` y `custody_verified: false`. Una copia preparada es un insumo para un futuro ejecutor aislado, no una corrida confirmatoria; deberá revalidarse inmediatamente antes de usarla. Un proceso hostil con el mismo UID puede correr contra estas comprobaciones puntuales y no se ensayó un backend de aislamiento en este host.
+
 ## Firma offline del diseño candidato
 
 [`scripts/check_study_signature.py`](../scripts/check_study_signature.py) vuelve a verificar los 15 archivos, exige el SHA-256 original de `GOAL.md` y que los bytes del protocolo coincidan con el digest del calendario. `challenge` produce los bytes canónicos en base64 para una firma Ed25519 externa; el mensaje liga propósito, GOAL, protocolo, calendario y roles/digests de activos. No incluye rutas ni contenido de los casos. La herramienta no genera ni lee claves privadas.

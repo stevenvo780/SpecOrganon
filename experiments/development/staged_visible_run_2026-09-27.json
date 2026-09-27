@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "classification": "development_visible_run_staging_probe_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "scope": "one-run visible-byte preparation before any model execution",
+  "synthetic_arm_checks": {
+    "arms": ["N", "S", "T"],
+    "source": "fixture._fixture compiled schedule and preflight release per arm",
+    "selected_roles_only": true,
+    "case_package_extracted_and_rehashed": true,
+    "work_directory_empty": true,
+    "hidden_reference_and_rubric_bytes_absent": true,
+    "release_bytes_and_mtime_unchanged": true,
+    "stage_json_published_last": true,
+    "execution_ready": false,
+    "runtime_enforced": false,
+    "provider_receipts_checked": false,
+    "custody_verified": false
+  },
+  "actual_toolkit_bundle_probe": {
+    "classification": "synthetic_unsealed_t_release_with_actual_local_toolkit_bytes",
+    "arm": "T",
+    "case_id": "R-F",
+    "run_id": "conf-342461d3a4392e98e913dfbf",
+    "source_artifact": "dist/toolkit-cpython311-linux_x86_64.zip",
+    "toolkit_sha256": "4991dac955aa43f87014f692b6e63d7596daaf331979fac2b6f13173f8e4fdda",
+    "staged_toolkit_bytes_equal_source": true,
+    "wheel_count": 29,
+    "toolkit_target": {
+      "platform": "linux_x86_64",
+      "python_implementation": "CPython",
+      "python_version": "3.11"
+    },
+    "stage_roles": [
+      "arm_prompt",
+      "case_package",
+      "common_prompt",
+      "task_contract",
+      "tool_policy",
+      "toolkit"
+    ],
+    "stage_root_entries": ["case", "inputs", "stage.json", "work"],
+    "hidden_bytes_present": false,
+    "execution_ready": false,
+    "runtime_enforced": false
+  },
+  "negative_controls": [
+    "changed prompt or extra release entry rejected before stage creation",
+    "release prompt changed after visible inspection rejected before stage manifest",
+    "valid case ZIP temporarily substituted during extraction and then restored rejected",
+    "extracted case file altered after extraction rejected",
+    "nested extracted case file altered after extraction rejected",
+    "work directory replaced by outside symlink rejected",
+    "failure after pending manifest write leaves no stage.json",
+    "caller-owned calendar mutated during pending write cannot alter stage limits",
+    "existing destination preserved and relative destination rejected"
+  ],
+  "independent_review": {
+    "initial_false_successes": [
+      "temporary valid case ZIP substitution yielded a success manifest with different case bytes",
+      "case mutation and work symlink yielded a success manifest",
+      "an error after direct stage.json write left a valid-looking success marker",
+      "caller mutated per_run_limits from 23 to 24 after release verification and stage.json published 24 with the original schedule SHA"
+    ],
+    "post_fix_extraction_and_marker_reproductions_returned_success": false,
+    "post_fix_extraction_and_marker_reproductions_published_stage_json": false,
+    "post_fix_caller_schedule_mutation_changes_published_limits": false,
+    "reviewer": "native read-only development agent, not an independent human custodian"
+  },
+  "checks": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_stage_released_run.py",
+      "result": "15 passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "923 passed"
+    },
+    {
+      "command": "ruff check scripts/stage_released_run.py tests/test_stage_released_run.py",
+      "result": "All checks passed"
+    },
+    {
+      "command": "ruff format --check scripts/stage_released_run.py tests/test_stage_released_run.py",
+      "result": "2 files already formatted"
+    }
+  ],
+  "limitations": [
+    "The source schedule, run, case, and review are synthetic and unsealed; no reserved case was opened.",
+    "The local actual toolkit ZIP is ignored by Git and has no external custody.",
+    "Staging does not install T, run a model, mount isolated roots, enforce policy or budgets, or authenticate provider receipts.",
+    "A same-UID writer can still race point-in-time checks after the last verification; a future executor must revalidate and use isolation and custody.",
+    "The final stage.json rename is the last operation on normal return; host-crash durability of the rename was not proven."
+  ],
+  "criterion_4": "not_assessed"
+}
