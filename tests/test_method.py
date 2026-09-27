@@ -651,6 +651,176 @@ def test_simulation_cannot_claim_field_success_and_field_needs_numbers(tmp_path)
     assert any("structured threshold and measured effect" in item for item in blockers)
 
 
+def test_simulation_cannot_claim_field_rejection_and_no_demostrado_remains_available(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    assessment = {"verdict": "incumplido", "claim_scope": "field", "uncertainty": "synthetic only",
+                  "adverse_effects": "not measured", "cost": "not measured"}
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment)
+    status = engine.gate(path, "validate")
+    assert not status["ready"] and not status["accepted"]
+    assert any("cannot use another evidence origin" in item for item in status["blockers"])
+
+    _put(path, "base1", "baseline", ["crit1"],
+         {"origin": "field", "source": "self report", "date": "2026-09-26"})
+    _put(path, "res1", "result", ["base1", "crit1"],
+         {"origin": "field", "source": "self report", "date": "2026-09-26"})
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment)
+    assert any("structured threshold and measured effect" in item
+               for item in engine.gate(path, "validate")["blockers"])
+
+    assessment["verdict"] = "no_demostrado"
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment)
+    assert engine.gate(path, "validate")["ready"]
+
+
+@pytest.mark.parametrize("success_statistic", ("lower_ci", "estimate"))
+def test_field_rejection_requires_measured_failure_of_prior_rule(tmp_path, success_statistic):
+    # The numbers and field label are invented; this checks gate mechanics only.
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    criterion = {"metric": "count", "threshold": {"operator": ">=", "value": 0.1,
+                                                 "statistic": success_statistic},
+                 "reject": "upper CI below 0.1"}
+    _put(path, "crit1", "criterion", ["req1", "i1"], criterion.copy())
+    _put(path, "t1", "test", ["impl1", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
+    _put(path, "base1", "baseline", ["crit1"],
+         {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+          "metric": "count", "value": 0.2, "unit": "count"})
+    effect = {"metric": "count", "estimate": 0.3, "interval": [0.05, 0.4],
+              "design": "randomized fixture", "comparator": "synthetic control",
+              "sample_size": 12, "unit": "count"}
+    assessment = {"verdict": "incumplido", "claim_scope": "field",
+                  "uncertainty": "synthetic interval", "adverse_effects": "invented fixture",
+                  "cost": "invented fixture"}
+
+    def record_result():
+        _put(path, "res1", "result", ["base1", "crit1"],
+             {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+              "effect": effect.copy()})
+        _put(path, "ass1", "assessment", ["res1", "r1"], assessment.copy())
+
+    def revise_criterion():
+        _put(path, "crit1", "criterion", ["req1", "i1"], criterion.copy())
+        _put(path, "t1", "test", ["impl1", "crit1"],
+             {"passed": True, "command": "synthetic fixture; no external command run"})
+        _put(path, "base1", "baseline", ["crit1"],
+             {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+              "metric": "count", "value": 0.2, "unit": "count"})
+        record_result()
+        _accept(path, "specify")
+        _accept(path, "build")
+
+    record_result()
+    _accept(path, "specify")
+    _accept(path, "build")
+    assert "ass1 rejection needs a structured preregistered rejection test" in \
+        engine.gate(path, "validate")["blockers"]
+
+    criterion["reject_test"] = {"operator": "<", "value": 0.1, "statistic": "lower_ci"}
+    revise_criterion()
+    assert "ass1 field rejection test must use upper_ci < at the success threshold" in \
+        engine.gate(path, "validate")["blockers"]
+
+    criterion["reject_test"] = {"operator": "<", "value": 0.1, "statistic": "upper_ci"}
+    revise_criterion()
+    assert "ass1 measured upper_ci does not meet the prior rejection test" in \
+        engine.gate(path, "validate")["blockers"]
+
+    assessment["verdict"] = "no_demostrado"
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment.copy())
+    assert engine.gate(path, "validate")["ready"]
+    assessment["verdict"] = "incumplido"
+
+    effect["estimate"] = 0.03
+    effect["interval"] = [0.01, 0.05]
+    record_result()
+    _accept(path, "validate")
+
+    effect["sample_size"] = 0
+    record_result()
+    assert "ass1 field rejection lacks a positive sample size" in \
+        engine.gate(path, "validate")["blockers"]
+
+    effect["sample_size"] = 12
+    effect["estimate"] = 0.3
+    effect["interval"] = [0.15, 0.4]
+    record_result()
+    status = engine.gate(path, "validate")
+    assert not status["ready"] and not status["accepted"]
+    assert any("does not meet the prior rejection test" in item
+               for item in status["blockers"])
+
+
+def test_overlapping_success_and_rejection_tests_block_both_verdicts(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    success_test = {"operator": ">=", "value": 0.1, "statistic": "lower_ci"}
+    _put(path, "crit1", "criterion", ["req1", "i1"],
+         {"metric": "count", "threshold": success_test,
+          "reject": "duplicate success condition", "reject_test": success_test})
+    _put(path, "t1", "test", ["impl1", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
+    _put(path, "base1", "baseline", ["crit1"],
+         {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+          "metric": "count", "value": 0.2, "unit": "count"})
+    _put(path, "res1", "result", ["base1", "crit1"],
+         {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+          "effect": {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
+                     "design": "randomized fixture", "comparator": "synthetic control",
+                     "sample_size": 12, "unit": "count"}})
+    _accept(path, "specify")
+    _accept(path, "build")
+
+    for verdict in ("incumplido", "cumplido"):
+        _put(path, "ass1", "assessment", ["res1", "r1"],
+             {"verdict": verdict, "claim_scope": "field", "uncertainty": "synthetic interval",
+              "adverse_effects": "invented fixture", "cost": "invented fixture"})
+        status = engine.gate(path, "validate")
+        assert not status["ready"] and not status["accepted"]
+        assert "ass1 success and rejection tests both hold for the measured effect" in \
+            status["blockers"]
+
+
+@pytest.mark.parametrize("success_statistic", ("upper_ci", "estimate"))
+def test_field_upper_bound_success_uses_lower_bound_for_rejection(tmp_path, success_statistic):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _put(path, "crit1", "criterion", ["req1", "i1"],
+         {"metric": "count", "threshold": {"operator": "<=", "value": 0.1,
+                                           "statistic": success_statistic},
+          "reject": "lower CI above 0.1",
+          "reject_test": {"operator": ">", "value": 0.1, "statistic": "lower_ci"}})
+    _put(path, "t1", "test", ["impl1", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
+    _put(path, "base1", "baseline", ["crit1"],
+         {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+          "metric": "count", "value": 0.2, "unit": "count"})
+    effect = {"metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
+              "design": "randomized fixture", "comparator": "synthetic control",
+              "sample_size": 12, "unit": "count"}
+
+    def record_result():
+        _put(path, "res1", "result", ["base1", "crit1"],
+             {"origin": "field", "source": "invented fixture", "date": "2026-09-26",
+              "effect": effect.copy()})
+        _put(path, "ass1", "assessment", ["res1", "r1"],
+             {"verdict": "incumplido", "claim_scope": "field",
+              "uncertainty": "synthetic interval", "adverse_effects": "invented fixture",
+              "cost": "invented fixture"})
+
+    record_result()
+    _accept(path, "specify")
+    _accept(path, "build")
+    _accept(path, "validate")
+
+    effect["interval"] = [0.05, 0.4]
+    record_result()
+    assert "ass1 measured lower_ci does not meet the prior rejection test" in \
+        engine.gate(path, "validate")["blockers"]
+
+
 def test_structured_field_claim_checks_prior_threshold_mechanically(tmp_path):
     # These are invented fixture numbers. Passing this gate is not field evidence.
     path = tmp_path / "case"

@@ -272,49 +272,67 @@ def _numeric(value: Any) -> float | None:
         return None
     try:
         number = float(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     return number if math.isfinite(number) else None
 
 
 def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) -> list[str]:
-    """Check that a fulfilled claim is at least numerically and procedurally auditable.
+    """Check that a decisive verdict is numerically and procedurally auditable.
 
+    Rejections use the declared reject_test predicate, not the reject prose.
     This does not establish source authenticity or causal identification; an
     independent evaluator must still judge those.
     """
-    if assessment["data"].get("verdict") != "cumplido":
+    verdict = assessment["data"].get("verdict")
+    if verdict not in {"cumplido", "incumplido"}:
         return []
+    claim = "success" if verdict == "cumplido" else "rejection"
     issues: list[str] = []
     ancestors = [items[key] for key in _ancestors(items, assessment["id"])]
     results = [item for item in ancestors if item["kind"] == "result"]
     baselines = [item for item in ancestors if item["kind"] == "baseline"]
     criteria = [item for item in ancestors if item["kind"] == "criterion"]
     if len(results) != 1 or len(baselines) != 1 or len(criteria) != 1:
-        return [f"{assessment['id']} success needs exactly one linked result, baseline and criterion"]
+        return [f"{assessment['id']} {claim} needs exactly one linked result, baseline and criterion"]
     result, baseline, criterion = results[0], baselines[0], criteria[0]
     scope = assessment["data"].get("claim_scope")
     if result["data"].get("origin") != scope or baseline["data"].get("origin") != scope:
-        issues.append(f"{assessment['id']} {scope} success cannot use another evidence origin")
+        issues.append(f"{assessment['id']} {scope} {claim} cannot use another evidence origin")
     if result["seq"] <= criterion["seq"]:
-        issues.append(f"{assessment['id']} success uses a criterion written after the result")
+        issues.append(f"{assessment['id']} {claim} uses a criterion written after the result")
+    rejection_test = criterion["data"].get("reject_test")
+    if verdict == "incumplido":
+        rejection_rule = criterion["data"].get("reject")
+        if not isinstance(rejection_rule, str) or not rejection_rule.strip():
+            issues.append(f"{assessment['id']} rejection lacks a declared rejection rule")
+        if rejection_test is None:
+            issues.append(f"{assessment['id']} rejection needs a structured preregistered rejection test")
+    if rejection_test is not None and not isinstance(rejection_test, dict):
+        issues.append(f"{assessment['id']} has an invalid preregistered rejection test")
+        rejection_test = None
     threshold = criterion["data"].get("threshold")
     effect = result["data"].get("effect")
     if not isinstance(threshold, dict) or not isinstance(effect, dict):
-        return issues + [f"{assessment['id']} success needs structured threshold and measured effect"]
+        return issues + [f"{assessment['id']} {claim} needs structured threshold and measured effect"]
     operator = threshold.get("operator")
     statistic = threshold.get("statistic")
     threshold_value = _numeric(threshold.get("value"))
     estimate = _numeric(effect.get("estimate"))
     interval = effect.get("interval")
-    if operator not in {">=", "<="} or statistic not in {"estimate", "lower_ci", "upper_ci"} or threshold_value is None:
+    threshold_valid = (operator in (">=", "<=") and statistic in ("estimate", "lower_ci", "upper_ci")
+                       and threshold_value is not None)
+    if not threshold_valid:
         issues.append(f"{assessment['id']} has an invalid preregistered threshold")
     if effect.get("metric") != criterion["data"].get("metric") or baseline["data"].get("metric") != effect.get("metric"):
         issues.append(f"{assessment['id']} metric differs between baseline, result and criterion")
     effect_unit = effect.get("unit")
     if not isinstance(effect_unit, str) or not effect_unit.strip():
-        issues.append(f"{assessment['id']} success lacks a measured effect unit")
-    for owner, declaration in (("criterion", criterion["data"]), ("threshold", threshold)):
+        issues.append(f"{assessment['id']} {claim} lacks a measured effect unit")
+    declarations = [("criterion", criterion["data"]), ("threshold", threshold)]
+    if rejection_test is not None:
+        declarations.append(("reject_test", rejection_test))
+    for owner, declaration in declarations:
         if "unit" not in declaration:
             continue
         declared_unit = declaration["unit"]
@@ -327,14 +345,14 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) ->
                          and items[key]["data"].get("metric") == criterion["data"].get("metric")]
     linked_units = [indicator["data"].get("unit") for indicator in linked_indicators]
     if not linked_units or any(not isinstance(unit, str) or not unit.strip() for unit in linked_units):
-        issues.append(f"{assessment['id']} success lacks a declared linked indicator unit")
+        issues.append(f"{assessment['id']} {claim} lacks a declared linked indicator unit")
     elif any(unit != linked_units[0] for unit in linked_units[1:]):
-        issues.append(f"{assessment['id']} success has ambiguous linked indicator units")
+        issues.append(f"{assessment['id']} {claim} has ambiguous linked indicator units")
     elif effect_unit != linked_units[0]:
         issues.append(f"{assessment['id']} effect unit differs from linked indicator")
     baseline_unit = baseline["data"].get("unit")
     if not isinstance(baseline_unit, str) or not baseline_unit.strip():
-        issues.append(f"{assessment['id']} success lacks a declared baseline unit")
+        issues.append(f"{assessment['id']} {claim} lacks a declared baseline unit")
     elif baseline_unit != effect_unit:
         issues.append(f"{assessment['id']} baseline unit differs from measured effect")
     if _numeric(baseline["data"].get("value")) is None or estimate is None:
@@ -348,16 +366,46 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) ->
             issues.append(f"{assessment['id']} has an inconsistent effect interval")
     if scope == "field":
         if not all(effect.get(field) for field in ("design", "comparator", "unit")):
-            issues.append(f"{assessment['id']} field success lacks design, comparator or unit")
+            issues.append(f"{assessment['id']} field {claim} lacks design, comparator or unit")
         sample_size = effect.get("sample_size")
         if not isinstance(sample_size, int) or isinstance(sample_size, bool) or sample_size < 1:
-            issues.append(f"{assessment['id']} field success lacks a positive sample size")
+            issues.append(f"{assessment['id']} field {claim} lacks a positive sample size")
     values = {"estimate": estimate, "lower_ci": low, "upper_ci": high}
-    chosen = values.get(statistic)
-    if threshold_value is not None and chosen is not None and operator in {">=", "<="}:
-        passes = chosen >= threshold_value if operator == ">=" else chosen <= threshold_value
-        if not passes:
+    chosen = values.get(statistic) if isinstance(statistic, str) else None
+    success_passes = None
+    if threshold_valid and chosen is not None:
+        success_passes = chosen >= threshold_value if operator == ">=" else chosen <= threshold_value
+        if verdict == "cumplido" and not success_passes:
             issues.append(f"{assessment['id']} measured {statistic} does not meet the prior threshold")
+    if rejection_test is not None:
+        reject_operator = rejection_test.get("operator")
+        reject_statistic = rejection_test.get("statistic")
+        reject_value = _numeric(rejection_test.get("value"))
+        allowed_keys = {"operator", "statistic", "value", "unit"}
+        required_keys = {"operator", "statistic", "value"}
+        if (not required_keys <= rejection_test.keys() or not rejection_test.keys() <= allowed_keys
+                or reject_operator not in ("<", "<=", ">", ">=")
+                or reject_statistic not in ("estimate", "lower_ci", "upper_ci")
+                or reject_value is None):
+            issues.append(f"{assessment['id']} has an invalid preregistered rejection test")
+        else:
+            if scope == "field" and threshold_valid:
+                # A crossing interval cannot establish a field rejection: the
+                # entire interval must fall on the adverse side of the threshold.
+                expected_statistic, expected_operator = (("upper_ci", "<") if operator == ">="
+                                                         else ("lower_ci", ">"))
+                if (reject_statistic != expected_statistic or reject_operator != expected_operator
+                        or reject_value != threshold_value):
+                    issues.append(f"{assessment['id']} field rejection test must use {expected_statistic} "
+                                  f"{expected_operator} at the success threshold")
+            reject_chosen = values[reject_statistic]
+            if reject_chosen is not None:
+                triggered = {"<": reject_chosen < reject_value, "<=": reject_chosen <= reject_value,
+                             ">": reject_chosen > reject_value, ">=": reject_chosen >= reject_value}[reject_operator]
+                if verdict == "incumplido" and not triggered:
+                    issues.append(f"{assessment['id']} measured {reject_statistic} does not meet the prior rejection test")
+                if success_passes and triggered:
+                    issues.append(f"{assessment['id']} success and rejection tests both hold for the measured effect")
     return issues
 
 
