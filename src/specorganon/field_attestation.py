@@ -151,7 +151,7 @@ def inspect_materials(
     project: dict[str, Any], assessment_id: str, assessment_version: int, verdict: str,
     manifest_path: str, report_path: str,
 ) -> dict[str, Any]:
-    """Reopen declared sources and check structural and primary-digest coverage."""
+    """Reopen declared sources and check structural and primary-record content."""
     manifest_path, manifest_raw = _absolute_regular_bytes(
         manifest_path, "source manifest", MAX_MANIFEST_BYTES)
     manifest = _json_object(manifest_raw, "source manifest")
@@ -207,21 +207,26 @@ def inspect_materials(
     if preflight.get("structural_match_at_read") is not True:
         raise FieldAttestationError("field guardrail preflight did not match")
     preflight_sha256 = _sha256(_canonical(preflight))
+    analysis = _json_object(sources["analysis"][0][1], "analysis")
+    source_analysis = analysis if type(analysis.get("schema")) is int and analysis["schema"] == 2 else None
     source_coverage = audit_field_source_digest_coverage(
         plan, field, registry, measurements,
         [{"role": source["role"], "sha256": source["sha256"]}
          for source in manifest["sources"]],
+        analysis=source_analysis,
     )
     if source_coverage.get("exact_primary_source_coverage") is not True:
         raise FieldAttestationError("field primary source digests lack exact manifest coverage")
     source_coverage_sha256 = _sha256(_canonical(source_coverage))
     source_content = audit_field_source_content(
         plan, field, registry, measurements, opened_primary_sources,
+        analysis=source_analysis,
     )
     if source_content.get("exact_declared_content_match") is not True:
         raise FieldAttestationError("field primary source content differs from declarations")
+    if source_analysis is not None and source_content.get("baseline_volume_input_byte_bound") is not True:
+        raise FieldAttestationError("baseline input-volume bytes were not bound to declarations")
     source_content_sha256 = _sha256(_canonical(source_content))
-    analysis = _json_object(sources["analysis"][0][1], "analysis")
     try:
         analysis_preflight = audit_field_effect_analysis(
             plan, field, registry, measurements, analysis,
@@ -264,6 +269,7 @@ def inspect_materials(
         "preflight_sha256": preflight_sha256,
         "source_coverage_sha256": source_coverage_sha256,
         "source_content_sha256": source_content_sha256,
+        **({"baseline_volume_input_byte_bound": True} if source_analysis is not None else {}),
         "analysis_sha256": analysis_sha256,
         "analysis_preflight_sha256": analysis_preflight_sha256,
     }

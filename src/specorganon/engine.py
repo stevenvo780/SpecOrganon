@@ -1222,6 +1222,11 @@ def get_state(path: str | Path) -> dict[str, Any]:
             "field_attestations": [
                 {"seq": entry["seq"], "actor": entry["actor"],
                  "signature_verified": entry["verified"],
+                 "baseline_volume_input_byte_bound": (
+                     entry["verified"] is True
+                     and isinstance(entry["materials"], dict)
+                     and entry["materials"].get("baseline_volume_input_byte_bound") is True
+                 ),
                  "binding_current": _field_statement_binding_current(state, entry),
                  "assessment_id": entry["binding"].get("assessment_id")
                  if isinstance(entry["binding"], dict) else None}

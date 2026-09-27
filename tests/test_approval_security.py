@@ -579,6 +579,7 @@ def test_synthetic_attestation_report_cannot_authorize_field_success(
     _cli("attest-field", *cli_args, "--signature", signature)
     statements = engine.get_state(case)["field_attestations"]
     assert len(statements) == 1 and statements[0]["signature_verified"] is True
+    assert statements[0]["baseline_volume_input_byte_bound"] is False
     assert statements[0]["binding_current"] is True
     gate = engine.gate(case, "validate")
     blocker = "ass1 decisive field verdict needs verified field effect analysis and source custody"

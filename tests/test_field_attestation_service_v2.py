@@ -101,7 +101,7 @@ def test_schema2_service_rows_are_checked_against_opened_attestation_sources(
     assert "analysis_preflight_sha256" in materials
 
 
-def test_schema2_service_extract_and_adjusted_candidate_share_attestation_bundle(
+def test_schema2_service_extract_does_not_cover_unopened_adjusted_volume(
     tmp_path: Path,
 ) -> None:
     project, report = _schema2_bundle(tmp_path)
@@ -130,13 +130,12 @@ def test_schema2_service_extract_and_adjusted_candidate_share_attestation_bundle
     analysis_entry["sha256"] = analysis_sha256
     report["analysis_sha256"] = analysis_sha256
     _refresh_declarations(tmp_path, manifest, report)
-    materials = field_attestation.inspect_materials(
-        project, "ass1", 1, "cumplido", str(tmp_path / "manifest.json"),
-        str(tmp_path / "report.json"),
-    )
-    assert materials["analysis_preflight_sha256"] == hashlib.sha256(
-        field_attestation._canonical(computed)
-    ).hexdigest()
+    with pytest.raises(field_attestation.FieldAttestationError,
+                       match="primary source digests lack exact manifest coverage"):
+        field_attestation.inspect_materials(
+            project, "ass1", 1, "cumplido", str(tmp_path / "manifest.json"),
+            str(tmp_path / "report.json"),
+        )
 
 
 @pytest.mark.parametrize("metric", ["consumed_service", "feasible_max_service"])
