@@ -86,7 +86,17 @@ equivalence approval is only declared, never authenticated. Denominator and
 upper-bound errors are rejected, but this tool never calculates V or G.
 Opt-in ``service.schema: 2`` requires each row's ``source`` to add a lowercase
 ``record_sha256`` and requires distinct ``(record_sha256, locator)`` references.
-This preflight does not open those bytes; a separate content audit binds them.
+Opt-in ``service.schema: 3`` additionally requires approved-equivalence-declared
+``denominator_rules`` of ``{id, material_id, classification, basis,
+max_service_per_kg}`` and each
+row's ``denominator_inputs`` of ``{input_flow_id, rule_id}``. Every external
+input declares ``material_id`` and is assigned exactly once to its material rule.
+Eligible feed/ingredient
+mass contributes its positive coefficient; unsuitable feed/ingredient and added
+water have zero coefficients. Both feasible service and its uncertainty must
+equal the exact rational sums over eligible input masses and uncertainties.
+The approval and input classifications remain declarations. This preflight
+does not open source bytes; a separate content audit binds them.
 Tolerance evidence and the declared equivalence approval record must predate
 the first assignment; the latter cannot predate its declared approval.
 
@@ -135,6 +145,11 @@ NOTICE_SCHEMA3 = (
     "safety, nutrition, independent approval, causal design and observed impact are "
     "not authenticated. Undeclared branches and households are not checked. "
     "No V or G is calculated; criterion 3 is not assessed."
+)
+NOTICE_SERVICE_SCHEMA3 = (
+    " Service schema 3 reconciles only a declared additive ceiling under the "
+    "declared approved-equivalence rules; it does not establish true physical "
+    "feasibility or validate material classifications."
 )
 MASS_FACTORS = {"kg": Fraction(1), "g": Fraction(1, 1000), "t": Fraction(1000)}
 MAX_ABS_NUMBER = Decimal("1e18")
@@ -362,17 +377,18 @@ def _validate_destination(flow: dict[str, Any], label: str, mass: tuple[Fraction
 def _validate_service(service: Any, groups: dict[str, dict[str, Any]], periods: set[str],
                       actors: set[str], consumed: dict[tuple[str, str], set[str]],
                       period_times: dict[str, tuple[datetime, datetime]],
-                      consumed_outcome_at: dict[str, datetime]) -> str:
+                      consumed_outcome_at: dict[str, datetime],
+                      flows: dict[str, dict[str, Any]]) -> tuple[str, list[dict[str, Any]]]:
     if service is None:
-        return "not_assessed_no_declared_equivalence"
+        return "not_assessed_no_declared_equivalence", []
     row = _object(service, "service", {"equivalence", "rows"}, {"schema"})
     service_schema = row.get("schema")
-    if "schema" in row and (type(service_schema) is not int or service_schema != 2):
-        raise FieldFlowError("service.schema must be integer 2 when present")
+    if "schema" in row and (type(service_schema) is not int or service_schema not in {2, 3}):
+        raise FieldFlowError("service.schema must be integer 2 or 3 when present")
     eq = _object(row["equivalence"], "service.equivalence", {
         "id", "service_unit", "approved_at_utc", "approved_by_actor_ids",
         "verified_by", "record_sha256", "source",
-    })
+    } | ({"denominator_rules"} if service_schema == 3 else set()))
     _text(eq["id"], "service.equivalence.id")
     unit = _text(eq["service_unit"], "service.equivalence.service_unit")
     approved_at = _utc(eq["approved_at_utc"], "service.equivalence.approved_at_utc")
@@ -393,14 +409,42 @@ def _validate_service(service: Any, groups: dict[str, dict[str, Any]], periods: 
         raise FieldFlowError("service.equivalence.source predates its declared approval")
     if equivalence_source_at >= first_assignment_at:
         raise FieldFlowError("service.equivalence.source must predate first group assignment")
+    rules: dict[str, tuple[str, str, str, Fraction]] = {}
+    if service_schema == 3:
+        seen_materials: set[str] = set()
+        for index, raw_rule in enumerate(_array(eq["denominator_rules"],
+                                                "service.equivalence.denominator_rules")):
+            rule_label = f"service.equivalence.denominator_rules[{index}]"
+            rule = _object(raw_rule, rule_label,
+                           {"id", "material_id", "classification", "basis",
+                            "max_service_per_kg"})
+            rule_id = _text(rule["id"], f"{rule_label}.id")
+            if rule_id in rules:
+                raise FieldFlowError(f"{rule_label}.id repeats a denominator rule")
+            material_id = _text(rule["material_id"], f"{rule_label}.material_id")
+            if material_id in seen_materials:
+                raise FieldFlowError(f"{rule_label}.material_id repeats a material")
+            seen_materials.add(material_id)
+            basis = _text(rule["basis"], f"{rule_label}.basis")
+            classification = _choice(rule["classification"],
+                                     f"{rule_label}.classification",
+                                     {"eligible", "unsuitable", "water"})
+            coefficient = _number(rule["max_service_per_kg"],
+                                  f"{rule_label}.max_service_per_kg")
+            if (classification == "eligible" and coefficient <= 0) or (
+                classification != "eligible" and coefficient != 0
+            ):
+                raise FieldFlowError(f"{rule_label}.max_service_per_kg must be positive for eligible material and zero for unsuitable or water")
+            rules[rule_id] = material_id, classification, basis, Fraction(coefficient)
     seen: set[tuple[str, str]] = set()
     seen_source_refs: set[tuple[str, str]] = set()
+    reconciliations: list[dict[str, Any]] = []
     for index, raw in enumerate(_array(row["rows"], "service.rows")):
         label = f"service.rows[{index}]"
         item = _object(raw, label, {
             "group_id", "period", "consumption_flow_ids", "consumed_service",
             "feasible_max_service", "source",
-        })
+        } | ({"denominator_inputs"} if service_schema == 3 else set()))
         key = (_text(item["group_id"], f"{label}.group_id"), _text(item["period"], f"{label}.period"))
         if key[0] not in groups or key[1] not in periods:
             raise FieldFlowError(f"{label} references unknown group or period")
@@ -411,19 +455,80 @@ def _validate_service(service: Any, groups: dict[str, dict[str, Any]], periods: 
         if set(flow_ids) != consumed[key]:
             raise FieldFlowError(f"{label} consumption_flow_ids must exactly cover observed consumed flows")
         quantities: list[Decimal] = []
+        uncertainties: list[Decimal] = []
         for field in ("consumed_service", "feasible_max_service"):
             measure = _object(item[field], f"{label}.{field}", {"value", "unit", "uncertainty"})
             if measure["unit"] != unit:
                 raise FieldFlowError(f"{label}.{field}.unit differs from approved service unit")
             quantities.append(_number(measure["value"], f"{label}.{field}.value",
                                       positive=field == "feasible_max_service"))
-            _number(measure["uncertainty"], f"{label}.{field}.uncertainty")
+            uncertainties.append(_number(measure["uncertainty"], f"{label}.{field}.uncertainty"))
         if quantities[0] > quantities[1]:
             raise FieldFlowError(f"{label} observed service exceeds feasible maximum (V > 1)")
         if not flow_ids and quantities[0] != 0:
             raise FieldFlowError(f"{label} positive consumed service has no observed consumption flow")
         source = item["source"]
-        if service_schema == 2:
+        if service_schema == 3:
+            inputs = _array(item["denominator_inputs"], f"{label}.denominator_inputs")
+            actual_inputs = {flow_id for flow_id, flow in flows.items()
+                             if flow["from"] is None and
+                             (flow["group_id"], flow["period"]) == key}
+            seen_inputs: set[str] = set()
+            total = Fraction(0)
+            total_uncertainty = Fraction(0)
+            excluded_mass: dict[str, Fraction] = {"unsuitable": Fraction(0),
+                                                  "water": Fraction(0)}
+            contributions: list[dict[str, str]] = []
+            for input_index, raw_input in enumerate(inputs):
+                input_label = f"{label}.denominator_inputs[{input_index}]"
+                input_item = _object(raw_input, input_label, {"input_flow_id", "rule_id"})
+                input_id = _text(input_item["input_flow_id"], f"{input_label}.input_flow_id")
+                rule_id = _text(input_item["rule_id"], f"{input_label}.rule_id")
+                if input_id in seen_inputs:
+                    raise FieldFlowError(f"{input_label} double counts an external input")
+                seen_inputs.add(input_id)
+                if input_id not in actual_inputs:
+                    raise FieldFlowError(f"{input_label} must reference an external input in the same group-period")
+                if rule_id not in rules:
+                    raise FieldFlowError(f"{input_label}.rule_id is not an approved denominator rule")
+                flow = flows[input_id]
+                material_id, classification, basis, coefficient = rules[rule_id]
+                if (flow["kind"] == "water_addition") != (classification == "water"):
+                    raise FieldFlowError(f"{input_label} flow kind and denominator classification disagree")
+                if flow["material_id"] != material_id:
+                    raise FieldFlowError(f"{input_label} material_id differs from approved denominator rule")
+                contribution = flow["mass"][0] * coefficient
+                contribution_uncertainty = flow["mass"][1] * coefficient
+                if classification == "eligible":
+                    total += contribution
+                    total_uncertainty += contribution_uncertainty
+                else:
+                    excluded_mass[classification] += flow["mass"][0]
+                contributions.append({
+                    "input_flow_id": input_id, "flow_kind": flow["kind"],
+                    "material_id": material_id, "rule_id": rule_id,
+                    "classification": classification, "basis": basis,
+                    "mass_kg": _exact_decimal(flow["mass"][0]),
+                    "mass_uncertainty_kg": _exact_decimal(flow["mass"][1]),
+                    "max_service_per_kg": _exact_decimal(coefficient),
+                    "service_contribution": _exact_decimal(contribution),
+                    "service_uncertainty_contribution": _exact_decimal(contribution_uncertainty),
+                })
+            if seen_inputs != actual_inputs:
+                raise FieldFlowError(f"{label}.denominator_inputs missing external inputs: {sorted(actual_inputs - seen_inputs)}")
+            if Fraction(quantities[1]) != total:
+                raise FieldFlowError(f"{label}.feasible_max_service differs from exact external-input denominator")
+            if Fraction(uncertainties[1]) != total_uncertainty:
+                raise FieldFlowError(f"{label}.feasible_max_service.uncertainty differs from exact eligible-input uncertainty")
+            reconciliations.append({"group_id": key[0], "period": key[1],
+                                    "recomputed_feasible_max_service": _exact_decimal(total),
+                                    "recomputed_uncertainty": _exact_decimal(total_uncertainty),
+                                    "excluded_unsuitable_mass_kg": _exact_decimal(excluded_mass["unsuitable"]),
+                                    "excluded_water_mass_kg": _exact_decimal(excluded_mass["water"]),
+                                    "inputs": sorted(contributions,
+                                                     key=lambda item: item["input_flow_id"]),
+                                    "unit": unit, "status": "declared_only_additive_ceiling"})
+        if service_schema in {2, 3}:
             source = _object(source, f"{label}.source", {
                 "source_id", "locator", "observed_at_utc", "method", "record_sha256",
             })
@@ -443,7 +548,9 @@ def _validate_service(service: Any, groups: dict[str, dict[str, Any]], periods: 
     expected = {(group, period) for group in groups for period in periods}
     if seen != expected:
         raise FieldFlowError(f"service.rows missing group-period combinations: {sorted(expected - seen)}")
-    return "declared_service_inputs_bounded_approval_unverified"
+    return ("declared_external_input_denominator_reconciled_approval_unverified" if service_schema == 3
+            else "declared_service_inputs_bounded_approval_unverified"), sorted(
+                reconciliations, key=lambda item: (item["group_id"], item["period"]))
 
 
 def _stage_witness_paths(lots: dict[str, dict[str, Any]], flows: dict[str, dict[str, Any]],
@@ -699,6 +806,8 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
     if type(root["schema"]) is not int or root["schema"] not in {1, 2, 3}:
         raise FieldFlowError("schema must be integer 1, 2 or 3")
     schema = root["schema"]
+    service_schema3 = (type(root.get("service")) is dict
+                       and root["service"].get("schema") == 3)
     study_id = _text(root["study_id"], "study_id")
     tolerance = Fraction(_number(root["balance_tolerance_kg"], "balance_tolerance_kg"))
     tolerance_source_at = _evidence(root["tolerance_source"], "tolerance_source")
@@ -791,7 +900,7 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
         item = _object(raw, label, {
             "id", "load_id", "group_id", "period", "from_lot_id", "to_lot_id",
             "kind", "mass", "source", "destination", "outcome",
-        })
+        }, {"material_id"} if service_schema3 else None)
         flow_id = _unique_id(item["id"], f"{label}.id", ids)
         load_id = _unique_id(item["load_id"], f"{label}.load_id", load_ids)
         group_id = _text(item["group_id"], f"{label}.group_id")
@@ -816,9 +925,15 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
         if source_lot is None:
             if kind not in INPUT_KINDS:
                 raise FieldFlowError(f"{label} external input must be feed, ingredient or water_addition")
+            if service_schema3:
+                if "material_id" not in item:
+                    raise FieldFlowError(f"{label}.material_id is required for service.schema 3 external input")
+                _text(item["material_id"], f"{label}.material_id")
             roots[key] += 1
         elif kind not in OUTPUT_KINDS:
             raise FieldFlowError(f"{label} output or transfer must be product, coproduct, residue or moisture")
+        elif "material_id" in item:
+            raise FieldFlowError(f"{label}.material_id is only for external inputs")
         if source_lot is not None and target_lot is not None and kind == "moisture":
             raise FieldFlowError(f"{label} moisture loss must have an observed terminal destination")
         mass = _mass(item["mass"], f"{label}.mass")
@@ -834,7 +949,8 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
             consumed_outcome_at[flow_id] = outcome_at
         flows[flow_id] = {"from": source_lot, "to": target_lot, "kind": kind, "load_id": load_id,
                           "mass": mass, "group_id": group_id, "period": period,
-                          "observed_at": flow_at, "outcome_at": outcome_at}
+                          "observed_at": flow_at, "outcome_at": outcome_at,
+                          "material_id": item.get("material_id")}
         if source_lot is not None:
             outgoing[source_lot].add(flow_id)
             outgoing_loads[source_lot].add(load_id)
@@ -916,9 +1032,12 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
                         for actor_id in group["actor_ids"]}
     if burden_keys != expected_burdens:
         raise FieldFlowError(f"missing actor-specific burden rows: {sorted(expected_burdens - burden_keys)}")
-    service_status = _validate_service(root.get("service"), groups, periods, actors, consumed,
-                                       period_times, consumed_outcome_at)
+    service_status, service_reconciliation = _validate_service(
+        root.get("service"), groups, periods, actors, consumed,
+        period_times, consumed_outcome_at, flows)
     notice = NOTICE_SCHEMA3 if schema == 3 else NOTICE
+    if service_schema3:
+        notice += NOTICE_SERVICE_SCHEMA3
     return {
         "schema": schema, "classification": CLASSIFICATION, "valid": True,
         "study_id": study_id, "notice": notice,
@@ -932,6 +1051,11 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
         "stage_witnesses": stage_witnesses,
         **({"lineage_bounds": lineage_bounds} if schema == 3 else {}),
         "service_status": service_status,
+        **({"service_denominator_reconciliation": service_reconciliation,
+            "service_denominator_rule_approval_byte_bound": False,
+            "service_denominator_input_byte_bound": False}
+           if service_schema3
+           else {}),
         **({"service_v_input_byte_bound": False}
            if type(root.get("service")) is dict and root["service"].get("schema") == 2
            else {}),

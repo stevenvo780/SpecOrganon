@@ -177,7 +177,7 @@ def _replace_aggregate_source(case: tuple, raw: bytes) -> None:
     case[0]["baseline_release"]["record_sha256"] = entry["sha256"]
     for row in case[3]["rows"]:
         row["source"]["record_sha256"] = entry["sha256"]
-    if case[1].get("service", {}).get("schema") == 2:
+    if case[1].get("service", {}).get("schema") in {2, 3}:
         for row in case[1]["service"]["rows"]:
             row["source"]["record_sha256"] = entry["sha256"]
 
@@ -217,6 +217,92 @@ def _v2_case(*, aggregate: bool = True) -> tuple[dict, dict, dict, dict, list[di
             case[4].append(entry)
             row["source"]["record_sha256"] = entry["sha256"]
     return case
+
+
+def _v3_case() -> tuple[dict, dict, dict, dict, list[dict]]:
+    case = _v2_case()
+    _, field, registry, _, opened = case
+    service = field["service"]
+    service["schema"] = 3
+    rules = [
+        {"id": "food", "material_id": "synthetic-food", "classification": "eligible",
+         "basis": "Synthetic declared ceiling", "max_service_per_kg": 1},
+        {"id": "inedible", "material_id": "synthetic-inedible",
+         "classification": "unsuitable", "basis": "Synthetic exclusion",
+         "max_service_per_kg": 0},
+        {"id": "water", "material_id": "synthetic-water",
+         "classification": "water", "basis": "Synthetic added water exclusion",
+         "max_service_per_kg": 0},
+    ]
+    service["equivalence"]["denominator_rules"] = rules
+    approval_body = json.loads(opened[1]["raw"])
+    approval_equivalence = next(record for record in approval_body["records"]
+                                if record["kind"] == "equivalence")
+    approval_equivalence["denominator_rules"] = copy.deepcopy(rules)
+    opened[1] = _opened("approval_record", _raw(approval_body["records"]))
+    service["equivalence"]["record_sha256"] = opened[1]["sha256"]
+    registry["cells"][1]["approval_record_sha256"] = opened[1]["sha256"]
+
+    source_body = json.loads(opened[0]["raw"])
+    field["flows"] = []
+    for row in service["rows"]:
+        period = row["period"]
+        record = next(item for item in source_body["records"]
+                      if item["kind"] == "service_row" and item["period"] == period)
+        inputs = []
+        for suffix, material_id, rule_id, kind, mass in (
+            ("raw", "synthetic-food", "food", "feed", 10),
+            ("inedible", "synthetic-inedible", "inedible", "ingredient", 2),
+            ("water", "synthetic-water", "water", "water_addition", 3),
+        ):
+            flow_id = f"flow/{period}/{suffix}"
+            declared_mass = {"value": mass, "unit": "kg", "uncertainty": 0.2}
+            field["flows"].append({"id": flow_id, "group_id": "c1", "period": period,
+                                   "from_lot_id": None, "kind": kind,
+                                   "material_id": material_id, "mass": declared_mass})
+            row.setdefault("denominator_inputs", []).append({"input_flow_id": flow_id,
+                                                               "rule_id": rule_id})
+            inputs.append({"input_flow_id": flow_id, "material_id": material_id,
+                           "rule_id": rule_id, "mass": declared_mass})
+        record["denominator_inputs"] = inputs
+    _replace_aggregate_source(case, _raw(source_body["records"]))
+    return case
+
+
+def test_service_schema3_rules_inputs_and_mass_match_opened_bytes() -> None:
+    case = _v3_case()
+    report = audit_field_source_content(*case)
+    assert report["exact_declared_content_match"] is True
+    assert report["service_denominator_rule_approval_byte_bound"] is True
+    assert report["service_denominator_input_byte_bound"] is True
+    assert "service_v_input_byte_bound" not in report
+
+
+@pytest.mark.parametrize("change", ["coefficient", "basis", "rule_material",
+                                     "input_rule", "input_mass", "flow_mass"])
+def test_schema3_rehashed_declaration_cannot_hide_rule_or_input_change(change: str) -> None:
+    case = _v3_case()
+    service = case[1]["service"]
+    if change == "coefficient":
+        service["equivalence"]["denominator_rules"][0]["max_service_per_kg"] = 2
+    elif change == "basis":
+        service["equivalence"]["denominator_rules"][0]["basis"] = "changed"
+    elif change == "rule_material":
+        service["equivalence"]["denominator_rules"][0]["material_id"] = "changed"
+    elif change == "input_rule":
+        service["rows"][0]["denominator_inputs"][0]["rule_id"] = "inedible"
+    elif change == "input_mass":
+        body = json.loads(case[4][0]["raw"])
+        record = next(item for item in body["records"] if item["kind"] == "service_row")
+        record["denominator_inputs"][0]["mass"]["value"] = 11
+        _replace_aggregate_source(case, _raw(body["records"]))
+    else:
+        case[1]["flows"][0]["mass"]["value"] = 11
+    report = audit_field_source_content(*case)
+    assert report["exact_declared_content_match"] is False
+    rule_changed = change in {"coefficient", "basis", "rule_material"}
+    assert report["service_denominator_rule_approval_byte_bound"] is not rule_changed
+    assert report["service_denominator_input_byte_bound"] is rule_changed
 
 
 @pytest.mark.parametrize("aggregate", [True, False])

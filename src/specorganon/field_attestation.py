@@ -224,6 +224,13 @@ def inspect_materials(
     )
     if source_content.get("exact_declared_content_match") is not True:
         raise FieldAttestationError("field primary source content differs from declarations")
+    service_denominator = (type(field.get("service")) is dict
+                           and field["service"].get("schema") == 3)
+    if service_denominator and (
+        source_content.get("service_denominator_rule_approval_byte_bound") is not True
+        or source_content.get("service_denominator_input_byte_bound") is not True
+    ):
+        raise FieldAttestationError("service denominator approval and input bytes were not bound")
     if source_analysis is not None and source_content.get("baseline_volume_input_byte_bound") is not True:
         raise FieldAttestationError("baseline input-volume bytes were not bound to declarations")
     source_content_sha256 = _sha256(_canonical(source_content))
@@ -269,6 +276,9 @@ def inspect_materials(
         "preflight_sha256": preflight_sha256,
         "source_coverage_sha256": source_coverage_sha256,
         "source_content_sha256": source_content_sha256,
+        **({"service_denominator_rule_approval_byte_bound": True,
+            "service_denominator_input_byte_bound": True}
+           if service_denominator else {}),
         **({"baseline_volume_input_byte_bound": True} if source_analysis is not None else {}),
         "analysis_sha256": analysis_sha256,
         "analysis_preflight_sha256": analysis_preflight_sha256,

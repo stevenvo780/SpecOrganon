@@ -313,6 +313,132 @@ def _as_service_schema2(data: dict[str, Any]) -> dict[str, Any]:
     return data
 
 
+def _as_service_schema3(data: dict[str, Any]) -> dict[str, Any]:
+    """A declared additive ceiling; output coproducts are not denominator inputs."""
+    data["service"]["schema"] = 3
+    data["service"]["equivalence"]["denominator_rules"] = [
+        {"id": "food", "material_id": "synthetic-raw-food", "classification": "eligible",
+         "basis": "Synthetic declared ceiling of 0.9 servings per kg of raw food",
+         "max_service_per_kg": 0.9},
+        {"id": "inedible", "material_id": "synthetic-inedible-ingredient",
+         "classification": "unsuitable", "basis": "Synthetic declared unsuitable material",
+         "max_service_per_kg": 0},
+        {"id": "water", "material_id": "synthetic-added-water",
+         "classification": "water", "basis": "Added water is excluded from food service",
+         "max_service_per_kg": 0},
+    ]
+    assignments = {"raw": ("synthetic-raw-food", "food"),
+                   "ingredient": ("synthetic-inedible-ingredient", "inedible"),
+                   "water": ("synthetic-added-water", "water")}
+    for row in data["service"]["rows"]:
+        prefix = f"{row['group_id']}-{row['period']}"
+        row["source"]["record_sha256"] = "a" * 64
+        row["feasible_max_service"]["uncertainty"] = 0.09
+        row["denominator_inputs"] = []
+        for suffix, (material_id, rule_id) in assignments.items():
+            flow = _by_id(data["flows"], f"{prefix}-{suffix}")
+            flow["material_id"] = material_id
+            row["denominator_inputs"].append({"input_flow_id": flow["id"],
+                                               "rule_id": rule_id})
+    return data
+
+
+def test_service_schema3_reconciles_each_external_input_once_and_reports_exclusions() -> None:
+    data = _as_service_schema3(field_data_with_schema3_allocations())
+    report = audit_field_flows(data)
+    assert report["valid"] is True
+    assert report["service_status"] == "declared_external_input_denominator_reconciled_approval_unverified"
+    assert report["service_denominator_rule_approval_byte_bound"] is False
+    assert report["service_denominator_input_byte_bound"] is False
+    row = next(item for item in report["service_denominator_reconciliation"]
+               if (item["group_id"], item["period"]) == ("control", "pre"))
+    assert row["recomputed_feasible_max_service"] == "90"
+    assert row["recomputed_uncertainty"] == "0.09"
+    assert row["excluded_unsuitable_mass_kg"] == "5"
+    assert row["excluded_water_mass_kg"] == "10"
+    assert [(item["input_flow_id"], item["service_contribution"])
+            for item in row["inputs"]] == [
+                ("control-pre-ingredient", "0"), ("control-pre-raw", "90"),
+                ("control-pre-water", "0"),
+            ]
+    assert "coproduct" not in {item["input_flow_id"] for item in row["inputs"]}
+    assert "true physical feasibility" in report["notice"]
+    assert report["criterion_3"]["status"] == "not_assessed"
+    assert "V" not in report and "G" not in report
+
+
+def test_service_schema3_converts_input_mass_and_uncertainty_exactly() -> None:
+    data = _as_service_schema3(field_data_with_schema3_allocations())
+    raw = _by_id(data["flows"], "control-pre-raw")
+    raw["mass"] = {"value": 100000, "unit": "g", "uncertainty": 100}
+    report = audit_field_flows(data)
+    row = next(item for item in report["service_denominator_reconciliation"]
+               if (item["group_id"], item["period"]) == ("control", "pre"))
+    food = next(item for item in row["inputs"] if item["input_flow_id"] == raw["id"])
+    assert food["mass_kg"] == "100"
+    assert food["mass_uncertainty_kg"] == "0.1"
+    assert food["service_contribution"] == "90"
+    assert food["service_uncertainty_contribution"] == "0.09"
+
+
+@pytest.mark.parametrize("change,match", [
+    ("inflated_denominator", "differs from exact external-input denominator"),
+    ("changed_coefficient", "differs from exact external-input denominator"),
+    ("wrong_uncertainty", "differs from exact eligible-input uncertainty"),
+    ("missing_input", "missing external inputs"),
+    ("duplicate_input", "double counts an external input"),
+    ("wrong_period", "external input in the same group-period"),
+    ("water_as_food", "flow kind and denominator classification disagree"),
+    ("food_as_water", "flow kind and denominator classification disagree"),
+    ("wrong_material", "material_id differs from approved denominator rule"),
+    ("zero_eligible_coefficient", "must be positive for eligible material"),
+    ("negative_eligible_coefficient", "must be nonnegative and finite"),
+    ("nonnumeric_coefficient", "must be a finite number"),
+    ("nonzero_excluded_coefficient", "must be positive for eligible material"),
+    ("missing_material", "material_id is required"),
+    ("duplicate_material_rule", "repeats a material"),
+])
+def test_service_schema3_rejects_false_denominator_reconciliation(
+    change: str, match: str,
+) -> None:
+    data = _as_service_schema3(field_data_with_schema3_allocations())
+    row = data["service"]["rows"][0]
+    rules = data["service"]["equivalence"]["denominator_rules"]
+    inputs = row["denominator_inputs"]
+    if change == "inflated_denominator":
+        row["feasible_max_service"]["value"] = 900000
+    elif change == "changed_coefficient":
+        rules[0]["max_service_per_kg"] = 0.8
+    elif change == "wrong_uncertainty":
+        row["feasible_max_service"]["uncertainty"] = 0.1
+    elif change == "missing_input":
+        inputs.pop()
+    elif change == "duplicate_input":
+        inputs.append(copy.deepcopy(inputs[0]))
+    elif change == "wrong_period":
+        inputs[0]["input_flow_id"] = "control-post-raw"
+    elif change == "water_as_food":
+        inputs[2]["rule_id"] = "food"
+    elif change == "food_as_water":
+        inputs[0]["rule_id"] = "water"
+    elif change == "wrong_material":
+        inputs[1]["rule_id"] = "food"
+    elif change == "zero_eligible_coefficient":
+        rules[0]["max_service_per_kg"] = 0
+    elif change == "negative_eligible_coefficient":
+        rules[0]["max_service_per_kg"] = -1
+    elif change == "nonnumeric_coefficient":
+        rules[0]["max_service_per_kg"] = "unsupported"
+    elif change == "nonzero_excluded_coefficient":
+        rules[1]["max_service_per_kg"] = 1
+    elif change == "missing_material":
+        del _by_id(data["flows"], "control-pre-raw")["material_id"]
+    else:
+        rules[1]["material_id"] = rules[0]["material_id"]
+    with pytest.raises(FieldFlowError, match=match):
+        audit_field_flows(data)
+
+
 def test_service_schema2_requires_digest_and_keeps_preflight_byte_claim_false() -> None:
     data = _as_service_schema2(field_data())
     report = audit_field_flows(data)

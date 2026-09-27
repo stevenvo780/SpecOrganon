@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "classification": "development_synthetic_declared_field_denominator_reconciliation",
+  "date_utc": "2026-09-27",
+  "baseline_head": "bd5ea34",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "file_sha256": {
+    "src/specorganon/field_flows.py": "112c3c3295224697c5b8d7c93841f411e8a6dc72c0dca1961bad6dcedd495dd7",
+    "src/specorganon/field_source_digest_audit.py": "820b3d1b310e80d002c74c9dcb54984449bc0fff3ba5079cdc1221818e6a3fbe",
+    "src/specorganon/field_source_content_audit.py": "1fb828ef82fbbe9c63efca3a2c8d32c9a716eb2aa2fca7f1421bfea4daead37f",
+    "src/specorganon/field_attestation.py": "62e2f75ee95bb1535c27be35cfb0cb175def146b380407de350ee5e2e20b10ba",
+    "tests/test_audit_field_flows.py": "640737138efd3d263da062581b6ef794f504ac4851b6281b2efaf4df111db78c",
+    "tests/test_field_source_digest_audit.py": "c839d8e255569f7427dc16829554332b9e16ffed5cbf26b554ddccadcbb55b21",
+    "tests/test_field_source_content_audit.py": "cfa874417f6bfdf5c095dc04c149f926bab77f68e9340cc2b178e95d70e2c299",
+    "tests/test_field_attestation_service_v3.py": "efe3febbc8e3de2caab79e2e2956e07a0605461ec310d66c7e236925fc3f59e0"
+  },
+  "gates": {
+    "focused_command": "uv run pytest -q tests/test_audit_field_flows.py tests/test_field_source_digest_audit.py tests/test_field_source_content_audit.py tests/test_field_attestation.py tests/test_field_attestation_service_v3.py",
+    "focused_result": "229 passed",
+    "global_command": "uv run pytest -q",
+    "global_result": "1847 passed",
+    "ruff_command": "uv run ruff check .",
+    "ruff_result": "passed",
+    "git_diff_check": "passed",
+    "wheel_install": {
+      "sha256": "eb528cf5cce822d25927580e5669bc79288cb9a4d6cd31a3e24263f65245a75b",
+      "build": "uv build --wheel --offline into a temporary directory",
+      "python_3_11_15": "offline install, uv pip check, site-packages field module import and CLI help passed",
+      "python_3_12_3": "offline install, uv pip check, site-packages field module import and CLI help passed"
+    }
+  },
+  "synthetic_positive": "service.schema 3 reconciles every declared external input exactly once under declared material rules, reports excluded unsuitable and water mass, and binds rules and inputs to opened local extracts in a newly signed materials payload.",
+  "synthetic_negative_controls": [
+    "Changing only declared feasible maximum from 90 to 900000 is rejected.",
+    "Changed coefficient, uncertainty, material, classification or input mass against fixed opened extracts is rejected even after local digest recalculation.",
+    "Missing, duplicate or cross-period external inputs are rejected; coproduct output is not counted twice.",
+    "A new signed attestation fails without both rule-approval and input-source byte binding."
+  ],
+  "independent_read_only_review": "No blocking criterion-3 false approval was reproduced; a coordinated fabrication of rules, inputs and new extracts can still pass as a declared ceiling and requires a new signature.",
+  "scope": {
+    "physical_input_completeness_verified": false,
+    "human_approval_authority_verified": false,
+    "actual_material_suitability_verified": false,
+    "physical_feasibility_of_additive_ceiling_verified": false,
+    "field_intervention_executed": false,
+    "causal_impact_observed": false,
+    "criterion_3": "not_assessed"
+  }
+}

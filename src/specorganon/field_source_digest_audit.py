@@ -96,15 +96,15 @@ def audit_field_source_digest_coverage(
     if service is not None:
         service = _object(service, "field.service")
         service_schema = service.get("schema")
-        if "schema" in service and (type(service_schema) is not int or service_schema != 2):
-            raise FieldSourceDigestAuditError("field.service.schema must be integer 2 when present")
+        if "schema" in service and (type(service_schema) is not int or service_schema not in {2, 3}):
+            raise FieldSourceDigestAuditError("field.service.schema must be integer 2 or 3 when present")
         if "equivalence" not in service:
             raise FieldSourceDigestAuditError("field.service.equivalence is required")
         equivalence = _object(service["equivalence"], "field.service.equivalence")
         add("approval_record", _required_digest(equivalence, "record_sha256",
                                                  "field.service.equivalence"),
             "field.service.equivalence.record_sha256")
-        if service_schema == 2:
+        if service_schema in {2, 3}:
             if "rows" not in service:
                 raise FieldSourceDigestAuditError("field.service.rows is required")
             seen_service_references: set[tuple[str, str]] = set()
@@ -240,6 +240,10 @@ def audit_field_source_digest_coverage(
         "exact_primary_source_coverage": exact,
         **({"service_v_input_byte_bound": False}
            if type(field.get("service")) is dict and field["service"].get("schema") == 2
+           else {}),
+        **({"service_denominator_rule_approval_byte_bound": False,
+            "service_denominator_input_byte_bound": False}
+           if type(field.get("service")) is dict and field["service"].get("schema") == 3
            else {}),
         **({"baseline_volume_input_byte_bound": False} if has_baseline_volume else {}),
         "counts": {

@@ -216,6 +216,20 @@ def _v2_case() -> tuple[dict, dict, dict, dict, list[dict[str, str]]]:
     return case
 
 
+def test_service_schema3_digest_coverage_only_links_declared_rules_and_inputs() -> None:
+    case = _v2_case()
+    case[1]["service"]["schema"] = 3
+    report = _audit(case)
+    assert report["exact_primary_source_coverage"] is True
+    assert report["service_denominator_rule_approval_byte_bound"] is False
+    assert report["service_denominator_input_byte_bound"] is False
+    assert "service_v_input_byte_bound" not in report
+    case[4][-1]["role"] = "approval_record"
+    report = _audit(case)
+    assert report["exact_primary_source_coverage"] is False
+    assert report["service_denominator_input_byte_bound"] is False
+
+
 def test_service_schema2_digest_coverage_counts_each_row_without_claiming_content() -> None:
     case = _v2_case()
     before = copy.deepcopy(case)

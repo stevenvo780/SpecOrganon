@@ -10,6 +10,9 @@ format is deliberately a constrained extract, not an arbitrary field document.
 Opt-in ``field.service.schema: 2`` also requires one ``service_row`` record per
 declared row under its ``source_record`` digest. The extract omits that digest
 from the row's ``source`` to avoid a self-referential file hash.
+Opt-in ``field.service.schema: 3`` additionally binds denominator rules in the
+approval extract and every external input ID, rule assignment and declared mass
+in the service-row source extract. This is still a declared additive ceiling.
 Opt-in ``analysis.schema: 2`` likewise requires one ``volume_row`` record per
 baseline input-volume manifest row, with the source digest omitted from the
 extract record.
@@ -165,8 +168,51 @@ def _service_flow_ids(value: Any, label: str) -> list[str]:
     return sorted(ids)
 
 
+def _denominator_rules(value: Any, label: str) -> list[dict[str, Any]]:
+    rules: dict[str, dict[str, Any]] = {}
+    materials: set[str] = set()
+    for index, raw in enumerate(_array(value, label, nonempty=True)):
+        rule_label = f"{label}[{index}]"
+        item = _object(raw, rule_label, {"id", "material_id", "classification", "basis",
+                                         "max_service_per_kg"})
+        rule_id = _text(item["id"], f"{rule_label}.id")
+        if rule_id in rules:
+            raise FieldSourceContentAuditError(f"{label} repeats a rule ID")
+        material_id = _text(item["material_id"], f"{rule_label}.material_id")
+        if material_id in materials:
+            raise FieldSourceContentAuditError(f"{label} repeats a material ID")
+        materials.add(material_id)
+        classification = _text(item["classification"], f"{rule_label}.classification")
+        if classification not in {"eligible", "unsuitable", "water"}:
+            raise FieldSourceContentAuditError(f"{rule_label}.classification is unsupported")
+        rules[rule_id] = {"id": rule_id,
+                          "material_id": material_id,
+                          "classification": classification,
+                          "basis": _text(item["basis"], f"{rule_label}.basis"),
+                          "max_service_per_kg": _number(item["max_service_per_kg"],
+                                                        f"{rule_label}.max_service_per_kg")}
+    return [rules[rule_id] for rule_id in sorted(rules)]
+
+
+def _denominator_inputs(value: Any, label: str) -> list[dict[str, Any]]:
+    inputs: dict[str, dict[str, Any]] = {}
+    for index, raw in enumerate(_array(value, label, nonempty=True)):
+        input_label = f"{label}[{index}]"
+        item = _object(raw, input_label, {"input_flow_id", "material_id", "rule_id", "mass"})
+        flow_id = _text(item["input_flow_id"], f"{input_label}.input_flow_id")
+        if flow_id in inputs:
+            raise FieldSourceContentAuditError(f"{label} repeats an input flow ID")
+        inputs[flow_id] = {"input_flow_id": flow_id,
+                           "material_id": _text(item["material_id"],
+                                                f"{input_label}.material_id"),
+                           "rule_id": _text(item["rule_id"], f"{input_label}.rule_id"),
+                           "mass": _service_quantity(item["mass"], f"{input_label}.mass")}
+    return [inputs[flow_id] for flow_id in sorted(inputs)]
+
+
 def _normalize_record(
     value: Any, label: str, *, allow_volume: bool = False,
+    allow_service_denominator: bool = False,
 ) -> tuple[str, str, dict[str, Any]]:
     item = _object(value, label)
     kind = _text(item.get("kind"), f"{label}.kind")
@@ -211,7 +257,7 @@ def _normalize_record(
         _object(item, label, {
             "kind", "group_id", "period", "consumption_flow_ids", "consumed_service",
             "feasible_max_service", "source", "equivalence_id",
-        })
+        } | ({"denominator_inputs"} if allow_service_denominator else set()))
         source = _source(item["source"], f"{label}.source", allow_fraction=True)
         identifier = source["locator"]
         normalized = {
@@ -227,6 +273,9 @@ def _normalize_record(
             "source": source,
             "equivalence_id": _text(item["equivalence_id"], f"{label}.equivalence_id"),
         }
+        if allow_service_denominator:
+            normalized["denominator_inputs"] = _denominator_inputs(
+                item["denominator_inputs"], f"{label}.denominator_inputs")
     elif kind == "allocation":
         _object(item, label, {"kind", "study_id", "allocation_method", "groups"})
         identifier = _text(item["study_id"], f"{label}.study_id")
@@ -266,7 +315,7 @@ def _normalize_record(
         _object(item, label, {
             "kind", "id", "service_unit", "approved_at_utc", "approved_by_actor_ids",
             "verified_by", "source",
-        })
+        } | ({"denominator_rules"} if allow_service_denominator else set()))
         identifier = _text(item["id"], f"{label}.id")
         normalized = {
             "kind": kind, "id": identifier,
@@ -277,6 +326,9 @@ def _normalize_record(
             "verified_by": _text(item["verified_by"], f"{label}.verified_by"),
             "source": _source(item["source"], f"{label}.source"),
         }
+        if allow_service_denominator:
+            normalized["denominator_rules"] = _denominator_rules(
+                item["denominator_rules"], f"{label}.denominator_rules")
     elif kind == "excluded_cell":
         _object(item, label, {
             "kind", "cell_id", "actor_id", "stage", "metric", "reason",
@@ -360,11 +412,15 @@ def _declared_records(
     measurements: dict[str, Any], volume_manifest: dict[str, Any] | None = None,
 ) -> dict[tuple[str, str, str, str], dict[str, Any]]:
     expected: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+    service = field.get("service")
+    service_schema = service.get("schema") if type(service) is dict else None
+    allow_service_denominator = service_schema == 3
 
     def add(role: str, digest: Any, record: dict[str, Any], label: str) -> None:
         digest = _digest(digest, f"{label}.record_sha256")
         kind, identifier, normalized = _normalize_record(
             record, label, allow_volume=volume_manifest is not None,
+            allow_service_denominator=allow_service_denominator,
         )
         key = role, digest, kind, identifier
         if key in expected:
@@ -436,12 +492,10 @@ def _declared_records(
             "custodian_id": release.get("custodian_id"),
         }, "plan.baseline_release")
 
-    service = field.get("service")
     if service is not None:
         service = _object(service, "field.service")
-        service_schema = service.get("schema")
-        if "schema" in service and (type(service_schema) is not int or service_schema != 2):
-            raise FieldSourceContentAuditError("field.service.schema must be integer 2 when present")
+        if "schema" in service and (type(service_schema) is not int or service_schema not in {2, 3}):
+            raise FieldSourceContentAuditError("field.service.schema must be integer 2 or 3 when present")
         equivalence = _object(service.get("equivalence"), "field.service.equivalence")
         add("approval_record", equivalence.get("record_sha256"), {
             "kind": "equivalence", "id": equivalence.get("id"),
@@ -450,14 +504,54 @@ def _declared_records(
             "approved_by_actor_ids": equivalence.get("approved_by_actor_ids"),
             "verified_by": equivalence.get("verified_by"),
             "source": equivalence.get("source"),
+            **({"denominator_rules": equivalence.get("denominator_rules")}
+               if allow_service_denominator else {}),
         }, "field.service.equivalence")
-        if service_schema == 2:
+        if service_schema in {2, 3}:
+            external_flows: dict[str, dict[str, Any]] = {}
+            if allow_service_denominator:
+                for index, raw_flow in enumerate(_array(field.get("flows"), "field.flows",
+                                                        nonempty=True)):
+                    flow_label = f"field.flows[{index}]"
+                    flow = _object(raw_flow, flow_label)
+                    flow_id = _text(flow.get("id"), f"{flow_label}.id")
+                    if flow.get("from_lot_id") is None:
+                        if flow_id in external_flows:
+                            raise FieldSourceContentAuditError("field.flows repeats an external input ID")
+                        external_flows[flow_id] = flow
             for index, raw_row in enumerate(_array(service.get("rows"), "field.service.rows",
                                                   nonempty=True)):
                 label = f"field.service.rows[{index}]"
                 row = _object(raw_row, label)
                 source = _object(row.get("source"), f"{label}.source",
                                  SOURCE_FIELDS | {"record_sha256"})
+                denominator_inputs: list[dict[str, Any]] = []
+                if allow_service_denominator:
+                    seen_input_ids: set[str] = set()
+                    for input_index, raw_input in enumerate(_array(
+                        row.get("denominator_inputs"), f"{label}.denominator_inputs", nonempty=True
+                    )):
+                        input_label = f"{label}.denominator_inputs[{input_index}]"
+                        input_item = _object(raw_input, input_label, {"input_flow_id", "rule_id"})
+                        flow_id = _text(input_item["input_flow_id"], f"{input_label}.input_flow_id")
+                        if flow_id in seen_input_ids:
+                            raise FieldSourceContentAuditError(f"{label}.denominator_inputs repeats an input flow ID")
+                        seen_input_ids.add(flow_id)
+                        flow = _object(external_flows.get(flow_id), f"{input_label}.input_flow_id")
+                        if (flow.get("group_id"), flow.get("period")) != (
+                            row.get("group_id"), row.get("period")
+                        ):
+                            raise FieldSourceContentAuditError(f"{input_label} crosses group-period")
+                        denominator_inputs.append({"input_flow_id": flow_id,
+                                                   "material_id": flow.get("material_id"),
+                                                   "rule_id": input_item["rule_id"],
+                                                   "mass": flow.get("mass")})
+                    expected_inputs = {flow_id for flow_id, flow in external_flows.items()
+                                       if (flow.get("group_id"), flow.get("period")) == (
+                                           row.get("group_id"), row.get("period"))}
+                    if seen_input_ids != expected_inputs:
+                        raise FieldSourceContentAuditError(
+                            f"{label}.denominator_inputs must cover every external input once")
                 add("source_record", source["record_sha256"], {
                     "kind": "service_row",
                     "group_id": row.get("group_id"),
@@ -467,6 +561,8 @@ def _declared_records(
                     "feasible_max_service": row.get("feasible_max_service"),
                     "equivalence_id": equivalence.get("id"),
                     "source": {key: source[key] for key in SOURCE_FIELDS},
+                    **({"denominator_inputs": denominator_inputs}
+                       if allow_service_denominator else {}),
                 }, label)
 
     cells: dict[str, dict[str, Any]] = {}
@@ -537,6 +633,8 @@ def audit_field_source_content(
     duplicate_files = 0
     malformed_files = 0
     total_records = 0
+    allow_service_denominator = (type(field.get("service")) is dict
+                                 and field["service"].get("schema") == 3)
     for index, raw_entry in enumerate(opened):
         label = f"opened_sources[{index}]"
         entry = _object(raw_entry, label, {"role", "sha256", "raw"})
@@ -574,6 +672,7 @@ def audit_field_source_content(
                 kind, identifier, normalized = _normalize_record(
                     record, f"{label}.records[{record_index}]",
                     allow_volume=volume_manifest is not None,
+                    allow_service_denominator=allow_service_denominator,
                 )
                 key = role, digest, kind, identifier
                 if key in actual:
@@ -593,6 +692,12 @@ def audit_field_source_content(
                         if expected[key] != actual[key])
     exact = not (missing or extra or mismatched or problems)
 
+    def kind_bound(kind: str) -> bool:
+        expected_kind = {key for key in expected_keys if key[2] == kind}
+        actual_kind = {key for key in actual_keys if key[2] == kind}
+        return (not problems and bool(expected_kind) and expected_kind == actual_kind
+                and all(expected[key] == actual[key] for key in expected_kind))
+
     def example(key: tuple[str, str, str, str]) -> dict[str, str]:
         role, digest, kind, identifier = key
         return {"role": role, "sha256": digest, "kind": kind, "id_or_locator": identifier}
@@ -604,6 +709,9 @@ def audit_field_source_content(
         **({"service_v_input_byte_bound": exact}
            if type(field.get("service")) is dict and field["service"].get("schema") == 2
            else {}),
+        **({"service_denominator_rule_approval_byte_bound": kind_bound("equivalence"),
+            "service_denominator_input_byte_bound": kind_bound("service_row")}
+           if allow_service_denominator else {}),
         **({"baseline_volume_input_byte_bound": exact} if volume_manifest is not None else {}),
         "counts": {
             "declared_references": len(expected),
