@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "classification": "development_field_primary_source_coverage_probe",
+  "date_utc": "2026-09-27",
+  "command": "uv run pytest -q tests/test_field_source_digest_audit.py tests/test_field_attestation.py tests/test_approval_security.py -k 'field or source_digest'",
+  "result": "18 passed, 13 deselected",
+  "synthetic_positive": {
+    "required_digest_references": 722,
+    "distinct_required_role_digests": 2,
+    "opened_primary_entries": 2,
+    "exact_primary_source_coverage": true
+  },
+  "negative_controls": [
+    "missing source_record digest",
+    "wrong manifest role",
+    "extra and duplicate primary entries",
+    "rehashed manifest without cited measurement source rejected before signature"
+  ],
+  "individual_source_file_probe": {
+    "manifest_entries": 727,
+    "measurement_source_files": 720,
+    "reader_result": "accepted for synthetic byte-link coverage"
+  },
+  "scope": "The reader hashes local source bytes and matches cited digests by role. Synthetic files are not field records.",
+  "not_verified": [
+    "measurement values or locators inside source files",
+    "physical custody or origin",
+    "approval authority",
+    "causal attribution or adjusted field effect"
+  ],
+  "criterion_3": "not_assessed"
+}

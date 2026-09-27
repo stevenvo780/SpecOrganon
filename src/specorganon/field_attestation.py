@@ -34,7 +34,7 @@ REPORT_REVIEWS = (
 MAX_MANIFEST_BYTES = 1024 * 1024
 MAX_REPORT_BYTES = 4 * 1024 * 1024
 MAX_SOURCE_BYTES = 64 * 1024 * 1024
-MAX_SOURCE_COUNT = 64
+MAX_SOURCE_COUNT = 2048
 MAX_TOTAL_SOURCE_BYTES = 256 * 1024 * 1024
 
 
@@ -151,7 +151,7 @@ def inspect_materials(
     project: dict[str, Any], assessment_id: str, assessment_version: int, verdict: str,
     manifest_path: str, report_path: str,
 ) -> dict[str, Any]:
-    """Reopen every declared source and rerun the declared structural preflight."""
+    """Reopen declared sources and check structural and primary-digest coverage."""
     manifest_path, manifest_raw = _absolute_regular_bytes(
         manifest_path, "source manifest", MAX_MANIFEST_BYTES)
     manifest = _json_object(manifest_raw, "source manifest")
@@ -186,6 +186,7 @@ def inspect_materials(
 
     from .field_effect_analysis import FieldEffectAnalysisError, audit_field_effect_analysis
     from .field_guardrails import audit_field_guardrails, canonical_sha256
+    from .field_source_digest_audit import audit_field_source_digest_coverage
 
     plan, field, registry, measurements = (
         _json_object(sources[role][0][1], role)
@@ -201,6 +202,14 @@ def inspect_materials(
     if preflight.get("structural_match_at_read") is not True:
         raise FieldAttestationError("field guardrail preflight did not match")
     preflight_sha256 = _sha256(_canonical(preflight))
+    source_coverage = audit_field_source_digest_coverage(
+        plan, field, registry, measurements,
+        [{"role": source["role"], "sha256": source["sha256"]}
+         for source in manifest["sources"]],
+    )
+    if source_coverage.get("exact_primary_source_coverage") is not True:
+        raise FieldAttestationError("field primary source digests lack exact manifest coverage")
+    source_coverage_sha256 = _sha256(_canonical(source_coverage))
     analysis = _json_object(sources["analysis"][0][1], "analysis")
     try:
         analysis_preflight = audit_field_effect_analysis(
@@ -242,6 +251,7 @@ def inspect_materials(
         "report_path": report_path,
         "report_sha256": _sha256(report_raw),
         "preflight_sha256": preflight_sha256,
+        "source_coverage_sha256": source_coverage_sha256,
         "analysis_sha256": analysis_sha256,
         "analysis_preflight_sha256": analysis_preflight_sha256,
     }

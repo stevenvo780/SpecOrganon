@@ -25,7 +25,36 @@ def _write_json(path: Path, value: dict) -> bytes:
 
 def _bundle(tmp_path: Path, project: dict, *, assessment_version: int = 1) -> tuple[str, str, dict]:
     plan, field, registry, measurements, analysis = _synthetic_analysis_case()
-    sources = []
+    approval_path = tmp_path / "synthetic_approval_record.json"
+    approval_raw = _write_json(approval_path, {
+        "synthetic_only": True,
+        "allocation": "declared stratified assignment",
+        "equivalence": "declared service unit",
+    })
+    approval_sha256 = hashlib.sha256(approval_raw).hexdigest()
+    field["service"]["equivalence"]["record_sha256"] = approval_sha256
+
+    source_path = tmp_path / "synthetic_source_record.json"
+    source_raw = _write_json(source_path, {
+        "synthetic_only": True,
+        "allocation": "declared stratified assignment",
+        "rows": [
+            {"group_id": row["group_id"], "period": row["period"],
+             "cell_id": row["cell_id"], "value": row["value"],
+             "locator": row["source"]["locator"]}
+            for row in measurements["rows"]
+        ],
+    })
+    source_sha256 = hashlib.sha256(source_raw).hexdigest()
+    plan["allocation_record_sha256"] = source_sha256
+    registry["plan_sha256"] = canonical_sha256(plan)
+    measurements["registry_sha256"] = canonical_sha256(registry)
+    for row in measurements["rows"]:
+        row["source"]["record_sha256"] = source_sha256
+    sources = [
+        {"role": "approval_record", "path": str(approval_path), "sha256": approval_sha256},
+        {"role": "source_record", "path": str(source_path), "sha256": source_sha256},
+    ]
     for role, value in (("plan", plan), ("field", field), ("registry", registry),
                         ("measurements", measurements),
                         ("analysis", analysis)):
@@ -100,6 +129,7 @@ def test_field_attestation_binds_sources_report_and_independent_key(
         project, tmp_path, binding, materials, actor, reason, head,
         signature, fingerprint, assessors,
     )
+    assert "source_coverage_sha256" in materials
     assert not field_attestation.verify(
         project, tmp_path, binding, materials, actor, reason, "c" * 64,
         signature, fingerprint, assessors,
@@ -136,3 +166,53 @@ def test_rehashed_empty_analysis_is_rejected_before_signature(tmp_path: Path) ->
         field_attestation.inspect_materials(
             project, "ass1", 1, "cumplido", manifest_path, report_path,
         )
+
+
+def test_rehashed_manifest_without_primary_record_is_rejected_before_signature(
+    tmp_path: Path,
+) -> None:
+    project = {"case_id": str(uuid.uuid4()), "approval_policy": "signed"}
+    manifest_path, report_path, report = _bundle(tmp_path, project)
+    manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    manifest["sources"] = [
+        source for source in manifest["sources"] if source["role"] != "source_record"
+    ]
+    manifest_raw = _write_json(Path(manifest_path), manifest)
+    report["source_manifest_sha256"] = hashlib.sha256(manifest_raw).hexdigest()
+    _write_json(Path(report_path), report)
+    with pytest.raises(field_attestation.FieldAttestationError,
+                       match="primary source digests lack exact manifest coverage"):
+        field_attestation.inspect_materials(
+            project, "ass1", 1, "cumplido", manifest_path, report_path,
+        )
+
+
+def test_individual_measurement_source_files_fit_bounded_manifest(tmp_path: Path) -> None:
+    project = {"case_id": str(uuid.uuid4()), "approval_policy": "signed"}
+    manifest_path, report_path, report = _bundle(tmp_path, project)
+    manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    measurements_path = tmp_path / "measurements.json"
+    measurements = json.loads(measurements_path.read_text(encoding="utf-8"))
+    for index, row in enumerate(measurements["rows"]):
+        source_path = tmp_path / f"measurement_source_{index}.txt"
+        raw = row["source"]["locator"].encode("utf-8")
+        source_path.write_bytes(raw)
+        digest = hashlib.sha256(raw).hexdigest()
+        row["source"]["record_sha256"] = digest
+        manifest["sources"].append({
+            "role": "source_record", "path": str(source_path), "sha256": digest,
+        })
+    measurements_raw = _write_json(measurements_path, measurements)
+    measurements_entry = next(
+        source for source in manifest["sources"] if source["role"] == "measurements"
+    )
+    measurements_entry["sha256"] = hashlib.sha256(measurements_raw).hexdigest()
+    manifest_raw = _write_json(Path(manifest_path), manifest)
+    report["source_manifest_sha256"] = hashlib.sha256(manifest_raw).hexdigest()
+    _write_json(Path(report_path), report)
+    assert len(manifest["sources"]) == 727
+    assert len(manifest_raw) < field_attestation.MAX_MANIFEST_BYTES
+    materials = field_attestation.inspect_materials(
+        project, "ass1", 1, "cumplido", manifest_path, report_path,
+    )
+    assert "source_coverage_sha256" in materials
