@@ -26,3 +26,21 @@ Por separado, el [recálculo desde la fuente publicada](../../experiments/develo
 uv run python scripts/verify_citibike_march_workflow.py
 uv run pytest -q tests/test_citibike_march_workflow.py
 ```
+
+## Auditoría retrospectiva de dos fracciones
+
+El [contrato de métricas](ratio_contract_2026-09-27.json) fija, para el [JSON derivado de marzo](../../experiments/development/citibike_sample_status_2026-09-27.json), la unidad `station_snapshot_rows`, la población elegible y la ventana entre el 12 y el 23 de marzo de 2024. Las dos [afirmaciones](ratio_claim_rental_2026-09-27.json) [separadas](ratio_claim_return_2026-09-27.json) producen exactamente `431312/452259` para alquiler habilitado con bicicleta y `841193/904518` para devolución habilitada con anclaje. Son **fracciones de filas elegibles**, no de estación-minutos ni de acceso de usuarios. El [recibo](../../experiments/development/citibike_march_ratio_audit_2026-09-27.json) conserva resultados y límites.
+
+El [auditor reutilizable](../../src/specorganon/ratio_audit.py) requiere un SHA-256 esperado del contrato **obtenido por un canal independiente** de los bytes que va a cotejar. La siguiente reproducción local usa el pin de desarrollo `44f016ce11b3e07ad0309221a5f9f285ea3d0b16c643328a5fc0f37dec705255`; publicar ese valor junto con el contrato no establece custodia externa ni prerregistro:
+
+```sh
+uv run python -m specorganon.ratio_audit \
+  --source experiments/development/citibike_sample_status_2026-09-27.json \
+  --contract cases/citibike_march2024/ratio_contract_2026-09-27.json \
+  --contract-sha256 44f016ce11b3e07ad0309221a5f9f285ea3d0b16c643328a5fc0f37dec705255 \
+  --claim cases/citibike_march2024/ratio_claim_rental_2026-09-27.json \
+  --claim cases/citibike_march2024/ratio_claim_return_2026-09-27.json
+uv run pytest -q tests/test_ratio_audit.py
+```
+
+La auditoría rechaza una afirmación que cambie unidad, población o período frente al contrato fijado. Si un mismo operador reescribe contrato y pin, puede reetiquetar las mismas cifras; el JSON tampoco verifica por sí solo el Parquet o la pertenencia de cada fila. El [recálculo previo desde Parquet](../../experiments/development/citibike_march_source_recalculation_2026-09-27.json) documenta esa fuente histórica por separado. El contrato se formuló después de ver la muestra y el criterio 5 sigue **no demostrado**.

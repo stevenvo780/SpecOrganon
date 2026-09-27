@@ -1,0 +1,112 @@
+{
+  "classification": "citibike_march_2024_ratio_audit_retrospective_development",
+  "contract_external_custody_verified": false,
+  "contract_pre_registered": false,
+  "contract_sha256_external_pin": "44f016ce11b3e07ad0309221a5f9f285ea3d0b16c643328a5fc0f37dec705255",
+  "criterion_5": "not_assessed",
+  "field_impact": "not_assessed",
+  "results": [
+    {
+      "claim_sha256": "48813b54b7ce4d393b0a803f38f0caf1cc66a8717fbddc34f1157e31e949b666",
+      "classification": "derived_ratio_audit",
+      "contract_classification": "independent_metric_contract_retrospective_development",
+      "contract_sha256": "44f016ce11b3e07ad0309221a5f9f285ea3d0b16c643328a5fc0f37dec705255",
+      "denominator": {
+        "locator": "snapshot_row_service.denominator",
+        "observation_unit": "station_snapshot_row",
+        "population": "quality_eligible_citibike_station_snapshot_rows",
+        "quantity_id": "eligible_rows",
+        "time_scope": {
+          "end_utc": "2024-03-23T14:49:01Z",
+          "id": "citibike_sample_march_2024",
+          "start_utc": "2024-03-12T21:40:49Z"
+        },
+        "unit": "station_snapshot_rows",
+        "value": 1809036,
+        "value_type": "integer_count"
+      },
+      "exact_ratio": {
+        "denominator": 452259,
+        "numerator": 431312
+      },
+      "metric": "rental_enabled_with_bike_share_of_quality_eligible_rows",
+      "numerator": {
+        "locator": "snapshot_row_service.rental_enabled_with_bike",
+        "observation_unit": "station_snapshot_row",
+        "population": "quality_eligible_citibike_station_snapshot_rows",
+        "quantity_id": "rental_rows",
+        "time_scope": {
+          "end_utc": "2024-03-23T14:49:01Z",
+          "id": "citibike_sample_march_2024",
+          "start_utc": "2024-03-12T21:40:49Z"
+        },
+        "unit": "station_snapshot_rows",
+        "value": 1725248,
+        "value_type": "integer_count"
+      },
+      "observation_unit": "station_snapshot_row",
+      "population": "quality_eligible_citibike_station_snapshot_rows",
+      "source_sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+      "source_truth_authenticated": false,
+      "subset_membership_verified_from_rows": false,
+      "target_id": "rental_service_fraction",
+      "time_scope": {
+        "end_utc": "2024-03-23T14:49:01Z",
+        "id": "citibike_sample_march_2024",
+        "start_utc": "2024-03-12T21:40:49Z"
+      },
+      "unit": "fraction"
+    },
+    {
+      "claim_sha256": "013c4bd67e9168efb301148590acfa6f9a9466655ceac0f851d6d6c1fb325f30",
+      "classification": "derived_ratio_audit",
+      "contract_classification": "independent_metric_contract_retrospective_development",
+      "contract_sha256": "44f016ce11b3e07ad0309221a5f9f285ea3d0b16c643328a5fc0f37dec705255",
+      "denominator": {
+        "locator": "snapshot_row_service.denominator",
+        "observation_unit": "station_snapshot_row",
+        "population": "quality_eligible_citibike_station_snapshot_rows",
+        "quantity_id": "eligible_rows",
+        "time_scope": {
+          "end_utc": "2024-03-23T14:49:01Z",
+          "id": "citibike_sample_march_2024",
+          "start_utc": "2024-03-12T21:40:49Z"
+        },
+        "unit": "station_snapshot_rows",
+        "value": 1809036,
+        "value_type": "integer_count"
+      },
+      "exact_ratio": {
+        "denominator": 904518,
+        "numerator": 841193
+      },
+      "metric": "return_enabled_with_dock_share_of_quality_eligible_rows",
+      "numerator": {
+        "locator": "snapshot_row_service.return_enabled_with_dock",
+        "observation_unit": "station_snapshot_row",
+        "population": "quality_eligible_citibike_station_snapshot_rows",
+        "quantity_id": "return_rows",
+        "time_scope": {
+          "end_utc": "2024-03-23T14:49:01Z",
+          "id": "citibike_sample_march_2024",
+          "start_utc": "2024-03-12T21:40:49Z"
+        },
+        "unit": "station_snapshot_rows",
+        "value": 1682386,
+        "value_type": "integer_count"
+      },
+      "observation_unit": "station_snapshot_row",
+      "population": "quality_eligible_citibike_station_snapshot_rows",
+      "source_sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+      "source_truth_authenticated": false,
+      "subset_membership_verified_from_rows": false,
+      "target_id": "return_service_fraction",
+      "time_scope": {
+        "end_utc": "2024-03-23T14:49:01Z",
+        "id": "citibike_sample_march_2024",
+        "start_utc": "2024-03-12T21:40:49Z"
+      },
+      "unit": "fraction"
+    }
+  ]
+}
