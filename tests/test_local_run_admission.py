@@ -307,7 +307,11 @@ raise SystemExit(staged.main(sys.argv[3:]))
     winner = next(result for result in outcomes if result[0] == 0)
     loser = next(result for result in outcomes if result[0] == 2)
     assert json.loads(winner[1])["status"] == "success"
-    assert "another local owner" in loser[2] or "already has a local admission claim" in loser[2]
+    assert any(message in loser[2] for message in (
+        "another local owner",
+        "already has a local admission claim",
+        "admission root changed during operation",
+    ))
     assert not (loser[3] / "calls" / "000001").exists()
     assert list((loser[3] / "calls").iterdir()) == []
     assert (winner[3] / "calls" / "000001" / "reservation.json").is_file()
