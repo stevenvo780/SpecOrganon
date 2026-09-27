@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "classification": "development_staged_local_tool_session_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "implementation_sha256": {
+    "scripts/staged_tool_session.py": "fa30df01e531ecee3c68510f1bf8a6dc698ab369c25df0c6b8b06e404af7ebee",
+    "scripts/local_replay_sandbox.py": "6dc4c2c4b6abb1b0fea3a0af76d20f034c297bcb96df4bbb6da6557dbbdb1d32",
+    "tests/test_staged_tool_session.py": "053dae80642b3c0a65842e0d49420f34cadeab09b4f853af050bc2d6f05aa359",
+    "tests/test_local_replay_sandbox.py": "948fbdf3afcc71d436bc5dc7f3b980309f72ddc80b65fc4a57fe942acbb5f0a2"
+  },
+  "synthetic_two_tool_session": {
+    "stage_verified_with_empty_work": true,
+    "first_call_status": "success",
+    "first_call_execution_bytes_sealed": true,
+    "first_call_deliverables_present": false,
+    "second_call_status": "success",
+    "second_call_execution_bytes_sealed": true,
+    "second_call_saw_first_output": true,
+    "second_call_outputs": ["intermediate.txt", "report.md"],
+    "second_call_deliverables_present": true,
+    "status_after_two_calls": "exhausted",
+    "third_call_rejected_before_launch": true,
+    "provider_calls": 0,
+    "measured_tokens": null,
+    "criterion_4": "not_assessed",
+    "budget_scope": "stage_instance_local",
+    "global_run_limits_enforced": false
+  },
+  "adversarial_controls": [
+    "A reserved call without a terminal receipt survives a simulated crash as indeterminate and is not retried.",
+    "A forged internally inconsistent terminal and a deeply nested unreadable terminal do not turn an indeterminate call into success.",
+    "Mutating visible stage inputs or work between calls, or exceeding the output inventory, blocks continuation.",
+    "A second session for one stage/run cannot reset the local tool-call or active-time budget; two concurrent inits leave one usable anchor.",
+    "A crash after a partial temporary anchor leaves no final anchor and permits a fresh init while the orphaned session remains unusable.",
+    "A call waits for anchor directory fsync after rename; EIO blocks it until a later successful fsync confirms durability.",
+    "A delay after reservation or during sandbox setup cannot launch the subprocess after the local UTC launch deadline.",
+    "A tool attempting to read a hidden reference received PermissionError and did not write the hidden-leaked marker."
+  ],
+  "known_scope_limit_control": "Two separate stages copied from the same release and run_id each consumed one policy tool call with cap one. The local supervisor explicitly reports global_run_limits_enforced: false; a confirmatory global run needs an independent shared registry and custody.",
+  "gates": [
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "1148 passed in 104.78s after both current changes"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_staged_tool_session.py tests/test_local_replay_sandbox.py tests/test_run_staged_local_tool.py",
+      "result": "61 passed in the implementation review"
+    },
+    {
+      "command": "uv run pytest -q tests/test_staged_tool_session.py tests/test_local_replay_sandbox.py",
+      "result": "42 passed in the independent review"
+    },
+    {
+      "command": "ruff check scripts/staged_tool_session.py scripts/local_replay_sandbox.py tests/test_staged_tool_session.py tests/test_local_replay_sandbox.py; git diff --check",
+      "result": "passed"
+    }
+  ],
+  "independent_review": "Approved for the declared local stage-instance contract after reproducing same-stage budget reset, concurrent init, partial-anchor interruption, fsync/EIO gating, post-reservation deadline, inconsistent terminal, hidden-reference denial, and separate-stage budget duplication.",
+  "limits": [
+    "Synthetic scripts are real local subprocesses but no model or provider was called and no methodology outcomes were compared.",
+    "The active timer charges local sandbox elapsed time plus a one-second guard per terminal receipt; the separate wall timer uses unattested host UTC, and neither is a global provider budget.",
+    "The runtime image is declared, not verified. Landlock, seccomp and process limits do not impose aggregate memory, file, provider-token or cost limits or defend against same-UID mutation.",
+    "Local fsync and process-crash tests do not prove survival of a real power failure or independent custody. Criterion 4 remains not assessed."
+  ]
+}

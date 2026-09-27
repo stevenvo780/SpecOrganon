@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "classification": "synthetic_development_regression_not_field_evidence",
+  "date_utc": "2026-09-27",
+  "baseline_commit": "76e523b",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "implementation_sha256": {
+    "src/specorganon/engine.py": "2b84e90d18c4124236796a237ad232d5de5e2afdb0cf9d1dc639d64b79d1708b",
+    "tests/test_method.py": "971d6955cacf8499408e380bd2b1bcb7b9d50433998bf3541205d9f42d5e73dc",
+    "tests/test_interfaces.py": "3b3a040ffa8f6eb9546fc99d7a3cc7c10c7bd957175f3d428152ee214f86fdbd"
+  },
+  "reproduced_before_fix": [
+    "Two evidence values 9007199254740992 and 9007199254740993 at zero tolerance produced no automatic conflict because both converted to the same float.",
+    "A reported product of 9007199254740993 against operands [9007199254740992, 1] passed with zero tolerance after float conversion.",
+    "An exact phase review retry after advance appended another review, invalidating the accepted marker; an exact advance retry appended a new marker and changed the next phase snapshot.",
+    "The short decimal string 1e5000000 took 3.013 seconds and about 32 MiB RSS during exact fraction conversion without an issue."
+  ],
+  "current_controls": [
+    "Exact Decimal-to-Fraction comparison distinguishes adjacent integers above 2**53 and respects an explicitly supplied tolerance of one.",
+    "Metric values are bounded before exact conversion; product operand count and total coefficient/exponent span are bounded and unsupported values add blocking issues.",
+    "Published mango evidence e_pulp_chamber retains its literal 3-6 range with unit rango porcentaje and no new issue; closed intervals compare exactly, including against a porcentaje scalar through presentation-prefix normalization.",
+    "An identical phase review or advance retry returns its current ledger event after both sequential and forced CAS interleavings; an empty or different advance actor does not duplicate the event."
+  ],
+  "gates": [
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "1148 passed in 104.78s after both current changes"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_method.py tests/test_interfaces.py",
+      "result": "110 passed in 18.47s in independent review"
+    },
+    {
+      "command": "uv build --offline --wheel --out-dir TEMP; uv venv --offline for CPython 3.11.15 and 3.12.3; uv pip install --offline built wheel; uv pip check",
+      "result": "both fresh environments installed 29 compatible packages; built wheel SHA-256 ba7919715aa48961d1c111437e7c9f99e1eea47b78b151282d2766451af718c0"
+    },
+    {
+      "command": "fresh-env python scripts/clean_smoke.py /workspace/SpecOrganon in CPython 3.11.15 and 3.12.3",
+      "result": "both passed nine phases, 29 items, 14 CLI commands, 14 MCP tools, signed synthetic approval, replay, SIGKILL resume, and interface parity"
+    },
+    {
+      "command": "ruff check src/specorganon/engine.py tests/test_method.py tests/test_interfaces.py; git diff --check",
+      "result": "passed"
+    }
+  ],
+  "independent_review": "The final reviewer reproduced interval/scalar conflict at zero tolerance, compatibility at tolerance four and across distinct units, mango ledger compatibility, bounded extreme values, exact product mismatch, CAS retry, actor validation, and revocation on a changed reason; no material finding remained in the reviewed scope.",
+  "limits": [
+    "All new quantitative examples and retries are synthetic except the preservation of the existing published mango ledger value.",
+    "The engine checks declared values, units and actors. It does not authenticate source measurements, physical unit conversion, human identity, or reviewer authority.",
+    "Criteria 1 and 2 remain not assessed as full acceptance conditions."
+  ]
+}
