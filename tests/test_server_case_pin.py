@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import asyncio
+import json
 import os
-from contextlib import contextmanager
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
+from mcp.client import Client
+from mcp.client.stdio import StdioServerParameters
 from mcp.server.mcpserver.exceptions import ToolError
 
 from specorganon import server
@@ -62,48 +67,122 @@ def test_case_fd_survives_replacement_before_invoke(tmp_path, monkeypatch, opera
     assert (outside / "organon.json").read_bytes() == outside_before
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="a same-UID rename can move the pinned case inode outside the root before a write",
-)
-def test_relocated_pinned_inode_can_still_be_written_outside_root(tmp_path, monkeypatch):
+def test_real_stdio_mcp_blocks_write_after_peer_moves_pinned_case(tmp_path):
     root = tmp_path / "root"
     root.mkdir()
     case = root / "case"
-    _init(case, "Inside")
-    before = (case / "organon.json").read_bytes()
     outside = tmp_path / "outside"
     outside.mkdir()
     moved = outside / "case"
-    monkeypatch.setenv("ORGANON_ROOT", str(root))
+    ready = root / "ready.fifo"
+    go = root / "go.fifo"
+    trigger = root / "relocate"
+    os.mkfifo(ready)
+    os.mkfifo(go)
 
-    original_case_path = server._case_path
-    relocated = False
+    # The child runs the real stdio transport and policy. The test-only hook
+    # pauses after _case_path pins the directory, so the parent can move it.
+    child_code = """
+import os
+from contextlib import contextmanager
+from pathlib import Path
+from specorganon import server
 
-    @contextmanager
-    def relocate_after_pin(path, *, create=False):
-        nonlocal relocated
-        with original_case_path(path, create=create) as pinned_path:
-            pinned_fd = int(pinned_path.removeprefix("/proc/self/fd/"))
-            case.rename(moved)
-            relocated = True
-            if os.fstat(pinned_fd).st_ino != moved.stat().st_ino:
-                raise RuntimeError("case inode was not pinned across relocation")
-            yield pinned_path
+original = server._case_path
+@contextmanager
+def pause_after_pin(path, *, create=False):
+    with original(path, create=create) as pinned:
+        if not create and Path(os.environ["CASE_RELOCATE_TRIGGER"]).exists():
+            with open(os.environ["CASE_RELOCATE_READY"], "wb", buffering=0) as pipe:
+                pipe.write(b"1")
+            with open(os.environ["CASE_RELOCATE_GO"], "rb", buffering=0) as pipe:
+                if pipe.read(1) != b"1":
+                    raise RuntimeError("case relocation handshake failed")
+        yield pinned
 
-    monkeypatch.setattr(server, "_case_path", relocate_after_pin)
-    try:
-        server._invoke("put", path="case", id="p1", kind="problem", text="After relocation",
-                       refs=[], data={}, actor="agent:writer")
-    except ToolError:
-        if not relocated:
-            raise RuntimeError("relocation hook was not reached") from None
-        assert (moved / "organon.json").read_bytes() == before, "write preceded rejection outside the root"
-        return  # Rejection would be an unexpected pass of the ideal boundary.
-    if not relocated:
-        raise RuntimeError("relocation hook was not reached")
-    assert (moved / "organon.json").read_bytes() == before, "write reached the case inode outside the root"
+server._case_path = pause_after_pin
+server.main()
+"""
+    environment = {
+        **os.environ,
+        "ORGANON_ROOT": str(root),
+        "ORGANON_ALLOW_FIXTURES": "1",
+        "CASE_RELOCATE_TRIGGER": str(trigger),
+        "CASE_RELOCATE_READY": str(ready),
+        "CASE_RELOCATE_GO": str(go),
+    }
+
+    def read_ready() -> bytes:
+        with ready.open("rb", buffering=0) as pipe:
+            return pipe.read(1)
+
+    def release_case() -> None:
+        with go.open("wb", buffering=0) as pipe:
+            pipe.write(b"1")
+
+    async def exercise() -> None:
+        params = StdioServerParameters(
+            command=sys.executable, args=["-c", child_code], cwd=str(tmp_path), env=environment
+        )
+        async with Client(params, mode="auto") as client:
+            created = await client.call_tool("init", {
+                "path": "case", "title": "Inside", "domain": "test",
+                "actor": "human:fixture", "approval_policy": "fixture",
+            })
+            assert not created.is_error, created.content
+            allowed = await client.call_tool("put", {
+                "path": "case", "id": "p1", "kind": "problem", "text": "Inside root",
+                "refs": [], "data": {}, "actor": "agent:writer",
+            })
+            assert not allowed.is_error, allowed.content
+            run_result = await client.call_tool("run", {
+                "path": "case", "actor": "agent:writer",
+                "manifest": {"schema": 1, "steps": [
+                    {"op": "put", "id": "p_run", "kind": "problem",
+                     "text": "Inside manifest", "refs": [], "data": {}},
+                ]},
+            })
+            assert not run_result.is_error, run_result.content
+            state = await client.call_tool("status", {"path": "case"})
+            assert not state.is_error, state.content
+            status_data = state.structured_content or json.loads(state.content[0].text)
+            assert {"p1", "p_run"} <= status_data["items"].keys()
+            before = (case / "organon.json").read_bytes()
+
+            trigger.touch()
+            pending = asyncio.create_task(client.call_tool("put", {
+                "path": "case", "id": "p2", "kind": "problem", "text": "After relocation",
+                "refs": [], "data": {}, "actor": "agent:writer",
+            }))
+            assert await asyncio.wait_for(asyncio.to_thread(read_ready), 10) == b"1"
+            case.rename(moved)  # Same-UID peer is outside the MCP process's rule.
+            await asyncio.wait_for(asyncio.to_thread(release_case), 10)
+            rejected = await asyncio.wait_for(pending, 10)
+            assert rejected.is_error, rejected.content
+            assert (moved / "organon.json").read_bytes() == before
+
+    asyncio.run(exercise())
+
+
+def test_explicit_root_fails_closed_if_landlock_cannot_be_installed(tmp_path):
+    root = tmp_path / "root"
+    root.mkdir()
+    script = """
+import errno
+from specorganon import server
+def unavailable(*args):
+    raise OSError(errno.ENOSYS, "Landlock unavailable")
+server._landlock_syscall = unavailable
+server.main()
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script], cwd=tmp_path,
+        env={**os.environ, "ORGANON_ROOT": str(root)},
+        text=True, capture_output=True, timeout=10, check=False,
+    )
+    assert result.returncode != 0
+    assert "Landlock" in result.stderr
+    assert not list(root.iterdir())
 
 
 def test_canonical_ancestor_replaced_by_symlink_before_open_is_rejected(tmp_path, monkeypatch):

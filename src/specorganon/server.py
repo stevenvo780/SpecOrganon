@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import ctypes
 import json
 import os
+import platform
 import sys
 from contextlib import contextmanager
 from pathlib import Path
@@ -33,6 +35,79 @@ from specorganon.ledger import strict_json_loads
 
 _DIR_FLAGS = os.O_PATH | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC
 _MAX_MCP_LINE_BYTES = 8 * 1024 * 1024
+_LANDLOCK_SYSCALLS = {"x86_64": (444, 445, 446), "aarch64": (444, 445, 446)}
+_LANDLOCK_MIN_ABI = 5  # ABI 3 adds truncate; ABI 5 adds device ioctl.
+_LANDLOCK_WRITE_ACCESS = sum(1 << bit for bit in (1, *range(4, 16)))
+
+
+class _LandlockRulesetAttr(ctypes.Structure):
+    _fields_ = [("handled_access_fs", ctypes.c_uint64)]
+
+
+class _LandlockPathBeneathAttr(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [("allowed_access", ctypes.c_uint64), ("parent_fd", ctypes.c_int32)]
+
+
+def _landlock_syscall(libc: ctypes.CDLL, number: int, *args: object) -> int:
+    ctypes.set_errno(0)
+    result = libc.syscall(number, *args)
+    if result == -1:
+        code = ctypes.get_errno()
+        raise OSError(code, os.strerror(code))
+    return int(result)
+
+
+def _confine_root_writes() -> None:
+    """Restrict new path-based writes by this MCP thread to ORGANON_ROOT.
+
+    The rule is installed before serving and inherited by the worker threads
+    the stdio transport creates. It does not revoke existing writable FDs or
+    confine same-UID peers; root moves and in-root hardlinks remain outside a
+    complete same-UID filesystem integrity boundary.
+    """
+    if "ORGANON_ROOT" not in os.environ:
+        return  # Keep the historical development mode when no root is set.
+    architecture = platform.machine()
+    if sys.platform != "linux" or architecture not in _LANDLOCK_SYSCALLS:
+        raise RuntimeError("ORGANON_ROOT requires Linux Landlock support")
+
+    root, root_fd = _root_directory()
+    try:
+        # _root_directory resolves aliases, then walks canonical components.
+        # Reject a root replaced during that walk before granting its inode.
+        pinned = os.fstat(root_fd)
+        current = os.stat(root, follow_symlinks=False)
+        if (pinned.st_dev, pinned.st_ino) != (current.st_dev, current.st_ino):
+            raise RuntimeError("ORGANON_ROOT changed during Landlock setup")
+
+        libc = ctypes.CDLL(None, use_errno=True)
+        libc.syscall.restype = ctypes.c_long
+        libc.prctl.argtypes = [ctypes.c_int, ctypes.c_ulong, ctypes.c_ulong,
+                               ctypes.c_ulong, ctypes.c_ulong]
+        libc.prctl.restype = ctypes.c_int
+        create, add_rule, restrict = _LANDLOCK_SYSCALLS[architecture]
+        abi = _landlock_syscall(libc, create, 0, 0, 1)
+        if abi < _LANDLOCK_MIN_ABI:
+            raise RuntimeError(f"ORGANON_ROOT requires Landlock ABI {_LANDLOCK_MIN_ABI}+")
+
+        ruleset_attr = _LandlockRulesetAttr(_LANDLOCK_WRITE_ACCESS)
+        ruleset_fd = _landlock_syscall(
+            libc, create, ctypes.byref(ruleset_attr), ctypes.sizeof(ruleset_attr), 0
+        )
+        try:
+            root_rule = _LandlockPathBeneathAttr(_LANDLOCK_WRITE_ACCESS, root_fd)
+            _landlock_syscall(libc, add_rule, ruleset_fd, 1, ctypes.byref(root_rule), 0)
+            if libc.prctl(38, 1, 0, 0, 0) != 0:  # PR_SET_NO_NEW_PRIVS
+                code = ctypes.get_errno()
+                raise OSError(code, os.strerror(code))
+            _landlock_syscall(libc, restrict, ruleset_fd, 0)
+        finally:
+            os.close(ruleset_fd)
+    except OSError as exc:
+        raise RuntimeError(f"cannot confine ORGANON_ROOT with Landlock: {exc}") from exc
+    finally:
+        os.close(root_fd)
 
 
 def _validate_raw_envelope(message: Any) -> None:
@@ -227,6 +302,7 @@ class _StrictStdin:
 class _StrictStdioMCPServer(MCPServer):
     async def run_stdio_async(self) -> None:
         """Use SDK stdio framing with validation before its JSON adapter."""
+        _confine_root_writes()
         stdin_buffer, restore_stdin = _claim_fd(
             0, sys.stdin, "rb", _open_stdin_diversion
         )
