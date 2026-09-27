@@ -488,7 +488,9 @@ def _decisive_indicator_has_evidence(items: dict[str, dict], flags: dict[str, di
         if any(flags[evidence_id][field] for field in ("stale", "contested", "issues")):
             continue
         data = evidence["data"]
-        if (data.get("metric_key") != metric or data.get("unit") != unit
+        scope = data.get("scope")
+        if (not isinstance(scope, str) or not scope.strip()
+                or data.get("metric_key") != metric or data.get("unit") != unit
                 or _metric_interval(data) is None):
             continue
         if _has_path(items, evidence_id, {"protocol"}):

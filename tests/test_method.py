@@ -41,7 +41,8 @@ def _synthetic_measured_outcomes():
 
 def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1"),
                              e0_refs=("pr1",), e0_origin="simulated", e0_metric_key="count",
-                             e0_unit="count", e0_value=10, e0_data_extra=None,
+                             e0_unit="count", e0_value=10, e0_scope="indicator fixture",
+                             e0_data_extra=None,
                              e1_refs=("pr1",), e1_origin="simulated", e1_value=10,
                              e1_metric_key="count", e1_unit="count",
                              inf_refs=("e1", "h1"), sibling_protocol=False, sibling_problem="p1",
@@ -92,7 +93,9 @@ def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1")
         _put(path, "e2", "evidence", ["pr2"], {"origin": "simulated", "source": "synthetic fixture", "date": "2026-09-26", "locator": "second problem", "metric_key": "count", "scope": "second problem", "unit": "count", "value": 10})
         _put(path, "i2", "indicator", ["p2", "n2", "e2"], {"metric": "count", "unit": "count"})
     e0_data = {"origin": e0_origin, "source": "synthetic fixture", "date": "2026-09-26",
-               "locator": "predeclared context", "scope": "indicator fixture"}
+               "locator": "predeclared context"}
+    if e0_scope is not None:
+        e0_data["scope"] = e0_scope
     if e0_metric_key is not None:
         e0_data["metric_key"] = e0_metric_key
     if e0_unit is not None:
@@ -1967,11 +1970,37 @@ def test_decisive_simulation_accepts_matching_indicator_measurement(tmp_path, ve
     path = tmp_path / "case"
     _complete_synthetic_case(
         path, e0_metric_key="waste_mass", e0_unit="kg", e0_value=10,
+        e0_scope="one synthetic lot",
         e1_metric_key="temperature", e1_unit="C",
         indicator_metric="waste_mass", indicator_unit="kg",
     )
     _record_decisive_simulation(path, verdict)
     _accept(path, "validate")
+
+
+@pytest.mark.parametrize("scope", (None, "", " \t", 17))
+@pytest.mark.parametrize("verdict", ("cumplido", "incumplido"))
+def test_decisive_indicator_rejects_missing_or_empty_evidence_scope(tmp_path, scope, verdict):
+    path = tmp_path / "case"
+    _complete_synthetic_case(
+        path, e0_metric_key="waste_mass", e0_unit="kg", e0_value=10,
+        e0_scope=scope, e1_metric_key="temperature", e1_unit="C",
+        indicator_metric="waste_mass", indicator_unit="kg",
+    )
+    evidence = engine.get_state(path)["items"]["e0"]["data"]
+    assert ("scope" in evidence) is (scope is not None)
+    assert engine.gate(path, "specify")["accepted"]
+    _record_decisive_simulation(path, verdict)
+    claim = "success" if verdict == "cumplido" else "rejection"
+    expected = f"ass1 {claim} needs current protocol-valid evidence measuring waste_mass/kg in indicator i1"
+    status = engine.gate(path, "validate")
+    assert status["blockers"] == [expected]
+    assert not status["ready"] and not status["accepted"]
+
+    _put(path, "ass1", "assessment", ["res1", "r1"],
+         {"verdict": "no_demostrado", "claim_scope": "simulation", "uncertainty": "synthetic interval",
+          "adverse_effects": "not measured", "cost": "not measured"})
+    assert engine.gate(path, "validate")["ready"]
 
 
 def test_decisive_indicator_needs_a_value_for_its_typed_measurement(tmp_path):
