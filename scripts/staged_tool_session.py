@@ -13,7 +13,7 @@ rerunning the empty-work stage verifier. Each numbered call reserves a slot in
 an fsynced journal before launch. A missing terminal receipt is indeterminate:
 its slot remains spent and no later call is launched. Nothing retries or
 deletes possibly effected work. A host-local claim admits only one staged
-owner or one-shot owner for a schedule/run at attempt 1. The first call claims;
+owner or one-shot owner for each scheduled attempt. The first call claims;
 init alone does not. Budgets are enforced for the winning local session only.
 Provider/model/study budgets and external custody are not enforced here.
 
@@ -61,9 +61,11 @@ from run_staged_local_tool import (
     MAX_WORK_FILES,
     LocalToolError,
     _check_snapshot_bindings,
+    _held_retry_gate,
     _immutable_snapshot,
     _inventory,
     _private_receipt_dir,
+    _require_retry_gate,
 )
 from tool_policy import (
     MAX_POLICY_BYTES,
@@ -87,6 +89,9 @@ NOTICE = (
     "admits one stage/session or one-shot owner at attempt 1; budgets apply "
     "only to that winner, not globally across providers/models/studies. "
     "Same-UID mutation and clock changes remain outside this journal's guarantees."
+)
+RETRY_NOTICE = NOTICE.replace(
+    "at attempt 1", "per scheduled attempt"
 )
 BUDGET_SCOPE = "stage_instance_local"
 SCHEMA = 1
@@ -283,8 +288,7 @@ def _check_anchor(
                 raise SessionError("stage/run anchor durability could not be confirmed") from exc
         finally:
             fcntl.flock(parent_fd, fcntl.LOCK_UN)
-    if (hashlib.sha256(data).hexdigest() != manifest.get("anchor_sha256")
-        or anchor != {
+    expected = {
             "schema": SCHEMA, "classification": ANCHOR_CLASSIFICATION,
             "run_id": run["run_id"], "run_sha256": run["run_sha256"],
             "schedule_sha256": schedule["schedule_sha256"],
@@ -295,9 +299,14 @@ def _check_anchor(
             "local_run_admission_root_identity": manifest["local_run_admission_root_identity"],
             "local_run_admission_scope": admission.SCOPE,
             "local_run_claim_sha256": manifest["local_run_claim_sha256"],
-            "attempt_number": 1,
+            "attempt_number": manifest["attempt_number"],
             "budget_scope": BUDGET_SCOPE, "global_run_limits_enforced": False,
-        }):
+    }
+    if manifest["attempt_number"] > 1:
+        expected.update({key: manifest[key] for key in (
+            "release_gate_root", "release_dir", "claim_sha256", "publication_sha256"
+        )})
+    if hashlib.sha256(data).hexdigest() != manifest.get("anchor_sha256") or anchor != expected:
         raise SessionError("stage/run anchor differs from this session")
 
 
@@ -400,7 +409,7 @@ def _valid_terminal(
     return (
         terminal.get("schema") == SCHEMA
         and terminal.get("classification") == CLASSIFICATION
-        and terminal.get("notice") == NOTICE
+        and terminal.get("notice") == (RETRY_NOTICE if reservation["attempt_number"] > 1 else NOTICE)
         and terminal.get("call_number") == reservation["call_number"]
         and terminal.get("reservation_sha256") == reservation_sha256
         and terminal.get("run_id") == run["run_id"]
@@ -439,7 +448,7 @@ def _valid_terminal(
         and terminal.get("local_run_admission_scope") == admission.SCOPE
         and terminal.get("local_run_claim_sha256") == reservation["local_run_claim_sha256"]
         and type(terminal.get("attempt_number")) is int
-        and terminal.get("attempt_number") == 1
+        and terminal.get("attempt_number") == reservation["attempt_number"]
     )
 
 
@@ -455,7 +464,10 @@ def _read_state(
         or manifest.get("schedule_sha256") != schedule["schedule_sha256"]
         or manifest.get("stage_dir") != str(stage)
         or manifest.get("session_dir") != str(session)
-        or manifest.get("notice") != NOTICE
+        or manifest.get("notice") != (
+            RETRY_NOTICE if type(manifest.get("attempt_number")) is int
+            and manifest["attempt_number"] > 1 else NOTICE
+        )
         or manifest.get("budget_scope") != BUDGET_SCOPE
         or manifest.get("global_run_limits_enforced") is not False
         or manifest.get("tool_call_cap") != schedule["per_run_limits"]["tool_calls"]
@@ -468,10 +480,19 @@ def _read_state(
         or manifest.get("local_run_admission_scope") != admission.SCOPE
         or not _is_sha256(manifest.get("local_run_claim_sha256"))
         or type(manifest.get("attempt_number")) is not int
-        or manifest.get("attempt_number") != 1
+        or not 1 <= manifest.get("attempt_number") <= admission.MAX_ATTEMPT_NUMBER
         or type(manifest.get("deliverables")) is not list
     ):
         raise SessionError("session identity differs from independent schedule or paths")
+    retry_fields = ("release_gate_root", "release_dir", "claim_sha256", "publication_sha256")
+    if manifest["attempt_number"] == 1:
+        if any(key in manifest for key in retry_fields):
+            raise SessionError("attempt-1 session contains retry gate fields")
+    elif (type(manifest.get("release_gate_root")) is not str
+          or type(manifest.get("release_dir")) is not str
+          or not _is_sha256(manifest.get("claim_sha256"))
+          or not _is_sha256(manifest.get("publication_sha256"))):
+        raise SessionError("retry session lacks gate provenance")
     if (type(manifest.get("active_budget_seconds")) not in (float, int)
         or type(manifest.get("wall_budget_seconds")) not in (float, int)
         or type(manifest.get("created_ns")) is not int
@@ -522,7 +543,7 @@ def _read_state(
                 or reservation.get("local_run_admission_scope") != admission.SCOPE
                 or reservation.get("local_run_claim_sha256") != manifest["local_run_claim_sha256"]
                 or type(reservation.get("attempt_number")) is not int
-                or reservation.get("attempt_number") != 1
+                or reservation.get("attempt_number") != manifest["attempt_number"]
                 or reservation.get("previous_terminal_sha256") != previous_digest
                 or reservation.get("policy_sha256") != manifest["policy_sha256"]
                 or reservation.get("immutable_snapshot_sha256") != manifest["immutable_snapshot_sha256"]
@@ -579,6 +600,7 @@ def _read_state(
         claim_sha256 = admission.require_claim(
             schedule["schedule_sha256"], run["run_id"], selected_owner,
             root_descriptor, override=admission_root, allow_missing=not calls,
+            attempt_number=manifest["attempt_number"],
         )
         if claim_sha256 is not None:
             if claim_sha256 != manifest["local_run_claim_sha256"]:
@@ -587,8 +609,16 @@ def _read_state(
     except (admission.AdmissionError, OSError) as exc:
         claim_status = "blocked"
         claim_reason = str(exc)
+    gate_reason = None
+    if manifest["attempt_number"] > 1:
+        try:
+            _require_retry_gate(
+                schedule, run["run_id"], manifest, manifest["release_gate_root"]
+            )
+        except (LocalToolError, OSError, ValueError) as exc:
+            gate_reason = str(exc)
     last = calls[-1][1] if calls and pending is None else None
-    blocked_reason = claim_reason
+    blocked_reason = claim_reason or gate_reason
     if blocked_reason is None and last is not None and (last.get("output_inventory_complete") is not True
                               or last.get("stage_unchanged_after_run") is not True
                               or last.get("status") == "stage_or_executable_mutated"
@@ -604,10 +634,10 @@ def _read_state(
     status = ("blocked" if blocked_reason else "indeterminate" if pending is not None
               else "exhausted" if exhausted_reason else "ready")
     summary = {
-        "schema": SCHEMA, "classification": CLASSIFICATION, "notice": NOTICE,
+        "schema": SCHEMA, "classification": CLASSIFICATION, "notice": manifest["notice"],
         "budget_scope": BUDGET_SCOPE, "global_run_limits_enforced": False,
         **root_descriptor, "local_run_claim_sha256": manifest["local_run_claim_sha256"],
-        "local_run_claim_status": claim_status, "attempt_number": 1,
+        "local_run_claim_status": claim_status, "attempt_number": manifest["attempt_number"],
         "run_id": run["run_id"], "schedule_sha256": schedule["schedule_sha256"],
         "status": status, "blocked_reason": blocked_reason or exhausted_reason,
         "pending_call": pending, "pending_reason": pending_reason if pending else None,
@@ -654,7 +684,7 @@ def _assert_stage_and_work(
 def create_session(
     schedule_raw: Any, run_id: str, stage_dir: Path | str, session_dir: Path | str, *,
     active_budget_seconds: float | None = None, wall_budget_seconds: float | None = None,
-    admission_root: Path | str | None = None,
+    admission_root: Path | str | None = None, gate_root: Path | str | None = None,
 ) -> dict[str, Any]:
     """Verify an empty stage exactly once and create a new durable session."""
     stage, session = _paths(stage_dir, session_dir)
@@ -670,13 +700,9 @@ def create_session(
     if session.exists():
         raise FileExistsError("session directory already exists")
     _anchor_preflight(stage, run_id)
-    root_descriptor = admission.descriptor(admission_root)
-    selected_owner = admission.owner("staged", stage, session)
-    claim_sha256 = admission.claim_digest(
-        schedule["schedule_sha256"], run_id, selected_owner, root_descriptor
-    )
     before = _immutable_snapshot(stage)
     verified = verify_stage(schedule, run_id, stage)
+    _require_retry_gate(schedule, run_id, verified, gate_root)
     after = _immutable_snapshot(stage)
     if before != after:
         raise SessionError("stage changed across initial verification")
@@ -685,6 +711,20 @@ def create_session(
     work = _work_inventory(stage)
     if not work["complete"] or work["files"] or set(work["directories"]) != {""}:
         raise SessionError("stage work directory must be completely empty at init")
+    attempt_number = verified["attempt_number"]
+    root_descriptor = admission.descriptor(admission_root)
+    selected_owner = admission.owner("staged", stage, session)
+    claim_sha256 = admission.claim_digest(
+        schedule["schedule_sha256"], run_id, selected_owner, root_descriptor,
+        attempt_number=attempt_number,
+    )
+    retry_provenance = (
+        {"release_gate_root": str(gate_root),
+         "release_dir": verified["release_dir"],
+         "claim_sha256": verified["claim_sha256"],
+         "publication_sha256": verified["publication_sha256"]}
+        if attempt_number > 1 else {}
+    )
     case_manifest = json.loads(_read_bounded_file(
         stage / "case" / "case.json", "staged case manifest", 1024 * 1024
     ))
@@ -700,12 +740,14 @@ def create_session(
         "stage_dir": str(stage), "session_dir": str(session),
         "immutable_snapshot_sha256": _digest(after), "created_ns": created_ns,
         **root_descriptor, "local_run_claim_sha256": claim_sha256,
-        "attempt_number": 1,
+        "attempt_number": attempt_number,
+        **retry_provenance,
         "budget_scope": BUDGET_SCOPE, "global_run_limits_enforced": False,
     }
     anchor_sha256 = hashlib.sha256(_canonical_bytes(anchor, newline=True)).hexdigest()
     manifest = {
-        "schema": SCHEMA, "classification": CLASSIFICATION, "notice": NOTICE,
+        "schema": SCHEMA, "classification": CLASSIFICATION,
+        "notice": RETRY_NOTICE if attempt_number > 1 else NOTICE,
         "budget_scope": BUDGET_SCOPE, "global_run_limits_enforced": False,
         "run_id": run_id, "run_sha256": verified["run_sha256"],
         "schedule_sha256": schedule["schedule_sha256"], "stage_dir": str(stage),
@@ -713,7 +755,8 @@ def create_session(
         "immutable_snapshot_sha256": _digest(after), "initial_work_sha256": _digest(work),
         "anchor_sha256": anchor_sha256,
         **root_descriptor, "local_run_claim_sha256": claim_sha256,
-        "attempt_number": 1,
+        "attempt_number": attempt_number,
+        **retry_provenance,
         "policy_sha256": policy_sha256, "tool_call_cap": policy["limits"]["tool_calls"],
         "deliverables": case_manifest["deliverables"],
         "active_budget_seconds": float(active_budget),
@@ -814,11 +857,13 @@ def call_tool(
             claimed = admission.acquire_staged_claim(
                 schedule["schedule_sha256"], run_id, admission.owner("staged", stage, session),
                 root_descriptor, override=admission_root,
+                attempt_number=manifest["attempt_number"],
             )
         else:
             claimed = admission.require_claim(
                 schedule["schedule_sha256"], run_id, admission.owner("staged", stage, session),
                 root_descriptor, override=admission_root,
+                attempt_number=manifest["attempt_number"],
             )
         if claimed != manifest["local_run_claim_sha256"]:
             raise SessionError("local admission claim digest differs from session")
@@ -836,7 +881,7 @@ def call_tool(
             "schema": SCHEMA, "call_number": call_number, "run_id": run_id,
             "budget_scope": BUDGET_SCOPE, "global_run_limits_enforced": False,
             **root_descriptor, "local_run_claim_sha256": claimed,
-            "attempt_number": 1,
+            "attempt_number": manifest["attempt_number"],
             "schedule_sha256": schedule["schedule_sha256"],
             "previous_terminal_sha256": previous_digest,
             "reserved_at_ns": now_ns, "tool_id": tool_id,
@@ -864,35 +909,39 @@ def call_tool(
         if admission.require_claim(
             schedule["schedule_sha256"], run_id, admission.owner("staged", stage, session),
             root_descriptor, override=admission_root,
+            attempt_number=manifest["attempt_number"],
         ) != claimed:
             raise SessionError("local admission claim changed before launch")
         result = None
         launch_error = None
         elapsed = 0.0
-        try:
-            runtime_roots = default_python_runtime_roots()
-            if time.time_ns() >= launch_deadline_ns:
-                launch_error = "session wall budget expired after reservation before launch"
-            else:
-                start = time.monotonic()
-                try:
-                    result = run_sandboxed(
-                        argv=[str(tool), str(stage / "case"), str(stage / "inputs"), str(stage / "work")],
-                        cwd=stage / "case", read_roots=[stage / "case", stage / "inputs"],
-                        write_roots=[stage / "work"], runtime_roots=runtime_roots,
-                        stdout_path=call_dir / "stdout", stderr_path=call_dir / "stderr",
-                        timeout_seconds=float(wall_seconds), cpu_seconds=cpu_seconds,
-                        address_space_bytes=address_space_bytes,
-                        file_bytes_per_file=file_bytes_per_file,
-                        env={"HOME": str(stage / "work"), "TMPDIR": str(stage / "work")},
-                        sealed_executable_bytes=tool_bytes,
-                        sealed_executable_sha256=executable_sha256,
-                        launch_deadline_utc_ns=launch_deadline_ns,
-                    )
-                finally:
-                    elapsed = time.monotonic() - start
-        except (SandboxError, SandboxUnavailable, OSError, ValueError) as exc:
-            launch_error = f"{type(exc).__name__}: {exc}"
+        with _held_retry_gate(
+            schedule, run_id, manifest, manifest.get("release_gate_root")
+        ):
+            try:
+                runtime_roots = default_python_runtime_roots()
+                if time.time_ns() >= launch_deadline_ns:
+                    launch_error = "session wall budget expired after reservation before launch"
+                else:
+                    start = time.monotonic()
+                    try:
+                        result = run_sandboxed(
+                            argv=[str(tool), str(stage / "case"), str(stage / "inputs"), str(stage / "work")],
+                            cwd=stage / "case", read_roots=[stage / "case", stage / "inputs"],
+                            write_roots=[stage / "work"], runtime_roots=runtime_roots,
+                            stdout_path=call_dir / "stdout", stderr_path=call_dir / "stderr",
+                            timeout_seconds=float(wall_seconds), cpu_seconds=cpu_seconds,
+                            address_space_bytes=address_space_bytes,
+                            file_bytes_per_file=file_bytes_per_file,
+                            env={"HOME": str(stage / "work"), "TMPDIR": str(stage / "work")},
+                            sealed_executable_bytes=tool_bytes,
+                            sealed_executable_sha256=executable_sha256,
+                            launch_deadline_utc_ns=launch_deadline_ns,
+                        )
+                    finally:
+                        elapsed = time.monotonic() - start
+            except (SandboxError, SandboxUnavailable, OSError, ValueError) as exc:
+                launch_error = f"{type(exc).__name__}: {exc}"
         if result is not None:
             launch_error = result.launch_error
         work_after = _work_inventory(stage)
@@ -929,10 +978,11 @@ def call_tool(
             status = "success"
         active_charged = elapsed + ACTIVE_GUARD_SECONDS
         terminal = {
-            "schema": SCHEMA, "classification": CLASSIFICATION, "notice": NOTICE,
+            "schema": SCHEMA, "classification": CLASSIFICATION,
+            "notice": manifest["notice"],
             "budget_scope": BUDGET_SCOPE, "global_run_limits_enforced": False,
             **root_descriptor, "local_run_claim_sha256": claimed,
-            "attempt_number": 1,
+            "attempt_number": manifest["attempt_number"],
             "call_number": call_number, "reservation_sha256": reservation_sha256,
             "run_id": run_id, "run_sha256": run["run_sha256"],
             "schedule_sha256": schedule["schedule_sha256"],
@@ -983,6 +1033,7 @@ def main(argv: list[str] | None = None) -> int:
     init.add_argument("--active-budget-seconds", type=float)
     init.add_argument("--wall-budget-seconds", type=float)
     init.add_argument("--admission-root")
+    init.add_argument("--gate-dir")
     status = sub.add_parser("status")
     call = sub.add_parser("call")
     for command in (status, call):
@@ -1006,6 +1057,7 @@ def main(argv: list[str] | None = None) -> int:
                 active_budget_seconds=args.active_budget_seconds,
                 wall_budget_seconds=args.wall_budget_seconds,
                 admission_root=args.admission_root,
+                gate_root=args.gate_dir,
             )
         elif args.command == "status":
             report = resume_session(schedule, args.run_id, args.stage_dir, args.session_dir,

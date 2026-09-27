@@ -6,8 +6,9 @@ override is for tests or an operator who configures *every* invoker alike.
 This protects against cooperating processes of the same UID; it is not external
 custody and cannot prevent that UID from modifying its own files.
 
-Only attempt 1 exists here. An authorized ``external_failure`` retry would need
-a future, separately reviewed state machine with durable terminal evidence.
+The caller must establish retry eligibility against the separate block release
+gate before using an attempt greater than one. This registry only prevents two
+local owners from claiming the same scheduled attempt.
 """
 
 from __future__ import annotations
@@ -32,6 +33,7 @@ SCHEMA = 1
 SCOPE = "same_uid_host_one_registry_root"
 ROOT_ENV = "SPECORGANON_LOCAL_ADMISSION_ROOT"
 MAX_CLAIM_BYTES = 4096
+MAX_ATTEMPT_NUMBER = 11
 DIR_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
 FILE_FLAGS = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
 _RENAME_NOREPLACE = 1
@@ -141,27 +143,33 @@ def _descriptor_fd(path: Path, fd: int) -> dict[str, str]:
             "local_run_admission_scope": SCOPE}
 
 
-def _key(schedule_sha256: str, run_id: str) -> str:
+def _key(schedule_sha256: str, run_id: str, attempt_number: int = 1) -> str:
     if not _sha256(schedule_sha256) or type(run_id) is not str or not run_id or len(run_id) > 256:
         raise AdmissionError("invalid validated schedule/run identity for local admission")
-    return _digest({"schedule_sha256": schedule_sha256, "run_id": run_id})
+    if type(attempt_number) is not int or not 1 <= attempt_number <= MAX_ATTEMPT_NUMBER:
+        raise AdmissionError("invalid local admission attempt number")
+    identity = {"schedule_sha256": schedule_sha256, "run_id": run_id}
+    if attempt_number > 1:
+        identity["attempt_number"] = attempt_number
+    return _digest(identity)
 
 
 def _claim(schedule_sha256: str, run_id: str, selected_owner: dict[str, str],
-           root_descriptor: dict[str, str]) -> dict[str, Any]:
-    _key(schedule_sha256, run_id)
+           root_descriptor: dict[str, str], attempt_number: int = 1) -> dict[str, Any]:
+    _key(schedule_sha256, run_id, attempt_number)
     if selected_owner != owner(selected_owner.get("mode", ""),
                                selected_owner.get("stage_dir", ""),
                                selected_owner.get("session_dir", selected_owner.get("receipt_dir", ""))):
         raise AdmissionError("invalid local admission owner")
     return {"schema": SCHEMA, "classification": "development_local_run_admission_unsealed",
-            "schedule_sha256": schedule_sha256, "run_id": run_id, "attempt_number": 1,
+            "schedule_sha256": schedule_sha256, "run_id": run_id, "attempt_number": attempt_number,
             "owner": selected_owner, **root_descriptor}
 
 
 def claim_digest(schedule_sha256: str, run_id: str, selected_owner: dict[str, str],
-                 root_descriptor: dict[str, str]) -> str:
-    return _digest(_claim(schedule_sha256, run_id, selected_owner, root_descriptor))
+                 root_descriptor: dict[str, str], *, attempt_number: int = 1) -> str:
+    return _digest(_claim(schedule_sha256, run_id, selected_owner, root_descriptor,
+                          attempt_number))
 
 
 def _read_claim(fd: int, name: str) -> bytes:
@@ -196,16 +204,17 @@ def _parse_claim(data: bytes) -> dict[str, Any]:
 
 def publish_claim(schedule_sha256: str, run_id: str, selected_owner: dict[str, str],
                   root_descriptor: dict[str, str], *,
-                  override: Path | str | None = None) -> str:
+                  override: Path | str | None = None, attempt_number: int = 1) -> str:
     """Fsync a temporary claim, then publish it once under an exclusive lock."""
-    expected = _claim(schedule_sha256, run_id, selected_owner, root_descriptor)
+    expected = _claim(schedule_sha256, run_id, selected_owner, root_descriptor,
+                      attempt_number)
     data = _canonical(expected)
     if len(data) > MAX_CLAIM_BYTES:
         raise AdmissionError("local admission claim exceeds byte limit")
     path = configured_root(override)
     if root_descriptor != descriptor(path, create=False):
         raise AdmissionError("admission registry root identity changed")
-    name = f"{_key(schedule_sha256, run_id)}.json"
+    name = f"{_key(schedule_sha256, run_id, attempt_number)}.json"
     temp = f".{name}.{secrets.token_hex(16)}.tmp"
     with _root_fd(path, create=False) as fd:
         temporary_fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
@@ -244,9 +253,11 @@ def publish_claim(schedule_sha256: str, run_id: str, selected_owner: dict[str, s
 
 def require_claim(schedule_sha256: str, run_id: str, selected_owner: dict[str, str],
                   root_descriptor: dict[str, str], *,
-                  override: Path | str | None = None, allow_missing: bool = False) -> str | None:
+                  override: Path | str | None = None, allow_missing: bool = False,
+                  attempt_number: int = 1) -> str | None:
     """Read and durably confirm the owner's immutable claim before launch."""
-    expected = _claim(schedule_sha256, run_id, selected_owner, root_descriptor)
+    expected = _claim(schedule_sha256, run_id, selected_owner, root_descriptor,
+                      attempt_number)
     path = configured_root(override)
     if root_descriptor != descriptor(path, create=False):
         raise AdmissionError("admission registry root identity differs from recorded root")
@@ -256,7 +267,7 @@ def require_claim(schedule_sha256: str, run_id: str, selected_owner: dict[str, s
             if root_descriptor != _descriptor_fd(path, fd):
                 raise AdmissionError("admission registry root identity differs from recorded root")
             try:
-                data = _read_claim(fd, f"{_key(schedule_sha256, run_id)}.json")
+                data = _read_claim(fd, f"{_key(schedule_sha256, run_id, attempt_number)}.json")
             except FileNotFoundError as exc:
                 os.fsync(fd)
                 if allow_missing:
@@ -274,21 +285,24 @@ def require_claim(schedule_sha256: str, run_id: str, selected_owner: dict[str, s
 
 def acquire_staged_claim(schedule_sha256: str, run_id: str,
                          selected_owner: dict[str, str], root_descriptor: dict[str, str],
-                         *, override: Path | str | None = None) -> str:
+                         *, override: Path | str | None = None,
+                         attempt_number: int = 1) -> str:
     """First call claims; the same owner may recover before its first reservation."""
     existing = require_claim(schedule_sha256, run_id, selected_owner, root_descriptor,
-                             override=override, allow_missing=True)
+                             override=override, allow_missing=True,
+                             attempt_number=attempt_number)
     if existing is not None:
         return existing
     try:
         return publish_claim(schedule_sha256, run_id, selected_owner, root_descriptor,
-                             override=override)
+                             override=override, attempt_number=attempt_number)
     except AdmissionError as exc:
         if "already has a local admission claim" not in str(exc):
             raise
         # Another claimant may have won after the missing-claim read. Only the
         # exact same stage/session owner can continue from this point.
         confirmed = require_claim(schedule_sha256, run_id, selected_owner,
-                                  root_descriptor, override=override)
+                                  root_descriptor, override=override,
+                                  attempt_number=attempt_number)
         assert confirmed is not None
         return confirmed

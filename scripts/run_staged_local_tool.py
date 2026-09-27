@@ -34,11 +34,12 @@ import math
 import os
 import stat
 import sys
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 import local_run_admission as admission
+from local_block_release_gate import BlockReleaseError, hold_claim, verify_claim
 from local_replay_sandbox import (
     SandboxError,
     SandboxUnavailable,
@@ -81,6 +82,57 @@ FILE_FLAGS = os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW
 
 class LocalToolError(ValueError):
     """The local tool run cannot be prepared or its receipt cannot be saved."""
+
+
+def _require_retry_gate(
+    schedule: dict[str, Any], run_id: str, verified_stage: dict[str, Any],
+    gate_root: Path | str | None,
+) -> None:
+    """Bind a retry stage to its currently published local release attempt."""
+    attempt_number = verified_stage["attempt_number"]
+    if attempt_number == 1:
+        if gate_root is not None:
+            raise LocalToolError("attempt-1 stage has no recorded release gate identity")
+        return
+    if gate_root is None:
+        raise LocalToolError("retry stage requires an explicit gate root before launch")
+    try:
+        claim = verify_claim(
+            schedule, run_id, gate_root, verified_stage["release_dir"],
+            attempt_number=attempt_number,
+        )
+    except BlockReleaseError as exc:
+        raise LocalToolError(f"retry release gate rejected launch: {exc}") from exc
+    if (claim["claim_sha256"] != verified_stage["claim_sha256"]
+        or claim["publication_sha256"] != verified_stage["publication_sha256"]):
+        raise LocalToolError("retry stage differs from its published release claim")
+
+
+@contextmanager
+def _held_retry_gate(
+    schedule: dict[str, Any], run_id: str, verified_stage: dict[str, Any],
+    gate_root: Path | str | None,
+) -> Iterator[None]:
+    """Keep an active retry claim open across one local sandbox operation."""
+    attempt_number = verified_stage["attempt_number"]
+    if attempt_number == 1:
+        if gate_root is not None:
+            raise LocalToolError("attempt-1 stage has no recorded release gate identity")
+        yield
+        return
+    if gate_root is None:
+        raise LocalToolError("retry stage requires an explicit gate root before launch")
+    try:
+        with hold_claim(
+            schedule, run_id, gate_root, verified_stage["release_dir"],
+            attempt_number=attempt_number,
+        ) as claim:
+            if (claim["claim_sha256"] != verified_stage["claim_sha256"]
+                or claim["publication_sha256"] != verified_stage["publication_sha256"]):
+                raise LocalToolError("retry stage differs from its published release claim")
+            yield
+    except BlockReleaseError as exc:
+        raise LocalToolError(f"retry release gate rejected launch: {exc}") from exc
 
 
 class _InventoryLimit(Exception):
@@ -302,6 +354,7 @@ def run_staged_local_tool(
     address_space_bytes: int = 512 * 1024 * 1024,
     file_bytes_per_file: int = 8 * 1024 * 1024,
     admission_root: Path | str | None = None,
+    gate_root: Path | str | None = None,
 ) -> dict[str, Any]:
     """Prepare, execute once, and save a separate local receipt."""
     stage = Path(stage_dir)
@@ -319,6 +372,8 @@ def run_staged_local_tool(
         raise LocalToolError("candidate schedule cannot be snapshotted") from exc
     baseline = _immutable_snapshot(stage)
     verified = verify_stage(schedule, run_id, stage)
+    attempt_number = verified["attempt_number"]
+    _require_retry_gate(schedule, run_id, verified, gate_root)
     after_verification = _immutable_snapshot(stage)
     if after_verification != baseline:
         raise LocalToolError("stage changed across verification")
@@ -368,12 +423,12 @@ def run_staged_local_tool(
     _private_receipt_dir(receipt, stage)
     claim_sha256 = admission.publish_claim(
         schedule["schedule_sha256"], run_id, selected_owner, root_descriptor,
-        override=admission_root,
+        override=admission_root, attempt_number=attempt_number,
     )
     reservation = {
         "schema": 1, "classification": "development_staged_local_tool_reservation_unsealed",
         "schedule_sha256": schedule["schedule_sha256"], "run_id": run_id,
-        "run_sha256": verified["run_sha256"], "attempt_number": 1,
+        "run_sha256": verified["run_sha256"], "attempt_number": attempt_number,
         **root_descriptor, "local_run_claim_sha256": claim_sha256,
         "stage_dir": str(stage), "receipt_dir": str(receipt),
         "tool_id": tool_id, "tool_version": selected["version"],
@@ -402,29 +457,30 @@ def run_staged_local_tool(
         raise LocalToolError("one-shot reservation changed before launch")
     if admission.require_claim(
         schedule["schedule_sha256"], run_id, selected_owner, root_descriptor,
-        override=admission_root,
+        override=admission_root, attempt_number=attempt_number,
     ) != claim_sha256:
         raise LocalToolError("local admission claim changed before launch")
     stdout_path = receipt / "stdout"
     stderr_path = receipt / "stderr"
     sandbox_result = None
     launch_error = None
-    try:
-        sandbox_result = run_sandboxed(
-            argv=[str(tool), str(stage / "case"), str(stage / "inputs"), str(stage / "work")],
-            cwd=stage / "case", read_roots=[stage / "case", stage / "inputs"],
-            write_roots=[stage / "work"],
-            runtime_roots=default_python_runtime_roots(),
-            stdout_path=stdout_path, stderr_path=stderr_path,
-            timeout_seconds=float(wall_seconds), cpu_seconds=cpu_seconds,
-            address_space_bytes=address_space_bytes,
-            file_bytes_per_file=file_bytes_per_file,
-            env={"HOME": str(stage / "work"), "TMPDIR": str(stage / "work")},
-            sealed_executable_bytes=tool_bytes,
-            sealed_executable_sha256=actual,
-        )
-    except (SandboxError, SandboxUnavailable, OSError, ValueError) as exc:
-        launch_error = f"{type(exc).__name__}: {exc}"
+    with _held_retry_gate(schedule, run_id, verified, gate_root):
+        try:
+            sandbox_result = run_sandboxed(
+                argv=[str(tool), str(stage / "case"), str(stage / "inputs"), str(stage / "work")],
+                cwd=stage / "case", read_roots=[stage / "case", stage / "inputs"],
+                write_roots=[stage / "work"],
+                runtime_roots=default_python_runtime_roots(),
+                stdout_path=stdout_path, stderr_path=stderr_path,
+                timeout_seconds=float(wall_seconds), cpu_seconds=cpu_seconds,
+                address_space_bytes=address_space_bytes,
+                file_bytes_per_file=file_bytes_per_file,
+                env={"HOME": str(stage / "work"), "TMPDIR": str(stage / "work")},
+                sealed_executable_bytes=tool_bytes,
+                sealed_executable_sha256=actual,
+            )
+        except (SandboxError, SandboxUnavailable, OSError, ValueError) as exc:
+            launch_error = f"{type(exc).__name__}: {exc}"
     if sandbox_result is not None:
         launch_error = sandbox_result.launch_error
 
@@ -474,7 +530,7 @@ def run_staged_local_tool(
         "schema": 1, "classification": CLASSIFICATION, "notice": NOTICE,
         "run_id": run_id, "run_sha256": verified["run_sha256"],
         "schedule_sha256": verified["schedule_sha256"],
-        "attempt_number": 1, **root_descriptor,
+        "attempt_number": attempt_number, **root_descriptor,
         "local_run_claim_sha256": claim_sha256,
         "reservation_sha256": hashlib.sha256(reservation_bytes).hexdigest(),
         "global_run_limits_enforced": False,
@@ -526,6 +582,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--address-space-bytes", type=int, default=512 * 1024 * 1024)
     parser.add_argument("--file-bytes-per-file", type=int, default=8 * 1024 * 1024)
     parser.add_argument("--admission-root")
+    parser.add_argument("--gate-dir", help="required to run a retry stage")
     args = parser.parse_args(argv)
     try:
         report = run_staged_local_tool(
@@ -535,6 +592,7 @@ def main(argv: list[str] | None = None) -> int:
             address_space_bytes=args.address_space_bytes,
             file_bytes_per_file=args.file_bytes_per_file,
             admission_root=args.admission_root,
+            gate_root=args.gate_dir,
         )
     except (admission.AdmissionError, LocalToolError, StageVerificationError, ReleaseVerificationError,
             ToolPolicyError, OSError, KeyError, TypeError, ValueError) as exc:

@@ -93,6 +93,32 @@ def test_private_claim_race_and_distinct_run_ids(tmp_path: Path) -> None:
     assert admission.require_claim(sha, "run-two", losers[0][0], registry) == other_digest
 
 
+def test_retry_claim_has_distinct_owner_and_preserves_attempt_one_key(tmp_path: Path) -> None:
+    registry = admission.descriptor()
+    schedule_sha256 = "a" * 64
+    run_id = "run-one"
+    first = admission.owner("staged", tmp_path / "stage-one", tmp_path / "session-one")
+    retry = admission.owner("oneshot", tmp_path / "stage-two", tmp_path / "receipt-two")
+    legacy_key = admission._digest({"schedule_sha256": schedule_sha256, "run_id": run_id})
+    assert admission._key(schedule_sha256, run_id) == legacy_key
+
+    first_digest = admission.publish_claim(schedule_sha256, run_id, first, registry)
+    retry_digest = admission.publish_claim(
+        schedule_sha256, run_id, retry, registry, attempt_number=2,
+    )
+    assert first_digest != retry_digest
+    assert admission._key(schedule_sha256, run_id, 2) != legacy_key
+    assert admission.require_claim(schedule_sha256, run_id, first, registry) == first_digest
+    assert admission.require_claim(
+        schedule_sha256, run_id, retry, registry, attempt_number=2,
+    ) == retry_digest
+    with pytest.raises(admission.AdmissionError, match="another local owner"):
+        admission.require_claim(schedule_sha256, run_id, first, registry, attempt_number=2)
+    for number in (0, True, 12):
+        with pytest.raises(admission.AdmissionError, match="attempt number"):
+            admission._key(schedule_sha256, run_id, number)
+
+
 def test_root_is_fixed_from_passwd_and_rejects_symlink(tmp_path: Path,
                                                        monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv(admission.ROOT_ENV)

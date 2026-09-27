@@ -21,8 +21,10 @@ sys.path.insert(0, str(SCRIPTS))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import local_replay_sandbox as sandbox  # noqa: E402
 import local_run_admission as admission  # noqa: E402
+import local_block_release_gate as gate  # noqa: E402
 import plan_confirmatory  # noqa: E402
 import preflight_assets  # noqa: E402
+import run_staged_local_tool as one_shot  # noqa: E402
 import stage_released_run  # noqa: E402
 import staged_tool_session as session_runner  # noqa: E402
 import test_inspect_released_payload as fixture  # noqa: E402
@@ -73,6 +75,7 @@ def _tool(path: Path, body: str) -> None:
 
 def _stage(
     tmp_path: Path, *, first_body: str = FIRST, cap: int = 2,
+    retry: bool = False,
 ) -> tuple[dict, Path, str, Path, Path, Path, tuple[bytes, ...]]:
     first = tmp_path / "first_tool"
     second = tmp_path / "second_tool"
@@ -100,17 +103,57 @@ def _stage(
     schedule_path.write_text(json.dumps(schedule), encoding="utf-8")
     assets["schedule_sha256"] = schedule["schedule_sha256"]
     assets["input_sha256"] = schedule["input_sha256"]
-    run = next(item for item in schedule["runs"] if item["arm"] == "N" and item["case_id"] == "R-F")
+    run = (schedule["runs"][0] if retry else next(
+        item for item in schedule["runs"] if item["arm"] == "N" and item["case_id"] == "R-F"
+    ))
     release = tmp_path / "release"
-    preflight_assets.preflight(
-        schedule, assets, run_id=run["run_id"], output_dir=release,
-        development_unsequenced=True,
-    )
+    if retry:
+        gate_root = tmp_path / "gate"
+        first_release = tmp_path / "first-release"
+        preflight_assets.preflight(
+            schedule, assets, run_id=run["run_id"], output_dir=first_release,
+            gate_root=gate_root,
+        )
+        _record_terminal(schedule, run, first_release, gate_root, tmp_path,
+                         "external_failure", 1)
+        preflight_assets.preflight(
+            schedule, assets, run_id=run["run_id"], output_dir=release,
+            gate_root=gate_root, attempt_number=2,
+        )
+    else:
+        preflight_assets.preflight(
+            schedule, assets, run_id=run["run_id"], output_dir=release,
+            development_unsequenced=True,
+        )
     stage = tmp_path / "stage"
     stage_released_run.stage_released_run(
-        schedule, release, stage, development_unsequenced=True
+        schedule, release, stage,
+        gate_root=tmp_path / "gate" if retry else None,
+        development_unsequenced=not retry,
+        attempt_number=2 if retry else 1,
     )
     return schedule, schedule_path, run["run_id"], stage, first, second, hidden
+
+
+def _record_terminal(
+    schedule: dict, run: dict, release: Path, gate_root: Path,
+    tmp_path: Path, status: str, attempt_number: int,
+) -> None:
+    trace_sha256 = _sha(f"synthetic trace {attempt_number}".encode())
+    evidence = tmp_path / f"terminal-{attempt_number}.json"
+    item = {
+        "schema": 1, "schedule_sha256": schedule["schedule_sha256"],
+        "run_id": run["run_id"], "run_sha256": run["run_sha256"],
+        "attempt_number": attempt_number, "release_dir": str(release),
+        "status": status, "trace_sha256": trace_sha256,
+    }
+    item["incident_sha256" if status == "external_failure" else "artifact_sha256"] = _sha(
+        f"synthetic {status} {attempt_number}".encode()
+    )
+    evidence.write_text(json.dumps(item, sort_keys=True) + "\n", encoding="utf-8")
+    evidence.chmod(0o600)
+    gate.record_terminal(schedule, run["run_id"], gate_root, status, trace_sha256,
+                         evidence, attempt_number=attempt_number)
 
 
 @pytest.fixture
@@ -126,6 +169,145 @@ def _cli(*args: object) -> subprocess.CompletedProcess[str]:
          *(str(arg) for arg in args)],
         capture_output=True, text=True, check=False, timeout=20,
     )
+
+
+RETRY_TOOL = """
+import sys
+from pathlib import Path
+Path(sys.argv[3], 'report.md').write_text('synthetic retry output\\n')
+"""
+
+
+def test_retry_session_requires_live_gate_and_blocks_after_terminal(
+    tmp_path: Path, available_sandbox: None,
+) -> None:
+    schedule, schedule_path, run_id, stage, first, _, _ = _stage(
+        tmp_path, first_body=RETRY_TOOL, retry=True
+    )
+    session = tmp_path / "session"
+    missing_gate = _cli("init", schedule_path, run_id, stage, session)
+    assert missing_gate.returncode == 2
+    assert "gate root" in missing_gate.stderr
+    assert not session.exists()
+
+    initialized = _cli("init", schedule_path, run_id, stage, session,
+                       "--gate-dir", tmp_path / "gate")
+    assert initialized.returncode == 0, initialized.stderr
+    assert json.loads(initialized.stdout)["attempt_number"] == 2
+    terminal = session_runner.call_tool(
+        schedule, run_id, stage, session, "first", first, wall_seconds=3
+    )
+    assert terminal["status"] == "success"
+    assert terminal["attempt_number"] == 2
+    assert json.loads((session / "calls" / "000001" / "reservation.json").read_text())[
+        "attempt_number"
+    ] == 2
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "ready"
+
+    run = next(item for item in schedule["runs"] if item["run_id"] == run_id)
+    _record_terminal(schedule, run, tmp_path / "release", tmp_path / "gate",
+                     tmp_path, "completed", 2)
+    closed = session_runner.resume_session(schedule, run_id, stage, session)
+    assert closed["status"] == "blocked"
+    assert "already has a terminal" in closed["blocked_reason"]
+    with pytest.raises(session_runner.SessionError, match="blocked"):
+        session_runner.call_tool(schedule, run_id, stage, session, "first", first)
+    assert not (session / "calls" / "000002").exists()
+
+
+def test_retry_one_shot_requires_gate_before_receipt(
+    tmp_path: Path, available_sandbox: None,
+) -> None:
+    schedule, _, run_id, stage, first, _, _ = _stage(
+        tmp_path, first_body=RETRY_TOOL, retry=True
+    )
+    receipt = tmp_path / "receipt"
+    with pytest.raises(one_shot.LocalToolError, match="gate root"):
+        one_shot.run_staged_local_tool(
+            schedule, run_id, stage, "first", first, receipt
+        )
+    assert not receipt.exists()
+    result = one_shot.run_staged_local_tool(
+        schedule, run_id, stage, "first", first, receipt,
+        gate_root=tmp_path / "gate",
+    )
+    assert result["status"] == "success"
+    assert result["attempt_number"] == 2
+    assert json.loads((receipt / "reservation.json").read_text())["attempt_number"] == 2
+
+
+@pytest.mark.parametrize("mode", ["session", "one_shot"])
+def test_retry_terminal_waits_for_local_sandbox_call(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    available_sandbox: None, mode: str,
+) -> None:
+    schedule, _, run_id, stage, first, _, _ = _stage(
+        tmp_path, first_body=RETRY_TOOL, retry=True
+    )
+    module = session_runner if mode == "session" else one_shot
+    if mode == "session":
+        session_runner.create_session(
+            schedule, run_id, stage, tmp_path / "session", gate_root=tmp_path / "gate"
+        )
+    original_run = module.run_sandboxed
+    entered = threading.Event()
+    proceed = threading.Event()
+    closing = threading.Event()
+    closed = threading.Event()
+    results: list[dict] = []
+    failures: list[BaseException] = []
+
+    def paused_run(**kwargs: object) -> object:
+        entered.set()
+        if not proceed.wait(5):
+            raise AssertionError("sandbox pause was not released")
+        return original_run(**kwargs)
+
+    monkeypatch.setattr(module, "run_sandboxed", paused_run)
+
+    def launch() -> None:
+        try:
+            if mode == "session":
+                results.append(session_runner.call_tool(
+                    schedule, run_id, stage, tmp_path / "session", "first", first,
+                    wall_seconds=3,
+                ))
+            else:
+                results.append(one_shot.run_staged_local_tool(
+                    schedule, run_id, stage, "first", first, tmp_path / "receipt",
+                    gate_root=tmp_path / "gate", wall_seconds=3,
+                ))
+        except BaseException as exc:
+            failures.append(exc)
+
+    def close() -> None:
+        try:
+            closing.set()
+            run = next(item for item in schedule["runs"] if item["run_id"] == run_id)
+            _record_terminal(schedule, run, tmp_path / "release", tmp_path / "gate",
+                             tmp_path, "completed", 2)
+        except BaseException as exc:
+            failures.append(exc)
+        finally:
+            closed.set()
+
+    runner_thread = threading.Thread(target=launch)
+    terminal_thread = threading.Thread(target=close)
+    runner_thread.start()
+    try:
+        assert entered.wait(5)
+        terminal_thread.start()
+        assert closing.wait(5)
+        assert not closed.wait(0.15)
+    finally:
+        proceed.set()
+        runner_thread.join(timeout=10)
+        if terminal_thread.ident is not None:
+            terminal_thread.join(timeout=10)
+    assert not runner_thread.is_alive() and not terminal_thread.is_alive()
+    assert not failures
+    assert results[0]["status"] == "success"
+    assert closed.is_set()
 
 
 def test_two_real_sealed_tools_resume_and_cap(
