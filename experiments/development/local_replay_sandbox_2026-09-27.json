@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "classification": "local_replay_sandbox_development_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "host_probe": {
+    "architecture": "x86_64",
+    "kernel": "7.1.4-1-cachyos",
+    "landlock_abi": 9,
+    "libseccomp_resolves_required_syscalls": true,
+    "docker_daemon_available": false,
+    "docker_error": "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?",
+    "unshare_user_mount_net_pid_available": false,
+    "unshare_error": "Operation not permitted"
+  },
+  "execution_scope": {
+    "mode": "opt_in_reviewed_local_replay_after_model_run",
+    "python_versions_probed": ["3.11.15", "3.12.3"],
+    "provider_calls_in_probes": 0,
+    "stage_nst_executed": false,
+    "readable_roots": "reviewed work directory and declared Python runtime roots",
+    "path_opened_writes_allowed": false,
+    "preopened_outputs": ["analysis_replay.stdout", "analysis_replay.stderr"],
+    "limits": {
+      "wall_seconds": "parent watchdog uses the recorded replay deadline",
+      "cpu_seconds": "RLIMIT_CPU per process",
+      "address_space_bytes": "RLIMIT_AS per process, not aggregate resident memory",
+      "file_bytes_per_file": "RLIMIT_FSIZE per stream, not aggregate file bytes",
+      "aggregate_memory_enforced": false,
+      "aggregate_file_bytes_enforced": false,
+      "measured_tokens_enforced": false,
+      "tool_call_count_enforced": false
+    }
+  },
+  "adversarial_checks": [
+    {"name": "outside_read_and_write", "observed": "denied"},
+    {"name": "outside_chmod", "observed": "denied"},
+    {"name": "socket_and_socketpair", "observed": "denied"},
+    {"name": "fork", "observed": "denied"},
+    {"name": "inherited_outside_fd", "observed": "closed_before_payload"},
+    {"name": "sibling_setpriority_before_fix", "observed": "changed_nice_value_minus4_to_10"},
+    {"name": "sibling_setpriority_after_fix", "observed": "EPERM_and_unchanged"},
+    {"name": "memfd_before_fix", "observed": "ten_8_MiB_memfds_exceeded_64_MiB_RLIMIT_AS"},
+    {"name": "memfd_after_fix", "observed": "EPERM"},
+    {"name": "read_only_replay_write_attempt", "observed": "EACCES_and_no_new_file"},
+    {"name": "four_files_at_RLIMIT_FSIZE_before_read_only_integration", "observed": "four_4096_byte_files_total_16384_bytes; per_file_limit_only"},
+    {"name": "wall_timeout", "observed": "child_terminated"},
+    {"name": "missing_capability", "observed": "payload_and_streams_not_started"}
+  ],
+  "verification": {
+    "focused_command": "uv run pytest -q tests/test_local_replay_sandbox.py tests/test_run_development_arm.py tests/test_observe_development_run.py",
+    "focused_result": "92 passed",
+    "full_command": "uv run pytest -q",
+    "full_result": "1063 passed in 72.18s",
+    "lint_command": "uv run ruff check scripts/local_replay_sandbox.py scripts/run_development_arm.py scripts/observe_development_run.py tests/test_local_replay_sandbox.py tests/test_run_development_arm.py tests/test_observe_development_run.py",
+    "lint_result": "All checks passed!",
+    "independent_review": "read-only adversarial review reproduced priority and memfd escapes, then verified both denied after repair"
+  },
+  "limitations": [
+    "The model CLI and its tool calls run before this replay and inherit none of these restrictions.",
+    "No container, mount, user or PID namespace, cgroup, authenticated provider receipt, external custody or aggregate resource budget is established.",
+    "Landlock does not mediate every filesystem metadata action, and path replacement by another process of the same UID remains possible between checks.",
+    "The mode is for a reviewed local script, not arbitrary hostile code."
+  ],
+  "criterion_4": {"status": "not_assessed"}
+}
