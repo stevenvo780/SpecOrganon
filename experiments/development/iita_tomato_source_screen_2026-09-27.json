@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "classification": "development_food_source_screen_not_field_impact",
+  "date_utc": "2026-09-27",
+  "catalog_url": "https://data.iita.org/dataset/irrigated-endline-survey-plastic-crates-rct-experiment-in-nigeria",
+  "csv_url": "https://data.iita.org/dataset/d994cfef-9d1a-4f3b-b3b4-5c19b4cf47d4/resource/3044ae04-6a3d-401a-b80a-616ef90bae15/download/tomato_endline-data.csv",
+  "source_institution": "International Institute of Tropical Agriculture",
+  "catalog_claim": "Endline survey from a randomized plastic-crates project for tomato postharvest loss in Nigeria",
+  "download": {
+    "http_head_status": 200,
+    "download_succeeded": true,
+    "bytes": 4492377,
+    "sha256": "604e3cf634700c3c7dd81714a27000be152d9fcb5ed092170fb6e513c33a004b",
+    "logical_csv_rows_excluding_header": 928,
+    "header_columns": 1949
+  },
+  "screen_method": "Read the CSV header and count logical rows with Python csv.reader; do not publish respondent rows or identifiers.",
+  "header_examples": [
+    "farmLoss_kg_RF",
+    "storgeLoss_kg_RF",
+    "trnsptLoss_kg_RF",
+    "proprtnStrdTrnsptCrate_strg",
+    "qtyCratesLstSeasn"
+  ],
+  "limits": [
+    "No explicit treatment, assignment or arm column was identified by a header-name scan; it may be encoded elsewhere and was not inferred from respondent rows.",
+    "No successive processing or physically observed consumption column was identified by the header-name scan.",
+    "No respondent values, linked loads, effect estimate, costs across all actors or safety outcome were analyzed.",
+    "The catalog says both Open Access and Embargo End Date 2026-11-30, despite a successful public CSV download; reuse status requires clarification.",
+    "The dataset cannot establish the full-chain V or G endpoint or criterion 3 from this screening."
+  ],
+  "criterion_3": "not_assessed"
+}
