@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "classification": "development_installed_field_source_wheel_probe",
+  "date_utc": "2026-09-27",
+  "build": "uv build --offline --wheel --out-dir <temporary-directory>",
+  "wheel_sha256": "3b31a36ebb8a7a6cd860689ef17447f896cf385c3318ffb8d7e47954e10c3c14",
+  "install": "uv pip install --offline --python <new-venv-python> <wheel>",
+  "interpreters": [
+    {
+      "python": "3.11.15",
+      "pip_check": "29 compatible packages",
+      "installed_import": "specorganon.field_source_digest_audit.audit_field_source_digest_coverage"
+    },
+    {
+      "python": "3.12.3",
+      "pip_check": "29 compatible packages",
+      "installed_import": "specorganon.field_source_digest_audit.audit_field_source_digest_coverage"
+    }
+  ],
+  "scope": "Offline packaging and import of the new digest auditor; synthetic integration tests are recorded separately.",
+  "not_verified": ["field source origin", "field impact", "production deployment"]
+}
