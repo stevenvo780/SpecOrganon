@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "classification": "development_field_volume_source_byte_binding_probe",
+  "date_utc": "2026-09-27",
+  "goal_sha256_unchanged": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "code_sha256": {
+    "field_source_digest_audit.py": "95a96dc920f69b1852a0e4c788b8ef3b1ae498e537412013e0a44c65241a0364",
+    "field_source_content_audit.py": "fe2df5e8a77fcfdaaaa0d52b926a7e3cf663372c3d28a91721ae188cb5d2083d",
+    "field_attestation.py": "49637ee73e2bb05f27a96a3a466c0b64cb5327866078a373cc0d80f5b2ee0aa2",
+    "engine.py": "28b5a73b6e1f7983d199771c4305986d9f0b786d16951b3fa858e4e5fad06bb2"
+  },
+  "contract": {
+    "analysis_schema": 2,
+    "required_record_kind": "volume_row",
+    "source_role": "source_record",
+    "reference_key": ["record_sha256", "locator"],
+    "digest_inventory_byte_bound": false,
+    "exact_opened_content_match_byte_bound": true,
+    "service_schema_independent": true,
+    "historical_signature_requires_explicit_signed_true": true
+  },
+  "synthetic_controls": [
+    "A newly signed schema-2 attestation with legacy or schema-2 service binds each baseline volume row to an opened extract; its decisive field gate remains blocked.",
+    "A volume declaration changed with analysis and outer hashes recomputed is rejected.",
+    "A source volume value changed with source, analysis and outer hashes recomputed is rejected.",
+    "Missing, wrong-role, extra and duplicate volume sources are rejected.",
+    "A historical-style schema-2 event without a volume extract and with old-style source audit hashes keeps a valid signature but reports baseline_volume_input_byte_bound false.",
+    "Omitted or schema-1 analysis preserves pinned legacy source audit report hashes."
+  ],
+  "legacy_replay_report_sha256": {
+    "source_digest_fixture": "816495cd01f95d752e176b020ec33ab1e4e47c3d00f019a16087e38759b7de41",
+    "source_content_aggregate_fixture": "684c6ea351182c3a9661288343bffcb12b475dfdba4e2d942f958cf264b4f172"
+  },
+  "checks": [
+    {
+      "command": "uv run pytest -q",
+      "result": "1625 passed, 1 xfailed in 246.88s",
+      "timing_note": "Completed before the historical test fixture was strengthened; production code did not change afterward."
+    },
+    {
+      "command": "uv run pytest -q tests/test_field_attestation_volume_v2.py tests/test_field_source_digest_audit.py tests/test_field_source_content_audit.py",
+      "result": "105 passed in 9.04s on the strengthened historical fixture"
+    },
+    {
+      "command": "uv run ruff check .; git diff --check",
+      "result": "Both passed after the historical fixture change"
+    },
+    {
+      "command": "uv build --wheel --offline; offline install in fresh Python 3.11.15 venv; uv pip check; packaged CLI module help",
+      "result": "Wheel built and installed; 29 packages compatible; module CLIs passed"
+    }
+  ],
+  "not_verified": [
+    "truth or provenance of an original physical measurement; a self-consistent extract can be invented",
+    "independent custody of sources, assessor identity and approval authority",
+    "site-specific confidence interval coverage, causal attribution, harms, costs or field impact",
+    "any GOAL.md acceptance criterion"
+  ],
+  "criterion_3": "not_assessed"
+}
