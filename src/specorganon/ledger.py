@@ -149,12 +149,17 @@ def _locked(directory: Path) -> Iterator[None]:
         os.close(fd)
 
 
-def init_project(directory: str | Path, title: str, domain: str, actor: str, approval_policy: str = "signed") -> dict[str, Any]:
+def init_project(directory: str | Path, title: str, domain: str, actor: str,
+                 approval_policy: str = "signed", test_gate_policy: str = "signed_report") -> dict[str, Any]:
     """Create a project, refusing to replace an existing ledger."""
     if not all(isinstance(v, str) and v.strip() for v in (title, domain, actor)):
         raise LedgerError("title, domain and actor must be nonempty strings")
     if approval_policy not in {"signed", "fixture"}:
         raise LedgerError("approval_policy must be signed or fixture")
+    if test_gate_policy not in {"signed_report", "signed_observed"}:
+        raise LedgerError("test_gate_policy must be signed_report or signed_observed")
+    if test_gate_policy == "signed_observed" and approval_policy != "signed":
+        raise LedgerError("signed_observed test gate requires signed approval policy")
     directory = Path(directory)
     with _locked(directory):
         target = project_file(directory)
@@ -166,6 +171,8 @@ def init_project(directory: str | Path, title: str, domain: str, actor: str, app
                         "created_at": _now(), "created_by": actor.strip(), "approval_policy": approval_policy},
             "events": [],
         }
+        if test_gate_policy == "signed_observed":
+            data["project"]["test_gate_policy"] = test_gate_policy
         _atomic_write(target, data)
         return data
 
@@ -186,6 +193,10 @@ def read_project(directory: str | Path, *, verify_external_anchor: bool = True) 
     policy = data["project"].get("approval_policy", "signed")
     if not isinstance(policy, str) or policy not in {"signed", "fixture"}:
         raise LedgerError("malformed project approval policy")
+    test_policy = data["project"].get("test_gate_policy", "signed_report")
+    if (type(test_policy) is not str or test_policy not in {"signed_report", "signed_observed"}
+            or (test_policy == "signed_observed" and policy != "signed")):
+        raise LedgerError("malformed project test gate policy")
     case_id = data["project"].get("case_id")
     if case_id is not None:
         try:

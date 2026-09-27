@@ -17,7 +17,7 @@ from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
-from . import approval, field_attestation, review_provenance, test_execution
+from . import approval, field_attestation, review_provenance, test_execution, test_observation
 from .ledger import ZERO_HASH, ConflictError, LedgerError, append_event, init_project, read_project
 from .workflow import KIND_TO_PHASE, KINDS, PHASES, PHASE_BY_ID
 
@@ -48,12 +48,15 @@ def _project(path: str | Path) -> dict[str, Any]:
     ledger = read_project(path)
     project = dict(ledger["project"])
     project.setdefault("approval_policy", "signed")
+    observed_tests = project.get("test_gate_policy") == "signed_observed"
     try:
-        approvers, phase_reviewers, test_executors, trust_status = approval.trust_contexts_with_executors(project, path)
+        (approvers, phase_reviewers, test_executors,
+         test_observers, trust_status) = approval.trust_contexts_with_observers(project, path)
     except ValueError:
         approvers = {}
         phase_reviewers = {}
         test_executors = {}
+        test_observers = {}
         trust_status = "unavailable"
     if project["approval_policy"] == "signed":
         try:
@@ -86,7 +89,15 @@ def _project(path: str | Path) -> dict[str, Any]:
         ),
         "test_executors": test_executors,
         "test_executions": {},
+        "test_execution_reports": {},
         "test_execution_history": [],
+        "test_observation_trust": (
+            "not_applicable" if not observed_tests else
+            "configured" if trust_status == "configured" and test_observers else "unavailable"
+        ),
+        "test_observers": test_observers,
+        "test_observations": {},
+        "test_observation_history": [],
         "field_attestation_trust": field_trust_status,
         "field_attestations": [],
         "item_reviews": {},
@@ -147,7 +158,7 @@ def _project(path: str | Path) -> dict[str, Any]:
             if (project["approval_policy"] == "signed" and item is not None
                     and item["kind"] == "test" and type(payload.get("version")) is int
                     and item["version"] == payload["version"]
-                    and not test_execution.item_issues(item)
+                    and not test_execution.item_issues(item, observed=observed_tests)
                     and isinstance(event["actor"], str) and isinstance(report, dict)):
                 try:
                     test_execution.validate_report(report)
@@ -169,6 +180,50 @@ def _project(path: str | Path) -> dict[str, Any]:
             state["test_execution_history"].append(record)
             if valid:
                 state["test_executions"][(item["id"], item["version"])] = record
+                state["test_execution_reports"][(item["id"], item["version"])] = report
+        elif kind == "test_observation":
+            item = state["items"].get(payload.get("id")) if isinstance(payload, dict) else None
+            receipt = payload.get("receipt") if isinstance(payload, dict) else None
+            report_record = (state["test_executions"].get((item["id"], item["version"]))
+                             if item is not None and item["kind"] == "test" else None)
+            report = (state["test_execution_reports"].get((item["id"], item["version"]))
+                      if report_record is not None else None)
+            provenance = {"seq": report_record["seq"], "hash": report_record["hash"]} if report_record else None
+            authenticated = False
+            passed = False
+            bundle_verified = False
+            if (observed_tests and item is not None and report is not None and type(receipt) is dict
+                    and type(payload.get("version")) is int and payload["version"] == item["version"]
+                    and payload.get("report_provenance") == provenance
+                    and receipt.get("report_provenance") == provenance
+                    and event["actor"] not in state["item_author_history"][item["id"]]
+                    and event["actor"] != report_record["actor"]):
+                try:
+                    authenticated = test_observation.verify(
+                        project, item, report, provenance, receipt, event["actor"],
+                        payload.get("signature"), payload.get("key_sha256"),
+                        test_observers, path, event["prev_hash"],
+                    )
+                    if authenticated:
+                        matched = test_observation.validate_receipt(
+                            receipt, project, item, report, provenance,
+                        )
+                        passed = bool(matched and report["exit_code"] == 0 and not report["timed_out"])
+                        bundle_verified = True
+                except (KeyError, TypeError, ValueError, OSError):
+                    bundle_verified = False
+            record = {
+                "seq": seq, "hash": event["hash"],
+                "id": payload.get("id") if isinstance(payload, dict) else None,
+                "version": payload.get("version") if isinstance(payload, dict) else None,
+                "report_provenance": provenance,
+                "actor": event["actor"], "signature_verified": authenticated,
+                "bundle_verified": bundle_verified, "passed": bool(bundle_verified and passed),
+            }
+            state["test_observation_history"].append(record)
+            if authenticated:
+                state["test_observations"][(item["id"], item["version"],
+                                            report_record["seq"], report_record["hash"])] = record
         elif kind == "field_attestation":
             valid = False
             if isinstance(payload, dict) and project["approval_policy"] == "signed":
@@ -823,7 +878,9 @@ def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
     flags: dict[str, dict[str, Any]] = {}
     for item_id, item in items.items():
         issues = (_item_issues(item) if state["project"]["approval_policy"] == "fixture" or item["kind"] != "test"
-                  else test_execution.item_issues(item))
+                  else test_execution.item_issues(
+                      item, observed=state["project"].get("test_gate_policy") == "signed_observed",
+                  ))
         flag = {
             "stale": _stale(items, item_id),
             "contested": item_id in contested,
@@ -850,6 +907,27 @@ def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
                     "latest signed test execution failed or timed out" if status == "signed_failed"
                     else "signed test needs a current successful signed execution receipt"
                 )
+            if state["project"].get("test_gate_policy") == "signed_observed":
+                provenance = flag["test_execution_provenance"]
+                observed = (state["test_observations"].get((item_id, item["version"], *provenance))
+                            if provenance else None)
+                seen = any(entry["id"] == item_id and entry["version"] == item["version"]
+                           for entry in state["test_observation_history"])
+                observation_status = (
+                    "observed_passed" if observed["passed"] else
+                    "observed_failed" if observed["bundle_verified"] else "unverified"
+                ) if observed else ("unverified" if seen else "missing")
+                flag["test_observation_status"] = observation_status
+                flag["test_observation_provenance"] = (
+                    (observed["seq"], observed["hash"]) if observed else None
+                )
+                flag["test_observation_actor"] = observed["actor"] if observed else None
+                if observation_status != "observed_passed":
+                    flag["issues"].append(
+                        "latest signed observed repeat failed or its bundle is unavailable"
+                        if observation_status in {"observed_failed", "unverified"}
+                        else "signed test needs a current successful observed repeat receipt"
+                    )
         flags[item_id] = flag
     return flags
 
@@ -1142,6 +1220,12 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
                      flags[item_id]["test_execution_provenance"])
                     for item_id in test_ids
                 ]
+                if state["project"].get("test_gate_policy") == "signed_observed":
+                    snapshot_data["test_observations"] = [
+                        (item_id, state["items"][item_id]["version"],
+                         flags[item_id]["test_observation_provenance"])
+                        for item_id in test_ids
+                    ]
         # Existing ledgers recorded this payload without an item_reviews key.
         if item_reviews:
             snapshot_data["item_reviews"] = item_reviews
@@ -1195,10 +1279,11 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return statuses
 
 
-def create_case(path: str | Path, title: str, domain: str, actor: str, approval_policy: str = "signed") -> dict[str, Any]:
+def create_case(path: str | Path, title: str, domain: str, actor: str,
+                approval_policy: str = "signed", test_gate_policy: str = "signed_report") -> dict[str, Any]:
     if "ORGANON_LEDGER_ANCHORS_FILE" in os.environ:
         raise MethodError("initialize a case before enabling ORGANON_LEDGER_ANCHORS_FILE; then register its sequence-zero head")
-    init_project(path, title, domain, actor, approval_policy)
+    init_project(path, title, domain, actor, approval_policy, test_gate_policy)
     return get_state(path)
 
 
@@ -1334,7 +1419,9 @@ def _test_execution_target(
     item = state["items"].get(id)
     if item is None or item["kind"] != "test":
         raise MethodError("test execution requires a current test item")
-    problems = test_execution.item_issues(item)
+    problems = test_execution.item_issues(
+        item, observed=state["project"].get("test_gate_policy") == "signed_observed",
+    )
     if problems:
         raise MethodError("; ".join(problems))
     if not isinstance(actor, str) or not actor.startswith("executor:") or actor != actor.strip():
@@ -1377,6 +1464,66 @@ def record_test_execution(
         "signature": signature, "key_sha256": fingerprint,
     }
     return append_event(path, "test_execution", payload, actor, expected_seq=state["revision"])
+
+
+def _test_observation_target(
+    state: dict[str, Any], id: str, receipt: dict[str, Any], actor: str,
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    if state["project"].get("test_gate_policy") != "signed_observed":
+        raise MethodError("test observations require signed_observed test gate policy")
+    item = state["items"].get(id)
+    if item is None or item["kind"] != "test":
+        raise MethodError("test observation requires a current test item")
+    problems = test_execution.item_issues(item, observed=True)
+    if problems:
+        raise MethodError("; ".join(problems))
+    report_record = state["test_executions"].get((id, item["version"]))
+    if report_record is None:
+        raise MethodError("test observation requires a current signed execution report")
+    report = state["test_execution_reports"][(id, item["version"])]
+    provenance = {"seq": report_record["seq"], "hash": report_record["hash"]}
+    if (not isinstance(actor, str) or not actor.startswith("observer:") or actor != actor.strip()
+            or actor == report_record["actor"]
+            or actor in state["item_author_history"][id]):
+        raise MethodError("test observer must be a distinct registered observer actor")
+    if state["test_observation_trust"] != "configured" or actor not in state["test_observers"]:
+        raise MethodError("test observer actor has no trusted public key")
+    try:
+        test_observation.validate_receipt(receipt, state["project"], item, report, provenance)
+    except (KeyError, TypeError, ValueError, OSError) as exc:
+        raise MethodError(f"test observation receipt is invalid or its bundle changed: {exc}") from exc
+    return item, report, provenance
+
+
+def test_observation_challenge(
+    path: str | Path, id: str, receipt: dict[str, Any], actor: str,
+) -> dict[str, Any]:
+    state = _project(path)
+    item, report, provenance = _test_observation_target(state, id, receipt, actor)
+    return test_observation.challenge(
+        state["project"], item, report, provenance, receipt, actor, path, state["head_hash"],
+    )
+
+
+def record_test_observation(
+    path: str | Path, id: str, receipt: dict[str, Any], actor: str, signature: str,
+) -> dict[str, Any]:
+    state = _project(path)
+    item, report, provenance = _test_observation_target(state, id, receipt, actor)
+    if not isinstance(signature, str) or not signature:
+        raise MethodError("test observation requires an Ed25519 signature")
+    key = state["test_observers"][actor]
+    fingerprint = approval.key_fingerprint(key)
+    if not test_observation.verify(
+        state["project"], item, report, provenance, receipt, actor, signature,
+        fingerprint, state["test_observers"], path, state["head_hash"],
+    ):
+        raise MethodError("test observation signature is invalid or stale for this case, test or report")
+    payload = {
+        "id": id, "version": item["version"], "report_provenance": provenance,
+        "receipt": receipt, "signature": signature, "key_sha256": fingerprint,
+    }
+    return append_event(path, "test_observation", payload, actor, expected_seq=state["revision"])
 
 
 def _field_attestation_target(state: dict[str, Any], id: str, reason: str,
@@ -1491,6 +1638,8 @@ def get_state(path: str | Path) -> dict[str, Any]:
             "phase_review_trust": state["phase_review_trust"],
             "test_execution_trust": state["test_execution_trust"],
             "test_execution_history": state["test_execution_history"],
+            "test_observation_trust": state["test_observation_trust"],
+            "test_observation_history": state["test_observation_history"],
             "phase_review_history": [
                 {"seq": entry["seq"], "phase": entry["phase"],
                  "verdict": entry.get("verdict"), "actor": entry["actor"],

@@ -26,7 +26,7 @@ _REPORT_FIELDS = {
 }
 
 
-def item_issues(item: dict[str, Any]) -> list[str]:
+def item_issues(item: dict[str, Any], *, observed: bool = False) -> list[str]:
     """Structural checks for a signed test declaration, independent of receipts."""
     data = item["data"]
     command, argv = data.get("command"), data.get("argv")
@@ -38,6 +38,13 @@ def item_issues(item: dict[str, Any]) -> list[str]:
         return ["signed test needs a nonempty argv list of strings"]
     if command != shlex.join(argv):
         return ["signed test command must equal shlex.join(argv)"]
+    if observed:
+        if not Path(argv[0]).is_absolute() or any(part in {".", ".."} for part in Path(argv[0]).parts):
+            return ["observed test argv[0] must be an absolute canonical executable path"]
+        for field in ("executable_sha256", "input_tree_sha256"):
+            value = data.get(field)
+            if type(value) is not str or not _SHA256.fullmatch(value):
+                return [f"observed test needs a lowercase {field} pin"]
     return []
 
 
