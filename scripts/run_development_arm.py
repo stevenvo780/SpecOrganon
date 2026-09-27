@@ -39,6 +39,7 @@ USAGE_FIELDS = {
 # The exposed Agy pilot asks for file writes only. This is a local JSONL
 # allowlist, not a provider-side or operating-system command prohibition.
 AGY_NO_COMMAND_ALLOWED_TOOLS = frozenset({"write_to_file"})
+AGY_KNOWN_EVENTS = frozenset({"init", "step_update", "result"})
 OPENCODE_USAGE_FIELDS = (
     "input_tokens", "output_tokens", "reasoning_tokens", "cache_read_tokens",
     "cache_write_tokens", "total_tokens",
@@ -691,6 +692,31 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
     agy_init_id_seen = False
     agy_result_id_seen = False
     agy_identity_invalid = False
+
+    def check_agy_conversation_id(
+        holder: dict[str, Any], kind: str | None, line_number: int,
+    ) -> None:
+        nonlocal agy_conversation_id, agy_init_id_seen, agy_result_id_seen
+        nonlocal agy_identity_invalid
+        if "conversation_id" not in holder:
+            return
+        label = kind if kind in AGY_KNOWN_EVENTS else "event"
+        conversation_id = holder["conversation_id"]
+        if type(conversation_id) is not str or not conversation_id.strip():
+            terminal_errors.append(
+                f"line {line_number}: agy {label} conversation_id is malformed")
+            agy_identity_invalid = True
+            return
+        if kind == "init":
+            agy_init_id_seen = True
+        elif kind == "result":
+            agy_result_id_seen = True
+        if agy_conversation_id is None:
+            agy_conversation_id = conversation_id
+        elif conversation_id != agy_conversation_id:
+            terminal_errors.append(f"line {line_number}: agy {label} conversation_id changed")
+            agy_identity_invalid = True
+
     with stdout_path.open("rb") as stream:
         for line_number, raw_line in enumerate(stream, start=1):
             if not raw_line.strip():
@@ -702,35 +728,25 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
                 terminal_errors.append(f"line {line_number}: {_jsonl_parse_error(exc)}")
                 continue
             kind_key = "type" if provider == "codex" else "event"
+            if provider == "agy" and type(event) is dict:
+                event_kind = event.get("event")
+                check_agy_conversation_id(
+                    event, event_kind if type(event_kind) is str else None, line_number)
             if type(event) is not dict or type(event.get(kind_key)) is not str:
                 terminal_errors.append(f"line {line_number}: event/{kind_key} missing")
                 continue
             event_count += 1
             kind = event[kind_key]
             last_type = kind
-            if provider == "agy" and kind in {"init", "result", "step_update"}:
-                # Agy emits the init ID on the event and the result ID inside
-                # its payload. Check either location when an event supplies it.
+            if provider == "agy":
+                if kind not in AGY_KNOWN_EVENTS:
+                    terminal_errors.append(f"line {line_number}: unknown agy event type")
+                    continue
+                # Agy emits the result ID inside its payload. Check the payload
+                # after the envelope, which was checked even for unknown events.
                 payload = event.get(kind)
-                for holder in (event, payload):
-                    if type(holder) is not dict or "conversation_id" not in holder:
-                        continue
-                    conversation_id = holder["conversation_id"]
-                    if type(conversation_id) is not str or not conversation_id.strip():
-                        terminal_errors.append(
-                            f"line {line_number}: agy {kind} conversation_id is malformed")
-                        agy_identity_invalid = True
-                        continue
-                    if kind == "init":
-                        agy_init_id_seen = True
-                    elif kind == "result":
-                        agy_result_id_seen = True
-                    if agy_conversation_id is None:
-                        agy_conversation_id = conversation_id
-                    elif conversation_id != agy_conversation_id:
-                        terminal_errors.append(
-                            f"line {line_number}: agy {kind} conversation_id changed")
-                        agy_identity_invalid = True
+                if type(payload) is dict:
+                    check_agy_conversation_id(payload, kind, line_number)
             if provider == "codex" and kind == "turn.completed":
                 final_events.append((line_number, event))
             elif provider == "codex" and kind == "turn.failed":

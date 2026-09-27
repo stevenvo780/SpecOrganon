@@ -358,11 +358,18 @@ def test_observer_rejects_old_green_claim_for_open_codex_item(
     assert "cli_usage differs from the verified local CLI stream" in rejected.stderr
 
 
-@pytest.mark.parametrize("scenario", [
-    "agy_result_id_mismatch", "agy_step_nested_id_mismatch", "agy_result_id_malformed",
+@pytest.mark.parametrize("scenario,identity", [
+    ("agy_result_id_mismatch", "local_ids_invalid"),
+    ("agy_step_nested_id_mismatch", "local_ids_invalid"),
+    ("agy_result_id_malformed", "local_ids_invalid"),
+    ("agy_unknown_event_same_id", "local_ids_consistent"),
+    ("agy_unknown_event_no_id", "local_ids_consistent"),
+    ("agy_unknown_event_mismatch", "local_ids_invalid"),
+    ("agy_unknown_event_malformed", "local_ids_invalid"),
+    ("agy_invalid_event_kind_with_id", "local_ids_invalid"),
 ])
 def test_observer_rejects_forged_green_agy_conversation_identity(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, scenario: str,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, scenario: str, identity: str,
 ) -> None:
     fake_bin = tmp_path / "bin"
     fake_bin.mkdir()
@@ -380,7 +387,7 @@ def test_observer_rejects_forged_green_agy_conversation_identity(
     assert honest.returncode == 0, honest.stderr
     honest_usage = json.loads(honest.stdout)["cli_usage"]
     assert honest_usage["terminal_success"] is False
-    assert honest_usage["conversation_identity"] == "local_ids_invalid"
+    assert honest_usage["conversation_identity"] == identity
     assert "local-conversation-id" not in honest.stdout
     assert "another-private-conversation-id" not in honest.stdout
 

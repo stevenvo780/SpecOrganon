@@ -166,6 +166,19 @@ else:
         init_event["conversation_id"] = (
             42 if scenario == "agy_init_id_malformed" else "local-conversation-id")
     print(json.dumps(init_event))
+    if scenario in {
+        "agy_unknown_event_same_id", "agy_unknown_event_mismatch",
+        "agy_unknown_event_malformed", "agy_unknown_event_no_id",
+        "agy_invalid_event_kind_with_id",
+    }:
+        unknown_event = {"event": 7 if scenario == "agy_invalid_event_kind_with_id"
+                         else "message"}
+        if scenario != "agy_unknown_event_no_id":
+            unknown_event["conversation_id"] = (
+                "local-conversation-id" if scenario == "agy_unknown_event_same_id"
+                else 42 if scenario == "agy_unknown_event_malformed"
+                else "another-private-conversation-id")
+        print(json.dumps(unknown_event))
     for state in (() if scenario == "agy_no_tool_step" else ("ACTIVE", "DONE")):
         tool_index = "2" if scenario == "agy_tool_index_string" and state == "DONE" else 2
         tool_state = 123 if scenario == "agy_tool_state_malformed" and state == "DONE" else state
@@ -720,6 +733,42 @@ def test_agy_conversation_identity_error_rejects_zero_exit_with_artifacts(
     public_summary = (run_dir / "run.json").read_text(encoding="utf-8")
     assert "local-conversation-id" not in public_summary
     assert "another-private-conversation-id" not in public_summary
+
+
+@pytest.mark.parametrize("scenario,identity,kind_error,id_error", [
+    ("agy_unknown_event_same_id", "local_ids_consistent",
+     "unknown agy event type", None),
+    ("agy_unknown_event_no_id", "local_ids_consistent",
+     "unknown agy event type", None),
+    ("agy_unknown_event_mismatch", "local_ids_invalid",
+     "unknown agy event type", "agy event conversation_id changed"),
+    ("agy_unknown_event_malformed", "local_ids_invalid",
+     "unknown agy event type", "agy event conversation_id is malformed"),
+    ("agy_invalid_event_kind_with_id", "local_ids_invalid",
+     "event/event missing", "agy event conversation_id changed"),
+])
+def test_agy_unknown_event_fails_closed_and_checks_envelope_id(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+    scenario: str, identity: str, kind_error: str, id_error: str | None,
+) -> None:
+    monkeypatch.setenv("FAKE_SCENARIO", scenario)
+    run_dir, summary = run_development_arm(
+        arm="N", provider="agy", model="test-model", effort="medium",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    usage = summary["cli_usage"]
+    assert summary["cli"]["exit_code"] == 0
+    assert all(summary["artifacts"].values())
+    assert summary["execution_status"] == "cli_internal_failure"
+    assert usage["terminal_success"] is False
+    assert usage["complete"] is False
+    assert usage["conversation_identity"] == identity
+    assert f"line 2: {kind_error}" in usage["terminal_errors"]
+    if id_error is not None:
+        assert f"line 2: {id_error}" in usage["terminal_errors"]
+    assert "local-conversation-id" not in (run_dir / "run.json").read_text(encoding="utf-8")
+    assert "another-private-conversation-id" not in (
+        run_dir / "run.json").read_text(encoding="utf-8")
 
 
 @pytest.mark.parametrize("arm", ["N", "S", "T"])
