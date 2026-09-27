@@ -65,7 +65,7 @@ def test_valid_copied_wheel_and_cli(tmp_path: Path) -> None:
         "classification": "development_toolkit_wheel_inspection_unsealed",
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         "version": "0.1.0",
-        "dependencies": ["cryptography<51,>=41", "mcp<3,>=2.2"],
+        "dependencies": ["cryptography<51,>=41", "mcp==2.2.0"],
         "file_count": 13,
         "static_format_checked": True,
         "install_checked": False,
@@ -98,7 +98,7 @@ def test_existing_dist_wheel_if_present() -> None:
         pytest.skip("prebuilt wheel is optional for unit tests")
     result = inspector.inspect_toolkit_wheel(path)
     assert result["version"] == "0.1.0"
-    assert result["dependencies"] == ["cryptography<51,>=41", "mcp<3,>=2.2"]
+    assert result["dependencies"] == ["cryptography<51,>=41", "mcp==2.2.0"]
     assert result["static_format_checked"] is True
     assert result["install_checked"] is False
 
@@ -276,8 +276,8 @@ def test_reject_corrupt_compressed_member(tmp_path: Path) -> None:
         (b"Name: specorganon", b"Name: anotherpkg"),
         (b"Version: 0.1.0", b"Version: nonsense"),
         (b"Requires-Python: >=3.11", b"Requires-Python: >=3.8"),
-        (b"Requires-Dist: mcp<3,>=2.2", b"Requires-Dist: surprise>=1"),
-        (b"Requires-Dist: mcp<3,>=2.2", b"Requires-Dist: mcp<4,>=2.2"),
+        (b"Requires-Dist: mcp==2.2.0", b"Requires-Dist: surprise>=1"),
+        (b"Requires-Dist: mcp==2.2.0", b"Requires-Dist: mcp<3,>=2.2"),
     ],
 )
 def test_reject_wrong_core_metadata(tmp_path: Path, old: bytes, new: bytes) -> None:

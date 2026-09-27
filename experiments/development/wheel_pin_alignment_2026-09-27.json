@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "classification": "development_local_static_wheel_alignment",
+  "date_utc": "2026-09-27",
+  "trigger": {
+    "command": ".venv/bin/python -m pytest -q",
+    "result": "1 failed, 1332 passed, 1 xfailed",
+    "failed_test": "tests/test_inspect_toolkit_wheel.py::test_existing_dist_wheel_if_present",
+    "cause": "pyproject.toml and the rebuilt dist wheel require mcp==2.2.0 while the static inspector and synthetic fixture still expected mcp>=2.2,<3"
+  },
+  "changed_contract": {
+    "files": [
+      "scripts/inspect_toolkit_wheel.py",
+      "tests/toolkit_wheel_fixture.py",
+      "tests/test_inspect_toolkit_wheel.py"
+    ],
+    "required_runtime_dependency": "mcp==2.2.0",
+    "negative_control": "old mcp<3,>=2.2 range is rejected by inspector"
+  },
+  "verification": {
+    "focused": "60 passed",
+    "static_inspection": {
+      "wheel": "dist/specorganon-0.1.0-py3-none-any.whl",
+      "sha256": "311e9b58ae5606fe733907d4743aa8b0aef4c57321cd012bbae3f4ff43a21dbe",
+      "dependencies": [
+        "cryptography<51,>=41",
+        "mcp==2.2.0"
+      ],
+      "static_format_checked": true,
+      "install_checked": false,
+      "execution_ready": false
+    },
+    "global": "1333 passed, 1 xfailed",
+    "ruff": "All checks passed; five changed Python files formatted"
+  },
+  "limits": [
+    "The static inspector checks this local wheel and declared metadata, not dependency provenance or runtime isolation.",
+    "The dist wheel is ignored by Git and is not a released or independently custodied bundle.",
+    "No field effect or controlled N/SDD/T comparison was measured."
+  ]
+}

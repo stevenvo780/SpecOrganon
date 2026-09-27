@@ -37,7 +37,7 @@ def wheel_members() -> dict[str, bytes]:
         b"Version: 0.1.0\n"
         b"Requires-Python: >=3.11\n"
         b"Requires-Dist: cryptography<51,>=41\n"
-        b"Requires-Dist: mcp<3,>=2.2\n"
+        b"Requires-Dist: mcp==2.2.0\n"
         b"Provides-Extra: dev\n"
         b"Requires-Dist: pytest<10,>=8; extra == 'dev'\n"
         b"\nSynthetic fixture.\n"

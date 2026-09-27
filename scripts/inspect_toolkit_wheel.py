@@ -532,7 +532,7 @@ def _metadata(data: bytes) -> tuple[str, list[str]]:
         else:
             expected = {
                 "cryptography": frozenset({">=41", "<51"}),
-                "mcp": frozenset({">=2.2", "<3"}),
+                "mcp": frozenset({"==2.2.0"}),
             }
             if name not in expected or specs != expected[name] or name in runtime:
                 raise ToolkitWheelError("METADATA has unexpected runtime dependencies")
