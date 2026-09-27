@@ -49,6 +49,44 @@ def _released(
     return schedule, schedule_path, release, hidden
 
 
+def _retry_release(tmp_path: Path) -> tuple[dict, Path, Path, Path, Path, dict]:
+    schedule, assets, schedule_path, _ = fixture._fixture(tmp_path)
+    run = schedule["runs"][0]
+    gate_root = tmp_path / "gate"
+    first_release = tmp_path / "first-release"
+    preflight_assets.preflight(
+        schedule, assets, run_id=run["run_id"], output_dir=first_release,
+        gate_root=gate_root,
+    )
+    trace_sha256 = hashlib.sha256(b"synthetic first attempt trace").hexdigest()
+    evidence = tmp_path / "first-external-failure.json"
+    evidence.write_text(
+        json.dumps({
+            "schema": 1,
+            "schedule_sha256": schedule["schedule_sha256"],
+            "run_id": run["run_id"],
+            "run_sha256": run["run_sha256"],
+            "attempt_number": 1,
+            "release_dir": str(first_release),
+            "status": "external_failure",
+            "trace_sha256": trace_sha256,
+            "incident_sha256": hashlib.sha256(b"synthetic incident").hexdigest(),
+        }, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    evidence.chmod(0o600)
+    gate.record_terminal(
+        schedule, run["run_id"], gate_root,
+        "external_failure", trace_sha256, evidence,
+    )
+    retry_release = tmp_path / "retry-release"
+    preflight_assets.preflight(
+        schedule, assets, run_id=run["run_id"], output_dir=retry_release,
+        gate_root=gate_root, attempt_number=2,
+    )
+    return schedule, schedule_path, first_release, retry_release, gate_root, run
+
+
 @pytest.mark.parametrize(
     "arm,expected_roles",
     [
@@ -457,3 +495,64 @@ def test_api_rejects_ambiguous_stage_mode(tmp_path: Path) -> None:
             development_unsequenced=True,
         )
     assert not output.exists()
+
+
+def test_retry_stage_requires_exact_attempt_and_gate_before_output(tmp_path: Path) -> None:
+    schedule, _, first_release, retry_release, gate_root, run = _retry_release(tmp_path)
+    output = tmp_path / "stage"
+    with pytest.raises(staging.StageError, match="release attempt differs"):
+        staging.stage_released_run(
+            schedule, retry_release, output, gate_root=gate_root,
+        )
+    assert not output.exists()
+    with pytest.raises(staging.StageError, match="release attempt differs"):
+        staging.stage_released_run(
+            schedule, first_release, output, gate_root=gate_root,
+            attempt_number=2,
+        )
+    assert not output.exists()
+    with pytest.raises(staging.StageError, match="retry staging requires gate_root"):
+        staging.stage_released_run(
+            schedule, retry_release, output, development_unsequenced=True,
+            attempt_number=2,
+        )
+    assert not output.exists()
+    with pytest.raises(staging.StageError, match="release gate rejected stage"):
+        staging.stage_released_run(
+            schedule, retry_release, output, gate_root=tmp_path / "wrong-gate",
+            attempt_number=2,
+        )
+    assert not output.exists()
+    with pytest.raises(staging.StageError, match="positive integer"):
+        staging.stage_released_run(
+            schedule, retry_release, output, gate_root=gate_root,
+            attempt_number=True,
+        )
+    assert not output.exists()
+    assert run["run_id"] == json.loads((retry_release / "manifest.json").read_text())["run_id"]
+
+
+def test_retry_stage_cli_preserves_claim_provenance(tmp_path: Path) -> None:
+    schedule, schedule_path, _, retry_release, gate_root, run = _retry_release(tmp_path)
+    claim = gate.verify_claim(
+        schedule, run["run_id"], gate_root, retry_release, attempt_number=2,
+    )
+    output = tmp_path / "stage"
+    process = subprocess.run(
+        [
+            sys.executable, "-B", str(SCRIPT), str(schedule_path),
+            str(retry_release), str(output), "--gate-dir", str(gate_root),
+            "--attempt-number", "2",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert process.returncode == 0, process.stderr
+    manifest = json.loads((output / "stage.json").read_text())
+    assert json.loads(process.stdout) == manifest
+    assert manifest["schema"] == 2
+    assert manifest["attempt_number"] == 2
+    assert manifest["release_dir"] == str(retry_release)
+    assert manifest["claim_sha256"] == claim["claim_sha256"]
+    assert manifest["publication_sha256"] == claim["publication_sha256"]

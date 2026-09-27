@@ -248,6 +248,7 @@ def stage_released_run(
     *,
     gate_root: Path | str | None = None,
     development_unsequenced: bool = False,
+    attempt_number: int = 1,
 ) -> dict[str, Any]:
     """Copy one verified visible release into a new private stage.
 
@@ -260,6 +261,10 @@ def stage_released_run(
         gate_root is not None and development_unsequenced
     ):
         raise StageError("staging requires exactly one of gate_root or development_unsequenced")
+    if type(attempt_number) is not int or attempt_number < 1:
+        raise StageError("attempt_number must be a positive integer")
+    if attempt_number > 1 and gate_root is None:
+        raise StageError("retry staging requires gate_root")
     try:
         # API callers may retain and mutate their input while this function
         # runs. Every check and the published manifest must use one snapshot.
@@ -273,6 +278,11 @@ def stage_released_run(
         raise StageError("release verification or visible inspection failed") from exc
     if first["run_id"] != inspection["run_id"]:
         raise StageError("release changed between checks")
+    if (
+        first["attempt_number"] != attempt_number
+        or inspection["attempt_number"] != attempt_number
+    ):
+        raise StageError("release attempt differs from requested attempt")
     run = next(
         item for item in schedule_raw["runs"] if item["run_id"] == first["run_id"]
     )
@@ -280,9 +290,16 @@ def stage_released_run(
         raise StageError("visible inspection unexpectedly claimed execution readiness")
     if not Path(output_dir).is_absolute():
         raise StageError("output_dir must be absolute")
+    claim = None
     if gate_root is not None:
         try:
-            verify_claim(schedule_raw, run["run_id"], gate_root, release_dir)
+            claim = verify_claim(
+                schedule_raw,
+                run["run_id"],
+                gate_root,
+                release_dir,
+                attempt_number=attempt_number,
+            )
         except BlockReleaseError as exc:
             raise StageError(f"release gate rejected stage: {exc}") from exc
 
@@ -409,6 +426,16 @@ def stage_released_run(
                 "provider_receipts_checked": False,
                 "custody_verified": False,
             }
+            if attempt_number > 1:
+                if claim is None:
+                    raise StageError("retry stage lacks a verified release claim")
+                manifest.update(
+                    schema=2,
+                    attempt_number=attempt_number,
+                    release_dir=claim["release_dir"],
+                    claim_sha256=claim["claim_sha256"],
+                    publication_sha256=claim["publication_sha256"],
+                )
             os.fsync(inputs_fd)
             os.fsync(case_fd)
             os.fsync(work_fd)
@@ -471,6 +498,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("release_dir", help="absolute path to one released run")
     parser.add_argument("output_dir", help="absolute path for a new private stage")
+    parser.add_argument(
+        "--attempt-number", type=int, default=1,
+        help="release attempt number (default: 1; retries require --gate-dir)",
+    )
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--gate-dir", help="absolute durable block release gate directory")
     mode.add_argument(
@@ -486,6 +517,7 @@ def main(argv: list[str] | None = None) -> int:
             args.output_dir,
             gate_root=args.gate_dir,
             development_unsequenced=args.development_unsequenced,
+            attempt_number=args.attempt_number,
         )
     except (ReleaseVerificationError, StageError) as exc:
         print(f"Run staging failed: {exc}", file=sys.stderr)

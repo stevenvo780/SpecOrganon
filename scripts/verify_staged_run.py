@@ -53,6 +53,7 @@ from verify_released_run import (
     _read_manifest,
     _read_schedule,
     _same_file_state,
+    verify_release,
 )
 
 
@@ -99,6 +100,9 @@ STAGE_FIELDS = frozenset(
         "custody_verified",
     }
 )
+RETRY_STAGE_FIELDS = STAGE_FIELDS | frozenset(
+    {"attempt_number", "release_dir", "claim_sha256", "publication_sha256"}
+)
 TEXT_ROLES = frozenset({"task_contract", "common_prompt", "arm_prompt", "sdd_guide"})
 
 
@@ -135,9 +139,29 @@ def _role_limit(role: str) -> int:
 def _validate_manifest(
     raw: Any, schedule: dict[str, Any], run: dict[str, Any]
 ) -> dict[str, Any]:
-    manifest = _exact_object(raw, STAGE_FIELDS, "stage.json")
-    if type(manifest["schema"]) is not int or manifest["schema"] != 1:
+    if type(raw) is not dict or type(raw.get("schema")) is not int:
         raise StageVerificationError("stage.json schema is invalid")
+    schema = raw["schema"]
+    if schema not in (1, 2):
+        raise StageVerificationError("stage.json schema is invalid")
+    manifest = _exact_object(
+        raw, STAGE_FIELDS if schema == 1 else RETRY_STAGE_FIELDS, "stage.json"
+    )
+    if schema == 2:
+        attempt_number = manifest["attempt_number"]
+        release_dir = manifest["release_dir"]
+        if type(attempt_number) is not int or attempt_number <= 1:
+            raise StageVerificationError("retry stage attempt_number is invalid")
+        if type(release_dir) is not str or not release_dir.startswith("/"):
+            raise StageVerificationError("retry stage release_dir must be absolute")
+        for field in ("claim_sha256", "publication_sha256"):
+            digest = manifest[field]
+            if (
+                type(digest) is not str
+                or len(digest) != 64
+                or any(character not in "0123456789abcdef" for character in digest)
+            ):
+                raise StageVerificationError(f"retry stage {field} is invalid")
     if (
         type(manifest["classification"]) is not str
         or manifest["classification"] != STAGE_CLASSIFICATION
@@ -435,6 +459,16 @@ def verify_stage(
             _check_directory_chain(chain, root_before)
             raw, manifest_fd, manifest_before = _read_stage_manifest(root_fd, stack)
             manifest = _validate_manifest(raw, schedule, run)
+            if manifest["schema"] == 2:
+                release = verify_release(schedule, manifest["release_dir"])
+                if (
+                    release["run_id"] != run_id
+                    or release["run_sha256"] != run["run_sha256"]
+                    or release["attempt_number"] != manifest["attempt_number"]
+                ):
+                    raise StageVerificationError(
+                        "retry stage release identity differs from stage manifest"
+                    )
             expected_root = {"case", "inputs", "work", "stage.json"}
             if set(os.listdir(root_fd)) != expected_root:
                 raise StageVerificationError("stage root has missing or extra entries")
@@ -544,6 +578,14 @@ def verify_stage(
         "run_id": run_id,
         "run_sha256": run["run_sha256"],
         "schedule_sha256": schedule["schedule_sha256"],
+        "attempt_number": (
+            manifest["attempt_number"] if manifest["schema"] == 2 else 1
+        ),
+        "release_dir": manifest["release_dir"] if manifest["schema"] == 2 else None,
+        "claim_sha256": manifest["claim_sha256"] if manifest["schema"] == 2 else None,
+        "publication_sha256": (
+            manifest["publication_sha256"] if manifest["schema"] == 2 else None
+        ),
         "verified_files": len(roles),
         "verified_bytes": verified_bytes,
         "verified_case_files": case_files,

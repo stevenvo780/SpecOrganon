@@ -59,6 +59,13 @@ def test_verifies_published_stage_by_api_and_cli(tmp_path: Path, arm: str) -> No
     assert result["classification"] == verifier.CLASSIFICATION
     assert result["run_id"] == published["run_id"]
     assert result["schedule_sha256"] == schedule["schedule_sha256"]
+    assert result["attempt_number"] == 1
+    assert result["release_dir"] is None
+    assert result["claim_sha256"] is None
+    assert result["publication_sha256"] is None
+    assert published["schema"] == 1
+    assert "attempt_number" not in published
+    assert "release_dir" not in published
     assert result["verified_files"] == len(published["visible_files"])
     assert result["verified_case_files"] == 3
     assert result["stage_verified_at_read"] is True
@@ -97,6 +104,49 @@ def test_verifies_bundle_stage_without_installing(tmp_path: Path) -> None:
         is True
     )
     assert list((stage / "work").iterdir()) == []
+
+
+def test_verifies_retry_stage_with_normalized_identity(tmp_path: Path) -> None:
+    schedule, schedule_path, first_release, retry_release, gate_root, run = (
+        stage_fixture._retry_release(tmp_path)
+    )
+    stage = tmp_path / "stage"
+    manifest = staging.stage_released_run(
+        schedule, retry_release, stage, gate_root=gate_root, attempt_number=2,
+    )
+    result = verifier.verify_stage(schedule, run["run_id"], stage)
+    assert manifest["schema"] == 2
+    assert result["attempt_number"] == 2
+    assert result["release_dir"] == str(retry_release)
+    assert result["claim_sha256"] == manifest["claim_sha256"]
+    assert result["publication_sha256"] == manifest["publication_sha256"]
+    assert result["execution_ready"] is False
+    process = subprocess.run(
+        [sys.executable, "-B", str(SCRIPT), str(schedule_path), run["run_id"], str(stage)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert process.returncode == 0, process.stderr
+    assert json.loads(process.stdout) == result
+
+    source = stage / "stage.json"
+    for field, value in (
+        ("attempt_number", 1),
+        ("attempt_number", True),
+        ("release_dir", str(first_release)),
+        ("release_dir", "relative-release"),
+        ("claim_sha256", "A" * 64),
+        ("publication_sha256", "bad"),
+        ("unexpected", "extra"),
+    ):
+        changed = dict(manifest)
+        changed[field] = value
+        _write_manifest(source, changed)
+        with pytest.raises(verifier.StageVerificationError):
+            verifier.verify_stage(schedule, run["run_id"], stage)
+    _write_manifest(source, manifest)
+    assert verifier.verify_stage(schedule, run["run_id"], stage) == result
 
 
 @pytest.mark.parametrize(
