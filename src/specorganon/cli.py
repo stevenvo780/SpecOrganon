@@ -23,6 +23,7 @@ ENGINE_OPERATIONS = {
     "challenge": "challenge",
     "resolve_challenge": "resolve_challenge",
     "gate": "gate",
+    "phase_review_challenge": "phase_review_challenge",
     "review_phase": "review_phase",
     "advance": "advance",
     "trace": "trace",
@@ -159,6 +160,16 @@ def build_parser() -> argparse.ArgumentParser:
     review_phase.add_argument("--verdict", required=True)
     review_phase.add_argument("--reason", required=True)
     review_phase.add_argument("--actor", required=True)
+    review_phase.add_argument("--signature", help="Base64 Ed25519 signature of phase-review-challenge message")
+
+    phase_review_challenge = commands.add_parser(
+        "phase-review-challenge", help="Prepare exact phase snapshot bytes for offline reviewer signing"
+    )
+    phase_review_challenge.add_argument("path")
+    phase_review_challenge.add_argument("phase")
+    phase_review_challenge.add_argument("--verdict", required=True)
+    phase_review_challenge.add_argument("--reason", required=True)
+    phase_review_challenge.add_argument("--actor", required=True)
 
     advance = commands.add_parser("advance", help="Advance a phase after its gate passes")
     advance.add_argument("path")

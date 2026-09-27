@@ -545,9 +545,26 @@ def gate(path: str, phase: str) -> dict[str, Any]:
     return _invoke("gate", path=path, phase=phase)
 
 
-@server.tool(description="Record a phase review with a verdict and reason.")
-def review_phase(
+@server.tool(
+    description="Return canonical bytes for offline Ed25519 signing of a phase review of the current snapshot."
+)
+def phase_review_challenge(
     path: str, phase: str, verdict: str, reason: str, actor: str
+) -> dict[str, Any]:
+    return _invoke(
+        "phase_review_challenge",
+        path=path,
+        phase=phase,
+        verdict=verdict,
+        reason=reason,
+        actor=actor,
+    )
+
+
+@server.tool(description="Record a phase review; signed cases require a trusted Ed25519 reviewer signature.")
+def review_phase(
+    path: str, phase: str, verdict: str, reason: str, actor: str,
+    signature: str | None = None,
 ) -> dict[str, Any]:
     return _invoke(
         "review_phase",
@@ -556,6 +573,7 @@ def review_phase(
         verdict=verdict,
         reason=reason,
         actor=actor,
+        signature=signature,
     )
 
 
