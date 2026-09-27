@@ -75,7 +75,7 @@ def _tool(path: Path, body: str) -> None:
 
 def _stage(
     tmp_path: Path, *, first_body: str = FIRST, cap: int = 2,
-    retry: bool = False,
+    retry: bool = False, gated_first: bool = False,
 ) -> tuple[dict, Path, str, Path, Path, Path, tuple[bytes, ...]]:
     first = tmp_path / "first_tool"
     second = tmp_path / "second_tool"
@@ -103,22 +103,23 @@ def _stage(
     schedule_path.write_text(json.dumps(schedule), encoding="utf-8")
     assets["schedule_sha256"] = schedule["schedule_sha256"]
     assets["input_sha256"] = schedule["input_sha256"]
-    run = (schedule["runs"][0] if retry else next(
+    run = (schedule["runs"][0] if retry or gated_first else next(
         item for item in schedule["runs"] if item["arm"] == "N" and item["case_id"] == "R-F"
     ))
     release = tmp_path / "release"
-    if retry:
+    if retry or gated_first:
         gate_root = tmp_path / "gate"
-        first_release = tmp_path / "first-release"
-        preflight_assets.preflight(
-            schedule, assets, run_id=run["run_id"], output_dir=first_release,
-            gate_root=gate_root,
-        )
-        _record_terminal(schedule, run, first_release, gate_root, tmp_path,
-                         "external_failure", 1)
+        if retry:
+            first_release = tmp_path / "first-release"
+            preflight_assets.preflight(
+                schedule, assets, run_id=run["run_id"], output_dir=first_release,
+                gate_root=gate_root,
+            )
+            _record_terminal(schedule, run, first_release, gate_root, tmp_path,
+                             "external_failure", 1)
         preflight_assets.preflight(
             schedule, assets, run_id=run["run_id"], output_dir=release,
-            gate_root=gate_root, attempt_number=2,
+            gate_root=gate_root, attempt_number=2 if retry else 1,
         )
     else:
         preflight_assets.preflight(
@@ -128,8 +129,8 @@ def _stage(
     stage = tmp_path / "stage"
     stage_released_run.stage_released_run(
         schedule, release, stage,
-        gate_root=tmp_path / "gate" if retry else None,
-        development_unsequenced=not retry,
+        gate_root=tmp_path / "gate" if retry or gated_first else None,
+        development_unsequenced=not retry and not gated_first,
         attempt_number=2 if retry else 1,
     )
     return schedule, schedule_path, run["run_id"], stage, first, second, hidden
@@ -213,6 +214,123 @@ def test_retry_session_requires_live_gate_and_blocks_after_terminal(
     with pytest.raises(session_runner.SessionError, match="blocked"):
         session_runner.call_tool(schedule, run_id, stage, session, "first", first)
     assert not (session / "calls" / "000002").exists()
+
+
+@pytest.mark.parametrize("location", ["gate", "child", "symlink_child"])
+def test_gated_session_cannot_poison_gate_root(
+    tmp_path: Path, location: str,
+) -> None:
+    schedule, _, run_id, stage, _, _, _ = _stage(tmp_path, retry=True)
+    gate_root = tmp_path / "gate"
+    before = sorted(path.name for path in gate_root.iterdir())
+    if location == "gate":
+        session = gate_root
+    elif location == "child":
+        session = gate_root / "session"
+    else:
+        alias = tmp_path / "gate-alias"
+        alias.symlink_to(gate_root, target_is_directory=True)
+        session = alias / "session"
+    with pytest.raises(session_runner.SessionError, match="outside gate root"):
+        session_runner.create_session(
+            schedule, run_id, stage, session, gate_root=gate_root
+        )
+    assert sorted(path.name for path in gate_root.iterdir()) == before
+    assert not (gate_root / "session").exists()
+    assert not (tmp_path / "admissions").exists()
+    assert not session_runner._anchor_path(stage, run_id).exists()
+    gate.verify_claim(schedule, run_id, gate_root, tmp_path / "release", attempt_number=2)
+
+
+@pytest.mark.parametrize("relation", ["same", "child", "parent", "symlink"])
+def test_gated_session_rejects_overlapping_admission_root_before_mutation(
+    tmp_path: Path, relation: str,
+) -> None:
+    schedule, _, run_id, stage, _, _, _ = _stage(tmp_path, retry=True)
+    gate_root = tmp_path / "gate"
+    if relation == "same":
+        admission_root = gate_root
+    elif relation == "child":
+        admission_root = gate_root / "admissions"
+    elif relation == "parent":
+        admission_root = tmp_path
+    else:
+        admission_root = tmp_path / "gate-alias"
+        admission_root.symlink_to(gate_root, target_is_directory=True)
+    before = sorted(path.name for path in gate_root.iterdir())
+    session = tmp_path / "session"
+    with pytest.raises(session_runner.SessionError, match="roots must be disjoint"):
+        session_runner.create_session(
+            schedule, run_id, stage, session, gate_root=gate_root,
+            admission_root=admission_root,
+        )
+    assert sorted(path.name for path in gate_root.iterdir()) == before
+    assert not session.exists()
+    assert not session_runner._anchor_path(stage, run_id).exists()
+    gate.verify_claim(schedule, run_id, gate_root, tmp_path / "release", attempt_number=2)
+
+
+def test_existing_session_rejects_overlapping_roots_without_hanging(
+    tmp_path: Path,
+) -> None:
+    schedule, schedule_path, run_id, stage, first, _, _ = _stage(tmp_path, retry=True)
+    gate_root = tmp_path / "gate"
+    session = tmp_path / "session"
+    session_runner.create_session(schedule, run_id, stage, session, gate_root=gate_root)
+    manifest_path = session / "session.json"
+    manifest = json.loads(manifest_path.read_text())
+    root_descriptor = admission.descriptor(gate_root, create=False)
+    manifest.update(root_descriptor)
+    manifest["local_run_claim_sha256"] = admission.claim_digest(
+        schedule["schedule_sha256"], run_id,
+        admission.owner("staged", stage, session), root_descriptor,
+        attempt_number=2,
+    )
+    anchor_path = session_runner._anchor_path(stage, run_id)
+    anchor = json.loads(anchor_path.read_text())
+    anchor.update(root_descriptor)
+    anchor["local_run_claim_sha256"] = manifest["local_run_claim_sha256"]
+    anchor_bytes = session_runner._canonical_bytes(anchor, newline=True)
+    manifest["anchor_sha256"] = _sha(anchor_bytes)
+    anchor_path.write_bytes(anchor_bytes)
+    manifest_path.write_bytes(session_runner._canonical_bytes(manifest, newline=True))
+    outcome = subprocess.run(
+        [sys.executable, "-B", str(SCRIPTS / "staged_tool_session.py"),
+         "call", str(schedule_path), run_id, str(stage), str(session),
+         "--admission-root", str(gate_root), "first", str(first)],
+        capture_output=True, text=True, check=False, timeout=5,
+    )
+    assert outcome.returncode == 2
+    assert "gate and admission roots must be disjoint" in outcome.stderr
+    assert list((session / "calls").iterdir()) == []
+
+
+def test_retry_terminal_closing_after_status_check_spends_no_call(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    schedule, _, run_id, stage, first, _, _ = _stage(
+        tmp_path, first_body=RETRY_TOOL, retry=True
+    )
+    session = tmp_path / "session"
+    session_runner.create_session(
+        schedule, run_id, stage, session, gate_root=tmp_path / "gate"
+    )
+    original_assert = session_runner._assert_stage_and_work
+
+    def close_after_status(*args: object) -> tuple:
+        checked = original_assert(*args)
+        run = next(item for item in schedule["runs"] if item["run_id"] == run_id)
+        _record_terminal(schedule, run, tmp_path / "release", tmp_path / "gate",
+                         tmp_path, "completed", 2)
+        return checked
+
+    monkeypatch.setattr(session_runner, "_assert_stage_and_work", close_after_status)
+    with pytest.raises(session_runner.LocalToolError, match="already has a terminal"):
+        session_runner.call_tool(
+            schedule, run_id, stage, session, "first", first, wall_seconds=3
+        )
+    assert list((session / "calls").iterdir()) == []
+    assert list((tmp_path / "admissions").glob("*.json")) == []
 
 
 def test_retry_one_shot_requires_gate_before_receipt(
@@ -308,6 +426,148 @@ def test_retry_terminal_waits_for_local_sandbox_call(
     assert not failures
     assert results[0]["status"] == "success"
     assert closed.is_set()
+
+
+def test_retry_terminal_waits_for_fsynced_session_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, available_sandbox: None,
+) -> None:
+    schedule, _, run_id, stage, first, _, _ = _stage(
+        tmp_path, first_body=RETRY_TOOL, retry=True
+    )
+    session = tmp_path / "session"
+    session_runner.create_session(
+        schedule, run_id, stage, session, gate_root=tmp_path / "gate"
+    )
+    original_write = session_runner._write_json
+    receipt_fsynced = threading.Event()
+    finish_publication = threading.Event()
+    writer_waiting = threading.Event()
+    closed = threading.Event()
+    failures: list[BaseException] = []
+    results: list[dict] = []
+
+    def pause_after_fsync(path: Path, value: dict) -> str:
+        digest = original_write(path, value)
+        if path.name == "terminal.json":
+            receipt_fsynced.set()
+            if not finish_publication.wait(10):
+                raise AssertionError("terminal receipt publication pause was not released")
+        return digest
+
+    monkeypatch.setattr(session_runner, "_write_json", pause_after_fsync)
+    original_flock = gate.fcntl.flock
+    gate_inode = (tmp_path / "gate").stat().st_ino
+
+    def observe_gate_writer(fd: int, operation: int) -> None:
+        if (threading.current_thread() is terminal_thread
+            and operation == gate.fcntl.LOCK_EX
+            and os.fstat(fd).st_ino == gate_inode):
+            writer_waiting.set()
+        original_flock(fd, operation)
+
+    monkeypatch.setattr(gate.fcntl, "flock", observe_gate_writer)
+
+    def launch() -> None:
+        try:
+            results.append(session_runner.call_tool(
+                schedule, run_id, stage, session, "first", first, wall_seconds=3
+            ))
+        except BaseException as exc:
+            failures.append(exc)
+
+    def close() -> None:
+        try:
+            run = next(item for item in schedule["runs"] if item["run_id"] == run_id)
+            _record_terminal(schedule, run, tmp_path / "release", tmp_path / "gate",
+                             tmp_path, "completed", 2)
+        except BaseException as exc:
+            failures.append(exc)
+        finally:
+            closed.set()
+
+    runner_thread = threading.Thread(target=launch)
+    terminal_thread = threading.Thread(target=close)
+    runner_thread.start()
+    try:
+        assert receipt_fsynced.wait(10)
+        receipt = session / "calls" / "000001" / "terminal.json"
+        assert json.loads(receipt.read_text())["status"] == "success"
+        terminal_thread.start()
+        assert writer_waiting.wait(5)
+        assert not closed.wait(0.15)
+    finally:
+        finish_publication.set()
+        runner_thread.join(timeout=10)
+        if terminal_thread.ident is not None:
+            terminal_thread.join(timeout=10)
+    assert not runner_thread.is_alive() and not terminal_thread.is_alive()
+    assert not failures
+    assert results[0]["status"] == "success"
+    assert closed.is_set()
+
+
+def test_retry_gate_releases_after_post_run_inventory_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, available_sandbox: None,
+) -> None:
+    schedule, _, run_id, stage, first, _, _ = _stage(
+        tmp_path, first_body=RETRY_TOOL, retry=True
+    )
+    session = tmp_path / "session"
+    session_runner.create_session(
+        schedule, run_id, stage, session, gate_root=tmp_path / "gate"
+    )
+    original_inventory = session_runner._work_inventory
+    scans = 0
+
+    def fail_after_run(path: Path) -> dict:
+        nonlocal scans
+        scans += 1
+        if scans == 2:
+            raise OSError("injected inventory failure after sandbox")
+        return original_inventory(path)
+
+    monkeypatch.setattr(session_runner, "_work_inventory", fail_after_run)
+    with pytest.raises(OSError, match="injected inventory failure after sandbox"):
+        session_runner.call_tool(
+            schedule, run_id, stage, session, "first", first, wall_seconds=3
+        )
+    assert scans == 2
+    assert (session / "calls" / "000001" / "reservation.json").is_file()
+    assert not (session / "calls" / "000001" / "terminal.json").exists()
+    gate_fd = os.open(tmp_path / "gate", os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        gate.fcntl.flock(gate_fd, gate.fcntl.LOCK_EX | gate.fcntl.LOCK_NB)
+        gate.fcntl.flock(gate_fd, gate.fcntl.LOCK_UN)
+    finally:
+        os.close(gate_fd)
+    assert session_runner.resume_session(schedule, run_id, stage, session)[
+        "status"
+    ] == "indeterminate"
+
+
+def test_gated_attempt_one_session_retains_gate_provenance(
+    tmp_path: Path, available_sandbox: None,
+) -> None:
+    schedule, _, run_id, stage, first, _, _ = _stage(
+        tmp_path, first_body=RETRY_TOOL, gated_first=True
+    )
+    session = tmp_path / "session"
+    summary = session_runner.create_session(
+        schedule, run_id, stage, session, gate_root=tmp_path / "gate"
+    )
+    assert summary["attempt_number"] == 1
+    manifest = json.loads((session / "session.json").read_text())
+    assert manifest["release_gate_root"] == str(tmp_path / "gate")
+    assert manifest["release_dir"] == str(tmp_path / "release")
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "ready"
+    terminal = session_runner.call_tool(
+        schedule, run_id, stage, session, "first", first, wall_seconds=3
+    )
+    assert terminal["status"] == "success"
+    run = next(item for item in schedule["runs"] if item["run_id"] == run_id)
+    _record_terminal(schedule, run, tmp_path / "release", tmp_path / "gate",
+                     tmp_path, "completed", 1)
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "blocked"
 
 
 def test_two_real_sealed_tools_resume_and_cap(

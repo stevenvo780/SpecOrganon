@@ -126,6 +126,48 @@ def _paths(stage_dir: Path | str, session_dir: Path | str) -> tuple[Path, Path]:
     return stage, session
 
 
+def _paths_overlap(first: Path, second: Path) -> bool:
+    """Compare names and existing directory identities, including path aliases."""
+    try:
+        resolved_first = first.resolve(strict=False)
+        resolved_second = second.resolve(strict=False)
+        if (resolved_first == resolved_second
+            or resolved_first.is_relative_to(resolved_second)
+            or resolved_second.is_relative_to(resolved_first)):
+            return True
+        for path, root in ((first, second), (second, first)):
+            try:
+                root_info = root.stat()
+            except FileNotFoundError:
+                continue
+            for ancestor in (path, *path.parents):
+                try:
+                    info = ancestor.stat()
+                except FileNotFoundError:
+                    continue
+                if (info.st_dev, info.st_ino) == (root_info.st_dev, root_info.st_ino):
+                    return True
+    except (OSError, RuntimeError) as exc:
+        raise SessionError("gate, admission, or session path cannot be checked") from exc
+    return False
+
+
+def _assert_gated_paths_disjoint(
+    session: Path, gate_root: Path | str | None, admission_root: Path | str | None,
+) -> None:
+    if gate_root is None:
+        return
+    try:
+        gate = admission.configured_root(gate_root)
+        registry = admission.configured_root(admission_root)
+    except (admission.AdmissionError, OSError, TypeError) as exc:
+        raise SessionError("gate or admission root path is invalid") from exc
+    if _paths_overlap(session, gate):
+        raise SessionError("session directory must be outside gate root")
+    if _paths_overlap(gate, registry):
+        raise SessionError("gate and admission roots must be disjoint")
+
+
 def _schedule(raw: Any, run_id: str) -> tuple[dict[str, Any], dict[str, Any]]:
     try:
         schedule = _candidate_schedule(copy.deepcopy(raw))
@@ -302,7 +344,7 @@ def _check_anchor(
             "attempt_number": manifest["attempt_number"],
             "budget_scope": BUDGET_SCOPE, "global_run_limits_enforced": False,
     }
-    if manifest["attempt_number"] > 1:
+    if "release_gate_root" in manifest:
         expected.update({key: manifest[key] for key in (
             "release_gate_root", "release_dir", "claim_sha256", "publication_sha256"
         )})
@@ -484,15 +526,19 @@ def _read_state(
         or type(manifest.get("deliverables")) is not list
     ):
         raise SessionError("session identity differs from independent schedule or paths")
-    retry_fields = ("release_gate_root", "release_dir", "claim_sha256", "publication_sha256")
-    if manifest["attempt_number"] == 1:
-        if any(key in manifest for key in retry_fields):
-            raise SessionError("attempt-1 session contains retry gate fields")
-    elif (type(manifest.get("release_gate_root")) is not str
-          or type(manifest.get("release_dir")) is not str
-          or not _is_sha256(manifest.get("claim_sha256"))
-          or not _is_sha256(manifest.get("publication_sha256"))):
+    gate_fields = ("release_gate_root", "release_dir", "claim_sha256", "publication_sha256")
+    has_gate = any(key in manifest for key in gate_fields)
+    if manifest["attempt_number"] > 1 and not has_gate:
         raise SessionError("retry session lacks gate provenance")
+    if has_gate and (type(manifest.get("release_gate_root")) is not str
+                     or type(manifest.get("release_dir")) is not str
+                     or not _is_sha256(manifest.get("claim_sha256"))
+                     or not _is_sha256(manifest.get("publication_sha256"))):
+        raise SessionError("session gate provenance is incomplete or invalid")
+    if has_gate:
+        _assert_gated_paths_disjoint(
+            session, manifest["release_gate_root"], manifest["local_run_admission_root"]
+        )
     if (type(manifest.get("active_budget_seconds")) not in (float, int)
         or type(manifest.get("wall_budget_seconds")) not in (float, int)
         or type(manifest.get("created_ns")) is not int
@@ -610,7 +656,7 @@ def _read_state(
         claim_status = "blocked"
         claim_reason = str(exc)
     gate_reason = None
-    if manifest["attempt_number"] > 1:
+    if has_gate:
         try:
             _require_retry_gate(
                 schedule, run["run_id"], manifest, manifest["release_gate_root"]
@@ -688,6 +734,7 @@ def create_session(
 ) -> dict[str, Any]:
     """Verify an empty stage exactly once and create a new durable session."""
     stage, session = _paths(stage_dir, session_dir)
+    _assert_gated_paths_disjoint(session, gate_root, admission_root)
     schedule, run = _schedule(schedule_raw, run_id)
     policy_cap = schedule["per_run_limits"]["active_seconds"]
     active_budget = float(policy_cap) if active_budget_seconds is None else active_budget_seconds
@@ -718,12 +765,12 @@ def create_session(
         schedule["schedule_sha256"], run_id, selected_owner, root_descriptor,
         attempt_number=attempt_number,
     )
-    retry_provenance = (
+    gate_provenance = (
         {"release_gate_root": str(gate_root),
          "release_dir": verified["release_dir"],
          "claim_sha256": verified["claim_sha256"],
          "publication_sha256": verified["publication_sha256"]}
-        if attempt_number > 1 else {}
+        if verified["release_dir"] is not None else {}
     )
     case_manifest = json.loads(_read_bounded_file(
         stage / "case" / "case.json", "staged case manifest", 1024 * 1024
@@ -741,7 +788,7 @@ def create_session(
         "immutable_snapshot_sha256": _digest(after), "created_ns": created_ns,
         **root_descriptor, "local_run_claim_sha256": claim_sha256,
         "attempt_number": attempt_number,
-        **retry_provenance,
+        **gate_provenance,
         "budget_scope": BUDGET_SCOPE, "global_run_limits_enforced": False,
     }
     anchor_sha256 = hashlib.sha256(_canonical_bytes(anchor, newline=True)).hexdigest()
@@ -756,7 +803,7 @@ def create_session(
         "anchor_sha256": anchor_sha256,
         **root_descriptor, "local_run_claim_sha256": claim_sha256,
         "attempt_number": attempt_number,
-        **retry_provenance,
+        **gate_provenance,
         "policy_sha256": policy_sha256, "tool_call_cap": policy["limits"]["tool_calls"],
         "deliverables": case_manifest["deliverables"],
         "active_budget_seconds": float(active_budget),
@@ -817,7 +864,7 @@ def call_tool(
         raise SessionError("tool_id is required")
     _validate_call_limits(wall_seconds, cpu_seconds, address_space_bytes, file_bytes_per_file)
     schedule, run = _schedule(schedule_raw, run_id)
-    with _locked_session(session):
+    with _locked_session(session), ExitStack() as retry_gate_guard:
         manifest, calls, summary = _read_state(schedule, run, stage, session, admission_root)
         if summary["status"] != "ready":
             raise SessionError(
@@ -853,6 +900,13 @@ def call_tool(
                                            "local_run_admission_root_identity",
                                            "local_run_admission_scope")
         }
+        # Close the gap between the point-in-time gate check in _read_state
+        # and the durable reservation. Once a call can be reserved, the gate
+        # stays held until its terminal receipt and directory are fsynced.
+        retry_gate_guard.enter_context(_held_retry_gate(
+            schedule, run_id, {**manifest, "release_dir": manifest.get("release_dir")},
+            manifest.get("release_gate_root"),
+        ))
         if not calls:
             claimed = admission.acquire_staged_claim(
                 schedule["schedule_sha256"], run_id, admission.owner("staged", stage, session),
@@ -915,33 +969,30 @@ def call_tool(
         result = None
         launch_error = None
         elapsed = 0.0
-        with _held_retry_gate(
-            schedule, run_id, manifest, manifest.get("release_gate_root")
-        ):
-            try:
-                runtime_roots = default_python_runtime_roots()
-                if time.time_ns() >= launch_deadline_ns:
-                    launch_error = "session wall budget expired after reservation before launch"
-                else:
-                    start = time.monotonic()
-                    try:
-                        result = run_sandboxed(
-                            argv=[str(tool), str(stage / "case"), str(stage / "inputs"), str(stage / "work")],
-                            cwd=stage / "case", read_roots=[stage / "case", stage / "inputs"],
-                            write_roots=[stage / "work"], runtime_roots=runtime_roots,
-                            stdout_path=call_dir / "stdout", stderr_path=call_dir / "stderr",
-                            timeout_seconds=float(wall_seconds), cpu_seconds=cpu_seconds,
-                            address_space_bytes=address_space_bytes,
-                            file_bytes_per_file=file_bytes_per_file,
-                            env={"HOME": str(stage / "work"), "TMPDIR": str(stage / "work")},
-                            sealed_executable_bytes=tool_bytes,
-                            sealed_executable_sha256=executable_sha256,
-                            launch_deadline_utc_ns=launch_deadline_ns,
-                        )
-                    finally:
-                        elapsed = time.monotonic() - start
-            except (SandboxError, SandboxUnavailable, OSError, ValueError) as exc:
-                launch_error = f"{type(exc).__name__}: {exc}"
+        try:
+            runtime_roots = default_python_runtime_roots()
+            if time.time_ns() >= launch_deadline_ns:
+                launch_error = "session wall budget expired after reservation before launch"
+            else:
+                start = time.monotonic()
+                try:
+                    result = run_sandboxed(
+                        argv=[str(tool), str(stage / "case"), str(stage / "inputs"), str(stage / "work")],
+                        cwd=stage / "case", read_roots=[stage / "case", stage / "inputs"],
+                        write_roots=[stage / "work"], runtime_roots=runtime_roots,
+                        stdout_path=call_dir / "stdout", stderr_path=call_dir / "stderr",
+                        timeout_seconds=float(wall_seconds), cpu_seconds=cpu_seconds,
+                        address_space_bytes=address_space_bytes,
+                        file_bytes_per_file=file_bytes_per_file,
+                        env={"HOME": str(stage / "work"), "TMPDIR": str(stage / "work")},
+                        sealed_executable_bytes=tool_bytes,
+                        sealed_executable_sha256=executable_sha256,
+                        launch_deadline_utc_ns=launch_deadline_ns,
+                    )
+                finally:
+                    elapsed = time.monotonic() - start
+        except (SandboxError, SandboxUnavailable, OSError, ValueError) as exc:
+            launch_error = f"{type(exc).__name__}: {exc}"
         if result is not None:
             launch_error = result.launch_error
         work_after = _work_inventory(stage)
