@@ -150,6 +150,69 @@ def test_false_household_interpretation_in_text_is_rejected() -> None:
         verify_source_transcription(manifest, ledger, CASE)
 
 
+def test_extra_household_data_claim_is_rejected_with_valid_ledger_chain(
+    tmp_path: Path,
+) -> None:
+    manifest, ledger = map(copy.deepcopy, _documents())
+    manifest_item = next(
+        step for step in manifest["steps"] if step.get("id") == "e_household_est"
+    )
+    ledger_item = next(
+        event["payload"]
+        for event in ledger["events"]
+        if event["kind"] == "item_put" and event["payload"]["id"] == "e_household_est"
+    )
+    manifest_item["data"]["field_observed_and_lot_linked"] = True
+    ledger_item["data"]["field_observed_and_lot_linked"] = True
+    _rehash_events(ledger)
+    assert manifest_item["data"] == ledger_item["data"]
+    (tmp_path / "organon.json").write_text(json.dumps(ledger), encoding="utf-8")
+    assert read_project(tmp_path, verify_external_anchor=False) == ledger
+    with pytest.raises(
+        SourceCheckError,
+        match="development-case evidence data fields differ: e_household_est",
+    ):
+        verify_source_transcription(manifest, ledger, CASE)
+
+
+def test_extra_top_level_household_claim_is_rejected() -> None:
+    manifest, ledger = map(copy.deepcopy, _documents())
+    manifest_item = next(
+        step for step in manifest["steps"] if step.get("id") == "e_household_est"
+    )
+    ledger_item = next(
+        event["payload"]
+        for event in ledger["events"]
+        if event["kind"] == "item_put" and event["payload"]["id"] == "e_household_est"
+    )
+    manifest_item["field_observed_and_lot_linked"] = True
+    ledger_item["field_observed_and_lot_linked"] = True
+    with pytest.raises(
+        SourceCheckError,
+        match="development-case evidence item shape differs: e_household_est",
+    ):
+        verify_source_transcription(manifest, ledger, CASE)
+
+
+def test_added_evidence_dependency_is_rejected() -> None:
+    manifest, ledger = map(copy.deepcopy, _documents())
+    manifest_item = next(
+        step for step in manifest["steps"] if step.get("id") == "e_household_est"
+    )
+    ledger_item = next(
+        event["payload"]
+        for event in ledger["events"]
+        if event["kind"] == "item_put" and event["payload"]["id"] == "e_household_est"
+    )
+    manifest_item["refs"] = ["e_product_mass"]
+    ledger_item["deps"] = {"e_product_mass": 1}
+    with pytest.raises(
+        SourceCheckError,
+        match="development-case evidence item shape differs: e_household_est",
+    ):
+        verify_source_transcription(manifest, ledger, CASE)
+
+
 def test_coherent_false_publication_date_is_rejected() -> None:
     manifest, ledger = map(copy.deepcopy, _documents())
     manifest_item = next(

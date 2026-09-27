@@ -75,6 +75,12 @@ FIXTURE_SCOPE = {
     "e_survey_size": "encuesta_pan_fresco_general_autoinforme",
 }
 FIXTURE_DATE = {"source_lca.pdf": "2018-12", "source_survey.pdf": "2018"}
+EVIDENCE_DATA_FIELDS = frozenset({
+    "archive", "date", "locator", "metric_key", "origin", "scope",
+    "source", "source_sha256", "unit", "value",
+})
+MANIFEST_EVIDENCE_FIELDS = frozenset({"op", "id", "kind", "text", "refs", "data"})
+LEDGER_EVIDENCE_FIELDS = frozenset({"id", "kind", "text", "version", "deps", "data"})
 
 
 class SourceCheckError(ValueError):
@@ -174,26 +180,38 @@ def published_evidence_values(case: Path) -> dict[str, Decimal]:
 def verify_source_transcription(manifest: dict, ledger: dict, case: Path) -> dict[str, Decimal]:
     """Reject a false numeric transcription even if manifest and ledger agree."""
     published = published_evidence_values(case)
-    manifest_items = {
-        step["id"]: step for step in manifest["steps"]
+    manifest_evidence = [
+        step for step in manifest["steps"]
         if step["op"] == "put" and step["kind"] == "evidence"
-    }
-    ledger_items = {
-        event["payload"]["id"]: event["payload"] for event in ledger["events"]
+    ]
+    ledger_evidence = [
+        event["payload"] for event in ledger["events"]
         if event["kind"] == "item_put" and event["payload"]["kind"] == "evidence"
-    }
+    ]
+    if len(manifest_evidence) != len(published) or len(ledger_evidence) != len(published):
+        raise SourceCheckError("development-case evidence count differs")
+    manifest_items = {step["id"]: step for step in manifest_evidence}
+    ledger_items = {item["id"]: item for item in ledger_evidence}
     if len(manifest_items) != len(ledger_items) or manifest_items.keys() != ledger_items.keys():
         raise SourceCheckError("manifest/ledger evidence sets differ")
     if (manifest_items.keys() != published.keys() or published.keys() != SOURCE_CLAIMS.keys()
             or published.keys() != TEXT_CLAIMS.keys() or published.keys() != FIXTURE_SCOPE.keys()):
         raise SourceCheckError("evidence ID set differs from pinned PDF claims")
     for evidence_id, value in published.items():
-        manifest_data = manifest_items[evidence_id]["data"]
-        ledger_data = ledger_items[evidence_id]["data"]
+        manifest_item = manifest_items[evidence_id]
+        ledger_item = ledger_items[evidence_id]
+        if (manifest_item.keys() != MANIFEST_EVIDENCE_FIELDS or manifest_item["refs"] != []
+                or ledger_item.keys() != LEDGER_EVIDENCE_FIELDS or ledger_item["deps"] != {}
+                or type(ledger_item["version"]) is not int or ledger_item["version"] != 1):
+            raise SourceCheckError(f"development-case evidence item shape differs: {evidence_id}")
+        manifest_data = manifest_item["data"]
+        ledger_data = ledger_item["data"]
         if manifest_data != ledger_data:
             raise SourceCheckError(f"manifest/ledger evidence differs: {evidence_id}")
-        manifest_text = manifest_items[evidence_id]["text"]
-        if manifest_text != ledger_items[evidence_id]["text"]:
+        if not isinstance(manifest_data, dict) or manifest_data.keys() != EVIDENCE_DATA_FIELDS:
+            raise SourceCheckError(f"development-case evidence data fields differ: {evidence_id}")
+        manifest_text = manifest_item["text"]
+        if manifest_text != ledger_item["text"]:
             raise SourceCheckError(f"manifest/ledger visible text differs: {evidence_id}")
         archive, locator, metric_key, unit, _ = SOURCE_CLAIMS[evidence_id]
         if (
@@ -320,7 +338,7 @@ def main() -> None:
             "values": {key: str(value) for key, value in sorted(published.items())},
             "verified_pdf_locations": {key: claim[4] for key, claim in sorted(SOURCE_CLAIMS.items())},
             "visible_text_check": "nine displayed numbers match PDFs; full current wording SHA-256 pinned",
-            "provenance_check": "reviewed origin, scope, and date pinned for all nine evidence claims",
+            "provenance_check": "reviewed origin, scope, date, and exact evidence item shape pinned for all nine claims",
             "scope": "fixed development transcript and provenance only; no automatic semantic proof, raw records, or field impact verified",
             "dependency": "Poppler pdftotext; text layout may vary by version and ambiguous extraction fails",
         },
