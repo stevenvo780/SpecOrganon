@@ -7,10 +7,11 @@ protocol, and descriptive post-period harm differences from declared rows.
 Rational values use canonical ``numerator/denominator`` strings so repeating
 ratios are compared exactly, with no rounding tolerance.
 
-The adjusted estimator and its bootstrap interval cannot be reconstructed
-from these inputs: there is no authenticated input-volume series, sealed
-assignment, resampling algorithm or primary-record custody. A structurally
-valid declaration therefore always returns ``decision_ready: false`` and
+Schema 1 retains the original declared adjusted effect. Schema 2 embeds a
+versioned development specification and baseline input-volume manifest, then
+recomputes an adjusted group-level candidate and its nominal percentile
+interval. Neither version authenticates registration, measurements or source
+custody. Both always return ``decision_ready: false`` and
 ``criterion_3.status: not_assessed``. In particular, a passing descriptive
 margin comparison is not a safety or causal verdict.
 """
@@ -26,15 +27,22 @@ from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
+from .field_adjusted_candidate import FieldAdjustedCandidateError, analyze_field_adjusted_candidate
 from .field_flows import FieldFlowError, _number, _text
 from .field_guardrails import FieldGuardrailError, _read_json, audit_field_guardrails, canonical_sha256
 
 
 CLASSIFICATION = "field_effect_analysis_declaration"
+RECOMPUTED_CLASSIFICATION = "field_effect_analysis_adjusted_candidate_development"
 MARGIN_DIRECTION = "max_absolute_increase"
 NOT_READY_REASONS = (
     "adjusted stratum/input-volume estimator and group-bootstrap interval are not reproducible",
     "primary source custody and prospective approvals are not authenticated",
+    "declared margins and textual stop conditions are not independently approved or assessed",
+)
+RECOMPUTED_NOT_READY_REASONS = (
+    "nominal group-bootstrap interval lacks site-specific coverage and power calibration",
+    "V and baseline input-volume source truth, assignment, and registration are not authenticated",
     "declared margins and textual stop conditions are not independently approved or assessed",
 )
 
@@ -207,7 +215,7 @@ def _harm_outcomes(field: dict[str, Any], registry: dict[str, Any],
 def audit_field_effect_analysis(
     plan: Any, field: Any, registry: Any, measurements: Any, analysis: Any,
 ) -> dict[str, Any]:
-    """Validate declared arithmetic, and report explicitly unassessed field impact.
+    """Validate field arithmetic, and report explicitly unassessed field impact.
 
     This routine checks internal consistency only. Its output must never be
     treated as approval of criterion 3 or authorization to run a field trial.
@@ -217,25 +225,44 @@ def audit_field_effect_analysis(
             plan, field, registry, measurements,
             plan_sha256=canonical_sha256(plan), registry_sha256=canonical_sha256(registry),
         )
-        root = _object(analysis, "analysis", {
-            "schema", "classification", "study_id", "v_rows", "unadjusted_g_fraction",
-            "adjusted_effect", "harm_outcomes",
-        })
-        if type(root["schema"]) is not int or root["schema"] != 1:
-            raise FieldEffectAnalysisError("analysis.schema must be 1")
-        if root["classification"] != CLASSIFICATION:
-            raise FieldEffectAnalysisError("analysis.classification is unsupported")
+        if type(analysis) is not dict or type(analysis.get("schema")) is not int:
+            raise FieldEffectAnalysisError("analysis.schema must be 1 or 2")
+        schema = analysis["schema"]
+        common_keys = {
+            "schema", "classification", "study_id", "v_rows",
+            "unadjusted_g_fraction", "harm_outcomes",
+        }
+        if schema == 1:
+            root = _object(analysis, "analysis", common_keys | {"adjusted_effect"})
+            if root["classification"] != CLASSIFICATION:
+                raise FieldEffectAnalysisError("analysis.classification is unsupported")
+            adjusted = _declared_ci(root["adjusted_effect"])
+            ready_reasons = NOT_READY_REASONS
+        elif schema == 2:
+            root = _object(analysis, "analysis", common_keys | {
+                "candidate_spec", "baseline_input_volume_manifest",
+            })
+            if root["classification"] != RECOMPUTED_CLASSIFICATION:
+                raise FieldEffectAnalysisError("analysis.classification is unsupported")
+            adjusted = analyze_field_adjusted_candidate(
+                plan, field, root["candidate_spec"], root["baseline_input_volume_manifest"],
+            )
+            ready_reasons = RECOMPUTED_NOT_READY_REASONS
+        else:
+            raise FieldEffectAnalysisError("analysis.schema must be 1 or 2")
         if _text(root["study_id"], "analysis.study_id") != preflight["study_id"]:
             raise FieldEffectAnalysisError("analysis and preflight study_id differ")
-        adjusted = _declared_ci(root["adjusted_effect"])
         ratios, g, means = _service_ratios(field, root)
         harms = _harm_outcomes(field, registry, measurements, root)
-    except (FieldFlowError, FieldGuardrailError) as exc:
+    except (FieldFlowError, FieldGuardrailError, FieldAdjustedCandidateError) as exc:
         raise FieldEffectAnalysisError(f"field analysis preflight or declaration failed: {exc}") from exc
 
-    return {
-        "schema": 1,
-        "classification": "field_effect_arithmetic_declared_only",
+    report = {
+        "schema": schema,
+        "classification": (
+            "field_effect_arithmetic_declared_only" if schema == 1
+            else "field_effect_arithmetic_adjusted_candidate_development"
+        ),
         "study_id": preflight["study_id"],
         "service_ratios_recomputed": len(ratios),
         "unadjusted_g_fraction": f"{g.numerator}/{g.denominator}",
@@ -243,16 +270,17 @@ def audit_field_effect_analysis(
             f"{arm}_{period}": f"{value.numerator}/{value.denominator}"
             for (arm, period), value in sorted(means.items())
         },
-        "adjusted_effect_declared": adjusted,
         "measured_harm_cells_checked": len(harms),
         "descriptive_margin_cells_within": sum(
             outcome.get("descriptive_within_margin") is True for outcome in harms.values()),
         "textual_stop_cells_unassessed": sum(
             outcome["kind"] == "stop_condition" for outcome in harms.values()),
         "decision_ready": False,
-        "not_ready_reasons": list(NOT_READY_REASONS),
-        "criterion_3": {"status": "not_assessed", "reason": "; ".join(NOT_READY_REASONS)},
+        "not_ready_reasons": list(ready_reasons),
+        "criterion_3": {"status": "not_assessed", "reason": "; ".join(ready_reasons)},
     }
+    report["adjusted_effect_declared" if schema == 1 else "adjusted_effect_computed_candidate"] = adjusted
+    return report
 
 
 def main(argv: list[str] | None = None) -> int:

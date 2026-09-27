@@ -66,6 +66,12 @@ def _audit(case: tuple[dict, dict, dict, dict, dict]) -> dict:
     return audit_field_effect_analysis(*case)
 
 
+def test_legacy_analysis_report_hash_remains_stable_for_signed_replay() -> None:
+    assert canonical_sha256(_audit(_case())) == (
+        "88487b94c4230e58b5b118ee00aa61d6a442c43e91bcccebc67ac16f370ce9b0"
+    )
+
+
 def test_exact_v_and_unadjusted_g_are_checked_but_decision_is_not_ready() -> None:
     report = _audit(_case())
     assert report["service_ratios_recomputed"] == 24
