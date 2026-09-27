@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "classification": "development_adjusted_field_candidate_and_service_byte_binding_probe",
+  "date_utc": "2026-09-27",
+  "goal_sha256_unchanged": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "code_sha256": {
+    "field_adjusted_candidate.py": "d9cfa7fb2053bf6e81bc0413ed6424b8084e34971c4fc2d0ef74a9174cb1a714",
+    "field_effect_analysis.py": "cf3ab0190e87702464e1482c95847a55af5f1ba46d9936bb74553fa66984ef9a",
+    "field_source_content_audit.py": "12e2e889048ced3670b3ec8b87b797027be169532be289c07e2d662e9e802037",
+    "field_source_digest_audit.py": "77cf9141c9fe97abf5034965c588bfbba3d690cf4f9b8b059aa6b0a3ce522d47"
+  },
+  "synthetic_candidate": {
+    "fixture": "tests/test_field_adjusted_candidate.py::_case",
+    "model": "equal-group OLS of post-minus-pre V on assigned arm, stratum indicators and centered log pre input volume",
+    "group_resampling": "whole groups within assigned arm and stratum",
+    "groups": 12,
+    "tau_adjusted_change": "0.0999999999999999",
+    "g_adjusted": "0.1999999999999998",
+    "nominal_percentile_95_bounds": ["0.1999999999999953", "0.20000000000000465"],
+    "bootstrap_draws": 400,
+    "valid_draws": 400,
+    "report_canonical_sha256": "312fb76d5a550725fdde31d694a79ba8865e15ea3e2a0d14c991401f2d512f14",
+    "note": "The fixture deliberately encodes a nearly exact linear relation; these narrow nominal bounds are numerical behavior, not site precision or field effect."
+  },
+  "negative_controls": [
+    "candidate specification registered after the pre window starts is rejected",
+    "one bootstrap draw leaves interval bounds null with an explicit insufficiency reason",
+    "a missing group volume, singular adjusted model or zero original G denominator is rejected",
+    "schema-2 service values changed while field, manifest and assessor hashes are recomputed still fail opened-source content comparison before signing",
+    "the schema-2 candidate integrated in field attestation remains decision_ready false"
+  ],
+  "legacy_replay_report_sha256": {
+    "effect_analysis_schema1": "88487b94c4230e58b5b118ee00aa61d6a442c43e91bcccebc67ac16f370ce9b0",
+    "source_content_aggregate_fixture": "684c6ea351182c3a9661288343bffcb12b475dfdba4e2d942f958cf264b4f172",
+    "source_digest_fixture": "816495cd01f95d752e176b020ec33ab1e4e47c3d00f019a16087e38759b7de41"
+  },
+  "checks": [
+    {
+      "command": "uv run pytest -q tests/test_field_adjusted_candidate.py tests/test_field_effect_analysis_v2.py tests/test_field_attestation_service_v2.py",
+      "result": "24 passed"
+    },
+    {
+      "command": "uv run pytest -q",
+      "result": "1573 passed, 1 xfailed in 238.24s"
+    },
+    {
+      "command": "uv run ruff check .",
+      "result": "All checks passed!"
+    },
+    {
+      "command": "uv build --wheel --offline; install wheel with uv pip --offline in fresh Python 3.11 virtual environment; uv pip check; invoke both packaged module CLIs",
+      "result": "wheel built and installed; 29 packages compatible; candidate and effect-analysis CLIs and imports passed"
+    }
+  ],
+  "independent_review": "A read-only reviewer reproduced a legacy signed-report hash change, registration after completed baseline and a one-draw interval before corrections. Legacy report hashes now match the previous implementation; late registration and insufficient draws fail closed. No remaining high-severity defect was found in the inspected paths.",
+  "not_verified": [
+    "real site input volume or physical source truth and independent custody",
+    "prospective approved design, allocation, equivalence and calibration",
+    "site-specific confidence-interval coverage, power, harms, costs or causal attribution",
+    "field intervention or any acceptance criterion"
+  ],
+  "criterion_3": "not_assessed"
+}

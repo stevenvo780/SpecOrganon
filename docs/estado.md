@@ -1,6 +1,10 @@
 # Estado de reanudación
 
-**Corte:** 2026-09-27 UTC. Objetivo íntegro en [GOAL.md](../GOAL.md), SHA-256 inicial `e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36`. Rama `work/toolkit-foundation`; no se alteró GOAL.md. El gate global más reciente pasó **1512 pruebas y 1 fallo esperado estricto**; pasaron también 213 pruebas focales del gate y 50 de actas y bytes de preparación en cortes anteriores. El [veredicto por criterio](validacion_actual.md) conserva los requisitos todavía no demostrados.
+**Corte:** 2026-09-27 UTC. Objetivo íntegro en [GOAL.md](../GOAL.md), SHA-256 inicial `e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36`. Rama `work/toolkit-foundation`; no se alteró GOAL.md. El gate global actual pasó **1573 pruebas y 1 fallo esperado estricto**; pasaron también 213 pruebas focales del gate y 50 de actas y bytes de preparación en cortes anteriores. El [veredicto por criterio](validacion_actual.md) conserva los requisitos todavía no demostrados.
+
+## Candidato ajustado implementado en desarrollo
+
+El [análisis alimentario de esquema 2](preparacion_campo.md#aritmética-declarada-y-candidato-ajustado) recalcula un candidato ajustado de `G` con especificación y volumen basal declarados, un grupo por fila, efectos fijos de estrato, log volumen centrado y bootstrap por grupo dentro de brazo y estrato. `field.service.schema:2` liga las cifras de servicio a extractos abiertos; los esquemas anteriores siguen disponibles. La suite global pasó **1573 pruebas y 1 xfail estricto**. El intervalo es nominal, sin calibración para el sitio; las fuentes de volumen no se abren, y no hay sitio, potencia aprobada, custodia, verificación de asignación ni datos de intervención. `decision_ready:false` y criterio 3 **no demostrado**.
 
 ## Implementado y verificado
 
