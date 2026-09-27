@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "classification": "development_local_cli_usage_consistency_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "scope": "Consistency of local Codex and Agy JSONL token counters used by the development runner and observer",
+  "false_green_before_fix": {
+    "codex": "input_tokens 10, cached_input_tokens 11, output_tokens 2, reasoning_output_tokens 3 were reported complete with no errors",
+    "agy": "input_tokens 10, cache_read_tokens 11, output_tokens 2, thinking_tokens 3, total_tokens 12, with matching DONE step and SUCCESS result, were reported complete with no errors"
+  },
+  "post_fix_checks": [
+    "cached input or cache read tokens must not exceed input tokens",
+    "reasoning output or thinking tokens must not exceed output tokens",
+    "Agy DONE agent_response steps and final usage are checked separately",
+    "equal subset and parent counts remain valid",
+    "an impossible usage report retains terminal_success when the terminal event succeeded but has complete false and explicit errors",
+    "the raw JSONL trace remains unchanged"
+  ],
+  "checks": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_run_development_arm.py tests/test_observe_development_run.py",
+      "result": "69 passed"
+    },
+    {
+      "command": "uv run --no-sync ruff check scripts/run_development_arm.py tests/test_run_development_arm.py",
+      "result": "All checks passed"
+    }
+  ],
+  "independent_review": {
+    "verdict": "no material reproducible false green found in the bounded review",
+    "focused_joint_check": "92 passed across tests/test_method.py and tests/test_run_development_arm.py",
+    "reviewer": "native read-only development agent, not an authenticated telemetry custodian"
+  },
+  "limitations": [
+    "The JSONL is a local CLI claim, not an authenticated provider receipt.",
+    "Arithmetic consistency does not prove complete billing, a strict pre-call token cutoff, or equal access and budgets across methods.",
+    "The fixtures are synthetic and do not establish any comparative advantage."
+  ],
+  "criterion_4": "not_assessed"
+}

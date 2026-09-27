@@ -139,6 +139,141 @@ def fake_clis(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return bin_dir
 
 
+def _usage_trace(
+    path: Path,
+    provider: str,
+    final_usage: dict[str, int],
+    step_usage: dict[str, int] | None = None,
+) -> str:
+    if provider == "codex":
+        events = [{"type": "turn.completed", "usage": final_usage}]
+    else:
+        assert step_usage is not None
+        events = [
+            {"event": "init", "init": {"model": "test-model"}},
+            {
+                "event": "step_update",
+                "step_update": {
+                    "step_index": 1,
+                    "step_type": "agent_response",
+                    "state": "DONE",
+                    "usage": step_usage,
+                },
+            },
+            {
+                "event": "result",
+                "result": {
+                    "status": "SUCCESS",
+                    "usage": final_usage,
+                    "denied_actions": [],
+                },
+            },
+        ]
+    raw = "".join(json.dumps(event) + "\n" for event in events)
+    path.write_text(raw, encoding="utf-8")
+    return raw
+
+
+@pytest.mark.parametrize("provider", ["codex", "agy"])
+def test_usage_subsets_accept_equality_and_keep_raw_trace(
+    tmp_path: Path,
+    provider: str,
+) -> None:
+    usage = {"input_tokens": 10, "output_tokens": 2}
+    if provider == "codex":
+        usage.update(
+            cached_input_tokens=10,
+            cache_write_input_tokens=0,
+            reasoning_output_tokens=2,
+        )
+    else:
+        usage.update(cache_read_tokens=10, thinking_tokens=2, total_tokens=12)
+    trace_path = tmp_path / "cli.stdout.jsonl"
+    raw = _usage_trace(
+        trace_path, provider, usage, usage if provider == "agy" else None
+    )
+
+    parsed = runner._parse_usage(provider, trace_path, "test-model")
+
+    assert parsed["terminal_success"] is True
+    assert parsed["complete"] is True
+    assert parsed["errors"] == []
+    assert parsed["final_usage"] == usage
+    assert trace_path.read_text(encoding="utf-8") == raw
+
+
+@pytest.mark.parametrize(
+    "provider,source,field,parent_field",
+    [
+        ("codex", "final", "cached_input_tokens", "input_tokens"),
+        ("codex", "final", "reasoning_output_tokens", "output_tokens"),
+        ("agy", "final", "cache_read_tokens", "input_tokens"),
+        ("agy", "final", "thinking_tokens", "output_tokens"),
+        ("agy", "step", "cache_read_tokens", "input_tokens"),
+        ("agy", "step", "thinking_tokens", "output_tokens"),
+    ],
+)
+def test_usage_subsets_exceeding_parent_invalidate_telemetry_only(
+    tmp_path: Path,
+    provider: str,
+    source: str,
+    field: str,
+    parent_field: str,
+) -> None:
+    final_usage = {"input_tokens": 10, "output_tokens": 2}
+    step_usage = None
+    if provider == "codex":
+        final_usage.update(
+            cached_input_tokens=0, cache_write_input_tokens=0, reasoning_output_tokens=0
+        )
+    else:
+        final_usage.update(cache_read_tokens=0, thinking_tokens=0, total_tokens=12)
+        step_usage = final_usage.copy()
+    target = final_usage if source == "final" else step_usage
+    assert target is not None
+    target[field] = target[parent_field] + 1
+    trace_path = tmp_path / "cli.stdout.jsonl"
+    raw = _usage_trace(trace_path, provider, final_usage, step_usage)
+
+    parsed = runner._parse_usage(provider, trace_path, "test-model")
+
+    assert parsed["terminal_success"] is True
+    assert parsed["terminal_errors"] == []
+    assert parsed["complete"] is False
+    label = "final usage" if source == "final" else "agy agent_response usage"
+    assert f"{label}.{field} exceeds {label}.{parent_field}" in parsed["errors"]
+    if source == "step":
+        assert parsed["preterminal_step_usage"]["invalid_events"] == 1
+    assert trace_path.read_text(encoding="utf-8") == raw
+
+
+@pytest.mark.parametrize("provider", ["codex", "agy"])
+def test_reported_success_with_both_usage_subsets_invalid_is_not_complete(
+    tmp_path: Path,
+    provider: str,
+) -> None:
+    usage = {"input_tokens": 10, "output_tokens": 2}
+    if provider == "codex":
+        usage.update(
+            cached_input_tokens=11,
+            cache_write_input_tokens=0,
+            reasoning_output_tokens=3,
+        )
+    else:
+        usage.update(cache_read_tokens=11, thinking_tokens=3, total_tokens=12)
+    trace_path = tmp_path / "cli.stdout.jsonl"
+    raw = _usage_trace(
+        trace_path, provider, usage, usage if provider == "agy" else None
+    )
+
+    parsed = runner._parse_usage(provider, trace_path, "test-model")
+
+    assert parsed["terminal_success"] is True
+    assert parsed["complete"] is False
+    assert len([error for error in parsed["errors"] if "exceeds" in error]) >= 2
+    assert trace_path.read_text(encoding="utf-8") == raw
+
+
 @pytest.mark.parametrize("provider", ["codex", "agy"])
 def test_run_copies_only_assigned_packet_preserves_streams_and_replays(
     tmp_path: Path, fake_clis: Path, provider: str,

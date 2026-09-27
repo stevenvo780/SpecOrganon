@@ -157,6 +157,31 @@ def _replay_environment(run_dir: Path) -> dict[str, str]:
             "LANG": "C.UTF-8", "PYTHONDONTWRITEBYTECODE": "1"}
 
 
+def _usage_subset_errors(
+    provider: str, usage: dict[str, int | None], source: str
+) -> list[str]:
+    """Check counters that must be subsets of input or output tokens."""
+    cached_field, reasoning_field = (
+        ("cached_input_tokens", "reasoning_output_tokens")
+        if provider == "codex"
+        else ("cache_read_tokens", "thinking_tokens")
+    )
+    errors: list[str] = []
+    if (
+        usage["input_tokens"] is not None
+        and usage[cached_field] is not None
+        and usage[cached_field] > usage["input_tokens"]
+    ):
+        errors.append(f"{source}.{cached_field} exceeds {source}.input_tokens")
+    if (
+        usage["output_tokens"] is not None
+        and usage[reasoning_field] is not None
+        and usage[reasoning_field] > usage["output_tokens"]
+    ):
+        errors.append(f"{source}.{reasoning_field} exceeds {source}.output_tokens")
+    return errors
+
+
 def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict[str, Any]:
     """Separate terminal execution evidence from optional token-field completeness."""
     final_events: list[tuple[int, dict[str, Any]]] = []
@@ -179,6 +204,7 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
     agy_agent_duplicate_events = 0
     agy_agent_invalid_events = 0
     agy_agent_conflicting_events = 0
+    agy_agent_subset_errors: set[str] = set()
     with stdout_path.open("r", encoding="utf-8", errors="replace") as stream:
         for line_number, line in enumerate(stream, start=1):
             if not line.strip():
@@ -254,6 +280,11 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
                     if parsed["total_tokens"] != parsed["input_tokens"] + parsed["output_tokens"]:
                         agy_agent_invalid_events += 1
                         continue
+                    subset_errors = _usage_subset_errors("agy", parsed, "agy agent_response usage")
+                    if subset_errors:
+                        agy_agent_invalid_events += 1
+                        agy_agent_subset_errors.update(subset_errors)
+                        continue
                     prior = agy_agent_usage.get(index)
                     if prior is None:
                         agy_agent_usage[index] = parsed
@@ -304,6 +335,7 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
                     values[field] = value
                 else:
                     usage_errors.append(f"final usage.{field} missing or invalid")
+            usage_errors.extend(_usage_subset_errors(provider, values, "final usage"))
     preterminal: dict[str, Any] | None = None
     if provider == "agy":
         unfinished_tools = len(observed_tool_steps - completed_tool_steps)
@@ -333,6 +365,7 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str) -> dict
             usage_errors.append("agy preterminal agent_response usage unavailable")
         if agy_agent_invalid_events:
             usage_errors.append(f"agy has {agy_agent_invalid_events} invalid agent_response usage events")
+        usage_errors.extend(sorted(agy_agent_subset_errors))
         if agy_agent_conflicting_events:
             usage_errors.append(
                 f"agy has {agy_agent_conflicting_events} contradictory duplicate agent_response usage events")
