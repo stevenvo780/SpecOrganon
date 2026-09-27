@@ -328,6 +328,232 @@ def test_service_schema2_missing_wrong_role_or_duplicate_record_fails(
     assert report["counts"][counter] > 0
 
 
+def _volume_case(*, aggregate: bool = True) -> tuple[tuple, dict]:
+    case = _case()
+    plan, field, _, _, opened = case
+    second_plan_group = copy.deepcopy(plan["groups"][0])
+    second_plan_group["id"] = "c2"
+    plan["groups"].append(second_plan_group)
+    second_field_group = copy.deepcopy(field["groups"][0])
+    second_field_group["id"] = "c2"
+    field["groups"].append(second_field_group)
+
+    body = json.loads(opened[0]["raw"])
+    allocation = next(record for record in body["records"]
+                      if record["kind"] == "allocation")
+    second_allocation_group = copy.deepcopy(allocation["groups"][0])
+    second_allocation_group["id"] = "c2"
+    allocation["groups"].append(second_allocation_group)
+
+    unit = "kg_eligible_input"
+    definition_sha256 = canonical_sha256({
+        "unit": unit, "definition": "all eligible pre-window input",
+    })
+    rows = []
+    records = []
+    for group_id, value in (("c1", 100), ("c2", 120.125)):
+        source = {
+            "locator": f"volume/pre/{group_id}",
+            "observed_at_utc": "2026-02-01T10:00:00.123456Z",
+            "method": "synthetic scale aggregate",
+        }
+        row = {
+            "group_id": group_id, "period": "pre", "value": value, "unit": unit,
+            "window_start_utc": "2026-01-01T00:00:00Z",
+            "window_end_utc": "2026-01-31T23:59:59.123456Z",
+            "source": {**source, "record_sha256": ""},
+        }
+        rows.append(row)
+        records.append({
+            "kind": "volume_row", "study_id": plan["study_id"],
+            "definition_sha256": definition_sha256,
+            **{key: value for key, value in row.items() if key != "source"},
+            "source": source,
+        })
+
+    if aggregate:
+        body["records"].extend(records)
+        _replace_aggregate_source(case, _raw(body["records"]))
+        for row in rows:
+            row["source"]["record_sha256"] = opened[0]["sha256"]
+    else:
+        _replace_aggregate_source(case, _raw(body["records"]))
+        for row, record in zip(rows, records, strict=True):
+            entry = _opened("source_record", _raw([record]))
+            opened.append(entry)
+            row["source"]["record_sha256"] = entry["sha256"]
+
+    analysis = {
+        "schema": 2,
+        "baseline_input_volume_manifest": {
+            "schema": 1,
+            "classification": "field_baseline_input_volume_manifest_unsealed",
+            "study_id": plan["study_id"],
+            "plan_sha256": canonical_sha256(plan),
+            "candidate_spec_sha256": hashlib.sha256(b"synthetic candidate spec").hexdigest(),
+            "unit": unit,
+            "definition_sha256": definition_sha256,
+            "rows": rows,
+        },
+    }
+    return case, analysis
+
+
+def _replace_aggregate_volume_source(case: tuple, analysis: dict, records: list[dict]) -> None:
+    _replace_aggregate_source(case, _raw(records))
+    digest = case[4][0]["sha256"]
+    for row in analysis["baseline_input_volume_manifest"]["rows"]:
+        row["source"]["record_sha256"] = digest
+
+
+@pytest.mark.parametrize("aggregate", [True, False])
+def test_analysis_schema2_volume_rows_match_aggregate_or_per_row_extracts(
+    aggregate: bool,
+) -> None:
+    case, analysis = _volume_case(aggregate=aggregate)
+    before = copy.deepcopy((case, analysis))
+    report = audit_field_source_content(*case, analysis=analysis)
+    assert (case, analysis) == before
+    assert report["exact_declared_content_match"] is True
+    assert report["baseline_volume_input_byte_bound"] is True
+    assert "service_v_input_byte_bound" not in report
+    assert report["counts"]["declared_references"] == 8
+    assert report["counts"]["opened_primary_entries"] == (2 if aggregate else 4)
+    assert report["counts"]["parsed_records"] == 8
+    assert report["counts"]["matched_records"] == 8
+
+
+def test_omitted_or_schema1_analysis_preserves_pinned_legacy_report() -> None:
+    case = _case()
+    omitted = audit_field_source_content(*case)
+    schema1 = audit_field_source_content(*case, analysis={"schema": 1})
+    assert schema1 == omitted
+    assert "baseline_volume_input_byte_bound" not in schema1
+    assert canonical_sha256(schema1) == (
+        "684c6ea351182c3a9661288343bffcb12b475dfdba4e2d942f958cf264b4f172"
+    )
+
+
+def test_volume_extract_kind_requires_schema2_analysis_opt_in() -> None:
+    case, _ = _volume_case()
+    for kwargs in ({}, {"analysis": {"schema": 1}}):
+        report = audit_field_source_content(*case, **kwargs)
+        assert "baseline_volume_input_byte_bound" not in report
+        assert report["exact_declared_content_match"] is False
+        assert report["counts"]["malformed_source_files"] == 1
+        assert report["counts"]["extra_records"] == 0
+
+
+def test_changed_declared_volume_value_cannot_pass_with_rederived_analysis() -> None:
+    case, analysis = _volume_case()
+    analysis["baseline_input_volume_manifest"]["rows"][0]["value"] = 101
+    report = audit_field_source_content(*case, analysis=analysis)
+    assert report["exact_declared_content_match"] is False
+    assert report["baseline_volume_input_byte_bound"] is False
+    assert report["counts"]["mismatched_records"] == 1
+    assert report["mismatched_examples"][0]["kind"] == "volume_row"
+
+
+def test_volume_row_numbers_compare_as_decimals() -> None:
+    case, analysis = _volume_case()
+    body = json.loads(case[4][0]["raw"])
+    record = next(item for item in body["records"] if item["kind"] == "volume_row")
+    record["value"] = 100.0
+    _replace_aggregate_volume_source(case, analysis, body["records"])
+    report = audit_field_source_content(*case, analysis=analysis)
+    assert report["exact_declared_content_match"] is True
+    assert report["baseline_volume_input_byte_bound"] is True
+
+
+@pytest.mark.parametrize("path, replacement", [
+    (("study_id",), "changed-study"),
+    (("definition_sha256",), "a" * 64),
+    (("group_id",), "changed-group"),
+    (("period",), "post"),
+    (("value",), 101),
+    (("unit",), "changed-unit"),
+    (("window_start_utc",), "2026-01-02T00:00:00Z"),
+    (("window_end_utc",), "2026-01-30T23:59:59.123456Z"),
+    (("source", "observed_at_utc"), "2026-02-01T11:00:00.123456Z"),
+    (("source", "method"), "changed method"),
+])
+def test_rehashed_volume_extract_must_match_every_declared_fact(
+    path: tuple[str, ...], replacement: object,
+) -> None:
+    case, analysis = _volume_case()
+    body = json.loads(case[4][0]["raw"])
+    record = next(item for item in body["records"] if item["kind"] == "volume_row")
+    target = record
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = replacement
+    _replace_aggregate_volume_source(case, analysis, body["records"])
+    report = audit_field_source_content(*case, analysis=analysis)
+    assert report["exact_declared_content_match"] is False
+    assert report["baseline_volume_input_byte_bound"] is False
+    assert report["counts"]["mismatched_records"] == 1
+    assert report["mismatched_examples"][0]["kind"] == "volume_row"
+
+
+def test_rehashed_volume_extract_with_changed_locator_loses_reference() -> None:
+    case, analysis = _volume_case()
+    body = json.loads(case[4][0]["raw"])
+    record = next(item for item in body["records"] if item["kind"] == "volume_row")
+    record["source"]["locator"] = "volume/pre/different"
+    _replace_aggregate_volume_source(case, analysis, body["records"])
+    report = audit_field_source_content(*case, analysis=analysis)
+    assert report["baseline_volume_input_byte_bound"] is False
+    assert report["counts"]["missing_records"] == 1
+    assert report["counts"]["extra_records"] == 1
+
+
+@pytest.mark.parametrize("change, counter", [
+    ("missing", "missing_records"),
+    ("duplicate", "duplicate_records"),
+    ("self_digest", "malformed_source_files"),
+    ("extra_record_key", "malformed_source_files"),
+    ("seven_digit_fraction", "malformed_source_files"),
+])
+def test_volume_extract_missing_duplicate_or_malformed_record_fails(
+    change: str, counter: str,
+) -> None:
+    case, analysis = _volume_case()
+    body = json.loads(case[4][0]["raw"])
+    record = next(item for item in body["records"] if item["kind"] == "volume_row")
+    if change == "missing":
+        body["records"].remove(record)
+    elif change == "duplicate":
+        body["records"].append(copy.deepcopy(record))
+    elif change == "self_digest":
+        record["source"]["record_sha256"] = "a" * 64
+    elif change == "extra_record_key":
+        record["extra"] = "unsupported"
+    else:
+        record["source"]["observed_at_utc"] = "2026-02-01T10:00:00.1234567Z"
+    _replace_aggregate_volume_source(case, analysis, body["records"])
+    report = audit_field_source_content(*case, analysis=analysis)
+    assert report["exact_declared_content_match"] is False
+    assert report["baseline_volume_input_byte_bound"] is False
+    assert report["counts"][counter] > 0
+
+
+def test_volume_extract_under_wrong_role_loses_reference() -> None:
+    case, analysis = _volume_case(aggregate=False)
+    case[4][-1]["role"] = "approval_record"
+    report = audit_field_source_content(*case, analysis=analysis)
+    assert report["baseline_volume_input_byte_bound"] is False
+    assert report["counts"]["missing_records"] == 1
+    assert report["counts"]["extra_records"] == 1
+
+
+def test_duplicate_declared_volume_digest_and_locator_is_rejected() -> None:
+    case, analysis = _volume_case()
+    second = analysis["baseline_input_volume_manifest"]["rows"][1]
+    second["source"]["locator"] = analysis["baseline_input_volume_manifest"]["rows"][0]["source"]["locator"]
+    with pytest.raises(FieldSourceContentAuditError, match="repeats a declared source reference"):
+        audit_field_source_content(*case, analysis=analysis)
+
+
 def test_rehashed_empty_extract_is_not_a_false_green() -> None:
     case = _case()
     _replace_aggregate_source(case, b"{}")

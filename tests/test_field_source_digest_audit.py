@@ -51,6 +51,22 @@ def _audit(case: tuple[dict, dict, dict, dict, list[dict[str, str]]]) -> dict:
     return audit_field_source_digest_coverage(*case)
 
 
+def _volume_case() -> tuple[tuple[dict, dict, dict, dict, list[dict[str, str]]], dict]:
+    case = _case()
+    digest = _sha("baseline input volume bytes")
+    analysis = {
+        "schema": 2,
+        "baseline_input_volume_manifest": {
+            "rows": [
+                {"source": {"record_sha256": digest, "locator": "volume/group-1"}},
+                {"source": {"record_sha256": digest, "locator": "volume/group-2"}},
+            ],
+        },
+    }
+    case[4].append({"role": "source_record", "sha256": digest})
+    return case, analysis
+
+
 def test_exact_role_coverage_counts_repeated_references_without_claiming_field_truth() -> None:
     case = _case()
     before = copy.deepcopy(case)
@@ -80,6 +96,110 @@ def test_exact_role_coverage_counts_repeated_references_without_claiming_field_t
         "816495cd01f95d752e176b020ec33ab1e4e47c3d00f019a16087e38759b7de41"
     )
     assert report["criterion_3"]["status"] == "not_assessed"
+
+
+def test_schema1_analysis_preserves_exact_legacy_report() -> None:
+    case = _case()
+    legacy = _audit(case)
+    report = audit_field_source_digest_coverage(*case, analysis={"schema": 1})
+    assert report == legacy
+    assert "baseline_volume_input_byte_bound" not in report
+    assert canonical_sha256(report) == (
+        "816495cd01f95d752e176b020ec33ab1e4e47c3d00f019a16087e38759b7de41"
+    )
+
+
+def test_schema2_volume_digest_coverage_counts_each_row_without_claiming_content() -> None:
+    case, analysis = _volume_case()
+    before = copy.deepcopy((case, analysis))
+    report = audit_field_source_digest_coverage(*case, analysis=analysis)
+    assert (case, analysis) == before
+    assert report["exact_primary_source_coverage"] is True
+    assert report["counts"]["required_references"] == 9
+    assert report["counts"]["unique_required_role_digests"] == 6
+    assert report["counts"]["repeated_references"] == 3
+    assert report["by_role"]["source_record"]["required_references"] == 6
+    assert report["baseline_volume_input_byte_bound"] is False
+    assert report["source_truth_authenticated"] is False
+    assert report["criterion_3"]["status"] == "not_assessed"
+
+
+@pytest.mark.parametrize("change, expected", [
+    ("missing", "missing_references"),
+    ("wrong_role", "wrong_role_unique_digests"),
+    ("extra", "extra_unique_role_digests"),
+    ("duplicate_opened", "duplicate_opened_entries"),
+])
+def test_schema2_volume_missing_wrong_role_extra_or_duplicate_opened_digest(
+    change: str, expected: str,
+) -> None:
+    case, analysis = _volume_case()
+    if change == "missing":
+        case[4].pop()
+    elif change == "wrong_role":
+        case[4][-1]["role"] = "approval_record"
+    elif change == "extra":
+        case[4].append({"role": "source_record", "sha256": _sha("unreferenced volume bytes")})
+    else:
+        case[4].append(copy.deepcopy(case[4][-1]))
+    report = audit_field_source_digest_coverage(*case, analysis=analysis)
+    assert report["exact_primary_source_coverage"] is False
+    assert report["counts"][expected] > 0
+    assert report["baseline_volume_input_byte_bound"] is False
+    if change in {"missing", "wrong_role"}:
+        missing = next(example for example in report["missing_examples"]
+                       if example["sha256"] == _sha("baseline input volume bytes"))
+        assert missing["reference_count"] == 2
+        assert missing["reference_examples"] == [
+            "analysis.baseline_input_volume_manifest.rows[0].source.record_sha256",
+            "analysis.baseline_input_volume_manifest.rows[1].source.record_sha256",
+        ]
+
+
+@pytest.mark.parametrize("change, message", [
+    ("missing_manifest", "analysis.baseline_input_volume_manifest is required"),
+    ("bad_manifest", "analysis.baseline_input_volume_manifest must be an object"),
+    ("missing_rows", "analysis.baseline_input_volume_manifest.rows is required"),
+    ("bad_rows", "analysis.baseline_input_volume_manifest.rows must be an array"),
+    ("empty_rows", "analysis.baseline_input_volume_manifest.rows must be nonempty"),
+    ("bad_row", "analysis.baseline_input_volume_manifest.rows[0] must be an object"),
+    ("missing_source", "analysis.baseline_input_volume_manifest.rows[0].source is required"),
+    ("bad_source", "analysis.baseline_input_volume_manifest.rows[0].source must be an object"),
+    ("missing_digest", "record_sha256 is required"),
+    ("bad_digest", "lowercase SHA-256"),
+    ("missing_locator", "locator must be nonempty trimmed text"),
+    ("duplicate_reference", "repeats a volume digest and locator reference"),
+])
+def test_schema2_volume_malformed_reference_fails_closed(change: str, message: str) -> None:
+    case, analysis = _volume_case()
+    manifest = analysis["baseline_input_volume_manifest"]
+    rows = manifest["rows"]
+    if change == "missing_manifest":
+        del analysis["baseline_input_volume_manifest"]
+    elif change == "bad_manifest":
+        analysis["baseline_input_volume_manifest"] = None
+    elif change == "missing_rows":
+        del manifest["rows"]
+    elif change == "bad_rows":
+        manifest["rows"] = {}
+    elif change == "empty_rows":
+        rows.clear()
+    elif change == "bad_row":
+        rows[0] = None
+    elif change == "missing_source":
+        del rows[0]["source"]
+    elif change == "bad_source":
+        rows[0]["source"] = None
+    elif change == "missing_digest":
+        del rows[0]["source"]["record_sha256"]
+    elif change == "bad_digest":
+        rows[0]["source"]["record_sha256"] = "A" * 64
+    elif change == "missing_locator":
+        del rows[0]["source"]["locator"]
+    else:
+        rows[1]["source"]["locator"] = rows[0]["source"]["locator"]
+    with pytest.raises(FieldSourceDigestAuditError, match=re.escape(message)):
+        audit_field_source_digest_coverage(*case, analysis=analysis)
 
 
 def _v2_case() -> tuple[dict, dict, dict, dict, list[dict[str, str]]]:

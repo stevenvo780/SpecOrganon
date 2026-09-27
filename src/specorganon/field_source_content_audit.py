@@ -10,6 +10,9 @@ format is deliberately a constrained extract, not an arbitrary field document.
 Opt-in ``field.service.schema: 2`` also requires one ``service_row`` record per
 declared row under its ``source_record`` digest. The extract omits that digest
 from the row's ``source`` to avoid a self-referential file hash.
+Opt-in ``analysis.schema: 2`` likewise requires one ``volume_row`` record per
+baseline input-volume manifest row, with the source digest omitted from the
+extract record.
 
 Matching these extracts does not authenticate their truth, custody, the
 authority of an approver, or real-world impact.
@@ -40,6 +43,15 @@ MAX_NUMBER = Decimal("1e18")
 MIN_NONZERO_NUMBER = Decimal("1e-18")
 MAX_NUMBER_DIGITS = 80
 SOURCE_FIELDS = {"source_id", "locator", "observed_at_utc", "method"}
+VOLUME_SOURCE_FIELDS = {"locator", "observed_at_utc", "method"}
+VOLUME_ROW_FIELDS = {
+    "group_id", "period", "value", "unit", "window_start_utc", "window_end_utc", "source",
+}
+VOLUME_RECORD_FIELDS = VOLUME_ROW_FIELDS | {"kind", "study_id", "definition_sha256"}
+VOLUME_MANIFEST_FIELDS = {
+    "schema", "classification", "study_id", "plan_sha256", "candidate_spec_sha256",
+    "unit", "definition_sha256", "rows",
+}
 NOTICE = (
     "Only declared facts in caller-opened, digest-checked JSON extracts were "
     "compared. Source truth, physical custody, approval authority, population "
@@ -126,6 +138,16 @@ def _source(value: Any, label: str, *, allow_fraction: bool = False) -> dict[str
     }
 
 
+def _volume_source(value: Any, label: str) -> dict[str, str]:
+    item = _object(value, label, VOLUME_SOURCE_FIELDS)
+    return {
+        "locator": _text(item["locator"], f"{label}.locator"),
+        "observed_at_utc": _utc(item["observed_at_utc"], f"{label}.observed_at_utc",
+                                allow_fraction=True),
+        "method": _text(item["method"], f"{label}.method"),
+    }
+
+
 def _service_quantity(value: Any, label: str) -> dict[str, Any]:
     item = _object(value, label, {"value", "unit", "uncertainty"})
     return {
@@ -143,7 +165,9 @@ def _service_flow_ids(value: Any, label: str) -> list[str]:
     return sorted(ids)
 
 
-def _normalize_record(value: Any, label: str) -> tuple[str, str, dict[str, Any]]:
+def _normalize_record(
+    value: Any, label: str, *, allow_volume: bool = False,
+) -> tuple[str, str, dict[str, Any]]:
     item = _object(value, label)
     kind = _text(item.get("kind"), f"{label}.kind")
     if kind == "measurement":
@@ -163,6 +187,25 @@ def _normalize_record(value: Any, label: str) -> tuple[str, str, dict[str, Any]]
             "unit": _text(item["unit"], f"{label}.unit"),
             "denominator": _text(item["denominator"], f"{label}.denominator"),
             "source_id": _text(item["source_id"], f"{label}.source_id"),
+        }
+    elif kind == "volume_row" and allow_volume:
+        _object(item, label, VOLUME_RECORD_FIELDS)
+        source = _volume_source(item["source"], f"{label}.source")
+        identifier = source["locator"]
+        normalized = {
+            "kind": kind,
+            "study_id": _text(item["study_id"], f"{label}.study_id"),
+            "definition_sha256": _digest(item["definition_sha256"],
+                                         f"{label}.definition_sha256"),
+            "group_id": _text(item["group_id"], f"{label}.group_id"),
+            "period": _text(item["period"], f"{label}.period"),
+            "value": _number(item["value"], f"{label}.value"),
+            "unit": _text(item["unit"], f"{label}.unit"),
+            "window_start_utc": _utc(item["window_start_utc"],
+                                     f"{label}.window_start_utc", allow_fraction=True),
+            "window_end_utc": _utc(item["window_end_utc"],
+                                   f"{label}.window_end_utc", allow_fraction=True),
+            "source": source,
         }
     elif kind == "service_row":
         _object(item, label, {
@@ -286,15 +329,43 @@ def _extract(raw: bytes, label: str) -> list[Any]:
     return records
 
 
+def _volume_manifest(analysis: Any) -> dict[str, Any] | None:
+    if analysis is None:
+        return None
+    root = _object(analysis, "analysis")
+    schema = root.get("schema")
+    if type(schema) is not int or schema not in (1, 2):
+        raise FieldSourceContentAuditError("analysis.schema must be integer 1 or 2")
+    if schema == 1:
+        return None
+    manifest = _object(root.get("baseline_input_volume_manifest"),
+                       "analysis.baseline_input_volume_manifest", VOLUME_MANIFEST_FIELDS)
+    if type(manifest["schema"]) is not int or manifest["schema"] != 1:
+        raise FieldSourceContentAuditError("baseline_input_volume_manifest.schema must be 1")
+    if manifest["classification"] != "field_baseline_input_volume_manifest_unsealed":
+        raise FieldSourceContentAuditError(
+            "baseline_input_volume_manifest.classification is unsupported"
+        )
+    _digest(manifest["plan_sha256"], "baseline_input_volume_manifest.plan_sha256")
+    _digest(manifest["candidate_spec_sha256"],
+            "baseline_input_volume_manifest.candidate_spec_sha256")
+    _text(manifest["unit"], "baseline_input_volume_manifest.unit")
+    _digest(manifest["definition_sha256"], "baseline_input_volume_manifest.definition_sha256")
+    _array(manifest["rows"], "baseline_input_volume_manifest.rows", nonempty=True)
+    return manifest
+
+
 def _declared_records(
     plan: dict[str, Any], field: dict[str, Any], registry: dict[str, Any],
-    measurements: dict[str, Any],
+    measurements: dict[str, Any], volume_manifest: dict[str, Any] | None = None,
 ) -> dict[tuple[str, str, str, str], dict[str, Any]]:
     expected: dict[tuple[str, str, str, str], dict[str, Any]] = {}
 
     def add(role: str, digest: Any, record: dict[str, Any], label: str) -> None:
         digest = _digest(digest, f"{label}.record_sha256")
-        kind, identifier, normalized = _normalize_record(record, label)
+        kind, identifier, normalized = _normalize_record(
+            record, label, allow_volume=volume_manifest is not None,
+        )
         key = role, digest, kind, identifier
         if key in expected:
             raise FieldSourceContentAuditError(f"{label} repeats a declared source reference")
@@ -332,6 +403,27 @@ def _declared_records(
         })
     if plan_group_ids != set(field_groups):
         raise FieldSourceContentAuditError("plan and field group IDs differ")
+
+    if volume_manifest is not None:
+        volume_study_id = _text(volume_manifest["study_id"],
+                                "baseline_input_volume_manifest.study_id")
+        if volume_study_id != study_id:
+            raise FieldSourceContentAuditError("volume manifest study_id differs from plan")
+        for index, raw_row in enumerate(volume_manifest["rows"]):
+            label = f"baseline_input_volume_manifest.rows[{index}]"
+            row = _object(raw_row, label, VOLUME_ROW_FIELDS)
+            source = _object(row["source"], f"{label}.source",
+                             VOLUME_SOURCE_FIELDS | {"record_sha256"})
+            if row["unit"] != volume_manifest["unit"]:
+                raise FieldSourceContentAuditError(f"{label}.unit differs from volume manifest")
+            add("source_record", source["record_sha256"], {
+                "kind": "volume_row",
+                "study_id": volume_study_id,
+                "definition_sha256": volume_manifest["definition_sha256"],
+                **{key: row[key] for key in VOLUME_ROW_FIELDS if key != "source"},
+                "source": {key: source[key] for key in VOLUME_SOURCE_FIELDS},
+            }, label)
+
     add("source_record", plan.get("allocation_record_sha256"), {
         "kind": "allocation", "study_id": study_id,
         "allocation_method": plan.get("allocation_method"), "groups": groups,
@@ -418,17 +510,21 @@ def _declared_records(
 def audit_field_source_content(
     plan: dict[str, Any], field: dict[str, Any], registry: dict[str, Any],
     measurements: dict[str, Any], opened_sources: list[dict[str, Any]],
+    *, analysis: Any = None,
 ) -> dict[str, Any]:
     """Check each declared primary reference against one JSON extract record.
 
     ``opened_sources`` contains ``{role, sha256, raw}`` entries from the caller's
     already byte-verified source manifest. Raw must be ``bytes``. Malformed
     extract files are reported as a failed match; malformed declarations raise
-    ``FieldSourceContentAuditError``. No file is opened here.
+    ``FieldSourceContentAuditError``. Optional schema-2 ``analysis`` binds every
+    baseline input-volume row to a typed extract. No file is opened here.
     """
+    volume_manifest = _volume_manifest(analysis)
     expected = _declared_records(
         _object(plan, "plan"), _object(field, "field"),
         _object(registry, "registry"), _object(measurements, "measurements"),
+        volume_manifest,
     )
     opened = _array(opened_sources, "opened_sources")
     if len(opened) > MAX_SOURCE_COUNT:
@@ -476,7 +572,8 @@ def audit_field_source_content(
         try:
             for record_index, record in enumerate(records):
                 kind, identifier, normalized = _normalize_record(
-                    record, f"{label}.records[{record_index}]"
+                    record, f"{label}.records[{record_index}]",
+                    allow_volume=volume_manifest is not None,
                 )
                 key = role, digest, kind, identifier
                 if key in actual:
@@ -507,6 +604,7 @@ def audit_field_source_content(
         **({"service_v_input_byte_bound": exact}
            if type(field.get("service")) is dict and field["service"].get("schema") == 2
            else {}),
+        **({"baseline_volume_input_byte_bound": exact} if volume_manifest is not None else {}),
         "counts": {
             "declared_references": len(expected),
             "opened_primary_entries": len(opened),

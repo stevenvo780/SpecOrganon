@@ -62,6 +62,8 @@ def audit_field_source_digest_coverage(
     registry: dict[str, Any],
     measurements: dict[str, Any],
     sources: list[dict[str, str]],
+    *,
+    analysis: Any = None,
 ) -> dict[str, Any]:
     """Compare every current primary digest reference with manifest role and hash.
 
@@ -69,7 +71,8 @@ def audit_field_source_digest_coverage(
     manifest to ``{role, sha256}`` records. A repeated reference to one digest
     is allowed; duplicate manifest entries and unreferenced primary entries
     prevent an exact match. Core manifest roles are outside this comparison.
-    This function does not replace structural preflight of its four inputs.
+    Schema-2 analysis adds baseline input volume source references. This
+    function does not replace structural preflight of its inputs.
     """
     plan = _object(plan, "plan")
     field = _object(field, "field")
@@ -146,6 +149,42 @@ def audit_field_source_digest_coverage(
         add("source_record", _required_digest(source, "record_sha256", f"{label}.source"),
             f"{label}.source.record_sha256")
 
+    has_baseline_volume = type(analysis) is dict and type(analysis.get("schema")) is int \
+        and analysis["schema"] == 2
+    if has_baseline_volume:
+        if "baseline_input_volume_manifest" not in analysis:
+            raise FieldSourceDigestAuditError("analysis.baseline_input_volume_manifest is required")
+        volume_manifest = _object(analysis["baseline_input_volume_manifest"],
+                                  "analysis.baseline_input_volume_manifest")
+        if "rows" not in volume_manifest:
+            raise FieldSourceDigestAuditError("analysis.baseline_input_volume_manifest.rows is required")
+        volume_rows = _list(volume_manifest["rows"],
+                            "analysis.baseline_input_volume_manifest.rows")
+        if not volume_rows:
+            raise FieldSourceDigestAuditError(
+                "analysis.baseline_input_volume_manifest.rows must be nonempty"
+            )
+        seen_volume_references: set[tuple[str, str]] = set()
+        for index, raw_row in enumerate(volume_rows):
+            label = f"analysis.baseline_input_volume_manifest.rows[{index}]"
+            volume_row = _object(raw_row, label)
+            if "source" not in volume_row:
+                raise FieldSourceDigestAuditError(f"{label}.source is required")
+            source = _object(volume_row["source"], f"{label}.source")
+            digest = _required_digest(source, "record_sha256", f"{label}.source")
+            locator = source.get("locator")
+            if type(locator) is not str or not locator.strip() or locator != locator.strip():
+                raise FieldSourceDigestAuditError(
+                    f"{label}.source.locator must be nonempty trimmed text"
+                )
+            reference = digest, locator
+            if reference in seen_volume_references:
+                raise FieldSourceDigestAuditError(
+                    f"{label}.source repeats a volume digest and locator reference"
+                )
+            seen_volume_references.add(reference)
+            add("source_record", digest, f"{label}.source.record_sha256")
+
     opened: Counter[tuple[str, str]] = Counter()
     non_primary_entries = 0
     for index, item in enumerate(sources):
@@ -202,6 +241,7 @@ def audit_field_source_digest_coverage(
         **({"service_v_input_byte_bound": False}
            if type(field.get("service")) is dict and field["service"].get("schema") == 2
            else {}),
+        **({"baseline_volume_input_byte_bound": False} if has_baseline_volume else {}),
         "counts": {
             "required_references": sum(len(paths) for paths in required.values()),
             "unique_required_role_digests": len(required_keys),
