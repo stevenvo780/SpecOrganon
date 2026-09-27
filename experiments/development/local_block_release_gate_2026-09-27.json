@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "classification": "development_local_block_release_gate_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "implementation_sha256": {
+    "scripts/local_block_release_gate.py": "0ec24ddbd9479c1c4c173415dc68e971c5c1e3372a54df091fb81f7fdd705b7c",
+    "scripts/preflight_assets.py": "65c4998a8a0f2daf1e2aa8ab370e5c479a47964de7038732d1eda7b07fa9a803",
+    "scripts/stage_released_run.py": "3c69eb0d53e0469f0b33783ad0933dfa5d8ea3263a7a3186032698244510ec6d",
+    "tests/test_inspect_released_payload.py": "e027aa7701ef70361737aba3d87677a29e4949c3662667ced23d6f8320c27297",
+    "tests/test_local_run_admission.py": "fc53399e16aa018fe091bcdffe2eb9db2ea8a40bb6e8f5cbc6f04f3836002215",
+    "tests/test_local_block_release_gate.py": "2b2d9c59672eed9ab9ae119d209907160054e0941139589d6c884fc669417aa2",
+    "tests/test_preflight_assets.py": "b7c45bdae00c90500a1bf471fa0816d35b2230ad8299830024e2c5a91d6eb44e",
+    "tests/test_run_staged_local_tool.py": "e89519d945ad181e57833c90635e1a9da538f362654cd649332638951653272d",
+    "tests/test_stage_released_run.py": "6bcbfd9d348bdb561b8eb79e1d347dba5107018c77bc1edf5f6465763be51380",
+    "tests/test_staged_tool_session.py": "350a9387a26243d2e5ddec7b75421b660d87bfad490b7f3c67ff5939ac97666c",
+    "tests/test_verify_released_run.py": "b2abc589f25c2de136f574fa502d34a841ba1da1b35d3b3be7710f6d5c5e04b5",
+    "tests/test_verify_staged_run.py": "299035feff7444933d08aaa92feb204a348464a88cefc438cf563a6231307a4a"
+  },
+  "initial_gap": "preflight_assets could publish any scheduled run, and stage_released_run could stage it, while audit_run_receipts detected block-order violations only after declared attempts existed.",
+  "local_contract": {
+    "scope": "cooperating processes on one host, one UID and one private gate root for one candidate schedule",
+    "event_order": ["claim", "published", "terminal"],
+    "attempt_number": 1,
+    "first_arm_of_later_block_waits_for": "publication of first arms of all earlier blocks",
+    "next_arm_waits_for": "completed or truncated terminal of preceding arm",
+    "max_open_blocks": 4,
+    "max_active_runs": 4,
+    "external_failure": "stops this block; no retry transition implemented",
+    "preflight_claim_before_output": true,
+    "stage_requires_active_published_claim": true,
+    "direct_cli_mode": "either --gate-dir or explicit --development-unsequenced",
+    "global_provider_limits_enforced": false,
+    "criterion_4": "not_assessed"
+  },
+  "adversarial_reproductions_and_repairs": [
+    "Four blocks with completed first arms still counted as open; a fifth first arm was previously accepted when only active run claims were counted. The new replay rejects it until a block closes.",
+    "A claim for block 1 without publication previously allowed a claim for block 2. The new order check requires the earlier first arm to be published.",
+    "A partial release directory previously accepted a locally declared completed terminal. Marking published and closing terminal now require a verified release manifest and bytes.",
+    "If manifest cleanup failed after a preflight error, verify_release could see a valid residual manifest and stage could proceed on the pending claim. An explicit durable published event now blocks staging and terminal until the completed preflight records it.",
+    "A caller could mutate the schedule object after claim and before manifest creation, yielding a successful but unverifiable release. Preflight now uses one private snapshot throughout.",
+    "An invalid first claim previously left a newly created empty gate root, preventing later valid work. The root now durably initializes an empty state before claim validation; an already-existing empty or damaged root remains blocked.",
+    "Completed terminal evidence without artifact_sha256 and external_failure without incident_sha256 could previously advance or close the local block. These fields are now structurally required in line with the receipt auditor."
+  ],
+  "independent_review": {
+    "result": "The reproduced false-green paths above were closed. No further bypass was found in the cooperating local flow after claim, publication, terminal, sequence, cap, and failure retests.",
+    "artifact_limit": "manifest.json and stage.json are byte-identical in gated and explicit development modes; registry plus exact release path is required to audit local gate use.",
+    "authority_limit": "Terminal status, artifact/incident/trace digests and receipt bytes remain local declarations. This gate does not authenticate provider activity or verify the claimed artifact and trace bytes.",
+    "filesystem_limit": "Visible partial bytes can exist before published, and a same-UID writer can rewrite local registry/evidence or move directories. No independent custody, isolation or cross-host limit is established."
+  },
+  "gates": [
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "1209 passed, 1 xfailed in 120.44s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_local_block_release_gate.py tests/test_preflight_assets.py tests/test_stage_released_run.py",
+      "result": "68 passed in 6.38s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_preflight_assets.py tests/test_inspect_released_payload.py tests/test_verify_released_run.py",
+      "result": "97 passed in 8.23s"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_stage_released_run.py tests/test_verify_staged_run.py tests/test_run_staged_local_tool.py tests/test_staged_tool_session.py tests/test_local_run_admission.py",
+      "result": "102 passed in 23.51s"
+    },
+    {
+      "command": "ruff check affected Python files; python -m py_compile core and integrations; git diff --check",
+      "result": "passed"
+    }
+  ],
+  "limits": [
+    "The prior MCP same-UID relocation boundary remains the one strict expected failure in the global suite; it is unrelated to this block gate.",
+    "No attempt 2 or shared ten-retry allowance is implemented. An external_failure stops its block and leaves later arms missing.",
+    "A schedule, root, terminal evidence and provider receipt under the same UID are not independently sealed or authenticated; the gate cannot support a confirmatory criterion-4 claim.",
+    "This is a structural development control, not an execution of the proposed matrix, a model comparison, human review or field trial."
+  ]
+}
