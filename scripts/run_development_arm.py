@@ -693,7 +693,7 @@ def run_development_arm(
             "limitations": ["development case and prompts are exposed; no sealed assignment",
                             "local CLI telemetry is not an authenticated provider receipt",
                             "no OS file-access isolation or global tool/token budget is proven",
-                            "generated analysis replay requires a later hash-bound opt-in and is not filesystem/network isolated"],
+                            "generated analysis replay requires a later hash-bound opt-in; default replay is not filesystem/network isolated"],
             "provider_request_id": None, "price": None, "cost": None,
         }
         _write_json(run_dir / "run.json", summary)
@@ -820,11 +820,15 @@ def _material_mismatches(run_dir: Path, summary: dict[str, Any]) -> list[str]:
     return mismatches
 
 
-def replay_run_dir(run_dir: Path, expected_analysis_sha256: str) -> dict[str, Any]:
+def replay_run_dir(
+    run_dir: Path, expected_analysis_sha256: str, *, sandboxed: bool = False
+) -> dict[str, Any]:
     """Replay a reviewed script only if its bytes and the packet still match the run.
 
-    The caller must inspect analysis.py before supplying its digest. Python -I
-    and a clean environment do not prevent file or network access by that code.
+    The caller must inspect analysis.py before supplying its digest. The
+    optional Linux sandbox is a local replay safeguard, not provider isolation.
+    Without it, Python -I and a clean environment do not restrict file/network
+    access by generated code.
     """
     if re.fullmatch(r"[0-9a-f]{64}", expected_analysis_sha256) is None:
         raise RunError("--expected-analysis-sha256 must be a lowercase SHA-256 hex digest")
@@ -861,11 +865,53 @@ def replay_run_dir(run_dir: Path, expected_analysis_sha256: str) -> dict[str, An
     previous_umask = os.umask(0o077)
     try:
         summary_before = _file_record(record)
-        replay = _capture([sys.executable, "-I", "analysis.py"], cwd=work,
-                          timeout_seconds=timeout,
-                          stdout_path=run_dir / "analysis_replay.stdout",
-                          stderr_path=run_dir / "analysis_replay.stderr",
-                          env=_replay_environment(run_dir))
+        stdout_path = run_dir / "analysis_replay.stdout"
+        stderr_path = run_dir / "analysis_replay.stderr"
+        if sandboxed:
+            from local_replay_sandbox import (
+                SandboxError, SandboxUnavailable, default_python_runtime_roots,
+                run_sandboxed,
+            )
+
+            started = _utc_now()
+            try:
+                restricted = run_sandboxed(
+                    argv=[sys.executable, "-I", "analysis.py"], cwd=work,
+                    read_roots=[work], runtime_roots=default_python_runtime_roots(),
+                    write_roots=[],
+                    stdout_path=stdout_path, stderr_path=stderr_path,
+                    timeout_seconds=timeout, cpu_seconds=timeout,
+                    address_space_bytes=512 * 1024 * 1024,
+                    file_bytes_per_file=16 * 1024 * 1024,
+                    env={"HOME": str(work), "TMPDIR": str(work)},
+                )
+            except (SandboxError, SandboxUnavailable) as exc:
+                raise RunError(f"sandboxed replay cannot start: {exc}") from exc
+            replay = {
+                "started_at_utc": started, "ended_at_utc": _utc_now(),
+                "wall_seconds": round(restricted.duration_seconds, 3),
+                "exit_code": restricted.exit_code,
+                "timed_out": restricted.timed_out,
+                "launch_error": restricted.launch_error,
+                "stdout": _file_record(stdout_path), "stderr": _file_record(stderr_path),
+                "sandbox": {
+                    "backend": "linux_landlock_seccomp_rlimit_single_process",
+                    "enforced": restricted.launch_error is None,
+                    "landlock_abi": restricted.landlock_abi,
+                    "cpu_seconds": timeout,
+                    "address_space_bytes": 512 * 1024 * 1024,
+                    "aggregate_memory_enforced": False,
+                    "file_bytes_per_file": 16 * 1024 * 1024,
+                    "aggregate_file_bytes_enforced": False,
+                    "path_opened_writes_allowed": False,
+                },
+            }
+        else:
+            replay = _capture([sys.executable, "-I", "analysis.py"], cwd=work,
+                              timeout_seconds=timeout, stdout_path=stdout_path,
+                              stderr_path=stderr_path,
+                              env=_replay_environment(run_dir))
+            replay["sandbox"] = {"backend": "none", "enforced": False}
         summary["analysis_replay"] = replay
         summary["reviewed_analysis_sha256"] = expected_analysis_sha256
         mismatches = _material_mismatches(run_dir, summary)
@@ -874,6 +920,8 @@ def replay_run_dir(run_dir: Path, expected_analysis_sha256: str) -> dict[str, An
         summary["replay_material_mismatches"] = mismatches
         if mismatches:
             summary["execution_status"] = "replay_artifacts_mutated"
+        elif replay["launch_error"] is not None:
+            summary["execution_status"] = "analysis_replay_launch_failure"
         elif replay["timed_out"]:
             summary["execution_status"] = "analysis_replay_timeout"
         elif replay["exit_code"] != 0:
@@ -904,6 +952,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="second step, after reviewing analysis.py; makes no model call")
     parser.add_argument("--expected-analysis-sha256",
                         help="digest of the exact analysis.py bytes inspected before replay")
+    parser.add_argument("--sandboxed-replay", action="store_true",
+                        help="enforce local Linux Landlock/seccomp/rlimit limits on replay")
     args = parser.parse_args(argv)
     try:
         if args.replay_run_dir is not None:
@@ -914,10 +964,13 @@ def main(argv: list[str] | None = None) -> int:
                     or args.agy_no_command_tool:
                 raise RunError("replay accepts only run directory and reviewed analysis digest")
             run_dir = args.replay_run_dir
-            summary = replay_run_dir(run_dir, args.expected_analysis_sha256)
+            summary = replay_run_dir(
+                run_dir, args.expected_analysis_sha256,
+                sandboxed=args.sandboxed_replay,
+            )
         else:
-            if args.expected_analysis_sha256 is not None:
-                raise RunError("--expected-analysis-sha256 requires --replay-run-dir")
+            if args.expected_analysis_sha256 is not None or args.sandboxed_replay:
+                raise RunError("replay options require --replay-run-dir")
             if any(value is None for value in
                    (args.arm, args.provider, args.model, args.effort, args.output_root)):
                 raise RunError("a model run requires arm, provider, model, effort and output-root")

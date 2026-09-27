@@ -34,6 +34,7 @@ REPLAY_STATUSES = frozenset(
         "replay_artifacts_mutated",
         "analysis_replay_timeout",
         "analysis_replay_failure",
+        "analysis_replay_launch_failure",
     }
 )
 RUN_STATUSES = (
@@ -345,12 +346,12 @@ def _verify_capture(
             type(launch_error) is not str
             or not launch_error
             or exit_code is not None
-            or timed_out
+            or (timed_out and prefix != "analysis_replay")
         ):
             raise ObservationError(
                 f"{prefix} capture has inconsistent launch failure fields"
             )
-    elif exit_code is None:
+    elif exit_code is None and not (prefix == "analysis_replay" and timed_out):
         raise ObservationError(f"{prefix} capture has no exit or launch failure")
     for suffix in ("stdout", "stderr"):
         filename = (
@@ -836,9 +837,28 @@ def observe_run_dir(run_dir: Path | str) -> dict[str, Any]:
                     replay_capture = _verify_capture(
                         run_fd, replay, "analysis_replay", verified_streams
                     )
+                    sandbox_claim = replay_capture.get("sandbox")
+                    if sandbox_claim is not None:
+                        sandbox_claim = _object(sandbox_claim, "analysis_replay sandbox")
+                        backend = sandbox_claim.get("backend")
+                        enforced = sandbox_claim.get("enforced")
+                        if (
+                            type(enforced) is not bool
+                            or type(backend) is not str
+                            or backend not in {
+                                "none", "linux_landlock_seccomp_rlimit_single_process"
+                            }
+                            or enforced is not (
+                                backend == "linux_landlock_seccomp_rlimit_single_process"
+                                and replay_capture.get("launch_error") is None
+                            )
+                        ):
+                            raise ObservationError("replay sandbox claim is inconsistent")
                     if summary.get("replay_material_mismatches") != []:
                         raise ObservationError("replay recorded material mismatches")
-                    if replay_capture["timed_out"]:
+                    if replay_capture.get("launch_error") is not None:
+                        replay_status = "analysis_replay_launch_failure"
+                    elif replay_capture["timed_out"]:
                         replay_status = "analysis_replay_timeout"
                     elif replay_capture["exit_code"] != 0:
                         replay_status = "analysis_replay_failure"

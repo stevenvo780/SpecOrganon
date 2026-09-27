@@ -335,6 +335,67 @@ def test_run_copies_only_assigned_packet_preserves_streams_and_replays(
         assert "local-thread-id" not in (run_dir / "run.json").read_text(encoding="utf-8")
 
 
+def test_explicit_sandboxed_replay_records_local_enforcement(
+    tmp_path: Path, fake_clis: Path,
+) -> None:
+    from local_replay_sandbox import probe_sandbox
+
+    capability = probe_sandbox()
+    if not capability.available:
+        pytest.skip(f"Linux local sandbox unavailable: {capability.reason}")
+    run_dir, summary = run_development_arm(
+        arm="N", provider="codex", model="test-model", effort="low",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    assert summary["execution_status"] == "artifacts_ready_for_inspection"
+
+    command = subprocess.run(
+        [sys.executable, str(SCRIPTS / "run_development_arm.py"),
+         "--replay-run-dir", str(run_dir), "--expected-analysis-sha256",
+         summary["artifacts"]["analysis.py"]["sha256"], "--sandboxed-replay"],
+        capture_output=True, text=True, check=False, timeout=15,
+    )
+    assert command.returncode == 0, command.stderr
+    replayed = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
+
+    assert replayed["execution_status"] == "output_replayed"
+    assert replayed["analysis_replay"]["sandbox"]["enforced"] is True
+    assert replayed["analysis_replay"]["sandbox"]["landlock_abi"] >= 3
+    assert replayed["analysis_replay"]["sandbox"]["path_opened_writes_allowed"] is False
+    assert "118280" in (run_dir / "analysis_replay.stdout").read_text(encoding="utf-8")
+    assert not (run_dir / "replay_tmp").exists()
+    assert not (run_dir / "replay_home").exists()
+    assert (run_dir / "run.json").exists()
+    observed = subprocess.run(
+        [sys.executable, str(SCRIPTS / "observe_development_run.py"), str(run_dir)],
+        capture_output=True, text=True, check=False, timeout=15,
+    )
+    assert observed.returncode == 0, observed.stderr
+    assert json.loads(observed.stdout)["execution_status"] == "output_replayed"
+
+
+def test_sandbox_setup_timeout_never_claims_enforcement(
+    tmp_path: Path, fake_clis: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import local_replay_sandbox as sandbox
+
+    run_dir, summary = run_development_arm(
+        arm="N", provider="codex", model="test-model", effort="low",
+        output_root=tmp_path / "runs", timeout_seconds=10,
+    )
+    monkeypatch.setattr(sandbox, "run_sandboxed", lambda **_kwargs: sandbox.SandboxResult(
+        exit_code=None, timed_out=True, launch_error="sandbox setup timed out",
+        landlock_abi=9, duration_seconds=10.0,
+    ))
+
+    replayed = replay_run_dir(
+        run_dir, summary["artifacts"]["analysis.py"]["sha256"], sandboxed=True,
+    )
+
+    assert replayed["execution_status"] == "analysis_replay_launch_failure"
+    assert replayed["analysis_replay"]["sandbox"]["enforced"] is False
+
+
 @pytest.mark.parametrize("scenario,duplicate_count,conflict_count,reconciles,complete", [
     ("agy_duplicate_step", 1, 0, True, True),
     ("agy_conflicting_step", 0, 1, None, False),

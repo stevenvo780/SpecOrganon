@@ -494,6 +494,39 @@ def test_existing_replay_streams_are_verified_without_executing_generated_code(
     assert "inconsistent launch failure" in forged.stderr
 
 
+def test_sandbox_setup_timeout_is_observed_as_launch_failure(
+    tmp_path: Path,
+) -> None:
+    run_dir, summary = _pilot(tmp_path)
+    for suffix in ("stdout", "stderr"):
+        (run_dir / f"analysis_replay.{suffix}").write_bytes(b"")
+    summary.update({
+        "execution_status": "analysis_replay_launch_failure",
+        "reviewed_analysis_sha256": summary["artifacts"]["analysis.py"]["sha256"],
+        "replay_material_mismatches": [],
+        "analysis_replay": {
+            "stdout": _record(run_dir / "analysis_replay.stdout"),
+            "stderr": _record(run_dir / "analysis_replay.stderr"),
+            "timed_out": True, "exit_code": None,
+            "launch_error": "sandbox setup timed out",
+            "sandbox": {
+                "backend": "linux_landlock_seccomp_rlimit_single_process",
+                "enforced": False,
+            },
+        },
+    })
+    _write_summary(run_dir, summary)
+    observed = _invoke(run_dir)
+    assert observed.returncode == 0, observed.stderr
+    assert json.loads(observed.stdout)["execution_status"] == "analysis_replay_launch_failure"
+
+    summary["analysis_replay"]["sandbox"]["enforced"] = True
+    _write_summary(run_dir, summary)
+    forged = _invoke(run_dir)
+    assert forged.returncode == 2
+    assert "sandbox claim is inconsistent" in forged.stderr
+
+
 def test_replay_mutation_status_is_explicitly_unobservable(tmp_path: Path) -> None:
     run_dir, summary = _pilot(tmp_path)
     summary["execution_status"] = "replay_artifacts_mutated"
