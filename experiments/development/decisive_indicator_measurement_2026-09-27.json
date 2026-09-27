@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "classification": "development_decisive_indicator_evidence_gate_not_source_authentication",
+  "date_utc": "2026-09-27",
+  "decision": "D-070",
+  "before": [
+    "In a temporary synthetic case, an evidence item describing only temperature, without metric_key, unit or value, could support an indicator for waste_mass in kg. The simulated assessment reached validate.ready=true with verdict cumplido.",
+    "After requiring a typed measurement, scope missing or blank still allowed simulated cumplido and incumplido because the matching evidence selection did not check it.",
+    "An observed evidence item with a whitespace, numeric or object method still passed the general evidence gate and could support either decisive simulated verdict."
+  ],
+  "correction_commits": ["9b2e3d2", "1edb5ea", "001f4ce"],
+  "after": {
+    "decisive_verdicts": ["cumplido", "incumplido"],
+    "indicator_requirement": "Each criterion indicator needs a current, unchallenged evidence measurement in its own ancestry with matching explicit metric_key and unit, numeric value, nonblank textual scope and a valid protocol path to the normative problem.",
+    "observed_method_requirement": "Observed evidence requires a nonblank textual collection method.",
+    "provisional_evidence": "Untyped evidence can remain provisional during study/specify and no_demostrado remains available; it cannot alone support a decisive verdict.",
+    "historical_ledgers": "Existing versioned ledger bytes and the synthetic_multiagent no_demostrado acceptance were retained."
+  },
+  "verification": {
+    "focused_command": "uv run pytest -q tests/test_method.py tests/test_field_attestation.py tests/test_injection_bank.py",
+    "focused_result": "154 passed",
+    "independent_review": "Reproduced rejection of missing, blank, whitespace and nontextual scopes and invalid observed methods for both decisive verdicts; valid method and no_demostrado controls passed. Final review reported no remaining finding in scope."
+  },
+  "limits": [
+    "The tests and decisive verdicts in the reproducer use synthetic data.",
+    "A typed, scoped, protocol-linked local evidence item is not an authenticated measurement or independent source verification.",
+    "A real signed field success still needs external custody, competent approval, causal analysis and observed outcomes."
+  ],
+  "criterion_2": "not_demonstrated",
+  "criterion_3": "not_demonstrated"
+}

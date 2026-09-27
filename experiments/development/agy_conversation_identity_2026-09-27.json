@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "classification": "development_local_agy_jsonl_consistency_not_provider_authentication",
+  "date_utc": "2026-09-27",
+  "decision": "D-069",
+  "before": [
+    "An Agy init event and terminal result with different explicit conversation_id values were parsed as terminal_success=true and complete=true. The runner marked the artifacts ready and the observer accepted the matching forged summary.",
+    "The first fix still accepted an unknown Agy event with a contradictory or malformed envelope conversation_id between matching init and result events."
+  ],
+  "correction_commits": [
+    "e59fe37",
+    "74e378b"
+  ],
+  "after": {
+    "known_events": ["init", "step_update", "result"],
+    "explicit_id_checks": "Compare every present nonblank conversation_id on known event envelopes and payloads; inspect the envelope even for an unknown or malformed event type.",
+    "unknown_event_behavior": "Unknown Agy event types fail closed with a line-numbered terminal error.",
+    "contradiction_behavior": "A changed or malformed explicit ID makes terminal_success and complete false; the observer rederives this from archived JSONL bytes.",
+    "absent_id_behavior": "Valid historical streams without IDs remain parseable and report local_identity_unverified.",
+    "privacy": "Only a sanitized consistency state and error location are retained in the summary or observer output, never the raw conversation ID."
+  },
+  "verification": {
+    "focused_command": "uv run pytest -q tests/test_run_development_arm.py tests/test_observe_development_run.py",
+    "focused_result": "180 passed",
+    "lint": "uv run ruff check . passed",
+    "independent_review": "Initial adversarial review reproduced the unknown-event bypass; follow-up review reproduced rejection for same, different, numeric and absent IDs on unknown events and an invalid event type, with no remaining finding in scope."
+  },
+  "limits": [
+    "A matching ID is consistency of local JSONL only, not provider, model, effort, usage or billing authentication.",
+    "An ID absent from a valid historical trace remains unverified, not equivalent to matching IDs.",
+    "No new Agy provider run or confirmatory N/SDD/toolkit comparison was performed."
+  ],
+  "criterion_4": "not_demonstrated"
+}
