@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "classification": "development_synthetic_pilot_triplet_requested_budget_binding",
+  "date_utc": "2026-09-27",
+  "baseline_head": "293868d88a274da25d1d4df6fdc2223d38841627",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "activation_dossier_sha256": "bdc7aeb95d21e33356d5eea7c14753444fbfb72ef656bad73f63ba825481e095",
+  "pilot_plan_template_v1_sha256": "9e043205553576090d3526d783be97b70328b197cc985b163f615e6dbcd28160",
+  "pilot_plan_template_v2_sha256": "94af09326a5aadeecf9eccdcd2bb8843ddf08f985a224c12c83a9cd8f96cdd54",
+  "file_sha256": {
+    "scripts/run_development_arm.py": "14fc9a4d33b0495c829774d187323eade29b9cf251e8dd4a0aee6a3a99263ecb",
+    "scripts/observe_development_run.py": "a0016efe150559351fee5e4c9566c2d4aee793cd92af6631f7feb493a4221331",
+    "tests/test_run_development_arm.py": "c77f8310717b5148a3b18293c2a1f7240cbd889cf3d2f62926a1144b4b678b92",
+    "tests/test_observe_development_run.py": "8cb35d53e06ea15f16753bda38419b3326fb9dbb5d14d966f07df840b4417c8a"
+  },
+  "gates": {
+    "focused_command": ".venv/bin/pytest -q tests/test_run_development_arm.py tests/test_observe_development_run.py",
+    "focused_result": "268 passed",
+    "global_command": ".venv/bin/pytest -q",
+    "global_result": "1901 passed in 141.00s",
+    "ruff_command": "uv run ruff check .",
+    "ruff_result": "All checks passed!",
+    "git_diff_check": "passed"
+  },
+  "local_contract": {
+    "live_pilot_plan_schema": 2,
+    "legacy_pilot_plan_schema_observation_and_replay_only": 1,
+    "active_budget_seconds_range_inclusive": [1, 5400],
+    "one_requested_budget_for_six_cells": true,
+    "preflight_before_cli_lookup_or_run_directory": true,
+    "observer_checks_copied_plan_binding_and_run_time_budget": true,
+    "template_v2_status": "no_go_missing_bindings"
+  },
+  "synthetic_controls": [
+    "Six A/B by N/S/T cells with fake CLIs record the same plan-requested active_budget_seconds in run metadata.",
+    "A configured schema-1 plan, a missing, boolean, fractional or out-of-range schema-2 budget, a different CLI budget, and a duplicate JSON budget key fail before provider lookup or run-directory creation.",
+    "The observer rejects altered plan digests, budget metadata and partial schema downgrades.",
+    "Historical schema-1 pilot records with and without D-080 budget metadata remain observable and replayable without a shared-budget claim."
+  ],
+  "independent_read_only_review": {
+    "initial_finding": "The first implementation rejected replay of historical schema-1 pilots even though observation still worked.",
+    "repair_and_recheck": "The material replay validator now accepts coherent legacy schema-1 plan/binding pairs with or without D-080 metadata; synthetic replay and observation passed in both forms, and a partial schema downgrade was rejected.",
+    "remaining_limit": "A same-UID writer can still coherently rewrite plan, hashes, binding and run metadata after the fact; there is no independent prelaunch custodian."
+  },
+  "scope": {
+    "new_real_provider_calls": 0,
+    "human_authorization_for_provider_spend": false,
+    "prelaunch_binding_authenticated": false,
+    "provider_identity_or_effective_model_verified": false,
+    "provider_side_tokens_tools_cost_or_agent_budget_proven": false,
+    "human_wait_excluded_from_active_time": false,
+    "agents_and_retries_share_budget": false,
+    "cap_status": "unknown",
+    "controlled_comparison_eligible": false,
+    "criterion_4": "not_demonstrated",
+    "goal_criteria_demonstrated": 0
+  }
+}
