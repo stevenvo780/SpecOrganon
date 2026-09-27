@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "classification": "development_synthetic_installed_public_interface_inventory",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "wheel": {
+    "sha256": "97b22b717c59a8332307f4993229e13c741f40d8304ecd8480bf0887d7107d80",
+    "build": "uv build --offline --wheel --out-dir TEMP .",
+    "installation": "uv pip install --offline --python CLEAN_VENV/bin/python WHEEL",
+    "artifact_committed": false,
+    "source_revision": "1cab45235396c2ed07d05e6cbb4f6cfcad6afea4",
+    "rebuild_from_git_archive": "git archive SOURCE_REVISION; extract into a fresh directory; uv build --offline --wheel --out-dir TEMP/WHEELS .",
+    "rebuild_sha256_matched": true,
+    "rebuild_after_later_readme_changes_expected_to_differ": true
+  },
+  "source_sha256": {
+    "scripts/clean_smoke.py": "1b80c9eea059547d65d09348832850962f90a2cfc08ad4fd6c57162babcbec5c",
+    "scripts/probe_signed_full_workflow.py": "8aa04bb0ebcec2986d7d6460778f3f5816a0261f687ed6654740615e5951b2f7",
+    "tests/test_approval_security.py": "7b421a15fa532496088b2e9471df86df77c0367eceeff974481939b2dd86c5ec",
+    "tests/test_signed_test_execution_transport.py": "8ee733440a706333d86d255df14e95b9b8eb499a3f2ac789b63eb25dcb477582"
+  },
+  "global_gate": {
+    "command": ".venv/bin/pytest -q",
+    "passed": 1873,
+    "failed": 0,
+    "ruff_check": "passed",
+    "git_diff_check": "passed"
+  },
+  "method": {
+    "same_current_wheel_in_both_clean_venvs": true,
+    "source_package_loaded_from_site_packages": true,
+    "common_fixture_smoke": "scripts/clean_smoke.py strips inherited Python import and Organon variables, asserts import from this interpreter's site-packages and entry-point shebangs for that interpreter, invokes both installed entry points and inspects a nine-phase ledger, errors, replay and effects",
+    "common_smoke_poisoned_parent_pythonpath": "/workspace/SpecOrganon/src",
+    "common_smoke_command": "env -i HOME=/tmp PATH=/usr/bin:/bin PYTHONPATH=/workspace/SpecOrganon/src CLEAN_VENV/bin/python scripts/clean_smoke.py /workspace/SpecOrganon",
+    "field_extra": "tests/test_approval_security.py::test_synthetic_attestation_report_cannot_authorize_field_success invokes field challenge and signed attestation by installed CLI and stdio MCP; both signatures append events while validate remains blocked",
+    "field_extra_strips_pythonpath_before_cli_and_mcp": true,
+    "test_execution_extra": "tests/test_signed_test_execution_transport.py::test_installed_cli_and_mcp_record_actual_synthetic_test executes argv without a shell, checks streams and artifact bytes, invokes matching challenges and signed records by installed CLI and stdio MCP, and inspects the ledger and status",
+    "extra_test_command": "env -i HOME=/tmp PATH=/usr/bin:/bin CLEAN_VENV/bin/pytest -q tests/test_approval_security.py::test_synthetic_attestation_report_cannot_authorize_field_success tests/test_signed_test_execution_transport.py",
+    "extra_tests_run_together_in_each_clean_venv": true
+  },
+  "operations": {
+    "common_cli": [
+      "advance", "approval-challenge", "approve", "challenge", "gate", "init",
+      "next-task", "phase-review-challenge", "put", "resolve-challenge",
+      "review", "review-phase", "run", "status", "trace"
+    ],
+    "extra_cli": [
+      "attest-field", "field-attestation-challenge", "record-test-execution",
+      "test-execution-challenge"
+    ],
+    "cli_subcommands_published": 19,
+    "cli_subcommands_invoked": 19,
+    "mcp_tools_discovered": [
+      "advance", "approval_challenge", "approve", "attest_field", "challenge",
+      "field_attestation_challenge", "gate", "init", "next_task",
+      "phase_review_challenge", "put", "record_test_execution",
+      "resolve_challenge", "review", "review_phase", "run", "status",
+      "test_execution_challenge", "trace"
+    ],
+    "mcp_tools_invoked": 19,
+    "cli_to_mcp_name_mapping": "replace hyphen with underscore",
+    "set_equality_checked_in_each_python": true
+  },
+  "runs": [
+    {
+      "python": "3.11.15",
+      "offline_install": "passed",
+      "uv_pip_check": "passed",
+      "installed_import": "venv311/lib/python3.11/site-packages/specorganon/__init__.py",
+      "smoke": "passed; 9 phases, 29 items, revision 49, 15 common CLI/MCP operations",
+      "smoke_output_sha256": "e35ca0b93fb36b9911d8db5a6860199da2c19489e1b91ff5b088632a561c223b",
+      "extra_tests": "2 passed in 2.48s",
+      "extra_test_output_sha256": "0dc9b414a4f4f9df7ba6d963826e55bc50265f07180d775114e64fd306d3fc40",
+      "signed_full_workflow_probe": "passed; installed CLI and stdio MCP",
+      "signed_full_workflow_probe_output_sha256": "e0dc8ebfe1bf57313561aeda2b8c18394e3709e5495b9b8b4ec2ab38927ec470"
+    },
+    {
+      "python": "3.12.3",
+      "offline_install": "passed",
+      "uv_pip_check": "passed",
+      "installed_import": "venv312/lib/python3.12/site-packages/specorganon/__init__.py",
+      "smoke": "passed; 9 phases, 29 items, revision 49, 15 common CLI/MCP operations",
+      "smoke_output_sha256": "ca25e76f3d38e4bc4cace0c2ff75ede0cd5d99d3300c37e3d37e1c7b85f264ff",
+      "extra_tests": "2 passed in 2.97s",
+      "extra_test_output_sha256": "68f46d3332eabf53d697fa732dd404c5dc2f20c82ccc7b68f0022bc7e811aece",
+      "signed_full_workflow_probe": "passed; installed CLI and stdio MCP",
+      "signed_full_workflow_probe_output_sha256": "aa35e44de298feca69ef5a0dbf3110bf4db73c82ee3b5e86146909076c62aaf9"
+    }
+  ],
+  "independent_review": {
+    "initial_findings": [
+      "smoke and field test could inherit PYTHONPATH and load the source tree",
+      "current README metadata changed the wheel hash, so rebuilding the current tree does not reproduce the historical wheel"
+    ],
+    "after_correction": "reviewer rebuilt the exact wheel from source revision 1cab452, installed it in fresh Python 3.11 and 3.12 environments, reran the smoke with source-tree PYTHONPATH injected and both extra tests, and checked 19/19 set equality",
+    "unresolved_findings_invalidating_installed_wheel_or_19_of_19_claim": 0,
+    "global_test_suite_repeated_by_reviewer": false
+  },
+  "scope": {
+    "all_cases_actors_keys_and_test_content_synthetic": true,
+    "ephemeral_outputs_and_wheel_not_committed": true,
+    "human_identity_or_competence_authenticated": false,
+    "independent_key_custody_verified": false,
+    "test_report_truth_proven_by_engine": false,
+    "real_case_complete_workflow_verified": false,
+    "confirmatory_multiagent_comparison_performed": false,
+    "field_impact_tested": false,
+    "goal_criteria_demonstrated": 0,
+    "criterion_1": "not_assessed",
+    "criterion_2": "not_assessed",
+    "criterion_3": "not_assessed",
+    "criterion_4": "not_assessed",
+    "criterion_5": "not_assessed"
+  }
+}
