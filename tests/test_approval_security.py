@@ -344,3 +344,166 @@ def test_signed_cli_and_mcp_share_challenge_and_rejection(tmp_path, signer):
             assert _cli("status", path)["items"]["n1"]["approved"]
 
     asyncio.run(exercise())
+
+
+def test_signed_field_success_stays_blocked_with_measured_records_and_claimed_guardrails(
+    tmp_path, signer,
+):
+    """A real signed ledger cannot turn synthetic field claims into an accepted verdict."""
+    key, trust_file = signer
+    case = _case(tmp_path, signer, "signed-field-claim")
+
+    def put(item_id: str, kind: str, refs=(), data=None, text: str | None = None) -> None:
+        engine.put_item(case, item_id, kind, text or item_id, list(refs), data or {}, "agent:writer")
+
+    def accept(phase: str) -> None:
+        status = engine.gate(case, phase)
+        assert status["ready"], (phase, status["blockers"])
+        engine.review_phase(case, phase, "accept", "Independent synthetic review", "agent:reviewer")
+        engine.advance(case, phase, "agent:lead")
+        assert engine.gate(case, phase)["accepted"]
+
+    put("b1", "boundary", ["p1"])
+    accept("frame")
+    put("c1", "concept", ["p1"])
+    put("s1", "assumption", ["p1"])
+    put("f1", "frame_option", ["p1"], text="First framing")
+    put("f2", "frame_option", ["p1"], text="Second framing")
+    engine.approve(case, "n1", REASON, ACTOR, signature=_sign(key, _challenge(case)))
+    accept("critique")
+
+    put("q1", "question", ["p1"])
+    put("h1", "hypothesis", ["q1"])
+    put("pr1", "protocol", ["q1", "h1"], {
+        "population": "synthetic", "method": "enumeration",
+        "comparison": "synthetic control", "uncertainty": "synthetic interval",
+    })
+    put("e0", "evidence", ["pr1"], {
+        "origin": "simulated", "source": "synthetic fixture", "date": "2026-09-26",
+        "locator": "synthetic prior context", "metric_key": "count", "scope": "synthetic",
+        "unit": "count", "value": 10,
+    })
+    put("i1", "indicator", ["p1", "n1", "e0"], {"metric": "count", "unit": "count"})
+    accept("study")
+
+    put("e1", "evidence", ["pr1"], {
+        "origin": "simulated", "source": "synthetic fixture", "date": "2026-09-26",
+        "locator": "synthetic observation", "metric_key": "count", "scope": "synthetic",
+        "unit": "count", "value": 10,
+    })
+    put("inf1", "inference", ["e1", "h1"])
+    accept("observe")
+    put("syn1", "synthesis", ["inf1", "e1"])
+    put("u1", "uncertainty", ["syn1"])
+    accept("explain")
+    put("o1", "option", ["syn1", "n1"])
+    put("o2", "option", ["syn1", "n1"])
+    put("cmp1", "comparison", ["o1", "o2"])
+    put("r1", "risk", ["o1"])
+    accept("compare")
+
+    put("d1", "decision", ["cmp1", "n1", "e1"])
+    put("req1", "requirement", ["d1"])
+    put("crit1", "criterion", ["req1", "i1"], {
+        "metric": "count",
+        "threshold": {"operator": ">=", "value": 0.1, "statistic": "lower_ci"},
+        "reject": "upper confidence bound below 0.1",
+        "reject_test": {"operator": "<", "value": 0.1, "statistic": "upper_ci"},
+    })
+    decision_reason = "I authorize this exact implementation decision"
+    engine.approve(case, "d1", decision_reason, ACTOR, signature=_sign(
+        key, _challenge(case, "d1", decision_reason)
+    ))
+    accept("specify")
+    put("impl1", "implementation", ["req1"])
+    put("t1", "test", ["impl1", "crit1"], {
+        "passed": True, "command": "synthetic fixture; no external command run",
+    })
+    accept("build")
+
+    put("base1", "baseline", ["crit1"], {
+        "origin": "field", "source": "invented synthetic fixture", "date": "2026-09-27",
+        "metric": "count", "value": 0.2, "unit": "count",
+    })
+    put("res1", "result", ["base1", "crit1", "t1"], {
+        "origin": "field", "source": "invented synthetic fixture", "date": "2026-09-27",
+        "effect": {
+            "metric": "count", "estimate": 0.3, "interval": [0.15, 0.4],
+            "design": "synthetic randomized design", "comparator": "synthetic control",
+            "sample_size": 12, "unit": "count",
+        },
+    })
+    assessment = {
+        "verdict": "cumplido", "claim_scope": "field", "uncertainty": "synthetic interval",
+        "adverse_effects": {
+            "status": "measured", "source": "invented synthetic fixture", "date": "2026-09-27",
+            "measurements": [{"metric": "adverse events", "unit": "count", "value": 0,
+                              "sample_size": 12}],
+        },
+        "cost": {
+            "status": "measured", "source": "invented synthetic fixture", "date": "2026-09-27",
+            "measurements": [{"metric": "cost", "unit": "synthetic units", "value": 2,
+                              "sample_size": 12}],
+        },
+    }
+    put("ass1", "assessment", ["res1", "r1"], assessment)
+    state = engine.get_state(case)
+    assert state["project"]["approval_policy"] == "signed"
+    assert state["approval_trust"] == "configured"
+    assert state["items"]["n1"]["approval_status"] == "signed_verified"
+    assert state["items"]["d1"]["approval_status"] == "signed_verified"
+    assert all(state["phases"][phase]["accepted"] for phase in (
+        "frame", "critique", "study", "observe", "explain", "compare", "specify", "build"
+    ))
+    blocker = (
+        "ass1 decisive field verdict needs an independently verified field "
+        "attestation (not yet supported)"
+    )
+    assert engine.gate(case, "validate")["blockers"] == [blocker]
+
+    assessment["field_guardrails"] = {
+        "approval_authenticated": True, "execution_ready": True,
+        "registry_sha256": "a" * 64,
+    }
+    put("ass1", "assessment", ["res1", "r1"], assessment)
+    gate = engine.gate(case, "validate")
+    assert gate["blockers"] == [blocker]
+    assert not gate["ready"] and not gate["accepted"]
+    assert _cli("gate", str(case), "validate") == gate
+
+    async def inspect_mcp_gate() -> None:
+        params = StdioServerParameters(
+            command=str(MCP), cwd=str(tmp_path),
+            env={"ORGANON_ROOT": str(tmp_path), "ORGANON_APPROVERS_FILE": str(trust_file)},
+        )
+        async with Client(params, mode="legacy") as client:
+            assert _mcp_data(await client.call_tool(
+                "gate", {"path": str(case), "phase": "validate"}
+            )) == gate
+
+    asyncio.run(inspect_mcp_gate())
+    before = (case / "organon.json").read_bytes()
+    with pytest.raises(engine.MethodError, match="phase cannot be accepted"):
+        engine.review_phase(case, "validate", "accept", "False field claim", "agent:reviewer")
+    with pytest.raises(engine.MethodError, match="phase cannot advance"):
+        engine.advance(case, "validate", "agent:lead")
+    assert (case / "organon.json").read_bytes() == before
+
+    rejected_result = engine.get_state(case)["items"]["res1"]["data"]
+    rejected_result["effect"] = {
+        **rejected_result["effect"],
+        "estimate": 0.03,
+        "interval": [0.01, 0.05],
+    }
+    put("res1", "result", ["base1", "crit1", "t1"], rejected_result)
+    assessment["verdict"] = "incumplido"
+    put("ass1", "assessment", ["res1", "r1"], assessment)
+    rejection_gate = engine.gate(case, "validate")
+    assert rejection_gate["blockers"] == [blocker]
+    assert not rejection_gate["ready"] and not rejection_gate["accepted"]
+
+    assessment["verdict"] = "no_demostrado"
+    put("ass1", "assessment", ["res1", "r1"], assessment)
+    inconclusive_gate = engine.gate(case, "validate")
+    assert inconclusive_gate["ready"], inconclusive_gate["blockers"]
+    assert not inconclusive_gate["accepted"]

@@ -393,7 +393,8 @@ def _structured_field_outcome(value: Any) -> bool:
     return True
 
 
-def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) -> list[str]:
+def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any],
+                          approval_policy: str) -> list[str]:
     """Check that a decisive verdict is numerically and procedurally auditable.
 
     Rejections use the declared reject_test predicate, not the reject prose.
@@ -411,6 +412,14 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any]) ->
         for field in ("adverse_effects", "cost"):
             if not _structured_field_outcome(data.get(field)):
                 issues.append(f"{assessment['id']} field success lacks structured measured {field} evidence")
+    if scope == "field" and approval_policy == "signed":
+        # Both success and rejection are decisive field claims. The separate
+        # preflight checks declarations only; its report or a self-declared
+        # flag cannot prove review of source custody, margins or impact.
+        issues.append(
+            f"{assessment['id']} decisive field verdict needs an independently "
+            "verified field attestation (not yet supported)"
+        )
     ancestors = [items[key] for key in _ancestors(items, assessment["id"])]
     results = [item for item in ancestors if item["kind"] == "result"]
     baselines = [item for item in ancestors if item["kind"] == "baseline"]
@@ -827,7 +836,9 @@ def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: boo
             if item["kind"] == "assessment":
                 if not refs_of(item, {"result", "risk"}):
                     blockers.append(f"{item['id']} must link result and risk")
-                blockers.extend(_success_claim_issues(items, item))
+                blockers.extend(_success_claim_issues(
+                    items, item, state["project"]["approval_policy"]
+                ))
     return sorted(set(blockers))
 
 

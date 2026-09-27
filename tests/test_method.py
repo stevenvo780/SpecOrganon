@@ -1577,6 +1577,31 @@ def test_field_success_requires_structured_adverse_effects_and_cost(tmp_path):
         )
 
 
+def test_signed_field_success_rejects_self_declared_attestation(tmp_path, monkeypatch):
+    # A synthetic complete graph isolates the gate branch; it is not field evidence.
+    path = tmp_path / "case"
+    _, assessment = _decisive_lineage_fixture(
+        path, "cumplido", tested_implementation="impl1",
+        baseline_refs=["crit1"], result_refs=["base1", "crit1", "t1"],
+    )
+    assessment["field_guardrails"] = {
+        "approval_authenticated": True,
+        "execution_ready": True,
+        "registry_sha256": "a" * 64,
+    }
+    _put(path, "ass1", "assessment", ["res1", "r1"], assessment)
+    assert engine.gate(path, "validate")["ready"]  # fixture mechanics only
+
+    state = engine._project(path)
+    signed_state = {**state, "project": {**state["project"], "approval_policy": "signed"}}
+    monkeypatch.setattr(engine, "_project", lambda _path: signed_state)
+    status = engine.gate(path, "validate")
+    assert status["blockers"] == [
+        "ass1 decisive field verdict needs an independently verified field attestation (not yet supported)"
+    ]
+    assert not status["ready"] and not status["accepted"]
+
+
 @pytest.mark.parametrize("scope", ("simulation", "technical"))
 def test_unmeasured_outcome_placeholders_do_not_change_non_field_success(tmp_path, scope):
     path = tmp_path / "case"
@@ -1867,13 +1892,13 @@ def test_success_rejects_missing_or_ambiguous_linked_indicator_units(tmp_path):
     items = engine._project(path)["items"]
     items["i1"]["data"]["unit"] = ""
     assert "ass1 success lacks a declared linked indicator unit" in \
-        engine._success_claim_issues(items, items["ass1"])
+        engine._success_claim_issues(items, items["ass1"], "fixture")
 
     items = engine._project(path)["items"]
     extra = {**items["i1"], "id": "i_extra", "data": {**items["i1"]["data"]}}
     items["i_extra"] = extra
     items["crit1"]["deps"]["i_extra"] = 1
-    assert not engine._success_claim_issues(items, items["ass1"])
+    assert not engine._success_claim_issues(items, items["ass1"], "fixture")
     extra["data"]["unit"] = "fraction"
     assert "ass1 success has ambiguous linked indicator units" in \
-        engine._success_claim_issues(items, items["ass1"])
+        engine._success_claim_issues(items, items["ass1"], "fixture")
