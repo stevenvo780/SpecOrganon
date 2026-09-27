@@ -102,7 +102,7 @@ async def _resume_mcp(
 
 
 def _source_checks(seed: dict[str, Any], published: dict[str, Any]) -> None:
-    """Authenticate available local bytes and every recorded numeric locator."""
+    """Check available local bytes and every recorded numeric locator."""
     result_hash = _sha256(PUBLISHED_RESULT.read_bytes())
     script_hash = _sha256(ANALYSIS_SCRIPT.read_bytes())
     evidence = {item["id"]: item for item in seed["items"] if item["id"] in EVIDENCE_IDS}
