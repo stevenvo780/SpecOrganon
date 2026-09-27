@@ -26,22 +26,39 @@ def _write_json(path: Path, value: dict) -> bytes:
 def _bundle(tmp_path: Path, project: dict, *, assessment_version: int = 1) -> tuple[str, str, dict]:
     plan, field, registry, measurements, analysis = _synthetic_analysis_case()
     approval_path = tmp_path / "synthetic_approval_record.json"
+    equivalence = field["service"]["equivalence"]
     approval_raw = _write_json(approval_path, {
-        "synthetic_only": True,
-        "allocation": "declared stratified assignment",
-        "equivalence": "declared service unit",
+        "schema": 1, "classification": "field_primary_source_content_extract",
+        "records": [{
+            "kind": "equivalence",
+            **{key: equivalence[key] for key in (
+                "id", "service_unit", "approved_at_utc", "approved_by_actor_ids",
+                "verified_by", "source",
+            )},
+        }],
     })
     approval_sha256 = hashlib.sha256(approval_raw).hexdigest()
     field["service"]["equivalence"]["record_sha256"] = approval_sha256
 
     source_path = tmp_path / "synthetic_source_record.json"
+    cells = {cell["id"]: cell for cell in registry["cells"]}
     source_raw = _write_json(source_path, {
-        "synthetic_only": True,
-        "allocation": "declared stratified assignment",
-        "rows": [
-            {"group_id": row["group_id"], "period": row["period"],
+        "schema": 1, "classification": "field_primary_source_content_extract",
+        "records": [{
+            "kind": "allocation", "study_id": plan["study_id"],
+            "allocation_method": plan["allocation_method"],
+            "groups": [{key: group[key] for key in (
+                "id", "arm", "stratum", "assigned_at_utc", "actor_ids", "source",
+            )} for group in field["groups"]],
+        }] + [
+            {"kind": "measurement", "locator": row["source"]["locator"],
+             "group_id": row["group_id"], "period": row["period"],
              "cell_id": row["cell_id"], "value": row["value"],
-             "locator": row["source"]["locator"]}
+             "observed_at_utc": row["source"]["observed_at_utc"],
+             "method": row["source"]["method"],
+             "unit": cells[row["cell_id"]]["unit"],
+             "denominator": cells[row["cell_id"]]["denominator"],
+             "source_id": cells[row["cell_id"]]["source_id"]}
             for row in measurements["rows"]
         ],
     })
@@ -191,12 +208,42 @@ def test_individual_measurement_source_files_fit_bounded_manifest(tmp_path: Path
     project = {"case_id": str(uuid.uuid4()), "approval_policy": "signed"}
     manifest_path, report_path, report = _bundle(tmp_path, project)
     manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    plan_path = tmp_path / "plan.json"
+    plan = json.loads(plan_path.read_text(encoding="utf-8"))
+    field = json.loads((tmp_path / "field.json").read_text(encoding="utf-8"))
+    registry_path = tmp_path / "registry.json"
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
     measurements_path = tmp_path / "measurements.json"
     measurements = json.loads(measurements_path.read_text(encoding="utf-8"))
+    aggregate_path = tmp_path / "synthetic_source_record.json"
+    aggregate = json.loads(aggregate_path.read_text(encoding="utf-8"))
+    measurement_records = {
+        record["locator"]: record for record in aggregate["records"]
+        if record["kind"] == "measurement"
+    }
+    aggregate["records"] = [
+        record for record in aggregate["records"] if record["kind"] == "allocation"
+    ]
+    allocation_raw = _write_json(aggregate_path, aggregate)
+    allocation_digest = hashlib.sha256(allocation_raw).hexdigest()
+    plan["allocation_record_sha256"] = allocation_digest
+    registry["plan_sha256"] = canonical_sha256(plan)
+    measurements["registry_sha256"] = canonical_sha256(registry)
+    for role, path, value in (("plan", plan_path, plan), ("registry", registry_path, registry)):
+        raw = _write_json(path, value)
+        entry = next(source for source in manifest["sources"] if source["role"] == role)
+        entry["sha256"] = hashlib.sha256(raw).hexdigest()
+    aggregate_entry = next(
+        source for source in manifest["sources"]
+        if source["path"] == str(aggregate_path)
+    )
+    aggregate_entry["sha256"] = allocation_digest
     for index, row in enumerate(measurements["rows"]):
-        source_path = tmp_path / f"measurement_source_{index}.txt"
-        raw = row["source"]["locator"].encode("utf-8")
-        source_path.write_bytes(raw)
+        source_path = tmp_path / f"measurement_source_{index}.json"
+        raw = _write_json(source_path, {
+            "schema": 1, "classification": "field_primary_source_content_extract",
+            "records": [measurement_records[row["source"]["locator"]]],
+        })
         digest = hashlib.sha256(raw).hexdigest()
         row["source"]["record_sha256"] = digest
         manifest["sources"].append({
@@ -209,6 +256,13 @@ def test_individual_measurement_source_files_fit_bounded_manifest(tmp_path: Path
     measurements_entry["sha256"] = hashlib.sha256(measurements_raw).hexdigest()
     manifest_raw = _write_json(Path(manifest_path), manifest)
     report["source_manifest_sha256"] = hashlib.sha256(manifest_raw).hexdigest()
+    preflight = audit_field_guardrails(
+        plan, field, registry, measurements,
+        plan_sha256=canonical_sha256(plan), registry_sha256=canonical_sha256(registry),
+    )
+    report["preflight_sha256"] = hashlib.sha256(
+        field_attestation._canonical(preflight)
+    ).hexdigest()
     _write_json(Path(report_path), report)
     assert len(manifest["sources"]) == 727
     assert len(manifest_raw) < field_attestation.MAX_MANIFEST_BYTES
@@ -216,3 +270,54 @@ def test_individual_measurement_source_files_fit_bounded_manifest(tmp_path: Path
         project, "ass1", 1, "cumplido", manifest_path, report_path,
     )
     assert "source_coverage_sha256" in materials
+    manifest["sources"].extend(
+        [manifest["sources"][0]] * (field_attestation.MAX_SOURCE_COUNT + 1 - len(manifest["sources"]))
+    )
+    _write_json(Path(manifest_path), manifest)
+    with pytest.raises(field_attestation.FieldAttestationError,
+                       match="malformed field source manifest"):
+        field_attestation.inspect_materials(
+            project, "ass1", 1, "cumplido", manifest_path, report_path,
+        )
+
+
+def test_rehashed_empty_primary_extract_is_rejected_before_signature(tmp_path: Path) -> None:
+    project = {"case_id": str(uuid.uuid4()), "approval_policy": "signed"}
+    manifest_path, report_path, report = _bundle(tmp_path, project)
+    manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    plan = json.loads((tmp_path / "plan.json").read_text(encoding="utf-8"))
+    field = json.loads((tmp_path / "field.json").read_text(encoding="utf-8"))
+    registry = json.loads((tmp_path / "registry.json").read_text(encoding="utf-8"))
+    measurements = json.loads((tmp_path / "measurements.json").read_text(encoding="utf-8"))
+    source_path = tmp_path / "synthetic_source_record.json"
+    source_path.write_bytes(b"{}")
+    empty_digest = hashlib.sha256(b"{}").hexdigest()
+    plan["allocation_record_sha256"] = empty_digest
+    registry["plan_sha256"] = canonical_sha256(plan)
+    measurements["registry_sha256"] = canonical_sha256(registry)
+    for row in measurements["rows"]:
+        row["source"]["record_sha256"] = empty_digest
+    for role, value in (("plan", plan), ("registry", registry),
+                        ("measurements", measurements)):
+        raw = _write_json(tmp_path / f"{role}.json", value)
+        entry = next(source for source in manifest["sources"] if source["role"] == role)
+        entry["sha256"] = hashlib.sha256(raw).hexdigest()
+    source_entry = next(
+        source for source in manifest["sources"] if source["path"] == str(source_path)
+    )
+    source_entry["sha256"] = empty_digest
+    manifest_raw = _write_json(Path(manifest_path), manifest)
+    report["source_manifest_sha256"] = hashlib.sha256(manifest_raw).hexdigest()
+    preflight = audit_field_guardrails(
+        plan, field, registry, measurements,
+        plan_sha256=canonical_sha256(plan), registry_sha256=canonical_sha256(registry),
+    )
+    report["preflight_sha256"] = hashlib.sha256(
+        field_attestation._canonical(preflight)
+    ).hexdigest()
+    _write_json(Path(report_path), report)
+    with pytest.raises(field_attestation.FieldAttestationError,
+                       match="primary source content differs from declarations"):
+        field_attestation.inspect_materials(
+            project, "ass1", 1, "cumplido", manifest_path, report_path,
+        )

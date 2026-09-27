@@ -162,6 +162,7 @@ def inspect_materials(
             or not 5 <= len(manifest["sources"]) <= MAX_SOURCE_COUNT):
         raise FieldAttestationError("malformed field source manifest")
     sources: dict[str, list[tuple[str, bytes]]] = {}
+    opened_primary_sources: list[dict[str, Any]] = []
     seen_paths: set[str] = set()
     total_bytes = 0
     for index, source in enumerate(manifest["sources"]):
@@ -181,11 +182,15 @@ def inspect_materials(
         if total_bytes > MAX_TOTAL_SOURCE_BYTES:
             raise FieldAttestationError("field sources exceed the supported total byte limit")
         sources.setdefault(role, []).append((path, raw))
+        if role in OPTIONAL_ROLES:
+            opened_primary_sources.append({"role": role, "sha256": source["sha256"],
+                                           "raw": raw})
     if any(len(sources.get(role, ())) != 1 for role in REQUIRED_ROLES):
         raise FieldAttestationError("source manifest needs one plan, field, registry, measurements and analysis")
 
     from .field_effect_analysis import FieldEffectAnalysisError, audit_field_effect_analysis
     from .field_guardrails import audit_field_guardrails, canonical_sha256
+    from .field_source_content_audit import audit_field_source_content
     from .field_source_digest_audit import audit_field_source_digest_coverage
 
     plan, field, registry, measurements = (
@@ -210,6 +215,12 @@ def inspect_materials(
     if source_coverage.get("exact_primary_source_coverage") is not True:
         raise FieldAttestationError("field primary source digests lack exact manifest coverage")
     source_coverage_sha256 = _sha256(_canonical(source_coverage))
+    source_content = audit_field_source_content(
+        plan, field, registry, measurements, opened_primary_sources,
+    )
+    if source_content.get("exact_declared_content_match") is not True:
+        raise FieldAttestationError("field primary source content differs from declarations")
+    source_content_sha256 = _sha256(_canonical(source_content))
     analysis = _json_object(sources["analysis"][0][1], "analysis")
     try:
         analysis_preflight = audit_field_effect_analysis(
@@ -252,6 +263,7 @@ def inspect_materials(
         "report_sha256": _sha256(report_raw),
         "preflight_sha256": preflight_sha256,
         "source_coverage_sha256": source_coverage_sha256,
+        "source_content_sha256": source_content_sha256,
         "analysis_sha256": analysis_sha256,
         "analysis_preflight_sha256": analysis_preflight_sha256,
     }

@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "classification": "development_field_source_extract_match_probe",
+  "date_utc": "2026-09-27",
+  "command": "uv run pytest -q tests/test_field_source_content_audit.py tests/test_field_source_digest_audit.py tests/test_field_attestation.py tests/test_approval_security.py -k 'field or source'",
+  "result": "32 passed, 13 deselected",
+  "synthetic_positive": {
+    "declared_references": 722,
+    "opened_primary_extract_files": 2,
+    "parsed_records": 722,
+    "matched_records": 722,
+    "exact_declared_content_match": true
+  },
+  "integration_controls": [
+    "a rehashed empty primary extract is rejected before signature",
+    "720 individual typed measurement extracts pass under the bounded manifest",
+    "the signed decisive field gate stays blocked after a synthetic attestation"
+  ],
+  "direct_controls": [
+    "wrong role or measurement value",
+    "missing, extra or duplicated record",
+    "duplicate JSON keys and invalid numeric values",
+    "aggregate record-count bound"
+  ],
+  "not_verified": [
+    "whether extracts faithfully transcribe original records",
+    "source origin or independent custody",
+    "approval authority or physical measurements",
+    "causal attribution or adjusted G confidence interval"
+  ],
+  "criterion_3": "not_assessed"
+}
