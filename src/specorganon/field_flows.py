@@ -84,6 +84,9 @@ approved_by_actor_ids, verified_by, record_sha256, source}`` and ``rows`` with
 group-period; IDs exactly cover observed human-consumption flows. The
 equivalence approval is only declared, never authenticated. Denominator and
 upper-bound errors are rejected, but this tool never calculates V or G.
+Opt-in ``service.schema: 2`` requires each row's ``source`` to add a lowercase
+``record_sha256`` and requires distinct ``(record_sha256, locator)`` references.
+This preflight does not open those bytes; a separate content audit binds them.
 Tolerance evidence and the declared equivalence approval record must predate
 the first assignment; the latter cannot predate its declared approval.
 
@@ -362,7 +365,10 @@ def _validate_service(service: Any, groups: dict[str, dict[str, Any]], periods: 
                       consumed_outcome_at: dict[str, datetime]) -> str:
     if service is None:
         return "not_assessed_no_declared_equivalence"
-    row = _object(service, "service", {"equivalence", "rows"})
+    row = _object(service, "service", {"equivalence", "rows"}, {"schema"})
+    service_schema = row.get("schema")
+    if "schema" in row and (type(service_schema) is not int or service_schema != 2):
+        raise FieldFlowError("service.schema must be integer 2 when present")
     eq = _object(row["equivalence"], "service.equivalence", {
         "id", "service_unit", "approved_at_utc", "approved_by_actor_ids",
         "verified_by", "record_sha256", "source",
@@ -388,6 +394,7 @@ def _validate_service(service: Any, groups: dict[str, dict[str, Any]], periods: 
     if equivalence_source_at >= first_assignment_at:
         raise FieldFlowError("service.equivalence.source must predate first group assignment")
     seen: set[tuple[str, str]] = set()
+    seen_source_refs: set[tuple[str, str]] = set()
     for index, raw in enumerate(_array(row["rows"], "service.rows")):
         label = f"service.rows[{index}]"
         item = _object(raw, label, {
@@ -415,7 +422,22 @@ def _validate_service(service: Any, groups: dict[str, dict[str, Any]], periods: 
             raise FieldFlowError(f"{label} observed service exceeds feasible maximum (V > 1)")
         if not flow_ids and quantities[0] != 0:
             raise FieldFlowError(f"{label} positive consumed service has no observed consumption flow")
-        row_at = _period_evidence(item["source"], f"{label}.source", period_times[key[1]])
+        source = item["source"]
+        if service_schema == 2:
+            source = _object(source, f"{label}.source", {
+                "source_id", "locator", "observed_at_utc", "method", "record_sha256",
+            })
+            source_digest = source["record_sha256"]
+            if type(source_digest) is not str or SHA256.fullmatch(source_digest) is None:
+                raise FieldFlowError(f"{label}.source.record_sha256 must be lowercase SHA-256")
+            locator = _text(source["locator"], f"{label}.source.locator")
+            reference = source_digest, locator
+            if reference in seen_source_refs:
+                raise FieldFlowError(f"{label}.source repeats a service digest and locator reference")
+            seen_source_refs.add(reference)
+            source = {field: source[field] for field in
+                      ("source_id", "locator", "observed_at_utc", "method")}
+        row_at = _period_evidence(source, f"{label}.source", period_times[key[1]])
         if any(row_at < consumed_outcome_at[flow_id] for flow_id in flow_ids):
             raise FieldFlowError(f"{label} service observation predates a covered consumption outcome")
     expected = {(group, period) for group in groups for period in periods}
@@ -910,6 +932,9 @@ def audit_field_flows(data: Any) -> dict[str, Any]:
         "stage_witnesses": stage_witnesses,
         **({"lineage_bounds": lineage_bounds} if schema == 3 else {}),
         "service_status": service_status,
+        **({"service_v_input_byte_bound": False}
+           if type(root.get("service")) is dict and root["service"].get("schema") == 2
+           else {}),
         "criterion_3": {"status": "not_assessed", "reason": notice},
     }
 

@@ -13,6 +13,7 @@ from specorganon.field_source_digest_audit import (
     FieldSourceDigestAuditError,
     audit_field_source_digest_coverage,
 )
+from specorganon.field_guardrails import canonical_sha256
 
 
 def _sha(label: str) -> str:
@@ -74,7 +75,76 @@ def test_exact_role_coverage_counts_repeated_references_without_claiming_field_t
     assert report["physical_custody_authenticated"] is False
     assert report["approval_authenticated"] is False
     assert report["execution_ready"] is False
+    assert "service_v_input_byte_bound" not in report
+    assert canonical_sha256(report) == (
+        "816495cd01f95d752e176b020ec33ab1e4e47c3d00f019a16087e38759b7de41"
+    )
     assert report["criterion_3"]["status"] == "not_assessed"
+
+
+def _v2_case() -> tuple[dict, dict, dict, dict, list[dict[str, str]]]:
+    case = _case()
+    digest = _sha("service ledger bytes")
+    case[1]["service"].update({
+        "schema": 2,
+        "rows": [
+            {"source": {"record_sha256": digest, "locator": "service/pre"}},
+            {"source": {"record_sha256": digest, "locator": "service/post"}},
+        ],
+    })
+    case[4].append({"role": "source_record", "sha256": digest})
+    return case
+
+
+def test_service_schema2_digest_coverage_counts_each_row_without_claiming_content() -> None:
+    case = _v2_case()
+    before = copy.deepcopy(case)
+    report = _audit(case)
+    assert case == before
+    assert report["exact_primary_source_coverage"] is True
+    assert report["counts"]["required_references"] == 9
+    assert report["counts"]["repeated_references"] == 3
+    assert report["by_role"]["source_record"]["required_references"] == 6
+    assert report["service_v_input_byte_bound"] is False
+
+
+@pytest.mark.parametrize("change, expected", [
+    ("missing", "missing_references"),
+    ("wrong_role", "wrong_role_unique_digests"),
+    ("duplicate_opened", "duplicate_opened_entries"),
+])
+def test_service_schema2_missing_wrong_role_or_duplicate_source_fails_coverage(
+    change: str, expected: str,
+) -> None:
+    case = _v2_case()
+    if change == "missing":
+        case[4].pop()
+    elif change == "wrong_role":
+        case[4][-1]["role"] = "approval_record"
+    else:
+        case[4].append(copy.deepcopy(case[4][-1]))
+    report = _audit(case)
+    assert report["exact_primary_source_coverage"] is False
+    assert report["counts"][expected] > 0
+    assert report["service_v_input_byte_bound"] is False
+
+
+@pytest.mark.parametrize("change, message", [
+    ("missing_digest", "record_sha256 is required"),
+    ("bad_digest", "lowercase SHA-256"),
+    ("duplicate_reference", "repeats a service digest and locator reference"),
+])
+def test_service_schema2_malformed_row_reference_fails_closed(change: str, message: str) -> None:
+    case = _v2_case()
+    sources = case[1]["service"]["rows"]
+    if change == "missing_digest":
+        del sources[0]["source"]["record_sha256"]
+    elif change == "bad_digest":
+        sources[0]["source"]["record_sha256"] = "A" * 64
+    else:
+        sources[1]["source"]["locator"] = sources[0]["source"]["locator"]
+    with pytest.raises(FieldSourceDigestAuditError, match=message):
+        _audit(case)
 
 
 def test_wrong_role_is_both_missing_and_extra_even_when_digest_matches() -> None:

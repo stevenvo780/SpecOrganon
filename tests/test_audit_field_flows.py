@@ -306,6 +306,42 @@ def test_complete_graph_without_approved_equivalence_does_not_compute_service() 
     assert "V" not in report and "G" not in report
 
 
+def _as_service_schema2(data: dict[str, Any]) -> dict[str, Any]:
+    data["service"]["schema"] = 2
+    for row in data["service"]["rows"]:
+        row["source"]["record_sha256"] = "a" * 64
+    return data
+
+
+def test_service_schema2_requires_digest_and_keeps_preflight_byte_claim_false() -> None:
+    data = _as_service_schema2(field_data())
+    report = audit_field_flows(data)
+    assert report["service_status"] == "declared_service_inputs_bounded_approval_unverified"
+    assert report["service_v_input_byte_bound"] is False
+    assert "service_v_input_byte_bound" not in audit_field_flows(field_data())
+
+
+@pytest.mark.parametrize("change, message", [
+    ("missing_digest", "missing keys"),
+    ("uppercase_digest", "record_sha256 must be lowercase SHA-256"),
+    ("duplicate_reference", "repeats a service digest and locator reference"),
+    ("unsupported_schema", "service.schema must be integer 2"),
+])
+def test_service_schema2_rejects_unbound_or_duplicate_sources(change: str, message: str) -> None:
+    data = _as_service_schema2(field_data())
+    rows = data["service"]["rows"]
+    if change == "missing_digest":
+        del rows[0]["source"]["record_sha256"]
+    elif change == "uppercase_digest":
+        rows[0]["source"]["record_sha256"] = "A" * 64
+    elif change == "duplicate_reference":
+        rows[1]["source"]["locator"] = rows[0]["source"]["locator"]
+    else:
+        data["service"]["schema"] = 1
+    with pytest.raises(FieldFlowError, match=message):
+        audit_field_flows(data)
+
+
 @pytest.mark.parametrize("change,match", [
     ("missing_link", "linkage is incomplete"),
     ("duplicate_flow_reference", "duplicate IDs"),

@@ -14,6 +14,7 @@ from specorganon.field_source_content_audit import (
     audit_field_source_content,
 )
 import specorganon.field_source_content_audit as content_audit
+from specorganon.field_guardrails import canonical_sha256
 
 
 def _raw(records: list[dict]) -> bytes:
@@ -158,6 +159,12 @@ def test_all_declared_records_match_aggregate_or_single_record_files(aggregate: 
         "malformed_source_files": 0,
     }
     assert report["source_truth_authenticated"] is False
+    assert "service_v_input_byte_bound" not in report
+    assert canonical_sha256(report) == (
+        "684c6ea351182c3a9661288343bffcb12b475dfdba4e2d942f958cf264b4f172"
+        if aggregate else
+        "3299b0d643918d404e8f3a205c51e09ad6a2c3d6f3cf9c269990da38e33ede42"
+    )
     assert report["physical_custody_authenticated"] is False
     assert report["approval_authenticated"] is False
     assert report["criterion_3"]["status"] == "not_assessed"
@@ -170,6 +177,155 @@ def _replace_aggregate_source(case: tuple, raw: bytes) -> None:
     case[0]["baseline_release"]["record_sha256"] = entry["sha256"]
     for row in case[3]["rows"]:
         row["source"]["record_sha256"] = entry["sha256"]
+    if case[1].get("service", {}).get("schema") == 2:
+        for row in case[1]["service"]["rows"]:
+            row["source"]["record_sha256"] = entry["sha256"]
+
+
+def _v2_case(*, aggregate: bool = True) -> tuple[dict, dict, dict, dict, list[dict]]:
+    case = _case(aggregate=aggregate)
+    service = case[1]["service"]
+    service["schema"] = 2
+    service["rows"] = []
+    records = []
+    for period, observed_at in (("pre", "2026-01-15T12:00:00Z"),
+                                ("post", "2026-03-15T12:00:00Z")):
+        source = {
+            "source_id": "service-ledger", "locator": f"service/{period}/c1",
+            "observed_at_utc": observed_at, "method": "synthetic service count",
+        }
+        row = {
+            "group_id": "c1", "period": period,
+            "consumption_flow_ids": [f"flow/{period}/consumed"],
+            "consumed_service": {"value": 7, "unit": "servings", "uncertainty": 0.1},
+            "feasible_max_service": {"value": 10, "unit": "servings", "uncertainty": 0.2},
+            "source": {**source, "record_sha256": ""},
+        }
+        service["rows"].append(row)
+        records.append({
+            "kind": "service_row", "equivalence_id": "equivalence-one",
+            **{key: value for key, value in row.items() if key != "source"},
+            "source": source,
+        })
+    if aggregate:
+        body = json.loads(case[4][0]["raw"])
+        body["records"].extend(records)
+        _replace_aggregate_source(case, json.dumps(body).encode("utf-8"))
+    else:
+        for row, record in zip(service["rows"], records, strict=True):
+            entry = _opened("source_record", _raw([record]))
+            case[4].append(entry)
+            row["source"]["record_sha256"] = entry["sha256"]
+    return case
+
+
+@pytest.mark.parametrize("aggregate", [True, False])
+def test_service_schema2_matches_aggregate_or_per_row_extracts(aggregate: bool) -> None:
+    case = _v2_case(aggregate=aggregate)
+    before = copy.deepcopy(case)
+    report = audit_field_source_content(*case)
+    assert case == before
+    assert report["exact_declared_content_match"] is True
+    assert report["service_v_input_byte_bound"] is True
+    assert report["counts"]["declared_references"] == 8
+    assert report["counts"]["parsed_records"] == 8
+    assert report["counts"]["matched_records"] == 8
+
+
+def test_rederived_field_hash_does_not_hide_changed_service_v_input() -> None:
+    case = _v2_case()
+    before_hash = hashlib.sha256(json.dumps(case[1], sort_keys=True).encode()).hexdigest()
+    case[1]["service"]["rows"][0]["consumed_service"]["value"] = 8
+    after_hash = hashlib.sha256(json.dumps(case[1], sort_keys=True).encode()).hexdigest()
+    assert before_hash != after_hash
+    report = audit_field_source_content(*case)
+    assert report["exact_declared_content_match"] is False
+    assert report["service_v_input_byte_bound"] is False
+    assert report["counts"]["mismatched_records"] == 1
+    assert report["mismatched_examples"][0]["kind"] == "service_row"
+
+
+def test_service_schema2_extract_accepts_matching_fractional_source_time() -> None:
+    case = _v2_case()
+    observed_at = "2026-01-15T12:00:00.123456Z"
+    case[1]["service"]["rows"][0]["source"]["observed_at_utc"] = observed_at
+    body = json.loads(case[4][0]["raw"])
+    record = next(item for item in body["records"] if item["kind"] == "service_row")
+    record["source"]["observed_at_utc"] = observed_at
+    _replace_aggregate_source(case, json.dumps(body).encode("utf-8"))
+    report = audit_field_source_content(*case)
+    assert report["exact_declared_content_match"] is True
+    assert report["service_v_input_byte_bound"] is True
+
+
+@pytest.mark.parametrize("path", [
+    ("group_id",), ("period",), ("consumption_flow_ids",),
+    ("consumed_service", "value"), ("consumed_service", "unit"),
+    ("consumed_service", "uncertainty"),
+    ("feasible_max_service", "value"), ("feasible_max_service", "unit"),
+    ("feasible_max_service", "uncertainty"),
+    ("source", "source_id"), ("source", "observed_at_utc"),
+    ("source", "method"), ("equivalence_id",),
+])
+def test_rehashed_service_extract_must_match_every_declared_fact(path: tuple[str, ...]) -> None:
+    case = _v2_case()
+    body = json.loads(case[4][0]["raw"])
+    record = next(item for item in body["records"] if item["kind"] == "service_row")
+    target = record
+    for key in path[:-1]:
+        target = target[key]
+    key = path[-1]
+    if key == "consumption_flow_ids":
+        target[key] = ["different-flow"]
+    elif key == "observed_at_utc":
+        target[key] = "2026-01-16T12:00:00Z"
+    elif key in {"value", "uncertainty"}:
+        target[key] = 5
+    else:
+        target[key] = "changed"
+    _replace_aggregate_source(case, json.dumps(body).encode("utf-8"))
+    report = audit_field_source_content(*case)
+    assert report["exact_declared_content_match"] is False
+    assert report["service_v_input_byte_bound"] is False
+    assert report["counts"]["mismatched_records"] == 1
+
+
+def test_rehashed_service_extract_with_changed_source_locator_loses_reference() -> None:
+    case = _v2_case()
+    body = json.loads(case[4][0]["raw"])
+    record = next(item for item in body["records"] if item["kind"] == "service_row")
+    record["source"]["locator"] = "service/different"
+    _replace_aggregate_source(case, json.dumps(body).encode("utf-8"))
+    report = audit_field_source_content(*case)
+    assert report["exact_declared_content_match"] is False
+    assert report["service_v_input_byte_bound"] is False
+    assert report["counts"]["missing_records"] == 1
+    assert report["counts"]["extra_records"] == 1
+
+
+@pytest.mark.parametrize("change, counter", [
+    ("missing", "missing_records"),
+    ("wrong_role", "missing_records"),
+    ("duplicate", "duplicate_records"),
+])
+def test_service_schema2_missing_wrong_role_or_duplicate_record_fails(
+    change: str, counter: str,
+) -> None:
+    case = _v2_case(aggregate=False)
+    if change == "missing":
+        case[4].pop()
+    elif change == "wrong_role":
+        case[4][-1]["role"] = "approval_record"
+    else:
+        body = json.loads(case[4][-1]["raw"])
+        body["records"].append(copy.deepcopy(body["records"][0]))
+        entry = _opened("source_record", json.dumps(body).encode("utf-8"))
+        case[4][-1] = entry
+        case[1]["service"]["rows"][-1]["source"]["record_sha256"] = entry["sha256"]
+    report = audit_field_source_content(*case)
+    assert report["exact_declared_content_match"] is False
+    assert report["service_v_input_byte_bound"] is False
+    assert report["counts"][counter] > 0
 
 
 def test_rehashed_empty_extract_is_not_a_false_green() -> None:

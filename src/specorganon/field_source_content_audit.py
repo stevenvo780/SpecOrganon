@@ -7,6 +7,9 @@ Schema 1 classifies it as ``field_primary_source_content_extract``. A record
 array may contain one or several typed records, but every declared reference
 must find exactly one record under the expected role and file SHA-256. The
 format is deliberately a constrained extract, not an arbitrary field document.
+Opt-in ``field.service.schema: 2`` also requires one ``service_row`` record per
+declared row under its ``source_record`` digest. The extract omits that digest
+from the row's ``source`` to avoid a self-referential file hash.
 
 Matching these extracts does not authenticate their truth, custody, the
 authority of an approver, or real-world impact.
@@ -26,6 +29,7 @@ REPORT_CLASSIFICATION = "field_primary_source_content_match_declared_only"
 PRIMARY_ROLES = frozenset({"source_record", "approval_record"})
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\Z")
+UTC_FRACTION = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z\Z")
 MAX_SOURCE_BYTES = 64 * 1024 * 1024
 MAX_TOTAL_SOURCE_BYTES = 256 * 1024 * 1024
 MAX_SOURCE_COUNT = 2048
@@ -69,9 +73,10 @@ def _text(value: Any, label: str) -> str:
     return value
 
 
-def _utc(value: Any, label: str) -> str:
+def _utc(value: Any, label: str, *, allow_fraction: bool = False) -> str:
     _text(value, label)
-    if UTC.fullmatch(value) is None:
+    pattern = UTC_FRACTION if allow_fraction else UTC
+    if pattern.fullmatch(value) is None:
         raise FieldSourceContentAuditError(f"{label} must be a UTC timestamp ending in Z")
     try:
         from datetime import datetime
@@ -110,14 +115,32 @@ def _ids(value: Any, label: str) -> list[str]:
     return sorted(items)
 
 
-def _source(value: Any, label: str) -> dict[str, str]:
+def _source(value: Any, label: str, *, allow_fraction: bool = False) -> dict[str, str]:
     item = _object(value, label, SOURCE_FIELDS)
     return {
         "source_id": _text(item["source_id"], f"{label}.source_id"),
         "locator": _text(item["locator"], f"{label}.locator"),
-        "observed_at_utc": _utc(item["observed_at_utc"], f"{label}.observed_at_utc"),
+        "observed_at_utc": _utc(item["observed_at_utc"], f"{label}.observed_at_utc",
+                                allow_fraction=allow_fraction),
         "method": _text(item["method"], f"{label}.method"),
     }
+
+
+def _service_quantity(value: Any, label: str) -> dict[str, Any]:
+    item = _object(value, label, {"value", "unit", "uncertainty"})
+    return {
+        "value": _number(item["value"], f"{label}.value"),
+        "unit": _text(item["unit"], f"{label}.unit"),
+        "uncertainty": _number(item["uncertainty"], f"{label}.uncertainty"),
+    }
+
+
+def _service_flow_ids(value: Any, label: str) -> list[str]:
+    ids = [_text(item, f"{label}[{index}]")
+           for index, item in enumerate(_array(value, label))]
+    if len(ids) != len(set(ids)):
+        raise FieldSourceContentAuditError(f"{label} repeats an ID")
+    return sorted(ids)
 
 
 def _normalize_record(value: Any, label: str) -> tuple[str, str, dict[str, Any]]:
@@ -140,6 +163,26 @@ def _normalize_record(value: Any, label: str) -> tuple[str, str, dict[str, Any]]
             "unit": _text(item["unit"], f"{label}.unit"),
             "denominator": _text(item["denominator"], f"{label}.denominator"),
             "source_id": _text(item["source_id"], f"{label}.source_id"),
+        }
+    elif kind == "service_row":
+        _object(item, label, {
+            "kind", "group_id", "period", "consumption_flow_ids", "consumed_service",
+            "feasible_max_service", "source", "equivalence_id",
+        })
+        source = _source(item["source"], f"{label}.source", allow_fraction=True)
+        identifier = source["locator"]
+        normalized = {
+            "kind": kind,
+            "group_id": _text(item["group_id"], f"{label}.group_id"),
+            "period": _text(item["period"], f"{label}.period"),
+            "consumption_flow_ids": _service_flow_ids(item["consumption_flow_ids"],
+                                                      f"{label}.consumption_flow_ids"),
+            "consumed_service": _service_quantity(item["consumed_service"],
+                                                   f"{label}.consumed_service"),
+            "feasible_max_service": _service_quantity(item["feasible_max_service"],
+                                                       f"{label}.feasible_max_service"),
+            "source": source,
+            "equivalence_id": _text(item["equivalence_id"], f"{label}.equivalence_id"),
         }
     elif kind == "allocation":
         _object(item, label, {"kind", "study_id", "allocation_method", "groups"})
@@ -304,6 +347,9 @@ def _declared_records(
     service = field.get("service")
     if service is not None:
         service = _object(service, "field.service")
+        service_schema = service.get("schema")
+        if "schema" in service and (type(service_schema) is not int or service_schema != 2):
+            raise FieldSourceContentAuditError("field.service.schema must be integer 2 when present")
         equivalence = _object(service.get("equivalence"), "field.service.equivalence")
         add("approval_record", equivalence.get("record_sha256"), {
             "kind": "equivalence", "id": equivalence.get("id"),
@@ -313,6 +359,23 @@ def _declared_records(
             "verified_by": equivalence.get("verified_by"),
             "source": equivalence.get("source"),
         }, "field.service.equivalence")
+        if service_schema == 2:
+            for index, raw_row in enumerate(_array(service.get("rows"), "field.service.rows",
+                                                  nonempty=True)):
+                label = f"field.service.rows[{index}]"
+                row = _object(raw_row, label)
+                source = _object(row.get("source"), f"{label}.source",
+                                 SOURCE_FIELDS | {"record_sha256"})
+                add("source_record", source["record_sha256"], {
+                    "kind": "service_row",
+                    "group_id": row.get("group_id"),
+                    "period": row.get("period"),
+                    "consumption_flow_ids": row.get("consumption_flow_ids"),
+                    "consumed_service": row.get("consumed_service"),
+                    "feasible_max_service": row.get("feasible_max_service"),
+                    "equivalence_id": equivalence.get("id"),
+                    "source": {key: source[key] for key in SOURCE_FIELDS},
+                }, label)
 
     cells: dict[str, dict[str, Any]] = {}
     for index, raw_cell in enumerate(_array(registry.get("cells"), "registry.cells")):
@@ -441,6 +504,9 @@ def audit_field_source_content(
         "schema": 1,
         "classification": REPORT_CLASSIFICATION,
         "exact_declared_content_match": exact,
+        **({"service_v_input_byte_bound": exact}
+           if type(field.get("service")) is dict and field["service"].get("schema") == 2
+           else {}),
         "counts": {
             "declared_references": len(expected),
             "opened_primary_entries": len(opened),

@@ -92,12 +92,36 @@ def audit_field_source_digest_coverage(
     service = field.get("service")
     if service is not None:
         service = _object(service, "field.service")
+        service_schema = service.get("schema")
+        if "schema" in service and (type(service_schema) is not int or service_schema != 2):
+            raise FieldSourceDigestAuditError("field.service.schema must be integer 2 when present")
         if "equivalence" not in service:
             raise FieldSourceDigestAuditError("field.service.equivalence is required")
         equivalence = _object(service["equivalence"], "field.service.equivalence")
         add("approval_record", _required_digest(equivalence, "record_sha256",
                                                  "field.service.equivalence"),
             "field.service.equivalence.record_sha256")
+        if service_schema == 2:
+            if "rows" not in service:
+                raise FieldSourceDigestAuditError("field.service.rows is required")
+            seen_service_references: set[tuple[str, str]] = set()
+            for index, raw_row in enumerate(_list(service["rows"], "field.service.rows")):
+                label = f"field.service.rows[{index}]"
+                service_row = _object(raw_row, label)
+                if "source" not in service_row:
+                    raise FieldSourceDigestAuditError(f"{label}.source is required")
+                source = _object(service_row["source"], f"{label}.source")
+                digest = _required_digest(source, "record_sha256", f"{label}.source")
+                locator = source.get("locator")
+                if type(locator) is not str or not locator.strip() or locator != locator.strip():
+                    raise FieldSourceDigestAuditError(f"{label}.source.locator must be nonempty trimmed text")
+                reference = digest, locator
+                if reference in seen_service_references:
+                    raise FieldSourceDigestAuditError(
+                        f"{label}.source repeats a service digest and locator reference"
+                    )
+                seen_service_references.add(reference)
+                add("source_record", digest, f"{label}.source.record_sha256")
 
     if "cells" not in registry:
         raise FieldSourceDigestAuditError("registry.cells is required")
@@ -175,6 +199,9 @@ def audit_field_source_digest_coverage(
         "schema": 1,
         "classification": CLASSIFICATION,
         "exact_primary_source_coverage": exact,
+        **({"service_v_input_byte_bound": False}
+           if type(field.get("service")) is dict and field["service"].get("schema") == 2
+           else {}),
         "counts": {
             "required_references": sum(len(paths) for paths in required.values()),
             "unique_required_role_digests": len(required_keys),
