@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "classification": "development_local_run_admission_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "implementation_sha256": {
+    "scripts/local_run_admission.py": "ecf0e1c121e76c77fe8b017090b525c1151caa008a2ebccd0cb1ac73bb6e43db",
+    "scripts/staged_tool_session.py": "5082a2cb136cefa814a16b2c5cfaadfdeade3e5d09f9883f600f62da7689d40e",
+    "scripts/run_staged_local_tool.py": "5be420e8be2c5287712d028df1a89642ee6ef32fd900c2de1d246600498b3aea",
+    "tests/test_local_run_admission.py": "e65f8ebb789cdff88f5bfe3a2c0ff2f32252022c21a631851e839bc0e6f0a9b6",
+    "tests/test_staged_tool_session.py": "935303dc95c980af0380a28545006d657834afd347e5d78a3d5a80295c593976",
+    "tests/test_run_staged_local_tool.py": "529e16f4e1f521f5173f628db5e0537ea83a59b45ca4d613c411f9b5ce1698fc"
+  },
+  "local_admission": {
+    "attempt_number": 1,
+    "key": "SHA-256 of canonical schedule_sha256 plus run_id",
+    "owner": "one staged stage/session or one one-shot stage/receipt",
+    "scope": "cooperating processes of one UID on one host using one configured private registry root",
+    "init_claims_attempt": false,
+    "first_valid_call_claims_before_reservation": true,
+    "one_shot_claims_before_reservation": true,
+    "other_owner_launch_rejected": true,
+    "retry_transition_implemented": false,
+    "global_run_limits_enforced": false,
+    "provider_calls": 0,
+    "measured_tokens": null,
+    "criterion_4": "not_assessed"
+  },
+  "adversarial_controls": [
+    "Two prepared copies of one schedule/run cannot both spend a local tool-call cap of one.",
+    "Staged session and one-shot execution exclude each other in both winner orders before a losing reservation or launch.",
+    "Two independent CLI processes released at the claim boundary produce one winner and no reservation for the loser.",
+    "A crash after claim and before staged reservation permits only the same owner to resume; a one-shot claim survives a crash before its reservation and blocks another owner.",
+    "A pending or damaged staged reservation keeps the winner indeterminate and blocks a second stage.",
+    "Injected EIO in claim publication or claim reading blocks launch and never gives another owner a reservation.",
+    "A missing or malformed claim blocks a previously claimed local session.",
+    "Changing the configured registry root blocks an existing staged session; CLI checks the root override for staged and one-shot modes."
+  ],
+  "independent_review": {
+    "result": "No actionable finding in the declared host-local scope after reviewing claim publication, both execution paths, identity checks and failure behavior.",
+    "tests_at_review": "54 affected tests passed; reviewer identified missing process-race and direct CLI override coverage, then three targeted tests were added without changing implementation code.",
+    "limitations": "The review did not establish power-loss survival, resistance to a hostile same-UID process, a cross-host budget, provider telemetry, or independent custody."
+  },
+  "gates": [
+    {
+      "command": ".venv/bin/python -m pytest -q",
+      "result": "1165 passed in 131.71s"
+    },
+    {
+      "command": "python3 -m pytest -q tests/test_local_run_admission.py tests/test_staged_tool_session.py tests/test_run_staged_local_tool.py",
+      "result": "57 passed in 18.58s"
+    },
+    {
+      "command": "ruff check scripts/local_run_admission.py scripts/staged_tool_session.py scripts/run_staged_local_tool.py tests/test_local_run_admission.py tests/test_staged_tool_session.py tests/test_run_staged_local_tool.py",
+      "result": "All checks passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "limits": [
+    "The registry works only when invokers cooperate on one private root; selecting another UID, host or root creates another scope.",
+    "The first local attempt has no implemented transition to a retry; the protocol requires documented external failure before a usable result and at most ten additional attempts studywide.",
+    "The local session budgets count local tool calls and observed sandbox time, not provider model activity, measured tokens or costs.",
+    "The runtime image is not verified; the registry and local sandbox do not supply independent custody, a blind evaluator or field evidence.",
+    "Process-crash and injected fsync errors were tested, not an actual power cut. Criterion 4 remains not assessed."
+  ]
+}
