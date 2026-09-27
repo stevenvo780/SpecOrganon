@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "classification": "exposed_development_text_only_manual_method_ablation_revision",
+  "revision": 2,
+  "parent_frozen_matrix_commit": "436065e",
+  "recorded_instrumental_failure_commit": "d001784",
+  "reason": "The bridge rejected gemini/gemini-3.8-flash-low before any provider call. Its local route parser accepts the exact display name from agy models, not the short catalog ID. No substantive model response from this pilot had been observed at revision time.",
+  "unchanged": [
+    "common_task.md",
+    "prompt_n.md",
+    "prompt_s.md",
+    "prompt_am.md",
+    "rubric.md",
+    "source file hashes",
+    "arm order",
+    "one call per cell",
+    "120 second timeout",
+    "900 word request"
+  ],
+  "changes": [
+    "Gemini routes use exact agy catalog display names",
+    "each v2 call uses a fresh empty working directory in text access"
+  ],
+  "source_frozen_matrix": "frozen_matrix.json",
+  "source_prompt_hashes": {
+    "N": "cf65311d73bf90044b748337c871e836042fb4a97e5c23282ead6ed2bc3913f7",
+    "S": "3c682649b458db687b266d62739081312fce6949ec6a39592e8b373f6d49ef67",
+    "A-M": "968f5b2da2bd7d3c5b50c7855bfb5e5799c6699c6eebc93620a390c0c36549da"
+  },
+  "rubric_sha256": "c0e301a85284530d91c9fcf1862948f21fa35c5a0e3a688bed400d8a0a8ca1e9",
+  "runner": {
+    "tool": "cloud-offload.delegar_a_cloud",
+    "access": "text",
+    "fresh_empty_cwd_per_cell": true,
+    "timeout_seconds_per_call": 120,
+    "max_v2_calls": 9,
+    "effort_argument": null,
+    "system_argument": null,
+    "output_word_limit_requested": 900,
+    "output_limit_enforced": false,
+    "token_limit_enforced": false,
+    "cost_limit_enforced": false
+  },
+  "blocks": [
+    {
+      "block": 1,
+      "route": "gemini/Gemini 3.8 Flash (Low)",
+      "model_family": "Gemini",
+      "effort_variant": "low",
+      "arm_order": [
+        "N",
+        "S",
+        "A-M"
+      ]
+    },
+    {
+      "block": 2,
+      "route": "minimax/MiniMax-M3",
+      "model_family": "MiniMax",
+      "effort_variant": "not_controllable_by_bridge",
+      "arm_order": [
+        "S",
+        "A-M",
+        "N"
+      ]
+    },
+    {
+      "block": 3,
+      "route": "gemini/Gemini 3.8 Flash (High)",
+      "model_family": "Gemini",
+      "effort_variant": "high",
+      "arm_order": [
+        "A-M",
+        "N",
+        "S"
+      ]
+    }
+  ],
+  "cells": [
+    {
+      "id": "v2_g38l_n",
+      "block": 1,
+      "arm": "N",
+      "prompt": "prompt_n.md"
+    },
+    {
+      "id": "v2_g38l_s",
+      "block": 1,
+      "arm": "S",
+      "prompt": "prompt_s.md"
+    },
+    {
+      "id": "v2_g38l_am",
+      "block": 1,
+      "arm": "A-M",
+      "prompt": "prompt_am.md"
+    },
+    {
+      "id": "v2_m3_s",
+      "block": 2,
+      "arm": "S",
+      "prompt": "prompt_s.md"
+    },
+    {
+      "id": "v2_m3_am",
+      "block": 2,
+      "arm": "A-M",
+      "prompt": "prompt_am.md"
+    },
+    {
+      "id": "v2_m3_n",
+      "block": 2,
+      "arm": "N",
+      "prompt": "prompt_n.md"
+    },
+    {
+      "id": "v2_g38h_am",
+      "block": 3,
+      "arm": "A-M",
+      "prompt": "prompt_am.md"
+    },
+    {
+      "id": "v2_g38h_n",
+      "block": 3,
+      "arm": "N",
+      "prompt": "prompt_n.md"
+    },
+    {
+      "id": "v2_g38h_s",
+      "block": 3,
+      "arm": "S",
+      "prompt": "prompt_s.md"
+    }
+  ],
+  "limits": [
+    "This is a versioned development revision after an instrumental route error, not the original frozen matrix or a confirmatory run.",
+    "The previous rejected call remains a failed attempt and is excluded from v2 quality scoring.",
+    "Runtime availability of corrected routes is unproven until a v2 call succeeds.",
+    "Cloud bridge duration is available; provider tokens, cost and strict output cap are not."
+  ]
+}
