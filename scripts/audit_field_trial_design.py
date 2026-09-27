@@ -1,7 +1,8 @@
 """Compare a declared field trial plan with declared food-chain observations.
 
-Usage: ``python scripts/audit_field_trial_design.py PLAN.json FIELD.json``.
-Both inputs remain under the caller's custody. A structural match does not
+Usage: ``python scripts/audit_field_trial_design.py PLAN.json FIELD.json
+          [--weekly-manifest WEEKLY.json]``.
+Inputs remain under the caller's custody. A structural match does not
 authenticate registration, randomization, measurement, or field impact.
 """
 
@@ -31,14 +32,17 @@ from audit_field_flows import (
 
 CLASSIFICATION = "field_trial_design_preflight_declared_only"
 PLAN_CLASSIFICATION = "field_trial_design_candidate_unsealed"
+WEEKLY_CLASSIFICATION = "field_trial_weekly_measurements_unsealed"
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 NOTICE = (
     "The supplied candidate plan and schema-3 observation graph agree on groups, "
     "arms, strata and period windows; declared group counts and window lengths "
-    "meet the protocol minimum. This does not authenticate prior registration, "
-    "random assignment, weekly measurement coverage, eligible inputs, source "
-    "truth, approval, causal attribution, safety, or field impact. No V or G "
-    "is calculated; criterion 3 is not assessed."
+    "meet the protocol minimum. An optional weekly manifest checks one declared "
+    "measurement per group and anchored week, including a trailing partial week. "
+    "It does not authenticate records or prove complete daily or eligible-load "
+    "coverage, prior registration, random assignment, source truth, approval, "
+    "causal attribution, safety, or field impact. No V or G is calculated; "
+    "criterion 3 is not assessed."
 )
 
 
@@ -83,7 +87,90 @@ def _periods(value: Any, label: str) -> dict[str, tuple[Any, Any]]:
     return result
 
 
-def audit_field_trial_design(plan: Any, field: Any) -> dict[str, Any]:
+def _weekly_presence(manifest: Any, study_id: str,
+                     groups: dict[str, tuple[str, str]],
+                     periods: dict[str, tuple[Any, Any]]) -> dict[str, Any]:
+    root = _object(manifest, "weekly_manifest", {
+        "schema", "classification", "study_id", "periods", "rows",
+    })
+    if type(root["schema"]) is not int or root["schema"] != 1:
+        raise FieldTrialDesignError("weekly_manifest.schema must be 1")
+    if root["classification"] != WEEKLY_CLASSIFICATION:
+        raise FieldTrialDesignError("weekly_manifest.classification must identify unsealed measurements")
+    if _text(root["study_id"], "weekly_manifest.study_id") != study_id:
+        raise FieldTrialDesignError("weekly manifest and plan study_id differ")
+    if _periods(root["periods"], "weekly_manifest.periods") != periods:
+        raise FieldTrialDesignError("weekly manifest and plan period windows differ")
+    if type(root["rows"]) is not list:
+        raise FieldTrialDesignError("weekly_manifest.rows must be an array")
+
+    week = timedelta(weeks=1)
+    weeks_by_period: dict[str, int] = {}
+    for period, (start, end) in sorted(periods.items()):
+        duration = end - start
+        full_weeks, trailing = divmod(duration, week)
+        weeks_by_period[period] = full_weeks + bool(trailing)
+
+    seen: set[tuple[str, str, int]] = set()
+    source_locations: set[tuple[str, str]] = set()
+    for index, raw in enumerate(root["rows"]):
+        label = f"weekly_manifest.rows[{index}]"
+        item = _object(raw, label, {
+            "group_id", "period", "week_index", "measured_at_utc",
+            "record_sha256", "locator", "method",
+        })
+        group_id = _text(item["group_id"], f"{label}.group_id")
+        period = _text(item["period"], f"{label}.period")
+        week_index = item["week_index"]
+        if group_id not in groups or period not in periods:
+            raise FieldTrialDesignError(f"{label} references unknown group or period")
+        if (type(week_index) is not int or week_index < 0
+                or week_index >= weeks_by_period[period]):
+            raise FieldTrialDesignError(f"{label}.week_index is outside the planned window")
+        key = group_id, period, week_index
+        if key in seen:
+            raise FieldTrialDesignError(f"duplicate weekly group-period-week row: {key}")
+        seen.add(key)
+        measured_at = _utc(item["measured_at_utc"], f"{label}.measured_at_utc")
+        start = periods[period][0] + week * week_index
+        period_end = periods[period][1]
+        end = period_end if period_end - start <= week else start + week
+        if not start <= measured_at < end:
+            raise FieldTrialDesignError(f"{label}.measured_at_utc falls outside its half-open week")
+        digest = _text(item["record_sha256"], f"{label}.record_sha256")
+        if SHA256.fullmatch(digest) is None:
+            raise FieldTrialDesignError(f"{label}.record_sha256 must be lowercase SHA-256")
+        locator = _text(item["locator"], f"{label}.locator")
+        _text(item["method"], f"{label}.method")
+        # A digest identifies source bytes; a locator identifies a row within those bytes.
+        # Neither field alone is a globally unique measurement identifier.
+        source_location = digest, locator
+        if source_location in source_locations:
+            raise FieldTrialDesignError("weekly manifest reuses the same record and locator")
+        source_locations.add(source_location)
+
+    expected_count = len(groups) * sum(weeks_by_period.values())
+    if len(seen) != expected_count:
+        missing = []
+        for group_id in sorted(groups):
+            for period in sorted(periods):
+                for week_index in range(weeks_by_period[period]):
+                    if (group_id, period, week_index) not in seen:
+                        missing.append((group_id, period, week_index))
+                        if len(missing) == 5:
+                            break
+                if len(missing) == 5:
+                    break
+            if len(missing) == 5:
+                break
+        raise FieldTrialDesignError(
+            f"weekly manifest missing {expected_count - len(seen)} group-week rows: {missing}"
+        )
+    return {"weeks_by_period": weeks_by_period, "group_week_rows": len(seen)}
+
+
+def audit_field_trial_design(plan: Any, field: Any,
+                             weekly_manifest: Any | None = None) -> dict[str, Any]:
     try:
         candidate = _object(plan, "plan", {
             "schema", "classification", "study_id", "registered_at_utc",
@@ -157,6 +244,9 @@ def audit_field_trial_design(plan: Any, field: Any) -> dict[str, Any]:
         if any(_utc(group["source"]["observed_at_utc"], "field.groups.source.observed_at_utc")
                <= registered_at for group in field["groups"]):
             raise FieldTrialDesignError("declared assignment source predates registration")
+        weekly_presence = (_weekly_presence(weekly_manifest, study_id,
+                                            planned_groups, planned_periods)
+                           if weekly_manifest is not None else None)
     except FieldFlowError as exc:
         raise FieldTrialDesignError(f"field or plan structure failed: {exc}") from exc
 
@@ -178,6 +268,12 @@ def audit_field_trial_design(plan: Any, field: Any) -> dict[str, Any]:
         "registration_authenticated": False,
         "baseline_release_declared": baseline_release is not None,
         "baseline_release_authenticated": False,
+        "weekly_manifest_supplied": weekly_presence is not None,
+        "declared_weekly_measurement_presence_complete": (
+            True if weekly_presence is not None else None
+        ),
+        "declared_weekly_measurement_summary": weekly_presence,
+        "weekly_manifest_sources_authenticated": False,
         "weekly_measurement_coverage_verified": False,
         "execution_ready": False,
         "notice": NOTICE,
@@ -199,15 +295,21 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("plan", type=Path)
     parser.add_argument("field", type=Path)
+    parser.add_argument("--weekly-manifest", type=Path)
     args = parser.parse_args(argv)
     try:
         plan, plan_sha256 = _read_json(args.plan)
         field, field_sha256 = _read_json(args.field)
-        report = audit_field_trial_design(plan, field)
+        weekly = None
+        if args.weekly_manifest is not None:
+            weekly, weekly_sha256 = _read_json(args.weekly_manifest)
+        report = audit_field_trial_design(plan, field, weekly)
     except (OSError, FieldTrialDesignError) as exc:
         print(f"Field trial design preflight failed: {exc}", file=sys.stderr)
         return 2
     report["input_sha256"] = {"plan": plan_sha256, "field": field_sha256}
+    if args.weekly_manifest is not None:
+        report["input_sha256"]["weekly_manifest"] = weekly_sha256
     print(json.dumps(report, sort_keys=True, separators=(",", ":")))
     return 0
 

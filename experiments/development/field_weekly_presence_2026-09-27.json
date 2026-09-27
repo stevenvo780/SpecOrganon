@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "classification": "development_declared_weekly_presence_preflight_unsealed",
+  "date_utc": "2026-09-27",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "protocol_sha256_unchanged": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "script_sha256": "7b74450d16cbddc36bc6232e9d856723e4e32a103fd3c666b316747a4eec7022",
+  "test_sha256": "850737040a937de213a62a2a43c1070ed8f06a8b96d1c462e29344ae4d56db2b",
+  "fixture": "tests/test_audit_field_trial_design.py creates the synthetic 12-group schema-3 field, candidate plan, and weekly manifest; the CLI probe serialized each input with json.dumps(sort_keys=True, separators=(',', ':')).",
+  "positive_input_sha256": {
+    "plan": "cc102bae460001d7c94655082f2ada7a01db6c48319ad432c50c6a4fb1d7dabc",
+    "field": "d2197fb3ed348a406c8fe875079bdeb21efd86eba0de3cdfd81cccb96a72a660",
+    "weekly_manifest": "2876557cf12ac4f9fabe4694dc3823ed9bfa74e4c37ac8ba85c9fbb1d5cdc841"
+  },
+  "positive_cli": {
+    "exit_code": 0,
+    "groups": 12,
+    "declared_weeks_pre": 5,
+    "declared_weeks_post": 9,
+    "declared_group_week_rows": 168,
+    "declared_weekly_measurement_presence_complete": true,
+    "weekly_manifest_sources_authenticated": false,
+    "weekly_measurement_coverage_verified": false,
+    "execution_ready": false,
+    "criterion_3": "not_assessed"
+  },
+  "negative_cli": {
+    "mutation": "remove intervention group i6, post week 4 from the synthetic weekly manifest",
+    "mutated_weekly_manifest_sha256": "98917ec6f95b82d442abaf3c525f776eb4404c7468c38f44dc70d7ec22e988d2",
+    "exit_code": 2,
+    "stdout_empty": true,
+    "stderr": "Field trial design preflight failed: weekly manifest missing 1 group-week rows: [('i6', 'post', 4)]"
+  },
+  "checks": [
+    {"command": "uv run pytest -q tests/test_audit_field_trial_design.py", "result": "26 passed"},
+    {"command": "uv run pytest -q", "result": "999 passed in 71.36s"},
+    {"command": "uv run --no-sync ruff check scripts/audit_field_trial_design.py tests/test_audit_field_trial_design.py", "result": "passed"}
+  ],
+  "independent_review": "A native read-only reviewer found no remaining false green inside the documented presence-only contract. A proposed duplicate-locator issue was withdrawn after clarifying that source identity is the pair of file digest and locator.",
+  "limits": [
+    "The weekly rows and SHA-256 strings are self-declared; the referenced source bytes and physical observations were not read or authenticated.",
+    "One declared event per group-week does not establish complete daily coverage, all eligible loads, a weekly food-service value, or consistency with period-aggregate service rows.",
+    "The test groups, lots, times, approvals, and weekly events are synthetic. No field trial, intervention, power calculation, V, G, causal interval, harm, or cost was measured.",
+    "The unchanged protocol's 80 percent power question versus lower-CI success threshold remains open pending site priors and a human statistical decision."
+  ],
+  "criterion_3": "not_assessed"
+}

@@ -7,6 +7,7 @@ import hashlib
 import json
 import subprocess
 import sys
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,7 @@ sys.path.insert(0, str(SCRIPT.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 from audit_field_trial_design import (  # noqa: E402
     PLAN_CLASSIFICATION,
+    WEEKLY_CLASSIFICATION,
     FieldTrialDesignError,
     audit_field_trial_design,
 )
@@ -72,6 +74,32 @@ def _plan(field: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _weekly_manifest(plan: dict[str, Any]) -> dict[str, Any]:
+    rows = []
+    for period in plan["periods"]:
+        start = datetime.fromisoformat(period["start_utc"].replace("Z", "+00:00"))
+        end = datetime.fromisoformat(period["end_utc"].replace("Z", "+00:00"))
+        index = 0
+        while start < end:
+            next_end = min(start + timedelta(weeks=1), end)
+            measured_at = (start + (next_end - start) / 2).isoformat().replace("+00:00", "Z")
+            for group in plan["groups"]:
+                locator = f"synthetic/{group['id']}/{period['id']}/{index}"
+                rows.append({
+                    "group_id": group["id"], "period": period["id"],
+                    "week_index": index, "measured_at_utc": measured_at,
+                    "record_sha256": hashlib.sha256(locator.encode()).hexdigest(),
+                    "locator": locator, "method": "synthetic fixture",
+                })
+            start = next_end
+            index += 1
+    return {
+        "schema": 1, "classification": WEEKLY_CLASSIFICATION,
+        "study_id": plan["study_id"], "periods": copy.deepcopy(plan["periods"]),
+        "rows": rows,
+    }
+
+
 def test_twelve_group_schema3_candidate_matches_without_claiming_impact() -> None:
     field = _twelve_group_field()
     report = audit_field_trial_design(_plan(field), field)
@@ -83,8 +111,66 @@ def test_twelve_group_schema3_candidate_matches_without_claiming_impact() -> Non
     assert not report["randomization_verified"]
     assert not report["registration_authenticated"]
     assert not report["weekly_measurement_coverage_verified"]
+    assert not report["weekly_manifest_supplied"]
+    assert report["declared_weekly_measurement_presence_complete"] is None
     assert not report["execution_ready"]
     assert report["criterion_3"]["status"] == "not_assessed"
+
+
+def test_weekly_manifest_checks_every_group_and_partial_week_without_claiming_coverage() -> None:
+    field = _twelve_group_field()
+    plan = _plan(field)
+    weekly = _weekly_manifest(plan)
+    report = audit_field_trial_design(plan, field, weekly)
+    assert report["weekly_manifest_supplied"]
+    assert report["declared_weekly_measurement_presence_complete"] is True
+    assert report["declared_weekly_measurement_summary"] == {
+        "weeks_by_period": {"pre": 5, "post": 9}, "group_week_rows": 168,
+    }
+    assert not report["weekly_manifest_sources_authenticated"]
+    assert not report["weekly_measurement_coverage_verified"]
+    assert not report["execution_ready"]
+    assert report["criterion_3"]["status"] == "not_assessed"
+
+
+@pytest.mark.parametrize("change,expected", [
+    ("missing_middle", "missing 1 group-week rows"),
+    ("duplicate", "duplicate weekly group-period-week row"),
+    ("unknown_group", "references unknown group or period"),
+    ("boundary", "falls outside its half-open week"),
+    ("outside", "week_index is outside the planned window"),
+    ("wrong_study", "study_id differ"),
+    ("wrong_window", "period windows differ"),
+    ("reused_locator", "reuses the same record and locator"),
+    ("bad_digest", "must be lowercase SHA-256"),
+])
+def test_weekly_manifest_rejects_gaps_reuse_and_scope_errors(change: str, expected: str) -> None:
+    field = _twelve_group_field()
+    plan = _plan(field)
+    weekly = _weekly_manifest(plan)
+    if change == "missing_middle":
+        weekly["rows"] = [row for row in weekly["rows"] if not (
+            row["group_id"] == "c1" and row["period"] == "pre" and row["week_index"] == 2
+        )]
+    elif change == "duplicate":
+        weekly["rows"].append(copy.deepcopy(weekly["rows"][0]))
+    elif change == "unknown_group":
+        weekly["rows"][0]["group_id"] = "unknown"
+    elif change == "boundary":
+        weekly["rows"][0]["measured_at_utc"] = "2026-01-08T00:00:00Z"
+    elif change == "outside":
+        weekly["rows"][0]["week_index"] = 5
+    elif change == "wrong_study":
+        weekly["study_id"] = "other-study"
+    elif change == "wrong_window":
+        weekly["periods"][0]["start_utc"] = "2026-01-02T00:00:00Z"
+    elif change == "reused_locator":
+        weekly["rows"][1]["record_sha256"] = weekly["rows"][0]["record_sha256"]
+        weekly["rows"][1]["locator"] = weekly["rows"][0]["locator"]
+    else:
+        weekly["rows"][0]["record_sha256"] = "invalid"
+    with pytest.raises(FieldTrialDesignError, match=expected):
+        audit_field_trial_design(plan, field, weekly)
 
 
 def test_two_group_field_fixture_cannot_be_mistaken_for_trial_design() -> None:
@@ -187,6 +273,54 @@ def test_cli_reads_exact_input_bytes_and_leaves_them_unchanged(tmp_path: Path) -
     }
     assert report["criterion_3"]["status"] == "not_assessed"
     assert before == {"plan": plan_path.read_bytes(), "field": field_path.read_bytes()}
+
+
+def test_cli_checks_and_hashes_weekly_manifest_without_mutation(tmp_path: Path) -> None:
+    field = _twelve_group_field()
+    plan = _plan(field)
+    inputs = {
+        "plan": (tmp_path / "plan.json", plan),
+        "field": (tmp_path / "field.json", field),
+        "weekly_manifest": (tmp_path / "weekly.json", _weekly_manifest(plan)),
+    }
+    before = {}
+    for key, (path, value) in inputs.items():
+        path.write_text(json.dumps(value), encoding="utf-8")
+        before[key] = path.read_bytes()
+    result = subprocess.run([
+        sys.executable, str(SCRIPT), str(inputs["plan"][0]), str(inputs["field"][0]),
+        "--weekly-manifest", str(inputs["weekly_manifest"][0]),
+    ], capture_output=True, text=True, check=True)
+    report = json.loads(result.stdout)
+    assert report["input_sha256"] == {
+        key: hashlib.sha256(raw).hexdigest() for key, raw in before.items()
+    }
+    assert report["declared_weekly_measurement_presence_complete"] is True
+    assert not report["weekly_measurement_coverage_verified"]
+    assert before == {key: path.read_bytes() for key, (path, _value) in inputs.items()}
+
+
+def test_cli_rejects_missing_week_without_success_report(tmp_path: Path) -> None:
+    field = _twelve_group_field()
+    plan = _plan(field)
+    weekly = _weekly_manifest(plan)
+    weekly["rows"] = [row for row in weekly["rows"] if not (
+        row["group_id"] == "i6" and row["period"] == "post" and row["week_index"] == 4
+    )]
+    plan_path, field_path, weekly_path = (tmp_path / name for name in (
+        "plan.json", "field.json", "weekly.json"
+    ))
+    for path, value in ((plan_path, plan), (field_path, field), (weekly_path, weekly)):
+        path.write_text(json.dumps(value), encoding="utf-8")
+    before = weekly_path.read_bytes()
+    result = subprocess.run([
+        sys.executable, str(SCRIPT), str(plan_path), str(field_path),
+        "--weekly-manifest", str(weekly_path),
+    ], capture_output=True, text=True, check=False)
+    assert result.returncode == 2
+    assert not result.stdout
+    assert "missing 1 group-week rows" in result.stderr
+    assert weekly_path.read_bytes() == before
 
 
 def test_cli_rejects_duplicate_json_keys(tmp_path: Path) -> None:
