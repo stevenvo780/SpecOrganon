@@ -21,6 +21,7 @@ SCRIPT = SCRIPTS / "stage_released_run.py"
 sys.path.insert(0, str(SCRIPTS))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import case_package  # noqa: E402
+import local_block_release_gate as gate  # noqa: E402
 import preflight_assets  # noqa: E402
 import stage_released_run as staging  # noqa: E402
 import test_inspect_released_payload as fixture  # noqa: E402
@@ -39,7 +40,11 @@ def _released(
     )
     release = tmp_path / "release"
     preflight_assets.preflight(
-        schedule, assets, run_id=run["run_id"], output_dir=release
+        schedule,
+        assets,
+        run_id=run["run_id"],
+        output_dir=release,
+        development_unsequenced=True,
     )
     return schedule, schedule_path, release, hidden
 
@@ -98,6 +103,7 @@ def test_stage_real_release_with_only_selected_visible_bytes(
             str(schedule_path),
             str(release),
             str(output),
+            "--development-unsequenced",
         ],
         capture_output=True,
         text=True,
@@ -152,7 +158,9 @@ def test_stage_t_bundle_keeps_311_target_and_does_not_install(
     bundle = fixture._bundle_bytes(tmp_path, dependency=True, python_version="3.11")
     schedule, _, release, _ = _released(tmp_path, "T", toolkit_bundle_bytes=bundle)
     output = tmp_path / "stage"
-    report = staging.stage_released_run(schedule, release, output)
+    report = staging.stage_released_run(
+        schedule, release, output, development_unsequenced=True
+    )
     assert report["toolkit_format"] == "bundle"
     assert report["toolkit_target"]["python_version"] == "3.11"
     assert report["toolkit_install_checked"] is False
@@ -172,7 +180,7 @@ def test_rejects_bad_release_before_creating_stage(
         (release / "rubric").write_bytes(b"hidden data must not be released")
     output = tmp_path / "stage"
     with pytest.raises(staging.StageError, match="verification or visible inspection"):
-        staging.stage_released_run(schedule, release, output)
+        staging.stage_released_run(schedule, release, output, development_unsequenced=True)
     assert not output.exists()
 
 
@@ -190,7 +198,7 @@ def test_mutation_after_inspection_fails_before_stage_manifest(
     monkeypatch.setattr(staging, "inspect_released_payload", change_after_inspection)
     output = tmp_path / "stage"
     with pytest.raises(staging.StageError):
-        staging.stage_released_run(schedule, release, output)
+        staging.stage_released_run(schedule, release, output, development_unsequenced=True)
     assert not (output / "stage.json").exists()
 
 
@@ -225,7 +233,7 @@ def test_replaced_case_archive_during_extraction_does_not_stage_hidden_bytes(
     monkeypatch.setattr(staging, "extract_package", swap_during_extract)
     output = tmp_path / "stage"
     with pytest.raises(staging.StageError):
-        staging.stage_released_run(schedule, release, output)
+        staging.stage_released_run(schedule, release, output, development_unsequenced=True)
     assert hidden[0] == (output / "case" / "task.md").read_bytes()
     assert not (output / "stage.json").exists()
 
@@ -254,7 +262,7 @@ def test_post_extraction_mutation_cannot_gain_stage_manifest(
     monkeypatch.setattr(staging, "extract_package", mutate_after_extract)
     output = tmp_path / "stage"
     with pytest.raises(staging.StageError):
-        staging.stage_released_run(schedule, release, output)
+        staging.stage_released_run(schedule, release, output, development_unsequenced=True)
     assert not (output / "stage.json").exists()
 
 
@@ -265,7 +273,7 @@ def test_existing_destination_is_not_replaced(tmp_path: Path) -> None:
     sentinel = output / "keep.txt"
     sentinel.write_text("preserve me")
     with pytest.raises(staging.StageError):
-        staging.stage_released_run(schedule, release, output)
+        staging.stage_released_run(schedule, release, output, development_unsequenced=True)
     assert sentinel.read_text() == "preserve me"
 
 
@@ -282,7 +290,7 @@ def test_failure_after_pending_write_does_not_publish_manifest(
     monkeypatch.setattr(staging, "_write_pending_manifest", fail_after_pending)
     output = tmp_path / "stage"
     with pytest.raises(staging.StageError):
-        staging.stage_released_run(schedule, release, output)
+        staging.stage_released_run(schedule, release, output, development_unsequenced=True)
     assert (output / ".stage.json.pending").exists()
     assert not (output / "stage.json").exists()
 
@@ -301,7 +309,9 @@ def test_mutating_caller_schedule_cannot_change_published_limits(
 
     monkeypatch.setattr(staging, "_write_pending_manifest", mutate_before_write)
     output = tmp_path / "stage"
-    report = staging.stage_released_run(schedule, release, output)
+    report = staging.stage_released_run(
+        schedule, release, output, development_unsequenced=True
+    )
     published = json.loads((output / "stage.json").read_text())
     assert schedule["per_run_limits"] != original_limits
     assert report == published
@@ -356,5 +366,94 @@ def test_nested_case_tree_is_rehashed_and_detects_tampering(tmp_path: Path) -> N
 def test_requires_absolute_new_destination(tmp_path: Path) -> None:
     schedule, _, release, _ = _released(tmp_path, "N")
     with pytest.raises(staging.StageError, match="must be absolute"):
-        staging.stage_released_run(schedule, release, Path("relative-stage"))
+        staging.stage_released_run(
+            schedule, release, Path("relative-stage"), development_unsequenced=True
+        )
     assert not (Path.cwd() / "relative-stage").exists()
+
+
+def test_cli_requires_an_explicit_stage_mode(tmp_path: Path) -> None:
+    _, schedule_path, release, _ = _released(tmp_path, "N")
+    output = tmp_path / "stage"
+    process = subprocess.run(
+        [sys.executable, "-B", str(SCRIPT), str(schedule_path), str(release), str(output)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert process.returncode == 2
+    assert "--gate-dir" in process.stderr
+    assert "--development-unsequenced" in process.stderr
+    assert not output.exists()
+
+
+def test_gate_rejects_missing_claim_before_stage_output(tmp_path: Path) -> None:
+    schedule, _, release, _ = _released(tmp_path, "N")
+    output = tmp_path / "stage"
+    with pytest.raises(staging.StageError, match="release gate rejected stage"):
+        staging.stage_released_run(
+            schedule, release, output, gate_root=tmp_path / "unclaimed-gate"
+        )
+    assert not output.exists()
+
+
+def test_gate_binds_stage_to_claimed_run_and_release(tmp_path: Path) -> None:
+    schedule, assets, schedule_path, _ = fixture._fixture(tmp_path)
+    run = schedule["runs"][0]
+    gate_root = tmp_path / "gate"
+    release = tmp_path / "release"
+    preflight_assets.preflight(
+        schedule,
+        assets,
+        run_id=run["run_id"],
+        output_dir=release,
+        gate_root=gate_root,
+    )
+    claim = gate.verify_claim(schedule, run["run_id"], gate_root, release)
+    assert claim["run_id"] == run["run_id"]
+
+    other_release = tmp_path / "other-release"
+    shutil.copytree(release, other_release)
+    rejected_stage = tmp_path / "rejected-stage"
+    with pytest.raises(staging.StageError, match="release gate rejected stage"):
+        staging.stage_released_run(
+            schedule, other_release, rejected_stage, gate_root=gate_root
+        )
+    assert not rejected_stage.exists()
+
+    stage = tmp_path / "stage"
+    process = subprocess.run(
+        [
+            sys.executable,
+            "-B",
+            str(SCRIPT),
+            str(schedule_path),
+            str(release),
+            str(stage),
+            "--gate-dir",
+            str(gate_root),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert process.returncode == 0, process.stderr
+    report = json.loads(process.stdout)
+    assert report["run_id"] == run["run_id"]
+    assert (stage / "stage.json").is_file()
+
+
+def test_api_rejects_ambiguous_stage_mode(tmp_path: Path) -> None:
+    schedule, _, release, _ = _released(tmp_path, "N")
+    output = tmp_path / "stage"
+    with pytest.raises(staging.StageError, match="exactly one"):
+        staging.stage_released_run(schedule, release, output)
+    with pytest.raises(staging.StageError, match="exactly one"):
+        staging.stage_released_run(
+            schedule,
+            release,
+            output,
+            gate_root=tmp_path / "gate",
+            development_unsequenced=True,
+        )
+    assert not output.exists()

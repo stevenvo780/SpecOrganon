@@ -102,9 +102,14 @@ def _stage(
     assets["input_sha256"] = schedule["input_sha256"]
     run = next(item for item in schedule["runs"] if item["arm"] == "N" and item["case_id"] == "R-F")
     release = tmp_path / "release"
-    preflight_assets.preflight(schedule, assets, run_id=run["run_id"], output_dir=release)
+    preflight_assets.preflight(
+        schedule, assets, run_id=run["run_id"], output_dir=release,
+        development_unsequenced=True,
+    )
     stage = tmp_path / "stage"
-    stage_released_run.stage_released_run(schedule, release, stage)
+    stage_released_run.stage_released_run(
+        schedule, release, stage, development_unsequenced=True
+    )
     return schedule, schedule_path, run["run_id"], stage, first, second, hidden
 
 
@@ -421,7 +426,10 @@ def test_same_release_run_second_stage_cannot_spend_local_cap(
 ) -> None:
     schedule, _, run_id, first_stage, first, _, _ = _stage(tmp_path, cap=1)
     second_stage = tmp_path / "second-stage"
-    stage_released_run.stage_released_run(schedule, tmp_path / "release", second_stage)
+    stage_released_run.stage_released_run(
+        schedule, tmp_path / "release", second_stage,
+        development_unsequenced=True,
+    )
     assert first_stage != second_stage
     first_session = tmp_path / "first-session"
     second_session = tmp_path / "second-session"

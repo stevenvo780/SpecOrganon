@@ -66,9 +66,14 @@ def _stage(tmp_path: Path, arm: str, body: str) -> tuple[dict, Path, str, Path, 
     assets["input_sha256"] = schedule["input_sha256"]
     run = next(item for item in schedule["runs"] if item["arm"] == arm and item["case_id"] == "R-F")
     release = tmp_path / "release"
-    preflight_assets.preflight(schedule, assets, run_id=run["run_id"], output_dir=release)
+    preflight_assets.preflight(
+        schedule, assets, run_id=run["run_id"], output_dir=release,
+        development_unsequenced=True,
+    )
     stage = tmp_path / "stage"
-    stage_released_run.stage_released_run(schedule, release, stage)
+    stage_released_run.stage_released_run(
+        schedule, release, stage, development_unsequenced=True
+    )
     return schedule, schedule_path, run["run_id"], stage, tool, hidden
 
 

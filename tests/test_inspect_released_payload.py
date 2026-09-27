@@ -195,7 +195,8 @@ def _release(
     )
     release = tmp_path / "release"
     preflight_assets.preflight(
-        schedule, assets, run_id=run["run_id"], output_dir=release
+        schedule, assets, run_id=run["run_id"], output_dir=release,
+        development_unsequenced=True,
     )
     assert (
         verify_released_run.verify_release(schedule, release)["run_id"] == run["run_id"]

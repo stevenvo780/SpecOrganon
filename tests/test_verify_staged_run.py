@@ -34,7 +34,9 @@ def _stage(
         tmp_path, arm, toolkit_bundle_bytes=bundle_bytes
     )
     stage = tmp_path / "stage"
-    published = staging.stage_released_run(schedule, release, stage)
+    published = staging.stage_released_run(
+        schedule, release, stage, development_unsequenced=True
+    )
     return schedule, schedule_path, stage, published
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import os
@@ -17,6 +18,7 @@ SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 SCRIPT = SCRIPTS / "preflight_assets.py"
 sys.path.insert(0, str(SCRIPTS))
 import preflight_assets  # noqa: E402
+from local_block_release_gate import BlockReleaseError, verify_claim  # noqa: E402
 from plan_confirmatory import compile_schedule  # noqa: E402
 
 
@@ -136,6 +138,53 @@ def test_check_cli_verifies_every_asset_without_writing_or_disclosing_paths(tmp_
     assert asset_map["inputs"]["rubric"] not in combined
 
 
+def test_release_requires_explicit_mode_before_destination_creation(tmp_path: Path) -> None:
+    schedule, assets, schedule_path, asset_map_path = _fixture(tmp_path)
+    run_id = schedule["runs"][0]["run_id"]
+    output = tmp_path / "unreleased"
+
+    process = _cli(
+        schedule_path, asset_map_path,
+        "--run-id", run_id, "--output-dir", str(output),
+    )
+
+    assert process.returncode == 2
+    assert "requires --gate-dir or --development-unsequenced" in process.stderr
+    assert not output.exists()
+
+    both = _cli(
+        schedule_path, asset_map_path,
+        "--run-id", run_id, "--output-dir", str(output),
+        "--gate-dir", str(tmp_path / "gate"), "--development-unsequenced",
+    )
+    assert both.returncode == 2
+    assert "not allowed with argument" in both.stderr
+    assert not output.exists()
+
+    with pytest.raises(preflight_assets.PreflightError, match="exactly one"):
+        preflight_assets.preflight(assets_raw=assets, schedule_raw=schedule,
+                                   run_id=run_id, output_dir=output)
+    with pytest.raises(preflight_assets.PreflightError, match="exactly one"):
+        preflight_assets.preflight(
+            schedule, assets, run_id=run_id, output_dir=output,
+            gate_root=tmp_path / "gate", development_unsequenced=True,
+        )
+    assert not output.exists()
+
+
+def test_check_rejects_release_mode_without_writing(tmp_path: Path) -> None:
+    _, _, schedule_path, asset_map_path = _fixture(tmp_path)
+    gate = tmp_path / "gate"
+
+    process = _cli(
+        schedule_path, asset_map_path, "--check", "--gate-dir", str(gate)
+    )
+
+    assert process.returncode == 2
+    assert "release mode requires --run-id" in process.stderr
+    assert not gate.exists()
+
+
 @pytest.mark.parametrize("arm,expected", [
     ("N", {"case_package", "task_contract", "common_prompt", "arm_prompt", "tool_policy"}),
     ("S", {"case_package", "task_contract", "common_prompt", "arm_prompt", "tool_policy", "sdd_guide"}),
@@ -148,7 +197,7 @@ def test_release_cli_copies_only_one_arms_visible_bytes(
     run = next(item for item in schedule["runs"] if item["arm"] == arm and item["case_id"] == "R-M")
     output = tmp_path / f"release-{arm}"
 
-    process = _cli(schedule_path, asset_map_path, "--run-id", run["run_id"], "--output-dir", str(output))
+    process = _cli(schedule_path, asset_map_path, "--run-id", run["run_id"], "--output-dir", str(output), "--development-unsequenced")
 
     assert process.returncode == 0, process.stderr
     manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
@@ -187,11 +236,257 @@ def test_release_cli_copies_only_one_arms_visible_bytes(
     assert all(other["run_id"] not in rendered for other in schedule["runs"] if other is not run)
 
 
+def test_gated_release_claims_first_run_and_denies_second_before_output(tmp_path: Path) -> None:
+    schedule, _, schedule_path, asset_map_path = _fixture(tmp_path)
+    first, second = schedule["runs"][:2]
+    assert (first["release_block_order"], first["order_position"]) == (1, 1)
+    assert (second["release_block_order"], second["order_position"]) == (1, 2)
+    gate = tmp_path / "gate"
+    first_output = tmp_path / "release-first"
+    second_output = tmp_path / "release-second"
+
+    released = _cli(
+        schedule_path, asset_map_path,
+        "--run-id", first["run_id"], "--output-dir", str(first_output),
+        "--gate-dir", str(gate),
+    )
+    assert released.returncode == 0, released.stderr
+    assert (first_output / "manifest.json").is_file()
+    claim = verify_claim(schedule, first["run_id"], gate, first_output)
+    assert claim["run_id"] == first["run_id"]
+    assert claim["release_dir"] == str(first_output)
+
+    denied = _cli(
+        schedule_path, asset_map_path,
+        "--run-id", second["run_id"], "--output-dir", str(second_output),
+        "--gate-dir", str(gate),
+    )
+    assert denied.returncode == 2
+    assert "release gate rejected claim" in denied.stderr
+    assert not second_output.exists()
+    assert str(tmp_path) not in denied.stderr
+
+
+def test_mutating_caller_schedule_after_claim_cannot_change_published_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    schedule, assets, _, _ = _fixture(tmp_path)
+    snapshot = copy.deepcopy(schedule)
+    first = schedule["runs"][0]
+    gate = tmp_path / "gate"
+    output = tmp_path / "release"
+    original_claim = preflight_assets.claim_release
+
+    def mutate_after_claim(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        result = original_claim(*args, **kwargs)
+        schedule["per_run_limits"]["tool_calls"] = 24
+        return result
+
+    monkeypatch.setattr(preflight_assets, "claim_release", mutate_after_claim)
+    manifest = preflight_assets.preflight(
+        schedule, assets, run_id=first["run_id"], output_dir=output,
+        gate_root=gate,
+    )
+
+    assert schedule["per_run_limits"]["tool_calls"] == 24
+    assert manifest["limits"]["tool_calls"] == 23
+    assert json.loads((output / "manifest.json").read_text(encoding="utf-8"))["limits"]["tool_calls"] == 23
+    assert verify_claim(snapshot, first["run_id"], gate, output)["run_id"] == first["run_id"]
+
+
+def test_gated_asset_error_occurs_before_claim(tmp_path: Path) -> None:
+    schedule, assets, schedule_path, asset_map_path = _fixture(tmp_path)
+    Path(assets["inputs"]["common_prompt"]).write_bytes(b"changed")
+    gate = tmp_path / "gate"
+    output = tmp_path / "release"
+
+    process = _cli(
+        schedule_path, asset_map_path,
+        "--run-id", schedule["runs"][0]["run_id"],
+        "--output-dir", str(output), "--gate-dir", str(gate),
+    )
+
+    assert process.returncode == 2
+    assert "byte digest differs" in process.stderr
+    assert not gate.exists()
+    assert not output.exists()
+
+
+def test_gated_existing_output_is_rejected_before_claim(tmp_path: Path) -> None:
+    schedule, _, schedule_path, asset_map_path = _fixture(tmp_path)
+    gate = tmp_path / "gate"
+    output = tmp_path / "existing"
+    output.mkdir()
+    marker = output / "marker"
+    marker.write_bytes(b"preserved")
+
+    process = _cli(
+        schedule_path, asset_map_path,
+        "--run-id", schedule["runs"][0]["run_id"],
+        "--output-dir", str(output), "--gate-dir", str(gate),
+    )
+
+    assert process.returncode == 2
+    assert "already exists" in process.stderr
+    assert not gate.exists()
+    assert marker.read_bytes() == b"preserved"
+
+
+def test_gated_copy_failure_leaves_active_claim_and_untrusted_partial_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    schedule, assets, _, _ = _fixture(tmp_path)
+    first = schedule["runs"][0]
+    gate = tmp_path / "gate"
+    output = tmp_path / "release"
+
+    def fail_copy(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
+        raise preflight_assets.PreflightError("synthetic copy failure")
+
+    monkeypatch.setattr(preflight_assets, "_copy_verified_asset", fail_copy)
+    with pytest.raises(preflight_assets.PreflightError, match="untrusted"):
+        preflight_assets.preflight(
+            schedule, assets, run_id=first["run_id"], output_dir=output,
+            gate_root=gate,
+        )
+
+    assert output.is_dir()
+    assert not (output / "manifest.json").exists()
+    with pytest.raises(BlockReleaseError):
+        verify_claim(schedule, first["run_id"], gate, output)
+
+
+def test_gated_post_manifest_identity_failure_removes_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    schedule, assets, _, _ = _fixture(tmp_path)
+    first = schedule["runs"][0]
+    gate = tmp_path / "gate"
+    output = tmp_path / "release"
+    original = preflight_assets._directory_matches_name
+    checked = 0
+
+    def fail_after_manifest(directory_fd: int, parent_fd: int, name: str) -> bool:
+        nonlocal checked
+        checked += 1
+        return checked == 1 and original(directory_fd, parent_fd, name)
+
+    monkeypatch.setattr(preflight_assets, "_directory_matches_name", fail_after_manifest)
+    with pytest.raises(preflight_assets.PreflightError, match="untrusted"):
+        preflight_assets.preflight(
+            schedule, assets, run_id=first["run_id"], output_dir=output,
+            gate_root=gate,
+        )
+
+    assert checked == 2
+    assert output.is_dir()
+    assert not (output / "manifest.json").exists()
+    with pytest.raises(BlockReleaseError):
+        verify_claim(schedule, first["run_id"], gate, output)
+
+
+def test_failed_manifest_cleanup_cannot_publish_pending_claim(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    schedule, assets, _, _ = _fixture(tmp_path)
+    first = schedule["runs"][0]
+    gate = tmp_path / "gate"
+    output = tmp_path / "release"
+    original_unlink = os.unlink
+    checked = 0
+    published: list[bool] = []
+
+    def fail_after_manifest(directory_fd: int, parent_fd: int, name: str) -> bool:
+        nonlocal checked
+        checked += 1
+        return checked == 1
+
+    def deny_unlink(path: str, *args: Any, **kwargs: Any) -> None:
+        if path == "manifest.json" and kwargs.get("dir_fd") is not None:
+            raise OSError("synthetic unlink failure")
+        original_unlink(path, *args, **kwargs)
+
+    def marker_must_not_run(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
+        published.append(True)
+        raise AssertionError("publication marker reached after failed identity check")
+
+    monkeypatch.setattr(preflight_assets, "_directory_matches_name", fail_after_manifest)
+    monkeypatch.setattr(preflight_assets.os, "unlink", deny_unlink)
+    monkeypatch.setattr(preflight_assets, "mark_published", marker_must_not_run)
+    with pytest.raises(preflight_assets.PreflightError, match="untrusted"):
+        preflight_assets.preflight(
+            schedule, assets, run_id=first["run_id"], output_dir=output,
+            gate_root=gate,
+        )
+
+    assert checked == 2
+    assert not published
+    assert (output / "manifest.json").is_file()
+    with pytest.raises(BlockReleaseError):
+        verify_claim(schedule, first["run_id"], gate, output)
+
+
+def test_failed_publication_marker_leaves_pending_claim(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    schedule, assets, _, _ = _fixture(tmp_path)
+    first = schedule["runs"][0]
+    gate = tmp_path / "gate"
+    output = tmp_path / "release"
+
+    def deny_marker(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
+        raise BlockReleaseError("synthetic marker failure")
+
+    monkeypatch.setattr(preflight_assets, "mark_published", deny_marker)
+    with pytest.raises(preflight_assets.PreflightError, match="untrusted"):
+        preflight_assets.preflight(
+            schedule, assets, run_id=first["run_id"], output_dir=output,
+            gate_root=gate,
+        )
+
+    assert output.is_dir()
+    assert not (output / "manifest.json").exists()
+    with pytest.raises(BlockReleaseError):
+        verify_claim(schedule, first["run_id"], gate, output)
+
+
+def test_gated_manifest_sync_failure_removes_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    schedule, assets, _, _ = _fixture(tmp_path)
+    first = schedule["runs"][0]
+    gate = tmp_path / "gate"
+    output = tmp_path / "release"
+    original_fsync = os.fsync
+    failed = False
+
+    def fail_release_directory_sync(fd: int) -> None:
+        nonlocal failed
+        if output.is_dir() and (output / "manifest.json").exists():
+            opened = os.fstat(fd)
+            named = output.stat()
+            if (opened.st_dev, opened.st_ino) == (named.st_dev, named.st_ino) and not failed:
+                failed = True
+                raise OSError("synthetic manifest directory sync failure")
+        original_fsync(fd)
+
+    monkeypatch.setattr(preflight_assets.os, "fsync", fail_release_directory_sync)
+    with pytest.raises(preflight_assets.PreflightError, match="untrusted"):
+        preflight_assets.preflight(
+            schedule, assets, run_id=first["run_id"], output_dir=output,
+            gate_root=gate,
+        )
+
+    assert failed
+    assert output.is_dir()
+    assert not (output / "manifest.json").exists()
+    with pytest.raises(BlockReleaseError):
+        verify_claim(schedule, first["run_id"], gate, output)
+
+
 def test_altered_source_bytes_fail_before_destination_creation(tmp_path: Path) -> None:
     schedule, asset_map, schedule_path, asset_map_path = _fixture(tmp_path)
     Path(asset_map["inputs"]["common_prompt"]).write_bytes(b"changed after planning")
     output = tmp_path / "must-not-exist"
-    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output))
+    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output), "--development-unsequenced")
     assert process.returncode == 2
     assert "byte digest differs" in process.stderr
     assert not output.exists()
@@ -203,7 +498,7 @@ def test_forged_asset_map_digest_binding_rejected_before_writing(tmp_path: Path)
     asset_map["schedule_sha256"] = "0" * 64
     asset_map_path.write_text(json.dumps(asset_map), encoding="utf-8")
     output = tmp_path / "must-not-exist"
-    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output))
+    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output), "--development-unsequenced")
     assert process.returncode == 2
     assert "digest binding" in process.stderr
     assert not output.exists()
@@ -213,7 +508,7 @@ def test_missing_hidden_reference_rejected_before_writing(tmp_path: Path) -> Non
     schedule, asset_map, schedule_path, asset_map_path = _fixture(tmp_path)
     Path(asset_map["cases"]["R-S"]["reference"]).unlink()
     output = tmp_path / "must-not-exist"
-    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output))
+    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output), "--development-unsequenced")
     assert process.returncode == 2
     assert "case:R-S:reference cannot be read" in process.stderr
     assert not output.exists()
@@ -224,7 +519,7 @@ def test_invalid_schedule_rejected_before_writing(tmp_path: Path) -> None:
     schedule["runs"][0]["order_position"] = 99
     schedule_path.write_text(json.dumps(schedule), encoding="utf-8")
     output = tmp_path / "must-not-exist"
-    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output))
+    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output), "--development-unsequenced")
     assert process.returncode == 2
     assert "invalid candidate schedule" in process.stderr
     assert not output.exists()
@@ -236,7 +531,7 @@ def test_existing_destination_is_never_deleted_or_overwritten(tmp_path: Path) ->
     output.mkdir()
     marker = output / "marker"
     marker.write_bytes(b"keep this")
-    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output))
+    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output), "--development-unsequenced")
     assert process.returncode == 2
     assert "already exists" in process.stderr
     assert marker.read_bytes() == b"keep this"
@@ -259,7 +554,7 @@ def test_invalid_asset_map_or_run_rejected_without_writing(tmp_path: Path, chang
         run_id = "conf-unknown"
     asset_map_path.write_text(json.dumps(asset_map), encoding="utf-8")
     output = tmp_path / "must-not-exist"
-    process = _cli(schedule_path, asset_map_path, "--run-id", run_id, "--output-dir", str(output))
+    process = _cli(schedule_path, asset_map_path, "--run-id", run_id, "--output-dir", str(output), "--development-unsequenced")
     assert process.returncode == 2
     assert not output.exists()
     assert str(tmp_path) not in process.stderr
@@ -280,7 +575,7 @@ def test_hidden_bytes_equal_to_visible_asset_cannot_be_released(tmp_path: Path) 
     asset_map["input_sha256"] = schedule["input_sha256"]
     output = tmp_path / "must-not-exist"
     with pytest.raises(preflight_assets.PreflightError, match="identical bytes"):
-        preflight_assets.preflight(schedule, asset_map, run_id=schedule["runs"][0]["run_id"], output_dir=output)
+        preflight_assets.preflight(schedule, asset_map, run_id=schedule["runs"][0]["run_id"], output_dir=output, development_unsequenced=True)
     assert not output.exists()
 
 
@@ -296,7 +591,7 @@ def test_change_after_preflight_leaves_no_manifest(tmp_path: Path, monkeypatch: 
     monkeypatch.setattr(preflight_assets, "_open_verified_assets", mutate_after_open)
     output = tmp_path / "partial-untrusted"
     with pytest.raises(preflight_assets.PreflightError, match="untrusted"):
-        preflight_assets.preflight(schedule, asset_map, run_id=schedule["runs"][0]["run_id"], output_dir=output)
+        preflight_assets.preflight(schedule, asset_map, run_id=schedule["runs"][0]["run_id"], output_dir=output, development_unsequenced=True)
     assert output.exists()
     assert not (output / "manifest.json").exists()
 
@@ -315,7 +610,7 @@ def test_replaced_output_directory_cannot_redirect_release(tmp_path: Path, monke
 
     monkeypatch.setattr(preflight_assets.os, "open", replace_at_reopen)
     with pytest.raises(preflight_assets.PreflightError, match="untrusted"):
-        preflight_assets.preflight(schedule, asset_map, run_id=schedule["runs"][0]["run_id"], output_dir=output)
+        preflight_assets.preflight(schedule, asset_map, run_id=schedule["runs"][0]["run_id"], output_dir=output, development_unsequenced=True)
     assert output.is_dir() and not list(output.iterdir())
     assert moved.is_dir() and not list(moved.iterdir())
 
@@ -338,7 +633,7 @@ def test_replacement_during_copy_cannot_write_valid_manifest(tmp_path: Path, mon
 
     monkeypatch.setattr(preflight_assets, "_copy_verified_asset", swap_after_copy)
     with pytest.raises(preflight_assets.PreflightError, match="untrusted"):
-        preflight_assets.preflight(schedule, asset_map, run_id=schedule["runs"][0]["run_id"], output_dir=output)
+        preflight_assets.preflight(schedule, asset_map, run_id=schedule["runs"][0]["run_id"], output_dir=output, development_unsequenced=True)
     assert output.is_dir() and not list(output.iterdir())
     assert moved.is_dir()
     assert not (moved / "manifest.json").exists()
@@ -363,7 +658,7 @@ def test_hidden_reference_mutation_after_first_hash_blocks_manifest(
 
     monkeypatch.setattr(preflight_assets, "_copy_verified_asset", mutate_hidden)
     with pytest.raises(preflight_assets.PreflightError, match="untrusted"):
-        preflight_assets.preflight(schedule, asset_map, run_id=schedule["runs"][0]["run_id"], output_dir=output)
+        preflight_assets.preflight(schedule, asset_map, run_id=schedule["runs"][0]["run_id"], output_dir=output, development_unsequenced=True)
     assert output.is_dir()
     assert not (output / "manifest.json").exists()
 
@@ -380,7 +675,7 @@ def test_uncontrolled_parent_rejected_before_destination_creation(tmp_path: Path
         actual.mkdir()
         parent.symlink_to(actual, target_is_directory=True)
     output = parent / "release"
-    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output))
+    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", str(output), "--development-unsequenced")
     assert process.returncode == 2
     assert "parent" in process.stderr
     assert not output.exists()
@@ -406,7 +701,7 @@ def test_symlink_source_and_duplicate_json_key_rejected(tmp_path: Path) -> None:
 
 def test_cli_rejects_relative_output_directory(tmp_path: Path) -> None:
     schedule, _, schedule_path, asset_map_path = _fixture(tmp_path)
-    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", "relative")
+    process = _cli(schedule_path, asset_map_path, "--run-id", schedule["runs"][0]["run_id"], "--output-dir", "relative", "--development-unsequenced")
     assert process.returncode == 2
     assert "absolute" in process.stderr
     assert not (tmp_path / "relative").exists()

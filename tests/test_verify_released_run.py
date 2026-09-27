@@ -32,7 +32,8 @@ def _release(tmp_path: Path, arm: str = "N") -> tuple[dict[str, Any], Path, Path
     )
     output = tmp_path / f"release-{arm}"
     preflight_assets.preflight(
-        schedule, assets, run_id=run["run_id"], output_dir=output
+        schedule, assets, run_id=run["run_id"], output_dir=output,
+        development_unsequenced=True,
     )
     return schedule, schedule_path, output
 

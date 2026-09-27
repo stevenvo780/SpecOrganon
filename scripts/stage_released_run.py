@@ -1,6 +1,9 @@
 """Prepare one unsealed release's visible bytes without executing a model.
 
-Usage: ``python scripts/stage_released_run.py schedule.json /absolute/release /absolute/new-stage``.
+Usage: ``python scripts/stage_released_run.py schedule.json /absolute/release /absolute/new-stage --gate-dir /absolute/gate``.
+
+For local development without block sequencing, use
+``--development-unsequenced`` explicitly instead of ``--gate-dir``.
 
 The stage is a private, new directory containing only the selected run's
 visible case, policy, arm inputs, and an empty work directory. It is not a
@@ -31,6 +34,7 @@ from case_package import (
     inspect_package,
 )
 from inspect_released_payload import PayloadInspectionError, inspect_released_payload
+from local_block_release_gate import BlockReleaseError, verify_claim
 from preflight_assets import _selected_assets
 from verify_released_run import (
     DIRECTORY_FLAGS,
@@ -238,13 +242,24 @@ def _verify_case_tree(
 
 
 def stage_released_run(
-    schedule_raw: Any, release_dir: Path | str, output_dir: Path | str
+    schedule_raw: Any,
+    release_dir: Path | str,
+    output_dir: Path | str,
+    *,
+    gate_root: Path | str | None = None,
+    development_unsequenced: bool = False,
 ) -> dict[str, Any]:
     """Copy one verified visible release into a new private stage.
 
     A failure after creating the stage leaves a partial directory without
     ``stage.json``. Its bytes are untrusted and must never be executed.
     """
+    if type(development_unsequenced) is not bool:
+        raise StageError("development_unsequenced must be a boolean")
+    if (gate_root is None and not development_unsequenced) or (
+        gate_root is not None and development_unsequenced
+    ):
+        raise StageError("staging requires exactly one of gate_root or development_unsequenced")
     try:
         # API callers may retain and mutate their input while this function
         # runs. Every check and the published manifest must use one snapshot.
@@ -265,6 +280,11 @@ def stage_released_run(
         raise StageError("visible inspection unexpectedly claimed execution readiness")
     if not Path(output_dir).is_absolute():
         raise StageError("output_dir must be absolute")
+    if gate_root is not None:
+        try:
+            verify_claim(schedule_raw, run["run_id"], gate_root, release_dir)
+        except BlockReleaseError as exc:
+            raise StageError(f"release gate rejected stage: {exc}") from exc
 
     created = False
     try:
@@ -451,10 +471,21 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("release_dir", help="absolute path to one released run")
     parser.add_argument("output_dir", help="absolute path for a new private stage")
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--gate-dir", help="absolute durable block release gate directory")
+    mode.add_argument(
+        "--development-unsequenced",
+        action="store_true",
+        help="explicitly stage without block sequencing for local development",
+    )
     args = parser.parse_args(argv)
     try:
         result = stage_released_run(
-            _read_schedule(args.schedule), args.release_dir, args.output_dir
+            _read_schedule(args.schedule),
+            args.release_dir,
+            args.output_dir,
+            gate_root=args.gate_dir,
+            development_unsequenced=args.development_unsequenced,
         )
     except (ReleaseVerificationError, StageError) as exc:
         print(f"Run staging failed: {exc}", file=sys.stderr)

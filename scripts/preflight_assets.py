@@ -4,7 +4,11 @@ Usage::
 
     python scripts/preflight_assets.py schedule.json assets.json --check
     python scripts/preflight_assets.py schedule.json assets.json \
-        --run-id conf-... --output-dir /absolute/new/directory
+        --run-id conf-... --output-dir /absolute/new/directory \
+        --gate-dir /absolute/gate/directory
+    python scripts/preflight_assets.py schedule.json assets.json \
+        --run-id conf-... --output-dir /absolute/new/directory \
+        --development-unsequenced
 
 The schema-1 asset map has exact keys ``schema``, ``schedule_sha256``,
 ``input_sha256``, ``cases``, and ``inputs``. ``cases`` maps R-F/R-M/R-S to
@@ -14,9 +18,11 @@ toolkit to absolute file paths, plus ``arm_prompts`` with N/S/T paths.
 
 All 15 files, including hidden references and the rubric, are checked against
 the candidate schedule before any destination is created. Only assets needed
-for the selected run are copied. A manifest is written last. This is an
-offline development aid: it does not establish external custody, a sealed
-registry, the authority of reference answers, provider access, or the absence
+for the selected run are copied. A manifest is written last. Sequenced release
+claims are durable and remain active if copying fails; the explicit development
+mode bypasses sequencing. This is an offline development aid: it does not
+establish external custody, a sealed registry, the authority of reference
+answers, provider access, or the absence
 of hidden answers embedded inside otherwise visible source files. It requires
 a parent directory owned by the current UID and not writable by group/others;
 a hostile process with the same UID can still replace it. Hidden assets are
@@ -27,6 +33,7 @@ custody. Independent human content review is required before case reservation.
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import os
@@ -37,6 +44,7 @@ from pathlib import Path
 from typing import Any
 
 from analyze_confirmatory import AnalysisError, _validate_schedule
+from local_block_release_gate import BlockReleaseError, claim_release, mark_published
 from plan_confirmatory import ManifestError, validate_manifest
 
 
@@ -183,17 +191,59 @@ def _copy_verified_asset(source_fd: int, directory_fd: int, name: str, expected:
     return {"file": name, "sha256": expected, "bytes": written}
 
 
-def _write_manifest(directory_fd: int, manifest: dict[str, Any]) -> None:
+def _remove_created_manifest(directory_fd: int, created: os.stat_result) -> None:
+    """Remove only the manifest inode created by this release when possible."""
+    try:
+        named = os.stat("manifest.json", dir_fd=directory_fd, follow_symlinks=False)
+        if (named.st_dev, named.st_ino) == (created.st_dev, created.st_ino):
+            os.unlink("manifest.json", dir_fd=directory_fd)
+            os.fsync(directory_fd)
+    except OSError:
+        # The caller still reports the partial directory as untrusted.
+        pass
+
+
+def _write_manifest(directory_fd: int, manifest: dict[str, Any]) -> tuple[os.stat_result, str]:
     encoded = json.dumps(
         manifest, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
     ).encode("utf-8") + b"\n"
     output_fd = os.open("manifest.json", os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=directory_fd)
-    with os.fdopen(output_fd, "wb") as destination:
-        os.fchmod(destination.fileno(), 0o600)
-        destination.write(encoded)
-        destination.flush()
-        os.fsync(destination.fileno())
-    os.fsync(directory_fd)
+    created = os.fstat(output_fd)
+    try:
+        with os.fdopen(output_fd, "wb") as destination:
+            os.fchmod(destination.fileno(), 0o600)
+            destination.write(encoded)
+            destination.flush()
+            os.fsync(destination.fileno())
+        os.fsync(directory_fd)
+    except BaseException:
+        _remove_created_manifest(directory_fd, created)
+        raise
+    return created, hashlib.sha256(encoded).hexdigest()
+
+
+def _published_manifest_digest(
+    directory_fd: int, created: os.stat_result, expected_sha256: str
+) -> str:
+    try:
+        fd = os.open(
+            "manifest.json", os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW,
+            dir_fd=directory_fd,
+        )
+    except OSError as exc:
+        raise PreflightError("published manifest cannot be read back") from exc
+    try:
+        current = os.fstat(fd)
+        if (
+            not stat.S_ISREG(current.st_mode)
+            or current.st_nlink != 1
+            or (current.st_dev, current.st_ino) != (created.st_dev, created.st_ino)
+            or _hash_fd(fd) != expected_sha256
+        ):
+            raise PreflightError("published manifest changed during release")
+        return expected_sha256
+    finally:
+        os.close(fd)
 
 
 def _directory_matches_name(directory_fd: int, parent_fd: int, name: str) -> bool:
@@ -232,12 +282,27 @@ def _reverify_hidden_asset(
         raise PreflightError(f"{label} cannot be reverified") from exc
 
 
-def preflight(schedule_raw: Any, assets_raw: Any, *, run_id: str | None = None, output_dir: Path | None = None) -> dict[str, Any]:
+def preflight(
+    schedule_raw: Any,
+    assets_raw: Any,
+    *,
+    run_id: str | None = None,
+    output_dir: Path | None = None,
+    gate_root: Path | None = None,
+    development_unsequenced: bool = False,
+) -> dict[str, Any]:
     """Check all bound bytes; optionally create one new, narrowly scoped release."""
-    schedule = _candidate_schedule(schedule_raw)
+    schedule = _candidate_schedule(copy.deepcopy(schedule_raw))
     paths, digests = _asset_paths(schedule, assets_raw)
     if (run_id is None) != (output_dir is None):
         raise PreflightError("run_id and output_dir must be supplied together")
+    if type(development_unsequenced) is not bool:
+        raise PreflightError("development_unsequenced must be a boolean")
+    if run_id is None:
+        if gate_root is not None or development_unsequenced:
+            raise PreflightError("release mode requires run_id and output_dir")
+    elif (gate_root is not None) == development_unsequenced:
+        raise PreflightError("release requires exactly one of gate_root or development_unsequenced")
     run = None
     if run_id is not None:
         if type(run_id) is not str:
@@ -288,6 +353,23 @@ def preflight(schedule_raw: Any, assets_raw: Any, *, run_id: str | None = None, 
         except OSError as exc:
             raise PreflightError("output_dir parent cannot be opened securely") from exc
         try:
+            os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            pass
+        except OSError as exc:
+            raise PreflightError("output_dir cannot be checked") from exc
+        else:
+            raise PreflightError("output_dir already exists")
+
+        if gate_root is not None:
+            # A successful claim is durable. Later publication failure leaves
+            # the claim active and a partial directory without a manifest.
+            try:
+                claim_release(schedule, run["run_id"], gate_root, output)
+            except BlockReleaseError as exc:
+                raise PreflightError(f"release gate rejected claim: {exc}") from exc
+
+        try:
             os.mkdir(name, 0o700, dir_fd=parent_fd)
         except FileExistsError as exc:
             raise PreflightError("output_dir already exists") from exc
@@ -299,6 +381,7 @@ def preflight(schedule_raw: Any, assets_raw: Any, *, run_id: str | None = None, 
         try:
             created = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
             directory_fd = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent_fd)
+            created_manifest: os.stat_result | None = None
             try:
                 opened_directory = os.fstat(directory_fd)
                 named_directory = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
@@ -332,9 +415,25 @@ def preflight(schedule_raw: Any, assets_raw: Any, *, run_id: str | None = None, 
                 _reverify_hidden_assets(paths, digests, opened)
                 if not _directory_matches_name(directory_fd, parent_fd, name):
                     raise PreflightError("output_dir identity changed during release")
-                _write_manifest(directory_fd, manifest)
+                created_manifest, expected_manifest_sha256 = _write_manifest(directory_fd, manifest)
                 if not _directory_matches_name(directory_fd, parent_fd, name):
                     raise PreflightError("output_dir identity changed after manifest")
+                published_sha256 = _published_manifest_digest(
+                    directory_fd, created_manifest, expected_manifest_sha256
+                )
+                if not _directory_matches_name(directory_fd, parent_fd, name):
+                    raise PreflightError("output_dir identity changed during manifest readback")
+                if gate_root is not None:
+                    try:
+                        mark_published(
+                            schedule, run["run_id"], gate_root, output, published_sha256
+                        )
+                    except BlockReleaseError as exc:
+                        raise PreflightError(f"release gate could not mark publication: {exc}") from exc
+            except (OSError, PreflightError):
+                if created_manifest is not None:
+                    _remove_created_manifest(directory_fd, created_manifest)
+                raise
             finally:
                 os.close(directory_fd)
         except (OSError, PreflightError) as exc:
@@ -374,14 +473,26 @@ def main(argv: list[str] | None = None) -> int:
     mode.add_argument("--check", action="store_true", help="verify without writing")
     mode.add_argument("--run-id", help="release exactly one scheduled run")
     parser.add_argument("--output-dir", help="new absolute release directory; required with --run-id")
+    release_mode = parser.add_mutually_exclusive_group()
+    release_mode.add_argument("--gate-dir", help="absolute durable block release gate directory")
+    release_mode.add_argument(
+        "--development-unsequenced", action="store_true",
+        help="explicitly release without block sequencing for local development",
+    )
     args = parser.parse_args(argv)
     if (args.check and args.output_dir) or (args.run_id and not args.output_dir):
         parser.error("--output-dir is required only with --run-id")
+    if args.check and (args.gate_dir or args.development_unsequenced):
+        parser.error("release mode requires --run-id")
+    if args.run_id and not (args.gate_dir or args.development_unsequenced):
+        parser.error("--run-id requires --gate-dir or --development-unsequenced")
     try:
         result = preflight(
             _read_json(args.schedule), _read_json(args.asset_map),
             run_id=args.run_id,
             output_dir=Path(args.output_dir) if args.output_dir else None,
+            gate_root=Path(args.gate_dir) if args.gate_dir else None,
+            development_unsequenced=args.development_unsequenced,
         )
     except PreflightError as exc:
         print(f"Asset preflight failed: {exc}", file=sys.stderr)

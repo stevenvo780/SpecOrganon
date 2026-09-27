@@ -42,7 +42,10 @@ def available_sandbox() -> None:
 def _copies(tmp_path: Path, *, cap: int = 1) -> tuple[dict, str, Path, Path, Path]:
     schedule, _, run_id, first_stage, first_tool, _, _ = fixture._stage(tmp_path, cap=cap)
     second_stage = tmp_path / "second-stage"
-    stage_released_run.stage_released_run(schedule, tmp_path / "release", second_stage)
+    stage_released_run.stage_released_run(
+        schedule, tmp_path / "release", second_stage,
+        development_unsequenced=True,
+    )
     return schedule, run_id, first_stage, second_stage, first_tool
 
 
