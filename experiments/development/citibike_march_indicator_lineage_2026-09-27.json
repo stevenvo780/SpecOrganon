@@ -1,0 +1,285 @@
+{
+  "append_only_source_event_prefix": true,
+  "classification": "development_lineage_probe",
+  "control": {
+    "items": {
+      "e_eligible": {
+        "deps": {
+          "e_archive": 1,
+          "pr_reanalysis": 1
+        },
+        "stale": false,
+        "version": 2
+      },
+      "e_rental": {
+        "deps": {
+          "e_eligible": 1,
+          "pr_reanalysis": 1
+        },
+        "stale": true,
+        "version": 1
+      },
+      "e_return": {
+        "deps": {
+          "e_eligible": 1,
+          "pr_reanalysis": 1
+        },
+        "stale": true,
+        "version": 1
+      },
+      "i_rows": {
+        "deps": {
+          "n_scope": 1,
+          "p_access": 1,
+          "pr_reanalysis": 1
+        },
+        "stale": false,
+        "version": 1
+      }
+    },
+    "revision": 25,
+    "study_blockers": [
+      "previous phase is not currently accepted"
+    ]
+  },
+  "criterion_5": "not_assessed",
+  "field_impact": "not_assessed",
+  "linked": {
+    "before_source_revision": {
+      "items": {
+        "d_reporting": {
+          "deps": {
+            "cmp_reporting": 1,
+            "e_eligible": 1,
+            "i_rows": 2,
+            "n_scope": 1
+          },
+          "stale": false,
+          "version": 1
+        },
+        "e_eligible": {
+          "deps": {
+            "e_archive": 1,
+            "pr_reanalysis": 1
+          },
+          "stale": false,
+          "version": 1
+        },
+        "i_rows": {
+          "deps": {
+            "e_eligible": 1,
+            "e_excluded": 1,
+            "e_gaps": 1,
+            "e_rental": 1,
+            "e_return": 1,
+            "n_scope": 1,
+            "p_access": 1,
+            "pr_reanalysis": 1
+          },
+          "stale": false,
+          "version": 2
+        },
+        "req_row_report": {
+          "deps": {
+            "d_reporting": 1,
+            "e_eligible": 1,
+            "e_excluded": 1,
+            "e_gaps": 1,
+            "e_rental": 1,
+            "e_return": 1,
+            "i_rows": 2
+          },
+          "stale": false,
+          "version": 1
+        }
+      },
+      "revision": 30,
+      "specify_blockers": [
+        "d_reporting requires a verified human approval",
+        "needs 1 valid criterion; has 0",
+        "previous phase is not currently accepted"
+      ],
+      "study_blockers": [
+        "previous phase is not currently accepted"
+      ]
+    },
+    "invalidated": {
+      "items": {
+        "d_reporting": {
+          "deps": {
+            "cmp_reporting": 1,
+            "e_eligible": 1,
+            "i_rows": 2,
+            "n_scope": 1
+          },
+          "stale": true,
+          "version": 1
+        },
+        "e_eligible": {
+          "deps": {
+            "e_archive": 1,
+            "pr_reanalysis": 1
+          },
+          "stale": false,
+          "version": 2
+        },
+        "i_rows": {
+          "deps": {
+            "e_eligible": 1,
+            "e_excluded": 1,
+            "e_gaps": 1,
+            "e_rental": 1,
+            "e_return": 1,
+            "n_scope": 1,
+            "p_access": 1,
+            "pr_reanalysis": 1
+          },
+          "stale": true,
+          "version": 2
+        },
+        "req_row_report": {
+          "deps": {
+            "d_reporting": 1,
+            "e_eligible": 1,
+            "e_excluded": 1,
+            "e_gaps": 1,
+            "e_rental": 1,
+            "e_return": 1,
+            "i_rows": 2
+          },
+          "stale": true,
+          "version": 1
+        }
+      },
+      "revision": 31,
+      "specify_blockers": [
+        "d_reporting depends on an older revision",
+        "d_reporting requires a verified human approval",
+        "needs 1 valid criterion; has 0",
+        "needs 1 valid decision; has 0",
+        "needs 1 valid requirement; has 0",
+        "previous phase is not currently accepted",
+        "req_row_report depends on an older revision"
+      ],
+      "study_blockers": [
+        "i_rows depends on an older revision",
+        "needs 1 valid indicator; has 0",
+        "previous phase is not currently accepted"
+      ]
+    },
+    "mcp_discovered": [
+      "advance",
+      "approval_challenge",
+      "approve",
+      "attest_field",
+      "challenge",
+      "field_attestation_challenge",
+      "gate",
+      "init",
+      "next_task",
+      "put",
+      "resolve_challenge",
+      "review",
+      "review_phase",
+      "run",
+      "status",
+      "trace"
+    ],
+    "repaired": {
+      "human_approvals_present": false,
+      "items": {
+        "d_reporting": {
+          "deps": {
+            "cmp_reporting": 2,
+            "e_eligible": 2,
+            "i_rows": 3,
+            "n_scope": 1
+          },
+          "stale": false,
+          "version": 2
+        },
+        "e_eligible": {
+          "deps": {
+            "e_archive": 1,
+            "pr_reanalysis": 1
+          },
+          "stale": false,
+          "version": 2
+        },
+        "i_rows": {
+          "deps": {
+            "e_eligible": 2,
+            "e_excluded": 1,
+            "e_gaps": 1,
+            "e_rental": 2,
+            "e_return": 2,
+            "n_scope": 1,
+            "p_access": 1,
+            "pr_reanalysis": 1
+          },
+          "stale": false,
+          "version": 3
+        },
+        "req_row_report": {
+          "deps": {
+            "d_reporting": 2,
+            "e_eligible": 2,
+            "e_excluded": 1,
+            "e_gaps": 1,
+            "e_rental": 2,
+            "e_return": 2,
+            "i_rows": 3
+          },
+          "stale": false,
+          "version": 2
+        }
+      },
+      "repaired_versions": {
+        "cmp_reporting": 2,
+        "d_reporting": 2,
+        "e_rental": 2,
+        "e_return": 2,
+        "i_rows": 3,
+        "inf_scope": 2,
+        "o_access_study": 2,
+        "o_rows_report": 2,
+        "req_row_report": 2,
+        "syn_limit": 2,
+        "unc_coverage": 2
+      },
+      "revision": 42,
+      "specify_blockers": [
+        "d_reporting requires a verified human approval",
+        "needs 1 valid criterion; has 0",
+        "previous phase is not currently accepted"
+      ],
+      "study_blockers": [
+        "previous phase is not currently accepted"
+      ]
+    },
+    "transport": {
+      "indicator_revision": "real_stdio_mcp",
+      "other_writes": "installed_cli"
+    }
+  },
+  "numeric_source_check": {
+    "eligible_denominator": 1809036,
+    "excluded_rows": 3512,
+    "false_raw_row_denominator_rejected": true,
+    "raw_rows": 1812548
+  },
+  "protected_sources_unchanged": true,
+  "schema": 1,
+  "sha256": {
+    "analysis_script": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+    "control_ledger": "6ca816216ba81665856b596cd3c5b23d8d74427b9c73e6dabd4412a14be81ea1",
+    "declared_parquet": "661221e1f6fc01ba6475cee61597e432fc0858689195b6c12255a6c005b52fc4",
+    "derived_ledger": "7cb7f451e953a02a7254edd2e6713ad7acc470181b2cc0966b5d9b88c51692e3",
+    "historical_event_prefix": "42c29d6649836334ac05412c2be69ae0636edb414e6a374cb4f34f037ba49782",
+    "historical_prefix_head": "061f398b0d252550ff05501fd2c7e02a708ae438b35092b42bfa5b028e221355",
+    "published_result": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+    "seed": "c63ffec48253ba21f9754a8fcc099a4f302525cfdb7b680acc47078eb90a0723",
+    "source_ledger": "af6b95cc40c3b6b44c04c47b713fa8db4ff2339a2b1fffefdce53a720688ddc4"
+  },
+  "source": "cases/citibike_march2024/organon.json"
+}
