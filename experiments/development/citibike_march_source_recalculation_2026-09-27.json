@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "classification": "development_public_source_recalculation",
+  "date_utc": "2026-09-27",
+  "goal_sha256_unchanged": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "case": "citibike_march2024",
+  "source": {
+    "url": "https://raw.githubusercontent.com/NYCComptroller/citi-bike-gbfs/4c36513cf3842efe9a2940a78974bf45cb13fc0b/dataset.parquet",
+    "retrieval": "HTTPS download to a temporary file; raw bytes were not added to this repository",
+    "download_command": "curl --fail --location --silent --show-error -o <temp>/source_from_github.parquet https://raw.githubusercontent.com/NYCComptroller/citi-bike-gbfs/4c36513cf3842efe9a2940a78974bf45cb13fc0b/dataset.parquet",
+    "bytes": 10853196,
+    "sha256": "661221e1f6fc01ba6475cee61597e432fc0858689195b6c12255a6c005b52fc4",
+    "local_git_blob_sha1": "6efe8e7cbf30591af1b9f4614be60a35650facdf",
+    "prior_local_copy_equal_by_cmp": true
+  },
+  "fresh_environment": {
+    "python": "3.11.15",
+    "pyarrow": "21.0.0",
+    "tzdata": "2026.4",
+    "install": "uv venv --python 3.11 <temp>/venv; uv pip install --offline --python <temp>/venv/bin/python 'pyarrow==21.0.0' 'tzdata==2026.4'"
+  },
+  "analysis": {
+    "script": "cases/citibike/analyze_sample_status.py",
+    "script_sha256": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+    "command": "<temp>/venv/bin/python cases/citibike/analyze_sample_status.py <temp>/source_from_github.parquet > <temp>/recomputed_from_github.json",
+    "recomputed_json_sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+    "archived_json": "experiments/development/citibike_sample_status_2026-09-27.json",
+    "archived_json_sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+    "byte_equal_by_cmp": true,
+    "rows": 1812548,
+    "conservative_dock_rows": 1809036,
+    "snapshot_count": 820
+  },
+  "negative_control": {
+    "input": "a local Parquet file with a different SHA-256",
+    "input_sha256": "f5f0fa134eda81d9d227c9e0c1b13520d5add0a80f232ab9ddb8fa09501dc609",
+    "exit_code": 2,
+    "stderr": "Citi Bike sample analysis failed: input SHA-256 differs from the pinned sample",
+    "failure_before_parquet_parse": true
+  },
+  "limits": [
+    "The source is a historical published sample, not a live feed or a reserved evaluation case.",
+    "A matching download and recomputation establish the published file's bytes and the declared calculation, not independent field observation or the truth of operator state.",
+    "Station-snapshot rows are not station-minutes, attempted rides, realized access or an intervention effect.",
+    "The raw Parquet is kept outside this repository and subject to the source data policy."
+  ],
+  "criterion_5": "not_assessed"
+}
