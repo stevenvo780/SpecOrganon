@@ -469,8 +469,52 @@ def _structured_field_outcome(value: Any) -> bool:
     return True
 
 
+def _decisive_indicator_has_evidence(items: dict[str, dict], flags: dict[str, dict],
+                                     indicator: dict[str, Any]) -> bool:
+    """Require a current measurement of this indicator on its own protocol path."""
+    metric, unit = indicator["data"].get("metric"), indicator["data"].get("unit")
+    if (not isinstance(metric, str) or not metric.strip()
+            or not isinstance(unit, str) or not unit.strip()):
+        return False
+    indicator_id = indicator["id"]
+    if any(flags[indicator_id][field] for field in ("stale", "contested", "issues")):
+        return False
+    normative_problems = _normative_problems(items, indicator_id)
+    indicator_ancestors = _ancestors(items, indicator_id)
+    for evidence_id in indicator_ancestors:
+        evidence = items[evidence_id]
+        if evidence["kind"] != "evidence":
+            continue
+        if any(flags[evidence_id][field] for field in ("stale", "contested", "issues")):
+            continue
+        data = evidence["data"]
+        if (data.get("metric_key") != metric or data.get("unit") != unit
+                or _metric_interval(data) is None):
+            continue
+        if _has_path(items, evidence_id, {"protocol"}):
+            problems = _valid_protocol_problems(items, flags, evidence_id)
+        elif data.get("origin") == "published":
+            # An independent publication needs an explicit protocol on the
+            # indicator or on the inference that interprets that publication.
+            problems = set()
+            for wrapper_id in indicator_ancestors:
+                wrapper = items[wrapper_id]
+                if (wrapper["kind"] not in {"indicator", "inference"}
+                        or evidence_id not in _ancestors(items, wrapper_id)):
+                    continue
+                for ref in wrapper["deps"]:
+                    if items[ref]["kind"] == "protocol":
+                        problems.update(_valid_protocol_problems(items, flags, ref))
+        else:
+            continue
+        if normative_problems & problems:
+            return True
+    return False
+
+
 def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any],
                           approval_policy: str, *,
+                          flags: dict[str, dict] | None = None,
                           skip_field_evidence_blocker: bool = False) -> list[str]:
     """Check that a decisive verdict is numerically and procedurally auditable.
 
@@ -505,6 +549,22 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any],
     if len(results) != 1 or len(baselines) != 1 or len(criteria) != 1:
         return issues + [f"{assessment['id']} {claim} needs exactly one linked result, baseline and criterion"]
     result, baseline, criterion = results[0], baselines[0], criteria[0]
+    if flags is None:
+        # Direct structural callers have no challenge ledger. Public gates
+        # provide the full current flags, including unresolved challenges.
+        flags = {
+            item_id: {"stale": _stale(items, item_id), "contested": False,
+                      "issues": _item_issues(item)}
+            for item_id, item in items.items()
+        }
+    for indicator_id in sorted(_ancestors(items, criterion["id"])):
+        indicator = items[indicator_id]
+        if indicator["kind"] == "indicator" and not _decisive_indicator_has_evidence(items, flags, indicator):
+            issues.append(
+                f"{assessment['id']} {claim} needs current protocol-valid evidence "
+                f"measuring {indicator['data'].get('metric')}/{indicator['data'].get('unit')} "
+                f"in indicator {indicator_id}"
+            )
     if result["data"].get("origin") != scope or baseline["data"].get("origin") != scope:
         issues.append(f"{assessment['id']} {scope} {claim} cannot use another evidence origin")
     if result["seq"] <= criterion["seq"]:
@@ -915,7 +975,7 @@ def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: boo
                 if not refs_of(item, {"result", "risk"}):
                     blockers.append(f"{item['id']} must link result and risk")
                 blockers.extend(_success_claim_issues(
-                    items, item, state["project"]["approval_policy"],
+                    items, item, state["project"]["approval_policy"], flags=flags,
                 ))
     return sorted(set(blockers))
 
@@ -1132,7 +1192,7 @@ def _field_attestation_target(state: dict[str, Any], id: str, reason: str,
     if key in approvers.values():
         raise MethodError("field assessor key must differ from normative approver keys")
     problems = _success_claim_issues(
-        state["items"], item, "signed", skip_field_evidence_blocker=True,
+        state["items"], item, "signed", flags=_flags(state), skip_field_evidence_blocker=True,
     )
     if problems:
         raise MethodError("field assessment fails prior structural checks: " + "; ".join(problems))

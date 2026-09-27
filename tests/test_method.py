@@ -40,13 +40,15 @@ def _synthetic_measured_outcomes():
 
 
 def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1"),
-                             e0_refs=("pr1",), e0_origin="simulated", e0_metric_key=None, e0_unit=None,
+                             e0_refs=("pr1",), e0_origin="simulated", e0_metric_key="count",
+                             e0_unit="count", e0_value=10, e0_data_extra=None,
                              e1_refs=("pr1",), e1_origin="simulated", e1_value=10,
                              e1_metric_key="count", e1_unit="count",
                              inf_refs=("e1", "h1"), sibling_protocol=False, sibling_problem="p1",
                              indicator_protocol_ref=None, indicator_extra_metric=None, indicator_extra_unit=None,
                              indicator_extra_via_inference=False,
                              disjoint_indicator=False, criterion_indicator="i1",
+                             indicator_metric="count", indicator_unit="count",
                              stop_before_observe=False, stop_before_specify=False):
     assert not disjoint_indicator or (study_problem == "p1" and not sibling_protocol)
     engine.create_case(path, "Synthetic control", "test", "human:fixture", approval_policy="fixture")
@@ -90,11 +92,14 @@ def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1")
         _put(path, "e2", "evidence", ["pr2"], {"origin": "simulated", "source": "synthetic fixture", "date": "2026-09-26", "locator": "second problem", "metric_key": "count", "scope": "second problem", "unit": "count", "value": 10})
         _put(path, "i2", "indicator", ["p2", "n2", "e2"], {"metric": "count", "unit": "count"})
     e0_data = {"origin": e0_origin, "source": "synthetic fixture", "date": "2026-09-26",
-               "locator": "predeclared context"}
+               "locator": "predeclared context", "scope": "indicator fixture"}
     if e0_metric_key is not None:
         e0_data["metric_key"] = e0_metric_key
     if e0_unit is not None:
         e0_data["unit"] = e0_unit
+    if e0_value is not None:
+        e0_data["value"] = e0_value
+    e0_data.update(e0_data_extra or {})
     _put(path, "e0", "evidence", e0_refs, e0_data)
     indicator_refs = ["p1", "n1", "e0"]
     if indicator_protocol_ref is not None:
@@ -110,7 +115,7 @@ def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1")
             _put(path, "ix", "inference", ["ex", "h1"])
             extra_ref = "ix"
         indicator_refs.append(extra_ref)
-    _put(path, "i1", "indicator", indicator_refs, {"metric": "count", "unit": "count"})
+    _put(path, "i1", "indicator", indicator_refs, {"metric": indicator_metric, "unit": indicator_unit})
     _accept(path, "study")
 
     _put(path, "e1", "evidence", e1_refs, {"origin": e1_origin, "source": "synthetic fixture", "date": "2026-09-26", "locator": "test_method.py", "metric_key": e1_metric_key, "scope": "fixture", "unit": e1_unit, "value": e1_value})
@@ -132,7 +137,7 @@ def _complete_synthetic_case(path, *, study_problem="p1", norm_refs=("p1", "a1")
     _put(path, "d1", "decision", ["cmp1", "n1", "e1"])
     _put(path, "req1", "requirement", ["d1"])
     _put(path, "crit1", "criterion", ["req1", criterion_indicator],
-         {"metric": "count", "threshold": 0, "reject": "negative count"})
+         {"metric": indicator_metric, "threshold": 0, "reject": "negative count"})
     if stop_before_specify:
         return
     assert not engine.gate(path, "specify")["ready"]
@@ -289,7 +294,8 @@ def test_independent_published_evidence_can_be_interpreted_under_protocol(tmp_pa
 
 def test_independent_published_indicator_evidence_can_use_explicit_protocol(tmp_path):
     path = tmp_path / "case"
-    _complete_synthetic_case(path, e0_refs=(), e0_origin="published", indicator_protocol_ref="pr1")
+    _complete_synthetic_case(path, e0_refs=(), e0_origin="published", indicator_protocol_ref="pr1",
+                             e0_metric_key=None, e0_unit=None, e0_value=None)
     evidence = engine.get_state(path)["items"]["e0"]
     assert evidence["deps"] == {}
     assert "metric_key" not in evidence["data"] and "unit" not in evidence["data"]
@@ -1902,3 +1908,155 @@ def test_success_rejects_missing_or_ambiguous_linked_indicator_units(tmp_path):
     extra["data"]["unit"] = "fraction"
     assert "ass1 success has ambiguous linked indicator units" in \
         engine._success_claim_issues(items, items["ass1"], "fixture")
+
+
+def _record_decisive_simulation(path, verdict, *, metric="waste_mass", unit="kg",
+                                indicator_refs=("req1", "i1")):
+    criterion = {
+        "metric": metric, "unit": unit,
+        "threshold": {"operator": "<=", "statistic": "upper_ci", "value": 0.1, "unit": unit},
+        "reject": "lower CI above 0.1",
+        "reject_test": {"operator": ">", "statistic": "lower_ci", "value": 0.1, "unit": unit},
+    }
+    _put(path, "crit1", "criterion", indicator_refs, criterion)
+    _put(path, "t1", "test", ["impl1", "crit1"],
+         {"passed": True, "command": "synthetic fixture; no external command run"})
+    _put(path, "base1", "baseline", ["crit1"],
+         {"origin": "simulation", "source": "invented fixture", "date": "2026-09-27",
+          "metric": metric, "unit": unit, "value": 0.2})
+    estimate, interval = ((0.03, [0.01, 0.05]) if verdict == "cumplido"
+                          else (0.3, [0.15, 0.4]))
+    _put(path, "res1", "result", ["base1", "crit1", "t1"],
+         {"origin": "simulation", "source": "invented fixture", "date": "2026-09-27",
+          "effect": {"metric": metric, "unit": unit, "estimate": estimate, "interval": interval}})
+    _put(path, "ass1", "assessment", ["res1", "r1"],
+         {"verdict": verdict, "claim_scope": "simulation", "uncertainty": "synthetic interval",
+          "adverse_effects": "not measured", "cost": "not measured"})
+    _accept(path, "specify")
+    _accept(path, "build")
+
+
+@pytest.mark.parametrize("verdict", ("cumplido", "incumplido"))
+def test_decisive_simulation_cannot_borrow_untyped_or_unrelated_evidence(tmp_path, verdict):
+    path = tmp_path / "case"
+    _complete_synthetic_case(
+        path, e0_metric_key=None, e0_unit=None, e0_value=None,
+        e0_data_extra={"temperature_c": 4}, e1_metric_key="waste_mass", e1_unit="kg",
+        indicator_metric="waste_mass", indicator_unit="kg",
+    )
+    assert engine.gate(path, "specify")["accepted"]
+    items = engine.get_state(path)["items"]
+    assert "e1" not in engine._ancestors(items, "i1")
+    assert items["e0"]["data"]["temperature_c"] == 4
+    assert not {"metric_key", "unit", "value"} & items["e0"]["data"].keys()
+    _record_decisive_simulation(path, verdict)
+    claim = "success" if verdict == "cumplido" else "rejection"
+    expected = f"ass1 {claim} needs current protocol-valid evidence measuring waste_mass/kg in indicator i1"
+    status = engine.gate(path, "validate")
+    assert status["blockers"] == [expected]
+    assert not status["ready"] and not status["accepted"]
+
+    _put(path, "ass1", "assessment", ["res1", "r1"],
+         {"verdict": "no_demostrado", "claim_scope": "simulation", "uncertainty": "synthetic interval",
+          "adverse_effects": "not measured", "cost": "not measured"})
+    assert engine.gate(path, "validate")["ready"]
+
+
+@pytest.mark.parametrize("verdict", ("cumplido", "incumplido"))
+def test_decisive_simulation_accepts_matching_indicator_measurement(tmp_path, verdict):
+    path = tmp_path / "case"
+    _complete_synthetic_case(
+        path, e0_metric_key="waste_mass", e0_unit="kg", e0_value=10,
+        e1_metric_key="temperature", e1_unit="C",
+        indicator_metric="waste_mass", indicator_unit="kg",
+    )
+    _record_decisive_simulation(path, verdict)
+    _accept(path, "validate")
+
+
+def test_decisive_indicator_needs_a_value_for_its_typed_measurement(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(
+        path, e0_metric_key="waste_mass", e0_unit="kg", e0_value=None,
+        e1_metric_key="waste_mass", e1_unit="kg",
+        indicator_metric="waste_mass", indicator_unit="kg",
+    )
+    _record_decisive_simulation(path, "cumplido")
+    assert "ass1 success needs current protocol-valid evidence measuring waste_mass/kg in indicator i1" in \
+        engine.gate(path, "validate")["blockers"]
+
+
+def test_decisive_indicator_accepts_typed_independent_publication_with_protocol(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(
+        path, e0_refs=(), e0_origin="published", indicator_protocol_ref="pr1",
+        e0_metric_key="waste_mass", e0_unit="kg", e0_value=10,
+        e1_metric_key="temperature", e1_unit="C",
+        indicator_metric="waste_mass", indicator_unit="kg",
+    )
+    _record_decisive_simulation(path, "cumplido")
+    _accept(path, "validate")
+
+
+def test_decisive_criterion_checks_every_linked_indicator(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _put(path, "e_aux", "evidence", ["pr1"],
+         {"origin": "simulated", "source": "synthetic fixture", "date": "2026-09-27",
+          "locator": "temperature record", "temperature_c": 4})
+    _put(path, "i_aux", "indicator", ["p1", "n1", "e_aux"],
+         {"metric": "temperature", "unit": "C"})
+    for phase in ("study", "observe", "explain", "compare"):
+        _accept(path, phase)
+    _record_decisive_simulation(
+        path, "cumplido", metric="count", unit="count",
+        indicator_refs=("req1", "i1", "i_aux"),
+    )
+    assert engine.gate(path, "specify")["accepted"]
+    assert engine.gate(path, "validate")["blockers"] == [
+        "ass1 success needs current protocol-valid evidence measuring temperature/C in indicator i_aux"
+    ]
+
+
+def test_decisive_indicator_cannot_borrow_sibling_protocol_measurement(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(
+        path, sibling_protocol=True, sibling_problem="p2",
+        e0_metric_key=None, e0_unit=None, e0_value=None,
+        e1_metric_key="waste_mass", e1_unit="kg",
+        indicator_metric="waste_mass", indicator_unit="kg",
+    )
+    _put(path, "ex", "evidence", ["pr2"],
+         {"origin": "simulated", "source": "synthetic fixture", "date": "2026-09-27",
+          "locator": "other problem", "metric_key": "waste_mass", "scope": "other problem",
+          "unit": "kg", "value": 10})
+    _put(path, "i1", "indicator", ["p1", "n1", "e0", "ex"],
+         {"metric": "waste_mass", "unit": "kg"})
+    for phase in ("study", "observe", "explain", "compare"):
+        _accept(path, phase)
+    _record_decisive_simulation(path, "cumplido")
+    assert engine.gate(path, "specify")["accepted"]
+    assert engine.gate(path, "validate")["blockers"] == [
+        "ass1 success needs current protocol-valid evidence measuring waste_mass/kg in indicator i1"
+    ]
+
+
+def test_decisive_indicator_drops_challenged_and_superseded_measurement(tmp_path):
+    path = tmp_path / "case"
+    _complete_synthetic_case(path)
+    _record_decisive_simulation(path, "cumplido", metric="count", unit="count")
+    assert engine.gate(path, "validate")["ready"]
+
+    engine.challenge(path, "e0", "e1", "independent review of indicator reading", "agent:reviewer")
+    expected = "ass1 success needs current protocol-valid evidence measuring count/count in indicator i1"
+    assert expected in engine.gate(path, "validate")["blockers"]
+
+    # A separate case isolates revision from the unresolved challenge.
+    revised_path = tmp_path / "revised"
+    _complete_synthetic_case(revised_path)
+    _record_decisive_simulation(revised_path, "cumplido", metric="count", unit="count")
+    assert engine.gate(revised_path, "validate")["ready"]
+    _put(revised_path, "e0", "evidence", ["pr1"],
+         {"origin": "simulated", "source": "synthetic fixture", "date": "2026-09-27",
+          "locator": "revised temperature only", "temperature_c": 4})
+    assert expected in engine.gate(revised_path, "validate")["blockers"]
