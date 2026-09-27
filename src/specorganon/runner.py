@@ -150,7 +150,17 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
     elif missing:
         action, role, task = "create_artifacts", base_role, "Producir los artefactos faltantes con contenido y fuentes verificables."
     elif not status["reviewed"]:
-        action, role, task = "review_phase", "reviewer", "Revisar independientemente el snapshot vigente y registrar veredicto motivado."
+        action, role = "review_phase", "reviewer"
+        if state["project"]["approval_policy"] == "signed":
+            if state["phase_review_trust"] == "configured":
+                task = ("Confirmar que el actor revisor elegido tiene clave pública registrada y es distinto "
+                        "de los autores; revisar el snapshot vigente, pedir phase-review-challenge "
+                        "y registrar la firma Ed25519 externa con review-phase.")
+            else:
+                task = ("Registrar fuera del caso la clave pública de un revisor competente y distinto "
+                        "de los autores; después pedir phase-review-challenge y registrar su firma.")
+        else:
+            task = "Revisar independientemente el snapshot vigente y registrar veredicto motivado."
     elif not status["independent_review"]:
         action, role, task = "review_phase", "reviewer", "Obtener una revisión aceptada por un actor distinto de los autores de la fase."
     else:
@@ -167,6 +177,7 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
         "actor": actors.get(role),
         "action": action,
         "task": task,
+        "phase_review_trust": state["phase_review_trust"],
         "inputs_description": phase.inputs,
         "inputs": _limited(prior),
         "artifacts": _limited(current),
@@ -174,7 +185,10 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
         "approval_targets": [{"id": item["id"], "version": item["version"]} for item in approvals[:CONTEXT_LIMIT]],
         "omitted_approval_targets": max(0, len(approvals) - CONTEXT_LIMIT),
         "criteria": {"exit": phase.exit_rule, "review": phase.review, "stop": phase.stop_rule},
-        "gate": {key: status[key] for key in ("ready", "reviewed", "independent_review", "accepted", "snapshot")},
+        "gate": {key: status[key] for key in (
+            "ready", "reviewed", "independent_review", "review_signature_verified",
+            "review_provenance", "accepted", "snapshot",
+        )},
         "blockers": [_short(blocker, TEXT_LIMIT) for blocker in status["blockers"][:BLOCKER_LIMIT]],
         "omitted_blockers": max(0, len(status["blockers"]) - BLOCKER_LIMIT),
         "open_challenges": [
