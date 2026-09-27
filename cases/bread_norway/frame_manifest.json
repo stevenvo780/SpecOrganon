@@ -1,0 +1,260 @@
+{
+  "schema": 1,
+  "steps": [
+    {
+      "op": "put",
+      "id": "e_product_mass",
+      "kind": "evidence",
+      "text": "El estudio describe una pieza de pan comercial de 736 g; la unidad funcional del ACV es 1 kg de pan producido, distribuido y consumido en Noruega.",
+      "refs": [],
+      "data": {
+        "origin": "published",
+        "source": "https://doi.org/10.3390/su11010043",
+        "date": "2018-12",
+        "locator": "secciones 3.2.1 y 4.2; tabla 1",
+        "archive": "source_lca.pdf",
+        "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "metric_key": "piece_mass",
+        "scope": "pan_comercial_estudiado",
+        "unit": "g/pieza",
+        "value": 736
+      }
+    },
+    {
+      "op": "put",
+      "id": "e_wheat_origin",
+      "kind": "evidence",
+      "text": "El molino informó que, durante varios años, en promedio 65 % del trigo procedía de Noruega y 35 % de Polonia; el artículo modeló los impactos del cultivo con bases comerciales.",
+      "refs": [],
+      "data": {
+        "origin": "published",
+        "source": "https://doi.org/10.3390/su11010043",
+        "date": "2018-12",
+        "locator": "sección 4.3 y tabla 1",
+        "archive": "source_lca.pdf",
+        "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "metric_key": "norway_wheat_share",
+        "scope": "promedio_historico_informado_por_molino_no_lote",
+        "unit": "%",
+        "value": 65
+      }
+    },
+    {
+      "op": "put",
+      "id": "e_mill_energy",
+      "kind": "evidence",
+      "text": "El molino informó un consumo de 129 kWh de electricidad por tonelada de harina producida; el artículo no publica los registros unitarios.",
+      "refs": [],
+      "data": {
+        "origin": "published",
+        "source": "https://doi.org/10.3390/su11010043",
+        "date": "2018-12",
+        "locator": "tabla 2",
+        "archive": "source_lca.pdf",
+        "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "metric_key": "mill_electricity",
+        "scope": "molino_informado_agregado",
+        "unit": "kWh/t_harina",
+        "value": 129
+      }
+    },
+    {
+      "op": "put",
+      "id": "e_mill_bran",
+      "kind": "evidence",
+      "text": "La tabla del molino presenta 19,1 % de salvado como una de las salidas del trigo, junto con harinas refinada e integral. Es un coproducto; su masa no es desperdicio por definición.",
+      "refs": [],
+      "data": {
+        "origin": "published",
+        "source": "https://doi.org/10.3390/su11010043",
+        "date": "2018-12",
+        "locator": "tabla 3, balance másico de productos del trigo",
+        "archive": "source_lca.pdf",
+        "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "metric_key": "wheat_bran_output",
+        "scope": "fraccion_masica_publicada_molino",
+        "unit": "%",
+        "value": 19.1
+      }
+    },
+    {
+      "op": "put",
+      "id": "e_mill_transport",
+      "kind": "evidence",
+      "text": "La tabla de panificación informa 438 km de transporte del molino a la panadería en camión de más de 32 toneladas; no son trayectos enlazados por lote.",
+      "refs": [],
+      "data": {
+        "origin": "published",
+        "source": "https://doi.org/10.3390/su11010043",
+        "date": "2018-12",
+        "locator": "tabla 5",
+        "archive": "source_lca.pdf",
+        "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "metric_key": "mill_to_baker_distance",
+        "scope": "parametro_informado_no_viajes_por_lote",
+        "unit": "km",
+        "value": 438
+      }
+    },
+    {
+      "op": "put",
+      "id": "e_baker_energy",
+      "kind": "evidence",
+      "text": "La empresa panificadora informó 0,297 kWh de electricidad y 0,115 kWh de gas natural por pieza; no se publicaron registros por lote.",
+      "refs": [],
+      "data": {
+        "origin": "published",
+        "source": "https://doi.org/10.3390/su11010043",
+        "date": "2018-12",
+        "locator": "tabla 5",
+        "archive": "source_lca.pdf",
+        "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "metric_key": "bakery_electricity",
+        "scope": "panaderia_informada_agregado",
+        "unit": "kWh/pieza",
+        "value": 0.297
+      }
+    },
+    {
+      "op": "put",
+      "id": "e_retail_waste",
+      "kind": "evidence",
+      "text": "La empresa panificadora informó 11,4 % de pan desechado en comercio como porcentaje del pan que entra en el sistema; no hay observaciones por tienda y fecha publicadas.",
+      "refs": [],
+      "data": {
+        "origin": "published",
+        "source": "https://doi.org/10.3390/su11010043",
+        "date": "2018-12",
+        "locator": "tabla 7, retail waste",
+        "archive": "source_lca.pdf",
+        "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "metric_key": "retail_bread_waste",
+        "scope": "agregado_informado_no_lote",
+        "unit": "%_pan_entrante_sistema",
+        "value": 11.4
+      }
+    },
+    {
+      "op": "put",
+      "id": "e_household_est",
+      "kind": "evidence",
+      "text": "El 8,2 % de desperdicio doméstico en la tabla 7 fue calculado a partir de otras fuentes; no se pesó ese pan en hogares enlazados con la cadena estudiada.",
+      "refs": [],
+      "data": {
+        "origin": "published",
+        "source": "https://doi.org/10.3390/su11010043",
+        "date": "2018-12",
+        "locator": "tabla 7, consumer waste y nota de fuente",
+        "archive": "source_lca.pdf",
+        "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "metric_key": "consumer_bread_waste_estimate",
+        "scope": "estimacion_externa_no_producto_observado",
+        "unit": "%_pan_entrante_sistema",
+        "value": 8.2
+      }
+    },
+    {
+      "op": "put",
+      "id": "e_survey_size",
+      "kind": "evidence",
+      "text": "Una encuesta web del mismo grupo investigador tuvo 1.000 personas y recabó rebanadas de pan desechadas declaradas; no identificó compradores del producto del ACV.",
+      "refs": [],
+      "data": {
+        "origin": "published",
+        "source": "https://doi.org/10.3390/su10072251",
+        "date": "2018",
+        "locator": "resumen y sección 3",
+        "archive": "source_survey.pdf",
+        "source_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+        "metric_key": "survey_respondents",
+        "scope": "encuesta_pan_fresco_general_autoinforme",
+        "unit": "personas",
+        "value": 1000
+      }
+    },
+    {
+      "op": "put",
+      "id": "p_bread_value",
+      "kind": "problem",
+      "text": "La empresa informó 11,4 % de pan descartado en comercio y el ACV calculó 8,2 % en hogares con fuentes externas; son cifras históricas sin lotes enlazados. Se desconoce si una intervención puede aumentar el pan inocuo y útil efectivamente consumido desde producción a hogar sin trasladar costes, riesgos o perjuicios entre actores.",
+      "refs": ["e_retail_waste", "e_household_est", "e_survey_size"],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "a_bread_chain",
+      "kind": "actor",
+      "text": "Agricultores de Noruega y Polonia, trabajadores, molino, panadería, transportistas, productores de envases, comercios, hogares, procesador y usuarios del pienso, gestores de residuos y autoridades sanitarias participan o son afectados en etapas distintas; sus intereses y autoridad para decidir necesitan consulta directa antes de ensayar.",
+      "refs": ["p_bread_value", "e_wheat_origin", "e_mill_bran"],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "b_bread_scope",
+      "kind": "boundary",
+      "text": "El caso delimita un pan comercial de 736 g y su ACV de 1 kg producido, distribuido y consumido en Noruega, con trigo de Noruega y Polonia. Incluye cultivo modelado, secado y almacenamiento sin mermas medidas, transporte parametrizado, molienda, panificación, envases, comercio, pienso para cerdos, tratamiento de residuos y consumo estimado; no enlaza un mismo lote desde fincas hasta hogares. El ACV excluye transporte de ingredientes de origen desconocido, pérdida de carbono orgánico del suelo, maquinaria agrícola y parte de bienes de capital.",
+      "refs": ["p_bread_value", "e_product_mass", "e_wheat_origin", "e_mill_energy", "e_mill_transport", "e_baker_energy", "e_household_est"],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "c_bread_value",
+      "kind": "concept",
+      "text": "Valor alimentario es una propuesta de evaluación plural: servicio comestible e inocuo, calidad nutricional y aceptación, costes y beneficios por actor, recursos y daños; no equivale solo a precio o a masa, y el salvado puede ser coproducto útil.",
+      "refs": ["p_bread_value", "a_bread_chain", "e_mill_bran"],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "s_bread_history",
+      "kind": "assumption",
+      "text": "Los porcentajes históricos agregados, la encuesta autodeclarada y los escenarios calculados sirven para plantear preguntas; no son línea base contemporánea de los mismos lotes ni prueba de efecto causal de envases o conservación.",
+      "refs": ["b_bread_scope", "e_retail_waste", "e_household_est", "e_survey_size"],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "f_bread_mass",
+      "kind": "frame_option",
+      "text": "Formulación rival A: reducir masa de pan descartada en tiendas y hogares; puede ocultar desplazamiento de residuos, riesgos o costes hacia otras etapas y actores.",
+      "refs": ["p_bread_value", "a_bread_chain"],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "f_bread_service",
+      "kind": "frame_option",
+      "text": "Formulación rival B: conservar servicio alimentario inocuo efectivamente consumido y examinar distribución de perjuicios por etapa; requiere consulta de afectados y aprobación humana competente de valores, equivalencias y mediciones antes de ensayar.",
+      "refs": ["p_bread_value", "a_bread_chain", "e_household_est"],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "n_bread_harm",
+      "kind": "norm",
+      "text": "Compromiso propuesto, pendiente de aprobación humana competente: ninguna reducción de descarte justifica aumentar el riesgo de inocuidad o trasladar daños inadmisibles a agricultores, trabajadores, comercios u hogares; las equivalencias de valor y márgenes deben acordarse antes del ensayo.",
+      "refs": ["p_bread_value", "a_bread_chain"],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "q_bread_chain",
+      "kind": "question",
+      "text": "¿Dónde, por qué y para quién se conserva o pierde servicio alimentario desde cultivo hasta consumo de este pan, y qué datos enlazables faltan para comparar una intervención sin perjuicios desplazados?",
+      "refs": ["p_bread_value", "b_bread_scope", "a_bread_chain"],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "h_bread_packaging",
+      "kind": "hypothesis",
+      "text": "Un cambio de envase o conservación podría reducir desperdicio real en comercio u hogares, pero el ACV y la encuesta no estiman su efecto causal ni garantizan ausencia de daños en etapas anteriores.",
+      "refs": ["q_bread_chain", "n_bread_harm", "e_retail_waste", "e_household_est"],
+      "data": {}
+    },
+    {
+      "op": "advance",
+      "phase": "frame"
+    }
+  ]
+}
