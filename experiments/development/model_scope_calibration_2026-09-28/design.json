@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "classification": "prospective_exposed_development_calibration_not_goal_acceptance",
+  "date_utc": "2026-09-28",
+  "source_case": "citibike_march2024_exposed_development",
+  "task_file": "task.json",
+  "task_sha256": "8f3efb7b8f634d85ee426947a3a8d373fdaa888fc302573a49bb4343fb67fc97",
+  "scorer_file": "score.py",
+  "scorer_sha256": "9358cf10e27fa4e961bf99624b06f0b401930989fe65156b53b0bc2efaf9d210",
+  "planned_runs": [
+    {"id": "luna_low", "requested_model": "gpt-6-luna", "requested_reasoning_effort": "low", "output": "luna_low.json"},
+    {"id": "luna_high", "requested_model": "gpt-6-luna", "requested_reasoning_effort": "high", "output": "luna_high.json"},
+    {"id": "sol_medium", "requested_model": "gpt-6-sol", "requested_reasoning_effort": "medium", "output": "sol_medium.json"}
+  ],
+  "method": "One identical closed-world public-data task per native Codex worker, run concurrently. Each worker reads only task.json, writes its assigned JSON and does not inspect other responses. Mechanical scoring uses the frozen score.py; next_measurement is archived but not scored.",
+  "quality_bar": "Correct classification of all ten claims, both reduced fractions, unit and criterion_5 flag: 14/14.",
+  "scope_limits": [
+    "No N/SDD/T method arms, independent replicates, reserved case, blind human judges or interventions.",
+    "The shared filesystem and instructions do not technically prevent cross-run reading.",
+    "Native agent outputs do not expose authenticated effective model, token, time or cost telemetry to this experiment.",
+    "The Codex quota probe returned unavailable with an aged stale probe; capacity is unverified despite callable native workers.",
+    "This is a calibration of a scoped source-reasoning task and cannot estimate methodology benefit or GOAL criterion 4."
+  ],
+  "criterion_4": "not_assessed",
+  "criterion_5": "not_assessed"
+}
