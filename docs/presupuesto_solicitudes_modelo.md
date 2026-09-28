@@ -34,8 +34,9 @@ reejecución. No llama herramientas.
    `model`, `input`, `max_output_tokens` y opcionalmente `instructions` y
    `reasoning: {"effort": "..."}`. Una solicitud con coste exige
    `service_tier: "default"`, concordancia exacta de modelo con el perfil y
-   confirma el tier devuelto antes de conciliar. El ejecutor rechaza
-   herramientas y otros campos: todavía no coordina llamadas de herramienta.
+   confirma el tier devuelto antes de conciliar. El adaptador admite definiciones
+   estrictas de funciones y cuenta sus esquemas, pero por sí solo no ejecuta
+   las llamadas; el puente descrito abajo coordina una herramienta sellada.
 3. El transportador solicita al proveedor el conteo de esa entrada. El ledger
    reserva, bajo un lock entre procesos, entrada contada más el techo de salida.
    Con perfil de coste, reserva también el coste máximo local: todos los tokens
@@ -135,6 +136,45 @@ estimación local sobre tarifas aportadas por el operador.** No
 se ejecutó `send` contra un proveedor para este desarrollo. Las pruebas usan
 un transporte falso y un servidor HTTP local, sin gasto ni credenciales.
 
+## Conversación de desarrollo con una herramienta sellada
+
+[`run_managed_tool_conversation.py`](../scripts/run_managed_tool_conversation.py)
+une el ledger anterior con una [sesión de herramienta sellada](preparacion_matriz.md#sesión-local-de-herramientas-consecutivas)
+para un `run_id` del calendario candidato. Prepara dos turnos de usuario, un
+modelo y una función de parámetros primitivos estrictos cuyo `tool_id` y
+ejecutable coinciden con la política y los bytes del stage. Cuenta el esquema
+de la función en cada solicitud, reserva tokens y coste declarado antes de
+enviar y usa un plazo activo del proceso y cupos locales de solicitudes y
+herramientas. Una llamada del modelo se valida antes de lanzar el ejecutable;
+su `call_id`, el digest de argumentos y el terminal quedan ligados en recibos
+privados. El siguiente input incluye `function_call` y su
+`function_call_output`, como exige la [guía de llamadas de función](https://developers.openai.com/api/docs/guides/function-calling).
+
+El plan privado de esquema 1 identifica `run_id`, `model`, `service_tier` de
+valor `default`, dos `turns`, una `functions` con definición estricta,
+`tool_id` y ruta absoluta `executable`, además de `max_model_requests`,
+`max_tool_calls` y `tool_wall_seconds`. Modelo y esfuerzo deben coincidir con
+el calendario; el perfil de tarifas debe nombrar ese mismo modelo. Por ejemplo,
+una vez preparados el calendario, el stage y el plan:
+
+```sh
+python3 scripts/run_managed_tool_conversation.py prepare \
+  /ruta/privada/calendario.json /ruta/privada/stage /ruta/privada/plan.json \
+  /ruta/privada/corrida-herramienta --limit-tokens 80000 \
+  --active-limit-seconds 5400 --price-profile /ruta/privada/tarifa.json \
+  --cost-limit-micro-usd "$TOPE_MICRO_USD"
+python3 scripts/run_managed_tool_conversation.py status /ruta/privada/corrida-herramienta
+```
+
+`prepare` y `status` son locales. `execute` exige
+`--allow-paid-requests`, clave `OPENAI_API_KEY` y autorización humana previa;
+no se usó con proveedor real. Una corrida iniciada, truncada o incierta no se
+reintenta automáticamente. Un fallo de herramienta conserva reserva y terminal
+sin inventar una respuesta satisfactoria. Los argumentos viajan como `argv`
+al ejecutable: otro proceso local podría leerlos en `/proc`. No deben usarse
+para pasar secretos. Los recibos son evidencia bajo el mismo UID, no custodia
+externa ni prueba de gasto real.
+
 ## Límite de la evidencia
 
 Estos controles cubren únicamente las solicitudes que pasan por estos
@@ -144,7 +184,7 @@ La CLI opaca de `run_development_arm.py` sigue analizando uso al terminar y no
 adopta este control. El ledger, el temporizador y los recibos son locales, sin
 custodia independiente ni recibo de factura. El plazo nuevo solo cubre la
 conversación secuencial de un proceso y no agrega varios agentes. Faltan
-herramientas compartidas, tarifa y gasto autenticados,
+herramientas compartidas entre agentes, tarifa y gasto autenticados,
 versiones efectivas de modelo, agentes coordinados, familias adicionales,
 reservas, jueces ciegos y evaluación de campo. Hasta integrar y verificar
 esas condiciones, el piloto facturable y el criterio 4 continúan **NO-GO / no

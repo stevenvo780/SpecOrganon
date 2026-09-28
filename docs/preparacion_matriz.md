@@ -159,6 +159,15 @@ python3 scripts/staged_tool_session.py call calendario-candidato.json RUN_ID /ru
 python3 scripts/staged_tool_session.py status calendario-candidato.json RUN_ID /ruta-privada/stage-existente /ruta-privada/sesion-nueva
 ```
 
+`call` admite opcionalmente `--args-json '{"clave":"valor"}'`: entrega un objeto
+JSON estricto como cuarto argumento del ejecutable, después de las tres rutas
+históricas. La reserva y el terminal conservan el SHA-256 de su forma canónica,
+sin copiar el objeto al journal; sin esa opción permanece el contrato de tres
+argumentos. El rechazo de tamaño, estructura o número inválido ocurre antes
+del reclamo del intento. El argumento sí puede verse en la línea de comandos
+del proceso hijo mediante `/proc` en hosts que lo permitan; esta interfaz no
+promete confidencialidad de esos valores frente a otros procesos locales.
+
 Al crear una sesión de un stage con gate, añade `--gate-dir /ruta-privada/gate` a `init`; el journal conserva esa procedencia para las llamadas siguientes.
 
 El contador de `tool_calls` incluye reservas indeterminadas. El presupuesto activo local carga el tiempo observado de cada llamada al sandbox más un segundo de resguardo por recibo; antes de lanzar exige espacio para el timeout solicitado y ese resguardo. El presupuesto separado de pared, por defecto 24 horas, incluye pausas entre llamadas y se comprueba también justo antes de `Popen` con reloj UTC del host. El journal aplica esos cupos **a la sesión ganadora**. Un registro privado por UID, externo al stage y compartido con la modalidad de una sola llamada, liga el SHA-256 del calendario, `run_id` e intento ya verificados a un único dueño. La clave histórica del intento 1 se conserva; cada reintento usa otra clave. Por defecto usa `.specorganon-local-admissions-v1` en el directorio de la cuenta efectiva; `SPECORGANON_LOCAL_ADMISSION_ROOT` o `--admission-root` sirven solo si **todos** los ejecutores cooperantes usan la misma raíz privada. La identidad de esa raíz queda ligada a la sesión o al recibo. Dos copias preparadas pueden coexistir, pero solo la primera llamada válida reclama ese intento; las demás se bloquean antes de lanzar. La elegibilidad y los diez cupos se comprueban en el gate antes de publicar el release; la admisión por sí sola no los demuestra. Cambiar de UID, host o raíz configura otro ámbito; el registro no acredita un límite global de matriz.
