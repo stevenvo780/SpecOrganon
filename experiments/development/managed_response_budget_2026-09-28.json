@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "classification": "development_local_managed_response_budget_unsealed",
+  "date_utc": "2026-09-28",
+  "status": "local_fake_transport_verified_no_external_provider_calls",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "source_sha256": {
+    "scripts/managed_token_ledger.py": "553aafbc43a503686f5d8a43c9565fbfbfd61bb830afd601f34156051091ccb5",
+    "scripts/run_managed_response.py": "9b20016a6bcd54b7f5feead5bea27638197f6523dd0452241db699ff6247f511",
+    "tests/test_managed_token_ledger.py": "8fc16596af241f888df98f8f066f7cc061a5d8552ad9e8fc4789a8ab4cc8130e",
+    "tests/test_run_managed_response.py": "dcc12d26c74a248909aa627090bdeee2a683d6fe69730e0ed4caaafb6aba4da5"
+  },
+  "checks": {
+    "focal_tests": {
+      "command": "pytest -q tests/test_managed_token_ledger.py tests/test_run_managed_response.py",
+      "passed": 28,
+      "failed": 0
+    },
+    "ruff": {
+      "command": "ruff check scripts/managed_token_ledger.py scripts/run_managed_response.py tests/test_managed_token_ledger.py tests/test_run_managed_response.py",
+      "result": "All checks passed"
+    },
+    "syntax": {
+      "command": "python3 -m py_compile scripts/managed_token_ledger.py scripts/run_managed_response.py tests/test_managed_token_ledger.py tests/test_run_managed_response.py",
+      "exit_code": 0
+    },
+    "independent_read_only_review": {
+      "result": "no_open_P1_or_P2_in_reviewed_scope",
+      "found_and_fixed": [
+        "reserved request after process death did not block next request",
+        "authenticated HTTP redirect forwarded the key to another local server",
+        "documentation overstated run replacement control for incomplete responses"
+      ]
+    }
+  },
+  "external_provider_requests_made": 0,
+  "real_api_usage_compared": false,
+  "provider_identity_authenticated": false,
+  "global_time_tool_and_cost_limits_enforced": false,
+  "criterion_4": "not_assessed",
+  "limitations": [
+    "The route handles text only and does not control the opaque D-E CLI.",
+    "Only requests using the same local ledger share this token allowance.",
+    "An incomplete response is metered; study-level truncation policy is external.",
+    "Host power loss, storage durability, provider billing, and external custody were not tested."
+  ]
+}
