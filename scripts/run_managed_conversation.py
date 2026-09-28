@@ -21,10 +21,12 @@ import time
 from pathlib import Path
 from typing import Any, Iterator
 
-from managed_token_ledger import BudgetError, TokenLedger
+from managed_token_ledger import (
+    BudgetError, CostBudgetExhausted, TokenBudgetExhausted, TokenLedger,
+)
 from run_managed_response import (
     MAX_JSON_BYTES, DispatchError, OpenAIResponsesHTTP, ResponseTransport,
-    _json_bytes, _validated_request, dispatch_response,
+    _json_bytes, _read_json_file, _validated_request, dispatch_response,
 )
 
 
@@ -69,10 +71,11 @@ _MAX_TOKENS = 80_000
 _MAX_ACTIVE_SECONDS = 5_400
 _MAX_TURNS = 32
 _STATES = {"prepared", "started", "completed", "truncated", "indeterminate"}
-_STATE_KEYS = {
+_STATE_KEYS_V1 = {
     "schema", "state", "plan_sha256", "limit_tokens", "active_limit_seconds",
     "turns_total", "turns_completed", "active_seconds", "reason",
 }
+_STATE_KEYS_V2 = _STATE_KEYS_V1 | {"cost_limit_micro_usd", "price_profile_sha256"}
 
 
 def _canonical(value: Any) -> bytes:
@@ -153,7 +156,8 @@ def _write_state(run_dir: Path, state: dict[str, Any]) -> None:
 
 def _validated_plan(raw: Any) -> dict[str, Any]:
     if (type(raw) is not dict or not {"schema", "model", "turns"} <= raw.keys()
-            or not raw.keys() <= {"schema", "model", "instructions", "reasoning", "turns"}
+            or not raw.keys() <= {"schema", "model", "instructions", "reasoning",
+                                      "service_tier", "turns"}
             or type(raw["schema"]) is not int or raw["schema"] != 1):
         raise ConversationError("plan schema or fields are invalid")
     turns = raw["turns"]
@@ -167,7 +171,7 @@ def _validated_plan(raw: Any) -> dict[str, Any]:
             raise ConversationError("each turn needs text and a positive output cap")
     first = {"model": raw["model"], "input": [{"role": "user", "content": turns[0]["user"]}],
              "max_output_tokens": turns[0]["max_output_tokens"]}
-    for optional in ("instructions", "reasoning"):
+    for optional in ("instructions", "reasoning", "service_tier"):
         if optional in raw:
             first[optional] = raw[optional]
     _validated_request(first)
@@ -177,8 +181,9 @@ def _validated_plan(raw: Any) -> dict[str, Any]:
 
 
 def _validated_state(value: dict[str, Any], plan: dict[str, Any], raw_plan: bytes) -> None:
-    if (set(value) != _STATE_KEYS or type(value["schema"]) is not int
-            or value["schema"] != 1 or type(value["state"]) is not str
+    if (type(value.get("schema")) is not int or value["schema"] not in {1, 2}
+            or set(value) != (_STATE_KEYS_V1 if value["schema"] == 1 else _STATE_KEYS_V2)
+            or type(value["state"]) is not str
             or value["state"] not in _STATES
             or type(value["plan_sha256"]) is not str
             or value["plan_sha256"] != hashlib.sha256(raw_plan).hexdigest()
@@ -194,6 +199,14 @@ def _validated_state(value: dict[str, Any], plan: dict[str, Any], raw_plan: byte
             or value["active_seconds"] < 0
             or value["reason"] is not None and type(value["reason"]) is not str):
         raise ConversationError("run state is inconsistent")
+    if value["schema"] == 2:
+        limit = value["cost_limit_micro_usd"]
+        digest = value["price_profile_sha256"]
+        if not ((limit is None and digest is None)
+                or (type(limit) is int and limit >= 0
+                    and type(digest) is str and len(digest) == 64
+                    and all(char in "0123456789abcdef" for char in digest))):
+            raise ConversationError("run cost state is inconsistent")
 
 
 def _load(run_dir: Path) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -227,6 +240,8 @@ def _run_lock(run_dir: Path) -> Iterator[None]:
 def prepare_conversation(
     run_dir: Path, plan: dict[str, Any], limit_tokens: int = _MAX_TOKENS,
     active_limit_seconds: int = _MAX_ACTIVE_SECONDS,
+    *, cost_limit_micro_usd: int | None = None,
+    price_profile: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create a new private, immutable plan and shared ledger without provider calls."""
     validated = _validated_plan(plan)
@@ -235,6 +250,13 @@ def prepare_conversation(
     if (type(active_limit_seconds) is not int
             or not 1 <= active_limit_seconds <= _MAX_ACTIVE_SECONDS):
         raise ConversationError("active cap must be between 1 and 5400 seconds")
+    if (cost_limit_micro_usd is None) != (price_profile is None):
+        raise ConversationError("cost limit and price profile must be supplied together")
+    if cost_limit_micro_usd is not None:
+        if validated.get("service_tier") != "default":
+            raise ConversationError("priced plans require the explicit default service tier")
+        if type(price_profile) is not dict or price_profile.get("model") != validated["model"]:
+            raise ConversationError("plan model differs from the price profile")
     run_dir = Path(run_dir)
     run_dir.mkdir(mode=0o700)
     run_dir.chmod(0o700)
@@ -242,16 +264,21 @@ def prepare_conversation(
     for name in ("requests", "responses", "receipts"):
         (run_dir / name).mkdir(mode=0o700)
         (run_dir / name).chmod(0o700)
-    TokenLedger.create(run_dir / "ledger", limit_tokens, len(validated["turns"]))
+    ledger = TokenLedger.create(
+        run_dir / "ledger", limit_tokens, len(validated["turns"]),
+        cost_limit_micro_usd=cost_limit_micro_usd, price_profile=price_profile)
+    ledger_status = ledger.status()
     raw_plan = _canonical(validated)
     _new_private_file(run_dir / "plan.json", raw_plan)
     _new_private_file(run_dir / ".lock", b"")
     state = {
-        "schema": 1, "state": "prepared",
+        "schema": 2, "state": "prepared",
         "plan_sha256": hashlib.sha256(raw_plan).hexdigest(),
         "limit_tokens": limit_tokens, "active_limit_seconds": active_limit_seconds,
         "turns_total": len(validated["turns"]), "turns_completed": 0,
         "active_seconds": 0, "reason": None,
+        "cost_limit_micro_usd": ledger_status["cost_limit_micro_usd"],
+        "price_profile_sha256": ledger_status["price_profile_sha256"],
     }
     _new_private_file(run_dir / "run.json", _canonical(state))
     _fsync_dir(run_dir)
@@ -313,7 +340,8 @@ def _finish(run_dir: Path, state: dict[str, Any], *, outcome: str,
     _write_state(run_dir, state)
 
 
-def execute_conversation(run_dir: Path, transport: ResponseTransport) -> dict[str, Any]:
+def execute_conversation(run_dir: Path, transport: ResponseTransport,
+                         *, require_cost_cap: bool = False) -> dict[str, Any]:
     """Send planned turns once, serially, with one ledger and one active timer."""
     run_dir = Path(run_dir)
     with _run_lock(run_dir):
@@ -321,7 +349,13 @@ def execute_conversation(run_dir: Path, transport: ResponseTransport) -> dict[st
         if state["state"] != "prepared":
             raise ConversationError("this run is terminal or already started; no retry")
         ledger = TokenLedger(run_dir / "ledger")
-        if ledger.status()["request_count"] != 0 or any(
+        budget = ledger.status()
+        if (state.get("cost_limit_micro_usd") != budget["cost_limit_micro_usd"]
+                or state.get("price_profile_sha256") != budget["price_profile_sha256"]):
+            raise ConversationError("run cost profile differs from the ledger")
+        if require_cost_cap and budget["cost_limit_micro_usd"] is None:
+            raise ConversationError("paid execution requires a prepared cost ceiling")
+        if budget["request_count"] != 0 or any(
             any((run_dir / name).iterdir()) for name in ("requests", "responses", "receipts")
         ):
             raise ConversationError("prepared run contains unexpected prior work")
@@ -331,7 +365,7 @@ def execute_conversation(run_dir: Path, transport: ResponseTransport) -> dict[st
         bounded_transport = _DeadlineTransport(
             transport, started_at + state["active_limit_seconds"])
         completed = 0
-        history: list[dict[str, str]] = []
+        history: list[dict[str, Any]] = []
         try:
             with _deadline(state["active_limit_seconds"]):
                 for number, turn in enumerate(plan["turns"], start=1):
@@ -339,7 +373,7 @@ def execute_conversation(run_dir: Path, transport: ResponseTransport) -> dict[st
                     history.append({"role": "user", "content": turn["user"]})
                     request = {"model": plan["model"], "input": list(history),
                                "max_output_tokens": turn["max_output_tokens"]}
-                    for optional in ("instructions", "reasoning"):
+                    for optional in ("instructions", "reasoning", "service_tier"):
                         if optional in plan:
                             request[optional] = plan[optional]
                     request = _validated_request(request)
@@ -351,7 +385,11 @@ def execute_conversation(run_dir: Path, transport: ResponseTransport) -> dict[st
                             request=request, response_path=run_dir / "responses" / name,
                             transport=bounded_transport,
                         )
-                    except BudgetError:
+                    except CostBudgetExhausted:
+                        _finish(run_dir, state, outcome="truncated", completed=completed,
+                                started_at=started_at, reason="cost_budget")
+                        return _snapshot(run_dir, plan, state, ledger)
+                    except TokenBudgetExhausted:
                         _finish(run_dir, state, outcome="truncated", completed=completed,
                                 started_at=started_at, reason="token_budget")
                         return _snapshot(run_dir, plan, state, ledger)
@@ -393,6 +431,9 @@ def execute_conversation(run_dir: Path, transport: ResponseTransport) -> dict[st
 def _snapshot(run_dir: Path, plan: dict[str, Any], state: dict[str, Any],
               ledger: TokenLedger) -> dict[str, Any]:
     budget = ledger.status()
+    if (state.get("cost_limit_micro_usd") != budget["cost_limit_micro_usd"]
+            or state.get("price_profile_sha256") != budget["price_profile_sha256"]):
+        raise ConversationError("run cost profile differs from the ledger")
     for number in range(1, state["turns_completed"] + 1):
         name = f"{number:04d}.json"
         request = _read_json(run_dir / "requests" / name)
@@ -400,10 +441,18 @@ def _snapshot(run_dir: Path, plan: dict[str, Any], state: dict[str, Any],
         response = _read_json(response_path)
         receipt = _read_json(run_dir / "receipts" / name)
         record = budget["requests"].get(f"turn-{number:04d}")
+        receipt_usage = receipt.get("usage")
+        reported_details = (
+            {key: receipt_usage[key] for key in
+             ("input_tokens_details", "output_tokens_details") if key in receipt_usage}
+            if type(receipt_usage) is dict else None
+        )
         request_sha256 = hashlib.sha256(_json_bytes(request)).hexdigest()
         response_sha256 = hashlib.sha256(response_path.read_bytes()).hexdigest()
         if (record is None or record["state"] != "settled"
                 or record["payload_sha256"] != request_sha256
+                or request.get("model") != plan["model"]
+                or response.get("model") != plan["model"]
                 or receipt.get("turn") != number
                 or receipt.get("request_sha256") != request_sha256
                 or receipt.get("response_sha256") != response_sha256
@@ -412,7 +461,14 @@ def _snapshot(run_dir: Path, plan: dict[str, Any], state: dict[str, Any],
                 or {key: receipt["usage"].get(key) for key in
                     ("input_tokens", "output_tokens", "total_tokens")} != record["usage"]
                 or receipt.get("provider_response_id") != response.get("id")
-                or receipt.get("provider_status") != response.get("status")):
+                or receipt.get("model_reported") != response.get("model")
+                or receipt.get("provider_status") != response.get("status")
+                or receipt.get("budget") != record
+                or (budget["cost_limit_micro_usd"] is not None
+                    and (reported_details != record.get("usage_details")
+                         or response.get("service_tier") != "default"
+                         or receipt.get("cost_basis")
+                         != "declared_price_ceiling_not_invoice"))):
             raise ConversationError("completed turn artifacts disagree")
     return {
             "classification": "development_text_conversation_unsealed",
@@ -424,6 +480,9 @@ def _snapshot(run_dir: Path, plan: dict[str, Any], state: dict[str, Any],
             "active_seconds": state["active_seconds"],
             "active_limit_seconds": state["active_limit_seconds"],
             "budget": budget,
+            "cost_basis": ("declared_price_ceiling_not_invoice"
+                           if budget["cost_limit_micro_usd"] is not None
+                           else "not_configured"),
             "completed_artifacts_verified": True,
             "global_run_limits_enforced": False,
             "criterion_4": "not_assessed",
@@ -445,6 +504,8 @@ def main(argv: list[str] | None = None) -> int:
     prepare.add_argument("run_dir", type=Path)
     prepare.add_argument("--limit-tokens", type=int, default=_MAX_TOKENS)
     prepare.add_argument("--active-limit-seconds", type=int, default=_MAX_ACTIVE_SECONDS)
+    prepare.add_argument("--cost-limit-micro-usd", type=int)
+    prepare.add_argument("--price-profile", type=Path)
     execute = sub.add_parser("execute", help="execute one prepared run")
     execute.add_argument("run_dir", type=Path)
     execute.add_argument("--allow-paid-requests", action="store_true")
@@ -457,17 +518,24 @@ def main(argv: list[str] | None = None) -> int:
             if len(raw) > MAX_JSON_BYTES:
                 raise ConversationError("plan exceeds the byte limit")
             plan = json.loads(raw, object_pairs_hook=_unique_pairs)
+            price_profile = (_read_json_file(args.price_profile)
+                             if args.price_profile is not None else None)
             result = prepare_conversation(args.run_dir, plan, args.limit_tokens,
-                                          args.active_limit_seconds)
+                                          args.active_limit_seconds,
+                                          cost_limit_micro_usd=args.cost_limit_micro_usd,
+                                          price_profile=price_profile)
         elif args.command == "status":
             result = read_conversation_status(args.run_dir)
         else:
             if not args.allow_paid_requests:
                 raise ConversationError("execute requires --allow-paid-requests")
+            if read_conversation_status(args.run_dir)["budget"]["cost_limit_micro_usd"] is None:
+                raise ConversationError("paid execution requires a prepared cost ceiling")
             api_key = os.environ.get("OPENAI_API_KEY")
             if not api_key:
                 raise ConversationError("OPENAI_API_KEY is unavailable")
-            result = execute_conversation(args.run_dir, OpenAIResponsesHTTP(api_key))
+            result = execute_conversation(args.run_dir, OpenAIResponsesHTTP(api_key),
+                                          require_cost_cap=True)
     except (OSError, ValueError, BudgetError, DispatchError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2

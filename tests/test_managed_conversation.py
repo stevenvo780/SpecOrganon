@@ -27,9 +27,19 @@ from run_managed_conversation import (  # noqa: E402
 )
 
 
+PRICE_PROFILE = {
+    "model": "gpt-6-luna",
+    "input_rate_micro_usd_per_million": 1_000_000,
+    "cached_input_rate_micro_usd_per_million": 1_000_000,
+    "cache_write_rate_micro_usd_per_million": 2_000_000,
+    "output_rate_micro_usd_per_million": 1_000_000,
+}
+
+
 def _response(number: int, text: str | None, *, status: str = "completed",
               with_reasoning: bool = False,
-              with_usage_details: bool = False) -> dict[str, Any]:
+              with_usage_details: bool = False,
+              service_tier: str | None = None) -> dict[str, Any]:
     content = [] if text is None else [{"type": "output_text", "text": text}]
     output: list[dict[str, Any]] = []
     if with_reasoning:
@@ -42,13 +52,16 @@ def _response(number: int, text: str | None, *, status: str = "completed",
     if with_usage_details:
         usage["input_tokens_details"] = {"cached_tokens": 3}
         usage["output_tokens_details"] = {"reasoning_tokens": 2}
-    return {
+    response = {
         "id": f"resp_fake_{number}",
         "model": "gpt-6-luna",
         "status": status,
         "usage": usage,
         "output": output,
     }
+    if service_tier is not None:
+        response["service_tier"] = service_tier
+    return response
 
 
 class FakeTransport:
@@ -82,6 +95,10 @@ def _plan() -> dict[str, Any]:
             {"user": "What follows that step?", "max_output_tokens": 10},
         ],
     }
+
+
+def _priced_plan() -> dict[str, Any]:
+    return {**_plan(), "service_tier": "default"}
 
 
 def _ledger(run_dir: Path) -> dict[str, Any]:
@@ -148,6 +165,137 @@ def test_two_turns_chain_text_and_share_one_metered_ledger(tmp_path: Path) -> No
     status = read_conversation_status(run_dir)
     assert status["state"] == "completed"
     assert status["completed_artifacts_verified"] is True
+
+
+def test_priced_two_turns_share_cost_cap_and_status_verifies_receipts(
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "conversation"
+    prepared = prepare_conversation(
+        run_dir, _priced_plan(), cost_limit_micro_usd=46,
+        price_profile=PRICE_PROFILE,
+    )
+    assert prepared["budget"]["cost_limit_micro_usd"] == 46
+    assert prepared["budget"]["request_count"] == 0
+    transport = FakeTransport([
+        _response(1, "Start with a baseline.", service_tier="default"),
+        _response(2, "Then compare the intervention.", service_tier="default"),
+    ])
+
+    summary = execute_conversation(run_dir, transport)
+
+    assert summary["state"] == "completed"
+    assert summary["turns_completed"] == 2
+    assert len(transport.counts) == len(transport.sends) == 2
+    assert all("service_tier" not in payload for payload in transport.counts)
+    assert all(payload["service_tier"] == "default" for payload in transport.sends)
+    budget = summary["budget"]
+    assert budget["request_count"] == 2
+    assert budget["settled_tokens"] == 24
+    assert budget["settled_cost_micro_usd"] == 40
+    assert budget["remaining_cost_micro_usd"] == 6
+    assert summary["cost_basis"] == "declared_price_ceiling_not_invoice"
+    for number in (1, 2):
+        receipt = json.loads((run_dir / "receipts" / f"{number:04d}.json").read_text())
+        assert receipt["budget"]["held_cost_micro_usd"] == 20
+        assert receipt["cost_basis"] == "declared_price_ceiling_not_invoice"
+        _assert_persisted_turn(run_dir, number)
+    status = read_conversation_status(run_dir)
+    assert status["budget"]["settled_cost_micro_usd"] == 40
+    assert status["completed_artifacts_verified"] is True
+
+    receipt_path = run_dir / "receipts" / "0002.json"
+    receipt = json.loads(receipt_path.read_text())
+    receipt["budget"]["held_cost_micro_usd"] = 19
+    receipt_path.write_text(
+        json.dumps(receipt, ensure_ascii=True, sort_keys=True,
+                   separators=(",", ":")) + "\n", encoding="utf-8",
+    )
+    with pytest.raises(ConversationError, match="artifacts disagree"):
+        read_conversation_status(run_dir)
+
+    receipt["budget"]["held_cost_micro_usd"] = 20
+    response_path = run_dir / "responses" / "0002.json"
+    response = json.loads(response_path.read_text())
+    original_response = json.loads(response_path.read_text())
+    response["usage"]["input_tokens_details"] = {"cached_tokens": 3}
+    response_path.write_text(
+        json.dumps(response, ensure_ascii=True, sort_keys=True,
+                   separators=(",", ":")) + "\n", encoding="utf-8",
+    )
+    receipt["usage"] = response["usage"]
+    receipt["response_sha256"] = hashlib.sha256(response_path.read_bytes()).hexdigest()
+    receipt_path.write_text(
+        json.dumps(receipt, ensure_ascii=True, sort_keys=True,
+                   separators=(",", ":")) + "\n", encoding="utf-8",
+    )
+    with pytest.raises(ConversationError, match="artifacts disagree"):
+        read_conversation_status(run_dir)
+
+    response_path.write_text(
+        json.dumps(original_response, ensure_ascii=True, sort_keys=True,
+                   separators=(",", ":")) + "\n", encoding="utf-8",
+    )
+    receipt["usage"] = original_response["usage"]
+    receipt["response_sha256"] = hashlib.sha256(response_path.read_bytes()).hexdigest()
+    receipt_path.write_text(
+        json.dumps(receipt, ensure_ascii=True, sort_keys=True,
+                   separators=(",", ":")) + "\n", encoding="utf-8",
+    )
+    assert read_conversation_status(run_dir)["completed_artifacts_verified"] is True
+
+    receipt["budget"]["held_tokens"] = 9999
+    receipt_path.write_text(
+        json.dumps(receipt, ensure_ascii=True, sort_keys=True,
+                   separators=(",", ":")) + "\n", encoding="utf-8",
+    )
+    with pytest.raises(ConversationError, match="artifacts disagree"):
+        read_conversation_status(run_dir)
+
+
+def test_second_turn_cost_shortfall_truncates_without_send(tmp_path: Path) -> None:
+    run_dir = tmp_path / "conversation"
+    # First turn settles at 20. The second needs 26 reserved; only 25 remain.
+    prepare_conversation(
+        run_dir, _priced_plan(), cost_limit_micro_usd=45,
+        price_profile=PRICE_PROFILE,
+    )
+    transport = FakeTransport([
+        _response(1, "Start with a baseline.", service_tier="default"),
+    ])
+
+    summary = execute_conversation(run_dir, transport)
+
+    assert summary["state"] == "truncated"
+    assert summary["reason"] == "cost_budget"
+    assert summary["turns_completed"] == 1
+    assert len(transport.counts) == 2
+    assert len(transport.sends) == 1
+    budget = summary["budget"]
+    assert budget["request_count"] == 1
+    assert budget["settled_cost_micro_usd"] == 20
+    assert budget["remaining_cost_micro_usd"] == 25
+    assert read_conversation_status(run_dir)["reason"] == "cost_budget"
+    assert (run_dir / "requests" / "0002.json").exists()
+    assert not (run_dir / "responses" / "0002.json").exists()
+
+
+def test_zero_cost_cap_is_a_valid_prepared_run_that_cannot_send(tmp_path: Path) -> None:
+    run_dir = tmp_path / "conversation"
+    prepared = prepare_conversation(
+        run_dir, _priced_plan(), cost_limit_micro_usd=0,
+        price_profile=PRICE_PROFILE,
+    )
+    assert prepared["budget"]["remaining_cost_micro_usd"] == 0
+    assert read_conversation_status(run_dir)["state"] == "prepared"
+
+    transport = FakeTransport([])
+    summary = execute_conversation(run_dir, transport)
+
+    assert summary["state"] == "truncated"
+    assert summary["reason"] == "cost_budget"
+    assert summary["turns_completed"] == 0
+    assert len(transport.sends) == 0
 
 
 def test_incomplete_response_stops_before_second_turn(tmp_path: Path) -> None:
@@ -304,9 +452,50 @@ def test_prepare_and_status_cli_are_offline_without_paid_flag(
     assert _ledger(run_dir)["request_count"] == 0
 
 
-def test_child_death_during_send_leaves_reserved_run_unretryable(tmp_path: Path) -> None:
+def test_cli_prepares_from_ordinary_price_json_and_execute_needs_paid_flag(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    plan_file = tmp_path / "plan.json"
+    profile_file = tmp_path / "prices.json"
+    plan_file.write_text(json.dumps(_priced_plan(), indent=2), encoding="utf-8")
+    profile_file.write_text(json.dumps(PRICE_PROFILE, indent=2), encoding="utf-8")
     run_dir = tmp_path / "conversation"
-    prepare_conversation(run_dir, _plan())
+    monkeypatch.setenv("OPENAI_API_KEY", "offline-only-key")
+
+    def fail_if_constructed(_api_key: str) -> None:
+        pytest.fail("provider transport must not be constructed without paid flag")
+
+    monkeypatch.setattr("run_managed_conversation.OpenAIResponsesHTTP", fail_if_constructed)
+    assert main([
+        "prepare", str(plan_file), str(run_dir), "--cost-limit-micro-usd", "46",
+        "--price-profile", str(profile_file),
+    ]) == 0
+    prepared = json.loads(capsys.readouterr().out)
+    assert prepared["state"] == "prepared"
+    assert prepared["budget"]["cost_limit_micro_usd"] == 46
+    assert prepared["budget"]["price_profile"] == PRICE_PROFILE
+    assert prepared["budget"]["request_count"] == 0
+
+    assert main(["execute", str(run_dir)]) == 2
+    assert "--allow-paid-requests" in capsys.readouterr().err
+    assert read_conversation_status(run_dir)["state"] == "prepared"
+    assert _ledger(run_dir)["request_count"] == 0
+    assert list((run_dir / "requests").iterdir()) == []
+
+
+@pytest.mark.parametrize("priced", [False, True])
+def test_child_death_during_send_leaves_reserved_run_unretryable(
+    tmp_path: Path, priced: bool,
+) -> None:
+    run_dir = tmp_path / "conversation"
+    if priced:
+        prepare_conversation(
+            run_dir, _priced_plan(), cost_limit_micro_usd=26,
+            price_profile=PRICE_PROFILE,
+        )
+    else:
+        prepare_conversation(run_dir, _plan())
     scripts_dir = Path(__file__).resolve().parents[1] / "scripts"
     child_code = """\
 import os
@@ -339,6 +528,8 @@ execute_conversation(Path(sys.argv[1]), ExitDuringSend())
     assert budget["request_count"] == 1
     assert budget["reserved_tokens"] == 18
     assert budget["indeterminate_tokens"] == 0
+    assert budget["reserved_cost_micro_usd"] == (26 if priced else None)
+    assert budget["indeterminate_cost_micro_usd"] == (0 if priced else None)
     assert budget["blocked"] is True
     assert budget["requests"]["turn-0001"]["state"] == "reserved"
     assert (run_dir / "requests" / "0001.json").exists()

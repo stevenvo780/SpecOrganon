@@ -25,6 +25,14 @@ from run_managed_response import (  # noqa: E402
 
 REQUEST = {"model": "gpt-6-luna", "input": "A short public question.",
            "reasoning": {"effort": "low"}, "max_output_tokens": 10}
+PRICE_PROFILE = {
+    "model": "gpt-6-luna",
+    "input_rate_micro_usd_per_million": 1_000_000,
+    "cached_input_rate_micro_usd_per_million": 1_000_000,
+    "cache_write_rate_micro_usd_per_million": 2_000_000,
+    "output_rate_micro_usd_per_million": 1_000_000,
+}
+PRICED_REQUEST = {**REQUEST, "service_tier": "default"}
 
 
 class FakeTransport:
@@ -44,17 +52,27 @@ class FakeTransport:
         self.sends.append(payload)
         if self.send_error is not None:
             raise self.send_error
-        return self.response or {
+        response = self.response or {
             "id": "resp_local_1", "model": "gpt-6-luna", "status": "completed",
             "usage": {"input_tokens": self.input_tokens,
                       "output_tokens": self.output_tokens,
                       "total_tokens": self.input_tokens + self.output_tokens},
             "output": [],
         }
+        if self.response is None and payload.get("service_tier") == "default":
+            response["service_tier"] = "default"
+        return response
 
 
 def _ledger(tmp_path: Path, limit: int = 30) -> TokenLedger:
     return TokenLedger.create(tmp_path / "ledger", limit, 8)
+
+
+def _priced_ledger(tmp_path: Path, cost_limit: int = 100) -> TokenLedger:
+    return TokenLedger.create(
+        tmp_path / "ledger", 100, 8, cost_limit_micro_usd=cost_limit,
+        price_profile=PRICE_PROFILE,
+    )
 
 
 def _output_dir(tmp_path: Path) -> Path:
@@ -98,6 +116,161 @@ def test_provider_usage_details_are_preserved_without_double_counting(
     assert receipt["budget"]["held_tokens"] == 12
     assert json.loads(output.read_text())["usage"]["output_tokens_details"] == {
         "reasoning_tokens": 2}
+
+
+def test_priced_dispatch_reserves_before_send_and_settles_schema_two(
+    tmp_path: Path,
+) -> None:
+    ledger = _priced_ledger(tmp_path, cost_limit=26)
+    output = _output_dir(tmp_path) / "one.json"
+
+    class InspectingTransport(FakeTransport):
+        def send(self, payload: dict) -> dict:
+            before_send = ledger.status()
+            assert before_send["request_count"] == 1
+            assert before_send["reserved_tokens"] == 18
+            assert before_send["reserved_cost_micro_usd"] == 26
+            assert before_send["requests"]["one"]["state"] == "reserved"
+            return super().send(payload)
+
+    transport = InspectingTransport()
+    receipt = dispatch_response(
+        ledger, request_id="one", role="leader", request=PRICED_REQUEST,
+        response_path=output, transport=transport,
+    )
+
+    assert transport.counts == [{
+        "model": REQUEST["model"], "input": REQUEST["input"],
+        "reasoning": REQUEST["reasoning"],
+    }]
+    assert transport.sends == [{**PRICED_REQUEST, "store": False, "stream": False}]
+    assert json.loads((ledger.directory / "ledger.json").read_text())["schema"] == 2
+    assert receipt["cost_basis"] == "declared_price_ceiling_not_invoice"
+    assert receipt["budget"]["held_cost_micro_usd"] == 20
+    status = ledger.status()
+    assert status["settled_cost_micro_usd"] == 20
+    assert status["remaining_cost_micro_usd"] == 6
+
+
+def test_priced_dispatch_accounts_for_cache_write_premium(tmp_path: Path) -> None:
+    ledger = _priced_ledger(tmp_path)
+    output = _output_dir(tmp_path) / "one.json"
+    transport = FakeTransport()
+    transport.response = {
+        "id": "resp_local_1", "model": REQUEST["model"], "status": "completed",
+        "service_tier": "default",
+        "usage": {
+            "input_tokens": 8, "output_tokens": 4, "total_tokens": 12,
+            "input_tokens_details": {
+                "cache_write_tokens": 3, "cached_tokens": 2, "uncached_tokens": 3,
+            },
+            "output_tokens_details": {"reasoning_tokens": 2},
+        },
+        "output": [],
+    }
+
+    receipt = dispatch_response(
+        ledger, request_id="one", role="leader", request=PRICED_REQUEST,
+        response_path=output, transport=transport,
+    )
+    # 3 cache writes at 2 each, 5 other input tokens at 1, 4 output at 1.
+    assert receipt["budget"]["held_cost_micro_usd"] == 15
+    assert receipt["cost_basis"] == "declared_price_ceiling_not_invoice"
+    assert ledger.status()["settled_cost_micro_usd"] == 15
+    assert ledger.status()["requests"]["one"]["usage_details"] == {
+        "input_tokens_details": transport.response["usage"]["input_tokens_details"],
+        "output_tokens_details": {"reasoning_tokens": 2},
+    }
+
+
+def test_cost_cap_rejects_before_send(tmp_path: Path) -> None:
+    ledger = _priced_ledger(tmp_path, cost_limit=25)
+    output = _output_dir(tmp_path) / "one.json"
+    transport = FakeTransport()
+
+    with pytest.raises(BudgetError, match="cost budget exhausted"):
+        dispatch_response(
+            ledger, request_id="one", role="leader", request=PRICED_REQUEST,
+            response_path=output, transport=transport,
+        )
+    assert len(transport.counts) == 1
+    assert transport.sends == []
+    assert ledger.status()["request_count"] == 0
+    assert not output.exists()
+
+
+@pytest.mark.parametrize("payload", [
+    {**REQUEST, "model": "different-model", "service_tier": "default"},
+    REQUEST,
+])
+def test_priced_model_or_tier_mismatch_rejects_before_count(
+    tmp_path: Path, payload: dict,
+) -> None:
+    ledger = _priced_ledger(tmp_path)
+    output = _output_dir(tmp_path) / "one.json"
+    transport = FakeTransport()
+
+    with pytest.raises(DispatchError, match="price profile|service tier"):
+        dispatch_response(
+            ledger, request_id="one", role="leader", request=payload,
+            response_path=output, transport=transport,
+        )
+    assert transport.counts == transport.sends == []
+    assert ledger.status()["request_count"] == 0
+    assert not output.exists()
+
+
+def test_reported_input_above_preflight_count_blocks_future_sends_but_cannot_undo_cost(
+    tmp_path: Path,
+) -> None:
+    ledger = _priced_ledger(tmp_path, cost_limit=3)
+    request = {**PRICED_REQUEST, "max_output_tokens": 1}
+    transport = FakeTransport(input_tokens=1, output_tokens=1)
+    transport.response = {
+        "id": "resp_local_1", "model": "gpt-6-luna", "status": "completed",
+        "service_tier": "default",
+        "usage": {"input_tokens": 100, "output_tokens": 1, "total_tokens": 101},
+        "output": [],
+    }
+    output = _output_dir(tmp_path) / "one.json"
+
+    with pytest.raises(DispatchError, match="indeterminate; reservation held"):
+        dispatch_response(ledger, request_id="one", role="leader",
+                          request=request, response_path=output,
+                          transport=transport)
+
+    status = ledger.status()
+    assert output.exists()
+    assert len(transport.sends) == 1
+    assert status["blocked"] is True
+    assert status["indeterminate_cost_micro_usd"] == 3
+    assert status["requests"]["one"]["state"] == "indeterminate"
+
+
+def test_reported_tier_mismatch_retains_token_and_cost_reservations(
+    tmp_path: Path,
+) -> None:
+    ledger = _priced_ledger(tmp_path)
+    output = _output_dir(tmp_path) / "one.json"
+    transport = FakeTransport()
+    transport.response = {
+        "id": "resp_local_1", "model": REQUEST["model"], "status": "completed",
+        "service_tier": "flex",
+        "usage": {"input_tokens": 8, "output_tokens": 4, "total_tokens": 12},
+        "output": [],
+    }
+
+    with pytest.raises(DispatchError, match="reservation held"):
+        dispatch_response(
+            ledger, request_id="one", role="leader", request=PRICED_REQUEST,
+            response_path=output, transport=transport,
+        )
+    assert json.loads(output.read_text())["service_tier"] == "flex"
+    status = ledger.status()
+    assert status["indeterminate_tokens"] == 18
+    assert status["indeterminate_cost_micro_usd"] == 26
+    assert status["blocked"] is True
+    assert status["requests"]["one"]["state"] == "indeterminate"
 
 
 def test_over_budget_rejects_before_send(tmp_path: Path) -> None:
@@ -232,6 +405,29 @@ def test_cli_init_is_offline_and_send_requires_explicit_flag(
                  str(tmp_path / "out.json"), "--request-id", "one",
                  "--role", "leader"]) == 2
     assert "--allow-paid-request" in capsys.readouterr().err
+
+
+def test_cli_paid_send_rejects_legacy_ledger_before_provider_setup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    ledger = _ledger(tmp_path)
+    request_file = tmp_path / "request.json"
+    request_file.write_text(json.dumps(PRICED_REQUEST), encoding="utf-8")
+    output = _output_dir(tmp_path) / "one.json"
+    monkeypatch.setenv("OPENAI_API_KEY", "offline-only-key")
+
+    def fail_if_constructed(_api_key: str) -> None:
+        pytest.fail("provider transport must not be constructed for a legacy ledger")
+
+    monkeypatch.setattr("run_managed_response.OpenAIResponsesHTTP", fail_if_constructed)
+    assert main([
+        "send", str(ledger.directory), str(request_file), str(output),
+        "--request-id", "one", "--role", "leader", "--allow-paid-request",
+    ]) == 2
+    assert "prepared cost ceiling" in capsys.readouterr().err
+    assert ledger.status()["request_count"] == 0
+    assert not output.exists()
 
 
 def test_http_transport_uses_count_then_response_endpoint(tmp_path: Path) -> None:

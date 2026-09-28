@@ -1,8 +1,8 @@
-"""Development-only Responses dispatcher with a pre-send, shared token reservation.
+"""Development-only Responses dispatcher with a pre-send shared reservation.
 
 This path sends one request at a time. Input may include plain messages and
 prior Responses reasoning/message output items, but never tools or multimodal
-parts. It does not manage an agent conversation, enforce time/cost limits, or
+parts. It does not manage an agent conversation, enforce time limits, or
 make a CLI opaque to the caller safe for a confirmatory study. The caller must
 use one ledger directory for every request and agent in the same run. Provider
 calls require an explicit CLI flag and an API key; tests use a fake transport.
@@ -25,7 +25,9 @@ from managed_token_ledger import BudgetError, TokenLedger
 
 
 MAX_JSON_BYTES = 16 * 1024 * 1024
-REQUEST_KEYS = frozenset({"model", "input", "instructions", "reasoning", "max_output_tokens"})
+REQUEST_KEYS = frozenset({
+    "model", "input", "instructions", "reasoning", "max_output_tokens", "service_tier",
+})
 
 
 class DispatchError(ValueError):
@@ -43,6 +45,27 @@ def _json_bytes(value: Any) -> bytes:
                           ensure_ascii=True, allow_nan=False).encode("utf-8")
     except (TypeError, ValueError, RecursionError) as exc:
         raise DispatchError("request contains invalid JSON") from exc
+
+
+def _unique_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    value: dict[str, Any] = {}
+    for key, item in pairs:
+        if key in value:
+            raise DispatchError("JSON contains a duplicate key")
+        value[key] = item
+    return value
+
+
+def _reject_constant(_value: str) -> None:
+    raise DispatchError("JSON contains a nonfinite number")
+
+
+def _read_json_file(path: Path) -> Any:
+    raw = path.read_bytes()
+    if len(raw) > MAX_JSON_BYTES:
+        raise DispatchError("JSON file exceeds the byte limit")
+    return json.loads(raw, object_pairs_hook=_unique_pairs,
+                      parse_constant=_reject_constant)
 
 
 def _validated_request(raw: Any) -> dict[str, Any]:
@@ -93,6 +116,8 @@ def _validated_request(raw: Any) -> dict[str, Any]:
             raise DispatchError("reasoning must specify a supported effort")
     if type(raw["max_output_tokens"]) is not int or raw["max_output_tokens"] < 1:
         raise DispatchError("max_output_tokens must be a positive integer")
+    if "service_tier" in raw and raw["service_tier"] != "default":
+        raise DispatchError("only the explicit default service tier is supported")
     if len(_json_bytes(raw)) > MAX_JSON_BYTES:
         raise DispatchError("request exceeds the byte limit")
     return json.loads(_json_bytes(raw))
@@ -140,8 +165,15 @@ def dispatch_response(
     """
     payload = _validated_request(request)
     _private_output(response_path)
+    budget_status = ledger.status()
+    cost_enabled = budget_status["cost_limit_micro_usd"] is not None
+    if cost_enabled:
+        if payload.get("service_tier") != "default":
+            raise DispatchError("priced requests require the explicit default service tier")
+        if budget_status["price_profile"]["model"] != payload["model"]:
+            raise DispatchError("request model differs from the frozen price profile")
     count_payload = {key: value for key, value in payload.items()
-                     if key != "max_output_tokens"}
+                     if key not in {"max_output_tokens", "service_tier"}}
     count_bytes = _json_bytes(count_payload)
     input_tokens = transport.count_input(count_payload)
     if type(input_tokens) is not int or input_tokens < 1:
@@ -150,7 +182,7 @@ def dispatch_response(
         raise DispatchError("input changed during token counting")
     digest = hashlib.sha256(_json_bytes(payload)).hexdigest()
     ledger.reserve(request_id, role, digest, input_tokens,
-                   payload["max_output_tokens"])
+                   payload["max_output_tokens"], model=payload["model"])
     try:
         provider_payload = {**payload, "store": False, "stream": False}
         response = transport.send(provider_payload)
@@ -159,13 +191,17 @@ def dispatch_response(
         response_sha256 = _write_response(response_path, response)
         if (type(response.get("id")) is not str or not response["id"]
                 or response.get("model") != payload["model"]
-                or response.get("status") not in {"completed", "incomplete"}):
+                or response.get("status") not in {"completed", "incomplete"}
+                or cost_enabled and response.get("service_tier") != "default"):
             raise DispatchError("provider identity or status is not verifiable")
         usage = response.get("usage")
         measured = ({key: usage.get(key) for key in
                      ("input_tokens", "output_tokens", "total_tokens")}
                     if type(usage) is dict else usage)
-        settled = ledger.settle(request_id, measured)
+        details = ({key: usage[key] for key in
+                    ("input_tokens_details", "output_tokens_details") if key in usage}
+                   if type(usage) is dict else None)
+        settled = ledger.settle(request_id, measured, usage_details=details)
     except Exception as exc:
         try:
             ledger.mark_indeterminate(request_id, type(exc).__name__)
@@ -182,6 +218,8 @@ def dispatch_response(
         "response_sha256": response_sha256,
         "usage": response["usage"],
         "budget": settled,
+        "cost_basis": ("declared_price_ceiling_not_invoice" if cost_enabled
+                       else "not_configured"),
         "criterion_4": "not_assessed",
     }
 
@@ -222,7 +260,8 @@ class OpenAIResponsesHTTP:
         if len(raw) > MAX_JSON_BYTES:
             raise DispatchError("provider JSON exceeds the byte limit")
         try:
-            value = json.loads(raw)
+            value = json.loads(raw, object_pairs_hook=_unique_pairs,
+                               parse_constant=_reject_constant)
         except (UnicodeError, ValueError, RecursionError) as exc:
             raise DispatchError("provider JSON is invalid") from exc
         if type(value) is not dict:
@@ -247,6 +286,8 @@ def main(argv: list[str] | None = None) -> int:
     init.add_argument("ledger_dir", type=Path)
     init.add_argument("--limit-tokens", type=int, default=80_000)
     init.add_argument("--max-requests", type=int, required=True)
+    init.add_argument("--cost-limit-micro-usd", type=int)
+    init.add_argument("--price-profile", type=Path)
     send = sub.add_parser("send", help="send exactly one bounded Responses request")
     send.add_argument("ledger_dir", type=Path)
     send.add_argument("request_file", type=Path)
@@ -257,21 +298,24 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "init":
+            profile = (_read_json_file(args.price_profile)
+                       if args.price_profile is not None else None)
             ledger = TokenLedger.create(args.ledger_dir, args.limit_tokens,
-                                        args.max_requests)
+                                        args.max_requests,
+                                        cost_limit_micro_usd=args.cost_limit_micro_usd,
+                                        price_profile=profile)
             result = {"classification": "development_token_ledger_unsealed",
                       "ledger": ledger.status(), "provider_calls": 0}
         else:
             if not args.allow_paid_request:
                 raise DispatchError("send requires --allow-paid-request")
+            ledger = TokenLedger(args.ledger_dir)
+            if ledger.status()["cost_limit_micro_usd"] is None:
+                raise DispatchError("paid send requires a prepared cost ceiling")
             api_key = os.environ.get("OPENAI_API_KEY")
             if not api_key:
                 raise DispatchError("OPENAI_API_KEY is unavailable")
-            raw = args.request_file.read_bytes()
-            if len(raw) > MAX_JSON_BYTES:
-                raise DispatchError("request exceeds the byte limit")
-            request = json.loads(raw)
-            ledger = TokenLedger(args.ledger_dir)
+            request = _read_json_file(args.request_file)
             result = dispatch_response(
                 ledger, request_id=args.request_id, role=args.role,
                 request=request, response_path=args.response_file,
