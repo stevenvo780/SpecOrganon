@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "classification": "development_citibike_march_durable_crash_recovery",
+  "date_utc": "2026-09-28",
+  "baseline_head": "1df65c5",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "published_seed_sha256": "c63ffec48253ba21f9754a8fcc099a4f302525cfdb7b680acc47078eb90a0723",
+  "published_result_sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+  "manifest_sha256": "27bc567d7435b5a0accbe9e3653f817323e7925c160f7a88d223f40dc6f04244",
+  "manual_runs_wheel_sha256": "b0a7691a29c2033fca29a2d727c9095b08ac7f9f2dad6b259f8b78df593b4b17",
+  "fresh_wheel_built_by_global_test_sha256": "d8fbb3448e362706df91f18fa611332d60a0b4f55176810f00b3e84f74339dc5",
+  "wheel_note": "The manual Python 3.11 and 3.12 runs reused the D-086 installed wheel. The global test rebuilt and installed a wheel from this tree in Python 3.11. Package source, pyproject.toml and uv.lock were unchanged from the manual wheel source; README metadata changed.",
+  "probe_sha256": "f8dc5e0e10d576f889a952556c207af8b2de490717b2a4adb7c43dedad8dce41",
+  "test_sha256": "3cfe4feb6d8d448f68d2c49dd2f148589eee80dad6c710d27f9ffd4cfcbbb45a",
+  "baseline_probe_sha256": "f40ed1e88e1d25c52c0e77a1158e991fb3dda3380183d9fef888c0f79fd42b61",
+  "temporary_crash_hook_sha256": "73802e395dc5a7498fe3a794e357f946dccb74bfe79adc64e607d585fed16798",
+  "runs": {
+    "3.11.15": {
+      "file": "py311.json",
+      "sha256": "f433366da3c612a6c1c13fa435eac5550aa947f21edf0ba87f1d03fd57cfc8c7",
+      "installed_wheel_probe_exit_code": 0,
+      "uv_pip_check": "29 compatible packages"
+    },
+    "3.12.3": {
+      "file": "py312.json",
+      "sha256": "258e9439bebf8da2514ed35d9926205f4ade0664b438a5305fed873d61225374",
+      "installed_wheel_probe_exit_code": 0,
+      "uv_pip_check": "29 compatible packages"
+    }
+  },
+  "observed_contract": {
+    "exposed_published_march_case_reseeded_to_empty_temporary_signed_case": true,
+    "cli_process_killed_after_durable_item_put_seq": 16,
+    "cli_sigkill_returncode": -9,
+    "prefix_events_and_hash_chain_verified": 16,
+    "fresh_cli_read_after_sigkill": true,
+    "real_stdio_mcp_resume_applied": 6,
+    "real_stdio_mcp_resume_skipped": 16,
+    "real_stdio_mcp_resume_cursor": 22,
+    "cli_retry_before_review_wrote_no_events": true,
+    "synthetic_signed_frame_review_and_mcp_advance": true,
+    "cli_retry_after_review_wrote_no_events": true,
+    "final_event_count": 24,
+    "five_evidence_traces_to_problem_and_protocol": true,
+    "critique_blocked_by_unapproved_n_scope": true,
+    "committed_case_ledgers_unchanged": true
+  },
+  "gates": {
+    "focused_command": "uv run --locked --extra dev python -m pytest -q tests/test_citibike_march_crash_recovery.py",
+    "focused_result": "1 passed in 3.39s",
+    "global_command": "uv run --locked --extra dev python -m pytest -q",
+    "global_result": "1965 passed in 176.27s",
+    "ruff_command": "uv run --locked --extra dev ruff check .",
+    "ruff_result": "All checks passed!",
+    "git_diff_check": "passed",
+    "independent_read_only_review": "no confirmed P1/P2 in the new probe and test"
+  },
+  "limitations": {
+    "temporary_child_only_crash_instrumentation": true,
+    "power_loss_or_storage_fault_tested": false,
+    "published_parquet_reopened_in_this_probe": false,
+    "independent_human_review_or_norm_approval": false,
+    "reserved_case_or_field_intervention": false,
+    "model_comparison_tested": false,
+    "goal_criteria_demonstrated": 0
+  }
+}

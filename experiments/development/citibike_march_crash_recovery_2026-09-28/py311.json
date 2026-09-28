@@ -1,0 +1,170 @@
+{
+  "case": "citibike_march2024_exposed_development",
+  "classification": "development_citibike_march_durable_crash_recovery",
+  "cli_final_retry": {
+    "applied": 0,
+    "cursor": 23,
+    "reason": "human_approval_required",
+    "skipped": 23,
+    "status": "waiting"
+  },
+  "cli_pre_review_retry": {
+    "applied": 0,
+    "cursor": 22,
+    "reason": "independent_review_required",
+    "skipped": 22,
+    "status": "waiting"
+  },
+  "crash": {
+    "after_durable_item_put_seq": 16,
+    "item_id": "e_rental",
+    "prefix_events": 16,
+    "prefix_head_hash": "2f4345e8a5e42efd64c9e2bf63fa22705205bf2c203655e0dbbe284608cf58c8",
+    "returncode": -9,
+    "signal": "SIGKILL"
+  },
+  "criterion_5": "not_assessed",
+  "final": {
+    "critique": {
+      "accepted": false,
+      "blockers": [
+        "n_scope requires a verified human approval"
+      ],
+      "ready": false
+    },
+    "event_counts": {
+      "item_put": 22,
+      "phase_advance": 1,
+      "phase_review": 1
+    },
+    "evidence_ancestors": {
+      "e_eligible": [
+        "a_riders",
+        "b_sample",
+        "c_service",
+        "e_archive",
+        "h_distinct",
+        "p_access",
+        "pr_reanalysis",
+        "q_rows",
+        "s_flags"
+      ],
+      "e_excluded": [
+        "a_riders",
+        "b_sample",
+        "c_service",
+        "e_archive",
+        "h_distinct",
+        "p_access",
+        "pr_reanalysis",
+        "q_rows",
+        "s_flags"
+      ],
+      "e_gaps": [
+        "a_riders",
+        "b_sample",
+        "c_service",
+        "e_archive",
+        "h_distinct",
+        "p_access",
+        "pr_reanalysis",
+        "q_rows",
+        "s_flags"
+      ],
+      "e_rental": [
+        "a_riders",
+        "b_sample",
+        "c_service",
+        "e_archive",
+        "e_eligible",
+        "h_distinct",
+        "p_access",
+        "pr_reanalysis",
+        "q_rows",
+        "s_flags"
+      ],
+      "e_return": [
+        "a_riders",
+        "b_sample",
+        "c_service",
+        "e_archive",
+        "e_eligible",
+        "h_distinct",
+        "p_access",
+        "pr_reanalysis",
+        "q_rows",
+        "s_flags"
+      ]
+    },
+    "frame_accepted": true,
+    "norm_approved": false,
+    "revision": 24
+  },
+  "mcp_advance": {
+    "applied": 1,
+    "cursor": 23,
+    "reason": "human_approval_required",
+    "skipped": 22,
+    "status": "waiting"
+  },
+  "mcp_resume": {
+    "applied": 6,
+    "cursor": 22,
+    "reason": "independent_review_required",
+    "skipped": 16,
+    "status": "waiting"
+  },
+  "real_ledgers_unchanged": true,
+  "receipt_kind": "rerunnable_summary_not_detached_attestation",
+  "schema": 1,
+  "scope": {
+    "crash_injection_in_temporary_process_only": true,
+    "historical_sample_exposed": true,
+    "hook_removed_from_mcp_and_retry_environment": true,
+    "independent_human_review": false,
+    "power_loss_or_storage_fault_tested": false,
+    "reserved_case_or_field_intervention": false,
+    "source_parquet_reopened_in_this_probe": false
+  },
+  "sha256": {
+    "after_mcp_resume": "b6c89fd2008fa4b915ba4fe2d48c9033d9826004570fe62151c4604f7e783b1d",
+    "analysis_script": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+    "crash_hook": "73802e395dc5a7498fe3a794e357f946dccb74bfe79adc64e607d585fed16798",
+    "final_ledger": "599ce8e622c17f872da329b8d9148b6b3b5e2575fe2a4033cf298a9686c1330a",
+    "interrupted_prefix": "4acc242b30724c9029b96608c4febd7c684323691ad9d3d85c5bd5ac487c7ea0",
+    "manifest": "27bc567d7435b5a0accbe9e3653f817323e7925c160f7a88d223f40dc6f04244",
+    "published_result": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+    "seed": "c63ffec48253ba21f9754a8fcc099a4f302525cfdb7b680acc47078eb90a0723"
+  },
+  "source_parquet_sha256_declared": "661221e1f6fc01ba6475cee61597e432fc0858689195b6c12255a6c005b52fc4",
+  "transport": {
+    "crashed": "installed_cli_with_temporary_sitecustomize_hook",
+    "discovered_tools": [
+      "advance",
+      "approval_challenge",
+      "approve",
+      "attest_field",
+      "challenge",
+      "field_attestation_challenge",
+      "gate",
+      "init",
+      "next_task",
+      "phase_review_challenge",
+      "put",
+      "record_test_execution",
+      "record_test_observation",
+      "resolve_challenge",
+      "review",
+      "review_phase",
+      "run",
+      "status",
+      "test_execution_challenge",
+      "test_observation_challenge",
+      "trace"
+    ],
+    "resume": "real_stdio_mcp",
+    "retry": "installed_cli",
+    "status_equal": true,
+    "wheel_module_under_site_packages": true
+  }
+}
