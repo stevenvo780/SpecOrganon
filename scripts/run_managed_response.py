@@ -1,10 +1,11 @@
 """Development-only Responses dispatcher with a pre-send, shared token reservation.
 
-This path sends one request at a time. It does not execute tools, manage an
-agent conversation, enforce time/cost limits, or make a CLI opaque to the
-caller safe for a confirmatory study. The caller must use one ledger directory
-for every request and agent in the same run. Provider calls require an explicit
-CLI flag and an API key; tests inject a local fake transport.
+This path sends one request at a time. Input may include plain messages and
+prior Responses reasoning/message output items, but never tools or multimodal
+parts. It does not manage an agent conversation, enforce time/cost limits, or
+make a CLI opaque to the caller safe for a confirmatory study. The caller must
+use one ledger directory for every request and agent in the same run. Provider
+calls require an explicit CLI flag and an API key; tests use a fake transport.
 """
 
 from __future__ import annotations
@@ -53,19 +54,42 @@ def _validated_request(raw: Any) -> dict[str, Any]:
     if type(raw["input"]) not in (str, list) or not raw["input"]:
         raise DispatchError("input must be nonempty text or a message array")
     if type(raw["input"]) is list:
-        if any(type(item) is not dict or set(item) != {"role", "content"}
-               or item["role"] not in {"system", "developer", "user", "assistant"}
-               or type(item["content"]) is not str or not item["content"]
-               for item in raw["input"]):
-            raise DispatchError("message array must contain only text roles and content")
+        for item in raw["input"]:
+            if type(item) is not dict:
+                raise DispatchError("input array contains a non-object item")
+            if set(item) == {"role", "content"}:
+                if (type(item["role"]) is not str
+                        or item["role"] not in {"system", "developer", "user", "assistant"}
+                        or type(item["content"]) is not str or not item["content"]):
+                    raise DispatchError("message array must contain only text roles and content")
+            elif item.get("type") == "reasoning":
+                if ("role" in item or type(item.get("encrypted_content")) is not str
+                        or not item["encrypted_content"]):
+                    raise DispatchError("reasoning item lacks encrypted content")
+            elif item.get("type") == "message":
+                if (item.get("role") != "assistant"
+                        or type(item.get("content")) is not list
+                        or not item["content"]):
+                    raise DispatchError("output message is not plain assistant text")
+                for part in item["content"]:
+                    if (type(part) is not dict or part.get("type") != "output_text"
+                            or type(part.get("text")) is not str):
+                        raise DispatchError("output message contains nontext content")
+            else:
+                raise DispatchError("input array contains unsupported item")
     if "instructions" in raw and (type(raw["instructions"]) is not str
                                   or not raw["instructions"]):
         raise DispatchError("instructions must be nonempty text")
     if "reasoning" in raw:
         reasoning = raw["reasoning"]
-        if (type(reasoning) is not dict or set(reasoning) != {"effort"}
+        if (type(reasoning) is not dict
+                or set(reasoning) not in ({"effort"}, {"effort", "context"})
+                or type(reasoning["effort"]) is not str
                 or reasoning["effort"] not in
-                {"none", "low", "medium", "high", "xhigh", "max"}):
+                {"none", "low", "medium", "high", "xhigh", "max"}
+                or "context" in reasoning
+                and (type(reasoning["context"]) is not str
+                     or reasoning["context"] not in {"current_turn", "all_turns"})):
             raise DispatchError("reasoning must specify a supported effort")
     if type(raw["max_output_tokens"]) is not int or raw["max_output_tokens"] < 1:
         raise DispatchError("max_output_tokens must be a positive integer")
