@@ -10,6 +10,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBE = ROOT / "scripts" / "probe_signed_full_workflow.py"
@@ -19,7 +21,18 @@ PHASES = [
 ]
 
 
-def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(tmp_path: Path) -> None:
+@pytest.mark.parametrize("test_gate_policy", ["signed_report", "signed_observed"])
+def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(
+    tmp_path: Path, test_gate_policy: str,
+) -> None:
+    observed_mode = test_gate_policy == "signed_observed"
+    if observed_mode:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from local_replay_sandbox import probe_sandbox
+
+        capability = probe_sandbox()
+        if not capability.available:
+            pytest.skip(f"signed observed full workflow needs local sandbox: {capability.reason}")
     output = tmp_path / "receipt.json"
     uv = shutil.which("uv")
     assert uv is not None, "uv is required for the installed-wheel integration test"
@@ -67,15 +80,22 @@ def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(tmp_path: Pat
         timeout=90, check=False,
     )
     assert installed.returncode == 0, installed.stderr
+    probe_args = [str(python), str(PROBE), str(ROOT), "--output", str(output)]
+    if observed_mode:
+        probe_args += ["--test-gate-policy", "signed_observed"]
     process = subprocess.run(
-        [str(python), str(PROBE), str(ROOT), "--output", str(output)],
+        probe_args,
         cwd=tmp_path, env=env, text=True, capture_output=True,
         timeout=120, check=False,
     )
     assert process.returncode == 0, process.stderr
     receipt = json.loads(process.stdout)
     assert receipt == json.loads(output.read_text(encoding="utf-8"))
-    assert receipt["classification"] == "synthetic_signed_full_workflow_installed_cli_stdio_mcp"
+    assert receipt["classification"] == (
+        "synthetic_signed_observed_full_workflow_installed_cli_stdio_mcp"
+        if observed_mode else "synthetic_signed_full_workflow_installed_cli_stdio_mcp"
+    )
+    assert receipt["test_gate_policy"] == test_gate_policy
     assert receipt["receipt_kind"] == "rerunnable_summary_not_detached_attestation"
     assert receipt["probe_sha256"] == hashlib.sha256(PROBE.read_bytes()).hexdigest()
     assert receipt["child_environment_keys"] == sorted({
@@ -88,7 +108,8 @@ def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(tmp_path: Pat
     assert len(receipt["executed_manifest_sha256"]) == 64
     assert receipt["executed_manifest_sha256"] != receipt["manifest_sha256"]
     assert receipt["transport"] == {
-        "run_sequence": ["cli", "mcp"] * 6 + ["cli"],
+        "run_sequence": ["cli", "mcp"] * (7 if observed_mode else 6)
+                        + ([] if observed_mode else ["cli"]),
         "cli_mcp_status_equal": True,
         "stdio_mcp_real": True,
         "wheel_module_under_site_packages": True,
@@ -99,18 +120,36 @@ def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(tmp_path: Pat
     executions = [entry for entry in decisions if entry["kind"] == "test_execution"]
     assert len(executions) == 1
     assert executions[0]["target"] == "t1" and executions[0]["transport"] == "cli"
-    assert len({entry["seq"] for entry in decisions}) == 12
-    assert receipt["final"]["revision"] == 50
-    assert receipt["final"]["event_counts"] == {
+    observations = [entry for entry in decisions if entry["kind"] == "test_observation"]
+    assert len(observations) == int(observed_mode)
+    if observed_mode:
+        assert observations[0]["target"] == "t1" and observations[0]["transport"] == "mcp"
+    assert len({entry["seq"] for entry in decisions}) == (13 if observed_mode else 12)
+    assert receipt["final"]["revision"] == (51 if observed_mode else 50)
+    expected_counts = {
         "approval": 2, "item_put": 29, "phase_advance": 9,
         "phase_review": 9, "test_execution": 1,
     }
+    if observed_mode:
+        expected_counts["test_observation"] = 1
+        assert receipt["final"]["signed_test_observations"] == 1
+        repeat = receipt["local_repeat"]
+        assert repeat["audit_script_sha256"] == hashlib.sha256(
+            (ROOT / "scripts" / "audit_signed_test_execution.py").read_bytes()
+        ).hexdigest()
+        assert repeat["landlock_abi"] >= 5
+        assert len(repeat["receipt_sha256"]) == 64
+        assert len(repeat["input_tree_sha256"]) == 64
+        assert repeat["stdout_sha256"] == hashlib.sha256(b"synthetic count=10\n").hexdigest()
+        assert repeat["artifact_sha256"] == repeat["stdout_sha256"]
+        assert repeat["bundle_retained_through_replay"] is True
+    assert receipt["final"]["event_counts"] == expected_counts
     assert receipt["final"]["artifact_count"] == 29
     assert receipt["final"]["accepted_phases"] == PHASES
     assert receipt["final"]["signed_test_executions"] == 1
     report = receipt["final"]["test_report"]
     assert report["schema"] == 1
-    assert report["argv"][1] == "-c"
+    assert report["argv"][1] == ("-I" if observed_mode else "-c")
     assert report["exit_code"] == 0 and report["timed_out"] is False
     assert report["stdout_sha256"] == hashlib.sha256(b"synthetic count=10\n").hexdigest()
     assert report["stderr_sha256"] == hashlib.sha256(b"").hexdigest()
@@ -124,12 +163,18 @@ def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(tmp_path: Pat
                for value in snapshots.values())
     assert receipt["final"]["assessment_verdict"] == "no_demostrado"
     assert receipt["final"]["assessment_claim_scope"] == "field"
-    assert receipt["negative_controls"] == {
+    expected_negative = {
         "unsigned_normative_mcp_no_write": True,
         "unsigned_phase_cli_no_write": True,
         "unsigned_test_execution_cli_no_write": True,
         "invalid_test_execution_mcp_no_write": True,
     }
+    if observed_mode:
+        expected_negative.update({
+            "unsigned_test_observation_cli_no_write": True,
+            "invalid_test_observation_mcp_no_write": True,
+        })
+    assert receipt["negative_controls"] == expected_negative
     assert receipt["replay"] == {
         "cli_applied": 0, "mcp_applied": 0, "ledger_byte_identical": True,
     }
@@ -143,7 +188,14 @@ def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(tmp_path: Pat
         "ledger_byte_identical": True,
         "restoration_recovered_status": True,
     }
-    assert receipt["scope"] == {
+    if observed_mode:
+        for key in ("observer_key_revocation", "bundle_tamper", "input_tamper"):
+            assert receipt[key] == {
+                "build_and_downstream_reopened": True,
+                "ledger_byte_identical": True,
+                "restoration_recovered_status": True,
+            }
+    expected_scope = {
         "human_identity_authenticated": False,
         "independent_human_judgment_tested": False,
         "field_impact_tested": False,
@@ -153,3 +205,9 @@ def test_signed_full_workflow_cli_mcp_resume_replay_and_revocation(tmp_path: Pat
         "content_is_synthetic": True,
         "private_keys_written_to_disk": False,
     }
+    if observed_mode:
+        expected_scope.update({
+            "t1_repeat_executed_locally": True,
+            "observer_custody_external": False,
+        })
+    assert receipt["scope"] == expected_scope

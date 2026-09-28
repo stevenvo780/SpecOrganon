@@ -29,6 +29,7 @@ from mcp.client import Client
 from mcp.client.stdio import StdioServerParameters
 
 import specorganon
+from specorganon import test_observation
 
 
 PHASES = (
@@ -40,6 +41,7 @@ RUNNER = "agent:synthetic-runner"
 APPROVER = "human:synthetic-approver-key"
 REVIEWER = "human:synthetic-reviewer-key"
 EXECUTOR = "executor:synthetic"
+OBSERVER = "observer:synthetic-repeat"
 ZERO_HASH = "0" * 64
 TEST_OUTPUT = b"synthetic count=10\n"
 TEST_ARTIFACT = "t1-artifact.txt"
@@ -67,7 +69,7 @@ def _public(key: Ed25519PrivateKey) -> str:
 def _registry(
     file: Path, case: Path, project: dict[str, Any],
     project_sha256: str, approver_public: str, reviewer_public: str | None,
-    executor_public: str | None,
+    executor_public: str | None, observer_public: str | None = None,
 ) -> None:
     entry = {
         "path": str(case.resolve(strict=True)),
@@ -75,6 +77,7 @@ def _registry(
         "approvers": {APPROVER: approver_public},
         "phase_reviewers": {REVIEWER: reviewer_public} if reviewer_public else {},
         "test_executors": {EXECUTOR: executor_public} if executor_public else {},
+        "test_observers": {OBSERVER: observer_public} if observer_public else {},
     }
     file.write_text(json.dumps({"schema": 2, "cases": {project["case_id"]: entry}}), encoding="utf-8")
     file.chmod(0o600)
@@ -135,11 +138,12 @@ def _message(challenge: dict[str, Any], expected: dict[str, Any]) -> bytes:
     return raw
 
 
-def _execute_test(work: Path, env: dict[str, str], argv: list[str]) -> dict[str, Any]:
-    artifact = work / TEST_ARTIFACT
+def _execute_test(work: Path, env: dict[str, str], argv: list[str],
+                  artifact_root: Path | None = None, cwd: Path | None = None) -> dict[str, Any]:
+    artifact = (artifact_root or work) / TEST_ARTIFACT
     _require(not artifact.exists(), "synthetic test artifact already exists")
     result = subprocess.run(
-        argv, cwd=work, env=env, capture_output=True, timeout=30, check=False,
+        argv, cwd=cwd or work, env=env, capture_output=True, timeout=30, check=False,
     )
     _require(result.returncode == 0 and result.stdout == TEST_OUTPUT and result.stderr == b"",
              "local synthetic command did not produce its declared bytes and exit code")
@@ -161,7 +165,10 @@ def _execute_test(work: Path, env: dict[str, str], argv: list[str]) -> dict[str,
     return report
 
 
-async def probe(repo: Path) -> dict[str, Any]:
+async def probe(repo: Path, *, test_gate_policy: str = "signed_report") -> dict[str, Any]:
+    _require(test_gate_policy in {"signed_report", "signed_observed"},
+             "unsupported test gate policy")
+    observed_mode = test_gate_policy == "signed_observed"
     module_path = Path(specorganon.__file__).resolve()
     site_packages = Path(sysconfig.get_path("purelib")).resolve()
     _require(sys.prefix != sys.base_prefix
@@ -204,34 +211,68 @@ async def probe(repo: Path) -> dict[str, Any]:
             "ORGANON_APPROVERS_FILE": str(registry),
             "ORGANON_ROOT": str(work),
         }
-        test_code = (
-            "from pathlib import Path; "
-            f"Path({TEST_ARTIFACT!r}).write_bytes({TEST_OUTPUT!r}); "
-            "print('synthetic count=10')"
-        )
-        test_argv = [str(sys.executable), "-c", test_code]
+        if observed_mode:
+            test_code = (
+                "from pathlib import Path; import os,sys; "
+                "data=Path('payload.txt').read_bytes(); "
+                f"(Path(os.environ['HOME']) / {TEST_ARTIFACT!r}).write_bytes(data); "
+                "sys.stdout.buffer.write(data)"
+            )
+        else:
+            test_code = (
+                "from pathlib import Path; "
+                f"Path({TEST_ARTIFACT!r}).write_bytes({TEST_OUTPUT!r}); "
+                "print('synthetic count=10')"
+            )
+        if observed_mode:
+            executable = next((candidate for candidate in (
+                Path(sys.executable).resolve(strict=True),
+                Path("/usr/bin/python3").resolve(strict=True),
+            ) if candidate.is_file() and candidate.stat().st_size <= 16 * 1024 * 1024), None)
+            _require(executable is not None,
+                     "no local Python executable fits the bounded signed repeat")
+        else:
+            executable = Path(sys.executable)
+        test_argv = [str(executable), *(["-I"] if observed_mode else []), "-c", test_code]
+        repeat_dir = work / "repeat"
+        if observed_mode:
+            repeat_dir.mkdir(mode=0o700)
+            (repeat_dir / "input").mkdir(mode=0o700)
+            (repeat_dir / "input" / "payload.txt").write_bytes(TEST_OUTPUT)
         test_step = next(step for step in item_steps if step["id"] == "t1")
         test_step["data"] = {
             "passed": True,
             "argv": test_argv,
             "command": shlex.join(test_argv),
         }
+        if observed_mode:
+            test_step["data"].update({
+                "executable_sha256": _sha256(executable.read_bytes()),
+                "input_tree_sha256": test_observation.hash_input_tree(repeat_dir / "input"),
+            })
         manifest_path = work / "signed-full-manifest.json"
         derived_manifest_raw = _canonical(manifest)
         manifest_path.write_bytes(derived_manifest_raw)
-        created = _cli(cli, env, work, "init", path, "--title", "Synthetic signed full workflow",
-                       "--domain", "synthetic mechanics only", "--actor", RUNNER,
-                       "--approval-policy", "signed")
+        init_args = ("init", path, "--title", "Synthetic signed full workflow",
+                     "--domain", "synthetic mechanics only", "--actor", RUNNER,
+                     "--approval-policy", "signed")
+        if observed_mode:
+            init_args += ("--test-gate-policy", "signed_observed")
+        created = _cli(cli, env, work, *init_args)
         project = created["project"]
         _require(project["approval_policy"] == "signed", "temporary case was not signed")
+        _require(project.get("test_gate_policy", "signed_report") == test_gate_policy,
+                 "temporary case has the wrong test gate policy")
         approver_key = Ed25519PrivateKey.generate()
         reviewer_key = Ed25519PrivateKey.generate()
         executor_key = Ed25519PrivateKey.generate()
+        observer_key = Ed25519PrivateKey.generate() if observed_mode else None
         approver_public = _public(approver_key)
         reviewer_public = _public(reviewer_key)
         executor_public = _public(executor_key)
+        observer_public = _public(observer_key) if observer_key else None
         _registry(registry, case, project, created["project_sha256"],
-                  approver_public, reviewer_public, executor_public)
+                  approver_public, reviewer_public, executor_public, observer_public)
         params = StdioServerParameters(command=str(mcp), cwd=str(work), env=env)
         run_transports: list[str] = []
         decisions: list[dict[str, Any]] = []
@@ -242,6 +283,8 @@ async def probe(repo: Path) -> dict[str, Any]:
             required = {"run", "status", "approval_challenge", "approve",
                         "phase_review_challenge", "review_phase",
                         "test_execution_challenge", "record_test_execution"}
+            if observed_mode:
+                required |= {"test_observation_challenge", "record_test_observation"}
             _require(required <= discovered, "installed MCP server lacks required signed workflow tools")
 
             async def call(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
@@ -343,7 +386,11 @@ async def probe(repo: Path) -> dict[str, Any]:
                         "argv": test_argv, "command": shlex.join(test_argv),
                     }] and task["omitted_test_execution_targets"] == 0,
                              "runner did not expose the exact pending test command")
-                    report = _execute_test(work, env, test_argv)
+                    report = _execute_test(
+                        work, env, test_argv,
+                        artifact_root=home if observed_mode else None,
+                        cwd=repeat_dir / "input" if observed_mode else None,
+                    )
                     report_json = _canonical(report).decode("utf-8")
                     cli_challenge = _cli(
                         cli, env, work, "test-execution-challenge", path, "t1",
@@ -392,6 +439,77 @@ async def probe(repo: Path) -> dict[str, Any]:
                              "signed test execution did not append its bound report")
                     decisions.append({"kind": "test_execution", "target": "t1",
                                       "transport": "cli", "seq": event["seq"]})
+                elif action == "observe_test":
+                    _require(observed_mode and phase == "build" and observer_key is not None,
+                             "runner requested an unexpected test observation")
+                    state = await status_pair()
+                    test_item = state["items"]["t1"]
+                    _require(test_item["test_execution_status"] == "signed_passed"
+                             and test_item["test_observation_status"] == "missing"
+                             and len(task["test_observation_targets"]) == 1
+                             and task["test_observation_targets"][0]["id"] == "t1",
+                             "runner did not identify the pending signed repeat")
+                    audit_process = subprocess.run(
+                        [str(sys.executable), str(repo / "scripts" / "audit_signed_test_execution.py"),
+                         path, "t1", str(repeat_dir)],
+                        cwd=work, env=env, text=True, capture_output=True, timeout=90, check=False,
+                    )
+                    _require(audit_process.returncode == 0,
+                             f"sandboxed repeat did not pass: {audit_process.stdout} {audit_process.stderr}")
+                    audit = json.loads(audit_process.stdout)
+                    _require(audit["observed_passed"] and audit["report_matches_observation"]
+                             and audit["checks"]["input_tree_unchanged"]
+                             and audit["checks"]["ledger_unchanged"],
+                             "sandboxed repeat failed its measured checks")
+                    receipt = audit["receipt"]
+                    _require(receipt["bundle_path"] == str(repeat_dir)
+                             and receipt["report_provenance"]["seq"] == event["seq"]
+                             and receipt["report_provenance"]["hash"] == event["hash"],
+                             "repeat receipt is not bound to the signed execution event")
+                    receipt_json = _canonical(receipt).decode("utf-8")
+                    cli_challenge = _cli(
+                        cli, env, work, "test-observation-challenge", path, "t1",
+                        "--receipt", receipt_json, "--actor", OBSERVER,
+                    )
+                    mcp_challenge = await call("test_observation_challenge", {
+                        "path": path, "id": "t1", "receipt": receipt, "actor": OBSERVER,
+                    })
+                    _require(cli_challenge == mcp_challenge
+                             and (case / "organon.json").read_bytes() == before,
+                             "CLI/MCP observation challenges differ or wrote the ledger")
+                    message = _message(cli_challenge, {
+                        **binding, "schema": 1, "purpose": "specorganon.test_observation",
+                        "actor": OBSERVER, "item_id": "t1", "item_version": test_item["version"],
+                        "item_deps": test_item["deps"], "report_provenance": receipt["report_provenance"],
+                        "report": report, "receipt": receipt,
+                    })
+                    _cli_rejected(
+                        cli, env, work, "record-test-observation", path, "t1",
+                        "--receipt", receipt_json, "--actor", OBSERVER,
+                    )
+                    _require((case / "organon.json").read_bytes() == before,
+                             "unsigned observation changed the ledger")
+                    negative["unsigned_test_observation_cli_no_write"] = True
+                    wrong_signature = base64.b64encode(
+                        Ed25519PrivateKey.generate().sign(message)
+                    ).decode("ascii")
+                    rejected = await client.call_tool("record_test_observation", {
+                        "path": path, "id": "t1", "receipt": receipt,
+                        "actor": OBSERVER, "signature": wrong_signature,
+                    })
+                    _require(rejected.is_error and (case / "organon.json").read_bytes() == before,
+                             "invalid observation signature changed the ledger")
+                    negative["invalid_test_observation_mcp_no_write"] = True
+                    signature = base64.b64encode(observer_key.sign(message)).decode("ascii")
+                    observed_event = await call("record_test_observation", {
+                        "path": path, "id": "t1", "receipt": receipt,
+                        "actor": OBSERVER, "signature": signature,
+                    })
+                    _require(observed_event["kind"] == "test_observation"
+                             and observed_event["payload"]["receipt"] == receipt,
+                             "signed observation did not append its measured receipt")
+                    decisions.append({"kind": "test_observation", "target": "t1",
+                                      "transport": "mcp", "seq": observed_event["seq"]})
                 elif action == "review_phase":
                     reason = f"Synthetic key review of {phase}; no human or field assessment"
                     challenge = await challenge_pair("phase", phase, reason, REVIEWER)
@@ -439,7 +557,8 @@ async def probe(repo: Path) -> dict[str, Any]:
                 state = await status_pair()
                 _require(state["approval_trust"] == "configured"
                          and state["phase_review_trust"] == "configured"
-                         and state["test_execution_trust"] == "configured",
+                         and state["test_execution_trust"] == "configured"
+                         and (not observed_mode or state["test_observation_trust"] == "configured"),
                          "registered signed case lost its trust context")
                 if action == "review_phase":
                     _require(state["phases"][phase]["accepted"],
@@ -459,21 +578,29 @@ async def probe(repo: Path) -> dict[str, Any]:
                      "signed phase reviews did not cover each phase in order")
             _require({entry["target"] for entry in decisions if entry["kind"] == "approval"} == APPROVALS,
                      "signed normative approvals did not cover both decisions")
-            _require(len(decisions) == 12 and len(run_transports) == 13,
+            _require(len(decisions) == (13 if observed_mode else 12)
+                     and len(run_transports) == (14 if observed_mode else 13),
                      "signed workflow used an unexpected number of pauses")
             _require(all(run_transports[index] != run_transports[index - 1]
                          for index in range(1, len(run_transports))),
                      "CLI and MCP runner invocations did not alternate")
-            _require(negative == {
+            expected_negative = {
                 "unsigned_normative_mcp_no_write": True,
                 "unsigned_phase_cli_no_write": True,
                 "unsigned_test_execution_cli_no_write": True,
                 "invalid_test_execution_mcp_no_write": True,
-            }, "missing-signature negative controls were not observed")
+            }
+            if observed_mode:
+                expected_negative.update({
+                    "unsigned_test_observation_cli_no_write": True,
+                    "invalid_test_observation_mcp_no_write": True,
+                })
+            _require(negative == expected_negative,
+                     "missing-signature negative controls were not observed")
 
             final = await status_pair()
             _require(final["project"]["approval_policy"] == "signed"
-                     and final["revision"] == 50,
+                     and final["revision"] == (51 if observed_mode else 50),
                      "signed case has an unexpected final policy or revision")
             _require(set(final["items"]) == {step["id"] for step in item_steps},
                      "final signed case item set differs from the manifest")
@@ -502,6 +629,12 @@ async def probe(repo: Path) -> dict[str, Any]:
                      and final["items"]["t1"]["test_execution_status"] == "signed_passed"
                      and final["items"]["t1"]["test_execution_actor"] == EXECUTOR,
                      "synthetic test artifact differs from its executed command")
+            if observed_mode:
+                _require(final["items"]["t1"]["test_observation_status"] == "observed_passed"
+                         and final["items"]["t1"]["test_observation_actor"] == OBSERVER
+                         and len(final["test_observation_history"]) == 1
+                         and final["test_observation_history"][0]["signature_verified"],
+                         "strict workflow lacks a current verified observed repeat")
             _require(len(final["test_execution_history"]) == 1
                      and final["test_execution_history"][0]["signature_verified"]
                      and final["test_execution_history"][0]["passed"],
@@ -509,10 +642,14 @@ async def probe(repo: Path) -> dict[str, Any]:
 
             ledger, final_raw = _ledger(case)
             counts = dict(sorted(Counter(event["kind"] for event in ledger["events"]).items()))
-            _require(counts == {
+            expected_counts = {
                 "approval": 2, "item_put": 29, "phase_advance": 9,
                 "phase_review": 9, "test_execution": 1,
-            }, "ledger event classes differ from the full signed workflow")
+            }
+            if observed_mode:
+                expected_counts["test_observation"] = 1
+            _require(counts == expected_counts,
+                     "ledger event classes differ from the full signed workflow")
             reviews = [event for event in ledger["events"] if event["kind"] == "phase_review"]
             advances = [event for event in ledger["events"] if event["kind"] == "phase_advance"]
             approvals = [event for event in ledger["events"] if event["kind"] == "approval"]
@@ -539,6 +676,13 @@ async def probe(repo: Path) -> dict[str, Any]:
                      and executions[0]["payload"]["report"] == report
                      and isinstance(executions[0]["payload"].get("signature"), str),
                      "synthetic test execution lacks its signed report")
+            if observed_mode:
+                observations = [event for event in ledger["events"]
+                                if event["kind"] == "test_observation"]
+                _require(len(observations) == 1 and observations[0]["actor"] == OBSERVER
+                         and observations[0]["payload"]["receipt"] == receipt
+                         and observations[0]["seq"] > executions[0]["seq"],
+                         "observed repeat is not tied to the signed test report")
             _require(len(final["phase_review_history"]) == 9
                      and all(entry["signature_verified"] and entry["provenance"] == "signed_verified"
                              for entry in final["phase_review_history"]),
@@ -553,8 +697,52 @@ async def probe(repo: Path) -> dict[str, Any]:
                      "CLI/MCP replay mutated the signed ledger")
             _require(await status_pair() == final, "replay changed effective signed status")
 
+            if observed_mode:
+                repeated_artifact = repeat_dir / "artifacts" / TEST_ARTIFACT
+                _require(repeated_artifact.read_bytes() == TEST_OUTPUT,
+                         "sandbox did not retain the expected artifact")
+                repeated_artifact.write_bytes(b"tampered repeat\n")
+                changed = await status_pair()
+                _require(changed["items"]["t1"]["test_observation_status"] == "unverified"
+                         and not changed["phases"]["build"]["accepted"]
+                         and not changed["phases"]["validate"]["accepted"]
+                         and changed["phases"]["specify"]["accepted"]
+                         and (case / "organon.json").read_bytes() == final_raw,
+                         "changed repeat bytes did not reopen build and validate")
+                repeated_artifact.write_bytes(TEST_OUTPUT)
+                _require(await status_pair() == final,
+                         "restoring repeat bytes did not recover the signed status")
+
+                repeated_input = repeat_dir / "input" / "payload.txt"
+                repeated_input.write_bytes(b"tampered input\n")
+                changed_input = await status_pair()
+                _require(changed_input["items"]["t1"]["test_observation_status"] == "unverified"
+                         and not changed_input["phases"]["build"]["accepted"]
+                         and not changed_input["phases"]["validate"]["accepted"]
+                         and changed_input["phases"]["specify"]["accepted"]
+                         and (case / "organon.json").read_bytes() == final_raw,
+                         "changed repeat input did not reopen build and validate")
+                repeated_input.write_bytes(TEST_OUTPUT)
+                _require(await status_pair() == final,
+                         "restoring repeat input did not recover the signed status")
+
+                _registry(registry, case, project, created["project_sha256"],
+                          approver_public, reviewer_public, executor_public, None)
+                observer_revoked = await status_pair()
+                _require(observer_revoked["test_observation_trust"] == "unavailable"
+                         and observer_revoked["items"]["t1"]["test_observation_status"] == "unverified"
+                         and not observer_revoked["phases"]["build"]["accepted"]
+                         and not observer_revoked["phases"]["validate"]["accepted"]
+                         and observer_revoked["phases"]["specify"]["accepted"]
+                         and (case / "organon.json").read_bytes() == final_raw,
+                         "observer revocation did not reopen build and validate")
+                _registry(registry, case, project, created["project_sha256"],
+                          approver_public, reviewer_public, executor_public, observer_public)
+                _require(await status_pair() == final,
+                         "restoring observer trust did not recover the signed status")
+
             _registry(registry, case, project, created["project_sha256"],
-                      approver_public, reviewer_public, None)
+                      approver_public, reviewer_public, None, observer_public)
             executor_revoked = await status_pair()
             _require(all(not executor_revoked["phases"][phase]["accepted"]
                          for phase in ("build", "validate"))
@@ -566,13 +754,13 @@ async def probe(repo: Path) -> dict[str, Any]:
             _require((case / "organon.json").read_bytes() == final_raw,
                      "executor revocation changed ledger bytes")
             _registry(registry, case, project, created["project_sha256"],
-                      approver_public, reviewer_public, executor_public)
+                      approver_public, reviewer_public, executor_public, observer_public)
             _require(await status_pair() == final
                      and (case / "organon.json").read_bytes() == final_raw,
                      "restoring trusted executor key did not restore the same signed status")
 
             _registry(registry, case, project, created["project_sha256"],
-                      approver_public, None, executor_public)
+                      approver_public, None, executor_public, observer_public)
             revoked = await status_pair()
             _require(revoked["approval_trust"] == "configured"
                      and revoked["phase_review_trust"] == "unavailable",
@@ -586,20 +774,22 @@ async def probe(repo: Path) -> dict[str, Any]:
             _require((case / "organon.json").read_bytes() == final_raw,
                      "reviewer revocation changed ledger bytes")
             _registry(registry, case, project, created["project_sha256"],
-                      approver_public, reviewer_public, executor_public)
+                      approver_public, reviewer_public, executor_public, observer_public)
             restored = await status_pair()
             _require(restored == final and (case / "organon.json").read_bytes() == final_raw,
                      "restoring trusted reviewer key did not restore the same signed status")
 
             return {
                 "schema": 1,
-                "classification": "synthetic_signed_full_workflow_installed_cli_stdio_mcp",
+                "classification": ("synthetic_signed_observed_full_workflow_installed_cli_stdio_mcp"
+                                   if observed_mode else "synthetic_signed_full_workflow_installed_cli_stdio_mcp"),
+                "test_gate_policy": test_gate_policy,
                 "receipt_kind": "rerunnable_summary_not_detached_attestation",
                 "probe_sha256": probe_sha256,
                 "manifest_sha256": _sha256(manifest_raw),
                 "executed_manifest_sha256": _sha256(derived_manifest_raw),
                 "child_environment_keys": sorted(env),
-                "transport": {"run_sequence": run_transports[:13],
+                "transport": {"run_sequence": run_transports[:14 if observed_mode else 13],
                               "cli_mcp_status_equal": True, "stdio_mcp_real": True,
                               "wheel_module_under_site_packages": True},
                 "decisions": decisions,
@@ -610,6 +800,7 @@ async def probe(repo: Path) -> dict[str, Any]:
                           "signed_approvals": sorted(APPROVALS),
                           "signed_reviews": len(reviews),
                           "signed_test_executions": len(executions),
+                          **({"signed_test_observations": 1} if observed_mode else {}),
                           "test_report": report,
                           "phase_snapshots": {
                               phase: final["phases"][phase]["snapshot"] for phase in PHASES
@@ -618,6 +809,15 @@ async def probe(repo: Path) -> dict[str, Any]:
                           "assessment_claim_scope": "field",
                           "ledger_sha256": _sha256(final_raw)},
                 "negative_controls": negative,
+                **({"local_repeat": {
+                    "audit_script_sha256": _sha256((repo / "scripts" / "audit_signed_test_execution.py").read_bytes()),
+                    "landlock_abi": receipt["sandbox"]["landlock_abi"],
+                    "receipt_sha256": _sha256(_canonical(receipt)),
+                    "input_tree_sha256": receipt["input_tree_sha256"],
+                    "stdout_sha256": receipt["observed"]["stdout_sha256"],
+                    "artifact_sha256": receipt["observed"]["artifacts"][0]["sha256"],
+                    "bundle_retained_through_replay": True,
+                }} if observed_mode else {}),
                 "replay": {"cli_applied": cli_replay["applied"],
                            "mcp_applied": mcp_replay["applied"],
                            "ledger_byte_identical": True},
@@ -627,6 +827,19 @@ async def probe(repo: Path) -> dict[str, Any]:
                 "executor_key_revocation": {"build_and_downstream_reopened": True,
                                              "ledger_byte_identical": True,
                                              "restoration_recovered_status": True},
+                **({"observer_key_revocation": {
+                    "build_and_downstream_reopened": True,
+                    "ledger_byte_identical": True,
+                    "restoration_recovered_status": True,
+                }, "bundle_tamper": {
+                    "build_and_downstream_reopened": True,
+                    "ledger_byte_identical": True,
+                    "restoration_recovered_status": True,
+                }, "input_tamper": {
+                    "build_and_downstream_reopened": True,
+                    "ledger_byte_identical": True,
+                    "restoration_recovered_status": True,
+                }} if observed_mode else {}),
                 "scope": {
                     "human_identity_authenticated": False,
                     "independent_human_judgment_tested": False,
@@ -634,6 +847,8 @@ async def probe(repo: Path) -> dict[str, Any]:
                     "t1_command_executed_locally": True,
                     "t1_report_signed_by_synthetic_executor": True,
                     "t1_execution_independently_verified": False,
+                    **({"t1_repeat_executed_locally": True,
+                        "observer_custody_external": False} if observed_mode else {}),
                     "content_is_synthetic": True,
                     "private_keys_written_to_disk": False,
                 },
@@ -644,8 +859,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("repo_root", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--test-gate-policy", choices=("signed_report", "signed_observed"),
+                        default="signed_report")
     args = parser.parse_args()
-    receipt = asyncio.run(probe(args.repo_root.resolve(strict=True)))
+    receipt = asyncio.run(probe(args.repo_root.resolve(strict=True),
+                                test_gate_policy=args.test_gate_policy))
     serialized = json.dumps(receipt, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
     if args.output is not None:
         args.output.write_text(serialized, encoding="utf-8")
