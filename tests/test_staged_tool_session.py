@@ -593,6 +593,10 @@ def test_two_real_sealed_tools_resume_and_cap(
     assert first_receipt["criterion_4"] == "not_assessed"
     assert first_receipt["budget_scope"] == "stage_instance_local"
     assert first_receipt["global_run_limits_enforced"] is False
+    assert "tool_args_sha256" not in first_receipt
+    assert "tool_args_sha256" not in json.loads(
+        (session / "calls" / "000001" / "reservation.json").read_text()
+    )
     assert first_receipt == json.loads((session / "calls" / "000001" / "terminal.json").read_text())
     resumed = _cli("status", schedule_path, run_id, stage, session)
     assert resumed.returncode == 0, resumed.stderr
@@ -621,6 +625,147 @@ def test_two_real_sealed_tools_resume_and_cap(
     for secret in hidden:
         for receipt in (session / "calls").glob("*/terminal.json"):
             assert secret not in receipt.read_bytes()
+
+
+def test_cli_tool_args_are_one_canonical_fourth_argv_and_bound_to_receipt(
+    tmp_path: Path, available_sandbox: None,
+) -> None:
+    payload = {"é": "private-value-123", "a": [3, {"z": 1}],
+               "fraction": 0.1, "half": 0.5}
+    canonical = session_runner._canonical_bytes(payload)
+    body = f"""
+import sys
+from pathlib import Path
+assert len(sys.argv) == 5
+assert sys.argv[4] == {canonical.decode('ascii')!r}
+Path(sys.argv[3], 'intermediate.txt').write_text('sealed first output\\n')
+"""
+    schedule, schedule_path, run_id, stage, first, second, _ = _stage(
+        tmp_path, first_body=body
+    )
+    session = tmp_path / "session"
+    session_runner.create_session(schedule, run_id, stage, session)
+    raw = json.dumps(payload, ensure_ascii=False)
+    outcome = _cli("call", schedule_path, run_id, stage, session, "first", first,
+                   "--args-json", raw, "--wall-seconds", "3")
+    assert outcome.returncode == 0, outcome.stderr
+    receipt = json.loads(outcome.stdout)
+    reservation_path = session / "calls" / "000001" / "reservation.json"
+    terminal_path = session / "calls" / "000001" / "terminal.json"
+    reservation = json.loads(reservation_path.read_text())
+    expected_digest = _sha(canonical)
+    assert reservation["tool_args_sha256"] == expected_digest
+    assert receipt["tool_args_sha256"] == expected_digest
+    assert receipt == json.loads(terminal_path.read_text())
+    assert b"private-value-123" not in reservation_path.read_bytes()
+    assert b"private-value-123" not in terminal_path.read_bytes()
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "ready"
+    legacy = session_runner.call_tool(schedule, run_id, stage, session, "second", second,
+                                      wall_seconds=3)
+    assert legacy["status"] == "success"
+    assert "tool_args_sha256" not in legacy
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "exhausted"
+
+
+@pytest.mark.parametrize("payload", [{}, {"fraction": 0.1}])
+def test_api_tool_args_pass_fourth_argv(
+    tmp_path: Path, available_sandbox: None, payload: dict,
+) -> None:
+    canonical = session_runner._canonical_bytes(payload)
+    body = f"""
+import sys
+from pathlib import Path
+assert len(sys.argv) == 5 and sys.argv[4] == {canonical.decode('ascii')!r}
+Path(sys.argv[3], 'report.md').write_text('done')
+"""
+    schedule, _, run_id, stage, first, _, _ = _stage(tmp_path, first_body=body)
+    session = tmp_path / "session"
+    session_runner.create_session(schedule, run_id, stage, session)
+    receipt = session_runner.call_tool(schedule, run_id, stage, session, "first", first,
+                                       tool_args=payload, wall_seconds=3)
+    assert receipt["status"] == "success"
+    assert receipt["tool_args_sha256"] == _sha(canonical)
+
+
+def test_cli_invalid_tool_args_spend_no_claim_or_reservation(tmp_path: Path) -> None:
+    schedule, schedule_path, run_id, stage, first, _, _ = _stage(tmp_path)
+    session = tmp_path / "session"
+    session_runner.create_session(schedule, run_id, stage, session)
+    too_deep = '{"x":' + '[' * 33 + '0' + ']' * 33 + '}'
+    invalid = [
+        "[]", "null", '{"x":1,"x":2}', '{"x":{"y":1,"y":2}}',
+        '{"x":NaN}', '{"x":Infinity}', '{"x":1e309}',
+        '{"x":1e-9999}', '{"x":0.10000000000000001}',
+        '{"x":0.1000000000000000055511151231257827021181583404541015625}',
+        too_deep,
+        " " * (session_runner.MAX_TOOL_ARGS_BYTES + 1) + "{}",
+    ]
+    for raw in invalid:
+        outcome = _cli("call", schedule_path, run_id, stage, session, "first", first,
+                       "--args-json", raw, "--wall-seconds", "3")
+        assert outcome.returncode == 2
+        assert "Staged local session failed" in outcome.stderr
+        assert session_runner.resume_session(schedule, run_id, stage, session)[
+            "local_run_claim_status"
+        ] == "unclaimed"
+        assert list((session / "calls").iterdir()) == []
+
+
+def test_api_invalid_tool_args_and_sandbox_limit_spend_no_claim(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    schedule, _, run_id, stage, first, _, _ = _stage(tmp_path)
+    session = tmp_path / "session"
+    session_runner.create_session(schedule, run_id, stage, session)
+    too_deep: dict = {}
+    cursor = too_deep
+    for _ in range(session_runner.MAX_TOOL_ARGS_DEPTH):
+        cursor["x"] = {}
+        cursor = cursor["x"]
+    cycle: dict = {}
+    cycle["x"] = cycle
+    for invalid in (
+        [1], {"x": float("nan")}, {"x": float("inf")}, {"x": object()},
+        {"x": "x" * session_runner.MAX_TOOL_ARGS_BYTES}, too_deep, cycle,
+    ):
+        with pytest.raises(session_runner.SessionError):
+            session_runner.call_tool(schedule, run_id, stage, session, "first", first,
+                                     tool_args=invalid, wall_seconds=3)
+    monkeypatch.setattr(session_runner, "_MAX_CONFIG_BYTES", 1)
+    with pytest.raises(session_runner.SessionError, match="sandbox configuration byte limit"):
+        session_runner.call_tool(schedule, run_id, stage, session, "first", first,
+                                 tool_args={}, wall_seconds=3)
+    assert session_runner.resume_session(schedule, run_id, stage, session)[
+        "local_run_claim_status"
+    ] == "unclaimed"
+    assert list((session / "calls").iterdir()) == []
+
+
+def test_changed_tool_args_digest_makes_receipt_indeterminate(
+    tmp_path: Path, available_sandbox: None,
+) -> None:
+    body = """
+import sys
+from pathlib import Path
+assert len(sys.argv) == 5
+Path(sys.argv[3], 'intermediate.txt').write_text('sealed first output\\n')
+"""
+    schedule, _, run_id, stage, first, second, _ = _stage(tmp_path, first_body=body)
+    session = tmp_path / "session"
+    session_runner.create_session(schedule, run_id, stage, session)
+    receipt = session_runner.call_tool(schedule, run_id, stage, session, "first", first,
+                                       tool_args={"query": "one"}, wall_seconds=3)
+    assert receipt["status"] == "success"
+    terminal_path = session / "calls" / "000001" / "terminal.json"
+    terminal = json.loads(terminal_path.read_text())
+    terminal["tool_args_sha256"] = "0" * 64
+    terminal_path.write_bytes(session_runner._canonical_bytes(terminal, newline=True))
+    status = session_runner.resume_session(schedule, run_id, stage, session)
+    assert status["status"] == "indeterminate"
+    assert status["pending_reason"] == "latest terminal receipt is invalid"
+    with pytest.raises(session_runner.SessionError, match="indeterminate"):
+        session_runner.call_tool(schedule, run_id, stage, session, "second", second)
+    assert not (session / "calls" / "000002").exists()
 
 
 def test_pending_reservation_survives_crash_and_blocks_retry(

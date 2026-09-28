@@ -1,8 +1,9 @@
 """Development-only, sequential text conversations on the measured Responses path.
 
 One prepared run may be executed once. A crash or uncertain provider outcome is
-terminal for that run. The local deadline covers this single process; there is
-no human-approval pause, tool execution, dollar cap, or independent custody.
+terminal for that run. The local deadline covers this single process; its
+optional declared-price ceiling is not a verified provider spending cap. There
+is no human-approval pause, tool execution, or independent custody.
 """
 
 from __future__ import annotations

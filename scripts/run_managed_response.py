@@ -1,8 +1,9 @@
 """Development-only Responses dispatcher with a pre-send shared reservation.
 
-This path sends one request at a time. Input may include plain messages and
-prior Responses reasoning/message output items, but never tools or multimodal
-parts. It does not manage an agent conversation, enforce time limits, or
+This path sends one request at a time. Input may include plain messages,
+prior Responses reasoning/message output items, and bounded function-call
+replay with strictly declared functions. It does not execute tools, accept
+multimodal parts, manage an agent conversation, enforce time limits, or
 make a CLI opaque to the caller safe for a confirmatory study. The caller must
 use one ledger directory for every request and agent in the same run. Provider
 calls require an explicit CLI flag and an API key; tests use a fake transport.
@@ -13,11 +14,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
+import re
 import stat
 import sys
 import urllib.error
 import urllib.request
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -27,7 +31,10 @@ from managed_token_ledger import BudgetError, TokenLedger
 MAX_JSON_BYTES = 16 * 1024 * 1024
 REQUEST_KEYS = frozenset({
     "model", "input", "instructions", "reasoning", "max_output_tokens", "service_tier",
+    "tools", "parallel_tool_calls",
 })
+FUNCTION_NAME = re.compile(r"[A-Za-z0-9_-]{1,64}\Z")
+PRIMITIVE_TYPES = frozenset({"string", "integer", "number", "boolean"})
 
 
 class DispatchError(ValueError):
@@ -60,12 +67,93 @@ def _reject_constant(_value: str) -> None:
     raise DispatchError("JSON contains a nonfinite number")
 
 
+def _parse_exact_float(raw: str) -> float:
+    """Reject JSON decimals that would change value when passed as a float."""
+    try:
+        value = float(raw)
+        original = Decimal(raw)
+    except (InvalidOperation, OverflowError, ValueError) as exc:
+        raise DispatchError("JSON decimal loses precision as a float") from exc
+    if not math.isfinite(value) or Decimal(str(value)) != original:
+        raise DispatchError("JSON decimal loses precision as a float")
+    return value
+
+
 def _read_json_file(path: Path) -> Any:
     raw = path.read_bytes()
     if len(raw) > MAX_JSON_BYTES:
         raise DispatchError("JSON file exceeds the byte limit")
     return json.loads(raw, object_pairs_hook=_unique_pairs,
                       parse_constant=_reject_constant)
+
+
+def _validate_function_tool(tool: Any) -> None:
+    if (type(tool) is not dict
+            or set(tool) != {"type", "name", "description", "parameters", "strict"}
+            or tool["type"] != "function" or tool["strict"] is not True
+            or type(tool["name"]) is not str
+            or FUNCTION_NAME.fullmatch(tool["name"]) is None
+            or type(tool["description"]) is not str
+            or not tool["description"].strip()):
+        raise DispatchError("tools must be strict custom function definitions")
+    schema = tool["parameters"]
+    if (type(schema) is not dict
+            or set(schema) != {"type", "properties", "required", "additionalProperties"}
+            or schema["type"] != "object"
+            or schema["additionalProperties"] is not False
+            or type(schema["properties"]) is not dict
+            or type(schema["required"]) is not list):
+        raise DispatchError("function parameters must be a closed object schema")
+    properties = schema["properties"]
+    required = schema["required"]
+    if (any(type(name) is not str or FUNCTION_NAME.fullmatch(name) is None
+            for name in properties)
+            or any(type(name) is not str for name in required)
+            or len(required) != len(properties) or set(required) != set(properties)):
+        raise DispatchError("function required must name every property exactly once")
+    for field in properties.values():
+        if (type(field) is not dict
+                or set(field) not in ({"type"}, {"type", "description"})
+                or type(field["type"]) is not str
+                or field["type"] not in PRIMITIVE_TYPES
+                or "description" in field
+                and (type(field["description"]) is not str
+                     or not field["description"].strip())):
+            raise DispatchError("function properties must use primitive types")
+
+
+def _parse_function_arguments(tool: dict, raw: str) -> dict:
+    """Parse a function call as strict JSON matching its closed primitive schema."""
+    _validate_function_tool(tool)
+    if type(raw) is not str:
+        raise DispatchError("function arguments must be bounded JSON text")
+    try:
+        raw_size = len(raw.encode("utf-8"))
+    except UnicodeError as exc:
+        raise DispatchError("function arguments are invalid JSON text") from exc
+    if raw_size > MAX_JSON_BYTES:
+        raise DispatchError("function arguments must be bounded JSON text")
+    try:
+        arguments = json.loads(raw, object_pairs_hook=_unique_pairs,
+                               parse_constant=_reject_constant,
+                               parse_float=_parse_exact_float)
+    except DispatchError:
+        raise
+    except (UnicodeError, ValueError, RecursionError) as exc:
+        raise DispatchError("function arguments are invalid JSON") from exc
+    properties = tool["parameters"]["properties"]
+    if type(arguments) is not dict or set(arguments) != set(properties):
+        raise DispatchError("function arguments must match the declared properties")
+    for name, field in properties.items():
+        value = arguments[name]
+        kind = field["type"]
+        valid = (type(value) is str if kind == "string" else
+                 type(value) is int if kind == "integer" else
+                 type(value) is int or type(value) is float and math.isfinite(value)
+                 if kind == "number" else type(value) is bool)
+        if not valid:
+            raise DispatchError(f"function argument {name} has the wrong type")
+    return arguments
 
 
 def _validated_request(raw: Any) -> dict[str, Any]:
@@ -76,10 +164,28 @@ def _validated_request(raw: Any) -> dict[str, Any]:
         raise DispatchError("model must be a nonempty string")
     if type(raw["input"]) not in (str, list) or not raw["input"]:
         raise DispatchError("input must be nonempty text or a message array")
+    functions: dict[str, dict] = {}
+    if "tools" in raw:
+        tools = raw["tools"]
+        if type(tools) is not list or not 1 <= len(tools) <= 8:
+            raise DispatchError("tools must contain one to eight functions")
+        if raw.get("parallel_tool_calls") is not False:
+            raise DispatchError("tools require parallel_tool_calls false")
+        for tool in tools:
+            _validate_function_tool(tool)
+            if tool["name"] in functions:
+                raise DispatchError("function names must be unique")
+            functions[tool["name"]] = tool
+    elif "parallel_tool_calls" in raw:
+        raise DispatchError("parallel_tool_calls requires tools")
     if type(raw["input"]) is list:
+        pending_call: str | None = None
+        seen_calls: set[str] = set()
         for item in raw["input"]:
             if type(item) is not dict:
                 raise DispatchError("input array contains a non-object item")
+            if pending_call is not None and item.get("type") != "function_call_output":
+                raise DispatchError("function call needs its matching output")
             if set(item) == {"role", "content"}:
                 if (type(item["role"]) is not str
                         or item["role"] not in {"system", "developer", "user", "assistant"}
@@ -98,8 +204,32 @@ def _validated_request(raw: Any) -> dict[str, Any]:
                     if (type(part) is not dict or part.get("type") != "output_text"
                             or type(part.get("text")) is not str):
                         raise DispatchError("output message contains nontext content")
+            elif item.get("type") == "function_call":
+                if (not {"type", "name", "arguments", "call_id"} <= set(item)
+                        or not set(item) <= {"type", "name", "arguments", "call_id",
+                                             "id", "status"}
+                        or type(item["name"]) is not str
+                        or item["name"] not in functions
+                        or type(item["call_id"]) is not str
+                        or not item["call_id"] or item["call_id"] in seen_calls
+                        or "id" in item and (type(item["id"]) is not str
+                                             or not item["id"])
+                        or "status" in item and item["status"] != "completed"):
+                    raise DispatchError("input contains an unsupported function call")
+                _parse_function_arguments(functions[item["name"]], item["arguments"])
+                pending_call = item["call_id"]
+                seen_calls.add(pending_call)
+            elif item.get("type") == "function_call_output":
+                if (set(item) != {"type", "call_id", "output"}
+                        or type(item["call_id"]) is not str
+                        or item["call_id"] != pending_call
+                        or type(item["output"]) is not str):
+                    raise DispatchError("function output needs a matching call_id and text")
+                pending_call = None
             else:
                 raise DispatchError("input array contains unsupported item")
+        if pending_call is not None:
+            raise DispatchError("function call needs its matching output")
     if "instructions" in raw and (type(raw["instructions"]) is not str
                                   or not raw["instructions"]):
         raise DispatchError("instructions must be nonempty text")

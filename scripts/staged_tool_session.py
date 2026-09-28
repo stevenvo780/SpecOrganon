@@ -41,11 +41,15 @@ import stat
 import sys
 import time
 from contextlib import ExitStack, contextmanager
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Iterator
 
 import local_run_admission as admission
 from local_replay_sandbox import (
+    _MAX_CONFIG_BYTES,
+    _roots,
+    _validate_env,
     SandboxError,
     SandboxUnavailable,
     default_python_runtime_roots,
@@ -99,6 +103,8 @@ ACTIVE_GUARD_SECONDS = 1.0
 MAX_SESSION_WALL_SECONDS = 86400.0
 MAX_JOURNAL_BYTES = 4 * 1024 * 1024
 MAX_CALLS = 10000
+MAX_TOOL_ARGS_BYTES = 16 * 1024
+MAX_TOOL_ARGS_DEPTH = 32
 
 
 class SessionError(ValueError):
@@ -113,6 +119,125 @@ def _digest(value: Any) -> str:
 def _canonical_bytes(value: Any, *, newline: bool = False) -> bytes:
     return (json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":"),
                        allow_nan=False) + ("\n" if newline else "")).encode("utf-8")
+
+
+def _canonical_tool_args(tool_args: dict[str, Any] | None) -> bytes | None:
+    """Bound one JSON object before a claim, keeping its bytes out of the journal."""
+    if tool_args is None:
+        return None
+    if type(tool_args) is not dict:
+        raise SessionError("tool_args must be a JSON object")
+    stack: list[tuple[Any, int]] = [(tool_args, 1)]
+    active: set[int] = set()
+    nodes = 0
+    while stack:
+        value, depth = stack.pop()
+        if depth == 0:
+            active.remove(id(value))
+            continue
+        nodes += 1
+        if nodes > MAX_TOOL_ARGS_BYTES:
+            raise SessionError("tool_args exceeds maximum canonical byte length")
+        if depth > MAX_TOOL_ARGS_DEPTH:
+            raise SessionError("tool_args exceeds maximum JSON depth")
+        if type(value) in (dict, list):
+            if len(value) > MAX_TOOL_ARGS_BYTES:
+                raise SessionError("tool_args exceeds maximum canonical byte length")
+            if id(value) in active:
+                raise SessionError("tool_args contains a JSON cycle")
+            active.add(id(value))
+            stack.append((value, 0))
+            if type(value) is dict:
+                if any(type(key) is not str for key in value):
+                    raise SessionError("tool_args object keys must be strings")
+                if any(len(key) > MAX_TOOL_ARGS_BYTES for key in value):
+                    raise SessionError("tool_args exceeds maximum canonical byte length")
+                stack.extend((item, depth + 1) for item in value.values())
+            else:
+                stack.extend((item, depth + 1) for item in value)
+        elif type(value) is float:
+            if not math.isfinite(value):
+                raise SessionError("tool_args contains a non-finite number")
+        elif type(value) is str:
+            if len(value) > MAX_TOOL_ARGS_BYTES:
+                raise SessionError("tool_args exceeds maximum canonical byte length")
+        elif type(value) not in (int, bool, type(None)):
+            raise SessionError("tool_args contains a non-JSON value")
+    try:
+        canonical = _canonical_bytes(tool_args)
+    except (TypeError, ValueError, UnicodeError, RecursionError) as exc:
+        raise SessionError("tool_args cannot be encoded as canonical JSON") from exc
+    if len(canonical) > MAX_TOOL_ARGS_BYTES:
+        raise SessionError("tool_args exceeds maximum canonical byte length")
+    return canonical
+
+
+def _parse_tool_args_json(raw: str) -> dict[str, Any]:
+    try:
+        if len(raw.encode("utf-8")) > MAX_TOOL_ARGS_BYTES:
+            raise SessionError("--args-json exceeds maximum input byte length")
+
+        def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+            result: dict[str, Any] = {}
+            for key, value in pairs:
+                if key in result:
+                    raise SessionError("--args-json contains a duplicate object key")
+                result[key] = value
+            return result
+
+        def reject_constant(value: str) -> None:
+            raise SessionError(f"--args-json contains non-JSON constant {value}")
+
+        def canonical_roundtrip_decimal(token: str) -> float:
+            try:
+                value = float(token)
+                original = Decimal(token)
+            except (InvalidOperation, OverflowError, ValueError) as exc:
+                raise SessionError("--args-json contains an invalid decimal") from exc
+            if (not math.isfinite(value)
+                or original != Decimal(_canonical_bytes(value).decode("ascii"))):
+                raise SessionError("--args-json decimal value changes when canonicalized")
+            return value
+
+        parsed = json.loads(raw, object_pairs_hook=unique_object,
+                            parse_constant=reject_constant,
+                            parse_float=canonical_roundtrip_decimal)
+    except SessionError:
+        raise
+    except (UnicodeError, ValueError, RecursionError) as exc:
+        raise SessionError("--args-json is invalid JSON") from exc
+    if type(parsed) is not dict:
+        raise SessionError("--args-json must be a JSON object")
+    _canonical_tool_args(parsed)
+    return parsed
+
+
+def _assert_sandbox_config_fits(
+    argv: list[str], stage: Path, runtime_roots: tuple[Path, ...],
+    cpu_seconds: int, address_space_bytes: int, file_bytes_per_file: int,
+) -> None:
+    """Mirror the sandbox's bounded config before admission spends the call."""
+    try:
+        reads = _roots([stage / "case", stage / "inputs"], directories_only=False)
+        writes = _roots([stage / "work"], directories_only=True)
+        runtimes = _roots(runtime_roots, directories_only=False, allow_char_device=True)
+        child_env = _validate_env(
+            {"HOME": str(stage / "work"), "TMPDIR": str(stage / "work")},
+            writes, stage / "case",
+        )
+        config = {
+            "argv": argv, "read_roots": reads, "write_roots": writes,
+            "runtime_roots": runtimes, "env": child_env,
+            "cpu_seconds": cpu_seconds, "address_space_bytes": address_space_bytes,
+            "file_bytes_per_file": file_bytes_per_file,
+            # A real Linux file descriptor needs fewer digits than sys.maxsize.
+            "sealed_executable_fd": sys.maxsize,
+        }
+        encoded = json.dumps(config, separators=(",", ":")).encode("utf-8")
+    except (SandboxError, TypeError, ValueError, UnicodeError, OSError) as exc:
+        raise SessionError("sandbox argument configuration is invalid") from exc
+    if len(encoded) > _MAX_CONFIG_BYTES:
+        raise SessionError("tool_args exceeds sandbox configuration byte limit")
 
 
 def _paths(stage_dir: Path | str, session_dir: Path | str) -> tuple[Path, Path]:
@@ -459,6 +584,9 @@ def _valid_terminal(
         and terminal.get("schedule_sha256") == schedule["schedule_sha256"]
         and terminal.get("tool_id") == reservation["tool_id"]
         and terminal.get("tool_version") == reservation["tool_version"]
+        and (("tool_args_sha256" not in reservation and "tool_args_sha256" not in terminal)
+             or ("tool_args_sha256" in reservation
+                 and terminal.get("tool_args_sha256") == reservation["tool_args_sha256"]))
         and terminal.get("executable_sha256") == reservation["executable_sha256"]
         and terminal.get("policy_sha256") == reservation["policy_sha256"]
         and terminal.get("work_before_sha256") == reservation["work_before_sha256"]
@@ -597,6 +725,8 @@ def _read_state(
                 or not _is_sha256(reservation.get("executable_sha256"))
                 or type(reservation.get("tool_id")) is not str
                 or type(reservation.get("tool_version")) is not str
+                or ("tool_args_sha256" in reservation
+                    and not _is_sha256(reservation["tool_args_sha256"]))
                 or type(reservation.get("reserved_at_ns")) is not int
                 or type(reservation.get("active_seconds_reserved")) not in (int, float)):
                 if number != len(names):
@@ -850,12 +980,16 @@ def _validate_call_limits(
 def call_tool(
     schedule_raw: Any, run_id: str, stage_dir: Path | str, session_dir: Path | str,
     tool_id: str, executable: Path | str, *,
+    tool_args: dict[str, Any] | None = None,
     wall_seconds: float = 30.0, cpu_seconds: int = 10,
     address_space_bytes: int = 512 * 1024 * 1024,
     file_bytes_per_file: int = 8 * 1024 * 1024,
     admission_root: Path | str | None = None,
 ) -> dict[str, Any]:
     """Reserve one call, execute sealed bytes, and write a terminal receipt."""
+    canonical_args = _canonical_tool_args(tool_args)
+    tool_args_sha256 = (hashlib.sha256(canonical_args).hexdigest()
+                        if canonical_args is not None else None)
     stage, session = _paths(stage_dir, session_dir)
     tool = Path(executable)
     if not tool.is_absolute() or any(part in (".", "..") for part in tool.parts):
@@ -888,6 +1022,14 @@ def call_tool(
             raise SessionError("tool executable SHA-256 differs from staged policy")
         if not os.access(tool, os.X_OK):
             raise SessionError("tool executable is not executable")
+        sandbox_argv = [str(tool), str(stage / "case"), str(stage / "inputs"), str(stage / "work")]
+        if canonical_args is not None:
+            sandbox_argv.append(canonical_args.decode("ascii"))
+        runtime_roots = default_python_runtime_roots()
+        _assert_sandbox_config_fits(
+            sandbox_argv, stage, runtime_roots, cpu_seconds,
+            address_space_bytes, file_bytes_per_file,
+        )
         now_ns = time.time_ns()
         wall_elapsed = _wall_elapsed(manifest["created_ns"], now_ns)
         reserved_active = float(wall_seconds) + ACTIVE_GUARD_SECONDS
@@ -940,6 +1082,7 @@ def call_tool(
             "previous_terminal_sha256": previous_digest,
             "reserved_at_ns": now_ns, "tool_id": tool_id,
             "tool_version": selected["version"], "executable_sha256": executable_sha256,
+            **({"tool_args_sha256": tool_args_sha256} if tool_args_sha256 is not None else {}),
             "policy_sha256": policy_sha256, "immutable_snapshot_sha256": _digest(snapshot),
             "work_before_sha256": _digest(work_before),
             "active_seconds_reserved": reserved_active,
@@ -970,14 +1113,13 @@ def call_tool(
         launch_error = None
         elapsed = 0.0
         try:
-            runtime_roots = default_python_runtime_roots()
             if time.time_ns() >= launch_deadline_ns:
                 launch_error = "session wall budget expired after reservation before launch"
             else:
                 start = time.monotonic()
                 try:
                     result = run_sandboxed(
-                        argv=[str(tool), str(stage / "case"), str(stage / "inputs"), str(stage / "work")],
+                        argv=sandbox_argv,
                         cwd=stage / "case", read_roots=[stage / "case", stage / "inputs"],
                         write_roots=[stage / "work"], runtime_roots=runtime_roots,
                         stdout_path=call_dir / "stdout", stderr_path=call_dir / "stderr",
@@ -1038,6 +1180,7 @@ def call_tool(
             "run_id": run_id, "run_sha256": run["run_sha256"],
             "schedule_sha256": schedule["schedule_sha256"],
             "tool_id": tool_id, "tool_version": selected["version"],
+            **({"tool_args_sha256": tool_args_sha256} if tool_args_sha256 is not None else {}),
             "executable_sha256": executable_sha256,
             "sealed_executable_sha256": result.sealed_executable_sha256 if result else None,
             "execution_bytes_sealed": sealed,
@@ -1095,6 +1238,7 @@ def main(argv: list[str] | None = None) -> int:
         command.add_argument("--admission-root")
     call.add_argument("tool_id")
     call.add_argument("executable")
+    call.add_argument("--args-json")
     call.add_argument("--wall-seconds", type=float, default=30.0)
     call.add_argument("--cpu-seconds", type=int, default=10)
     call.add_argument("--address-space-bytes", type=int, default=512 * 1024 * 1024)
@@ -1114,9 +1258,12 @@ def main(argv: list[str] | None = None) -> int:
             report = resume_session(schedule, args.run_id, args.stage_dir, args.session_dir,
                                     admission_root=args.admission_root)
         else:
+            tool_args = (_parse_tool_args_json(args.args_json)
+                         if args.args_json is not None else None)
             report = call_tool(
                 schedule, args.run_id, args.stage_dir, args.session_dir,
-                args.tool_id, args.executable, wall_seconds=args.wall_seconds,
+                args.tool_id, args.executable, tool_args=tool_args,
+                wall_seconds=args.wall_seconds,
                 cpu_seconds=args.cpu_seconds,
                 address_space_bytes=args.address_space_bytes,
                 file_bytes_per_file=args.file_bytes_per_file,

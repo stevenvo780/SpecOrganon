@@ -18,6 +18,7 @@ from managed_token_ledger import BudgetError, TokenLedger  # noqa: E402
 from run_managed_response import (  # noqa: E402
     DispatchError,
     OpenAIResponsesHTTP,
+    _parse_function_arguments,
     dispatch_response,
     main,
 )
@@ -33,6 +34,24 @@ PRICE_PROFILE = {
     "output_rate_micro_usd_per_million": 1_000_000,
 }
 PRICED_REQUEST = {**REQUEST, "service_tier": "default"}
+FUNCTION_TOOL = {
+    "type": "function", "name": "measure_sample",
+    "description": "Measure one sample with declared values.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "label": {"type": "string", "description": "Sample name."},
+            "batch": {"type": "integer"},
+            "ratio": {"type": "number"},
+            "approved": {"type": "boolean"},
+        },
+        "required": ["label", "batch", "ratio", "approved"],
+        "additionalProperties": False,
+    },
+    "strict": True,
+}
+FUNCTION_ARGUMENTS = '{"label":"A","batch":2,"ratio":0.5,"approved":false}'
+TOOL_REQUEST = {**REQUEST, "tools": [FUNCTION_TOOL], "parallel_tool_calls": False}
 
 
 class FakeTransport:
@@ -95,6 +114,195 @@ def test_count_reserve_send_and_persist_response(tmp_path: Path) -> None:
     assert receipt["response_sha256"] == hashlib.sha256(output.read_bytes()).hexdigest()
     assert stat.S_IMODE(output.stat().st_mode) == 0o600
     assert receipt["criterion_4"] == "not_assessed"
+
+
+def test_function_tools_are_counted_and_sent_with_complete_replay(
+    tmp_path: Path,
+) -> None:
+    input_items = [
+        {"role": "user", "content": "Measure sample A."},
+        {"type": "reasoning", "encrypted_content": "opaque-replay"},
+        {"type": "function_call", "id": "fc_1", "status": "completed",
+         "name": FUNCTION_TOOL["name"], "call_id": "call_1",
+         "arguments": FUNCTION_ARGUMENTS},
+        {"type": "function_call_output", "call_id": "call_1", "output": "0.5"},
+    ]
+    request = {**TOOL_REQUEST, "input": input_items}
+    transport = FakeTransport()
+    output = _output_dir(tmp_path) / "one.json"
+
+    receipt = dispatch_response(
+        _ledger(tmp_path), request_id="one", role="leader", request=request,
+        response_path=output, transport=transport,
+    )
+
+    assert transport.counts == [{
+        "model": REQUEST["model"], "input": input_items,
+        "reasoning": REQUEST["reasoning"], "tools": [FUNCTION_TOOL],
+        "parallel_tool_calls": False,
+    }]
+    assert transport.sends == [{**request, "store": False, "stream": False}]
+    assert receipt["usage"]["total_tokens"] == 12
+
+
+@pytest.mark.parametrize("raw,expected", [
+    (FUNCTION_ARGUMENTS, {"label": "A", "batch": 2, "ratio": 0.5,
+                          "approved": False}),
+    ('{"label":"A","batch":2,"ratio":3,"approved":true}',
+     {"label": "A", "batch": 2, "ratio": 3, "approved": True}),
+    ('{"label":"A","batch":2,"ratio":0.1,"approved":true}',
+     {"label": "A", "batch": 2, "ratio": 0.1, "approved": True}),
+])
+def test_function_argument_parser_accepts_exact_primitive_object(
+    raw: str, expected: dict,
+) -> None:
+    assert _parse_function_arguments(FUNCTION_TOOL, raw) == expected
+
+
+@pytest.mark.parametrize("raw", [
+    '{"label":"A","batch":2,"ratio":0.5}',
+    '{"label":"A","batch":2,"ratio":0.5,"approved":false,"extra":1}',
+    '{"label":"A","label":"B","batch":2,"ratio":0.5,"approved":false}',
+    '{"label":"A","batch":true,"ratio":0.5,"approved":false}',
+    '{"label":"A","batch":2,"ratio":true,"approved":false}',
+    '{"label":"A","batch":2,"ratio":0.5,"approved":0}',
+    '{"label":"A","batch":2.0,"ratio":0.5,"approved":false}',
+    '{"label":"A","batch":2,"ratio":"0.5","approved":false}',
+    '{"label":"A","batch":2,"ratio":NaN,"approved":false}',
+    '{"label":"A","batch":2,"ratio":Infinity,"approved":false}',
+    '{"label":"A","batch":2,"ratio":1e999,"approved":false}',
+    '{"label":"A","batch":2,"ratio":1e-9999,"approved":false}',
+    '{"label":"A","batch":2,"ratio":0.10000000000000001,"approved":false}',
+    '["A",2,0.5,false]',
+    'not JSON',
+])
+def test_function_argument_parser_rejects_invalid_json_or_schema(raw: str) -> None:
+    with pytest.raises(DispatchError):
+        _parse_function_arguments(FUNCTION_TOOL, raw)
+
+
+@pytest.mark.parametrize("decimal", ["1e-9999", "0.10000000000000001"])
+def test_lossy_function_decimal_rejects_before_count(
+    tmp_path: Path, decimal: str,
+) -> None:
+    arguments = ('{"label":"A","batch":2,"ratio":' + decimal
+                 + ',"approved":false}')
+    input_items = [
+        {"type": "function_call", "name": FUNCTION_TOOL["name"],
+         "call_id": "call_1", "arguments": arguments},
+        {"type": "function_call_output", "call_id": "call_1", "output": "0"},
+    ]
+    transport = FakeTransport()
+    ledger = _ledger(tmp_path)
+    with pytest.raises(DispatchError, match="loses precision"):
+        dispatch_response(
+            ledger, request_id="one", role="leader",
+            request={**TOOL_REQUEST, "input": input_items},
+            response_path=_output_dir(tmp_path) / "one.json", transport=transport,
+        )
+    assert transport.counts == transport.sends == []
+    assert ledger.status()["request_count"] == 0
+
+
+@pytest.mark.parametrize("change", [
+    {"tools": []},
+    {"tools": [FUNCTION_TOOL] * 9},
+    {"parallel_tool_calls": True},
+    {"parallel_tool_calls": None},
+    {"tools": [{**FUNCTION_TOOL, "type": "web_search"}]},
+    {"tools": [{**FUNCTION_TOOL, "type": "custom"}]},
+    {"tools": [{**FUNCTION_TOOL, "strict": False}]},
+    {"tools": [{**FUNCTION_TOOL, "name": "bad name"}]},
+    {"tools": [{**FUNCTION_TOOL, "description": " "}]},
+    {"tools": [{**FUNCTION_TOOL, "execution": "client"}]},
+    {"tools": [FUNCTION_TOOL, FUNCTION_TOOL]},
+    {"tools": [{**FUNCTION_TOOL, "parameters": {
+        **FUNCTION_TOOL["parameters"], "additionalProperties": True,
+    }}]},
+    {"tools": [{**FUNCTION_TOOL, "parameters": {
+        **FUNCTION_TOOL["parameters"], "required": ["label"],
+    }}]},
+    {"tools": [{**FUNCTION_TOOL, "parameters": {
+        **FUNCTION_TOOL["parameters"],
+        "required": ["label", "batch", "ratio", "ratio"],
+    }}]},
+    {"tools": [{**FUNCTION_TOOL, "parameters": {
+        **FUNCTION_TOOL["parameters"],
+        "properties": {"label": {"type": "array"}},
+        "required": ["label"],
+    }}]},
+    {"tools": [{**FUNCTION_TOOL, "parameters": {
+        **FUNCTION_TOOL["parameters"],
+        "properties": {"label": {"type": "string", "enum": ["A"]}},
+        "required": ["label"],
+    }}]},
+])
+def test_invalid_function_tool_contract_rejects_before_count(
+    tmp_path: Path, change: dict,
+) -> None:
+    transport = FakeTransport()
+    with pytest.raises(DispatchError):
+        dispatch_response(
+            _ledger(tmp_path), request_id="one", role="leader",
+            request={**TOOL_REQUEST, **change},
+            response_path=_output_dir(tmp_path) / "one.json", transport=transport,
+        )
+    assert transport.counts == transport.sends == []
+
+
+def test_parallel_setting_without_tools_rejects_before_count(tmp_path: Path) -> None:
+    transport = FakeTransport()
+    with pytest.raises(DispatchError, match="requires tools"):
+        dispatch_response(
+            _ledger(tmp_path), request_id="one", role="leader",
+            request={**REQUEST, "parallel_tool_calls": False},
+            response_path=_output_dir(tmp_path) / "one.json", transport=transport,
+        )
+    assert transport.counts == transport.sends == []
+
+
+def test_tools_without_explicit_parallel_false_reject_before_count(
+    tmp_path: Path,
+) -> None:
+    transport = FakeTransport()
+    with pytest.raises(DispatchError, match="parallel_tool_calls false"):
+        dispatch_response(
+            _ledger(tmp_path), request_id="one", role="leader",
+            request={**REQUEST, "tools": [FUNCTION_TOOL]},
+            response_path=_output_dir(tmp_path) / "one.json", transport=transport,
+        )
+    assert transport.counts == transport.sends == []
+
+
+@pytest.mark.parametrize("input_items", [
+    [{"type": "function_call_output", "call_id": "call_1", "output": "0.5"}],
+    [{"type": "function_call", "name": "measure_sample", "call_id": "call_1",
+      "arguments": FUNCTION_ARGUMENTS}],
+    [{"type": "function_call", "name": "unknown", "call_id": "call_1",
+      "arguments": FUNCTION_ARGUMENTS},
+     {"type": "function_call_output", "call_id": "call_1", "output": "0.5"}],
+    [{"type": "function_call", "name": "measure_sample", "call_id": "call_1",
+      "arguments": FUNCTION_ARGUMENTS, "program": "print('unsafe')"},
+     {"type": "function_call_output", "call_id": "call_1", "output": "0.5"}],
+    [{"type": "function_call", "name": "measure_sample", "call_id": "call_1",
+      "arguments": FUNCTION_ARGUMENTS},
+     {"type": "function_call_output", "call_id": "wrong", "output": "0.5"}],
+    [{"type": "function_call", "name": "measure_sample", "call_id": "call_1",
+      "arguments": FUNCTION_ARGUMENTS},
+     {"type": "function_call_output", "call_id": "call_1", "output": {"result": 1}}],
+    [{"type": "computer_call", "call_id": "call_1", "action": "click"}],
+])
+def test_unsupported_function_replay_rejects_before_count(
+    tmp_path: Path, input_items: list[dict],
+) -> None:
+    transport = FakeTransport()
+    with pytest.raises(DispatchError):
+        dispatch_response(
+            _ledger(tmp_path), request_id="one", role="leader",
+            request={**TOOL_REQUEST, "input": input_items},
+            response_path=_output_dir(tmp_path) / "one.json", transport=transport,
+        )
+    assert transport.counts == transport.sends == []
 
 
 def test_provider_usage_details_are_preserved_without_double_counting(
@@ -289,9 +497,10 @@ def test_unsupported_tool_route_rejects_before_count(tmp_path: Path) -> None:
     ledger = _ledger(tmp_path)
     output = _output_dir(tmp_path) / "one.json"
     transport = FakeTransport()
-    with pytest.raises(DispatchError, match="unsupported"):
+    with pytest.raises(DispatchError, match="strict custom function"):
         dispatch_response(ledger, request_id="one", role="leader",
-                          request={**REQUEST, "tools": [{"type": "web_search"}]},
+                          request={**REQUEST, "tools": [{"type": "web_search"}],
+                                   "parallel_tool_calls": False},
                           response_path=output, transport=transport)
     assert transport.counts == transport.sends == []
 
@@ -430,7 +639,10 @@ def test_cli_paid_send_rejects_legacy_ledger_before_provider_setup(
     assert not output.exists()
 
 
-def test_http_transport_uses_count_then_response_endpoint(tmp_path: Path) -> None:
+@pytest.mark.parametrize("request_payload", [REQUEST, TOOL_REQUEST])
+def test_http_transport_uses_count_then_response_endpoint(
+    tmp_path: Path, request_payload: dict,
+) -> None:
     calls: list[tuple[str, dict]] = []
 
     class Handler(http.server.BaseHTTPRequestHandler):
@@ -464,7 +676,7 @@ def test_http_transport_uses_count_then_response_endpoint(tmp_path: Path) -> Non
             "test-only-key", base_url=f"http://127.0.0.1:{server.server_port}/v1")
         output = _output_dir(tmp_path) / "one.json"
         receipt = dispatch_response(_ledger(tmp_path), request_id="one", role="leader",
-                                    request=REQUEST, response_path=output,
+                                    request=request_payload, response_path=output,
                                     transport=transport)
     finally:
         server.shutdown()
@@ -472,6 +684,11 @@ def test_http_transport_uses_count_then_response_endpoint(tmp_path: Path) -> Non
         server.server_close()
     assert receipt["usage"]["total_tokens"] == 12
     assert [path for path, _ in calls] == ["/v1/responses/input_tokens", "/v1/responses"]
+    assert calls[0][1].get("tools") == request_payload.get("tools")
+    assert calls[1][1].get("tools") == request_payload.get("tools")
+    if "tools" in request_payload:
+        assert calls[0][1]["parallel_tool_calls"] is False
+        assert calls[1][1]["parallel_tool_calls"] is False
 
 
 def test_http_transport_rejects_redirect_without_forwarding_key() -> None:
