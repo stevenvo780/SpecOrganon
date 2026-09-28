@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "classification": "development_synthetic_signed_observed_full_workflow",
+  "date_utc": "2026-09-28",
+  "baseline_head": "701a737",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "manifest_sha256": "5fdac6a2cb4ab0f5f4f4991774445471ce0fd6dd3eb3f5cbdd882e1fd9c8e03f",
+  "wheel_sha256": "b0a7691a29c2033fca29a2d727c9095b08ac7f9f2dad6b259f8b78df593b4b17",
+  "probe_sha256": "27c9a0ec16b3eee3f5ce822078a74bc60199dbed1b8be0b5ed05ab719c00323b",
+  "test_sha256": "0d0a8e67ca275e9ac8636a976744584fa59c1dcb34b209372628d04ef6398f6e",
+  "auditor_sha256": "0a86f352713c4be8362230f058d93f6e108830d714ceb936f381b720665f30e5",
+  "runs": {
+    "3.11.15": {
+      "file": "py311.json",
+      "sha256": "a95d513b87d98289eb3e5bcd5497eb151086aa02172a08d63f073fb14f413df9",
+      "offline_install": true,
+      "pip_check": "29 compatible packages",
+      "probe_exit_code": 0
+    },
+    "3.12.3": {
+      "file": "py312.json",
+      "sha256": "35581d74f44b314129aeae345805bfc8777e16f4d293c877ac8487c7801a96f9",
+      "offline_install": true,
+      "pip_check": "29 compatible packages",
+      "probe_exit_code": 0
+    }
+  },
+  "local_contract": {
+    "new_case_created_with_signed_observed": true,
+    "installed_wheel_cli_and_real_stdio_mcp": true,
+    "sandbox_landlock_abi": 9,
+    "repeat_child_executable_in_both_runs": "/usr/bin/python3.12",
+    "input_file_and_executable_pinned_before_report": true,
+    "observed_repeat_receipt_signed_after_report": true,
+    "nine_phases_accepted": true,
+    "items": 29,
+    "events": 51,
+    "signed_approvals": 2,
+    "signed_phase_reviews": 9,
+    "signed_test_reports": 1,
+    "signed_test_observations": 1,
+    "cli_mcp_challenge_equal": true,
+    "unsigned_or_invalid_signatures_did_not_write": true,
+    "cli_mcp_replay_wrote_no_events": true,
+    "artifact_input_or_observer_key_change_reopened_build_and_validate": true,
+    "legacy_signed_report_path_still_passed": true
+  },
+  "gates": {
+    "focused_command": "uv run --locked --extra dev python -m pytest -q tests/test_signed_full_workflow.py",
+    "focused_result": "2 passed in 18.68s",
+    "global_command": "uv run --locked --extra dev python -m pytest -q",
+    "global_result": "1964 passed in 264.40s",
+    "ruff_command": "uv run --locked --extra dev ruff check .",
+    "ruff_result": "All checks passed!",
+    "git_diff_check": "passed"
+  },
+  "limitations": {
+    "actors_and_keys_synthetic_under_one_process": true,
+    "bundle_temporary_and_removed_after_probe": true,
+    "python_311_wheel_used_system_python_312_for_the_sealed_test_child": true,
+    "external_custody_or_historical_execution_authenticated": false,
+    "independent_human_judgment_or_field_impact_tested": false,
+    "model_comparison_or_reserved_case_tested": false,
+    "goal_criteria_demonstrated": 0
+  }
+}
