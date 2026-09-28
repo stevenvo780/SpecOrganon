@@ -8,6 +8,10 @@ OpenAI incluye salida visible y razonamiento. El ledger privado
 `scripts/managed_token_ledger.py` reserva la suma antes de enviar, comparte
 el tope entre roles que usan la misma carpeta y conserva la reserva cuando
 el resultado es incierto.
+El esquema 2 opcional añade una reserva local de coste en microUSD a partir de
+un perfil de tarifas declarado por el operador. La reserva de tokens y coste
+ocurre en la misma escritura durable; **el perfil no es una tarifa autenticada
+ni el cálculo es una factura**.
 
 `scripts/run_managed_conversation.py` compone esa ruta en una corrida de **2 a
 32 turnos de texto del mismo modelo**. Prepara un plan privado, conserva cada
@@ -22,20 +26,33 @@ reejecución. No llama herramientas.
 ## Contrato local
 
 1. El operador crea **una sola** carpeta de ledger por corrida, fuera del
-   workspace visible al modelo. Fija el máximo de tokens y de solicitudes.
+   workspace visible al modelo. Fija el máximo de tokens y de solicitudes. Para
+   usar `send` o `execute` desde la CLI debe fijar además un techo de microUSD
+   y un perfil de tarifas para un modelo exacto; los ledgers antiguos de solo
+   tokens siguen legibles para pruebas offline, pero la CLI no envía con ellos.
 2. Cada agente entrega un ID de solicitud único, su rol y un JSON con
    `model`, `input`, `max_output_tokens` y opcionalmente `instructions` y
-   `reasoning: {"effort": "..."}`. El ejecutor rechaza herramientas y otros
-   campos: todavía no coordina llamadas de herramienta ni conversaciones.
+   `reasoning: {"effort": "..."}`. Una solicitud con coste exige
+   `service_tier: "default"`, concordancia exacta de modelo con el perfil y
+   confirma el tier devuelto antes de conciliar. El ejecutor rechaza
+   herramientas y otros campos: todavía no coordina llamadas de herramienta.
 3. El transportador solicita al proveedor el conteo de esa entrada. El ledger
-   reserva, bajo un lock entre procesos, entrada contada más el techo de salida. Si no cabe,
-   no se llama a `/responses`. Solo puede quedar una solicitud pendiente a la
-   vez por ledger; una muerte del proceso tras reservar impide enviar otra
+   reserva, bajo un lock entre procesos, entrada contada más el techo de salida.
+   Con perfil de coste, reserva también el coste máximo local: todos los tokens
+   de entrada al mayor precio declarado entre entrada normal, lectura de caché
+   y escritura de caché, más el máximo de salida al precio declarado de salida,
+   redondeado hacia arriba al microUSD por solicitud. Si cualquiera de los
+   topes no admite la reserva, no se llama a `/responses`. Solo puede quedar
+   una solicitud pendiente a la vez por ledger; una muerte del proceso tras
+   reservar impide enviar otra
    hasta revisar ese intento.
 4. Tras el envío se guarda el JSON completo de respuesta en un archivo nuevo
    bajo una carpeta privada. Solo entonces se concilian
    `input_tokens + output_tokens = total_tokens`; el caché está incluido en
-   entrada y el razonamiento en salida, sin volver a sumarlos.
+   entrada y el razonamiento en salida, sin volver a sumarlos. Para el coste,
+   concilia lectura y escritura de caché cuando el proveedor informa su
+   desglose; los tokens de entrada no clasificados conservan la mayor tarifa
+   declarada. Un desglose inválido retiene la reserva y bloquea la corrida.
 5. Si el envío, la escritura o la telemetría fallan, la reserva queda retenida
    y el ledger impide otras solicitudes hasta revisión. No hay reintento
    automático. Una respuesta `incomplete` con uso válido se concilia y el
@@ -46,15 +63,37 @@ La preparación local no llama al proveedor:
 
 ```sh
 python3 scripts/run_managed_response.py init /ruta/privada/corrida-01/ledger \
-  --limit-tokens 80000 --max-requests 100
+  --limit-tokens 80000 --max-requests 100 \
+  --price-profile /ruta/privada/tarifa.json \
+  --cost-limit-micro-usd "$TOPE_MICRO_USD"
 ```
+
+El JSON `tarifa.json` debe contener exactamente `model` y cuatro enteros no
+negativos: `input_rate_micro_usd_per_million`,
+`cached_input_rate_micro_usd_per_million`,
+`cache_write_rate_micro_usd_per_million` y
+`output_rate_micro_usd_per_million`; entrada normal y salida deben ser mayores
+que cero. La unidad es **microUSD por millón de tokens**. Antes de usar la ruta
+con dinero, el operador debe cotejar el perfil y el modelo con la
+[tarifa aplicable](https://developers.openai.com/api/docs/pricing), incluidos
+tramos de contexto y tier. La
+[guía de caché](https://developers.openai.com/api/docs/guides/prompt-caching)
+distingue lectura y escritura; sus tokens son clases de entrada y no cargos
+adicionales sobre la misma entrada. `TOPE_MICRO_USD` es un valor que el
+operador debe establecer: esta documentación no fija un presupuesto ni precios.
+El conteo previo puede diferir del uso que reporte la respuesta: se detecta
+**después** del envío y se bloquean solicitudes posteriores, pero el cargo
+ya pudo superar la reserva y el techo local. Un límite estricto del gasto real
+requiere control externo del proveedor o custodio, además de verificar la
+tarifa, el tier efectivo y la factura. Esta ruta no los implementa.
 
 Para una conversación, crear primero un JSON privado como este:
 
 ```json
 {
   "schema": 1,
-  "model": "gpt-6-luna",
+  "model": "modelo-exacto-verificado",
+  "service_tier": "default",
   "instructions": "Examina la evidencia aportada y declara incertidumbres.",
   "reasoning": {"effort": "low"},
   "turns": [
@@ -64,15 +103,22 @@ Para una conversación, crear primero un JSON privado como este:
 }
 ```
 
+El ID del ejemplo es un marcador: debe sustituirse por un modelo disponible en
+la API y coincidir exactamente con `tarifa.json`. El uso de Luna como subagente
+nativo de Codex no demuestra disponibilidad ni precio de Luna en esta API.
+
 ```sh
 python3 scripts/run_managed_conversation.py prepare plan.json /ruta/privada/corrida-02 \
-  --limit-tokens 80000 --active-limit-seconds 5400
+  --limit-tokens 80000 --active-limit-seconds 5400 \
+  --price-profile /ruta/privada/tarifa.json \
+  --cost-limit-micro-usd "$TOPE_MICRO_USD"
 python3 scripts/run_managed_conversation.py status /ruta/privada/corrida-02
 ```
 
 `prepare` y `status` son locales y no facturan. `execute` requiere
 `--allow-paid-requests` y `OPENAI_API_KEY`; solo debe usarse después de la
-autorización humana y de fijar también tarifas y techo de gasto. El temporizador
+autorización humana. La CLI exige el techo y perfil declarados antes de enviar;
+no comprueba que coincidan con la factura. El temporizador
 monotónico del proceso cubre conteo, envíos y escritura local mientras la
 ejecución está activa. No pausa esperas humanas y una interrupción mata la
 posibilidad de continuar esa misma corrida automáticamente. Una carpeta nueva
@@ -83,8 +129,9 @@ un corte duro; la comprobación monotónica posterior evita continuar o marcar
 externo antes de usar la ruta como presupuesto confirmatorio.
 
 El subcomando `send` requiere `--allow-paid-request` y `OPENAI_API_KEY`, además
-del ledger, JSON de solicitud, archivo nuevo de respuesta, ID y rol. **Esa
-bandera no acredita autorización humana ni impone un límite de dólares.** No
+del ledger con techo de coste, JSON de solicitud, archivo nuevo de respuesta,
+ID y rol. **Esa bandera no acredita autorización humana; el techo es una
+estimación local sobre tarifas aportadas por el operador.** No
 se ejecutó `send` contra un proveedor para este desarrollo. Las pruebas usan
 un transporte falso y un servidor HTTP local, sin gasto ni credenciales.
 
@@ -97,8 +144,8 @@ La CLI opaca de `run_development_arm.py` sigue analizando uso al terminar y no
 adopta este control. El ledger, el temporizador y los recibos son locales, sin
 custodia independiente ni recibo de factura. El plazo nuevo solo cubre la
 conversación secuencial de un proceso y no agrega varios agentes. Faltan
-herramientas compartidas, tarifa y techo de gasto,
-versiones exactas de modelo, agentes coordinados, familias adicionales,
+herramientas compartidas, tarifa y gasto autenticados,
+versiones efectivas de modelo, agentes coordinados, familias adicionales,
 reservas, jueces ciegos y evaluación de campo. Hasta integrar y verificar
 esas condiciones, el piloto facturable y el criterio 4 continúan **NO-GO / no
 demostrado**. El máximo de 80 000 tokens procede del
