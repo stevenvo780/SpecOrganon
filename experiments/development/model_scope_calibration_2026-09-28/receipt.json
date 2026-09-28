@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "classification": "exposed_development_model_scope_calibration_result",
+  "date_utc": "2026-09-28",
+  "preregistered_head": "c523ee4",
+  "task_sha256": "8f3efb7b8f634d85ee426947a3a8d373fdaa888fc302573a49bb4343fb67fc97",
+  "scorer_sha256": "9358cf10e27fa4e961bf99624b06f0b401930989fe65156b53b0bc2efaf9d210",
+  "design_sha256": "689effd14e230f827f1bdb7f80f8afcfb545bfef59cbeb9a8f29ebb7304b43d2",
+  "source_sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+  "runs": {
+    "luna_low": {
+      "requested_model": "gpt-6-luna",
+      "requested_reasoning_effort": "low",
+      "agent_task": "/root/cal_luna_low",
+      "response_file": "luna_low.json",
+      "response_sha256": "d74aa35911a7e74b155c9bb4914a059564723ae1bb94a522300f92df19bd6ebc",
+      "score_file": "luna_low_score.json",
+      "score_sha256": "7354c259d940a8294f22fd163985883351b5229e7e603f8b05a28251ecdd864a",
+      "score": 14,
+      "maximum": 14,
+      "next_measurement_words": 20
+    },
+    "luna_high": {
+      "requested_model": "gpt-6-luna",
+      "requested_reasoning_effort": "high",
+      "agent_task": "/root/cal_luna_high",
+      "response_file": "luna_high.json",
+      "response_sha256": "7d4b41e65a95f5677b1210daa51095deda58c6e51d4a857884a85461b222df0b",
+      "score_file": "luna_high_score.json",
+      "score_sha256": "473721ca942938a067024861e19db1c42cd8cb847972e3b3938802f7b32f00cf",
+      "score": 14,
+      "maximum": 14,
+      "next_measurement_words": 26
+    },
+    "sol_medium": {
+      "requested_model": "gpt-6-sol",
+      "requested_reasoning_effort": "medium",
+      "agent_task": "/root/cal_sol_medium",
+      "response_file": "sol_medium.json",
+      "response_sha256": "c2fe9243f948695e0479a85601f5e4194322e4777ab5ef25cd0d557f697617d7",
+      "score_file": "sol_medium_score.json",
+      "score_sha256": "870e01c6c307e6163fc157699cf2d2bf3dbe9f06a969d5dba6c5bd07120ea72b",
+      "score": 14,
+      "maximum": 14,
+      "next_measurement_words": 19
+    }
+  },
+  "observation": {
+    "all_response_schemas_valid": true,
+    "all_reduced_fractions_correct": true,
+    "all_10_claims_correct_for_each_run": true,
+    "unit_field_matches_declared_observation_unit_not_fraction_dimension": true,
+    "all_three_next_measurements_mention_attempted_rides_and_a_comparison": true,
+    "all_three_next_measurements_within_45_words_checked_separately": true,
+    "scorer_negative_control_two_injected_errors_score": "12/14",
+    "score_ceiling_prevents_ranking_models_or_efforts": true
+  },
+  "limits": {
+    "native_agent_requested_model_and_effort_not_provider_attested": true,
+    "task_unit_field_does_not_explicitly_name_observation_unit": true,
+    "scorer_does_not_enforce_sentence_or_word_limit_for_unscored_next_measurement": true,
+    "authenticated_token_time_and_cost_telemetry": false,
+    "filesystem_isolation_between_workers": false,
+    "independent_replicates": false,
+    "blind_human_evaluation": false,
+    "method_arms_N_S_T": false,
+    "second_model_family": false,
+    "reserved_case_or_field_intervention": false,
+    "criterion_4": "not_assessed",
+    "criterion_5": "not_assessed",
+    "goal_criteria_demonstrated": 0
+  }
+}
