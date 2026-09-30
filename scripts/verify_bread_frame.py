@@ -1,7 +1,8 @@
 """Recheck the documentary bread frame through the installed CLI and MCP client.
 
-This verifies local bytes and interface behavior. It does not authenticate
-published measurements, a human approver, or a field intervention.
+This verifies local bytes and interface behavior on a temporary case copy.
+The unsigned historical review is not an accepted independent review. This
+does not authenticate measurements, a human approver, or a field intervention.
 """
 
 from __future__ import annotations
@@ -11,8 +12,10 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from collections import Counter
 from decimal import Decimal
 from pathlib import Path
@@ -89,6 +92,13 @@ class SourceCheckError(ValueError):
 
 def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def case_file_hashes(case: Path) -> dict[str, str]:
+    return {
+        str(path.relative_to(case)): digest(path)
+        for path in sorted(case.rglob("*")) if path.is_file()
+    }
 
 
 def _section(text: str, start: str, end: str) -> str:
@@ -246,44 +256,49 @@ def tool_data(result) -> dict:
     return json.loads(result.content[0].text)
 
 
-async def check_mcp(manifest: dict, cli_views: dict, original_hash: str) -> dict:
+async def check_mcp(
+    case: Path, manifest: dict, cli_views: dict, cli_replay: dict, original_hash: str,
+) -> dict:
     environment = os.environ.copy()
-    environment["ORGANON_ROOT"] = str(CASE.parent)
+    environment["ORGANON_ROOT"] = str(case.parent)
     params = StdioServerParameters(command=str(MCP), cwd=str(ROOT), env=environment)
     checked: list[str] = []
     async with Client(params, mode="legacy") as client:
         discovered = {tool.name for tool in (await client.list_tools()).tools}
         assert {"status", "gate", "trace", "next_task", "run"} <= discovered
         for name, arguments in (
-            ("status", {"path": CASE.name}),
-            ("gate_frame", {"path": CASE.name, "phase": "frame"}),
-            ("gate_critique", {"path": CASE.name, "phase": "critique"}),
-            ("trace", {"path": CASE.name, "id": "n_bread_harm"}),
-            ("next_task", {"path": CASE.name}),
+            ("status", {"path": case.name}),
+            ("gate_frame", {"path": case.name, "phase": "frame"}),
+            ("gate_critique", {"path": case.name, "phase": "critique"}),
+            ("trace", {"path": case.name, "id": "n_bread_harm"}),
+            ("next_task", {"path": case.name}),
         ):
             tool = "gate" if name.startswith("gate_") else name
             assert tool_data(await client.call_tool(tool, arguments)) == cli_views[name]
             checked.append(name)
         replay = tool_data(await client.call_tool(
-            "run", {"path": CASE.name, "manifest": manifest, "actor": "agent:analyst"}
+            "run", {"path": case.name, "manifest": manifest, "actor": "agent:analyst"}
         ))
-        assert replay["applied"] == 0 and replay["skipped"] == 20
-        assert replay["reason"] == "human_approval_required"
-        assert digest(CASE / "organon.json") == original_hash
+        assert replay == cli_replay
+        assert digest(case / "organon.json") == original_hash
         checked.append("idempotent_run")
 
         invalid = await client.call_tool(
-            "run", {"path": CASE.name, "manifest": {"schema": 1, "steps": [
+            "run", {"path": case.name, "manifest": {"schema": 1, "steps": [
                 {"op": "approve", "id": "n_bread_harm"}
             ]}, "actor": "agent:analyst"}
         )
         assert invalid.is_error
-        assert digest(CASE / "organon.json") == original_hash
+        assert digest(case / "organon.json") == original_hash
         checked.append("invalid_run_no_mutation")
-    return {"discovered_tools": len(discovered), "parity_checks": checked}
+    return {
+        "discovered_tools": len(discovered), "parity_checks": checked,
+        "replay_reason": replay["reason"], "replay_skipped": replay["skipped"],
+    }
 
 
 def main() -> None:
+    original_files = case_file_hashes(CASE)
     manifest_path = CASE / "frame_manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     put_steps = [step for step in manifest["steps"] if step["op"] == "put"]
@@ -306,32 +321,61 @@ def main() -> None:
     assert review["actor"] == "agent:independent_reviewer"
     assert review["payload"]["phase"] == "frame"
     assert review["payload"]["verdict"] == "accept" and review["payload"]["independent"]
+    assert "signature" not in review["payload"] and "key_sha256" not in review["payload"]
 
-    path = str(CASE)
-    cli_views = {
-        "status": cli("status", path),
-        "gate_frame": cli("gate", path, "frame"),
-        "gate_critique": cli("gate", path, "critique"),
-        "trace": cli("trace", path, "n_bread_harm"),
-        "next_task": cli("next-task", path),
-    }
-    status = cli_views["status"]
-    assert status["revision"] == 21 and status["project"]["approval_policy"] == "signed"
-    assert status["phases"]["frame"]["accepted"]
-    assert status["phases"]["frame"]["independent_review"]
-    assert not status["phases"]["critique"]["ready"]
-    assert "n_bread_harm requires a verified human approval" in status["phases"]["critique"]["blockers"]
-    assert cli_views["next_task"]["action"] == "human_approval"
-    assert cli_views["next_task"]["approval_targets"] == [{"id": "n_bread_harm", "version": 1}]
-    mcp = asyncio.run(check_mcp(manifest, cli_views, original_hash))
-    replay = cli("run", path, "--manifest", str(manifest_path), "--actor", "agent:analyst")
-    assert replay["applied"] == 0 and replay["skipped"] == 20
-    assert replay["reason"] == "human_approval_required" and digest(ledger_path) == original_hash
+    # Even an idempotent run creates/acquires runner locks. Confine all probe
+    # interfaces, including MCP writes, to a disposable copy of the case.
+    try:
+        with tempfile.TemporaryDirectory(prefix="organon-bread-frame-") as temporary:
+            case = shutil.copytree(CASE, Path(temporary) / CASE.name)
+            assert case_file_hashes(case) == original_files
+            path = str(case)
+            cli_views = {
+                "status": cli("status", path),
+                "gate_frame": cli("gate", path, "frame"),
+                "gate_critique": cli("gate", path, "critique"),
+                "trace": cli("trace", path, "n_bread_harm"),
+                "next_task": cli("next-task", path),
+            }
+            status = cli_views["status"]
+            assert status["revision"] == 21 and status["project"]["approval_policy"] == "signed"
+            frame = status["phases"]["frame"]
+            assert frame["ready"] and frame["blockers"] == []
+            assert not frame["accepted"] and not frame["reviewed"]
+            assert not frame["independent_review"] and not frame["review_signature_verified"]
+            assert frame["review_provenance"] == "legacy_unverified"
+            assert frame["advance_seq"] is None
+            assert not status["phases"]["critique"]["ready"]
+            assert status["phases"]["critique"]["blockers"] == [
+                "n_bread_harm requires a verified human approval",
+                "previous phase is not currently accepted",
+            ]
+            assert cli_views["next_task"]["phase"] == "frame"
+            assert cli_views["next_task"]["action"] == "review_phase"
+            assert cli_views["next_task"]["approval_targets"] == []
+            replay = cli(
+                "run", path, "--manifest", str(case / manifest_path.name),
+                "--actor", "agent:analyst",
+            )
+            assert replay["status"] == "waiting" and replay["cursor"] == 19
+            assert replay["total_steps"] == 20
+            assert replay["applied"] == 0 and replay["skipped"] == 19
+            assert replay["reason"] == "independent_review_required"
+            assert replay["next"] == cli_views["next_task"]
+            assert digest(case / "organon.json") == original_hash
+            mcp = asyncio.run(check_mcp(case, manifest, cli_views, replay, original_hash))
+    finally:
+        preserved_files = case_file_hashes(CASE)
+        assert preserved_files == original_files, "original bread case files changed during probe"
 
     report = {
         "schema": 1,
         "case": "cases/bread_norway",
         "scope": "documentary_development_frame_only",
+        "probe_case": "temporary_copy",
+        "original_case_preserved": preserved_files == original_files,
+        "original_case_sha256_before": original_files,
+        "original_case_sha256_after": preserved_files,
         "source_sha256": dict(sorted(source_hashes.items())),
         "source_content_check": {
             "method": "pdftotext -layout, fixed PDF SHA-256, anchored passage or table row",
@@ -346,13 +390,23 @@ def main() -> None:
         "ledger_sha256": original_hash,
         "ledger_revision": status["revision"],
         "events": dict(sorted(events.items())),
+        "frame_ready": frame["ready"],
+        "frame_blockers": frame["blockers"],
         "frame_accepted": status["phases"]["frame"]["accepted"],
-        "independent_review_recorded": status["phases"]["frame"]["independent_review"],
+        "frame_reviewed": frame["reviewed"],
+        "independent_review": frame["independent_review"],
+        "review_provenance": frame["review_provenance"],
+        "review_signature_verified": frame["review_signature_verified"],
+        "historical_review_verdict": review["payload"]["verdict"],
+        "historical_independence_claim_unverified": review["payload"]["independent"],
         "review_actor_is_unverified_label": review["actor"],
         "critique_blockers": status["phases"]["critique"]["blockers"],
         "approval_trust": status["approval_trust"],
+        "phase_review_trust": status["phase_review_trust"],
+        "next_phase": cli_views["next_task"]["phase"],
         "next_action": cli_views["next_task"]["action"],
         "cli_replay_skipped": replay["skipped"],
+        "cli_replay_reason": replay["reason"],
         "mcp": mcp,
         "criterion_3": "not_assessed",
     }

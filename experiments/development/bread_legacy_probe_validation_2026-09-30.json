@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "decision": "D-098",
+  "recorded_at_utc": "2026-09-30T08:35:26.449982+00:00",
+  "classification": "current_bread_documentary_cli_mcp_probe_contract_fix",
+  "technical_scope": "align installed CLI/MCP probe with legacy_unverified; every interface probe runs in a temporary case copy",
+  "tests": {
+    "worker_passed": 16,
+    "independent_passed": 16,
+    "independent_seconds": 3.91,
+    "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_bread_frame.py --basetemp=/tmp/specorganon-bread-frame-review-pytest",
+    "global_suite_repeated": false
+  },
+  "probe": {
+    "command": ".venv/bin/python scripts/verify_bread_frame.py",
+    "exit_code": 0,
+    "stderr_negative_expected": "Tool 'run' failed: 'Error executing tool run: step 0 has unsupported op: approve'",
+    "discovered_tools": 21,
+    "parity_checks": [
+      "status",
+      "gate_frame",
+      "gate_critique",
+      "trace",
+      "next_task",
+      "idempotent_run",
+      "invalid_run_no_mutation"
+    ],
+    "frame_ready": true,
+    "frame_accepted": false,
+    "independent_review": false,
+    "review_provenance": "legacy_unverified",
+    "review_signature_verified": false,
+    "next_action": "review_phase",
+    "cli_mcp_replay_equal": true,
+    "replay_applied": 0,
+    "replay_skipped": 19,
+    "replay_reason": "independent_review_required"
+  },
+  "initial_validation_environment_errors": [
+    {
+      "command": "python3 scripts/verify_bread_frame.py",
+      "exit_code": 1,
+      "error": "ModuleNotFoundError: No module named 'mcp'",
+      "resolution": "use project .venv/bin/python; no dependency installation or auth change"
+    },
+    {
+      "command": ".venv/bin/ruff check scripts/verify_bread_frame.py tests/test_bread_frame.py",
+      "error": "/bin/bash: line 1: .venv/bin/ruff: No such file or directory",
+      "resolution": "use installed /home/dev/.local/bin/ruff; final separate command passed"
+    }
+  ],
+  "ruff": "passed",
+  "compile": "passed",
+  "diff_check": "passed",
+  "independent_review": {
+    "agent": "source_gate_review",
+    "open_p1_p2": [],
+    "original_case_git_changes": false,
+    "model_auth_or_original_D097_replay_called": false
+  },
+  "original_case_preserved": true,
+  "original_files_verified": 9,
+  "ledger_sha256": "1c2795bc3a31ebf828991d8e87518028c340f303db5f3acc3b11fab04b88de23",
+  "figures_verified": 9,
+  "files": {
+    "scripts/verify_bread_frame.py": {
+      "bytes": 22682,
+      "sha256": "32963c7dc0805620416cacd27d3b6206afc4abe664a055fb7aa4e6ca1e4f5a6e"
+    },
+    "tests/test_bread_frame.py": {
+      "bytes": 13754,
+      "sha256": "76baab4a9d77f24b2eade9884ca66cb92da38611d2697a05829d791d7c1f847b"
+    },
+    "experiments/development/bread_legacy_probe_2026-09-30.json": {
+      "bytes": 4822,
+      "sha256": "2c7906c7c5899e5a08cacf10ac84ea90dcac86c4bcedff97946f766435252cc6"
+    }
+  },
+  "approval_trust": "unavailable",
+  "phase_review_trust": "unavailable",
+  "historical_reports_modified": false,
+  "model_calls": 0,
+  "human_approvals_added": 0,
+  "criterion_1": "not_demonstrated",
+  "criterion_3": "not_assessed",
+  "global_acceptance": "0/5"
+}

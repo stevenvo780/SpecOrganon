@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import shutil
 import sys
 from decimal import Decimal
 from pathlib import Path
@@ -14,6 +15,7 @@ from specorganon.ledger import read_project
 
 CASE = Path(__file__).resolve().parents[1] / "cases" / "bread_norway"
 sys.path.insert(0, str(CASE.parents[1] / "scripts"))
+import verify_bread_frame as bread_probe  # noqa: E402
 from verify_bread_frame import SourceCheckError, verify_source_transcription  # noqa: E402
 
 
@@ -30,6 +32,52 @@ def test_nine_original_transcriptions_match_archived_pdf_passages() -> None:
     assert published["e_retail_waste"] == Decimal("11.4")
     assert published["e_household_est"] == Decimal("8.2")
     assert published["e_survey_size"] == Decimal("1000")
+
+
+def test_cli_mcp_probe_requires_verified_review_and_preserves_source_case(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture,
+) -> None:
+    source_case = shutil.copytree(CASE, tmp_path / "source" / "bread_norway")
+    # Removing copied locks makes accidental runner writes to the source
+    # visible even if the ledger itself would remain idempotent.
+    for name in (".organon.lock", ".organon.runner.lock"):
+        (source_case / name).unlink(missing_ok=True)
+    before = bread_probe.case_file_hashes(source_case)
+    monkeypatch.setattr(bread_probe, "CASE", source_case)
+
+    bread_probe.main()
+
+    report = json.loads(capsys.readouterr().out)
+    assert report["probe_case"] == "temporary_copy"
+    assert report["original_case_preserved"] is True
+    assert report["original_case_sha256_before"] == report["original_case_sha256_after"] == before
+    assert bread_probe.case_file_hashes(source_case) == before
+    assert not (source_case / ".organon.runner.lock").exists()
+    assert report["ledger_revision"] == 21
+    assert report["events"] == {"item_put": 19, "phase_review": 1, "phase_advance": 1}
+    assert len(report["source_content_check"]["values"]) == 9
+    assert report["source_sha256"] == {
+        archive: pinned[1] for archive, pinned in bread_probe.SOURCE_PDFS.items()
+    }
+    assert report["historical_review_verdict"] == "accept"
+    assert report["historical_independence_claim_unverified"] is True
+    assert report["frame_ready"] is True and report["frame_blockers"] == []
+    assert report["frame_accepted"] is False and report["frame_reviewed"] is False
+    assert report["independent_review"] is False
+    assert report["review_provenance"] == "legacy_unverified"
+    assert report["review_signature_verified"] is False
+    assert report["next_phase"] == "frame" and report["next_action"] == "review_phase"
+    assert report["cli_replay_skipped"] == report["mcp"]["replay_skipped"] == 19
+    assert report["cli_replay_reason"] == report["mcp"]["replay_reason"] == "independent_review_required"
+    assert report["mcp"]["parity_checks"] == [
+        "status", "gate_frame", "gate_critique", "trace", "next_task",
+        "idempotent_run", "invalid_run_no_mutation",
+    ]
+    assert report["critique_blockers"] == [
+        "n_bread_harm requires a verified human approval",
+        "previous phase is not currently accepted",
+    ]
+    assert report["criterion_3"] == "not_assessed"
 
 
 def _rehash_events(ledger: dict) -> None:
