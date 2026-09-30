@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "study_id": "D103",
+  "classification": "prospective technical development verification; not confirmatory model or field trial",
+  "parent_commit": "0dd6ca44d48ae864c920c2f515182f6321212728",
+  "objective": "Verify all22 public operations and signed nine-phase workflow against the same installed D102 wheel on Python3.11 and3.12, with actual native agent coordination",
+  "wheel": {
+    "path": "experiments/development/lot_journal_prospectus_2026-09-30/installed/specorganon-0.1.0-py3-none-any.whl",
+    "sha256": "e155d010a17a1235f071da6b0d89c1773b5dc92295a85251873f1880c448390b"
+  },
+  "baseline_current_wheel_coverage": {"python3.11": "16/22 positive CLI and MCP", "python3.12": "6/22 positive CLI and MCP"},
+  "missing_both_python": ["field_attestation_challenge", "attest_field", "test_execution_challenge", "record_test_execution", "test_observation_challenge", "record_test_observation"],
+  "sources_versioned_in_parent": [
+    "scripts/clean_smoke.py",
+    "scripts/probe_signed_full_workflow.py",
+    "tests/test_approval_security.py",
+    "tests/test_signed_test_execution_transport.py",
+    "tests/test_test_observation_transport.py",
+    "tests/test_field_attestation.py",
+    "workflows/synthetic_full.json"
+  ],
+  "runs": [
+    "Existing clean_smoke from installed3.12, retain existing3.11 result as separate evidence",
+    "Signed_observed nine-phase probe from installed3.11 and3.12",
+    "Exactly three positive signed transport tests from installed3.11 and3.12, no source import and no skips",
+    "Two actual native agents write disjoint pending items via current installed CLI into a signed case, with version guards and recorded process overlap"
+  ],
+  "transport_probe_source_to_freeze_before_its_execution": "scripts/probe_installed_signed_transports.py",
+  "budgets": {"new_experimental_model_generations": 0, "paid_API_calls": 0, "field_operations": 0, "positive_transport_tests_per_python": 3, "native_agents": 2},
+  "failure_policy": "Preserve original traces/errors and diagnose concrete failures; no replacement of prior model trials or synthetic field truth",
+  "checks": [
+    "Wheel SHA and installed package module bytes/origins",
+    "Every public operation positive CLI and real MCP, parity and ledger effects",
+    "Nine signed phases and actual sandbox repeat, invalid signatures and changed bytes rejected",
+    "Native signed-case writes unique, guarded and durable; independent model advantage not inferred",
+    "Existing sources, model trials, cases and GOAL preserved"
+  ],
+  "synthetic_keys_do_not_authenticate_human_authority": true,
+  "prefabricated_transport_observation_is_not_historical_execution_proof": true,
+  "human_decisions": 0,
+  "field_evidence": 0,
+  "Q": null,
+  "counts_toward_required_24_runs": false,
+  "final_verdict_requires_independent_requirement_audit": true
+}
