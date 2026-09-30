@@ -50,17 +50,22 @@ def main() -> None:
     parser.add_argument("repo", type=Path)
     parser.add_argument("runtime", type=Path)
     parser.add_argument("env", choices=["311", "312"])
+    parser.add_argument("--freeze", choices=("source_freeze.json", "source_freeze_amendment.json"),
+                        default="source_freeze.json")
     args = parser.parse_args()
     repo, runtime = args.repo.resolve(strict=True), args.runtime.resolve(strict=True)
     dossier = repo / "experiments/development/citibike_fraction_lineage_2026-09-30"
-    frozen = json.loads((dossier / "source_freeze.json").read_text())
+    frozen = json.loads((dossier / args.freeze).read_text())
     assert runtime == Path(frozen["runtime"]) and not runtime.is_relative_to(repo)
     source = runtime / args.env
-    record = archive(source, dossier / f"installed_{args.env}.tar.gz")
-    copy(source / "report.json", dossier / f"installed_{args.env}.json")
+    prefix = "installed" if args.freeze == "source_freeze.json" else "repaired"
+    record = archive(source, dossier / f"{prefix}_{args.env}.tar.gz")
+    copy(source / "report.json", dossier / f"{prefix}_{args.env}.json")
     for suffix in ("stdout.log", "stderr.log", "execution.json"):
-        copy(runtime / f"{args.env}.{suffix}", dossier / "executions" / f"{args.env}.{suffix}")
-    with (dossier / f"archive_{args.env}.json").open("x") as stream:
+        directory = "executions" if prefix == "installed" else "executions_repaired"
+        copy(runtime / f"{args.env}.{suffix}", dossier / directory / f"{args.env}.{suffix}")
+    archive_record = f"archive_{args.env}.json" if prefix == "installed" else f"archive_repaired_{args.env}.json"
+    with (dossier / archive_record).open("x") as stream:
         json.dump(record, stream, indent=2, sort_keys=True)
         stream.write("\n")
     print(json.dumps({"env": args.env, "regular_files": len(record["files"]),

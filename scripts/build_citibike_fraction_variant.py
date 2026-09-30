@@ -179,9 +179,20 @@ def _latest(ledger: dict) -> dict[str, dict]:
              ledger["project"].get("case_id") == "4df9f84c-4340-4c88-81b5-110b33fd0e55",
              "source project identity/policy differs")
     items = {}
+    historical_events = {
+        23: ("phase_review", "ddab73d4262c9691d4049cfbcc927e94d25abcccdb535c77909f0362396675b1"),
+        24: ("phase_advance", "061f398b0d252550ff05501fd2c7e02a708ae438b35092b42bfa5b028e221355"),
+    }
     for seq, event in enumerate(ledger["events"], 1):
-        _require(event["seq"] == seq and event["kind"] == "item_put",
+        expected_kind = historical_events.get(seq, ("item_put", None))[0]
+        _require(event["seq"] == seq and event["kind"] == expected_kind,
                  "source ledger contains an unexpected event")
+        if seq in historical_events:
+            # Retain these exact source events; they do not define item versions
+            # or grant any new approval in this variant.
+            _require(event["hash"] == historical_events[seq][1],
+                     "source historical event identity differs")
+            continue
         item = event["payload"]
         _require(item["version"] == items.get(item["id"], {}).get("version", 0) + 1,
                  "source item version sequence differs")

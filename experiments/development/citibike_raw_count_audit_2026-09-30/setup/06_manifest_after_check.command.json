@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/tmp/specorganon-D106-raw-bdp0u2dw/venv/bin/python",
+    "-I",
+    "-B",
+    "-c",
+    "\nfrom pathlib import Path\nimport base64,hashlib,importlib.metadata as md,json,stat,sys\nvenv=Path(sys.prefix).resolve()\nexpected={'pyarrow':'21.0.0','tzdata':'2026.4'}\nversion=sys.version.split()[0]\nif version!='3.11.15':raise RuntimeError('unexpected Python '+version)\ninstalled={d.metadata['Name'].lower():d.version for d in md.distributions()}\nif installed!=expected:raise RuntimeError('unexpected distributions '+repr(installed))\nout={'schema':1,'venv':str(venv),'python':{'version':version,'executable':sys.executable,'base_prefix':sys.base_prefix},'distributions':{},'files':{},'symlinks':[],'excluded_pycache':[],'record_validation':{'matched':0,'unhashed_entries':0,'mismatched':0}}\nfor name,required_version in expected.items():\n d=md.distribution(name)\n if d.version!=required_version:raise RuntimeError('wrong version '+name)\n files=d.files\n if files is None:raise RuntimeError('missing RECORD file list for '+name)\n packagefiles=[];recordlisted=set();nonregular=[]\n for rel in files:\n  p=Path(d.locate_file(rel)).absolute()\n  if not p.is_relative_to(venv):raise RuntimeError('distribution path outside venv '+str(p))\n  key=str(p.relative_to(venv));recordlisted.add(key)\n  if '__pycache__' in p.parts or p.suffix=='.pyc':\n   if p.exists():out['excluded_pycache'].append(key)\n   continue\n  s=p.lstat()\n  if stat.S_ISLNK(s.st_mode):\n   out['symlinks'].append({'path':key,'distribution':name,'target':p.readlink().as_posix()});continue\n  if not stat.S_ISREG(s.st_mode):nonregular.append(key);continue\n  if not p.resolve().is_relative_to(venv):raise RuntimeError('resolved path outside venv '+key)\n  h=hashlib.sha256();size=0\n  with p.open('rb') as f:\n   for chunk in iter(lambda:f.read(1024*1024),b''):h.update(chunk);size+=len(chunk)\n  out['files'][key]={'bytes':size,'sha256':h.hexdigest()};packagefiles.append(key)\n  if rel.hash:\n   encoded=base64.urlsafe_b64encode(h.digest()).decode().rstrip('=')\n   if rel.hash.mode!='sha256' or rel.hash.value!=encoded or (rel.size is not None and rel.size!=size):\n    out['record_validation']['mismatched']+=1;raise RuntimeError('wheel RECORD differs '+key)\n   out['record_validation']['matched']+=1\n  else:out['record_validation']['unhashed_entries']+=1\n # Audit ownership completeness across the package and its dist-info directories.\n roots={Path(d.locate_file(name)).absolute()}\n roots.update(Path(d.locate_file(rel)).absolute().parent for rel in files if str(rel).endswith('.dist-info/METADATA'))\n unlisted=[]\n for package_root in roots:\n  for p in package_root.rglob('*'):\n   if '__pycache__' in p.parts or p.suffix=='.pyc':continue\n   if p.is_symlink():\n    key=str(p.relative_to(venv))\n    if not any(x['path']==key for x in out['symlinks']):out['symlinks'].append({'path':key,'distribution':name,'target':p.readlink().as_posix()})\n    continue\n   if p.is_file() and str(p.relative_to(venv)) not in recordlisted:unlisted.append(str(p.relative_to(venv)))\n if unlisted:raise RuntimeError('regular package files absent from RECORD '+repr(unlisted))\n out['distributions'][name]={'version':d.version,'metadata_origin':str(d._path),'package_origin':str(d.locate_file(name)),'installer':(d.read_text('INSTALLER') or '').strip(),'regular_file_count':len(packagefiles),'regular_file_bytes':sum(out['files'][x]['bytes'] for x in packagefiles),'nonregular_entries':nonregular,'unlisted_regular_files':unlisted}\nout['file_count']=len(out['files']);out['regular_file_bytes']=sum(x['bytes'] for x in out['files'].values())\nprint(json.dumps(out,sort_keys=True,ensure_ascii=False,allow_nan=False))\n"
+  ],
+  "cwd": "/tmp/specorganon-D106-raw-bdp0u2dw",
+  "environment": {
+    "LANG": "C.UTF-8",
+    "PATH": "/usr/bin:/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 0,
+  "finished_at_utc": "2026-09-30T20:40:50.827831+00:00",
+  "name": "06_manifest_after_check",
+  "started_at_utc": "2026-09-30T20:40:50.646400+00:00",
+  "stderr": "/workspace/SpecOrganon/experiments/development/citibike_raw_count_audit_2026-09-30/setup/06_manifest_after_check.stderr",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout": "/workspace/SpecOrganon/experiments/development/citibike_raw_count_audit_2026-09-30/setup/06_manifest_after_check.stdout",
+  "stdout_bytes": 224931,
+  "stdout_sha256": "df9670e8f6f41180890df59bc1f2020495322130dc04e8b96835390d4b7c7075",
+  "wall_seconds_local": 0.18143843597499654
+}

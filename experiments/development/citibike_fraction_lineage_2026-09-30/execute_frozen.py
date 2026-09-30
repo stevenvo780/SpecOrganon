@@ -27,10 +27,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("repo", type=Path)
     parser.add_argument("env", choices=("311", "312"))
+    parser.add_argument("--freeze", choices=("source_freeze.json", "source_freeze_amendment.json"),
+                        default="source_freeze.json")
     args = parser.parse_args()
     repo = args.repo.resolve(strict=True)
     dossier = repo / "experiments/development/citibike_fraction_lineage_2026-09-30"
-    freeze_raw = (dossier / "source_freeze.json").read_bytes()
+    freeze_raw = (dossier / args.freeze).read_bytes()
     frozen = json.loads(freeze_raw)
     runtime = Path(frozen["runtime"]).resolve(strict=True)
     if runtime.is_relative_to(repo):
@@ -58,6 +60,7 @@ def main() -> int:
     record = {
         "schema": 1, "env": args.env, "argv": argv,
         "freeze_pin": pin(freeze_raw), "executed_source_pin": pin(raw),
+        "freeze_file": args.freeze,
         "execution_mode": "compile already verified probe bytes supplied through stdin",
         "git_head_before": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip(),
