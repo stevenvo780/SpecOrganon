@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "decision": "D-095",
+  "classification": "prelaunch_local_supervisor_validation_with_fake_provider",
+  "command": "uv run --locked --extra dev python -m pytest -q tests/test_prototype_checkpoint.py",
+  "exit_code": 0,
+  "passed": 17,
+  "duration_seconds": 4.79,
+  "additional_checks": {
+    "ruff": "passed",
+    "py_compile": "passed",
+    "git_diff_check": "passed"
+  },
+  "real_model_calls": 0,
+  "real_prototype_init_observed_with_fake_model": true,
+  "real_local_process_timeout_observed": true,
+  "fresh_status_process_observed": true,
+  "protocol_override_exposed": false,
+  "local_admission_scope": "cooperating processes sharing the same root; no independent custody or host-wide prevention",
+  "retained_negative_checks": [
+    "timeout with partial stream and no relaunch",
+    "changed source rejected before destination",
+    "normative linkage, pending statuses, cycle and unknown dependency",
+    "observed tool item",
+    "zero token usage",
+    "API-key login classification",
+    "stream over32MiB still publishes failed receipt",
+    "second destination under same protocol no CLI invocation",
+    "coherent config edits and protocol path override rejected"
+  ],
+  "files": {
+    "scripts/run_prototype_checkpoint.py": {
+      "sha256": "01fdaee98b0999478c3a8e4a706bfa03b2fba4f77c6b2cd7549c50491e68fd37",
+      "bytes": 23309
+    },
+    "tests/test_prototype_checkpoint.py": {
+      "sha256": "8a27ed60ecdd07edf873e49588b1615223c5b2a93b6275bb41e7df6d72650900",
+      "bytes": 11455
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/plan.json": {
+      "sha256": "a738b51f649ba1d64a2f8c929d6a41925ed97f1935c20f52c887d613c3713969",
+      "bytes": 3671
+    }
+  },
+  "global_run_limits_enforced": false,
+  "criterion_4": "not_assessed"
+}

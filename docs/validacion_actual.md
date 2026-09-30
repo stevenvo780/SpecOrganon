@@ -1,5 +1,11 @@
 # Auditoría de aceptación actual
 
+**Avance D-095:** el [control del plazo del calendario](../experiments/development/prototype_checkpoint_2026-09-30/managed_validation.json)
+pasó 172 pruebas de presupuesto/sesión y revisión independiente. Cierra una
+discordancia del puente managed antes de escrituras o envíos; no unifica el
+presupuesto entre agentes o proveedores. El ensayo prospectivo de checkpoint
+CLI aún no tiene resultado. Los cinco criterios siguen **No demostrados**.
+
 **Corte:** 2026-09-30 UTC. La [matriz prospectiva](protocolo_experimental.md#7-matriz-propuesta-antes-de-observar-resultados-confirmatorios) propone evidencias, procedimientos y umbrales antes de ensayos confirmatorios; sus decisiones normativas aún requieren aprobación humana y registro. Este archivo registra solo lo que se ejecutó; no modifica esos umbrales. `GOAL.md` permanece intacto.
 
 El [corte D-086](../experiments/development/signed_observed_full_workflow_2026-09-28/) ejecuta desde wheels instalados en Python 3.11 y 3.12 un caso **nuevo** `signed_observed` de nueve fases por CLI y cliente MCP stdio. `t1` usa un archivo de entrada y ejecutable fijados; el auditor lo repite bajo Landlock/seccomp y un actor sintético distinto registra por MCP el recibo firmado. Los 51 eventos incluyen reporte y observación; replay no escribe y alterar entrada o artefacto, o retirar la clave del observador, reabre `build` y `validate`. El test instalado cubre también el modo legado; una revisión read-only no halló P1/P2 confirmado. Los recibos son resúmenes reproducibles de bundles temporales y claves bajo un mismo UID: **no** acreditan custodia independiente, ejecución histórica, decisión humana ni caso alimentario real. Criterio 1 **No demostrado**; veredicto global **0/5**.

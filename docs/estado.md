@@ -1,5 +1,13 @@
 # Estado de reanudación
 
+**D-095 en curso:** el puente managed ya respeta el plazo del calendario al
+preparar, consultar y ejecutar. Commit local `ca22ea6`; 172 pruebas combinadas,
+Ruff, compilación y revisión independiente sin P1/P2 abiertos en esa corrección.
+El [plan del checkpoint inicial](../experiments/development/prototype_checkpoint_2026-09-30/plan.json)
+fija un intento CLI Luna medio/graph de 120 segundos; todavía está pendiente
+congelar y revisar el supervisor antes del lanzamiento. No cuenta entre las
+24 corridas ni altera el veredicto 0/5.
+
 **Corte actual:** 2026-09-30 UTC. Objetivo íntegro en [GOAL.md](../GOAL.md), SHA-256 `e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36`. Rama `work/toolkit-foundation`; GOAL.md y los cinco ledgers reales permanecen intactos. El [gate D-093](../experiments/development/local_evidence_gate_2026-09-30/receipt.json) pasó **2114 pruebas globales**, Ruff y compilación. Un wheel con el motor final pasó instalación offline, `uv pip check` y la sonda de evidencia por CLI y MCP reales en Python 3.11 y 3.12; la revisión independiente repitió ambas pruebas instaladas sin skips. El [dossier D-E congelado](../experiments/development/energy_pilot/activation_dossier_2026-09-27.json) conserva sus hashes históricos y su NO-GO para llamadas. La [auditoría de aceptación](validacion_actual.md) mantiene **0/5 criterios demostrados**.
 
 El [corte D-086](../experiments/development/signed_observed_full_workflow_2026-09-28/) prueba `signed_observed` desde la creación de un caso sintético de nueve fases. Un wheel instalado sin red en Python 3.11.15 y 3.12.3 ejecutó CLI y cliente MCP stdio real; el auditor repitió `t1` en Landlock ABI 9 con entrada y ejecutable fijados, y el observador sintético registró por MCP la observación firmada. Ambos recibos muestran 29 ítems, 51 eventos, dos aprobaciones, nueve revisiones, reporte y observación de test, replay sin escritura y reapertura al alterar insumo o artefacto o revocar clave. El [test de wheel instalado](../tests/test_signed_full_workflow.py) pasó en modos legado y estricto; revisión independiente sin P1/P2 confirmado. El bundle temporal y las claves no tuvieron custodia separada, y el recibo no atestigua la ejecución histórica. Los cinco criterios siguen **No demostrados**.

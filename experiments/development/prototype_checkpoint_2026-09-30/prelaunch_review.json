@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "decision": "D-095",
+  "stage": "prelaunch",
+  "reviewer": "/root/source_gate_review",
+  "type": "separate_native_read_only_review",
+  "open_p1_p2": 0,
+  "provider_or_auth_calls": 0,
+  "repeated_tests": {
+    "passed": 17,
+    "seconds": 3.61,
+    "provider": "fake"
+  },
+  "closed_findings": [
+    {
+      "severity": "P1",
+      "finding": "plan config and study attempt not bound",
+      "correction": "fixed protocol path/hash, prepare and reload match, shared O_EXCL admission before invocation"
+    },
+    {
+      "severity": "P2",
+      "finding": "oversized stream aborts terminal publication",
+      "correction": "streaming digest and terminal failure publication"
+    },
+    {
+      "severity": "P2",
+      "finding": "nonempty output accepted with zero usage",
+      "correction": "strictly positive input/output counts"
+    },
+    {
+      "severity": "P2",
+      "finding": "public protocol override changes authority and admission key",
+      "correction": "remove production override, fix authority on reload; test seams internal only"
+    }
+  ],
+  "limits": [
+    "local cooperative admission root only",
+    "same UID may alter code, registry and state",
+    "no authenticated provider identity, token/cost/global caps or remote cancellation",
+    "future real attempt not yet observed"
+  ]
+}
