@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "date_utc": "2026-09-30",
+  "decision": "D-093",
+  "classification": "signed_local_evidence_byte_gate_development_validation",
+  "receipt_kind": "rerunnable_summary_not_detached_attestation",
+  "implementation_commit": "a51242a6cb71309e3b1a31401d99cb258194a668",
+  "previous_engine_commit": "2084d309951e8400c9a11d1f6a868dc8812c54e6",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "files": {
+    "src/specorganon/engine.py": {
+      "sha256": "52b0a5ee102c695bd903723552c8654e0197100bf6afb8208794c93fc0fefa7d",
+      "size_bytes": 105072
+    },
+    "scripts/probe_local_evidence_gate.py": {
+      "sha256": "32ffb224ac2493c2b0c2dcd7364df7bcd6a484fcb01e1ad9e2abd74bf46b1fc6",
+      "size_bytes": 20107
+    },
+    "tests/test_local_evidence_archive_gate.py": {
+      "sha256": "7dad99763021c4735cc59827e181dabb03e4e193b62c9e1220ec62e325926072",
+      "size_bytes": 13574
+    },
+    "tests/test_local_evidence_gate_installed.py": {
+      "sha256": "b5343b68d44741163a714e854b22c5a99fff4efb70fe25195e488ab1cd635a3e",
+      "size_bytes": 9746
+    },
+    "cases/bread_norway/frame_manifest.json": {
+      "sha256": "3fe514c94e304bef768abdb471a1adbec0f22c8c26703daf2be1624417062ead",
+      "size_bytes": 11601
+    },
+    "cases/bread_norway/source_lca.pdf": {
+      "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "size_bytes": 2212666
+    },
+    "cases/bread_norway/source_survey.pdf": {
+      "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "size_bytes": 526604
+    },
+    "experiments/development/local_evidence_gate_2026-09-30/python3.11.json": {
+      "sha256": "691eb219ff9f83f04795e3b479344080c559734ed3d279081a3bf8358389e591",
+      "size_bytes": 7458
+    },
+    "experiments/development/local_evidence_gate_2026-09-30/python3.12.json": {
+      "sha256": "6171463591296164b66551141ff4039e21c98025b828085bfb6ba3ea66020c4f",
+      "size_bytes": 7457
+    },
+    "GOAL.md": {
+      "sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+      "size_bytes": 7273
+    },
+    "cases/mango/organon.json": {
+      "sha256": "a5bc7f92d080270ccd4eef54129c3406352155cc60d643695abfafcbfbfed315",
+      "size_bytes": 26544
+    },
+    "cases/citibike/organon.json": {
+      "sha256": "204b8094474113a52f2d271f5ae10e174979c66628e1753dc5df8e2b1e682678",
+      "size_bytes": 28550
+    },
+    "cases/citibike_march2024/organon.json": {
+      "sha256": "af6b95cc40c3b6b44c04c47b713fa8db4ff2339a2b1fffefdce53a720688ddc4",
+      "size_bytes": 21991
+    },
+    "cases/citibike_march2024_lineage/organon.json": {
+      "sha256": "7cb7f451e953a02a7254edd2e6713ad7acc470181b2cc0966b5d9b88c51692e3",
+      "size_bytes": 39013
+    },
+    "cases/bread_norway/organon.json": {
+      "sha256": "1c2795bc3a31ebf828991d8e87518028c340f303db5f3acc3b11fab04b88de23",
+      "size_bytes": 20012
+    }
+  },
+  "tested_wheel": {
+    "filename": "specorganon-0.1.0-py3-none-any.whl",
+    "sha256": "8b4b4cf8c9cccc31ca9fe37dce345b391377dc532907d1d2be4f6cdce4a3053a",
+    "size_bytes": 127602,
+    "engine_sha256": "52b0a5ee102c695bd903723552c8654e0197100bf6afb8208794c93fc0fefa7d",
+    "engine_bytes_equal_current_source": true
+  },
+  "contract": {
+    "policy": "signed",
+    "item_kind": "evidence",
+    "trigger": "archive or source_sha256 present",
+    "required_pair": [
+      "archive",
+      "source_sha256"
+    ],
+    "local_archive_max_bytes": 33554432,
+    "relative_canonical_path_required": true,
+    "lowercase_sha256_required": true,
+    "regular_file_single_link_required": true,
+    "symlink_components_rejected": true,
+    "same_path_incompatible_digests_rejected_before_io": true,
+    "transitive_dependency_issues": true,
+    "source_byte_checks_repeated_on_new_status_calculation": true,
+    "exact_byte_restoration_can_reactivate_prior_review": true,
+    "fixture_policy_unchanged": true,
+    "evidence_without_either_key_unchanged": true,
+    "existing_partial_pair_now_blocked": true
+  },
+  "validations": {
+    "focal": {
+      "command": ".venv/bin/python -m pytest -q tests/test_local_evidence_archive_gate.py",
+      "passed": 17,
+      "exit_code": 0
+    },
+    "final_related": {
+      "command": ".venv/bin/python -m pytest -q tests/test_local_evidence_archive_gate.py tests/test_signed_phase_review.py tests/test_bread_frame.py",
+      "passed": 46,
+      "duration_seconds": 13.33,
+      "exit_code": 0
+    },
+    "installed": {
+      "command": ".venv/bin/python -m pytest -q tests/test_local_evidence_gate_installed.py",
+      "passed": 2,
+      "skipped": 0,
+      "duration_seconds": 19.39,
+      "exit_code": 0,
+      "python_versions": [
+        "3.11.15",
+        "3.12.3"
+      ],
+      "offline_build_and_install": true,
+      "pip_check_all_compatible": true
+    },
+    "global": {
+      "command": ".venv/bin/python -m pytest -q",
+      "exit_code": 0,
+      "passed": 2114,
+      "skipped": 0,
+      "duration_seconds": 501.47
+    },
+    "ruff": {
+      "command": "ruff check .",
+      "exit_code": 0,
+      "result": "All checks passed"
+    },
+    "compilation": {
+      "command": ".venv/bin/python -m py_compile src/specorganon/engine.py scripts/probe_local_evidence_gate.py tests/test_local_evidence_archive_gate.py tests/test_local_evidence_gate_installed.py",
+      "exit_code": 0
+    },
+    "diff_check": {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  },
+  "installed_receipts": [
+    "python3.11.json",
+    "python3.12.json"
+  ],
+  "installed_observations": {
+    "accepted_phase": "frame",
+    "temporary_items": 19,
+    "temporary_events": 21,
+    "cli_mcp_status_and_gate_pairs_each": 9,
+    "altered_sources_each": 1,
+    "copied_sources_each": 2,
+    "modes": [
+      "mutate",
+      "remove",
+      "symlink"
+    ],
+    "invalidated_evidence_each": 8,
+    "affected_dependents_each": 10,
+    "rejected_advances_without_writes": true,
+    "runner_waits_without_writes": true,
+    "exact_restoration_recovers_complete_status": true,
+    "replay_without_writes": true
+  },
+  "independent_review": {
+    "type": "separate_native_read_only_agent",
+    "open_p1_p2": 0,
+    "confirmed_finding": {
+      "severity": "P2",
+      "description": "Different declared digests for the same path could each match separate file versions during one gate calculation",
+      "real_digest_reproduction": true,
+      "correction": "Reject all same-path incompatible digests before reading",
+      "repeated_digest_calls_after_correction": 0,
+      "ready_after_correction": false
+    },
+    "downstream_accepted_explain_reopened_after_source_mutation": true,
+    "mutation_during_read_detected": true,
+    "independently_repeated_installed_tests": {
+      "passed": 2,
+      "skipped": 0,
+      "duration_seconds": 17.71
+    },
+    "detached_attestation": false
+  },
+  "compatibility": {
+    "cases": [
+      {
+        "case": "mango",
+        "ledger_byte_identical": true,
+        "ledger_sha256": "a5bc7f92d080270ccd4eef54129c3406352155cc60d643695abfafcbfbfed315",
+        "status_equals_previous_engine": true
+      },
+      {
+        "case": "citibike",
+        "ledger_byte_identical": true,
+        "ledger_sha256": "204b8094474113a52f2d271f5ae10e174979c66628e1753dc5df8e2b1e682678",
+        "status_equals_previous_engine": true
+      },
+      {
+        "case": "citibike_march2024",
+        "ledger_byte_identical": true,
+        "ledger_sha256": "af6b95cc40c3b6b44c04c47b713fa8db4ff2339a2b1fffefdce53a720688ddc4",
+        "status_equals_previous_engine": true
+      },
+      {
+        "case": "citibike_march2024_lineage",
+        "ledger_byte_identical": true,
+        "ledger_sha256": "7cb7f451e953a02a7254edd2e6713ad7acc470181b2cc0966b5d9b88c51692e3",
+        "status_equals_previous_engine": true
+      },
+      {
+        "case": "bread_norway",
+        "ledger_byte_identical": true,
+        "ledger_sha256": "1c2795bc3a31ebf828991d8e87518028c340f303db5f3acc3b11fab04b88de23",
+        "status_equals_previous_engine": true
+      }
+    ],
+    "comparison": "current_engine_vs_HEAD_engine",
+    "comparison_engine_commit": "2084d309951e8400c9a11d1f6a868dc8812c54e6"
+  },
+  "preserved_files": {
+    "GOAL.md": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+    "cases/mango/organon.json": "a5bc7f92d080270ccd4eef54129c3406352155cc60d643695abfafcbfbfed315",
+    "cases/citibike/organon.json": "204b8094474113a52f2d271f5ae10e174979c66628e1753dc5df8e2b1e682678",
+    "cases/citibike_march2024/organon.json": "af6b95cc40c3b6b44c04c47b713fa8db4ff2339a2b1fffefdce53a720688ddc4",
+    "cases/citibike_march2024_lineage/organon.json": "7cb7f451e953a02a7254edd2e6713ad7acc470181b2cc0966b5d9b88c51692e3",
+    "cases/bread_norway/organon.json": "1c2795bc3a31ebf828991d8e87518028c340f303db5f3acc3b11fab04b88de23"
+  },
+  "limits": {
+    "installed_probe_accepted_phases": [
+      "frame"
+    ],
+    "installed_probe_source_replacements_concurrent": false,
+    "installed_probe_archive_size_boundary": false,
+    "focal_archive_size_limit_tested": true,
+    "same_uid_writers_after_reads_not_prevented": true,
+    "source_meaning_verified": false,
+    "publisher_authenticity_verified": false,
+    "source_custody_independent": false,
+    "human_reviewer_identity_or_competence_verified": false,
+    "field_impact_tested": false,
+    "paid_model_calls": 0,
+    "private_keys_or_signatures_in_receipts": false,
+    "temporary_cases_and_keys_retained": false
+  },
+  "acceptance": {
+    "criterion_1": "not_demonstrated",
+    "criterion_2": "not_demonstrated",
+    "criterion_3": "not_demonstrated",
+    "criterion_4": "not_demonstrated",
+    "criterion_5": "not_demonstrated",
+    "demonstrated": 0,
+    "total": 5
+  }
+}

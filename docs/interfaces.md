@@ -97,6 +97,18 @@ Todos los marcadores se reemplazan por el UUID, la ruta canónica absoluta, el d
 
 La firma prueba control de la clave configurada para ese actor. No prueba por sí sola quién sostuvo la clave, si recibió toda la información ni si tenía competencia para decidir. Esas verificaciones y el registro de autorización pertenecen al proceso humano externo.
 
+### Evidencia con archivo local y SHA-256
+
+En un caso `signed`, un ítem `evidence` que declare `data.archive` o `data.source_sha256` activa un contrato de bytes: debe aportar ambos campos. `archive` es una ruta relativa canónica dentro del caso, sin componentes vacíos, `.` o `..`, barras invertidas ni ruta absoluta; `source_sha256` contiene exactamente 64 caracteres hexadecimales minúsculos. Por ejemplo:
+
+```json
+{"archive":"fuentes/estudio.pdf","source_sha256":"<SHA-256 calculado sobre el archivo conservado>"}
+```
+
+Cada cálculo de estado o compuerta comprueba el archivo actual en Linux. La apertura usa descriptores de directorio y `O_NOFOLLOW`; exige un archivo regular con un solo enlace físico y un máximo de 32 MiB, y coteja su identidad antes y después del hash. Si varias evidencias declaran digests diferentes para una misma ruta, todas quedan bloqueadas antes de leerla. Un archivo ausente, alterado, demasiado grande, enlazado o un contrato incompleto genera `issues` en la evidencia y sus dependientes transitivos. Las incidencias cambian la instantánea de las fases afectadas y bloquean su aceptación y avance, incluso si el ledger conserva una revisión firmada anterior. CLI, MCP, desafíos de revisión y el runner consultan el mismo motor. Las lecturas y avances rechazados no reescriben el ledger.
+
+Restaurar exactamente los bytes declarados recupera la instantánea anterior y puede volver a hacer efectiva su revisión. Para sustituir legítimamente una fuente, publica una nueva versión de la evidencia con el archivo y digest nuevos y vuelve a revisar las dependencias afectadas. La evidencia que no declara ninguno de los dos campos conserva el contrato previo; los casos `fixture` no aplican esta comprobación. Un expediente externo que utilizaba `source_sha256` como metadato libre sin archivo debe completar el par o revisar ese campo: ahora queda bloqueado. El cotejo verifica bytes locales: la correspondencia entre texto, datos y documento sigue requiriendo auditoría de contenido, como [la del caso del pan](../scripts/verify_bread_frame.py). Tampoco prueba autenticidad de la publicación, observación de campo, custodia independiente o ausencia de cambios entre la lectura y una escritura posterior por otro proceso del mismo UID.
+
 ### Revisión firmada de una fase
 
 En un caso `signed`, una revisión que permita avanzar requiere la clave pública del actor en `phase_reviewers` y un actor distinto de los autores de los ítems de esa fase. Tras comprobar el contenido y la instantánea, el revisor pide `phase-review-challenge RUTA FASE --verdict accept --reason MOTIVO --actor ACTOR`. El resultado incluye `message_base64` y `message_sha256`. El revisor comprueba el mensaje canónico y firma **sus bytes decodificados** fuera del entorno del agente; incluye propósito, UUID, ruta, metadatos, cabeza previa del ledger, fase, hash de la instantánea, veredicto, motivo y actor. Después registra `review-phase RUTA FASE --verdict accept --reason MOTIVO --actor ACTOR --signature FIRMA_BASE64` y comprueba `gate` antes de `advance`. CLI y MCP usan el mismo contrato.
