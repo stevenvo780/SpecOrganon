@@ -1,5 +1,16 @@
 # Auditoría de aceptación actual
 
+**Preparación D-099:** se registraron el [plan expuesto N/SDD/T](../experiments/development/subscription_method_trial_2026-09-30/plan.json)
+y la [revisión del scorer](../experiments/development/subscription_method_trial_2026-09-30/scorer_review.json)
+antes de nuevas llamadas. Ocho pruebas verifican la proyección de 18
+cotejos y rechazan errores numéricos; una falsificación confirma que la
+referencia se calcula desde los mismos bytes cuyo SHA se verificó.
+El revisor recalculó el CSV por separado y cerró el defecto. La sonda real
+del diseño sólo valida seis escrituras y compuertas iniciales sobre un caso
+temporal; no usa respuestas de modelo. Broker y terna aún pendientes,
+sin medición de calidad, comparación confirmatoria o intervención.
+Veredicto global **0/5**.
+
 **Resultado D-097:** una sola generación con Luna medio solicitado creó
 [código, fuentes e informe originales](../experiments/development/bread_continuation_2026-09-30/attempt/),
 después de congelar plan y evaluador en `6a8018c`. La generación terminó

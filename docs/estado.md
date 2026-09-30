@@ -1,5 +1,18 @@
 # Estado de reanudación
 
+**D-099 en preparación:** el [plan de dos turnos N/SDD/T](../experiments/development/subscription_method_trial_2026-09-30/)
+fija Luna medio solicitado, orden S/T/N, dos invocaciones CLI y 360 s locales
+por brazo sobre el caso público y expuesto de energía. T recibirá respuestas
+reales de `init`, `put`, `status` y compuertas iniciales; no representa aún
+el tratamiento completo de nueve fases. Diseño y evaluador numérico fueron
+revisados: se corrigieron la exclusión de actor/boundary y la lectura doble
+del CSV; ocho pruebas del scorer pasaron. La sonda previa creó seis ítems
+en un caso temporal, con `frame.ready=true` y sin fases aceptadas; conservó
+todas las causas de bloqueo de `critique`. Los 272 archivos protegidos
+siguen idénticos. **No se ejecutó ninguna celda de modelo:** implementación
+y revisión del broker pendientes. No Q, ganador, corridas de las 24 o
+criterio 4 demostrado; aceptación **0/5**.
+
 **D-097 conservó un análisis nativo fallido:** el [workflow y plan](../experiments/development/bread_continuation_2026-09-30/)
 se congelaron en `6a8018c` antes de una sola generación con Luna medio
 solicitado. Produjo código, fuentes e informe de 780 palabras en 134,488 s

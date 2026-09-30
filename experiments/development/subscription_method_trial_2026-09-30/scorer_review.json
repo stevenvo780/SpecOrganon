@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "study_id": "D099",
+  "recorded_at_utc": "2026-09-30T10:06:37.570677+00:00",
+  "scope": "independent native read-only numerical scorer review; broker implementation not yet reviewed",
+  "reviewer": "source_gate_review",
+  "plan": {
+    "bytes": 8035,
+    "sha256": "ec9c7d1a6359e91a8543e07872226c4d2009296e78b8c151843cc283dab24ed1"
+  },
+  "scorer": {
+    "bytes": 4200,
+    "sha256": "30f228bc15b1e0bf1eedcf1b0409c10637f44d2360d53ee5ce22c09a12534533"
+  },
+  "test": {
+    "bytes": 2932,
+    "sha256": "7127abfa57851f1a40cbcdd71a03e1e2029926e2027fd6193b0e81d5f173d7ef"
+  },
+  "reference": {
+    "bytes": 540,
+    "sha256": "eb940b7c29ac6326796d6e4bf147aabc0a0fc8e9bc527402163726f8892a7e67"
+  },
+  "independent_csv_reference_recomputed": true,
+  "contract_checks": 18,
+  "reference_observations": {
+    "rows": 1008,
+    "continuous": true,
+    "interval_minutes": 10,
+    "appliances_total_kwh": 118.28,
+    "lights_total_kwh": 5.32,
+    "daily_dates": 7
+  },
+  "closed_finding": {
+    "severity": "P2",
+    "issue": "hash then reopening CSV allowed reference values from different bytes",
+    "resolution": "parse already hashed bytes through io.StringIO",
+    "negative_test": "temporary CSV replaced after read; computed reference remains from captured pinned bytes",
+    "independent_closure_confirmed": true
+  },
+  "validation": {
+    "command": ".venv/bin/python -m pytest -q tests/test_subscription_method_score.py",
+    "passed": 8,
+    "seconds": 0.38,
+    "ruff": "passed",
+    "earlier_prelaunch_test_collection_error": "parametrized 10000-digit integer exceeded Python automatic test ID conversion limit; explicit parameter IDs fixed without changing interpreter limit"
+  },
+  "metric_absence_policy": "no metrics artifact -> measured=0, passed=null; an emitted finite JSON {} may be projected as 0/18",
+  "preserved_originals_verified": 272,
+  "provider_calls": 0,
+  "additional_auditor_agent_launch": {
+    "launched": false,
+    "error": "collab spawn failed: agent thread limit reached"
+  },
+  "broker_worker_planning_interrupted": true,
+  "broker_worker_resumed_with_same_ownership": true,
+  "broker_worker_interruption_was_model_trial": false,
+  "Q": null,
+  "counts_toward_required_24_runs": false,
+  "global_acceptance": "0/5"
+}
