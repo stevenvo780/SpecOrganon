@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "study_id": "D099",
+  "recorded_at_utc": "2026-09-30T10:47:51.929102+00:00",
+  "registration_commit": "3ab2982",
+  "protocol_sha256": "ec9c7d1a6359e91a8543e07872226c4d2009296e78b8c151843cc283dab24ed1",
+  "scope": "prelaunch implementation, source protection and local test validation; no model results",
+  "independent_reviewer": "source_gate_review",
+  "verdict": "no confirmed open P1/P2 under declared scope",
+  "closed_findings": [
+    "actor/boundary absent from initial design",
+    "scorer hash/read race",
+    "legitimate prospective test metadata rejected by substring filter",
+    "valid item.updated CLI event rejected",
+    "toolkit attempted confused with executed",
+    "empty final report accepted as completed",
+    "literal text starting dash passed as an option"
+  ],
+  "limits_explicitly_declared": [
+    "operator applies S/T/N order; not automatically enforced across arms",
+    "cooperating local admission root and same UID state",
+    "runtime interpreter and libraries unsealed",
+    "no provider/model identity or provider RPC count attestation",
+    "no preventive global token or cost limits",
+    "no numerical reference answers in prompts",
+    "local Codex safety review is not human quality or norm approval"
+  ],
+  "root_tests": {
+    "distinct_tests": 35,
+    "broker_tests": 27,
+    "scorer_tests": 8,
+    "commands": [
+      ".venv/bin/python -m pytest -q tests/test_subscription_method_trial.py tests/test_subscription_method_score.py",
+      "python3 -m pytest -q tests/test_subscription_method_trial.py tests/test_subscription_method_score.py"
+    ],
+    "python_3_11_15": {
+      "passed": 35,
+      "seconds": 6.83
+    },
+    "python_3_12_3": {
+      "passed": 35,
+      "seconds": 6.93
+    },
+    "ruff": "passed",
+    "models": "fake CLI only",
+    "real_processes": [
+      "sealed Linux sandbox",
+      "temporary signed toolkit CLI trace"
+    ],
+    "independent_focal_cases": 9,
+    "independent_focal_passed": 9,
+    "independent_full_suite_repeated": false
+  },
+  "prelaunch_errors_retained": [
+    "additional native auditor spawn failed: agent thread limit reached; no agent launched",
+    "independent pytest collection failed without repository PYTHONPATH, corrected using PYTHONPATH=.",
+    "root Ruff caught three E402 imports after formatter removed noqa; restored explicit import annotations and passed"
+  ],
+  "protected_originals_verified": 272,
+  "provider_calls": 0,
+  "Q": null,
+  "counts_toward_required_24_runs": false,
+  "criterion_4": "not_assessed",
+  "global_acceptance": "0/5",
+  "files": {
+    "scripts/run_subscription_method_trial.py": {
+      "bytes": 49595,
+      "sha256": "537541324cf37194b335eb2da64d9ecca9736dc12c46fd95f47811a710d9cec0"
+    },
+    "tests/test_subscription_method_trial.py": {
+      "bytes": 19816,
+      "sha256": "047371b1967dcf97a44fcf20279498f13658e1bf391083be49a82a930404ea8c"
+    },
+    "tests/test_subscription_method_score.py": {
+      "bytes": 2932,
+      "sha256": "7127abfa57851f1a40cbcdd71a03e1e2029926e2027fd6193b0e81d5f173d7ef"
+    },
+    "scripts/run_development_arm.py": {
+      "bytes": 128973,
+      "sha256": "e8ad30330fbe92fb777c0d1390923d06eda834e6f84c5841d4fac3aa8286d7e5"
+    },
+    "scripts/run_prototype_checkpoint.py": {
+      "bytes": 26165,
+      "sha256": "133029fb26c820e97e5d6bdcf2a0402e21087fd8391b6c31a06a3b4e525266fc"
+    },
+    "scripts/local_replay_sandbox.py": {
+      "bytes": 27803,
+      "sha256": "6dc4c2c4b6abb1b0fea3a0af76d20f034c297bcb96df4bbb6da6557dbbdb1d32"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/README.md": {
+      "bytes": 3127,
+      "sha256": "64f374473c886c8ea4065559766edc87bb958cd5bb12758dd6176f3868f96583"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/arm_n.md": {
+      "bytes": 250,
+      "sha256": "ef319b592e6600a99018c2e33cd6d0cdc0b34b7e979f58e5b8f9e74372e5625f"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/arm_s.md": {
+      "bytes": 423,
+      "sha256": "0a5efd20554c7b32d6fa9df44bb2f085e5a6a4b26fdc908b7e560540a8879ff9"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/arm_t.md": {
+      "bytes": 1353,
+      "sha256": "07017595feddf4a46c93828488d0f9cd388a7422eac1f285c9dc0ab63ac7cd33"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/common.md": {
+      "bytes": 3552,
+      "sha256": "dd08557d5078a5bc58b1701e25d9653c3eefb886395629fe1f4e8e4531fa1582"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/design_review.json": {
+      "bytes": 1206,
+      "sha256": "7d462bd970cc8104706de4eeb418c208e4a65d2451688eebb991832ca17c05fa"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/design_runtime_probe.json": {
+      "bytes": 2223,
+      "sha256": "b1b50d8475ccc9b5f6b55b1dbf789c53f72da31bf45e87b21ddd893e343c8aa7"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/plan.json": {
+      "bytes": 8035,
+      "sha256": "ec9c7d1a6359e91a8543e07872226c4d2009296e78b8c151843cc283dab24ed1"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/pre_amendment/arm_t.md": {
+      "bytes": 1336,
+      "sha256": "6fa00957215fe46f61e1533ac8f4eb3cead9fd44989eedfc5c5efa48be744fde"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/pre_amendment/common.md": {
+      "bytes": 3535,
+      "sha256": "0b23fa1eda67d001691e8a56be002a06d9c1fa3eb6281c8ac32de4c5ea3024b8"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/pre_amendment/plan.json": {
+      "bytes": 7581,
+      "sha256": "2c5d4f5f1886f28e512c163bb030b633655b61f3ae4218b5e58b0036edcefb09"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/preservation.json": {
+      "bytes": 51641,
+      "sha256": "8eafa629924752a2d86a01d3429a1ac4c12ccb414d37f4e0fefb15885b1457f1"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/reference.json": {
+      "bytes": 540,
+      "sha256": "eb940b7c29ac6326796d6e4bf147aabc0a0fc8e9bc527402163726f8892a7e67"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/score.py": {
+      "bytes": 4200,
+      "sha256": "30f228bc15b1e0bf1eedcf1b0409c10637f44d2360d53ee5ce22c09a12534533"
+    },
+    "experiments/development/subscription_method_trial_2026-09-30/scorer_review.json": {
+      "bytes": 2267,
+      "sha256": "885a0aae70c4042c391c9d20da64a6b7ddef318d5f4ce97498b220614b742ada"
+    }
+  }
+}

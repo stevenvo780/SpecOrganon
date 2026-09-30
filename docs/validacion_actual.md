@@ -7,7 +7,10 @@ cotejos y rechazan errores numéricos; una falsificación confirma que la
 referencia se calcula desde los mismos bytes cuyo SHA se verificó.
 El revisor recalculó el CSV por separado y cerró el defecto. La sonda real
 del diseño sólo valida seis escrituras y compuertas iniciales sobre un caso
-temporal; no usa respuestas de modelo. Broker y terna aún pendientes,
+temporal; no usa respuestas de modelo. El [broker revisado](../experiments/development/subscription_method_trial_2026-09-30/broker_prelaunch_review.json)
+pasa 35 pruebas en Python 3.11 y 3.12, Ruff y nueve casos focales del
+revisor independiente. Los modelos son CLI falsas; sandbox y toolkit son
+procesos locales reales. El orden entre brazos es manual. Terna aún pendiente,
 sin medición de calidad, comparación confirmatoria o intervención.
 Veredicto global **0/5**.
 

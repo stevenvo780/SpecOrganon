@@ -17,6 +17,13 @@ fallida o reparación del análisis. Una salida numérica negativa puede
 informar el segundo turno si aún queda presupuesto; un modelo, revisión
 de seguridad o plazo inválidos detienen la celda. Se conserva todo resultado.
 
+El operador aplica el orden S → T → N y sólo inicia la siguiente celda tras
+el terminal de la anterior. El broker impone los límites locales de cada
+brazo; **no impone automáticamente ese orden entre brazos**. El recibo
+cotejará la cronología registrada y declarará este límite. La inspección
+local de seguridad por Codex y su declaración del SHA no son una revisión
+humana de calidad, autoridad normativa o custodia independiente.
+
 La información disponible y el replay genérico son comunes. Los comandos
 especializados de T son tratamiento y cuentan en su tiempo/uso. La revisión
 de seguridad tiene el mismo alcance y no ofrece correcciones de contenido.

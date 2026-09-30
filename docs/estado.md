@@ -9,8 +9,11 @@ revisados: se corrigieron la exclusión de actor/boundary y la lectura doble
 del CSV; ocho pruebas del scorer pasaron. La sonda previa creó seis ítems
 en un caso temporal, con `frame.ready=true` y sin fases aceptadas; conservó
 todas las causas de bloqueo de `critique`. Los 272 archivos protegidos
-siguen idénticos. **No se ejecutó ninguna celda de modelo:** implementación
-y revisión del broker pendientes. No Q, ganador, corridas de las 24 o
+siguen idénticos. El [broker revisado](../scripts/run_subscription_method_trial.py)
+pasa 35 pruebas en Python 3.11 y 3.12 y Ruff, con modelos falsos y procesos
+locales reales; el revisor no encuentra P1/P2 abierto. El orden entre
+brazos lo aplica el operador, sin garantía preventiva del broker.
+**No se ejecutó ninguna celda de modelo:** terna pendiente. No Q, ganador, corridas de las 24 o
 criterio 4 demostrado; aceptación **0/5**.
 
 **D-097 conservó un análisis nativo fallido:** el [workflow y plan](../experiments/development/bread_continuation_2026-09-30/)
