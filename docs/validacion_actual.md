@@ -1,5 +1,21 @@
 # Auditoría de aceptación actual
 
+**Receta D-101:** [evidencia instalada y límites](../experiments/development/audited_bread_recipe_2026-09-30/).
+Repite el cotejo D-100 y construye 37 ítems pendientes; valida identidad,
+prefijo exacto y efectos reales de transporte. Dos entornos con wheel D-100
+instalado, Python 3.11/3.12, recuperan SIGKILL durable tras 16 puts por MCP
+21/16 y reintento CLI 0/37; dirección inversa también sin duplicados.
+Cada entorno verifica 18 controles de archivo y 39 pares CLI/MCP de
+estado/compuerta/próxima tarea, invalidación transitiva y restitución exacta.
+50 pruebas focales por Python, Ruff y compilación pasan. Las revisiones y
+el avance del probe son sintéticos externos al workflow y el controlador
+rechaza ese checkpoint divergente. Cierra tres falsos verdes de admisión,
+conserva fallo inicial de ROOT y originales previos. Un cambio concurrente
+puede dejar escrituras rechazadas; no hay transacción atómica ni cotejo
+semántico universal de `put`. Sin Q, autoridad normativa, campo, nueva
+comparación de modelos o corrida de las 24. Los cinco criterios finales
+permanecen **No demostrados**, **0/5**.
+
 **Cotejo D-100:** el [auditor de pasajes](../experiments/development/bread_source_audit_2026-09-30/)
 verifica 17 afirmaciones y siete filas contra valores extraídos de PDF
 fijados, y conserva dos contradicciones de prosa/tablas. Un contrato revisado

@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "study_id": "D101",
+  "operations": [
+    {
+      "argv": [
+        ".venv/bin/python",
+        "scripts/run_subscription_method_trial.py",
+        "status",
+        "experiments/development/subscription_method_trial_2026-09-30/attempts/S"
+      ],
+      "exit_code": 0,
+      "state": "completed",
+      "new_provider_call": false
+    },
+    {
+      "argv": [
+        ".venv/bin/python",
+        "scripts/run_subscription_method_trial.py",
+        "status",
+        "experiments/development/subscription_method_trial_2026-09-30/attempts/T"
+      ],
+      "exit_code": 0,
+      "state": "completed",
+      "new_provider_call": false
+    },
+    {
+      "argv": [
+        ".venv/bin/python",
+        "scripts/run_subscription_method_trial.py",
+        "status",
+        "experiments/development/subscription_method_trial_2026-09-30/attempts/N"
+      ],
+      "exit_code": 0,
+      "state": "completed",
+      "new_provider_call": false
+    },
+    {
+      "argv": [
+        ".venv/bin/python",
+        "scripts/run_bread_continuation.py",
+        "status",
+        "experiments/development/bread_continuation_2026-09-30/attempt"
+      ],
+      "exit_code": 1,
+      "state": "failed",
+      "new_provider_call": false
+    },
+    {
+      "argv": [
+        ".venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_audited_bread_recipe.py"
+      ],
+      "python": "3.11.15",
+      "exit_code": 0,
+      "passed": 50
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_audited_bread_recipe.py"
+      ],
+      "env_override": {
+        "PYTHONPATH": "src"
+      },
+      "python": "3.12.3",
+      "exit_code": 0,
+      "passed": 50
+    },
+    {
+      "argv": [
+        "ruff",
+        "check",
+        "scripts/run_audited_bread_recipe.py",
+        "scripts/probe_audited_bread_recipe.py",
+        "tests/test_audited_bread_recipe.py"
+      ],
+      "exit_code": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        ".venv/bin/python",
+        "-m",
+        "py_compile",
+        "scripts/run_audited_bread_recipe.py",
+        "scripts/probe_audited_bread_recipe.py",
+        "tests/test_audited_bread_recipe.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "py_compile",
+        "scripts/run_audited_bread_recipe.py",
+        "scripts/probe_audited_bread_recipe.py",
+        "tests/test_audited_bread_recipe.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "global_suite_repeated": false,
+  "Q": null,
+  "global_acceptance": "0/5",
+  "new_experimental_model_cli_calls": 0,
+  "native_code_review_agents_used": true
+}

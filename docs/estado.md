@@ -1,5 +1,23 @@
 # Estado de reanudación
 
+**D-101 integró una receta alimentaria auditable:** [dossier y límites](../experiments/development/audited_bread_recipe_2026-09-30/).
+Prepara copias, repite D-100 y publica 37 ítems pendientes ligados a 17
+cantidades y siete filas archivadas. Memfd protege el manifiesto CLI; MCP
+recibe raíz y objeto explícitos. El checkpoint exige proyecto `signed` y
+prefijo exacto: no acepta reviews ajenos, versiones nuevas o falso éxito sin
+ledger. Pasaron 50 pruebas en cada Python 3.11/3.12, Ruff y compilación.
+Ambos paquetes instalados recuperan SIGKILL real tras 16 puts: MCP 21/16,
+CLI 0/37, y dirección inversa sin duplicados. Dieciocho controles de archivos
+y 39 pares de estado/compuerta/próxima tarea por entorno verifican
+invalidación, rechazo sin escrituras y restitución exacta. La firma del probe
+es sintética y externa al controlador; éste sólo publica puts sin avances.
+Un cambio concurrente de fuente puede dejar eventos escritos y rechazados:
+no es una transacción atómica; `put` directo elude el cotejo semántico.
+Fuentes y ensayos anteriores intactos, D-097 fallido conservado; sin nuevas
+generaciones, Q, aprobación humana o campo. **Aceptación 0/5**.
+Siguiente frente: ampliar crítica/especificación e ingeniería con obligaciones
+ligadas a valores y bloqueos explícitos, sin avanzar normas pendientes.
+
 **D-100 cotejó fuentes alimentarias:** [auditor y límites](../experiments/development/bread_source_audit_2026-09-30/).
 Un primitivo genérico nuevo extrae pasajes únicos de los mismos bytes PDF
 verificados; el adaptador coteja 17 afirmaciones y siete filas de Tabla 1,
@@ -13,8 +31,8 @@ Ruff y dos instalaciones offline del wheel final; el módulo vino de
 site-packages y ambos resultados fueron byte idénticos, 17/7 y dos avisos.
 Host/bibliotecas y contrato son límites explícitos, sin aprobación humana,
 Q, nuevas generaciones, campo o corrida de las 24. **Aceptación 0/5**.
-Siguiente frente: vincular estos cotejos a una receta alimentaria nueva y
-reanudable con trazabilidad y bloqueos normativos, manteniendo D-097 intacto.
+Su siguiente frente de integración se implementó en D-101 con el alcance
+documental inicial descrito arriba, manteniendo D-097 intacto.
 
 **D-099 completó una terna de desarrollo N/SDD/T:** [resultados y límites](../experiments/development/subscription_method_trial_2026-09-30/RESULTS.md).
 Plan en `3ab2982`, broker y pruebas en `842d618`, antes de seis invocaciones

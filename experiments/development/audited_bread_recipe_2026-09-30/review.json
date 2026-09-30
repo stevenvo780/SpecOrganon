@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "study_id": "D101",
+  "reviewer": "/root/source_gate_review",
+  "read_only": true,
+  "identity_kind": "separate native Codex agent, not authenticated human reviewer",
+  "classification": "development controller and installed mechanics only",
+  "findings": [
+    {
+      "defect": "binding coverage/policy/approval counters editable",
+      "correction": "strict metadata and keys; four original failing regressions now pass",
+      "evidence": "tests/test_audited_bread_recipe.py"
+    },
+    {
+      "defect": "transport success without actual ledger",
+      "independent_reproduction": true,
+      "fixed_reproduction_rejected": true,
+      "correction": "actual complete ledger and result reconciliation"
+    },
+    {
+      "defect": "fixture case presented as signed recipe",
+      "independent_reproduction": true,
+      "fixed_reproduction_rejected": true,
+      "correction": "project policy/title/domain/creator/testpolicy checked"
+    },
+    {
+      "defect": "foreign item review in version1 checkpoint accepted",
+      "independent_reproduction": true,
+      "fixed_reproduction_rejected": true,
+      "correction": "ordered event prefix exact actor/kind/payload; excess events rejected"
+    },
+    {
+      "defect": "archive changes between audit and run can leave events",
+      "independent_reproduction": true,
+      "resolution": "explicit residual non-atomic transaction limit; not a successful wrapper or phase acceptance",
+      "reproduction": "source_claims.json changed to737 before run;37events published with audited736;sourceinvalid/postcheck rejected",
+      "test": "test_archive_changed_at_run_leaves_retained_negative_checkpoint mutates PDF",
+      "blocked_advancement": true
+    }
+  ],
+  "installed_verification": {
+    "python": [
+      "3.11.15",
+      "3.12.3"
+    ],
+    "receipt_and_trace_pins_recomputed": true,
+    "decoded_trace_bytes_each": 8347135,
+    "source_and_code_pins_match": true,
+    "ledger_event_counts": [
+      16,
+      37,
+      39,
+      40
+    ],
+    "archive_controls_each": 18,
+    "cli_mcp_equal_query_pairs_each": 39,
+    "mcp_tools_each": 21,
+    "resume": {
+      "durable_prefix": 16,
+      "mcp_applied": 21,
+      "mcp_skipped": 16,
+      "cli_replay_applied": 0,
+      "cli_replay_skipped": 37
+    },
+    "reverse_resume": {
+      "mcp_applied": 37,
+      "cli_applied": 0,
+      "cli_skipped": 37
+    },
+    "external_synthetic_review_and_advance_distinguished": true,
+    "assumption_revision_rejects_old_manifest": true,
+    "preservation_recomputed": {
+      "protected": 272,
+      "D099_originals": 147,
+      "D099_markers": 12,
+      "D099_modules": 22,
+      "D099_frozen_dossier": 16,
+      "mismatches": 0,
+      "D100_pins_before_documentation_update": 24,
+      "D100_evidence_code_pins_final": 21,
+      "D100_active_documentation_intentionally_updated": 3
+    }
+  },
+  "raw_review_reproduction_captures_persisted": false,
+  "observation_attribution": "reviewer reports temporary independent reproductions; no invented stdout/stderr artifacts",
+  "open_P1_P2_in_declared_scope": [],
+  "limits": [
+    "source and ledger transaction not atomic",
+    "direct engine puts can bypass semantic auditor",
+    "probe does not attest wheel authority; local D100 install receipt supplies build association",
+    "synthetic signing key not human authority",
+    "no Q, field, causal or confirmatory model evidence"
+  ],
+  "Q": null,
+  "human_acceptance": false,
+  "global_acceptance": "0/5",
+  "final_documentation_preservation_note": "Before documentation update reviewer checked all24 D100 pins; final operator checks21 artifact/code pins and parent/current pins of three active docs; no evidence modified."
+}
