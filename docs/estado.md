@@ -1,5 +1,37 @@
 # Estado de reanudación
 
+**D-108 enlaza energía documental con el grafo alimentario:**
+[dossier](../experiments/development/bread_energy_derivation_2026-09-30/README.md)
+y [Pan68 publicado](../cases/bread_documentary_energy/README.md).
+103/184kWh/kg de pan producido, racional exacto y HALF_EVEN24/error≤5e-25
+sólo de representación. Tres fuentes publicadas fijadas por versión → nuevo
+protocolo/inferencia/evidencia/indicador; revisión de cualquiera invalida los
+cuatro nodos. Fecha UTC de derivación separada de publicación2018-12-21;
+registros empresariales de fecha desconocida, incertidumbre física no cuantificada.
+
+Plan880ccbd, instrumentosb7a1df6, freeze64aa0a8/89inputs presentes en Git.
+Un intento por Python3.11/3.12 reutiliza wheel D107 sin rebuild/install:
+CLI/MCP4puts por positivo,68eventos/prefijo64, replay0/4, discovery23;
+58pares por entorno, tres revisiones de fuentes y dos controles de archivo,
+siete negativos puros del constructor. 243registros por entorno incluyen
+streams/modelos SDK, tiempos y comparaciones; no243invocaciones. Cuatro
+pruebas de contrato pasan por Python, Ruff/compile pasan; global2674 sigue D107.
+Dos tar/432regulares y diez copias publicadas sin locks; revisión independiente
+confirma bytes/cadenas/24módulos/1555archivos por venv. Cero nuevas normas,
+reviews o fases aceptadas; cuatro umbrales de intervención siguen nulos.
+
+**Aceptación1/5; C1 técnico permanece en wheel D107, C2–C5 No demostrados.**
+Sin modelos experimentales/Luna nuevo/Q/campo/reserva24. El constructor
+específico verifica la división; put genérico no autentica semántica ni fuentes.
+El cálculo no sustenta los cuatro indicadores de intervención ni resuelve
+baseline/autoridad/eficacia. Próximo frente: evidencia técnica tipada de captura
+y bases, evaluación final independiente y comparaciones/condiciones de campo.
+
+Conservación Git D107 corregida en6b5ccb4: .gitignore/wheel ignorados en474ed13
+incorporados con bytes originales;470pines finales verificados contra HEAD.
+Reproducción D107 exige checkout combinado/nuevo registro prospectivo,
+como explica su dossier. Las notas siguientes son históricas.
+
 **D-107 añade retiro versionado y enlaza la reproducción con el grafo:**
 [dossier/recibo](../experiments/development/indicator_retirement_2026-09-30/),
 [Citi62 publicado](../cases/citibike_march2024_reproduced/README.md) y

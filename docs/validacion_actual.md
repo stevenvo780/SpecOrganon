@@ -1,5 +1,34 @@
 # Auditoría de aceptación actual
 
+## D-108 · Derivación alimentaria y conservación
+
+[Dossier](../experiments/development/bread_energy_derivation_2026-09-30/README.md):
+freeze64aa0a8/89pines presentes en Git, dos intentos instalados exit0/no timeout
+ni error. Mismo wheel D107/24módulos y1555archivos por venv intactos;
+discovery23, cuatro positivos68eventos/prefijo64 y4puts, replay0/4.
+58pares CLI/MCP por entorno (nueve gates, cuatro trazas, status/next/controles);
+243registros incluyen63CLI,61MCP,1builder,60tiempos y58comparaciones.
+Tres fuentes revisadas por copia invalidan los cuatro nuevos descendientes;
+archivo de derivación cambiado/ausente invalida evidencia/indicador sin
+eventos de consulta; restauración exacta recupera estado. Siete negativos
+puros, no verificación semántica del CLI. Cuatro tests de contrato por Python,
+Ruff/compile pasan; suite global2674 conserva alcance D107.
+
+Revisión independiente recalcula432miembros de tar,58pares/128streams por
+Python, cuatro cadenas positivas y seis controles69eventos,89inputs, diez
+copias publicadas y racional103/184/error de representación11/(23×10^24).
+Fecha de derivación UTC real distinta de publicación2018; dato empresarial
+de fecha desconocida. No P1/P2 abierto en alcance revisado, cero aprobación
+normativa/fase aceptada y cuatro umbrales de intervención todavía nulos.
+**Aceptación1/5; C2–C5 No demostrados.** Sin Q/campo/reserva24 ni comparación
+experimental nueva. La suma documental de portadores no es energía útil,
+efecto causal, baseline actual o resolución de la cadena alimentaria.
+
+Reparación Git D1076b5ccb4 conserva los dos archivos ignorados del build;
+sus470pines finales coinciden con ese commit. El freeze474ed13 sólo contenía
+430/432inputs: el dossier declara checkout combinado y nuevo registro para
+reproducir, sin modificar resultados/freeze. Evidencias siguientes son históricas.
+
 ## D-107 · Núcleo, paquete e historia de retiro
 
 [Evidencia](../experiments/development/indicator_retirement_2026-09-30/README.md).
