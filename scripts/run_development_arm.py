@@ -837,6 +837,12 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
             event_count += 1
             kind = event[kind_key]
             last_type = kind
+            codex_explicit_error = provider == "codex" and (
+                kind == "error" or (
+                    kind.startswith("item.") and type(event.get("item")) is dict
+                    and event["item"].get("type") == "error"))
+            if codex_explicit_error:
+                failed_codex_items += 1
             if provider == "agy":
                 if kind not in AGY_KNOWN_EVENTS:
                     terminal_errors.append(f"line {line_number}: unknown agy event type")
@@ -852,7 +858,7 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
                 failed_codex_items += 1
             elif provider == "codex" and kind in {"item.started", "item.completed", "item.failed"}:
                 item = event.get("item")
-                if kind == "item.failed":
+                if kind == "item.failed" and not codex_explicit_error:
                     failed_codex_items += 1
                 if type(item) is not dict:
                     codex_malformed_item_events += 1
@@ -863,7 +869,8 @@ def _parse_usage(provider: str, stdout_path: Path, requested_model: str,
                     if (item.get("type") == "command_execution" and "exit_code" in item
                             and type(exit_code) is not int):
                         codex_malformed_item_events += 1
-                    if ((type(status) is str and status in {"failed", "error"})
+                    if not codex_explicit_error and (
+                            (type(status) is str and status in {"failed", "error"})
                             or (item.get("type") == "command_execution" and type(exit_code) is int
                                 and exit_code != 0)):
                         failed_codex_items += 1

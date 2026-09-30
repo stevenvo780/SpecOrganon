@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "decision": "D-096",
+  "reviewed_at_utc": "2026-09-30T06:47:24.966363+00:00",
+  "classification": "independent_native_read_only_prelaunch_review",
+  "reviewer_task": "source_gate_review",
+  "scope": [
+    "scripts/run_prototype_checkpoint.py",
+    "scripts/run_development_arm.py",
+    "tests/test_prototype_checkpoint.py",
+    "tests/test_run_development_arm.py",
+    "experiments/development/prototype_checkpoint_compatibility_2026-09-30/plan.json"
+  ],
+  "files": {
+    "scripts/run_prototype_checkpoint.py": {
+      "sha256": "133029fb26c820e97e5d6bdcf2a0402e21087fd8391b6c31a06a3b4e525266fc",
+      "bytes": 26165
+    },
+    "scripts/run_development_arm.py": {
+      "sha256": "e8ad30330fbe92fb777c0d1390923d06eda834e6f84c5841d4fac3aa8286d7e5",
+      "bytes": 128973
+    },
+    "tests/test_prototype_checkpoint.py": {
+      "sha256": "184ea0d6d95da91567e99f425046664be02318be74df7d81032f20bf36afee5e",
+      "bytes": 14601
+    },
+    "tests/test_run_development_arm.py": {
+      "sha256": "1484a42be2110217ee48fba2bee89093c00faf98d6e89d316ab14181969f4e50",
+      "bytes": 137056
+    },
+    "experiments/development/prototype_checkpoint_compatibility_2026-09-30/plan.json": {
+      "sha256": "20a7c3917f7a19006b62e61154e931b09b31920bd3039ea68f0fd4e1466ec746",
+      "bytes": 4640
+    }
+  },
+  "findings": [
+    {
+      "severity": "P2",
+      "finding": "item.updated with explicit error could remain successful in generic parser",
+      "before_fix_reproduction_failed": 4,
+      "resolution": "generic explicit item.* error recognition with no double counting",
+      "status": "closed"
+    }
+  ],
+  "independent_tests": {
+    "checkpoint_initial_review_passed": 22,
+    "parser_final_focal_passed": 79,
+    "parser_final_deselected": 202
+  },
+  "d095_negative_preserved": true,
+  "d095_raw_usage_input_tokens": 17576,
+  "d095_raw_usage_output_tokens": 956,
+  "d095_current_parser_terminal_success": false,
+  "d095_current_parser_complete": false,
+  "d095_current_parser_failed_items": 1,
+  "d095_raw_trace_unchanged": true,
+  "registered_authority_sha_verified": true,
+  "d096_host_enabled_others_still_disabled": true,
+  "same_prompt_sha_enforced": true,
+  "host_help_is_not_handshake": true,
+  "open_p1_p2_in_scope": [],
+  "provider_calls": 0,
+  "auth_or_config_files_read": false,
+  "actual_execute_called": false,
+  "criterion_4": "not_assessed",
+  "global_acceptance": "0/5"
+}

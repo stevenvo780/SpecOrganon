@@ -39,7 +39,7 @@ def admission(tmp_path, monkeypatch):
     monkeypatch.setenv(checkpoint.ADMISSION_ENV, str(tmp_path / "admission"))
 
 
-def _prepare(tmp_path, *, active_seconds=120, name="run", monkeypatch=None) -> Path:
+def _prepare(tmp_path, *, active_seconds=120, name="run", monkeypatch=None, study_id="D095") -> Path:
     if active_seconds != 120:
         assert monkeypatch is not None
         protocol = json.loads(checkpoint.PROTOCOL.read_text())
@@ -50,7 +50,7 @@ def _prepare(tmp_path, *, active_seconds=120, name="run", monkeypatch=None) -> P
         monkeypatch.setattr(checkpoint, "PROTOCOL_SHA", hashlib.sha256(protocol_path.read_bytes()).hexdigest())
     directory = tmp_path / name
     checkpoint.prepare(checkpoint.ROOT, directory, mode="graph", model="gpt-6-luna",
-                       effort="medium", active_seconds=active_seconds)
+                       effort="medium", active_seconds=active_seconds, study_id=study_id)
     return directory
 
 
@@ -240,3 +240,64 @@ def test_coherent_protocol_override_is_rejected_on_reload(tmp_path, admission):
     checkpoint._atomic(directory / "run.json", state)
     with pytest.raises(checkpoint.CheckpointError, match="fixed study authority"):
         checkpoint.execute(directory)
+
+
+def _fake_host(bindir: Path, *, success=True) -> None:
+    host = bindir / "codex-code-mode-host"
+    host.write_text("#!" + sys.executable + "\n" +
+                    f"import sys\nprint('synthetic help, no provider')\nsys.exit({0 if success else 1})\n")
+    host.chmod(0o700)
+
+
+def test_registered_compatibility_round_initializes_without_changing_d095(tmp_path, monkeypatch, admission):
+    archive = checkpoint.ROOT / "experiments/development/prototype_checkpoint_2026-09-30/attempt"
+    before = (archive / "run.json").read_bytes()
+    directory = _prepare(tmp_path, study_id="D096")
+    bindir = _fake_cli(tmp_path, monkeypatch)
+    _fake_host(bindir)
+    result = checkpoint.execute(directory)
+    assert result["checkpoint_verified"]
+    assert result["run"]["host"]["exit_code"] == 0
+    assert result["run"]["host"]["model_call"] is False
+    argv = result["run"]["argv"]
+    assert argv[argv.index("--enable") + 1] == "code_mode_host"
+    pairs = [(argv[i], argv[i + 1]) for i in range(len(argv) - 1)]
+    assert ("--disable", "code_mode_host") not in pairs
+    assert ("--disable", "shell_tool") in pairs
+    assert ("--disable", "multi_agent") in pairs
+    assert checkpoint.status(archive)["state"] == "failed"
+    assert (archive / "run.json").read_bytes() == before
+    process = subprocess.run([sys.executable, str(checkpoint.ROOT / "scripts/run_prototype_checkpoint.py"),
+                             "status", str(directory)], capture_output=True, text=True, check=True)
+    assert json.loads(process.stdout)["checkpoint_verified"]
+
+
+@pytest.mark.parametrize("host_state", ["missing", "failed"])
+def test_host_preflight_stops_before_model_invocation(tmp_path, monkeypatch, admission, host_state):
+    directory = _prepare(tmp_path, study_id="D096")
+    bindir = _fake_cli(tmp_path, monkeypatch)
+    if host_state == "failed":
+        _fake_host(bindir, success=False)
+    result = checkpoint.execute(directory)
+    assert result["state"] == "failed" and not result["checkpoint_verified"]
+    assert not (bindir / "calls.txt").exists()
+    assert not (directory / "model.stdout.jsonl").exists()
+    assert not (directory / "state.json").exists()
+
+
+def test_second_compatibility_destination_never_invokes_model(tmp_path, monkeypatch, admission):
+    first = _prepare(tmp_path, study_id="D096", name="first")
+    second = _prepare(tmp_path, study_id="D096", name="second")
+    bindir = _fake_cli(tmp_path, monkeypatch)
+    _fake_host(bindir)
+    assert checkpoint.execute(first)["checkpoint_verified"]
+    result = checkpoint.execute(second)
+    assert result["state"] == "failed" and "already claimed" in result["run"]["error"]
+    assert (bindir / "calls.txt").read_text() == "execute\n"
+
+
+def test_unregistered_study_rejected_before_destination(tmp_path, admission):
+    with pytest.raises(checkpoint.CheckpointError, match="unknown registered study"):
+        checkpoint.prepare(checkpoint.ROOT, tmp_path / "invalid", mode="graph", model="gpt-6-luna",
+                           effort="medium", active_seconds=120, study_id="unregistered")
+    assert not (tmp_path / "invalid").exists()

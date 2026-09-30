@@ -28,6 +28,8 @@ STAGING_SHA = "edc8a5c6de6e8af0813a0032091d60900d7460b849c18a09efdb1309a95e825a"
 FREEZE = "7f8a344d56b467d032e449883074feb977f5a2c7"
 PROTOCOL = ROOT / "experiments/development/prototype_checkpoint_2026-09-30/plan.json"
 PROTOCOL_SHA = "a738b51f649ba1d64a2f8c929d6a41925ed97f1935c20f52c887d613c3713969"
+D096_PROTOCOL = ROOT / "experiments/development/prototype_checkpoint_compatibility_2026-09-30/plan.json"
+D096_PROTOCOL_SHA = "20a7c3917f7a19006b62e61154e931b09b31920bd3039ea68f0fd4e1466ec746"
 ADMISSION_ENV = "SPECORGANON_CHECKPOINT_ADMISSION_ROOT"
 SOURCES = {
     "task.md": "cases/bread_development/task.md",
@@ -51,6 +53,19 @@ LIMITS = {"global_run_limits_enforced": False, "token_limit_enforced": False,
 
 class CheckpointError(ValueError):
     pass
+
+
+def _authority(study_id: str) -> tuple[Path, str]:
+    if study_id == "D095":
+        return PROTOCOL, PROTOCOL_SHA
+    if study_id == "D096":
+        return D096_PROTOCOL, D096_PROTOCOL_SHA
+    raise CheckpointError("unknown registered study")
+
+
+def _disabled_features(study_id: str) -> tuple[str, ...]:
+    _authority(study_id)
+    return tuple(f for f in FEATURES_OFF if study_id == "D095" or f != "code_mode_host")
 
 
 def _now() -> str:
@@ -150,13 +165,13 @@ def _proposal(raw: bytes) -> dict:
 
 
 def prepare(repo: Path, destination: Path, *, mode: str, model: str,
-            effort: str, active_seconds: int) -> dict:
+            effort: str, active_seconds: int, study_id: str = "D095") -> dict:
     if mode not in {"graph", "risk", "sequential"} or effort not in {"low", "medium", "high"}:
         raise CheckpointError("invalid mode or effort")
     if not re.fullmatch(r"gpt-[a-zA-Z0-9.-]+", model) or type(active_seconds) is not int or not 1 <= active_seconds <= 300:
         raise CheckpointError("invalid requested model or time limit")
-    protocol_path = PROTOCOL.resolve(strict=True)
-    protocol_sha256 = PROTOCOL_SHA
+    authority_path, protocol_sha256 = _authority(study_id)
+    protocol_path = authority_path.resolve(strict=True)
     protocol_raw = _read(protocol_path)
     if _record(protocol_raw)["sha256"] != protocol_sha256:
         raise CheckpointError("prospective protocol bytes changed")
@@ -198,6 +213,8 @@ def prepare(repo: Path, destination: Path, *, mode: str, model: str,
     for name in ("task.md", "source_claims.json", "source_manifest.json"):
         prompt += f"\nPUBLIC {name}\n" + blobs[f"input/{name}"].decode("utf-8")
     blobs["prompt.txt"] = prompt.encode("utf-8")
+    if study_id == "D096" and _record(blobs["prompt.txt"])["sha256"] != protocol.get("prompt_sha256"):
+        raise CheckpointError("prompt differs from the frozen compatibility study")
     blobs["schema.json"] = (json.dumps(_schema(), sort_keys=True, indent=2) + "\n").encode()
     destination = destination.absolute()
     if destination.exists() or destination.is_symlink():
@@ -210,6 +227,7 @@ def prepare(repo: Path, destination: Path, *, mode: str, model: str,
     (destination / "work").mkdir(mode=0o700)
     (destination / "run.lock").touch(mode=0o600)
     plan = {"schema": 1, "mode": mode, "model": model, "effort": effort,
+            "study_id": study_id,
             "active_seconds": active_seconds, "source_commit": FREEZE,
             "protocol_path": str(protocol_path), "protocol_sha256": protocol_sha256,
             "admission_root": str(Path(os.environ.get(ADMISSION_ENV,
@@ -229,8 +247,9 @@ def _load(directory: Path) -> tuple[dict, dict]:
     if state.get("plan") != _record(plan_raw):
         raise CheckpointError("plan changed")
     plan = _json(plan_raw)
-    if (plan["protocol_path"] != str(PROTOCOL.resolve(strict=True))
-            or plan["protocol_sha256"] != PROTOCOL_SHA):
+    authority_path, authority_sha = _authority(plan.get("study_id", "D095"))
+    if (plan["protocol_path"] != str(authority_path.resolve(strict=True))
+            or plan["protocol_sha256"] != authority_sha):
         raise CheckpointError("runtime protocol differs from the fixed study authority")
     protocol_raw = _read(Path(plan["protocol_path"]))
     if _record(protocol_raw)["sha256"] != plan["protocol_sha256"]:
@@ -240,6 +259,9 @@ def _load(directory: Path) -> tuple[dict, dict]:
             protocol["prototype_mode"], protocol["requested_model"],
             protocol["requested_effort"], protocol["active_seconds"]):
         raise CheckpointError("runtime configuration differs from the prospective protocol")
+    if plan.get("study_id") == "D096" and (
+            plan["fixed_files"].get("prompt.txt", {}).get("sha256") != protocol.get("prompt_sha256")):
+        raise CheckpointError("runtime prompt differs from the frozen compatibility study")
     if state.get("state") not in {"prepared", "started", "failed", "checkpoint_ready"}:
         raise CheckpointError("invalid execution state")
     if type(plan.get("active_seconds")) is not int or not 1 <= plan["active_seconds"] <= 300:
@@ -291,6 +313,11 @@ def status(directory: Path) -> dict:
                 "prototype_case.json", "state.json", "model.stdout.jsonl", "model.stderr.txt",
                 "proposal.json", "init.stdout.json", "init.stderr.txt")):
             raise CheckpointError("checkpoint lacks required artifact pins")
+        if plan.get("study_id") == "D096" and (
+                not all(n in state["artifacts"] for n in ("host.stdout.txt", "host.stderr.txt"))
+                or state.get("host", {}).get("exit_code") != 0
+                or state["host"].get("timed_out") is not False):
+            raise CheckpointError("checkpoint lacks successful local host preflight")
         _trace(directory, plan["model"])
         _check_init(directory, plan)
     return {"state": state["state"], "checkpoint_verified": state["state"] == "checkpoint_ready",
@@ -351,6 +378,20 @@ def _claim(directory: Path, plan: dict) -> dict:
     return claim
 
 
+def _host_preflight(cli: str, directory: Path, env: dict[str, str], deadline: float) -> dict:
+    host = Path(cli).resolve(strict=True).parent / "codex-code-mode-host"
+    if not host.is_file() or not os.access(host, os.X_OK):
+        raise CheckpointError("packaged local Code Mode host unavailable")
+    capture = _capture([str(host), "--help"], cwd=directory / "work", env=env,
+                       timeout_seconds=10, active_deadline=deadline, stage="host_preflight",
+                       stdout_path=directory / "host.stdout.txt", stderr_path=directory / "host.stderr.txt")
+    capture.update(executable=str(host), executable_record=_artifact_record(host),
+                   model_call=False, handshake_observed=False)
+    if capture["exit_code"] != 0 or capture["timed_out"]:
+        raise CheckpointError("packaged local Code Mode host help failed")
+    return capture
+
+
 def execute(directory: Path) -> dict:
     directory = directory.resolve(strict=True)
     with (directory / "run.lock").open("rb") as lock:
@@ -369,11 +410,16 @@ def execute(directory: Path) -> dict:
             if not cli:
                 raise CheckpointError("codex CLI unavailable")
             state["authentication"] = _auth(cli, env, deadline)
+            study_id = plan.get("study_id", "D095")
+            if study_id == "D096":
+                state["host"] = _host_preflight(cli, directory, env, deadline)
             argv = [cli, "exec", "--json", "--ephemeral", "--ignore-user-config",
                     "--skip-git-repo-check", "-C", str(directory / "work"), "-s", "read-only",
                     "-m", plan["model"], "-c", f'model_reasoning_effort="{plan["effort"]}"',
                     "-c", 'web_search="disabled"']
-            for feature in FEATURES_OFF:
+            if study_id == "D096":
+                argv += ["--enable", "code_mode_host"]
+            for feature in _disabled_features(study_id):
                 argv += ["--disable", feature]
             argv += ["--output-schema", str(directory / "schema.json"), "-o",
                      str(directory / "proposal.json"), "-"]
@@ -406,7 +452,7 @@ def execute(directory: Path) -> dict:
             state.update(state="failed", error=f"{type(exc).__name__}: {exc}")
         finally:
             for name in ("model.stdout.jsonl", "model.stderr.txt", "proposal.json", "prototype_case.json",
-                         "state.json", "init.stdout.json", "init.stderr.txt"):
+                         "state.json", "init.stdout.json", "init.stderr.txt", "host.stdout.txt", "host.stderr.txt"):
                 path = directory / name
                 if path.exists():
                     try:
@@ -433,13 +479,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--model", required=True)
     p.add_argument("--effort", required=True)
     p.add_argument("--active-seconds", required=True, type=int)
+    p.add_argument("--study", choices=("D095", "D096"), default="D095")
     for name in ("execute", "status"):
         commands.add_parser(name).add_argument("directory", type=Path)
     args = parser.parse_args(argv)
     try:
         if args.command == "prepare":
             result = prepare(args.repo, args.directory, mode=args.mode, model=args.model,
-                             effort=args.effort, active_seconds=args.active_seconds)
+                             effort=args.effort, active_seconds=args.active_seconds, study_id=args.study)
         else:
             result = execute(args.directory) if args.command == "execute" else status(args.directory)
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))

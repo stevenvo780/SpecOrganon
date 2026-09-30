@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "decision": "D-096",
+  "classification": "local_prelaunch_validation",
+  "provider_calls_in_tests": 0,
+  "tests": {
+    "runner": {
+      "passed": 281,
+      "command": "python3 -m pytest tests/test_run_development_arm.py -q"
+    },
+    "checkpoint": {
+      "passed": 22,
+      "seconds": 4.28,
+      "command": "uv run --locked --extra dev python -m pytest -q tests/test_prototype_checkpoint.py"
+    }
+  },
+  "ruff": "passed",
+  "compile": "passed",
+  "diff_check": "passed",
+  "fake_model_real_local_processes": true,
+  "codex_error_usage": "any explicit error or item.* carrying item.type error rejects success without duplicate counting; usage retained",
+  "d095_archive_not_modified": true,
+  "files": {
+    "scripts/run_prototype_checkpoint.py": {
+      "sha256": "133029fb26c820e97e5d6bdcf2a0402e21087fd8391b6c31a06a3b4e525266fc",
+      "bytes": 26165
+    },
+    "tests/test_prototype_checkpoint.py": {
+      "sha256": "184ea0d6d95da91567e99f425046664be02318be74df7d81032f20bf36afee5e",
+      "bytes": 14601
+    },
+    "scripts/run_development_arm.py": {
+      "sha256": "e8ad30330fbe92fb777c0d1390923d06eda834e6f84c5841d4fac3aa8286d7e5",
+      "bytes": 128973
+    },
+    "tests/test_run_development_arm.py": {
+      "sha256": "1484a42be2110217ee48fba2bee89093c00faf98d6e89d316ab14181969f4e50",
+      "bytes": 137056
+    },
+    "experiments/development/prototype_checkpoint_compatibility_2026-09-30/plan.json": {
+      "sha256": "20a7c3917f7a19006b62e61154e931b09b31920bd3039ea68f0fd4e1466ec746",
+      "bytes": 4640
+    }
+  },
+  "global_run_limits_enforced": false,
+  "criterion_4": "not_assessed",
+  "review_gap_before_fix": {
+    "synthetic_item_updated_errors_false_green": 4,
+    "reproduction": "4 failed before fix; corrected regressions included in 281 passed"
+  }
+}

@@ -1383,6 +1383,77 @@ def test_codex_complete_item_pair_and_legacy_unpaired_completion(
         assert legacy["complete"] is True
 
 
+@pytest.mark.parametrize("item_type", ["agent_message", "reasoning"])
+@pytest.mark.parametrize("kind", ["item.completed", "item.updated", "item.future_suffix"])
+def test_codex_message_and_reasoning_items_keep_terminal_success(
+    tmp_path: Path, item_type: str, kind: str,
+) -> None:
+    trace = tmp_path / "codex.jsonl"
+    usage = _codex_item_trace(trace, [{
+        "type": kind,
+        "item": {"id": "message-1", "type": item_type, "text": "done"},
+    }])
+    parsed = runner._parse_usage("codex", trace, "test-model")
+    assert parsed["terminal_success"] is True
+    assert parsed["complete"] is True
+    assert parsed["final_usage"] == usage
+
+
+@pytest.mark.parametrize("kind", [
+    "item.started", "item.completed", "item.failed", "item.updated", "item.future_suffix", "error",
+])
+@pytest.mark.parametrize("details", [
+    {"message": "startup failure", "status": "error", "id": "error-1"},
+    {}, {"message": None}, {"message": 42, "id": []},
+])
+@pytest.mark.parametrize("position", ["startup", "before_final", "after_final"])
+def test_codex_explicit_errors_fail_closed_and_preserve_usage(
+    tmp_path: Path, kind: str, details: dict[str, object], position: str,
+) -> None:
+    trace = tmp_path / "codex.jsonl"
+    usage = _codex_item_trace(trace, [])
+    final_event = json.loads(trace.read_text(encoding="utf-8"))
+    error_event = ({"type": kind, **details} if kind == "error" else {
+        "type": kind, "item": {"type": "error", **details},
+    })
+    events = [{"type": "turn.started"}, final_event]
+    error_index = {"startup": 0, "before_final": 1, "after_final": 2}[position]
+    events.insert(error_index, error_event)
+    raw = "".join(json.dumps(event) + "\n" for event in events)
+    trace.write_text(raw, encoding="utf-8")
+
+    parsed = runner._parse_usage("codex", trace, "test-model")
+
+    assert parsed["terminal_success"] is False
+    assert parsed["complete"] is False
+    assert parsed["observed_failed_codex_items_partial"] == 1
+    assert any("failed item/turn events" in error for error in parsed["terminal_errors"])
+    assert parsed["final_usage"] == usage
+    assert trace.read_text(encoding="utf-8") == raw
+
+
+def test_codex_d095_archived_startup_error_rejects_terminal_success() -> None:
+    trace = (SCRIPTS.parent / "experiments/development/prototype_checkpoint_2026-09-30"
+             / "attempt/model.stdout.jsonl")
+    raw = trace.read_bytes()
+    events = [json.loads(line) for line in raw.splitlines()]
+    assert events[1]["type"] == "item.completed"
+    assert events[1]["item"]["type"] == "error"
+    assert events[-1]["type"] == "turn.completed"
+
+    parsed = runner._parse_usage("codex", trace, "archived-model")
+
+    assert parsed["terminal_success"] is False
+    assert parsed["complete"] is False
+    assert parsed["observed_failed_codex_items_partial"] == 1
+    assert parsed["final_usage"] == events[-1]["usage"] == {
+        "input_tokens": 17576, "cached_input_tokens": 0, "cache_write_input_tokens": 0,
+        "output_tokens": 956, "reasoning_output_tokens": 0,
+    }
+    assert any("failed item/turn events" in error for error in parsed["terminal_errors"])
+    assert trace.read_bytes() == raw
+
+
 @pytest.mark.parametrize("item_events,error_fragment", [
     ([{"type": "item.started", "item": {"id": "item-1", "type": "command_execution"}}],
      "started items without completion/failure"),
