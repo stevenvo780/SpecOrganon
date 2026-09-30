@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "study_id": "D099",
+  "classification": "exposed_development_two_turn_subscription_method_bridge",
+  "registered_at_utc": "2026-09-30T09:19:35.240544+00:00",
+  "requested_model": "gpt-6-luna",
+  "requested_effort": "medium",
+  "arm_order": [
+    "S",
+    "T",
+    "N"
+  ],
+  "attempts_per_arm": 1,
+  "active_seconds_per_arm": 360,
+  "max_model_calls_per_arm": 2,
+  "max_generic_replays_per_arm": 1,
+  "max_toolkit_puts": 8,
+  "sandbox": {
+    "wall_seconds": 30,
+    "cpu_seconds": 10,
+    "address_space_bytes": 536870912,
+    "file_bytes_per_file": 2097152
+  },
+  "sources": {
+    "task.md": {
+      "path": "cases/building_energy/task.md",
+      "bytes": 3166,
+      "sha256": "f6fed29bc6ce18631cff30710b25f30b9662e04f889f336cccda2869f0789b64"
+    },
+    "source_manifest.json": {
+      "path": "cases/building_energy/source_manifest.json",
+      "bytes": 1874,
+      "sha256": "0e18340d130c495201e68c1c869bc2c6f49b35663176040aebb0d0d7d7bd1ee1"
+    },
+    "sample_first_complete_week.csv": {
+      "path": "cases/building_energy/sample_first_complete_week.csv",
+      "bytes": 612074,
+      "sha256": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba"
+    }
+  },
+  "prompts": {
+    "common": {
+      "path": "experiments/development/subscription_method_trial_2026-09-30/common.md",
+      "bytes": 3552,
+      "sha256": "dd08557d5078a5bc58b1701e25d9653c3eefb886395629fe1f4e8e4531fa1582"
+    },
+    "N": {
+      "path": "experiments/development/subscription_method_trial_2026-09-30/arm_n.md",
+      "bytes": 250,
+      "sha256": "ef319b592e6600a99018c2e33cd6d0cdc0b34b7e979f58e5b8f9e74372e5625f"
+    },
+    "S": {
+      "path": "experiments/development/subscription_method_trial_2026-09-30/arm_s.md",
+      "bytes": 423,
+      "sha256": "0a5efd20554c7b32d6fa9df44bb2f085e5a6a4b26fdc908b7e560540a8879ff9"
+    },
+    "T": {
+      "path": "experiments/development/subscription_method_trial_2026-09-30/arm_t.md",
+      "bytes": 1353,
+      "sha256": "07017595feddf4a46c93828488d0f9cd388a7422eac1f285c9dc0ab63ac7cd33"
+    }
+  },
+  "toolkit": {
+    "cli_path": "/workspace/SpecOrganon/.venv/bin/organon",
+    "cli_pin": {
+      "bytes": 321,
+      "sha256": "fa67315e89026ca7fabd60ee2bce7564fb70bf9aac19a4eb28884591eb4270d1"
+    },
+    "source_files": {
+      "src/specorganon/__init__.py": {
+        "bytes": 83,
+        "sha256": "cbfd011a2da30410ed99125aaf779fb4ad070c49834a5bbdd932a0125f269f56"
+      },
+      "src/specorganon/anchor.py": {
+        "bytes": 5406,
+        "sha256": "6e12048244f3d603b1d4f7c16d9284c78676dba207c195a69d1a8ba2a9947d1c"
+      },
+      "src/specorganon/approval.py": {
+        "bytes": 10381,
+        "sha256": "25ccbf82aaf8fed4437e45de8050dd761efe6b945af3b3a59d4a453a4b37a4bf"
+      },
+      "src/specorganon/cli.py": {
+        "bytes": 11494,
+        "sha256": "9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82"
+      },
+      "src/specorganon/engine.py": {
+        "bytes": 105072,
+        "sha256": "52b0a5ee102c695bd903723552c8654e0197100bf6afb8208794c93fc0fefa7d"
+      },
+      "src/specorganon/field_adjusted_candidate.py": {
+        "bytes": 24846,
+        "sha256": "88a70560fbe0907ad1e3cb3a2e25dabb7fc0c02eaa42db6f6cda3cad2178971c"
+      },
+      "src/specorganon/field_attestation.py": {
+        "bytes": 16767,
+        "sha256": "62e2f75ee95bb1535c27be35cfb0cb175def146b380407de350ee5e2e20b10ba"
+      },
+      "src/specorganon/field_effect_analysis.py": {
+        "bytes": 16005,
+        "sha256": "cf3ab0190e87702464e1482c95847a55af5f1ba46d9936bb74553fa66984ef9a"
+      },
+      "src/specorganon/field_flows.py": {
+        "bytes": 64082,
+        "sha256": "112c3c3295224697c5b8d7c93841f411e8a6dc72c0dca1961bad6dcedd495dd7"
+      },
+      "src/specorganon/field_guardrails.py": {
+        "bytes": 24760,
+        "sha256": "97f93030259db9d66ab88c858868bf481758c52a3e7dca410be044b196eab777"
+      },
+      "src/specorganon/field_power_sensitivity.py": {
+        "bytes": 17014,
+        "sha256": "aa973e17ee4df24c8ba4b9a181967a92216cf9be24d7d36e08c8363beaee7e4e"
+      },
+      "src/specorganon/field_source_content_audit.py": {
+        "bytes": 38314,
+        "sha256": "1fb828ef82fbbe9c63efca3a2c8d32c9a716eb2aa2fca7f1421bfea4daead37f"
+      },
+      "src/specorganon/field_source_digest_audit.py": {
+        "bytes": 13832,
+        "sha256": "820b3d1b310e80d002c74c9dcb54984449bc0fff3ba5079cdc1221818e6a3fbe"
+      },
+      "src/specorganon/field_trial_design.py": {
+        "bytes": 16425,
+        "sha256": "f0e937ba77d894e9f56088d7f80b6e3fef182a4b1c153e45a1f185b1a6407cb0"
+      },
+      "src/specorganon/ledger.py": {
+        "bytes": 9726,
+        "sha256": "0d27ff5b65d5932229f88983878e55d986ae491c7272ed4ae9345d5434a17ea3"
+      },
+      "src/specorganon/ratio_audit.py": {
+        "bytes": 15839,
+        "sha256": "55bf8b9174d49985ce69b503b113541bc313f992ca4fced9532fb0f0201121d1"
+      },
+      "src/specorganon/review_provenance.py": {
+        "bytes": 3086,
+        "sha256": "3b2a59bd195a9b77819f716d35ba8527180235cd978030dc4b7351dc8dc033a3"
+      },
+      "src/specorganon/runner.py": {
+        "bytes": 22186,
+        "sha256": "24582016305fc9b7c415922808a43b93f79fac9a2d419d470984dd5975cb2681"
+      },
+      "src/specorganon/server.py": {
+        "bytes": 24562,
+        "sha256": "c0b8be038e2b14f2de3667edb05316556cd669ebe715fce27cb9c019c9c50408"
+      },
+      "src/specorganon/test_execution.py": {
+        "bytes": 6931,
+        "sha256": "2952534b0b709513224e3bb25f155e282ed5dd63a41bf99e2fa0a1d2bf400d24"
+      },
+      "src/specorganon/test_observation.py": {
+        "bytes": 20720,
+        "sha256": "02e5a316e44f90e67f75797624fd6f243b6516df4be3c9aa3b11974f6b2af5a0"
+      },
+      "src/specorganon/workflow.py": {
+        "bytes": 4239,
+        "sha256": "3f3980119743962a210beffdc2b0f8d845d53bb25a0cc3eace3eacaa347ad5f2"
+      }
+    }
+  },
+  "first_schema_fields": [
+    "analysis_py",
+    "draft_report_md",
+    "items_json"
+  ],
+  "second_schema_fields": [
+    "report_md"
+  ],
+  "item_fields": [
+    "id",
+    "kind",
+    "text",
+    "refs",
+    "data"
+  ],
+  "toolkit_scope": "initial signed trace and frame/critique gate feedback only; no approvals/reviews/advance",
+  "ordered_execution": "each arm reaches terminal or safety rejection before next arm; no replacement",
+  "manual_review_scope": "safety only; no edits or factual coaching; exact proposal SHA declaration",
+  "metric_contract": {
+    "reference": "independent CSV parsing before generation; no reference outputs in model prompt",
+    "checks": [
+      "rows",
+      "first_timestamp",
+      "last_timestamp",
+      "interval_minutes",
+      "continuous",
+      "appliances_total_kwh",
+      "daily_appliances_kwh for every date",
+      "lights_total_kwh",
+      "three energy units"
+    ],
+    "numeric_abs_tolerance": 1e-09,
+    "Q": null,
+    "human_quality_score": null,
+    "method_winner_selected": false
+  },
+  "generation_tools_observed_allowed": 0,
+  "model_calls_independently_attested": false,
+  "provider_identity_authenticated": false,
+  "effective_model_version": null,
+  "token_limit_preventively_enforced": false,
+  "cost": null,
+  "cost_limit_enforced": false,
+  "global_run_limits_enforced": false,
+  "local_claim_scope": "cooperating processes sharing one local admission root",
+  "authentication_policy": "existing ChatGPT login classification; API env excluded; no paid fallback",
+  "parent_negative_preserved": "D097",
+  "counts_toward_required_24_runs": false,
+  "field_intervention_authorized": false,
+  "criterion_4": "not_assessed",
+  "global_acceptance": "0/5",
+  "allowed_item_kinds": [
+    "problem",
+    "actor",
+    "boundary",
+    "assumption",
+    "evidence",
+    "norm",
+    "decision",
+    "requirement"
+  ],
+  "prospective_amendment": {
+    "reason": "initial item kinds excluded actor/boundary required by real frame gate",
+    "before_any_model_calls": true,
+    "original_plan_sha256": "2c5d4f5f1886f28e512c163bb030b633655b61f3ae4218b5e58b0036edcefb09",
+    "root_applied_independent_finding": true
+  }
+}

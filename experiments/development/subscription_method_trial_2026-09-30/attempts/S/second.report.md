@@ -1,0 +1,21 @@
+# Informe final D‑E · brazo S (SDD)
+
+## Resultado del replay
+
+El análisis sellado se ejecutó correctamente, terminó con código 0 en 0,095 s y no produjo errores. Leyó 1.008 filas, desde `2016-01-12 00:00:00` hasta `2016-01-18 23:50:00`; las marcas consecutivas mantienen el intervalo esperado de 10 minutos. El SHA‑256 del CSV coincide con el manifiesto (`c7f66ffa…f05e6ba`) y el conteo también coincide.
+
+`Appliances` suma **118,28 kWh** en la semana. Los totales diarios son: 12 ene, 12,34; 13 ene, 13,97; 14 ene, 21,80; 15 ene, 18,05; 16 ene, 18,04; 17 ene, 20,55; 18 ene, 13,53 kWh. Como observación adicional, `lights` suma **5,32 kWh**. Son conversiones de Wh por intervalo a kWh mediante división por 1.000. La zona horaria de las marcas no está especificada.
+
+## Recomendación y límites
+
+Los resultados son descriptivos de una semana observacional de una vivienda. No identifican qué aparatos explican el consumo ni estiman el ahorro, los efectos sobre confort, seguridad o trabajo, ni los costes de una intervención. No justifican elegir entre cambios voluntarios de horario para cargas no esenciales identificadas y reducir el consumo en espera de equipos que los residentes confirmen que pueden apagarse. Cada opción podría causar molestias o interrupciones; faltan datos para comparar sus beneficios y perjuicios. Por ello, **se suspende la elección de una intervención**. No se autoriza actuar sobre una vivienda real. Los criterios de valor y las salvaguardas siguen pendientes de decisión por residentes y responsables de costes.
+
+## Medición prospectiva propuesta
+
+Con consentimiento y cargas elegibles acordadas, registrar energía por aparato o circuito, operación e intervención, junto con ocupación en categorías mínimas acordadas, comodidad, temperatura pertinente, incidentes, interrupciones laborales y costes. Recoger al menos dos semanas de línea base que incluyan días laborales y fin de semana; luego asignar aleatoriamente bloques comparables de días entre rutina habitual y una medida elegida, durante al menos cuatro semanas con estados repetidos. Si hay efectos persistentes, definir de antemano el lavado y el orden. La unidad propuesta de asignación es el bloque de días dentro de una vivienda; un ensayo de una vivienda no establecería generalización a otras.
+
+La métrica primaria sería la diferencia en kWh diarios de los aparatos elegibles entre intervención y control, con incertidumbre informada y ajuste por duración observada. También se mediría el consumo total del hogar para detectar desplazamientos. Antes de iniciar, los actores deben acordar márgenes de confort, seguridad, trabajo y coste. Un incidente de seguridad o una interrupción esencial exige detener la prueba; se retiraría la recomendación ante daño, incumplimiento de un margen acordado o ahorro neto insuficiente según el criterio aprobado. No imputar intervalos faltantes como cero; excluir del análisis principal días con más del 10% de intervalos primarios ausentes o sin un registro esencial de salvaguarda, y presentar una sensibilidad con días parcialmente observados. Informar faltantes y motivos por brazo.
+
+## Estado del procedimiento
+
+No hubo toolkit, comandos ni traza de tratamiento T. Se registran **cero decisiones normativas aprobadas y cero fases completadas**. La autorización de intervención de campo sigue en falso. La aceptación global es 0/5; los criterios 3 y 4 no quedan resueltos por este replay, el cual no cuenta hacia las 24 ejecuciones requeridas. No se seleccionó ganador de método. El coste y la puntuación humana son nulos; identidad del proveedor, llamadas a modelos, límites preventivos, cancelación remota y límites globales no se verificaron independientemente. El supervisor revisó la seguridad de la propuesta completa; esa revisión no constituye aprobación normativa ni aceptación del resultado.

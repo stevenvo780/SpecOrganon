@@ -1,0 +1,23 @@
+# D-E: propuesta de ensayo prospectivo
+
+## Qué muestran estos datos
+
+El paquete declara una semana completa de observaciones cada diez minutos, seleccionada antes de analizar desenlaces (12–18 de enero de 2016), de un solo hogar. El script propuesto verifica el hash del CSV frente al manifiesto, las columnas, el número de filas y la continuidad; calcula energía acumulada de `Appliances` y `lights` y totales diarios. Esos campos son energía en Wh por intervalo; dividir la suma por 1000 produce kWh. No se interpreta energía de intervalo como potencia. `rv1` y `rv2` se excluyen como variables aleatorias sin significado de palanca.
+
+La muestra no identifica qué aparatos consumieron energía, cuáles estaban en espera, quién los usó ni cuándo, y no mide ocupación, tarifas individuales, efectos de una acción o perjuicios. No permite atribuir consumo a una conducta ni estimar ahorro, coste o eficacia. Temperatura y humedad son observaciones ambientales, no medidas suficientes de confort percibido. Las marcas no especifican zona horaria.
+
+## Recomendación y alternativas
+
+Con estos datos no es responsable seleccionar ya un cambio operativo para este hogar. Recomiendo primero una fase prospectiva breve de inventario y medición, y someter a aprobación de los habitantes un ensayo optativo de reducción de consumo en espera, limitado a aparatos que ellos identifiquen como no críticos y seguros de desconectar o controlar. No desconectar equipos médicos, de seguridad, refrigeración, comunicaciones necesarias ni dispositivos requeridos para trabajo; la elegibilidad debe decidirla cada hogar con información específica del equipo. Si no se encuentra una carga no crítica medible, no iniciar ese ensayo.
+
+Alternativas que merecen comparación en la fase de diseño: (1) control horario o desconexión selectiva de cargas no críticas en espera, con riesgo de interrupciones, pérdida de ajustes o trabajo adicional; (2) desplazar el uso de aparatos de alto consumo a horarios elegidos por el hogar, que puede causar molestias, ruido o conflicto con rutinas y solo reducir coste —no necesariamente energía— si existe una tarifa horaria pertinente. La muestra no aporta desagregación, tarifas ni horarios de uso para elegir entre ellas. Ninguna acción se autoriza aquí.
+
+## Diseño para resolver la incertidumbre
+
+Tras consentimiento, instalar medidores de circuito o enchufes medidores adecuados, aprobados para las cargas, y registrar energía por aparato elegible, estado de uso, interrupciones y tarifa aplicable. Recoger también temperatura y humedad en el espacio pertinente, breves valoraciones de confort y registro de trabajo afectado, incidentes y tiempo de gestión. Registrar quién paga equipo, energía, instalación y tiempo. Limitar los datos a lo necesario, acordar acceso y retención con los habitantes.
+
+Unidad de asignación: hogar, para evitar contaminación entre aparatos y personas. Comparar periodos de línea base y tratamiento mediante secuencia aleatoria de bloques dentro del mismo hogar, solo si los habitantes aceptan y no hay riesgo; incluir repetición de bloques y días de adaptación. La duración se fija antes de iniciar con potencia estadística basada en variabilidad de la medición y en una reducción mínima que los habitantes consideren útil; una semana histórica no basta para calcularla. Cubrir suficientes días laborables y fines de semana y condiciones de uso representativas. Si solo participa un hogar, la inferencia se limita a ese hogar.
+
+Métrica primaria: diferencia de kWh de los aparatos elegibles por día de observación válido, tratamiento frente a línea base, con regla de ajuste por días y uso definida antes de abrir resultados. Informar estimación e intervalo de incertidumbre, no solo un valor puntual. Separar ahorro energético de coste tarifario. Definir faltantes antes del ensayo: documentar causas; no imputar como consumo cero; excluir días sin cobertura mínima preestablecida y presentar sensibilidad con límites plausibles. Detener el tratamiento ante incidente de seguridad, interrupción crítica o deterioro de confort/trabajo según umbrales aprobados por los habitantes.
+
+La recomendación se retira si no hay reducción compatible con el umbral útil acordado, si los datos son insuficientes para distinguirla de variación normal, o si aparece perjuicio, coste neto inaceptable para cualquier actor afectado o carga de gestión que los habitantes no acepten. Habitantes deben definir antes de comenzar umbrales, compensación de costes, duración y regla de parada. Esas decisiones de valor siguen pendientes. Este diseño evalúa factibilidad y, solo tras medición prospectiva válida, eficacia en el hogar participante; la muestra observacional no es evidencia de eficacia ni justifica actuar en campo.

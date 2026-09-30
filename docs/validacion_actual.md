@@ -1,18 +1,23 @@
 # Auditoría de aceptación actual
 
-**Preparación D-099:** se registraron el [plan expuesto N/SDD/T](../experiments/development/subscription_method_trial_2026-09-30/plan.json)
-y la [revisión del scorer](../experiments/development/subscription_method_trial_2026-09-30/scorer_review.json)
-antes de nuevas llamadas. Ocho pruebas verifican la proyección de 18
-cotejos y rechazan errores numéricos; una falsificación confirma que la
-referencia se calcula desde los mismos bytes cuyo SHA se verificó.
-El revisor recalculó el CSV por separado y cerró el defecto. La sonda real
-del diseño sólo valida seis escrituras y compuertas iniciales sobre un caso
-temporal; no usa respuestas de modelo. El [broker revisado](../experiments/development/subscription_method_trial_2026-09-30/broker_prelaunch_review.json)
-pasa 35 pruebas en Python 3.11 y 3.12, Ruff y nueve casos focales del
-revisor independiente. Los modelos son CLI falsas; sandbox y toolkit son
-procesos locales reales. El orden entre brazos es manual. Terna aún pendiente,
-sin medición de calidad, comparación confirmatoria o intervención.
-Veredicto global **0/5**.
+**Resultado D-099:** el [recibo de la terna expuesta](../experiments/development/subscription_method_trial_2026-09-30/receipt.json)
+conserva seis invocaciones CLI con Luna medio solicitado, dos por brazo,
+después de congelar plan y broker. Los tres únicos replays sellados
+produjeron métricas y pasaron 18/18 cotejos numéricos y de formato; el
+segundo turno recibió los streams reales y sólo produjo informe final.
+No se reparó o reemplazó código. T añadió 11 comandos reales y siete
+`item_put`: `frame.ready=true`, aceptación falsa, cuatro bloqueos de
+`critique` y defectos conservados de procedencia y validez en `status`.
+El [revisor posterior](../experiments/development/subscription_method_trial_2026-09-30/posttrial_review.json)
+cotejó 147 archivos byte idénticos, 12 marcadores separados, 272 protegidos,
+estados de proceso nuevo y cronología manual S/T/N; sin P1/P2 abierto.
+Antes del lanzamiento pasaron 35 pruebas en Python 3.11 y 3.12 y Ruff,
+con CLI falsas y sandbox/toolkit locales reales. El techo numérico no
+mide Q, calidad equivalente, ventaja de método o efecto causal; T sólo
+cubre traza y compuertas iniciales, sin normas o fases aprobadas. Coste,
+RPC e identidad efectiva no autenticados; límites globales sin aplicar.
+Sin intervención, comparación confirmatoria o corrida de las 24.
+Veredicto global **0/5**. [Análisis de alcance](../experiments/development/subscription_method_trial_2026-09-30/RESULTS.md).
 
 **Resultado D-097:** una sola generación con Luna medio solicitado creó
 [código, fuentes e informe originales](../experiments/development/bread_continuation_2026-09-30/attempt/),

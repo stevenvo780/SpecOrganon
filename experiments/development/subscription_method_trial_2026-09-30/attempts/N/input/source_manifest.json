@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "classification": "development_public_observational_case_not_an_intervention",
+  "source": {
+    "title": "Appliances Energy Prediction",
+    "publisher": "UCI Machine Learning Repository",
+    "creator": "Luis Candanedo",
+    "doi": "https://doi.org/10.24432/C5VC8G",
+    "url": "https://archive.ics.uci.edu/static/public/374/appliances+energy+prediction.zip",
+    "license": "CC BY 4.0",
+    "archive_sha256": "2fccf354445d886e7917620b0195db1f3e3e34d5a067a93b844694a4c561255a",
+    "member": "energydata_complete.csv",
+    "member_sha256": "2820bf712ad0275cb18b85a05250926100d8e65ebb9f4d2d016ca91ea152a25d"
+  },
+  "selection": {
+    "rule": "first seven whole calendar days after the source's partial opening day",
+    "start_inclusive": "2016-01-12 00:00:00",
+    "end_exclusive": "2016-01-19 00:00:00",
+    "timestamp_timezone": "not specified by source CSV",
+    "interval_minutes": 10,
+    "rows": 1008,
+    "columns": [
+      "date",
+      "Appliances",
+      "lights",
+      "T1",
+      "RH_1",
+      "T2",
+      "RH_2",
+      "T3",
+      "RH_3",
+      "T4",
+      "RH_4",
+      "T5",
+      "RH_5",
+      "T6",
+      "RH_6",
+      "T7",
+      "RH_7",
+      "T8",
+      "RH_8",
+      "T9",
+      "RH_9",
+      "T_out",
+      "Press_mm_hg",
+      "RH_out",
+      "Windspeed",
+      "Visibility",
+      "Tdewpoint",
+      "rv1",
+      "rv2"
+    ],
+    "sample_sha256": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba"
+  },
+  "limits": [
+    "One observed low-energy house, not a sample of buildings or a causal trial.",
+    "The excerpt is seven days; no intervention, control assignment, occupancy, costs or harms are observed.",
+    "Weather data include interpolated hourly airport observations according to the UCI record.",
+    "The two rv columns are random variables for model diagnostics, not intervention variables."
+  ]
+}

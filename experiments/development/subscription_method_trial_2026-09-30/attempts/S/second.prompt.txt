@@ -1,0 +1,213 @@
+Return ONLY one JSON object with exactly one string report_md, <=32 KiB and <=1200 words. Produce the final report from the exact first prompt/proposal and unmodified supervisor feedback below. No new analysis, code, tools, repair or third call. Explain measured outputs and failures honestly. Normative approvals and completed phases remain zero. No field impact, global acceptance or method winner.
+
+EXACT FIRST PROMPT
+Return ONLY one JSON object with exactly three strings: analysis_py, draft_report_md, items_json. No tools, shell, filesystem inspection, subprocess, network, approvals, reviews or phase advance. Each string <=32 KiB; draft report <=1200 words. analysis_py is standard-library Python: one argument INPUT_DIRECTORY; read public inputs and sample_first_complete_week.csv; emit exactly one finite JSON object to stdout and write no files. The supervisor will inspect this exact proposal before one sealed offline replay. items_json is a JSON array; each item has exactly id,kind,text,refs,data; safe unique ids, refs only earlier ids, finite object data, at most eight items. Kinds: problem,actor,boundary,assumption,evidence,norm,decision,requirement. No privileged data keys or commands. N/S can leave the array empty. Preserve all normative decisions as pending.
+
+COMMON
+# Contrato común D-099 · dos turnos sobre D-E expuesto
+
+Resuelve íntegramente la tarea D-E adjunta como un único agente. Los tres
+brazos reciben la misma tarea, manifiesto y CSV, sin respuestas o resultados
+de otros ejecutores. No uses herramientas de modelo, web, subprocess o red.
+El CSV estará disponible al código en el directorio de entrada; no está
+insertado entero en el prompt. Una sola ejecución genérica de tu análisis
+permitirá observarlo antes del segundo turno. No infieras efectos causales
+ni simules decisiones de los habitantes o una intervención.
+
+En el primer turno devuelve un objeto JSON con exactamente tres strings:
+`analysis_py`, `draft_report_md`, `items_json`. El código usa biblioteca
+estándar, recibe un único argumento INPUT_DIRECTORY y lee
+`sample_first_complete_week.csv`, `task.md` o `source_manifest.json` allí.
+Sólo escribe un objeto JSON finito a stdout; no escribe archivos. Verifica
+integridad, filas y continuidad y calcula las magnitudes solicitadas.
+Código y items tienen un límite individual de 32 KiB; propuesta total
+96 KiB e informe de hasta 1200 palabras. El supervisor conservará los bytes
+originales y un revisor inspeccionará el código antes de su único replay.
+
+Para permitir el cotejo numérico común, usa estos campos en stdout:
+
+- `rows`: número entero de observaciones.
+- `first_timestamp` y `last_timestamp`: marcas originales en formato
+  `YYYY-MM-DD HH:MM:SS`.
+- `interval_minutes`: separación esperada entre registros.
+- `continuous`: booleano que refleje el cotejo de todos los intervalos.
+- `appliances_total_kwh`: energía acumulada de Appliances, Wh/1000.
+- `daily_appliances_kwh`: objeto fecha `YYYY-MM-DD` → total diario en kWh.
+- `lights_total_kwh`: energía acumulada de lights, como observación adicional.
+- `units`: objeto con los tres campos de energía anteriores y valor `kWh`.
+
+Puedes añadir otras observaciones justificadas. No conviertas energía de
+intervalo en potencia sin declarar la operación y su base. La corrección
+mecánica no sustituye la justificación de recomendaciones, incertidumbre,
+seguridad, confort, trabajo o costes.
+
+`items_json` es un array JSON, posiblemente vacío para N/S, con hasta ocho
+objetos de claves exactas `id`, `kind`, `text`, `refs`, `data`. `kind` puede
+ser problem, actor, boundary, assumption, evidence, norm, decision o requirement. Los IDs
+son simples, únicos; cada ref sólo nombra un ítem anterior; data es un
+objeto JSON finito. Las decisiones de valor propuestas permanecen pendientes.
+No incluyas aprobaciones, claves, firmas, confianza, revisiones o avances.
+T usa esos ítems como acciones limitadas del tratamiento; N/S no ejecutan
+el toolkit y pueden organizarse por iniciativa propia.
+
+El supervisor devolverá en el segundo turno los streams originales del
+único replay y, para T, las respuestas reales del toolkit. Entrega entonces
+únicamente el informe final como JSON `{"report_md":"..."}`, hasta 1200
+palabras. Justifica la recomendación o su suspensión conforme a la tarea,
+explicando cualquier fallo. El código del primer turno no se reemplaza;
+no hay tercer turno, reparación o nueva tentativa de esa celda.
+
+Se comparten dos solicitudes y 360 segundos de actividad local por brazo,
+con la revisión humana fuera del reloj. No hay límite preventivo verificado
+de tokens o gasto; su uso y coste se declaran sin inventar equivalencia.
+Esto es exploración expuesta de un puente y un tratamiento inicial, no
+una comparación confirmatoria, aceptación de GOAL o actuación en campo.
+
+ASSIGNED ARM
+# Brazo S · SDD
+
+Aplica especificación, plan, tareas, implementación y verificación a la
+misma tarea. Formula requisitos verificables, relaciona tus cálculos y
+pruebas con ellos y revisa cualquier expectativa contradicha por el replay.
+Registra sólo las decisiones pertinentes al informe, con el mismo límite.
+No recibes CLI/MCP ni módulos filosóficos, empíricos o de invalidación
+adicionales del tratamiento T.
+
+PUBLIC task.md
+# D-E · Paquete visible de desarrollo: energía de un edificio
+
+**Pregunta común:** Con la muestra observacional adjunta, ¿qué intervención concreta merecería un ensayo prospectivo para reducir el consumo eléctrico de electrodomésticos de esta vivienda sin trasladar perjuicios a confort, seguridad, trabajo o coste? Si los datos no permiten elegir con fundamento, explica la decisión y diseña la medición que resolvería la incertidumbre.
+
+## Datos disponibles para los tres métodos
+
+- [`sample_first_complete_week.csv`](sample_first_complete_week.csv): las 1008 observaciones originales cada diez minutos entre el 12 y el 18 de enero de 2016, inclusive. Son los primeros siete días completos después del inicio parcial del archivo, elegidos por fecha antes de analizar desenlaces.
+- [`source_manifest.json`](source_manifest.json): procedencia, licencia, regla de selección, columnas y hashes. El [archivo completo de UCI](https://archive.ics.uci.edu/dataset/374/appliances%2Benergy%2Bprediction) cubre unos 4,5 meses, pero este paquete entrega solo la semana indicada. `Appliances` y `lights` son energía en Wh por intervalo; `T*` y `RH_*` son sensores de temperatura y humedad. Las variables `rv1` y `rv2` son aleatorias y no representan palancas de intervención. Las marcas de tiempo del CSV no declaran zona horaria.
+
+El hogar, su ocupación, operación de aparatos y costos individuales no están descritos con suficiente detalle para inferir efectos causales. No hay asignación, intervención ni seguimiento posterior en este paquete. No se autoriza actuar sobre una vivienda real ni fijar compromisos normativos por sus habitantes.
+
+## Entrega común
+
+1. Un `analysis.py` ejecutable con la biblioteca estándar de Python que lea este CSV, verifique el número y la continuidad de intervalos y calcule al menos el total semanal de `Appliances` en kWh, totales por día y una observación adicional pertinente. Debe informar sus unidades y no usar `rv1`/`rv2` como predictores causales.
+2. Un `report.md` de hasta 1200 palabras que distinga medidas del archivo, inferencias, supuestos y decisiones que requieren aprobación. Delimita actores y criterios de valor; compara al menos dos intervenciones posibles y sus perjuicios; recomienda una o explica por qué todavía no es responsable elegir.
+3. En ese informe, especifica cómo probar prospectivamente la recomendación frente a una línea base/control: unidad de asignación, datos y duración necesarios, métrica primaria, salvaguardas de confort/seguridad y costes por actor, regla de faltantes, incertidumbre y condición que haría retirar la recomendación. Separa factibilidad de eficacia observada.
+
+Todas las cifras utilizadas deben proceder del CSV, del manifiesto o de una fuente adicional accesible por igual a los tres métodos y citada explícitamente. No inventes resultados de intervención. La corrección de los cálculos, la justificación de afirmaciones y el reconocimiento de límites importan más que la cantidad de documentos.
+
+**Clasificación:** desarrollo expuesto D-E. No es R-F, R-M ni R-S, no es reserva ciega y no produce un veredicto del criterio 3 o 4.
+
+PUBLIC source_manifest.json
+{
+  "schema": 1,
+  "classification": "development_public_observational_case_not_an_intervention",
+  "source": {
+    "title": "Appliances Energy Prediction",
+    "publisher": "UCI Machine Learning Repository",
+    "creator": "Luis Candanedo",
+    "doi": "https://doi.org/10.24432/C5VC8G",
+    "url": "https://archive.ics.uci.edu/static/public/374/appliances+energy+prediction.zip",
+    "license": "CC BY 4.0",
+    "archive_sha256": "2fccf354445d886e7917620b0195db1f3e3e34d5a067a93b844694a4c561255a",
+    "member": "energydata_complete.csv",
+    "member_sha256": "2820bf712ad0275cb18b85a05250926100d8e65ebb9f4d2d016ca91ea152a25d"
+  },
+  "selection": {
+    "rule": "first seven whole calendar days after the source's partial opening day",
+    "start_inclusive": "2016-01-12 00:00:00",
+    "end_exclusive": "2016-01-19 00:00:00",
+    "timestamp_timezone": "not specified by source CSV",
+    "interval_minutes": 10,
+    "rows": 1008,
+    "columns": [
+      "date",
+      "Appliances",
+      "lights",
+      "T1",
+      "RH_1",
+      "T2",
+      "RH_2",
+      "T3",
+      "RH_3",
+      "T4",
+      "RH_4",
+      "T5",
+      "RH_5",
+      "T6",
+      "RH_6",
+      "T7",
+      "RH_7",
+      "T8",
+      "RH_8",
+      "T9",
+      "RH_9",
+      "T_out",
+      "Press_mm_hg",
+      "RH_out",
+      "Windspeed",
+      "Visibility",
+      "Tdewpoint",
+      "rv1",
+      "rv2"
+    ],
+    "sample_sha256": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba"
+  },
+  "limits": [
+    "One observed low-energy house, not a sample of buildings or a causal trial.",
+    "The excerpt is seven days; no intervention, control assignment, occupancy, costs or harms are observed.",
+    "Weather data include interpolated hourly airport observations according to the UCI record.",
+    "The two rv columns are random variables for model diagnostics, not intervention variables."
+  ]
+}
+
+EXACT FIRST PROPOSAL
+{"analysis_py":"import csv, datetime as dt, hashlib, json, math, pathlib, sys\n\ndef main():\n    root = pathlib.Path(sys.argv[1])\n    sample = root / 'sample_first_complete_week.csv'\n    manifest_path = root / 'source_manifest.json'\n    manifest = json.loads(manifest_path.read_text(encoding='utf-8'))\n    raw = sample.read_bytes()\n    expected_hash = manifest['selection']['sample_sha256']\n    actual_hash = hashlib.sha256(raw).hexdigest()\n    expected_rows = int(manifest['selection']['rows'])\n    interval = int(manifest['selection']['interval_minutes'])\n    with sample.open('r', encoding='utf-8-sig', newline='') as f:\n        reader = csv.DictReader(f)\n        headers = reader.fieldnames or []\n        required = ('date', 'Appliances', 'lights')\n        if any(c not in headers for c in required):\n            raise ValueError('missing required CSV columns')\n        records = list(reader)\n    times = [dt.datetime.strptime(r['date'], '%Y-%m-%d %H:%M:%S') for r in records]\n    appliances = [float(r['Appliances']) for r in records]\n    lights = [float(r['lights']) for r in records]\n    if not all(math.isfinite(x) for x in appliances + lights):\n        raise ValueError('non-finite energy value')\n    deltas = [(b-a).total_seconds() for a, b in zip(times, times[1:])]\n    continuous = (len(times) == expected_rows and bool(times) and\n                  all(x == interval * 60 for x in deltas))\n    daily_wh = {}\n    for t, v in zip(times, appliances):\n        key = t.strftime('%Y-%m-%d')\n        daily_wh[key] = daily_wh.get(key, 0.0) + v\n    daily_kwh = {k: v / 1000.0 for k, v in sorted(daily_wh.items())}\n    result = {\n        'rows': len(records),\n        'first_timestamp': times[0].strftime('%Y-%m-%d %H:%M:%S') if times else '',\n        'last_timestamp': times[-1].strftime('%Y-%m-%d %H:%M:%S') if times else '',\n        'interval_minutes': interval,\n        'continuous': continuous,\n        'appliances_total_kwh': sum(appliances) / 1000.0,\n        'daily_appliances_kwh': daily_kwh,\n        'lights_total_kwh': sum(lights) / 1000.0,\n        'units': {'appliances_total_kwh': 'kWh', 'daily_appliances_kwh': 'kWh', 'lights_total_kwh': 'kWh'},\n        'sample_sha256': actual_hash,\n        'sample_hash_matches_manifest': actual_hash == expected_hash,\n        'rows_match_manifest': len(records) == expected_rows,\n        'timestamp_timezone': manifest['selection']['timestamp_timezone']\n    }\n    print(json.dumps(result, allow_nan=False, separators=(',', ':')))\n\nif __name__ == '__main__':\n    try:\n        main()\n    except Exception as exc:\n        print(json.dumps({'error': str(exc)}, allow_nan=False, separators=(',', ':')))\n","draft_report_md":"# D-E: energía de electrodomésticos\n\n## Resultado de la muestra y límites\n\nEl análisis propuesto lee la semana seleccionada del 12 al 18 de enero de 2016, comprueba el hash SHA-256 frente al manifiesto, cuenta observaciones y compara cada marca de tiempo consecutiva con el intervalo declarado de diez minutos. Suma `Appliances` y `lights` en Wh por intervalo y divide por 1.000 para informar kWh; calcula además el total de `Appliances` por fecha. El replay debe aportar las cifras exactas. Si el hash, el conteo o la continuidad no coinciden, esos resultados no deben usarse para decidir sin resolver primero la discrepancia. Las marcas no tienen zona horaria especificada. `rv1` y `rv2` no se usan como palancas ni predictores causales.\n\nSon medidas descriptivas de una sola vivienda durante siete días, no estimaciones de ahorro. No constan ocupación, aparatos concretos, tarifas, horarios de trabajo, preferencias, línea base posterior ni daños. No se conoce qué parte del total podría controlar un hogar. Los datos no justifican afirmar que una medida ahorraría energía o que sería segura, cómoda o rentable.\n\n## Opciones y recomendación\n\nDos opciones razonables para evaluar, todavía sin elegir una como intervención, son: (1) identificar con los residentes cargas no esenciales y probar cambios voluntarios de horario; (2) reducir consumos en espera de equipos identificados, sólo cuando los usuarios confirmen que apagarlos no interrumpe tareas, mantenimiento, seguridad o servicios necesarios. La primera puede trasladar actividad a horarios incómodos o de trabajo; la segunda puede causar pérdida de disponibilidad, reinicios o perjuicio a equipos que deben permanecer encendidos. Ambas requieren tiempo de los residentes y posiblemente medición o automatización; sus costes monetarios no están disponibles. No recomendaría control automático ni desconexiones generales.\n\nPor ahora no es responsable escoger entre ellas: la semana no identifica cargas ni efectos, y faltan criterios aceptados por quienes viven y trabajan en la vivienda. Los residentes deben decidir qué cargas son elegibles, qué cambios son aceptables y los límites de confort y coste; quien pague energía y equipo debe definir el coste relevante. Toda elección de valores queda pendiente de aprobación de esos actores. La viabilidad de instrumentar un ensayo no equivale a eficacia observada.\n\n## Ensayo prospectivo que resolvería la incertidumbre\n\nTras consentimiento y definición conjunta de cargas elegibles, registrar por circuito o aparato energía con marcas de tiempo, estado de operación y eventos de intervención. Añadir ocupación en categorías acordadas (sin recolectar más detalle personal del necesario), temperaturas relevantes, incidencias de seguridad, interrupciones de trabajo, comodidad reportada y costes de equipo, instalación, tiempo y electricidad. Obtener una línea base de al menos dos semanas que incluya días laborables y fin de semana; después asignar aleatoriamente bloques comparables de días dentro del hogar a la rutina habitual o a una de las medidas elegidas, por al menos cuatro semanas, incluyendo ciclos repetidos de ambos estados. Si la medida tiene efectos que persisten, fijar lavado y orden aleatorio antes de empezar. Una sola vivienda limita generalización; replicar en otros hogares requeriría autorización y diseño separado.\n\nMétrica primaria: diferencia en kWh de los aparatos elegibles por día asignado entre intervención y control, con comparación ajustada por duración de observación y reportando incertidumbre (intervalo compatible con los datos y variabilidad entre días). Informar también el total del hogar para detectar desplazamiento a otras cargas. Definir antes del ensayo márgenes aceptables de confort, seguridad, trabajo y coste. Interrumpir inmediatamente ante evento de seguridad o interrupción esencial; retirar la recomendación si aparece daño, se excede un margen acordado o el ahorro neto no compensa costes según el criterio aprobado.\n\nPredefinir tratamiento de faltantes: marcar intervalos ausentes, no imputar como cero; excluir días si falta más del 10% de intervalos de medición primaria o si falta un registro de salvaguarda esencial, y presentar sensibilidad con todos los días parcialmente observados. Informar cantidad y motivos de faltantes por brazo. Los márgenes, duración final, cargas, salvaguardas, umbral de decisión y tratamiento de datos son decisiones pendientes de residentes y responsables de costes antes de iniciar; este paquete no autoriza acción en vivienda real.","items_json":"[{\"id\":\"req_integrity\",\"kind\":\"requirement\",\"text\":\"Comprobar filas, hash del extracto y continuidad de intervalos antes de interpretar los agregados.\",\"refs\":[],\"data\":{\"expected_rows\":1008,\"interval_minutes\":10}},{\"id\":\"req_units\",\"kind\":\"requirement\",\"text\":\"Calcular energía acumulada y diaria de Appliances y una observación adicional de lights en kWh a partir de Wh por intervalo.\",\"refs\":[],\"data\":{\"conversion\":\"Wh / 1000 = kWh\"}},{\"id\":\"ev_limits\",\"kind\":\"evidence\",\"text\":\"La fuente es una semana observacional de una vivienda, sin asignación, intervención, seguimiento, ocupación ni costes; zona horaria sin especificar.\",\"refs\":[],\"data\":{\"source\":\"source_manifest.json\",\"sample_period\":\"2016-01-12..2016-01-18\"}},{\"id\":\"bound_values\",\"kind\":\"boundary\",\"text\":\"No inferir eficacia causal ni actuar en vivienda real; criterios de valor y elección requieren aprobación de residentes y actores que asumen costes.\",\"refs\":[\"ev_limits\"],\"data\":{}},{\"id\":\"assume_no_rv\",\"kind\":\"assumption\",\"text\":\"rv1 y rv2 son variables aleatorias de diagnóstico y no se tratan como causas ni palancas.\",\"refs\":[\"ev_limits\"],\"data\":{}},{\"id\":\"decision_pending\",\"kind\":\"decision\",\"text\":\"Queda pendiente decidir si ensayar cambio voluntario de horario o reducción de espera tras identificar cargas y acordar salvaguardas.\",\"refs\":[\"bound_values\",\"ev_limits\"],\"data\":{\"status\":\"pending\"}},{\"id\":\"req_trial\",\"kind\":\"requirement\",\"text\":\"Un ensayo futuro debe comparar bloques aleatorizados de rutina habitual e intervención, medir energía por carga, confort, seguridad, trabajo y costes, y predefinir faltantes y retirada.\",\"refs\":[\"decision_pending\"],\"data\":{\"primary_metric\":\"kWh diarios de aparatos elegibles\"}}]"}
+UNMODIFIED SUPERVISOR FEEDBACK
+{
+  "Q": null,
+  "approved_normative_decisions": 0,
+  "arm": "S",
+  "arm_order_control": "operator applies fixed S/T/N terminal-before-next",
+  "completed_phases": 0,
+  "cost": null,
+  "cost_limit_enforced": false,
+  "counts_toward_required_24_runs": false,
+  "criterion_4": "not_assessed",
+  "field_intervention_authorized": false,
+  "generic": {
+    "analysis_successful": true,
+    "backend": "linux_landlock_seccomp_rlimit_sealed_memfd",
+    "duration_seconds": 0.09539844997925684,
+    "executed": true,
+    "exit_code": 0,
+    "landlock_abi": 9,
+    "launch_error": null,
+    "read_roots": [
+      "/tmp/specorganon-D099-fdjvxrnq/S/input"
+    ],
+    "sealed_executable_sha256": "dcf4aa6bcce2312de7e7c40a08c6e34fb52819231ab34c2ce0415b6fa05acd93",
+    "stderr": "",
+    "stdout": "{\"rows\":1008,\"first_timestamp\":\"2016-01-12 00:00:00\",\"last_timestamp\":\"2016-01-18 23:50:00\",\"interval_minutes\":10,\"continuous\":true,\"appliances_total_kwh\":118.28,\"daily_appliances_kwh\":{\"2016-01-12\":12.34,\"2016-01-13\":13.97,\"2016-01-14\":21.8,\"2016-01-15\":18.05,\"2016-01-16\":18.04,\"2016-01-17\":20.55,\"2016-01-18\":13.53},\"lights_total_kwh\":5.32,\"units\":{\"appliances_total_kwh\":\"kWh\",\"daily_appliances_kwh\":\"kWh\",\"lights_total_kwh\":\"kWh\"},\"sample_sha256\":\"c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba\",\"sample_hash_matches_manifest\":true,\"rows_match_manifest\":true,\"timestamp_timezone\":\"not specified by source CSV\"}\n",
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "write_roots": []
+  },
+  "global_acceptance": "0/5",
+  "global_run_limits_enforced": false,
+  "human_quality_score": null,
+  "method_winner_selected": false,
+  "model_calls_independently_attested": false,
+  "ordered_execution_preventively_enforced": false,
+  "provider_identity_authenticated": false,
+  "remote_cancellation_verified": false,
+  "review_scope": "entire raw proposal safety only",
+  "reviewed_proposal_sha256": "7faf3d618c74237aa95290f87f4179d3b9abec40a89d7bd6382461a2c09018d5",
+  "schema": 1,
+  "token_limit_enforced": false,
+  "tool_limit_preventively_enforced": false,
+  "toolkit": {
+    "attempted": false,
+    "commands": [],
+    "executed": false,
+    "successful_commands": 0,
+    "trace_created": false
+  }
+}

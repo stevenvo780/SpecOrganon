@@ -1,0 +1,433 @@
+{
+  "active_seconds_used": 68.57394630397903,
+  "admission": {
+    "arm": "S",
+    "claimed_at_utc": "2026-09-30T10:50:44.226769+00:00",
+    "directory": "/tmp/specorganon-D099-fdjvxrnq/S",
+    "protocol_sha256": "ec9c7d1a6359e91a8543e07872226c4d2009296e78b8c151843cc283dab24ed1",
+    "scope": "cooperating callers sharing one local admission root"
+  },
+  "analysis_successful": true,
+  "artifacts": {
+    "feedback.json": {
+      "bytes": 2269,
+      "sha256": "3bdca77f77905f35a00025d4a9319399aaafde6323530d37d093ef5c11f18363"
+    },
+    "first.analysis.py": {
+      "bytes": 2631,
+      "sha256": "d5dc9bee91ad253f7785502fb56e317bb48a61af2caf48a45f9219d2a1d23c42"
+    },
+    "first.items.json": {
+      "bytes": 1714,
+      "sha256": "bd6807368b877991e5bfbdee6efe85520725dcdb33e729940ad9c4392e90a73f"
+    },
+    "first.model.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "first.model.stdout.jsonl": {
+      "bytes": 9945,
+      "sha256": "dd930194f06b26e908e7582c1454aecd0648d3b1a290d1298a1247ca247f3cef"
+    },
+    "first.preflight/host.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "first.preflight/host.stdout.txt": {
+      "bytes": 563,
+      "sha256": "049a2dd4443292662c24710d2ed1da0d224e11d2e885404263f1b91e30fb3313"
+    },
+    "first.proposal.json": {
+      "bytes": 9223,
+      "sha256": "7faf3d618c74237aa95290f87f4179d3b9abec40a89d7bd6382461a2c09018d5"
+    },
+    "first.report.md": {
+      "bytes": 4603,
+      "sha256": "5f597d8f0da8630c92ffddb62ce39527eea8f274b1e1511406346a91b907bc04"
+    },
+    "generic.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "generic.stdout.json": {
+      "bytes": 634,
+      "sha256": "62298a490bde4fe94988cd33adb0c61dcf96c2358890c90bbf02ab9815f843d1"
+    },
+    "metrics.json": {
+      "bytes": 634,
+      "sha256": "62298a490bde4fe94988cd33adb0c61dcf96c2358890c90bbf02ab9815f843d1"
+    },
+    "second.model.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "second.model.stdout.jsonl": {
+      "bytes": 4309,
+      "sha256": "66bfd2fd98fcb33aff36749c6403f965f651f72835d03f8ffd4a491847543a58"
+    },
+    "second.preflight/host.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "second.preflight/host.stdout.txt": {
+      "bytes": 563,
+      "sha256": "049a2dd4443292662c24710d2ed1da0d224e11d2e885404263f1b91e30fb3313"
+    },
+    "second.prompt.txt": {
+      "bytes": 21912,
+      "sha256": "f81cb270b7442fe881c005acdc57db1937b353078e8326ba1fed6f17433d2b88"
+    },
+    "second.proposal.json": {
+      "bytes": 3944,
+      "sha256": "65085230a38a64e3560a5dac9c66c663c1526d0c6fbe96a14b3d6ce0b1abe684"
+    },
+    "second.report.md": {
+      "bytes": 3908,
+      "sha256": "39a96f500b7beadb577ed499c3ba08a9db5dd0f4357e634d3f5571eeedcd11b8"
+    }
+  },
+  "current_stage": "finalize",
+  "error": null,
+  "first": {
+    "argv": [
+      "/home/dev/.local/bin/codex",
+      "exec",
+      "--json",
+      "--ephemeral",
+      "--ignore-user-config",
+      "--skip-git-repo-check",
+      "-C",
+      "/tmp/specorganon-D099-fdjvxrnq/S/work",
+      "-s",
+      "read-only",
+      "-m",
+      "gpt-6-luna",
+      "-c",
+      "model_reasoning_effort=\"medium\"",
+      "-c",
+      "web_search=\"disabled\"",
+      "--enable",
+      "code_mode_host",
+      "--disable",
+      "shell_tool",
+      "--disable",
+      "unified_exec",
+      "--disable",
+      "multi_agent",
+      "--disable",
+      "apps",
+      "--disable",
+      "plugins",
+      "--disable",
+      "browser_use",
+      "--disable",
+      "computer_use",
+      "--disable",
+      "image_generation",
+      "--disable",
+      "view_image",
+      "--disable",
+      "memories",
+      "--disable",
+      "hooks",
+      "--disable",
+      "skill_search",
+      "--disable",
+      "workspace_dependencies",
+      "--disable",
+      "remote_plugin",
+      "--disable",
+      "goals",
+      "--disable",
+      "sleep_tool",
+      "--disable",
+      "in_app_browser",
+      "--disable",
+      "browser_use_external",
+      "--disable",
+      "browser_use_full_cdp_access",
+      "--output-schema",
+      "/tmp/specorganon-D099-fdjvxrnq/S/first.schema.json",
+      "-o",
+      "/tmp/specorganon-D099-fdjvxrnq/S/first.proposal.json",
+      "-"
+    ],
+    "authentication": {
+      "api_key_login_reported": false,
+      "chatgpt_login_reported": true,
+      "exit_code": 0,
+      "raw_output_retained": false,
+      "wall_seconds": 0.026789508992806077
+    },
+    "host": {
+      "ended_at_utc": "2026-09-30T10:50:44.271835Z",
+      "executable": "/home/dev/.codex/packages/standalone/releases/0.159.2-x86_64-unknown-linux-musl/bin/codex-code-mode-host",
+      "executable_record": {
+        "bytes": 74068880,
+        "sha256": "5b2c075ac2380fa04d76d7313fbc044d29c8d0a0d0b9138415acd4610211ca03"
+      },
+      "exit_code": 0,
+      "handshake_observed": false,
+      "launch_error": null,
+      "model_call": false,
+      "started_at_utc": "2026-09-30T10:50:44.255770Z",
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 563,
+        "sha256": "049a2dd4443292662c24710d2ed1da0d224e11d2e885404263f1b91e30fb3313"
+      },
+      "timed_out": false,
+      "timeout_cap": "stage",
+      "timeout_seconds": 10,
+      "wall_seconds": 0.016
+    },
+    "model": {
+      "ended_at_utc": "2026-09-30T10:51:32.928499Z",
+      "exit_code": 0,
+      "launch_error": null,
+      "started_at_utc": "2026-09-30T10:50:44.344464Z",
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 9945,
+        "sha256": "dd930194f06b26e908e7582c1454aecd0648d3b1a290d1298a1247ca247f3cef"
+      },
+      "timed_out": false,
+      "timeout_cap": "run_budget",
+      "timeout_seconds": 359.8796457260032,
+      "wall_seconds": 48.584
+    },
+    "usage": {
+      "complete": true,
+      "denied_action_count": null,
+      "errors": [],
+      "event_count": 4,
+      "final_status": null,
+      "final_usage": {
+        "cache_write_input_tokens": 0,
+        "cached_input_tokens": 0,
+        "input_tokens": 14039,
+        "output_tokens": 2463,
+        "reasoning_output_tokens": 302
+      },
+      "observed_completed_tool_steps": null,
+      "observed_failed_agy_steps": null,
+      "observed_failed_codex_items_partial": 0,
+      "observed_model": null,
+      "observed_unfinished_tool_steps": null,
+      "origin": "local_cli_jsonl_not_authenticated_provider_receipt",
+      "preterminal_step_usage": null,
+      "terminal_errors": [],
+      "terminal_success": true
+    }
+  },
+  "generic_replays": 1,
+  "model_cli_invocations": 2,
+  "packaging_prefix": "#!/usr/bin/python3.12 -I\n",
+  "payload_sha256": "dcf4aa6bcce2312de7e7c40a08c6e34fb52819231ab34c2ce0415b6fa05acd93",
+  "plan": {
+    "bytes": 2709,
+    "sha256": "d1d81d946384d4c8af3c99a48fd90e26e0c4e0efff504a7aafdeb2afab246a4c"
+  },
+  "prepared_at_utc": "2026-09-30T10:50:04.782511+00:00",
+  "replay": {
+    "backend": "linux_landlock_seccomp_rlimit_sealed_memfd",
+    "duration_seconds": 0.09539844997925684,
+    "executed": true,
+    "exit_code": 0,
+    "landlock_abi": 9,
+    "launch_error": null,
+    "read_roots": [
+      "/tmp/specorganon-D099-fdjvxrnq/S/input"
+    ],
+    "sealed_executable_sha256": "dcf4aa6bcce2312de7e7c40a08c6e34fb52819231ab34c2ce0415b6fa05acd93",
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "write_roots": []
+  },
+  "reviewed_proposal_sha256": "7faf3d618c74237aa95290f87f4179d3b9abec40a89d7bd6382461a2c09018d5",
+  "runtime_interpreter": {
+    "bytes": 8020928,
+    "path": "/usr/bin/python3.12",
+    "sealed": false,
+    "sha256": "e1efa562c2cc2e35521a5c9c9b9939921001ff8ca9708a13ef15ace68cc2ccd7"
+  },
+  "runtime_roots": [
+    "/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/bin/python3.11",
+    "/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11",
+    "/workspace/SpecOrganon/.venv/lib/python3.11",
+    "/workspace/SpecOrganon/.venv/lib/python3.11/site-packages",
+    "/workspace/SpecOrganon/.venv/pyvenv.cfg",
+    "/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib",
+    "/usr/lib",
+    "/usr/lib64",
+    "/etc/ld.so.cache",
+    "/dev/urandom",
+    "/usr/bin/python3.12"
+  ],
+  "schema": 1,
+  "second": {
+    "argv": [
+      "/home/dev/.local/bin/codex",
+      "exec",
+      "--json",
+      "--ephemeral",
+      "--ignore-user-config",
+      "--skip-git-repo-check",
+      "-C",
+      "/tmp/specorganon-D099-fdjvxrnq/S/work",
+      "-s",
+      "read-only",
+      "-m",
+      "gpt-6-luna",
+      "-c",
+      "model_reasoning_effort=\"medium\"",
+      "-c",
+      "web_search=\"disabled\"",
+      "--enable",
+      "code_mode_host",
+      "--disable",
+      "shell_tool",
+      "--disable",
+      "unified_exec",
+      "--disable",
+      "multi_agent",
+      "--disable",
+      "apps",
+      "--disable",
+      "plugins",
+      "--disable",
+      "browser_use",
+      "--disable",
+      "computer_use",
+      "--disable",
+      "image_generation",
+      "--disable",
+      "view_image",
+      "--disable",
+      "memories",
+      "--disable",
+      "hooks",
+      "--disable",
+      "skill_search",
+      "--disable",
+      "workspace_dependencies",
+      "--disable",
+      "remote_plugin",
+      "--disable",
+      "goals",
+      "--disable",
+      "sleep_tool",
+      "--disable",
+      "in_app_browser",
+      "--disable",
+      "browser_use_external",
+      "--disable",
+      "browser_use_full_cdp_access",
+      "--output-schema",
+      "/tmp/specorganon-D099-fdjvxrnq/S/second.schema.json",
+      "-o",
+      "/tmp/specorganon-D099-fdjvxrnq/S/second.proposal.json",
+      "-"
+    ],
+    "authentication": {
+      "api_key_login_reported": false,
+      "chatgpt_login_reported": true,
+      "exit_code": 0,
+      "raw_output_retained": false,
+      "wall_seconds": 0.03983099397737533
+    },
+    "host": {
+      "ended_at_utc": "2026-09-30T10:56:17.239425Z",
+      "executable": "/home/dev/.codex/packages/standalone/releases/0.159.2-x86_64-unknown-linux-musl/bin/codex-code-mode-host",
+      "executable_record": {
+        "bytes": 74068880,
+        "sha256": "5b2c075ac2380fa04d76d7313fbc044d29c8d0a0d0b9138415acd4610211ca03"
+      },
+      "exit_code": 0,
+      "handshake_observed": false,
+      "launch_error": null,
+      "model_call": false,
+      "started_at_utc": "2026-09-30T10:56:17.235647Z",
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 563,
+        "sha256": "049a2dd4443292662c24710d2ed1da0d224e11d2e885404263f1b91e30fb3313"
+      },
+      "timed_out": false,
+      "timeout_cap": "stage",
+      "timeout_seconds": 10,
+      "wall_seconds": 0.004
+    },
+    "model": {
+      "ended_at_utc": "2026-09-30T10:56:36.940057Z",
+      "exit_code": 0,
+      "launch_error": null,
+      "started_at_utc": "2026-09-30T10:56:17.280455Z",
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 4309,
+        "sha256": "66bfd2fd98fcb33aff36749c6403f965f651f72835d03f8ffd4a491847543a58"
+      },
+      "timed_out": false,
+      "timeout_cap": "run_budget",
+      "timeout_seconds": 311.08993356401334,
+      "wall_seconds": 19.66
+    },
+    "usage": {
+      "complete": true,
+      "denied_action_count": null,
+      "errors": [],
+      "event_count": 4,
+      "final_status": null,
+      "final_usage": {
+        "cache_write_input_tokens": 0,
+        "cached_input_tokens": 0,
+        "input_tokens": 17011,
+        "output_tokens": 908,
+        "reasoning_output_tokens": 0
+      },
+      "observed_completed_tool_steps": null,
+      "observed_failed_agy_steps": null,
+      "observed_failed_codex_items_partial": 0,
+      "observed_model": null,
+      "observed_unfinished_tool_steps": null,
+      "origin": "local_cli_jsonl_not_authenticated_provider_receipt",
+      "preterminal_step_usage": null,
+      "terminal_errors": [],
+      "terminal_success": true
+    }
+  },
+  "stages": {
+    "feedback": {
+      "active_seconds": 0.11417707102373242,
+      "active_seconds_before": 48.70891495596152,
+      "ended_at_utc": "2026-09-30T10:55:36.911510+00:00",
+      "started_at_utc": "2026-09-30T10:55:36.797335+00:00"
+    },
+    "finalize": {
+      "active_seconds": 19.750854276993778,
+      "active_seconds_before": 48.82309202698525,
+      "ended_at_utc": "2026-09-30T10:56:36.944894+00:00",
+      "started_at_utc": "2026-09-30T10:56:17.194040+00:00"
+    },
+    "generate": {
+      "active_seconds": 48.70891495596152,
+      "active_seconds_before": 0.0,
+      "ended_at_utc": "2026-09-30T10:51:32.933624+00:00",
+      "started_at_utc": "2026-09-30T10:50:44.224708+00:00"
+    }
+  },
+  "state": "completed"
+}

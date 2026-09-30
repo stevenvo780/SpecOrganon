@@ -1,20 +1,25 @@
 # Estado de reanudación
 
-**D-099 en preparación:** el [plan de dos turnos N/SDD/T](../experiments/development/subscription_method_trial_2026-09-30/)
-fija Luna medio solicitado, orden S/T/N, dos invocaciones CLI y 360 s locales
-por brazo sobre el caso público y expuesto de energía. T recibirá respuestas
-reales de `init`, `put`, `status` y compuertas iniciales; no representa aún
-el tratamiento completo de nueve fases. Diseño y evaluador numérico fueron
-revisados: se corrigieron la exclusión de actor/boundary y la lectura doble
-del CSV; ocho pruebas del scorer pasaron. La sonda previa creó seis ítems
-en un caso temporal, con `frame.ready=true` y sin fases aceptadas; conservó
-todas las causas de bloqueo de `critique`. Los 272 archivos protegidos
-siguen idénticos. El [broker revisado](../scripts/run_subscription_method_trial.py)
-pasa 35 pruebas en Python 3.11 y 3.12 y Ruff, con modelos falsos y procesos
-locales reales; el revisor no encuentra P1/P2 abierto. El orden entre
-brazos lo aplica el operador, sin garantía preventiva del broker.
-**No se ejecutó ninguna celda de modelo:** terna pendiente. No Q, ganador, corridas de las 24 o
-criterio 4 demostrado; aceptación **0/5**.
+**D-099 completó una terna de desarrollo N/SDD/T:** [resultados y límites](../experiments/development/subscription_method_trial_2026-09-30/RESULTS.md).
+Plan en `3ab2982`, broker y pruebas en `842d618`, antes de seis invocaciones
+CLI con Luna medio solicitado. Cada brazo produjo código e informe, consumió
+un único replay sellado y un segundo turno, y pasó 18/18 cotejos numéricos y
+de formato. Tiempo activo local: N 66,305 s; S 68,574 s; T 76,085 s, dentro
+de 360 s por brazo; preparación y revisión de seguridad excluidas.
+T ejecutó 11 comandos reales y siete escrituras: `frame` listo sin aceptar,
+`critique` con cuatro bloqueos; su evidencia carece de procedencia completa
+y `specify` señala un bloqueo compuesto. No se reparó candidato, informe o
+grafo. Los tres estados archivados se leen como `completed` y no permiten
+relanzar. Revisor cotejó 147 originales byte idénticos, 12 marcadores vacíos
+separados y 272 archivos protegidos intactos. El orden S/T/N se verificó
+en registros locales y fue aplicado por el operador, sin garantía del broker.
+Pasaron 35 pruebas en Python 3.11 y 3.12 y Ruff antes de las generaciones.
+No Q, calidad equivalente, ganador, intervención o corrida de las 24;
+el tratamiento T es inicial, con todas las fases sin aceptar. Identidad
+efectiva, RPC, gasto y límites globales siguen sin autenticar. **0/5**.
+Siguiente frente: auditor de las 17 claims y siete filas alimentarias desde
+pasajes PDF, con valores, unidades, bases y negativos aislables; D-097 sigue
+fallido e intacto. El panel confirmatorio y la autoridad humana siguen pendientes.
 
 **D-097 conservó un análisis nativo fallido:** el [workflow y plan](../experiments/development/bread_continuation_2026-09-30/)
 se congelaron en `6a8018c` antes de una sola generación con Luna medio

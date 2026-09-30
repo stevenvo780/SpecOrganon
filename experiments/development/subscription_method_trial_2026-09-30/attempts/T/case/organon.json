@@ -1,0 +1,161 @@
+{
+  "events": [
+    {
+      "actor": "agent:d099_executor",
+      "at": "2026-09-30T11:01:59+00:00",
+      "hash": "5e87adfd3a86797a16c570bf21fa0e9c944b3106f3fa0aa11125dbb7c4223d07",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "case": "D-E",
+          "status": "open"
+        },
+        "deps": {},
+        "id": "problem_energy",
+        "kind": "problem",
+        "text": "La muestra no permite identificar una intervención causalmente eficaz y aceptable para reducir energía de electrodomésticos sin perjuicios en confort, seguridad, trabajo o costo.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:d099_executor",
+      "at": "2026-09-30T11:01:59+00:00",
+      "hash": "3407e1148a9d1eb2554c3f9256642cbeaff9ddc9fabaec34ed90f6f24fecec6c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "authority": "unconfirmed",
+          "identity": "unknown"
+        },
+        "deps": {
+          "problem_energy": 1
+        },
+        "id": "actor_residents",
+        "kind": "actor",
+        "text": "Habitantes y personas que realizan trabajo doméstico pueden recibir beneficios y soportar perjuicios; pagador y operador de equipos pueden ser personas distintas.",
+        "version": 1
+      },
+      "prev_hash": "5e87adfd3a86797a16c570bf21fa0e9c944b3106f3fa0aa11125dbb7c4223d07",
+      "seq": 2
+    },
+    {
+      "actor": "agent:d099_executor",
+      "at": "2026-09-30T11:01:59+00:00",
+      "hash": "7531fff9ebb786c3787fc63cac82afe1fb10fe20c23a4eeec3e647922eaa6235",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "doi": "10.24432/C5VC8G",
+          "license": "CC BY 4.0",
+          "source": "UCI Appliances Energy Prediction"
+        },
+        "deps": {
+          "problem_energy": 1
+        },
+        "id": "boundary_week",
+        "kind": "boundary",
+        "text": "Alcance: extracto observacional UCI de siete días completos (2016-01-12 a 2016-01-18), 1008 filas nominales cada diez minutos; sin intervención, asignación, ocupación ni costos descritos.",
+        "version": 1
+      },
+      "prev_hash": "3407e1148a9d1eb2554c3f9256642cbeaff9ddc9fabaec34ed90f6f24fecec6c",
+      "seq": 3
+    },
+    {
+      "actor": "agent:d099_executor",
+      "at": "2026-09-30T11:01:59+00:00",
+      "hash": "35894f11549ebafaa6df75010532932a8819f4d8950ec9d27d87fa7153cad004",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "interval_minutes": 10,
+          "rows": 1008,
+          "timezone": "unspecified"
+        },
+        "deps": {
+          "boundary_week": 1
+        },
+        "id": "evidence_manifest",
+        "kind": "evidence",
+        "text": "El manifiesto documenta selección previa a desenlaces, columnas/unidades, hashes, zona horaria no especificada y límites de una vivienda; Appliances y lights son Wh por intervalo; rv1 y rv2 son aleatorias.",
+        "version": 1
+      },
+      "prev_hash": "7531fff9ebb786c3787fc63cac82afe1fb10fe20c23a4eeec3e647922eaa6235",
+      "seq": 4
+    },
+    {
+      "actor": "agent:d099_executor",
+      "at": "2026-09-30T11:01:59+00:00",
+      "hash": "83c2d22b2a38edc516633116a0f7f81817925ecdee597a88dc25c619e8d8a151",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "status": "untested"
+        },
+        "deps": {
+          "evidence_manifest": 1,
+          "problem_energy": 1
+        },
+        "id": "assumption_trial",
+        "kind": "assumption",
+        "text": "Un ensayo prospectivo co-diseñado y una medición energética adecuada podrían comparar una acción acordada con práctica habitual; su factibilidad y validez aún deben demostrarse.",
+        "version": 1
+      },
+      "prev_hash": "35894f11549ebafaa6df75010532932a8819f4d8950ec9d27d87fa7153cad004",
+      "seq": 5
+    },
+    {
+      "actor": "agent:d099_executor",
+      "at": "2026-09-30T11:01:59+00:00",
+      "hash": "dba1963bf451803317feefbc400d4bf3e55f5ed80c6ad31d4442e8b98f56fe03",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "authority": "inhabitants and competent stakeholders",
+          "status": "pending"
+        },
+        "deps": {
+          "actor_residents": 1,
+          "problem_energy": 1
+        },
+        "id": "norm_pending",
+        "kind": "norm",
+        "text": "Norma propuesta pendiente: considerar una intervención aceptable sólo si reduce kWh de electrodomésticos sin cruzar umbrales acordados de confort, seguridad, trabajo y costo.",
+        "version": 1
+      },
+      "prev_hash": "83c2d22b2a38edc516633116a0f7f81817925ecdee597a88dc25c619e8d8a151",
+      "seq": 6
+    },
+    {
+      "actor": "agent:d099_executor",
+      "at": "2026-09-30T11:01:59+00:00",
+      "hash": "3cc5fdec9b33c8a7d5ecda1b7d2ec68a6cb7edbb059c934bc7e5043909fc6cea",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "status": "pending"
+        },
+        "deps": {
+          "assumption_trial": 1,
+          "norm_pending": 1
+        },
+        "id": "requirement_measure",
+        "kind": "requirement",
+        "text": "Antes de recomendar una acción, co-diseñar comparación prospectiva con línea base/control, energía, ocupación y eventos relevantes; preacordar faltantes, incertidumbre, salvaguardas, costos y regla de retiro.",
+        "version": 1
+      },
+      "prev_hash": "dba1963bf451803317feefbc400d4bf3e55f5ed80c6ad31d4442e8b98f56fe03",
+      "seq": 7
+    }
+  ],
+  "project": {
+    "approval_policy": "signed",
+    "case_id": "dfdd2bfd-80e3-4c75-a64c-6c8ce3e4bcc7",
+    "created_at": "2026-09-30T11:01:59+00:00",
+    "created_by": "agent:d099_executor",
+    "domain": "building_energy",
+    "title": "D099 exposed building energy method trial"
+  },
+  "schema": 1
+}
