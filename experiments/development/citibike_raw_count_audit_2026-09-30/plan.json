@@ -1,0 +1,74 @@
+{
+  "D105_artifacts_or_flags_rewritten": false,
+  "Q": null,
+  "acceptance_thresholds_changed": false,
+  "budget": {
+    "automatic_retry": false,
+    "field_operations": 0,
+    "new_model_generations": 0,
+    "paid_API_calls": 0,
+    "raw_analyzer_runs": 1,
+    "timeout_seconds": 60
+  },
+  "classification": "exposed development reproduction of archived public Parquet counts; not final evaluation",
+  "counts_toward_required_24_runs": false,
+  "environment": {
+    "auth_copied": false,
+    "new_external_venv": true,
+    "offline_install_from_existing_public_package_cache": true,
+    "pyarrow": "21.0.0",
+    "python": "/workspace/SpecOrganon/.venv/bin/python",
+    "toolkit_environments_modified": false,
+    "tzdata": "2026.4",
+    "uv_config_disabled": true
+  },
+  "external_custody_verified": false,
+  "failure_policy": "Retain failed streams and frozen instrument; do not repair historical input, analyzer or report; any bounded instrument repair uses a new destination and prospective amendment",
+  "fixed_files": {
+    "GOAL.md": {
+      "bytes": 7273,
+      "sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36"
+    },
+    "cases/citibike/analyze_sample_status.py": {
+      "bytes": 6786,
+      "sha256": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949"
+    },
+    "docs/protocolo_experimental.md": {
+      "bytes": 47390,
+      "sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341"
+    },
+    "experiments/development/citibike_sample_status_2026-09-27.json": {
+      "bytes": 1599,
+      "sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1"
+    }
+  },
+  "global_acceptance": "1/5",
+  "goal_complete": false,
+  "independent_methodological_validation": false,
+  "measurement_scope": "Archived station-snapshot rows; not time-weighted availability, attempted journeys, realized access or intervention impact",
+  "method": "Open bounded nofollow raw input once; verify both hashes/size; seal same bytes in memfd; execute previously verified original analyzer bytes from stdin with inherited read-only descriptor. Original analyzer hash/read/stat resolve same immutable input. Compare entire resulting JSON object against fixed published report.",
+  "objective": "Recompute archived March2024 station-snapshot counts from the pinned raw rows, without changing the historical analyzer or toolkit",
+  "planned_at_utc": "2026-09-30T20:34:51.511774+00:00",
+  "prospective_checks": [
+    "source and script pins",
+    "sealed dataset SHA256/size/GitblobSHA1",
+    "dependency versions and source origins",
+    "seven required column types and no nulls",
+    "unique station-snapshot pairs and binary flags",
+    "declared eligible mask and both numerator subsets",
+    "quality exclusions, station/snapshot counts, temporal gaps and full report equality",
+    "source originals unchanged after execution"
+  ],
+  "raw_source": {
+    "bytes": 10853196,
+    "git_blob_sha1": "6efe8e7cbf30591af1b9f4614be60a35650facdf",
+    "path": "/tmp/specorganon-citibike-raw-miqm2mfg/dataset.parquet",
+    "raw_url": "https://raw.githubusercontent.com/NYCComptroller/citi-bike-gbfs/4c36513cf3842efe9a2940a78974bf45cb13fc0b/dataset.parquet",
+    "sha256": "661221e1f6fc01ba6475cee61597e432fc0858689195b6c12255a6c005b52fc4",
+    "source_page": "https://github.com/NYCComptroller/citi-bike-gbfs/blob/4c36513cf3842efe9a2940a78974bf45cb13fc0b/dataset.parquet"
+  },
+  "runtime": "/tmp/specorganon-D106-raw-bdp0u2dw",
+  "schema": 1,
+  "source_truth_authenticated": false,
+  "study_id": "D106"
+}
