@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "source_pins": {
+    "scripts/build_bread_energy_variant.py": {
+      "bytes": 18457,
+      "sha256": "b61b4224915620ec51f3e050249fea6f3157c18985846ce2e787326bfde723b7"
+    },
+    "scripts/probe_bread_energy_variant.py": {
+      "bytes": 25181,
+      "sha256": "cced803b0832c6917ed259cac8f41d916b0cf0e09dc49824773583fcc08892a8"
+    },
+    "tests/test_bread_energy_variant.py": {
+      "bytes": 4544,
+      "sha256": "f781cf44a0adc375c6d25b2d4375cb9d7e2aa73089effca44f024b2c3b3e76d6"
+    }
+  },
+  "source_pins_unchanged_after": true,
+  "commands": [
+    {
+      "label": "ruff",
+      "argv": [
+        "/home/dev/.local/bin/ruff",
+        "check",
+        "--no-cache",
+        "scripts/build_bread_energy_variant.py",
+        "scripts/probe_bread_energy_variant.py",
+        "tests/test_bread_energy_variant.py"
+      ],
+      "cwd": "/workspace/SpecOrganon",
+      "environment_allowlist": {
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C.UTF-8",
+        "TZ": "UTC",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "started_at_utc": "2026-09-30T23:24:15.520296+00:00",
+      "finished_at_utc": "2026-09-30T23:24:15.528816+00:00",
+      "wall_seconds": 0.008522271004039794,
+      "exit_code": 0,
+      "source_pins_before": {
+        "scripts/build_bread_energy_variant.py": {
+          "bytes": 18457,
+          "sha256": "b61b4224915620ec51f3e050249fea6f3157c18985846ce2e787326bfde723b7"
+        },
+        "scripts/probe_bread_energy_variant.py": {
+          "bytes": 25181,
+          "sha256": "cced803b0832c6917ed259cac8f41d916b0cf0e09dc49824773583fcc08892a8"
+        },
+        "tests/test_bread_energy_variant.py": {
+          "bytes": 4544,
+          "sha256": "f781cf44a0adc375c6d25b2d4375cb9d7e2aa73089effca44f024b2c3b3e76d6"
+        }
+      },
+      "stdout": {
+        "bytes": 19,
+        "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "scope": "Static compile/Ruff or pure documentary contract checks; no engine/CLI/MCP or external preparation execution"
+    },
+    {
+      "label": "311-compile",
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,\"exec\") for p in sys.argv[1:]]; print(\"compiled verified source syntax only\")",
+        "scripts/build_bread_energy_variant.py",
+        "scripts/probe_bread_energy_variant.py",
+        "tests/test_bread_energy_variant.py"
+      ],
+      "cwd": "/workspace/SpecOrganon",
+      "environment_allowlist": {
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C.UTF-8",
+        "TZ": "UTC",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "started_at_utc": "2026-09-30T23:24:15.528898+00:00",
+      "finished_at_utc": "2026-09-30T23:24:15.550545+00:00",
+      "wall_seconds": 0.021665466018021107,
+      "exit_code": 0,
+      "source_pins_before": {
+        "scripts/build_bread_energy_variant.py": {
+          "bytes": 18457,
+          "sha256": "b61b4224915620ec51f3e050249fea6f3157c18985846ce2e787326bfde723b7"
+        },
+        "scripts/probe_bread_energy_variant.py": {
+          "bytes": 25181,
+          "sha256": "cced803b0832c6917ed259cac8f41d916b0cf0e09dc49824773583fcc08892a8"
+        },
+        "tests/test_bread_energy_variant.py": {
+          "bytes": 4544,
+          "sha256": "f781cf44a0adc375c6d25b2d4375cb9d7e2aa73089effca44f024b2c3b3e76d6"
+        }
+      },
+      "stdout": {
+        "bytes": 37,
+        "sha256": "1f479713422d64d6e666d293b7dde09ce2ac65b97f812c68a7bc6f51da8e7b77"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "scope": "Static compile/Ruff or pure documentary contract checks; no engine/CLI/MCP or external preparation execution"
+    },
+    {
+      "label": "311-unit",
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-I",
+        "-B",
+        "tests/test_bread_energy_variant.py",
+        "-v"
+      ],
+      "cwd": "/workspace/SpecOrganon",
+      "environment_allowlist": {
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C.UTF-8",
+        "TZ": "UTC",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "started_at_utc": "2026-09-30T23:24:15.550631+00:00",
+      "finished_at_utc": "2026-09-30T23:24:15.618523+00:00",
+      "wall_seconds": 0.06790586799615994,
+      "exit_code": 0,
+      "source_pins_before": {
+        "scripts/build_bread_energy_variant.py": {
+          "bytes": 18457,
+          "sha256": "b61b4224915620ec51f3e050249fea6f3157c18985846ce2e787326bfde723b7"
+        },
+        "scripts/probe_bread_energy_variant.py": {
+          "bytes": 25181,
+          "sha256": "cced803b0832c6917ed259cac8f41d916b0cf0e09dc49824773583fcc08892a8"
+        },
+        "tests/test_bread_energy_variant.py": {
+          "bytes": 4544,
+          "sha256": "f781cf44a0adc375c6d25b2d4375cb9d7e2aa73089effca44f024b2c3b3e76d6"
+        }
+      },
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 734,
+        "sha256": "41aa429125c32b81a5609c5e6109b8dd41980d3f93757c69c6fe817f2823523a"
+      },
+      "scope": "Static compile/Ruff or pure documentary contract checks; no engine/CLI/MCP or external preparation execution"
+    },
+    {
+      "label": "312-compile",
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,\"exec\") for p in sys.argv[1:]]; print(\"compiled verified source syntax only\")",
+        "scripts/build_bread_energy_variant.py",
+        "scripts/probe_bread_energy_variant.py",
+        "tests/test_bread_energy_variant.py"
+      ],
+      "cwd": "/workspace/SpecOrganon",
+      "environment_allowlist": {
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C.UTF-8",
+        "TZ": "UTC",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "started_at_utc": "2026-09-30T23:24:15.618593+00:00",
+      "finished_at_utc": "2026-09-30T23:24:15.642513+00:00",
+      "wall_seconds": 0.023943518986925483,
+      "exit_code": 0,
+      "source_pins_before": {
+        "scripts/build_bread_energy_variant.py": {
+          "bytes": 18457,
+          "sha256": "b61b4224915620ec51f3e050249fea6f3157c18985846ce2e787326bfde723b7"
+        },
+        "scripts/probe_bread_energy_variant.py": {
+          "bytes": 25181,
+          "sha256": "cced803b0832c6917ed259cac8f41d916b0cf0e09dc49824773583fcc08892a8"
+        },
+        "tests/test_bread_energy_variant.py": {
+          "bytes": 4544,
+          "sha256": "f781cf44a0adc375c6d25b2d4375cb9d7e2aa73089effca44f024b2c3b3e76d6"
+        }
+      },
+      "stdout": {
+        "bytes": 37,
+        "sha256": "1f479713422d64d6e666d293b7dde09ce2ac65b97f812c68a7bc6f51da8e7b77"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "scope": "Static compile/Ruff or pure documentary contract checks; no engine/CLI/MCP or external preparation execution"
+    },
+    {
+      "label": "312-unit",
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-I",
+        "-B",
+        "tests/test_bread_energy_variant.py",
+        "-v"
+      ],
+      "cwd": "/workspace/SpecOrganon",
+      "environment_allowlist": {
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C.UTF-8",
+        "TZ": "UTC",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "started_at_utc": "2026-09-30T23:24:15.642605+00:00",
+      "finished_at_utc": "2026-09-30T23:24:15.744046+00:00",
+      "wall_seconds": 0.10147174802841619,
+      "exit_code": 0,
+      "source_pins_before": {
+        "scripts/build_bread_energy_variant.py": {
+          "bytes": 18457,
+          "sha256": "b61b4224915620ec51f3e050249fea6f3157c18985846ce2e787326bfde723b7"
+        },
+        "scripts/probe_bread_energy_variant.py": {
+          "bytes": 25181,
+          "sha256": "cced803b0832c6917ed259cac8f41d916b0cf0e09dc49824773583fcc08892a8"
+        },
+        "tests/test_bread_energy_variant.py": {
+          "bytes": 4544,
+          "sha256": "f781cf44a0adc375c6d25b2d4375cb9d7e2aa73089effca44f024b2c3b3e76d6"
+        }
+      },
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 734,
+        "sha256": "6eb7ac7d8145a903192dfd86e9c3e6bf274cf0b89a85e1ed4050f1acb5a9b664"
+      },
+      "scope": "Static compile/Ruff or pure documentary contract checks; no engine/CLI/MCP or external preparation execution"
+    }
+  ],
+  "passed": true,
+  "experiment_executed": false
+}

@@ -1,0 +1,88 @@
+{
+  "checked_at_utc": "2026-09-30T23:10:09.286506+00:00",
+  "checks": [
+    {
+      "argv": [
+        "/home/dev/.local/bin/ruff",
+        "check",
+        "experiments/development/bread_energy_derivation_2026-09-30/execute_frozen.py",
+        "experiments/development/bread_energy_derivation_2026-09-30/archive_executed.py"
+      ],
+      "exit_code": 0,
+      "streams": {
+        "stderr": {
+          "bytes": 0,
+          "path": "experiments/development/bread_energy_derivation_2026-09-30/validation/repaired_1.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 19,
+          "path": "experiments/development/bread_energy_derivation_2026-09-30/validation/repaired_1.stdout",
+          "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+        }
+      }
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print('compiled',len(sys.argv)-1,'public instruments')",
+        "experiments/development/bread_energy_derivation_2026-09-30/execute_frozen.py",
+        "experiments/development/bread_energy_derivation_2026-09-30/archive_executed.py"
+      ],
+      "exit_code": 0,
+      "streams": {
+        "stderr": {
+          "bytes": 0,
+          "path": "experiments/development/bread_energy_derivation_2026-09-30/validation/repaired_2.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 30,
+          "path": "experiments/development/bread_energy_derivation_2026-09-30/validation/repaired_2.stdout",
+          "sha256": "9bf06f40b02a05ce1024c1a3aac0025e2a0fb1668e70e28882bc082e181a0bae"
+        }
+      }
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print('compiled',len(sys.argv)-1,'public instruments')",
+        "experiments/development/bread_energy_derivation_2026-09-30/execute_frozen.py",
+        "experiments/development/bread_energy_derivation_2026-09-30/archive_executed.py"
+      ],
+      "exit_code": 0,
+      "streams": {
+        "stderr": {
+          "bytes": 0,
+          "path": "experiments/development/bread_energy_derivation_2026-09-30/validation/repaired_3.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 30,
+          "path": "experiments/development/bread_energy_derivation_2026-09-30/validation/repaired_3.stdout",
+          "sha256": "9bf06f40b02a05ce1024c1a3aac0025e2a0fb1668e70e28882bc082e181a0bae"
+        }
+      }
+    }
+  ],
+  "sources": {
+    "experiments/development/bread_energy_derivation_2026-09-30/archive_executed.py": {
+      "bytes": 6836,
+      "sha256": "5b3624e9641a94b09d24284471774ac1bd7e3bc88c78207d1b4aa182d39c58f3"
+    },
+    "experiments/development/bread_energy_derivation_2026-09-30/execute_frozen.py": {
+      "bytes": 8036,
+      "sha256": "c6a7cc1b6a817136791fe9658e02c2ab1632b30f6a808e67df3559b1c223bf5f"
+    }
+  },
+  "static_findings_fixed": [
+    "exit0 without report",
+    "false passed flag after failed preservation"
+  ]
+}

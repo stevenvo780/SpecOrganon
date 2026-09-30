@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "study_id": "D108",
+  "classification": "attributed independent read-only static review and prospective repair",
+  "reviewer": "/root/source_gate_review",
+  "initial_P2": [
+    "execute could return success after child exit0 without report.json, preventing later terminal archival",
+    "archive passed flag used child exit0 alone and could ignore a failed post-execution preservation check"
+  ],
+  "unexecuted_initial_sources": ["prelaunch_static_rejected/execute_frozen.py", "prelaunch_static_rejected/archive_executed.py"],
+  "repairs_before_any_experimental_launch": [
+    "exit0 requires a regular valid JSON report with passed is True; otherwise retain terminal error",
+    "archive success requires exit0, no error or report_error or timeout, frozen inputs unchanged and a passed report",
+    "failed attempts without directory/report can archive an empty tar plus available terminal records, with absent files declared"
+  ],
+  "independent_followup": "both P2 closed; no additional P1/P2 in reviewed diff",
+  "checks": ["validation/wrappers.json", "validation/wrappers_afterrepair.json"],
+  "actual_experimental_runs_at_review": 0,
+  "reviewer_executed_wrappers_or_probe": false,
+  "raw_agent_session_archived": false
+}

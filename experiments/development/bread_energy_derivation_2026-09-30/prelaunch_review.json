@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "study_id": "D108",
+  "classification": "attributed independent final static gate before experimental launch",
+  "reviewer": "/root/source_gate_review",
+  "final_sources": {
+    "scripts/build_bread_energy_variant.py": {"bytes": 18457, "sha256": "b61b4224915620ec51f3e050249fea6f3157c18985846ce2e787326bfde723b7"},
+    "scripts/probe_bread_energy_variant.py": {"bytes": 25181, "sha256": "cced803b0832c6917ed259cac8f41d916b0cf0e09dc49824773583fcc08892a8"},
+    "tests/test_bread_energy_variant.py": {"bytes": 4544, "sha256": "f781cf44a0adc375c6d25b2d4375cb9d7e2aa73089effca44f024b2c3b3e76d6"}
+  },
+  "P1_P2_open": 0,
+  "initial_findings_closed": ["derived date incorrectly used article date", "exit0 without positive report", "archive false passed flag after failed postcheck"],
+  "unit_checks": {"each_python": 4, "pythons": ["3.11.15", "3.12.3"], "ruff_compile_and_unit_commands_exit0": 5, "receipt": "unit_checks/receipt.json"},
+  "final_builder_changes_since_date_fix": ["exact input units", "24-place HALF_EVEN representation declaration", "exact not_inferred scope list", "data provenance matches claim provenance"],
+  "wrapper_gate": "wrapper_review.json",
+  "freeze_preparation_gate": "freeze_preparation_review.json",
+  "initial_date_rejected_source_bytes_separately_archived": false,
+  "reviewer_executed_tests_or_experiments": false,
+  "actual_experimental_launches_before_gate": 0,
+  "installed_case_evidence_pending": true,
+  "C2_C5_PASS": false,
+  "raw_agent_session_archived": false
+}
