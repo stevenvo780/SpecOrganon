@@ -1,0 +1,170 @@
+{
+  "classification": "local_stopped_native_artifact_inspection",
+  "inspector_sha256": "714c80e312277bf1db7d426b0cc6aa2aa5ecf34e892c12c9b8d31c896580f67e",
+  "review_correction": {
+    "corrected_B_observed_normative_control": false,
+    "finding": "P2: engineering rejection was caused by prior phases, not isolated normative blocker",
+    "inspection_recomputed_without_repeating_agents_or_analysis": true,
+    "native_artifacts_modified": false,
+    "pending_norm_direct_rejection_phase": "philosophy",
+    "previous_B_observed_normative_control": true
+  },
+  "schema": 1,
+  "trials": [
+    {
+      "artifacts": {
+        "analysis.py": {
+          "bytes": 16599,
+          "sha256": "c7aaba576fa584a22309d7a160f56dbd226138aad2aa3a142a286c0f88312897"
+        },
+        "metrics.json": {
+          "bytes": 23933,
+          "sha256": "d0a2e857ef67747e45a5479ea838e0ff0f8c3b037c399a4ae7c5e59361ee9c9a"
+        }
+      },
+      "classification": "local_native_trial_byte_inspection",
+      "counts_toward_required_24_runs": false,
+      "custody_independent": false,
+      "fixed_file_mismatches": [],
+      "missing_artifacts": [
+        "sources.json",
+        "report.md",
+        "prototype_case.json",
+        "state.json",
+        "prototype_calls.jsonl"
+      ],
+      "mode": "sequential",
+      "native_cost": null,
+      "native_tokens": null,
+      "schema": 1,
+      "trial_id": "A-01"
+    },
+    {
+      "advance_rejections_with_causes": [
+        {
+          "normative_ids_named_as_blockers": [
+            "N-consent"
+          ],
+          "phase": "philosophy",
+          "reason": "blocked nodes in philosophy: N-consent",
+          "seq": 3
+        },
+        {
+          "normative_ids_named_as_blockers": [],
+          "phase": "engineering",
+          "reason": "prior phases not accepted: philosophy, science",
+          "seq": 4
+        },
+        {
+          "normative_ids_named_as_blockers": [],
+          "phase": "validation",
+          "reason": "prior phases not accepted: philosophy, science, engineering",
+          "seq": 5
+        }
+      ],
+      "approval_in_captured_calls": false,
+      "approval_in_state_history": false,
+      "artifacts": {
+        "analysis.py": {
+          "bytes": 19566,
+          "sha256": "4d937e90d1bb7ef48afa63c95e71a0208574dd907583b61124538226167d9c27"
+        },
+        "metrics.json": {
+          "bytes": 25785,
+          "sha256": "14962f5efccec419aeee218bcedc4c7e5f254a93c63d2e973ac4668586182ff9"
+        },
+        "prototype_calls.jsonl": {
+          "bytes": 4492,
+          "sha256": "db258fb3e6ee20a9c49e63b4be51e9c8bd31436a8455c6cb7c8338ab67224e9e"
+        },
+        "prototype_case.json": {
+          "bytes": 5585,
+          "sha256": "44a5c6191f1dea96bd5ebd4b5269474d467ec560956ee9228a1eab3f47c56871"
+        },
+        "report.md": {
+          "bytes": 7542,
+          "sha256": "570984252969c89e76c676b6146d53939283caa478f01b63f3423193e6d09628"
+        },
+        "sources.json": {
+          "bytes": 64224,
+          "sha256": "05452447584c8428ffcb7f15ca7464c95597d4a002e813855bac9d9487a12a10"
+        },
+        "state.json": {
+          "bytes": 7232,
+          "sha256": "6c7ed36c80925f7b4b714e847ff192fc0ea218f600ee70439c6991b81bfc55d0"
+        }
+      },
+      "classification": "local_native_trial_byte_inspection",
+      "counts_toward_required_24_runs": false,
+      "custody_independent": false,
+      "engineering_accepted": false,
+      "engineering_normative_links": {
+        "R-engineering": [
+          "N-consent"
+        ]
+      },
+      "engineering_normative_rejection_isolated": false,
+      "engineering_rejection_sequences": [
+        4
+      ],
+      "final_norms_exist_and_pending": true,
+      "fixed_file_mismatches": [],
+      "initial_norms_exist_and_pending": true,
+      "journal_calls": 6,
+      "journal_hash_chain_consistent": true,
+      "missing_artifacts": [],
+      "mode": "graph",
+      "native_cost": null,
+      "native_tokens": null,
+      "nonzero_exit_sequences": [
+        3,
+        4,
+        5
+      ],
+      "normative_ids": [
+        "N-consent"
+      ],
+      "normative_link_exists": true,
+      "observed_normative_control": false,
+      "pending_normative_direct_rejection_observed": true,
+      "phase_status": {
+        "engineering": "not_started",
+        "philosophy": "not_started",
+        "science": "not_started",
+        "validation": "not_started"
+      },
+      "prototype_call_allowance_observed": true,
+      "report_word_count_whitespace": 1009,
+      "schema": 1,
+      "trial_id": "B-01"
+    },
+    {
+      "artifacts": {
+        "analysis.py": {
+          "bytes": 19288,
+          "sha256": "e0b064c5bed3f7bf717ac334d171711e584547ceed3dc505a4e61abf614e686b"
+        },
+        "metrics.json": {
+          "bytes": 30315,
+          "sha256": "14817abefec2e6e4266148ec151a9bff8abb80c784df8e3de81cda56085713ac"
+        }
+      },
+      "classification": "local_native_trial_byte_inspection",
+      "counts_toward_required_24_runs": false,
+      "custody_independent": false,
+      "fixed_file_mismatches": [],
+      "missing_artifacts": [
+        "sources.json",
+        "report.md",
+        "prototype_case.json",
+        "state.json",
+        "prototype_calls.jsonl"
+      ],
+      "mode": "risk",
+      "native_cost": null,
+      "native_tokens": null,
+      "schema": 1,
+      "trial_id": "C-01"
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "accepted_versions": {},
+  "case_id": "D-F-B-01",
+  "history": [
+    {
+      "action": "init",
+      "seq": 1,
+      "source": "prototype_case.json"
+    }
+  ],
+  "mode": "graph",
+  "nodes": {
+    "A-slices": {
+      "claim": "Analyst interpretation: whole nonnegative slices, >12 starts at13; unknowns are unconstrained nonnegative quantities and zero enters only a lower bound. source_survey.pdf SHA-256 61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee p4 Table1; survey_table1.json SHA-256 50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f category endpoints; sources.json integer_slices.",
+      "depends_on": [
+        "E-passages"
+      ],
+      "id": "A-slices",
+      "kind": "assumption",
+      "phase": "science",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "supported",
+      "version": 1
+    },
+    "E-calculation": {
+      "claim": "Reproduced: 1t wheat gives671kg refined+138kg whole+191kg bran=1000kg,residual0; economic weights78.5/14.2/7.3% differ from mass fractions. 736g loaf:0.297+0.115kWh yields0.55978261kWh/kg. Declared survey lower1720 slices/week, mean1.72/1000 or1.778697/967; closed948 mean[1473/948,2511/948]; no finite full/known upper bound. source_lca.pdf SHA-256 9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32 pp6–8 Tables2,3,5; source_survey.pdf SHA-256 61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee p4 Table1; calculations/inputs/formulas in sources.json.",
+      "depends_on": [
+        "E-passages",
+        "A-slices"
+      ],
+      "id": "E-calculation",
+      "kind": "evidence",
+      "phase": "science",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "supported",
+      "version": 1
+    },
+    "E-limit": {
+      "claim": "Published aggregates and consumer estimates are not a single tracked lot; freshness tests/scenarios and survey associations do not establish proposed causal discard reduction. source_lca.pdf SHA-256 9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32 pp6,8,13 §§4.1,4.9,5.5; source_survey.pdf SHA-256 61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee pp3,12–13 §§3,5. Prices, paired flows and trial outcomes are absent from reviewed sections.",
+      "depends_on": [
+        "E-passages"
+      ],
+      "id": "E-limit",
+      "kind": "evidence",
+      "phase": "science",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "supported",
+      "version": 1
+    },
+    "E-passages": {
+      "claim": "17 claims and 7 table rows were checked against local PDF passages, separately from hashes: source_lca.pdf SHA-256 9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32 pp6–8 §§4.2–4.9 Tables2,3,5,7; source_survey.pdf SHA-256 61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee pp3–4 §3 Table1; source_claims.json SHA-256 63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc. Methodology 7–10/>10 differs from Table1 7–9/10–12/>12.",
+      "depends_on": [
+        "P-scope"
+      ],
+      "id": "E-passages",
+      "kind": "evidence",
+      "phase": "science",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "supported",
+      "version": 1
+    },
+    "N-consent": {
+      "claim": "Proposed human decision on voluntary consent/withdrawal, privacy, minimum worthwhile reduction delta and acceptable safety/price/energy/worker/material harms remains pending competent human authorities. sources.json N-consent; proposal, no empirical source or approval. Depends on explicit case scope.",
+      "depends_on": [
+        "P-scope"
+      ],
+      "id": "N-consent",
+      "kind": "normative",
+      "phase": "philosophy",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "P-scope": {
+      "claim": "Reduce avoidable bread discard while preserving food safety, access, consent and worker/material burdens. Scope is archived documentary analysis; input/task.md SHA-256 ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51, Entrega común 4. No field authority or impact is established.",
+      "depends_on": [],
+      "id": "P-scope",
+      "kind": "problem",
+      "phase": "philosophy",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "supported",
+      "version": 1
+    },
+    "R-engineering": {
+      "claim": "Before intervention, human authority must settle N-consent and food safety limits; verify candidate contact/barrier/closure/labels, traceable withdrawal/recall, calibrated scales and consent/data permissions. Then household-randomized 1:1 contemporaneous current-package comparator on identical bread, proposed2baseline+6follow-up weeks; effects and costs measured, delta pre-agreed. sources.json R-engineering,pilot_comparator,pilot_windows: proposed requirements, no implementation or source-based efficacy claim.",
+      "depends_on": [
+        "N-consent",
+        "E-calculation",
+        "E-limit"
+      ],
+      "id": "R-engineering",
+      "kind": "requirement",
+      "phase": "engineering",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "T-doc": {
+      "claim": "Local documentary checks: python3 analysis.py input > metrics.json exited0,17 quantitative passage checks+7 row checks, manifest bytes/SHA verified. This supports computational reproducibility only; metrics.json source_audit and sources.json execution. Archived source hashes and locators are inherited from E-passages.",
+      "depends_on": [
+        "E-calculation"
+      ],
+      "id": "T-doc",
+      "kind": "test_result",
+      "phase": "validation",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "supported",
+      "version": 1
+    },
+    "T-impact": {
+      "claim": "No household enrollment, packaging safety experiment, randomized comparison or causal impact has occurred. Human-approved delta, uncertainty plan, missing-data sensitivity, harms and withdrawal criteria are pending. sources.json pilot_uncertainty,pilot_stop,pilot_refutation; input/task.md SHA-256 ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51 Entrega común4 prospective design.",
+      "depends_on": [
+        "R-engineering",
+        "E-limit"
+      ],
+      "id": "T-impact",
+      "kind": "test_result",
+      "phase": "validation",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    }
+  },
+  "phase_status": {
+    "engineering": "not_started",
+    "philosophy": "not_started",
+    "science": "not_started",
+    "validation": "not_started"
+  },
+  "schema": 1
+}

@@ -1,0 +1,1981 @@
+{
+  "schema": 1,
+  "case_id": "D-F-B-01",
+  "source_files": [
+    {
+      "file": "input/task.md",
+      "sha256": "ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51",
+      "bytes": 6887,
+      "match": true,
+      "custody_independent": false
+    },
+    {
+      "file": "input/source_claims.json",
+      "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+      "bytes": 9162,
+      "match": true,
+      "custody_independent": false
+    },
+    {
+      "file": "input/source_lca.pdf",
+      "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "bytes": 2212666,
+      "match": true,
+      "custody_independent": false
+    },
+    {
+      "file": "input/source_survey.pdf",
+      "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "bytes": 526604,
+      "match": true,
+      "custody_independent": false
+    },
+    {
+      "file": "input/survey_table1.json",
+      "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+      "bytes": 1440,
+      "match": true,
+      "custody_independent": false
+    },
+    {
+      "file": "input/source_manifest.json",
+      "sha256": "83bdf5e7bc584971ca2446cf0fe6bd83dd4b9ea624a433fc54c5e5b3f89c4f3a",
+      "bytes": 6281,
+      "match": null,
+      "reason": "manifest has no independent hash anchor inside this package",
+      "custody_independent": false
+    }
+  ],
+  "claims_and_calculations": [
+    {
+      "id": "piece_mass",
+      "classification": "reported",
+      "value": 736,
+      "unit": "g/piece",
+      "base": "One commercial loaf, bread mass after baking",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 6,
+            "printed_page": 6,
+            "section": "4.2",
+            "table": null,
+            "row": "First paragraph",
+            "column": null
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "piece_mass"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "total mass of the bread itself was 736 grams",
+      "data_origin": "baking_company_data"
+    },
+    {
+      "id": "norway_wheat_share",
+      "classification": "reported",
+      "value": 65,
+      "unit": "%",
+      "base": "Average wheat origin reported over several years",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 6,
+            "printed_page": 6,
+            "section": "4.3",
+            "table": null,
+            "row": "First paragraph",
+            "column": null
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "norway_wheat_share"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "average of 65% of the wheat has been coming from Norway",
+      "data_origin": "mill_company_data"
+    },
+    {
+      "id": "mill_electricity",
+      "classification": "reported",
+      "value": 129,
+      "unit": "kWh/t_flour",
+      "base": "One tonne of flour produced",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "printed_page": 7,
+            "section": "4.4",
+            "table": "2",
+            "row": "Mill energy consumption",
+            "column": "Data"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "mill_electricity"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Mill energy consumption 129 kWh electricity per ton of flour produced",
+      "data_origin": "mill_company_data"
+    },
+    {
+      "id": "wheat_bran_mass_share",
+      "classification": "reported",
+      "value": 19.1,
+      "unit": "% w/w",
+      "base": "Wheat input to flour mill, mass fraction of bran output",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "printed_page": 7,
+            "section": "4.4",
+            "table": "3",
+            "row": "Wheat flour products (% w/w)",
+            "column": "Material Balance and Allocation Factors"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "wheat_bran_mass_share"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Wheat flour products (% w/w) 67.1% refined flour, 13.8% whole flour, 19.1% bran",
+      "data_origin": "mill_company_data"
+    },
+    {
+      "id": "mill_to_baker_distance",
+      "classification": "reported",
+      "value": 438,
+      "unit": "km",
+      "base": "Transport from mill to baker in >32 tonne truck",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 8,
+            "printed_page": 8,
+            "section": "4.6",
+            "table": "5",
+            "row": "Transport from mill to baker",
+            "column": "Data"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "mill_to_baker_distance"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Transport from mill to baker 438 km on >32 tonne truck",
+      "data_origin": "mill_company_data"
+    },
+    {
+      "id": "bakery_electricity",
+      "classification": "reported",
+      "value": 0.297,
+      "unit": "kWh/piece",
+      "base": "One commercial loaf of the studied bread",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 8,
+            "printed_page": 8,
+            "section": "4.6",
+            "table": "5",
+            "row": "Baker energy consumption",
+            "column": "Data"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "bakery_electricity"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Baker energy consumption 0.297 kWh electricity and 0.115 kWh natural gas per bread",
+      "data_origin": "baking_company_data"
+    },
+    {
+      "id": "retail_bread_waste",
+      "classification": "reported",
+      "value": 11.4,
+      "unit": "%",
+      "base": "Bread entering the system as named by Table 7",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 8,
+            "printed_page": 8,
+            "section": "4.9",
+            "table": "7",
+            "row": "Retail waste",
+            "column": "Amount Wasted as % of Bread Entering the System"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "retail_bread_waste"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Retail waste 11.4",
+      "data_origin": "baking_company_data"
+    },
+    {
+      "id": "consumer_bread_waste_estimate",
+      "classification": "reported",
+      "value": 8.2,
+      "unit": "%",
+      "base": "Bread entering the system as named by Table 7",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 8,
+            "printed_page": 8,
+            "section": "4.9",
+            "table": "7",
+            "row": "Consumer waste",
+            "column": "Amount Wasted as % of Bread Entering the System"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "consumer_bread_waste_estimate"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Consumer waste 8.2",
+      "data_origin": "authors_calculation_from_consumption_reference_3_and_wastage_reference_9"
+    },
+    {
+      "id": "survey_respondents",
+      "classification": "reported",
+      "value": 1000,
+      "unit": "respondents",
+      "base": "Respondents answering a web survey about household bread wasting",
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "printed_page": 4,
+            "section": "3",
+            "table": "1",
+            "row": "Total",
+            "column": "Number of Respondents"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "survey_respondents"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Total 1000 100.0",
+      "data_origin": "web_survey_reported_frequency"
+    },
+    {
+      "id": "poland_wheat_share",
+      "classification": "reported",
+      "value": 35,
+      "unit": "%",
+      "base": "Average wheat origin reported over several years",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 6,
+            "printed_page": 6,
+            "section": "4.3",
+            "table": null,
+            "row": "First paragraph",
+            "column": null
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "poland_wheat_share"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "remaining 35% from Poland",
+      "data_origin": "mill_company_data"
+    },
+    {
+      "id": "wheat_refined_flour_mass_share",
+      "classification": "reported",
+      "value": 67.1,
+      "unit": "% w/w",
+      "base": "Wheat input to flour mill, mass fraction of refined flour output",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "printed_page": 7,
+            "section": "4.4",
+            "table": "3",
+            "row": "Wheat flour products (% w/w)",
+            "column": "Material Balance and Allocation Factors"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "wheat_refined_flour_mass_share"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Wheat flour products (% w/w) 67.1% refined flour, 13.8% whole flour, 19.1% bran",
+      "data_origin": "mill_company_data"
+    },
+    {
+      "id": "wheat_whole_flour_mass_share",
+      "classification": "reported",
+      "value": 13.8,
+      "unit": "% w/w",
+      "base": "Wheat input to flour mill, mass fraction of whole flour output",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "printed_page": 7,
+            "section": "4.4",
+            "table": "3",
+            "row": "Wheat flour products (% w/w)",
+            "column": "Material Balance and Allocation Factors"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "wheat_whole_flour_mass_share"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Wheat flour products (% w/w) 67.1% refined flour, 13.8% whole flour, 19.1% bran",
+      "data_origin": "mill_company_data"
+    },
+    {
+      "id": "bakery_natural_gas",
+      "classification": "reported",
+      "value": 0.115,
+      "unit": "kWh/piece",
+      "base": "One commercial loaf of the studied bread",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 8,
+            "printed_page": 8,
+            "section": "4.6",
+            "table": "5",
+            "row": "Baker energy consumption",
+            "column": "Data"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "bakery_natural_gas"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Baker energy consumption 0.297 kWh electricity and 0.115 kWh natural gas per bread",
+      "data_origin": "baking_company_data"
+    },
+    {
+      "id": "wheat_refined_flour_economic_allocation",
+      "classification": "reported",
+      "value": 78.5,
+      "unit": "%",
+      "base": "Economic allocation factor for refined flour in milling inventory",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "printed_page": 7,
+            "section": "4.4",
+            "table": "3",
+            "row": "Wheat, economic allocation factors",
+            "column": "Material Balance and Allocation Factors"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "wheat_refined_flour_economic_allocation"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Wheat, economic allocation factors Refined flour 78.5%, whole flour 14.2%, bran 7.3%",
+      "data_origin": "mill_company_data"
+    },
+    {
+      "id": "wheat_whole_flour_economic_allocation",
+      "classification": "reported",
+      "value": 14.2,
+      "unit": "%",
+      "base": "Economic allocation factor for whole flour in milling inventory",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "printed_page": 7,
+            "section": "4.4",
+            "table": "3",
+            "row": "Wheat, economic allocation factors",
+            "column": "Material Balance and Allocation Factors"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "wheat_whole_flour_economic_allocation"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Wheat, economic allocation factors Refined flour 78.5%, whole flour 14.2%, bran 7.3%",
+      "data_origin": "mill_company_data"
+    },
+    {
+      "id": "wheat_bran_economic_allocation",
+      "classification": "reported",
+      "value": 7.3,
+      "unit": "%",
+      "base": "Economic allocation factor for bran in milling inventory",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "printed_page": 7,
+            "section": "4.4",
+            "table": "3",
+            "row": "Wheat, economic allocation factors",
+            "column": "Material Balance and Allocation Factors"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "wheat_bran_economic_allocation"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Wheat, economic allocation factors Refined flour 78.5%, whole flour 14.2%, bran 7.3%",
+      "data_origin": "mill_company_data"
+    },
+    {
+      "id": "bakery_bread_waste",
+      "classification": "reported",
+      "value": 3.3,
+      "unit": "%",
+      "base": "Bread entering the system as named by Table 7",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 8,
+            "printed_page": 8,
+            "section": "4.9",
+            "table": "7",
+            "row": "Bakery waste",
+            "column": "Amount Wasted as % of Bread Entering the System"
+          }
+        },
+        {
+          "file": "input/source_claims.json",
+          "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+          "locator": {
+            "claim_key": "bakery_bread_waste"
+          }
+        }
+      ],
+      "passage_check": "passage_matched",
+      "matched_passage": "Bakery waste 3.3",
+      "data_origin": "baking_company_data"
+    },
+    {
+      "id": "survey_row_zero",
+      "classification": "reported",
+      "count": {
+        "value": 429,
+        "unit": "respondents",
+        "base": "Zero slices category, Table 1"
+      },
+      "reported_percent": {
+        "value": 42.9,
+        "unit": "%",
+        "base": "1000 Table 1 respondents"
+      },
+      "published_interval": "Zero slices",
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1",
+            "row": "Zero slices",
+            "columns": [
+              "Number of Respondents",
+              "Percentage of Respondents"
+            ]
+          }
+        },
+        {
+          "file": "input/survey_table1.json",
+          "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+          "locator": {
+            "category_key": "zero"
+          }
+        }
+      ],
+      "passage_check": "label_count_percent_passage_matched"
+    },
+    {
+      "id": "survey_row_one_to_three",
+      "classification": "reported",
+      "count": {
+        "value": 301,
+        "unit": "respondents",
+        "base": "1–3 slices category, Table 1"
+      },
+      "reported_percent": {
+        "value": 30.1,
+        "unit": "%",
+        "base": "1000 Table 1 respondents"
+      },
+      "published_interval": "1–3 slices",
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1",
+            "row": "1–3 slices",
+            "columns": [
+              "Number of Respondents",
+              "Percentage of Respondents"
+            ]
+          }
+        },
+        {
+          "file": "input/survey_table1.json",
+          "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+          "locator": {
+            "category_key": "one_to_three"
+          }
+        }
+      ],
+      "passage_check": "label_count_percent_passage_matched"
+    },
+    {
+      "id": "survey_row_four_to_six",
+      "classification": "reported",
+      "count": {
+        "value": 140,
+        "unit": "respondents",
+        "base": "4–6 slices category, Table 1"
+      },
+      "reported_percent": {
+        "value": 14,
+        "unit": "%",
+        "base": "1000 Table 1 respondents"
+      },
+      "published_interval": "4–6 slices",
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1",
+            "row": "4–6 slices",
+            "columns": [
+              "Number of Respondents",
+              "Percentage of Respondents"
+            ]
+          }
+        },
+        {
+          "file": "input/survey_table1.json",
+          "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+          "locator": {
+            "category_key": "four_to_six"
+          }
+        }
+      ],
+      "passage_check": "label_count_percent_passage_matched"
+    },
+    {
+      "id": "survey_row_seven_to_nine",
+      "classification": "reported",
+      "count": {
+        "value": 56,
+        "unit": "respondents",
+        "base": "7–9 slices category, Table 1"
+      },
+      "reported_percent": {
+        "value": 5.6,
+        "unit": "%",
+        "base": "1000 Table 1 respondents"
+      },
+      "published_interval": "7–9 slices",
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1",
+            "row": "7–9 slices",
+            "columns": [
+              "Number of Respondents",
+              "Percentage of Respondents"
+            ]
+          }
+        },
+        {
+          "file": "input/survey_table1.json",
+          "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+          "locator": {
+            "category_key": "seven_to_nine"
+          }
+        }
+      ],
+      "passage_check": "label_count_percent_passage_matched"
+    },
+    {
+      "id": "survey_row_ten_to_twelve",
+      "classification": "reported",
+      "count": {
+        "value": 22,
+        "unit": "respondents",
+        "base": "10–12 slices category, Table 1"
+      },
+      "reported_percent": {
+        "value": 2.2,
+        "unit": "%",
+        "base": "1000 Table 1 respondents"
+      },
+      "published_interval": "10–12 slices",
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1",
+            "row": "10–12 slices",
+            "columns": [
+              "Number of Respondents",
+              "Percentage of Respondents"
+            ]
+          }
+        },
+        {
+          "file": "input/survey_table1.json",
+          "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+          "locator": {
+            "category_key": "ten_to_twelve"
+          }
+        }
+      ],
+      "passage_check": "label_count_percent_passage_matched"
+    },
+    {
+      "id": "survey_row_more_than_twelve",
+      "classification": "reported",
+      "count": {
+        "value": 19,
+        "unit": "respondents",
+        "base": "More than 12 slices category, Table 1"
+      },
+      "reported_percent": {
+        "value": 1.9,
+        "unit": "%",
+        "base": "1000 Table 1 respondents"
+      },
+      "published_interval": "More than 12 slices",
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1",
+            "row": "More than 12 slices",
+            "columns": [
+              "Number of Respondents",
+              "Percentage of Respondents"
+            ]
+          }
+        },
+        {
+          "file": "input/survey_table1.json",
+          "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+          "locator": {
+            "category_key": "more_than_twelve"
+          }
+        }
+      ],
+      "passage_check": "label_count_percent_passage_matched"
+    },
+    {
+      "id": "survey_row_do_not_know",
+      "classification": "reported",
+      "count": {
+        "value": 33,
+        "unit": "respondents",
+        "base": "Do not know category, Table 1"
+      },
+      "reported_percent": {
+        "value": 3.3,
+        "unit": "%",
+        "base": "1000 Table 1 respondents"
+      },
+      "published_interval": "Do not know",
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1",
+            "row": "Do not know",
+            "columns": [
+              "Number of Respondents",
+              "Percentage of Respondents"
+            ]
+          }
+        },
+        {
+          "file": "input/survey_table1.json",
+          "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+          "locator": {
+            "category_key": "do_not_know"
+          }
+        }
+      ],
+      "passage_check": "label_count_percent_passage_matched"
+    },
+    {
+      "id": "normalization",
+      "classification": "assumption",
+      "author": "B-01 analyst under task instruction",
+      "value": 1000,
+      "unit": "kg_wheat",
+      "base": "one normalized tonne entering mill",
+      "sources": [
+        {
+          "file": "input/task.md",
+          "sha256": "ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51",
+          "locator": "Entrega común 2, milling"
+        }
+      ]
+    },
+    {
+      "id": "integer_slices",
+      "classification": "assumption",
+      "author": "B-01 analyst",
+      "claim": "Whole nonnegative slice counts are the interpretation; >12 means minimum 13; fragment counts would instead have infimum 12. Unknown responses are nonnegative, not observed zero.",
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        },
+        {
+          "file": "input/survey_table1.json",
+          "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+          "locator": "categories.more_than_twelve and do_not_know"
+        }
+      ]
+    },
+    {
+      "id": "output_refined_flour",
+      "classification": "derived",
+      "metric_path": "milling.outputs.refined_flour",
+      "value": 671,
+      "unit": "kg",
+      "base": "normalized 1 t wheat input",
+      "formula": "1000 kg * reported mass share / 100",
+      "inputs": [
+        "normalization",
+        "wheat_refined_flour_mass_share"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fraction_refined_flour",
+      "classification": "derived",
+      "metric_path": "milling.mass_fractions.refined_flour",
+      "value": 0.6709999999999999,
+      "unit": "kg/kg_wheat",
+      "base": "physical output fraction of wheat input",
+      "formula": "reported mass share / 100",
+      "inputs": [
+        "wheat_refined_flour_mass_share"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "allocation_refined_flour",
+      "classification": "derived",
+      "metric_path": "milling.economic_allocation_factors.refined_flour",
+      "value": 0.785,
+      "unit": "share",
+      "base": "economic allocation of milling inventory; not physical loss or market price",
+      "formula": "reported economic allocation percentage / 100",
+      "inputs": [
+        "wheat_refined_flour_economic_allocation"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "output_whole_flour",
+      "classification": "derived",
+      "metric_path": "milling.outputs.whole_flour",
+      "value": 138,
+      "unit": "kg",
+      "base": "normalized 1 t wheat input",
+      "formula": "1000 kg * reported mass share / 100",
+      "inputs": [
+        "normalization",
+        "wheat_whole_flour_mass_share"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fraction_whole_flour",
+      "classification": "derived",
+      "metric_path": "milling.mass_fractions.whole_flour",
+      "value": 0.138,
+      "unit": "kg/kg_wheat",
+      "base": "physical output fraction of wheat input",
+      "formula": "reported mass share / 100",
+      "inputs": [
+        "wheat_whole_flour_mass_share"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "allocation_whole_flour",
+      "classification": "derived",
+      "metric_path": "milling.economic_allocation_factors.whole_flour",
+      "value": 0.142,
+      "unit": "share",
+      "base": "economic allocation of milling inventory; not physical loss or market price",
+      "formula": "reported economic allocation percentage / 100",
+      "inputs": [
+        "wheat_whole_flour_economic_allocation"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "output_bran",
+      "classification": "derived",
+      "metric_path": "milling.outputs.bran",
+      "value": 191,
+      "unit": "kg",
+      "base": "normalized 1 t wheat input",
+      "formula": "1000 kg * reported mass share / 100",
+      "inputs": [
+        "normalization",
+        "wheat_bran_mass_share"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fraction_bran",
+      "classification": "derived",
+      "metric_path": "milling.mass_fractions.bran",
+      "value": 0.191,
+      "unit": "kg/kg_wheat",
+      "base": "physical output fraction of wheat input",
+      "formula": "reported mass share / 100",
+      "inputs": [
+        "wheat_bran_mass_share"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "allocation_bran",
+      "classification": "derived",
+      "metric_path": "milling.economic_allocation_factors.bran",
+      "value": 0.073,
+      "unit": "share",
+      "base": "economic allocation of milling inventory; not physical loss or market price",
+      "formula": "reported economic allocation percentage / 100",
+      "inputs": [
+        "wheat_bran_economic_allocation"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "milling_sum",
+      "classification": "derived",
+      "metric_path": "milling.sum_outputs",
+      "value": 1000,
+      "unit": "kg",
+      "base": "normalized 1 t wheat input",
+      "formula": "671 + 138 + 191",
+      "inputs": [
+        "output_refined_flour",
+        "output_whole_flour",
+        "output_bran"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "milling_residual",
+      "classification": "derived",
+      "metric_path": "milling.balance_residual",
+      "value": 0,
+      "unit": "kg",
+      "base": "input minus reported output fractions; rounding-level accounting",
+      "formula": "normalized input - output sum",
+      "inputs": [
+        "normalization",
+        "milling_sum"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "loaf_kg",
+      "classification": "derived",
+      "metric_path": "baking_energy.piece_mass",
+      "value": 0.736,
+      "unit": "kg/piece",
+      "base": "commercial loaf after baking",
+      "formula": "736 / 1000",
+      "inputs": [
+        "piece_mass"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 6,
+            "section": "4.2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "energy_piece_sum",
+      "classification": "derived",
+      "metric_path": "baking_energy.sum_per_piece",
+      "value": 0.412,
+      "unit": "kWh/piece",
+      "base": "sum of reported energy carriers; not primary energy or GHG",
+      "formula": "0.297 + 0.115",
+      "inputs": [
+        "bakery_electricity",
+        "bakery_natural_gas"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 8,
+            "table": "5",
+            "row": "Baker energy consumption"
+          }
+        }
+      ]
+    },
+    {
+      "id": "electricity_per_kg",
+      "classification": "derived",
+      "metric_path": "baking_energy.electricity_per_kg",
+      "value": 0.40353260869565216,
+      "unit": "kWh/kg_bread",
+      "base": "mass of studied bread after baking",
+      "formula": "bakery_electricity / (piece_mass / 1000)",
+      "inputs": [
+        "bakery_electricity",
+        "loaf_kg"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 8,
+            "table": "5",
+            "row": "Baker energy consumption"
+          }
+        }
+      ]
+    },
+    {
+      "id": "natural_gas_per_kg",
+      "classification": "derived",
+      "metric_path": "baking_energy.natural_gas_per_kg",
+      "value": 0.15625,
+      "unit": "kWh/kg_bread",
+      "base": "mass of studied bread after baking",
+      "formula": "bakery_natural_gas / (piece_mass / 1000)",
+      "inputs": [
+        "bakery_natural_gas",
+        "loaf_kg"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 8,
+            "table": "5",
+            "row": "Baker energy consumption"
+          }
+        }
+      ]
+    },
+    {
+      "id": "energy_kg_sum",
+      "classification": "derived",
+      "metric_path": "baking_energy.sum_per_kg",
+      "value": 0.5597826086956521,
+      "unit": "kWh/kg_bread",
+      "base": "sum of reported energy carriers for studied bread",
+      "formula": "(0.297 + 0.115) / 0.736",
+      "inputs": [
+        "energy_piece_sum",
+        "loaf_kg"
+      ],
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 8,
+            "table": "5",
+            "row": "Baker energy consumption"
+          }
+        }
+      ]
+    },
+    {
+      "id": "total_respondents",
+      "classification": "derived",
+      "metric_path": "survey.total_respondents",
+      "value": 1000,
+      "unit": "respondents",
+      "base": "Table 1 total",
+      "formula": "sum(all category counts)",
+      "inputs": [
+        "survey_row_zero",
+        "survey_row_one_to_three",
+        "survey_row_four_to_six",
+        "survey_row_seven_to_nine",
+        "survey_row_ten_to_twelve",
+        "survey_row_more_than_twelve",
+        "survey_row_do_not_know"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "unknown_respondents",
+      "classification": "derived",
+      "metric_path": "survey.unknown_respondents",
+      "value": 33,
+      "unit": "respondents",
+      "base": "Table 1 Do not know",
+      "formula": "count(Do not know)",
+      "inputs": [
+        "survey_row_do_not_know"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "known_respondents",
+      "classification": "derived",
+      "metric_path": "survey.known_respondents",
+      "value": 967,
+      "unit": "respondents",
+      "base": "Table 1 except Do not know",
+      "formula": "1000 - 33",
+      "inputs": [
+        "total_respondents",
+        "unknown_respondents"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "open_category_respondents",
+      "classification": "derived",
+      "metric_path": "survey.open_category_respondents",
+      "value": 19,
+      "unit": "respondents",
+      "base": "Table 1 More than 12 slices",
+      "formula": "count(More than 12)",
+      "inputs": [
+        "survey_row_more_than_twelve"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "closed_category_respondents",
+      "classification": "derived",
+      "metric_path": "survey.closed_category_respondents",
+      "value": 948,
+      "unit": "respondents",
+      "base": "Table 1 zero through 10–12",
+      "formula": "967 - 19",
+      "inputs": [
+        "known_respondents",
+        "open_category_respondents"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "lower_total_all",
+      "classification": "derived",
+      "metric_path": "survey.lower_total_all",
+      "value": 1720,
+      "unit": "slices/week",
+      "base": "1000 surveyed respondents; household weekly discard, including unknown responses",
+      "formula": "429*0+301*1+140*4+56*7+22*10+19*13+33*0; last term is bound, not observation",
+      "inputs": [
+        "survey_row_zero",
+        "survey_row_one_to_three",
+        "survey_row_four_to_six",
+        "survey_row_seven_to_nine",
+        "survey_row_ten_to_twelve",
+        "survey_row_more_than_twelve",
+        "survey_row_do_not_know",
+        "integer_slices"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "lower_total_known",
+      "classification": "derived",
+      "metric_path": "survey.lower_total_known",
+      "value": 1720,
+      "unit": "slices/week",
+      "base": "967 respondents choosing a known category; household weekly discard",
+      "formula": "429*0+301*1+140*4+56*7+22*10+19*13",
+      "inputs": [
+        "survey_row_zero",
+        "survey_row_one_to_three",
+        "survey_row_four_to_six",
+        "survey_row_seven_to_nine",
+        "survey_row_ten_to_twelve",
+        "survey_row_more_than_twelve",
+        "integer_slices"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "lower_mean_all",
+      "classification": "derived",
+      "metric_path": "survey.lower_mean_all",
+      "value": 1.72,
+      "unit": "slices/(respondent_household*week)",
+      "base": "1000 surveyed respondents; household weekly discard, including unknown responses",
+      "formula": "1720 / 1000",
+      "inputs": [
+        "lower_total_all",
+        "total_respondents"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "lower_mean_known",
+      "classification": "derived",
+      "metric_path": "survey.lower_mean_known",
+      "value": 1.778697001034126,
+      "unit": "slices/(respondent_household*week)",
+      "base": "967 respondents choosing a known category; household weekly discard",
+      "formula": "1720 / 967",
+      "inputs": [
+        "lower_total_known",
+        "known_respondents"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "closed_total_interval.lower",
+      "classification": "derived",
+      "metric_path": "survey.closed_total_interval.lower",
+      "value": 1473,
+      "unit": "slices/week",
+      "base": "948 respondents in closed Table 1 categories; household weekly discard",
+      "formula": "429*0+301*1+140*4+56*7+22*10",
+      "inputs": [
+        "survey_row_zero",
+        "survey_row_one_to_three",
+        "survey_row_four_to_six",
+        "survey_row_seven_to_nine",
+        "survey_row_ten_to_twelve"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "closed_total_interval.upper",
+      "classification": "derived",
+      "metric_path": "survey.closed_total_interval.upper",
+      "value": 2511,
+      "unit": "slices/week",
+      "base": "948 respondents in closed Table 1 categories; household weekly discard",
+      "formula": "429*0+301*3+140*6+56*9+22*12",
+      "inputs": [
+        "survey_row_zero",
+        "survey_row_one_to_three",
+        "survey_row_four_to_six",
+        "survey_row_seven_to_nine",
+        "survey_row_ten_to_twelve"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "closed_mean_interval.lower",
+      "classification": "derived",
+      "metric_path": "survey.closed_mean_interval.lower",
+      "value": 1.5537974683544304,
+      "unit": "slices/(respondent_household*week)",
+      "base": "948 respondents in closed Table 1 categories; household weekly discard",
+      "formula": "1473 / 948",
+      "inputs": [
+        "closed_total_interval.lower",
+        "closed_category_respondents"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "closed_mean_interval.upper",
+      "classification": "derived",
+      "metric_path": "survey.closed_mean_interval.upper",
+      "value": 2.6487341772151898,
+      "unit": "slices/(respondent_household*week)",
+      "base": "948 respondents in closed Table 1 categories; household weekly discard",
+      "formula": "2511 / 948",
+      "inputs": [
+        "closed_total_interval.upper",
+        "closed_category_respondents"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "upper_total_all",
+      "classification": "derived",
+      "metric_path": "survey.upper_total_all",
+      "value": null,
+      "unit": "slices/week",
+      "base": "1000 surveyed respondents; household weekly discard, including unknown responses",
+      "reason": "open category has no finite cap; unknown responses also have no finite cap",
+      "formula": "No finite upper bound follows from an unbounded nonempty >12 category; unknown responses also lack a cap",
+      "inputs": [
+        "survey_row_more_than_twelve",
+        "survey_row_do_not_know",
+        "integer_slices"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "upper_mean_all",
+      "classification": "derived",
+      "metric_path": "survey.upper_mean_all",
+      "value": null,
+      "unit": "slices/(respondent_household*week)",
+      "base": "1000 surveyed respondents; household weekly discard, including unknown responses",
+      "reason": "open category has no finite cap; unknown responses also have no finite cap",
+      "formula": "No finite upper bound follows from an unbounded nonempty >12 category; unknown responses also lack a cap",
+      "inputs": [
+        "survey_row_more_than_twelve",
+        "survey_row_do_not_know",
+        "integer_slices"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "upper_total_known",
+      "classification": "derived",
+      "metric_path": "survey.upper_total_known",
+      "value": null,
+      "unit": "slices/week",
+      "base": "967 respondents choosing a known category; household weekly discard",
+      "reason": "19 responses above 12 without finite cap",
+      "formula": "No finite upper bound follows from an unbounded nonempty >12 category; unknown responses also lack a cap",
+      "inputs": [
+        "survey_row_more_than_twelve",
+        "survey_row_do_not_know",
+        "integer_slices"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "upper_mean_known",
+      "classification": "derived",
+      "metric_path": "survey.upper_mean_known",
+      "value": null,
+      "unit": "slices/(respondent_household*week)",
+      "base": "967 respondents choosing a known category; household weekly discard",
+      "reason": "19 responses above 12 without finite cap",
+      "formula": "No finite upper bound follows from an unbounded nonempty >12 category; unknown responses also lack a cap",
+      "inputs": [
+        "survey_row_more_than_twelve",
+        "survey_row_do_not_know",
+        "integer_slices"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "finite_upper_bound_all",
+      "classification": "derived",
+      "metric_path": "survey.finite_upper_bound_all",
+      "value": false,
+      "unit": "boolean",
+      "base": "Table 1 categorized respondent set",
+      "formula": "finite iff every included nonempty category has finite upper endpoint; unknowns also lack endpoints",
+      "inputs": [
+        "survey_row_more_than_twelve",
+        "survey_row_do_not_know"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "finite_upper_bound_known",
+      "classification": "derived",
+      "metric_path": "survey.finite_upper_bound_known",
+      "value": false,
+      "unit": "boolean",
+      "base": "Table 1 categorized respondent set",
+      "formula": "finite iff every included nonempty category has finite upper endpoint; unknowns also lack endpoints",
+      "inputs": [
+        "survey_row_more_than_twelve",
+        "survey_row_do_not_know"
+      ],
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "interval_discrepancy",
+      "classification": "reported",
+      "claim": "Survey methodology page 3 says 7–10 and >10; Table 1 page 4 says 7–9, 10–12, >12. Table used without claiming questionnaire repair.",
+      "sources": [
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 3,
+            "section": "3"
+          }
+        },
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_page": 4,
+            "table": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "mill_rebase_missing",
+      "classification": "pending",
+      "value": null,
+      "unit": "kWh/t_wheat",
+      "base": "normalized wheat input",
+      "reason": "not rebased: whether published flour denominator encompasses both products and allocated mill operations is not confirmed",
+      "metric_path": "milling.electricity_per_t_wheat",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "tables": [
+              "2",
+              "3"
+            ]
+          }
+        }
+      ],
+      "review_scope": "Supplied structured quantities plus LCA pages 6–9, 12–15 and survey pages 3–4, 11–13; no claim of exhaustive literature review. No new causal comparison, market transaction ledger or tracked lot was available."
+    },
+    {
+      "id": "prices_missing",
+      "classification": "pending",
+      "value": null,
+      "unit": "currency/t_wheat",
+      "base": "normalized wheat input",
+      "reason": "absolute prices and transaction flows are not supplied",
+      "metric_path": "milling.monetary_loss",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 7,
+            "table": "3"
+          }
+        }
+      ],
+      "review_scope": "Supplied structured quantities plus LCA pages 6–9, 12–15 and survey pages 3–4, 11–13; no claim of exhaustive literature review. No new causal comparison, market transaction ledger or tracked lot was available."
+    },
+    {
+      "id": "chain_loss_missing",
+      "classification": "pending",
+      "value": null,
+      "unit": "%",
+      "base": "one lot across production, retail and household",
+      "reason": "Table 7 aggregates and secondary estimates do not identify sequential conditional rates or a tracked lot",
+      "metric_path": "linked_chain_loss",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 8,
+            "table": "7"
+          }
+        }
+      ],
+      "review_scope": "Supplied structured quantities plus LCA pages 6–9, 12–15 and survey pages 3–4, 11–13; no claim of exhaustive literature review. No new causal comparison, market transaction ledger or tracked lot was available."
+    },
+    {
+      "id": "causal_effect_missing",
+      "classification": "pending",
+      "value": null,
+      "unit": "g_discard/(household*week)",
+      "base": "future randomized comparator",
+      "reason": "reviewed studies provide inventories, observational associations and freshness tests/scenarios, not the proposed trial outcome",
+      "metric_path": "causal_effect_of_packaging",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 13,
+            "section": "5.5"
+          }
+        }
+      ],
+      "review_scope": "Supplied structured quantities plus LCA pages 6–9, 12–15 and survey pages 3–4, 11–13; no claim of exhaustive literature review. No new causal comparison, market transaction ledger or tracked lot was available."
+    },
+    {
+      "id": "material_destinations",
+      "classification": "reported",
+      "claim": "Cereals are dried/stored/processed; packaging covers consumer/distribution/transport systems. Bakery/retail bread waste is used as pig feed; household waste destinations are modeled treatment mixtures. Bran remains coproduct mass, not classified as disappearance.",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_pages": [
+              6,
+              7,
+              8,
+              9
+            ],
+            "sections": [
+              "4.4",
+              "4.5",
+              "4.9",
+              "4.10",
+              "4.11"
+            ],
+            "tables": [
+              "3",
+              "4",
+              "8"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "packaging_hypothesis",
+      "classification": "reported",
+      "claim": "LCA describes tests of firmness/perceived freshness and explicitly asks for larger tests in actual value chain; these do not identify causal weighed household-discard reduction. Survey studies associations and reported intentions/behavior.",
+      "sources": [
+        {
+          "file": "input/source_lca.pdf",
+          "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "locator": {
+            "pdf_page": 13,
+            "section": "5.5"
+          }
+        },
+        {
+          "file": "input/source_survey.pdf",
+          "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "locator": {
+            "pdf_pages": [
+              3,
+              12,
+              13
+            ],
+            "sections": [
+              "3",
+              "5"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pilot_comparator",
+      "classification": "assumption",
+      "status": "pending",
+      "author": "B-01 native executor, prospective proposal requiring competent human acceptance",
+      "claim": "Contemporaneous randomized household assignment of unchanged bread with candidate resealable packaging versus current packaging; allocation concealed before enrollment, same provision and measurement routines.",
+      "values": {
+        "allocation": {
+          "value": "1:1",
+          "unit": "allocation_ratio",
+          "base": "consenting households"
+        }
+      },
+      "sources": [],
+      "reason": "proposal, not a published result or authorization"
+    },
+    {
+      "id": "pilot_windows",
+      "classification": "assumption",
+      "status": "pending",
+      "author": "B-01 native executor, prospective proposal requiring competent human acceptance",
+      "claim": "Observe baseline before assignment, then concurrent assigned follow-up; window proposal, not measured shelf life.",
+      "values": {
+        "baseline": {
+          "value": 2,
+          "unit": "weeks",
+          "base": "per enrolled household"
+        },
+        "follow_up": {
+          "value": 6,
+          "unit": "weeks",
+          "base": "per randomized household"
+        }
+      },
+      "sources": [],
+      "reason": "proposal, not a published result or authorization"
+    },
+    {
+      "id": "pilot_uncertainty",
+      "classification": "assumption",
+      "status": "pending",
+      "author": "B-01 native executor, prospective proposal requiring competent human acceptance",
+      "claim": "Estimate randomized intention-to-treat household mean-discard contrast with baseline adjustment and stratification; household bootstrap interval and missing-outcome tipping-point analyses.",
+      "values": {
+        "interval_level": {
+          "value": 95,
+          "unit": "%",
+          "base": "prospective statistical uncertainty interval"
+        }
+      },
+      "sources": [],
+      "reason": "proposal, not a published result or authorization"
+    },
+    {
+      "id": "N-consent",
+      "classification": "assumption",
+      "status": "pending",
+      "author": "B-01 native executor, prospective proposal requiring competent human acceptance",
+      "claim": "Competent human decision remains pending on voluntary consent/withdrawal, data minimization, minimum worthwhile reduction delta, food safety limits, maximum household price burden and acceptable worker/material/energy displacement. Need pilot costs, product contact/barrier/mold tests, household acceptability and stakeholder consultation before acceptance.",
+      "values": null,
+      "sources": [],
+      "reason": "proposal, not a published result or authorization"
+    },
+    {
+      "id": "R-engineering",
+      "classification": "assumption",
+      "status": "pending",
+      "author": "B-01 native executor, prospective proposal requiring competent human acceptance",
+      "claim": "Release no study packs or enroll participants until N-consent and food safety responsibility are approved by competent humans and independent checks document barrier/closure/contact safety, valid labels, withdrawal traceability, scales, unique pack identifiers and data collection permissions. Protocol depends explicitly on N-consent.",
+      "values": null,
+      "sources": [],
+      "reason": "proposal, not a published result or authorization"
+    },
+    {
+      "id": "pilot_stop",
+      "classification": "assumption",
+      "status": "pending",
+      "author": "B-01 native executor, prospective proposal requiring competent human acceptance",
+      "claim": "Stop and recall candidate packs upon a serious plausibly related safety event, failed mold/barrier test, consent/privacy breach or approved harm/cost ceiling breach. Preserve incident data and offer withdrawal without penalty. Neither delta nor ceilings are settled in this run.",
+      "values": null,
+      "sources": [],
+      "reason": "proposal, not a published result or authorization"
+    },
+    {
+      "id": "pilot_refutation",
+      "classification": "assumption",
+      "status": "pending",
+      "author": "B-01 native executor, prospective proposal requiring competent human acceptance",
+      "claim": "Once agreed before outcomes, reject adoption if the interval excludes the minimum worthwhile discard reduction delta, or a net burden/approved safety/price limit is exceeded. An interval spanning zero is inconclusive and cannot support rollout. Measure retail displacement, packaging, extra bags and freezing energy at common demand.",
+      "values": null,
+      "sources": [],
+      "reason": "proposal, not a published result or authorization"
+    }
+  ],
+  "assurance_limits": [
+    "Hash checks use a supplied local manifest with no external anchor.",
+    "Passage matches establish the published transcription only.",
+    "Only sources and sections named here were used, without network access.",
+    "Future window, comparison and decision criteria are proposals; authorization and impact are pending."
+  ],
+  "execution": {
+    "command": "python3 analysis.py input > metrics.json",
+    "python_dependencies": "standard library only; local pdftotext executable required for passage auditing"
+  }
+}

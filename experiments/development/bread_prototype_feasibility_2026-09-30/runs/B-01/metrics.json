@@ -1,0 +1,754 @@
+{
+  "schema": 1,
+  "case": "D-F",
+  "classification": "exposed_documentary_development",
+  "integrity": {
+    "method": "bytes and SHA-256 against local manifest",
+    "files": {
+      "task.md": {
+        "sha256": "ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51",
+        "bytes": 6887,
+        "match": true
+      },
+      "source_claims.json": {
+        "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+        "bytes": 9162,
+        "match": true
+      },
+      "source_lca.pdf": {
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "bytes": 2212666,
+        "match": true
+      },
+      "source_survey.pdf": {
+        "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+        "bytes": 526604,
+        "match": true
+      },
+      "survey_table1.json": {
+        "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+        "bytes": 1440,
+        "match": true
+      },
+      "source_manifest.json": {
+        "sha256": "83bdf5e7bc584971ca2446cf0fe6bd83dd4b9ea624a433fc54c5e5b3f89c4f3a",
+        "bytes": 6281,
+        "match": null,
+        "reason": "manifest has no independent hash anchor inside this package"
+      }
+    },
+    "scope": "integrity does not establish passage correctness, field observations, or independent custody"
+  },
+  "milling": {
+    "wheat_input": {
+      "value": 1000,
+      "unit": "kg",
+      "base": "normalized 1 t wheat entering mill; analyst-selected base"
+    },
+    "outputs": {
+      "refined_flour": {
+        "value": 671.0,
+        "unit": "kg",
+        "base": "normalized 1 t wheat input"
+      },
+      "whole_flour": {
+        "value": 138.0,
+        "unit": "kg",
+        "base": "normalized 1 t wheat input"
+      },
+      "bran": {
+        "value": 191.0,
+        "unit": "kg",
+        "base": "normalized 1 t wheat input"
+      }
+    },
+    "sum_outputs": {
+      "value": 1000.0,
+      "unit": "kg",
+      "base": "normalized 1 t wheat input"
+    },
+    "balance_residual": {
+      "value": 0.0,
+      "unit": "kg",
+      "base": "input minus reported output fractions; rounding-level accounting"
+    },
+    "mass_fractions": {
+      "refined_flour": {
+        "value": 0.6709999999999999,
+        "unit": "kg/kg_wheat",
+        "base": "physical output fraction of wheat input"
+      },
+      "whole_flour": {
+        "value": 0.138,
+        "unit": "kg/kg_wheat",
+        "base": "physical output fraction of wheat input"
+      },
+      "bran": {
+        "value": 0.191,
+        "unit": "kg/kg_wheat",
+        "base": "physical output fraction of wheat input"
+      }
+    },
+    "economic_allocation_factors": {
+      "refined_flour": {
+        "value": 0.785,
+        "unit": "share",
+        "base": "economic allocation of milling inventory; not physical loss or market price"
+      },
+      "whole_flour": {
+        "value": 0.142,
+        "unit": "share",
+        "base": "economic allocation of milling inventory; not physical loss or market price"
+      },
+      "bran": {
+        "value": 0.073,
+        "unit": "share",
+        "base": "economic allocation of milling inventory; not physical loss or market price"
+      }
+    },
+    "electricity_original": {
+      "value": 129,
+      "unit": "kWh/t_flour",
+      "base": "One tonne of flour produced"
+    },
+    "electricity_per_t_wheat": {
+      "value": null,
+      "unit": "kWh/t_wheat",
+      "base": "normalized wheat input",
+      "reason": "not rebased: whether published flour denominator encompasses both products and allocated mill operations is not confirmed"
+    },
+    "monetary_loss": {
+      "value": null,
+      "unit": "currency/t_wheat",
+      "base": "normalized wheat input",
+      "reason": "absolute prices and transaction flows are not supplied"
+    }
+  },
+  "baking_energy": {
+    "piece_mass_original": {
+      "value": 736,
+      "unit": "g/piece",
+      "base": "One commercial loaf, bread mass after baking"
+    },
+    "piece_mass": {
+      "value": 0.736,
+      "unit": "kg/piece",
+      "base": "commercial loaf after baking"
+    },
+    "electricity_per_piece": {
+      "value": 0.297,
+      "unit": "kWh/piece",
+      "base": "One commercial loaf of the studied bread"
+    },
+    "natural_gas_per_piece": {
+      "value": 0.115,
+      "unit": "kWh/piece",
+      "base": "One commercial loaf of the studied bread"
+    },
+    "sum_per_piece": {
+      "value": 0.412,
+      "unit": "kWh/piece",
+      "base": "sum of reported energy carriers; not primary energy or GHG"
+    },
+    "electricity_per_kg": {
+      "value": 0.40353260869565216,
+      "unit": "kWh/kg_bread",
+      "base": "mass of studied bread after baking"
+    },
+    "natural_gas_per_kg": {
+      "value": 0.15625,
+      "unit": "kWh/kg_bread",
+      "base": "mass of studied bread after baking"
+    },
+    "sum_per_kg": {
+      "value": 0.5597826086956521,
+      "unit": "kWh/kg_bread",
+      "base": "sum of reported energy carriers for studied bread"
+    },
+    "conversion": "kg/piece = g/piece / 1000; carrier kWh/kg = carrier kWh/piece / kg/piece"
+  },
+  "survey": {
+    "total_respondents": {
+      "value": 1000,
+      "unit": "respondents",
+      "base": "Table 1 total"
+    },
+    "known_respondents": {
+      "value": 967,
+      "unit": "respondents",
+      "base": "Table 1 except Do not know"
+    },
+    "unknown_respondents": {
+      "value": 33,
+      "unit": "respondents",
+      "base": "Table 1 Do not know"
+    },
+    "open_category_respondents": {
+      "value": 19,
+      "unit": "respondents",
+      "base": "Table 1 More than 12 slices"
+    },
+    "closed_category_respondents": {
+      "value": 948,
+      "unit": "respondents",
+      "base": "Table 1 zero through 10–12"
+    },
+    "lower_total_all": {
+      "value": 1720,
+      "unit": "slices/week",
+      "base": "1000 surveyed respondents; household weekly discard, including unknown responses"
+    },
+    "lower_mean_all": {
+      "value": 1.72,
+      "unit": "slices/(respondent_household*week)",
+      "base": "1000 surveyed respondents; household weekly discard, including unknown responses"
+    },
+    "lower_total_known": {
+      "value": 1720,
+      "unit": "slices/week",
+      "base": "967 respondents choosing a known category; household weekly discard"
+    },
+    "lower_mean_known": {
+      "value": 1.778697001034126,
+      "unit": "slices/(respondent_household*week)",
+      "base": "967 respondents choosing a known category; household weekly discard"
+    },
+    "closed_total_interval": {
+      "lower": {
+        "value": 1473,
+        "unit": "slices/week",
+        "base": "948 respondents in closed Table 1 categories; household weekly discard"
+      },
+      "upper": {
+        "value": 2511,
+        "unit": "slices/week",
+        "base": "948 respondents in closed Table 1 categories; household weekly discard"
+      }
+    },
+    "closed_mean_interval": {
+      "lower": {
+        "value": 1.5537974683544304,
+        "unit": "slices/(respondent_household*week)",
+        "base": "948 respondents in closed Table 1 categories; household weekly discard"
+      },
+      "upper": {
+        "value": 2.6487341772151898,
+        "unit": "slices/(respondent_household*week)",
+        "base": "948 respondents in closed Table 1 categories; household weekly discard"
+      }
+    },
+    "finite_upper_bound_all": false,
+    "finite_upper_bound_known": false,
+    "upper_total_all": {
+      "value": null,
+      "unit": "slices/week",
+      "base": "1000 surveyed respondents; household weekly discard, including unknown responses",
+      "reason": "open category has no finite cap; unknown responses also have no finite cap"
+    },
+    "upper_mean_all": {
+      "value": null,
+      "unit": "slices/(respondent_household*week)",
+      "base": "1000 surveyed respondents; household weekly discard, including unknown responses",
+      "reason": "open category has no finite cap; unknown responses also have no finite cap"
+    },
+    "upper_total_known": {
+      "value": null,
+      "unit": "slices/week",
+      "base": "967 respondents choosing a known category; household weekly discard",
+      "reason": "19 responses above 12 without finite cap"
+    },
+    "upper_mean_known": {
+      "value": null,
+      "unit": "slices/(respondent_household*week)",
+      "base": "967 respondents choosing a known category; household weekly discard",
+      "reason": "19 responses above 12 without finite cap"
+    },
+    "interpretation": "whole nonnegative slices; More than 12 starts at 13. Unknowns contribute zero only to mathematical lower bound, never to observed discard. Bounds constrain declared categories, not weighed real waste; no conversion to kg, intake, or consumption percentage."
+  },
+  "published_waste_percentages": {
+    "bakery_bread_waste": {
+      "value": 3.3,
+      "unit": "%",
+      "base": "Bread entering the system as named by Table 7",
+      "provenance": "baking_company_data"
+    },
+    "retail_bread_waste": {
+      "value": 11.4,
+      "unit": "%",
+      "base": "Bread entering the system as named by Table 7",
+      "provenance": "baking_company_data"
+    },
+    "consumer_bread_waste_estimate": {
+      "value": 8.2,
+      "unit": "%",
+      "base": "Bread entering the system as named by Table 7",
+      "provenance": "authors_calculation_from_consumption_reference_3_and_wastage_reference_9"
+    }
+  },
+  "linked_chain_loss": {
+    "value": null,
+    "unit": "%",
+    "base": "one lot across production, retail and household",
+    "reason": "Table 7 aggregates and secondary estimates do not identify sequential conditional rates or a tracked lot"
+  },
+  "source_audit": {
+    "method": "current pdftotext -layout passage extraction, contextual numeric matching, manual reading of cited passages; distinct from hash checks",
+    "quantities_audited": 17,
+    "quantities": [
+      {
+        "key": "piece_mass",
+        "result": "passage_matched",
+        "reported_value": 736,
+        "observed_value": 736.0,
+        "unit": "g/piece",
+        "base": "One commercial loaf, bread mass after baking",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 6,
+          "printed_page": 6,
+          "section": "4.2",
+          "table": null,
+          "row": "First paragraph",
+          "column": null
+        },
+        "matched_passage": "total mass of the bread itself was 736 grams",
+        "provenance": "baking_company_data"
+      },
+      {
+        "key": "norway_wheat_share",
+        "result": "passage_matched",
+        "reported_value": 65,
+        "observed_value": 65.0,
+        "unit": "%",
+        "base": "Average wheat origin reported over several years",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 6,
+          "printed_page": 6,
+          "section": "4.3",
+          "table": null,
+          "row": "First paragraph",
+          "column": null
+        },
+        "matched_passage": "average of 65% of the wheat has been coming from Norway",
+        "provenance": "mill_company_data"
+      },
+      {
+        "key": "mill_electricity",
+        "result": "passage_matched",
+        "reported_value": 129,
+        "observed_value": 129.0,
+        "unit": "kWh/t_flour",
+        "base": "One tonne of flour produced",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 7,
+          "printed_page": 7,
+          "section": "4.4",
+          "table": "2",
+          "row": "Mill energy consumption",
+          "column": "Data"
+        },
+        "matched_passage": "Mill energy consumption 129 kWh electricity per ton of flour produced",
+        "provenance": "mill_company_data"
+      },
+      {
+        "key": "wheat_bran_mass_share",
+        "result": "passage_matched",
+        "reported_value": 19.1,
+        "observed_value": 19.1,
+        "unit": "% w/w",
+        "base": "Wheat input to flour mill, mass fraction of bran output",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 7,
+          "printed_page": 7,
+          "section": "4.4",
+          "table": "3",
+          "row": "Wheat flour products (% w/w)",
+          "column": "Material Balance and Allocation Factors"
+        },
+        "matched_passage": "Wheat flour products (% w/w) 67.1% refined flour, 13.8% whole flour, 19.1% bran",
+        "provenance": "mill_company_data"
+      },
+      {
+        "key": "mill_to_baker_distance",
+        "result": "passage_matched",
+        "reported_value": 438,
+        "observed_value": 438.0,
+        "unit": "km",
+        "base": "Transport from mill to baker in >32 tonne truck",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 8,
+          "printed_page": 8,
+          "section": "4.6",
+          "table": "5",
+          "row": "Transport from mill to baker",
+          "column": "Data"
+        },
+        "matched_passage": "Transport from mill to baker 438 km on >32 tonne truck",
+        "provenance": "mill_company_data"
+      },
+      {
+        "key": "bakery_electricity",
+        "result": "passage_matched",
+        "reported_value": 0.297,
+        "observed_value": 0.297,
+        "unit": "kWh/piece",
+        "base": "One commercial loaf of the studied bread",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 8,
+          "printed_page": 8,
+          "section": "4.6",
+          "table": "5",
+          "row": "Baker energy consumption",
+          "column": "Data"
+        },
+        "matched_passage": "Baker energy consumption 0.297 kWh electricity and 0.115 kWh natural gas per bread",
+        "provenance": "baking_company_data"
+      },
+      {
+        "key": "retail_bread_waste",
+        "result": "passage_matched",
+        "reported_value": 11.4,
+        "observed_value": 11.4,
+        "unit": "%",
+        "base": "Bread entering the system as named by Table 7",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 8,
+          "printed_page": 8,
+          "section": "4.9",
+          "table": "7",
+          "row": "Retail waste",
+          "column": "Amount Wasted as % of Bread Entering the System"
+        },
+        "matched_passage": "Retail waste 11.4",
+        "provenance": "baking_company_data"
+      },
+      {
+        "key": "consumer_bread_waste_estimate",
+        "result": "passage_matched",
+        "reported_value": 8.2,
+        "observed_value": 8.2,
+        "unit": "%",
+        "base": "Bread entering the system as named by Table 7",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 8,
+          "printed_page": 8,
+          "section": "4.9",
+          "table": "7",
+          "row": "Consumer waste",
+          "column": "Amount Wasted as % of Bread Entering the System"
+        },
+        "matched_passage": "Consumer waste 8.2",
+        "provenance": "authors_calculation_from_consumption_reference_3_and_wastage_reference_9"
+      },
+      {
+        "key": "survey_respondents",
+        "result": "passage_matched",
+        "reported_value": 1000,
+        "observed_value": 1000.0,
+        "unit": "respondents",
+        "base": "Respondents answering a web survey about household bread wasting",
+        "file": "source_survey.pdf",
+        "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+        "locator": {
+          "pdf_page": 4,
+          "printed_page": 4,
+          "section": "3",
+          "table": "1",
+          "row": "Total",
+          "column": "Number of Respondents"
+        },
+        "matched_passage": "Total 1000 100.0",
+        "provenance": "web_survey_reported_frequency"
+      },
+      {
+        "key": "poland_wheat_share",
+        "result": "passage_matched",
+        "reported_value": 35,
+        "observed_value": 35.0,
+        "unit": "%",
+        "base": "Average wheat origin reported over several years",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 6,
+          "printed_page": 6,
+          "section": "4.3",
+          "table": null,
+          "row": "First paragraph",
+          "column": null
+        },
+        "matched_passage": "remaining 35% from Poland",
+        "provenance": "mill_company_data"
+      },
+      {
+        "key": "wheat_refined_flour_mass_share",
+        "result": "passage_matched",
+        "reported_value": 67.1,
+        "observed_value": 67.1,
+        "unit": "% w/w",
+        "base": "Wheat input to flour mill, mass fraction of refined flour output",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 7,
+          "printed_page": 7,
+          "section": "4.4",
+          "table": "3",
+          "row": "Wheat flour products (% w/w)",
+          "column": "Material Balance and Allocation Factors"
+        },
+        "matched_passage": "Wheat flour products (% w/w) 67.1% refined flour, 13.8% whole flour, 19.1% bran",
+        "provenance": "mill_company_data"
+      },
+      {
+        "key": "wheat_whole_flour_mass_share",
+        "result": "passage_matched",
+        "reported_value": 13.8,
+        "observed_value": 13.8,
+        "unit": "% w/w",
+        "base": "Wheat input to flour mill, mass fraction of whole flour output",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 7,
+          "printed_page": 7,
+          "section": "4.4",
+          "table": "3",
+          "row": "Wheat flour products (% w/w)",
+          "column": "Material Balance and Allocation Factors"
+        },
+        "matched_passage": "Wheat flour products (% w/w) 67.1% refined flour, 13.8% whole flour, 19.1% bran",
+        "provenance": "mill_company_data"
+      },
+      {
+        "key": "bakery_natural_gas",
+        "result": "passage_matched",
+        "reported_value": 0.115,
+        "observed_value": 0.115,
+        "unit": "kWh/piece",
+        "base": "One commercial loaf of the studied bread",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 8,
+          "printed_page": 8,
+          "section": "4.6",
+          "table": "5",
+          "row": "Baker energy consumption",
+          "column": "Data"
+        },
+        "matched_passage": "Baker energy consumption 0.297 kWh electricity and 0.115 kWh natural gas per bread",
+        "provenance": "baking_company_data"
+      },
+      {
+        "key": "wheat_refined_flour_economic_allocation",
+        "result": "passage_matched",
+        "reported_value": 78.5,
+        "observed_value": 78.5,
+        "unit": "%",
+        "base": "Economic allocation factor for refined flour in milling inventory",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 7,
+          "printed_page": 7,
+          "section": "4.4",
+          "table": "3",
+          "row": "Wheat, economic allocation factors",
+          "column": "Material Balance and Allocation Factors"
+        },
+        "matched_passage": "Wheat, economic allocation factors Refined flour 78.5%, whole flour 14.2%, bran 7.3%",
+        "provenance": "mill_company_data"
+      },
+      {
+        "key": "wheat_whole_flour_economic_allocation",
+        "result": "passage_matched",
+        "reported_value": 14.2,
+        "observed_value": 14.2,
+        "unit": "%",
+        "base": "Economic allocation factor for whole flour in milling inventory",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 7,
+          "printed_page": 7,
+          "section": "4.4",
+          "table": "3",
+          "row": "Wheat, economic allocation factors",
+          "column": "Material Balance and Allocation Factors"
+        },
+        "matched_passage": "Wheat, economic allocation factors Refined flour 78.5%, whole flour 14.2%, bran 7.3%",
+        "provenance": "mill_company_data"
+      },
+      {
+        "key": "wheat_bran_economic_allocation",
+        "result": "passage_matched",
+        "reported_value": 7.3,
+        "observed_value": 7.3,
+        "unit": "%",
+        "base": "Economic allocation factor for bran in milling inventory",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 7,
+          "printed_page": 7,
+          "section": "4.4",
+          "table": "3",
+          "row": "Wheat, economic allocation factors",
+          "column": "Material Balance and Allocation Factors"
+        },
+        "matched_passage": "Wheat, economic allocation factors Refined flour 78.5%, whole flour 14.2%, bran 7.3%",
+        "provenance": "mill_company_data"
+      },
+      {
+        "key": "bakery_bread_waste",
+        "result": "passage_matched",
+        "reported_value": 3.3,
+        "observed_value": 3.3,
+        "unit": "%",
+        "base": "Bread entering the system as named by Table 7",
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+        "locator": {
+          "pdf_page": 8,
+          "printed_page": 8,
+          "section": "4.9",
+          "table": "7",
+          "row": "Bakery waste",
+          "column": "Amount Wasted as % of Bread Entering the System"
+        },
+        "matched_passage": "Bakery waste 3.3",
+        "provenance": "baking_company_data"
+      }
+    ],
+    "survey_rows": [
+      {
+        "key": "zero",
+        "result": "label_count_percent_passage_matched",
+        "locator": {
+          "pdf_page": 4,
+          "table": "1",
+          "row": "Zero slices"
+        },
+        "matched_passage": "Zero slices 429 42.9"
+      },
+      {
+        "key": "one_to_three",
+        "result": "label_count_percent_passage_matched",
+        "locator": {
+          "pdf_page": 4,
+          "table": "1",
+          "row": "1–3 slices"
+        },
+        "matched_passage": "1–3 slices 301 30.1"
+      },
+      {
+        "key": "four_to_six",
+        "result": "label_count_percent_passage_matched",
+        "locator": {
+          "pdf_page": 4,
+          "table": "1",
+          "row": "4–6 slices"
+        },
+        "matched_passage": "4–6 slices 140 14.0"
+      },
+      {
+        "key": "seven_to_nine",
+        "result": "label_count_percent_passage_matched",
+        "locator": {
+          "pdf_page": 4,
+          "table": "1",
+          "row": "7–9 slices"
+        },
+        "matched_passage": "7–9 slices 56 5.6"
+      },
+      {
+        "key": "ten_to_twelve",
+        "result": "label_count_percent_passage_matched",
+        "locator": {
+          "pdf_page": 4,
+          "table": "1",
+          "row": "10–12 slices"
+        },
+        "matched_passage": "10–12 slices 22 2.2"
+      },
+      {
+        "key": "more_than_twelve",
+        "result": "label_count_percent_passage_matched",
+        "locator": {
+          "pdf_page": 4,
+          "table": "1",
+          "row": "More than 12 slices"
+        },
+        "matched_passage": "More than 12 slices 19 1.9"
+      },
+      {
+        "key": "do_not_know",
+        "result": "label_count_percent_passage_matched",
+        "locator": {
+          "pdf_page": 4,
+          "table": "1",
+          "row": "Do not know"
+        },
+        "matched_passage": "Do not know 33 3.3"
+      }
+    ],
+    "discrepancies": [
+      {
+        "file": "source_survey.pdf",
+        "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+        "prose_locator": {
+          "pdf_page": 3,
+          "section": "3"
+        },
+        "prose_intervals": [
+          "0",
+          "1–3",
+          "4–6",
+          "7–10",
+          ">10"
+        ],
+        "table_locator": {
+          "pdf_page": 4,
+          "table": "1"
+        },
+        "table_intervals": [
+          "0",
+          "1–3",
+          "4–6",
+          "7–9",
+          "10–12",
+          ">12",
+          "unknown"
+        ],
+        "resolution": "Table 1 categories determine bounds; no repair of original questionnaire is claimed"
+      }
+    ],
+    "scope": "17 supplied claims on LCA PDF pages 6–8 and survey page 4; all seven Table 1 labels/counts/percentages and methodology intervals on survey page 3. Proposal interpretation also reads LCA pages 9, 12–15 and survey pages 11–13."
+  },
+  "causal_effect_of_packaging": {
+    "value": null,
+    "unit": "g_discard/(household*week)",
+    "base": "future randomized comparator",
+    "reason": "reviewed studies provide inventories, observational associations and freshness tests/scenarios, not the proposed trial outcome"
+  },
+  "normative_approval": {
+    "status": "pending",
+    "authority": "competent human owner plus responsible food safety and consent authorities; no authority exercised in this run"
+  }
+}

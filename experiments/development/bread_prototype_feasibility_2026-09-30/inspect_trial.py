@@ -57,6 +57,21 @@ def inspect(receipt: Path, trial_id: str, work: Path) -> dict:
                               and "--phase" in row["argv"]
                               and row["argv"][row["argv"].index("--phase") + 1] == "engineering"
                               and row["exit_code"] != 0]
+    rejections = []
+    for row in rows:
+        if row["argv"][2:3] != ["advance"] or "--phase" not in row["argv"] or row["exit_code"] == 0:
+            continue
+        phase = row["argv"][row["argv"].index("--phase") + 1]
+        try:
+            reason = json.loads(row["stdout"]).get("error", row["stderr"])
+        except ValueError:
+            reason = row["stderr"] or row["stdout"]
+        prefix = f"blocked nodes in {phase}: "
+        blocked = reason.removeprefix(prefix).split(", ") if reason.startswith(prefix) else []
+        rejections.append({"seq": row["seq"], "phase": phase, "reason": reason,
+                           "normative_ids_named_as_blockers": sorted(set(blocked) & set(norm_ids))})
+    direct_engineering_norm_rejection = any(row["phase"] == "engineering" and
+                                           row["normative_ids_named_as_blockers"] for row in rejections)
     history_approval = any(row.get("action") == "approve" for row in state["history"])
     captured_approval = any(row["argv"][2:3] == ["approve"] for row in rows)
     chain_ok = bool(rows) and rows[0]["state_before_sha256"] is None
@@ -72,6 +87,10 @@ def inspect(receipt: Path, trial_id: str, work: Path) -> dict:
         "prototype_call_allowance_observed": len(rows) <= 20,
         "nonzero_exit_sequences": [row["seq"] for row in rows if row["exit_code"] != 0],
         "phase_status": state["phase_status"], "engineering_rejection_sequences": engineering_rejections,
+        "advance_rejections_with_causes": rejections,
+        "pending_normative_direct_rejection_observed": any(
+            row["normative_ids_named_as_blockers"] for row in rejections),
+        "engineering_normative_rejection_isolated": direct_engineering_norm_rejection,
         "normative_ids": norm_ids, "engineering_normative_links": links,
         "initial_norms_exist_and_pending": bool(initial_norms) and all(
             node["status"] == "pending" for node in initial_norms),
@@ -84,7 +103,7 @@ def inspect(receipt: Path, trial_id: str, work: Path) -> dict:
         "observed_normative_control": bool(initial_norms) and bool(norm_ids)
         and all(node["status"] == "pending" for node in initial_norms)
         and all(nodes[key]["status"] == "pending" for key in norm_ids)
-        and any(links.values()) and bool(engineering_rejections)
+        and any(links.values()) and direct_engineering_norm_rejection
         and not history_approval and not captured_approval
         and state["phase_status"]["engineering"] != "accepted",
     })
