@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "decision": "D-097",
+  "classification": "prelaunch_fake_cli_and_real_local_sandbox_validation",
+  "tests": {
+    "workflow_passed": 44,
+    "workflow_python_versions": [
+      "3.12",
+      "3.11.15"
+    ],
+    "evaluator_passed": 9,
+    "combined_passed": 53,
+    "independent_combined_passed": 53,
+    "independent_seconds": 8.54
+  },
+  "provider_calls": 0,
+  "generation_in_tests": "fake",
+  "sandbox_in_tests": "real_Linux_Landlock_seccomp",
+  "ruff": "passed",
+  "compile": "passed",
+  "diff_check": "passed",
+  "runtime_gap_before_fix": "sealed shebang Python3.12 absent from runtime roots under supervisor Python3.11; ERROR exec 13",
+  "runtime_fix": "add only resolved Python3.12 binary to existing runtime roots; no broader directory grant",
+  "destination_gap_before_fix": "new stage could be created under immutable parent work tree",
+  "destination_fix": "resolve real parent and reject new stage within repository, parent, source or frozen dossier before mkdir",
+  "four_destination_negative_snapshots_unchanged": true,
+  "files": {
+    "scripts/run_bread_continuation.py": {
+      "sha256": "4b2e5fd2766367a7ba6ec306d64502ecf29baa6ea1766ab19f8001b0717cbf5d",
+      "bytes": 26804
+    },
+    "tests/test_bread_continuation.py": {
+      "sha256": "9d2af8c5457d6e4674a036b44b6446a5e4a675658a620e11738e6b8fdb4fc754",
+      "bytes": 19052
+    },
+    "tests/test_bread_continuation_evaluate.py": {
+      "sha256": "17d923606ba0c84ffb6a2149df2bc358a4223c2f2b8da3678fad02d1b3b8208e",
+      "bytes": 3692
+    },
+    "experiments/development/bread_continuation_2026-09-30/evaluate.py": {
+      "sha256": "5c62eae1f8a62de2494cf4ec00dc90ddc194e2de80bfbf9b873c1bfe96fa2e6f",
+      "bytes": 9729
+    },
+    "experiments/development/bread_continuation_2026-09-30/plan.json": {
+      "sha256": "fca4a7dc7587782541402710a83d07f81724432fa0f4a6eec631ff529906b0a2",
+      "bytes": 9483
+    }
+  },
+  "criterion_4": "not_assessed"
+}

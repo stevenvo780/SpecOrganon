@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "decision": "D-097",
+  "classification": "exposed_development_food_analysis_continuation",
+  "registered_at_utc": "2026-09-30T07:23:07.172592+00:00",
+  "case": "D-F-BREAD-NORWAY",
+  "purpose": "Continue actual pending D096 analysis drafts with auditable whole-PDF text, reviewed code and bounded offline execution; no quality equivalence inference.",
+  "attempts": 1,
+  "provider_cli": "codex",
+  "requested_model": "gpt-6-luna",
+  "requested_effort": "medium",
+  "active_seconds": 240,
+  "source_freeze_commit": "7f8a344d56b467d032e449883074feb977f5a2c7",
+  "source_files": {
+    "task.md": {
+      "path": "cases/bread_development/task.md",
+      "sha256": "ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51",
+      "bytes": 6887
+    },
+    "source_claims.json": {
+      "path": "cases/bread_development/source_claims.json",
+      "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+      "bytes": 9162
+    },
+    "source_manifest.json": {
+      "path": "cases/bread_development/source_manifest.json",
+      "sha256": "83bdf5e7bc584971ca2446cf0fe6bd83dd4b9ea624a433fc54c5e5b3f89c4f3a",
+      "bytes": 6281
+    },
+    "source_lca.pdf": {
+      "path": "cases/bread_norway/source_lca.pdf",
+      "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "bytes": 2212666
+    },
+    "source_survey.pdf": {
+      "path": "cases/bread_norway/source_survey.pdf",
+      "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "bytes": 526604
+    },
+    "survey_table1.json": {
+      "path": "cases/bread_norway/survey_table1.json",
+      "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+      "bytes": 1440
+    },
+    "source_lca.txt": {
+      "path": "experiments/development/bread_continuation_2026-09-30/raw_texts/source_lca.txt",
+      "sha256": "e65be3ae44b90aa7a78eabde032d874d97897db0ba458e8015e7c8f6d8c10582",
+      "bytes": 93076
+    },
+    "source_survey.txt": {
+      "path": "experiments/development/bread_continuation_2026-09-30/raw_texts/source_survey.txt",
+      "sha256": "1ee82f5fe6c51981b640995d9ddcaebd1077cf0315f45744f5ffdd1981b514f3",
+      "bytes": 75822
+    },
+    "text_manifest.json": {
+      "path": "experiments/development/bread_continuation_2026-09-30/raw_texts/text_manifest.json",
+      "sha256": "5c93953df0ec933bf06e9eebe419612be555df7f00a48c718c7354b64a7b41fa",
+      "bytes": 1511
+    }
+  },
+  "parent_checkpoint": {
+    "directory": "experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt",
+    "receipt": {
+      "path": "experiments/development/prototype_checkpoint_compatibility_2026-09-30/receipt.json",
+      "sha256": "039558aed7674e029a74cd8e2a4aafd9bf2dbf565630817ade44ce4d11b6fbc2",
+      "bytes": 12112
+    },
+    "case": {
+      "path": "experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt/prototype_case.json",
+      "sha256": "1633c1a915b4f94bcff655c622ea4a980079a0c37e8ebb67640c0b0a59292b3f",
+      "bytes": 7079
+    },
+    "state": {
+      "path": "experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt/state.json",
+      "sha256": "11592f84642ef5b50f8329ef0146ba3d886854e9048f718d47c9d929311d7b6a",
+      "bytes": 9964
+    }
+  },
+  "prompt_addendum": "D097 continuation: produce ONLY a JSON object with three strings analysis_py, sources_json, report_md. No tools, no file inspection, no additional models, no approvals, no field actions. sources_json must itself be a strict JSON object. analysis_py must be Python standard library, WITHOUT a shebang, markdown fences, external packages, subprocess/network, threads or filesystem writes. It accepts a positional input directory and emits only finite JSON object metrics by stdout; errors must be nonzero with explanatory stderr. Original six public inputs are unchanged. Raw source_lca.txt and source_survey.txt were extracted from WHOLE archived PDFs by the supervisor, preserve form-feed page boundaries, and are pinned by text_manifest.json; read these instead of invoking pdftotext. Validate original source_manifest files against hashes/sizes, and validate derived texts against text_manifest plus original PDF hashes. The initial prototype case shown remains wholly pending; satisfy its proposed analysis work as drafts without advancing or approving any phase/node.\nUse these canonical metric keys so an independent pre-existing arithmetic reference can inspect the actual output; do not assume any expected derived values. Each quantitative leaf has value (number or null), unit and nonempty base, with reason for null. Milling: wheat_input; outputs.refined_flour/whole_flour/bran; outputs_sum; balance_residual (unit kg); economic_allocation separately (percent, economic base); mill_electricity preserving kWh/t_flour. Baking_energy: piece_mass (unit kg); electricity_per_kg,natural_gas_per_kg,sum_per_kg (unit kWh/kg_bread); retain original per-piece quantities/formula. Survey: total_respondents,known_respondents,unknown_respondents,open_category_respondents,closed_category_respondents (unit respondents); lower_bound_total_all,lower_bound_total_known,closed_total_interval.lower/upper (unit slices/week); lower_bound_mean_all,lower_bound_mean_known,closed_mean_interval.lower/upper (unit slices/household/week and explicit denominator in base); finite_upper_bound_all and finite_upper_bound_known are plain booleans. Include source_audit of the 17 transcribed claims, seven table rows and prosa/table discrepancy with locators and exact checked excerpts; a hash check alone is not a passage audit. Preserve value/precio/masa distinctions, underidentified ingestion/conversion/causal impact as null with reason. sources_json maps all used quantitative claims and calculations to source filename, SHA, locator, units/base, reported/derived/assumption/pending, inputs/formula and proposed author for assumptions. report_md <=1200 words must answer the FULL original task including chain stages, two substantial options, harms, pending human decision/dependent requirement, and prospective falsifiable design. No model-generated repair/replacement will be allowed. The supervisor will add a fixed interpreter shebang solely for sealed execution; original analysis_py remains byte exact.",
+  "prompt_source_order": [
+    "task.md",
+    "source_claims.json",
+    "survey_table1.json",
+    "source_manifest.json",
+    "text_manifest.json",
+    "source_lca.txt",
+    "source_survey.txt"
+  ],
+  "generation_schema_fields": [
+    "analysis_py",
+    "sources_json",
+    "report_md"
+  ],
+  "payload_prefix": "#!/usr/bin/python3.12 -I\n",
+  "replay": {
+    "wall_seconds": 30,
+    "cpu_seconds": 10,
+    "address_space_bytes": 536870912,
+    "file_bytes_per_file": 2097152,
+    "write_roots": [],
+    "requires_exact_reviewed_script_sha": true,
+    "model_generated_code_automatically_executed": false
+  },
+  "evaluation": {
+    "classification": "predeclared_exposed_arithmetic_and_contract_checks_not_Q",
+    "arithmetic_reference": "experiments/development/bread_prototype_feasibility_2026-09-30/reference.json",
+    "reference_record": {
+      "path": "experiments/development/bread_prototype_feasibility_2026-09-30/reference.json",
+      "sha256": "36792525c2394335a25f30d6bebf7139dd9d20cf63954f958988079618dda775",
+      "bytes": 2226
+    },
+    "arithmetic_checks": 25,
+    "numeric_tolerance": {
+      "relative": 1e-12,
+      "absolute": 1e-12
+    },
+    "required_quantities_value_unit_base": true,
+    "base_meaning_judged_separately": true,
+    "negative_script_runs": [
+      "corrupt_pdf",
+      "missing_pdf",
+      "unit_conflict_rehashed"
+    ],
+    "negative_total_active_seconds": 45,
+    "negative_cpu_seconds_each": 10,
+    "negative_file_limit_bytes": 2097152,
+    "negative_run_once_each_no_replacement": true,
+    "success_requires_nonzero_stderr_no_valid_metrics_on_negatives": true,
+    "source_and_report_review": "separate native technical read-only critique, not blind human Q"
+  },
+  "stop_rule": "One native generation, one reviewed baseline replay, one run per three frozen negative cases; preserve all failures and do not repair model artifacts. No additional Luna iteration under this study.",
+  "normative_rule": "Never approve a node, sign human acceptance, advance a prototype phase or take field action; parent D096 remains initial and byte identical.",
+  "freeze_rule": "Commit plan, raw text provenance, workflow, tests and evaluator before the native generation.",
+  "limits": {
+    "authentication": "existing reported ChatGPT login only, no API-key fallback",
+    "codex_quota": "probe unavailable, unknown remaining quota",
+    "local_generation_clock_scope": "after prepared inputs load/lock, excludes preparation and review pause; cleanup may exceed deadline",
+    "local_replay_budget": "separate 30s baseline plus cumulative45s negatives; manual review pause excluded",
+    "token_limit_enforced": false,
+    "cost_limit_enforced": false,
+    "global_run_limits_enforced": false,
+    "remote_cancellation_verified": false,
+    "provider_identity_authenticated": false,
+    "independent_custody": false,
+    "site_packages_runtime_not_sealed": true
+  },
+  "interpretation": {
+    "quality_comparison": "not_assessed",
+    "luna_quality_equivalence": "not_assessed",
+    "counts_toward_required_24_runs": false,
+    "field_impact": "not_observed",
+    "criterion_4": "not_assessed",
+    "global_acceptance": "0/5"
+  }
+}

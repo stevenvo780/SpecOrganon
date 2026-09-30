@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "decision": "D-097",
+  "reviewed_at_utc": "2026-09-30T08:08:22.673752+00:00",
+  "classification": "independent_native_read_only_prelaunch_review",
+  "reviewer_task": "source_gate_review",
+  "source_files_verified": 9,
+  "parent_pins_verified": 3,
+  "full_pdf_texts_reextracted_identical": 2,
+  "findings": [
+    {
+      "severity": "P2",
+      "issue": "destination could write new stage under parent/frozen tree",
+      "status": "closed",
+      "verification": "four path/symlink negatives preserved entire copied tree snapshot"
+    },
+    {
+      "severity": "P2",
+      "issue": "Python3.12 interpreter not granted under Python3.11 sandbox caller",
+      "status": "closed",
+      "verification": "exact resolved binary added; sealed baseline passed"
+    }
+  ],
+  "open_p1_p2": [],
+  "tests_repeated": 53,
+  "tests_seconds": 8.54,
+  "provider_calls": 0,
+  "actual_original_attempt_called": false,
+  "auth_or_config_files_read": false,
+  "negative_errors_do_not_isolate_semantic_cause": true,
+  "script_sha_declaration_does_not_authenticate_human_or_custody": true,
+  "files": {
+    "scripts/run_bread_continuation.py": {
+      "sha256": "4b2e5fd2766367a7ba6ec306d64502ecf29baa6ea1766ab19f8001b0717cbf5d",
+      "bytes": 26804
+    },
+    "tests/test_bread_continuation.py": {
+      "sha256": "9d2af8c5457d6e4674a036b44b6446a5e4a675658a620e11738e6b8fdb4fc754",
+      "bytes": 19052
+    },
+    "tests/test_bread_continuation_evaluate.py": {
+      "sha256": "17d923606ba0c84ffb6a2149df2bc358a4223c2f2b8da3678fad02d1b3b8208e",
+      "bytes": 3692
+    },
+    "experiments/development/bread_continuation_2026-09-30/evaluate.py": {
+      "sha256": "5c62eae1f8a62de2494cf4ec00dc90ddc194e2de80bfbf9b873c1bfe96fa2e6f",
+      "bytes": 9729
+    },
+    "experiments/development/bread_continuation_2026-09-30/plan.json": {
+      "sha256": "fca4a7dc7587782541402710a83d07f81724432fa0f4a6eec631ff529906b0a2",
+      "bytes": 9483
+    }
+  },
+  "global_acceptance": "0/5"
+}
