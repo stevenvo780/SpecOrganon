@@ -201,6 +201,7 @@ def _validate_state(state: dict[str, Any]) -> None:
                    ("limit_tokens", "active_limit_seconds", "cost_limit_micro_usd",
                     "max_model_requests", "max_tool_calls", "model_requests_completed",
                     "tool_calls_completed", "turns_completed"))
+            or not 1 <= state["active_limit_seconds"] <= MAX_ACTIVE_SECONDS
             or not 0 <= state["model_requests_completed"] <= state["max_model_requests"]
             or not 0 <= state["tool_calls_completed"] <= state["max_tool_calls"]
             or not 0 <= state["turns_completed"] <= 2
@@ -226,6 +227,8 @@ def _load(run_dir: Path) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]
     schedule, schedule_sha = _schedule_at(schedule_path)
     if schedule_sha != state["schedule_bytes_sha256"]:
         raise ToolConversationError("schedule bytes changed after preparation")
+    if state["active_limit_seconds"] > schedule["per_run_limits"]["active_seconds"]:
+        raise ToolConversationError("active time ceiling exceeds the schedule")
     plan_bytes = (run_dir / "plan.json").read_bytes()
     if _sha(plan_bytes) != state["plan_sha256"]:
         raise ToolConversationError("plan bytes changed after preparation")
@@ -280,6 +283,7 @@ def prepare_tool_conversation(
             or limit_tokens > schedule["per_run_limits"]["measured_tokens"]
             or type(active_limit_seconds) is not int
             or not 1 <= active_limit_seconds <= MAX_ACTIVE_SECONDS
+            or active_limit_seconds > schedule["per_run_limits"]["active_seconds"]
             or type(cost_limit_micro_usd) is not int or cost_limit_micro_usd < 0
             or type(price_profile) is not dict or price_profile.get("model") != validated["model"]):
         raise ToolConversationError("token, time, or declared cost ceiling is invalid")

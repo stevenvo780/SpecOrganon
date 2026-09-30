@@ -175,6 +175,17 @@ al ejecutable: otro proceso local podría leerlos en `/proc`. No deben usarse
 para pasar secretos. Los recibos son evidencia bajo el mismo UID, no custodia
 externa ni prueba de gasto real.
 
+### Plazo fijado por el calendario
+
+Desde D-095, `prepare` exige que `active_limit_seconds` sea positivo, no supere
+el máximo local ni `per_run_limits.active_seconds` del calendario fijado. La
+comprobación ocurre antes de crear el directorio o reservar recursos. `status`
+y `execute` vuelven a cotejar ese techo al cargar: editar coherentemente el
+plan y el estado local no permite exceder el calendario sin cambiar sus bytes
+fijados. Las cinco regresiones nuevas incluyen igualdad, un límite menor y
+rechazo sin escrituras ni llamadas. Esta corrección aplica a este puente;
+no establece un deadline común para todos los agentes o proveedores.
+
 ## Límite de la evidencia
 
 Estos controles cubren únicamente las solicitudes que pasan por estos

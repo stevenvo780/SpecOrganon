@@ -39,7 +39,7 @@ def _sha(raw: bytes) -> str:
 def _prepare(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *,
     max_model_requests: int = 3, max_tool_calls: int = 1,
-    cost_limit: int = 1000, first_body: str = TOOL,
+    cost_limit: int = 1000, first_body: str = TOOL, active_limit_seconds: int = 30,
 ) -> tuple[Path, dict, dict]:
     monkeypatch.setenv(admission.ROOT_ENV, str(tmp_path / "admissions"))
     schedule, schedule_path, run_id, stage, tool, _, _ = staged_fixture._stage(
@@ -78,12 +78,17 @@ def _prepare(
     run_dir = tmp_path / "managed-tool"
     prepared = bridge.prepare_tool_conversation(
         run_dir, schedule_path, stage, plan,
-        limit_tokens=1000, active_limit_seconds=30,
+        limit_tokens=1000, active_limit_seconds=active_limit_seconds,
         cost_limit_micro_usd=cost_limit, price_profile=profile,
     )
     assert prepared["state"] == "prepared"
     assert stat.S_IMODE(run_dir.stat().st_mode) == 0o700
     return run_dir, plan, schedule
+
+
+def _tree_bytes(root: Path) -> dict[Path, bytes | None]:
+    return {path.relative_to(root): path.read_bytes() if path.is_file() else None
+            for path in root.rglob("*")}
 
 
 class FakeTransport:
@@ -125,6 +130,70 @@ def available_sandbox() -> None:
     probe = sandbox.probe_sandbox()
     if not probe.available:
         pytest.skip(probe.reason or "sandbox unavailable")
+
+
+def test_prepare_rejects_time_ceiling_above_schedule_without_writes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(staged_fixture.plan_confirmatory, "ACTIVE_SECONDS_PER_RUN", 20)
+    run_dir, plan, _ = _prepare(tmp_path, monkeypatch, active_limit_seconds=20)
+    state = json.loads((run_dir / "run.json").read_text())
+    budget = bridge.TokenLedger(run_dir / "ledger").status()
+    before = _tree_bytes(tmp_path)
+    rejected_dir = tmp_path / "rejected-tool"
+
+    with pytest.raises(bridge.ToolConversationError, match="ceiling is invalid"):
+        bridge.prepare_tool_conversation(
+            rejected_dir, Path(state["schedule_path"]), Path(state["stage_dir"]), plan,
+            limit_tokens=state["limit_tokens"], active_limit_seconds=21,
+            cost_limit_micro_usd=state["cost_limit_micro_usd"],
+            price_profile=budget["price_profile"],
+        )
+
+    assert not rejected_dir.exists()
+    assert _tree_bytes(tmp_path) == before
+
+
+@pytest.mark.parametrize("active_limit_seconds", [20, 19])
+def test_prepare_accepts_time_ceiling_at_or_below_schedule(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, active_limit_seconds: int,
+) -> None:
+    monkeypatch.setattr(staged_fixture.plan_confirmatory, "ACTIVE_SECONDS_PER_RUN", 20)
+    run_dir, _, schedule = _prepare(
+        tmp_path, monkeypatch, active_limit_seconds=active_limit_seconds,
+    )
+    status = bridge.read_tool_conversation_status(run_dir)
+    assert schedule["per_run_limits"]["active_seconds"] == 20
+    assert status["state"] == "prepared"
+    assert status["active_limit_seconds"] == active_limit_seconds
+    assert status["budget"]["request_count"] == 0
+    assert status["model_requests_completed"] == status["tool_calls_completed"] == 0
+
+
+@pytest.mark.parametrize("operation", ["status", "execute"])
+def test_reload_rejects_consistently_rewritten_plan_and_excess_time_ceiling(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, operation: str,
+) -> None:
+    monkeypatch.setattr(staged_fixture.plan_confirmatory, "ACTIVE_SECONDS_PER_RUN", 20)
+    run_dir, plan, _ = _prepare(tmp_path, monkeypatch, active_limit_seconds=20)
+    state_path = run_dir / "run.json"
+    state = json.loads(state_path.read_text())
+    plan["turns"][0]["user"] = "Use the same sealed function after editing the plan."
+    plan_bytes = bridge._canonical(plan)
+    (run_dir / "plan.json").write_bytes(plan_bytes)
+    state.update(plan_sha256=_sha(plan_bytes), active_limit_seconds=21)
+    state_path.write_bytes(bridge._canonical(state))
+    before = _tree_bytes(tmp_path)
+    transport = FakeTransport(plan["model"], [])
+
+    with pytest.raises(bridge.ToolConversationError, match="time ceiling exceeds the schedule"):
+        if operation == "status":
+            bridge.read_tool_conversation_status(run_dir)
+        else:
+            bridge.execute_tool_conversation(run_dir, transport)
+
+    assert _tree_bytes(tmp_path) == before
+    assert transport.counts == transport.sends == []
 
 
 def test_two_user_turns_replay_complete_output_and_sealed_tool(
