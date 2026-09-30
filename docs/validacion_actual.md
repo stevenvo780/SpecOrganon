@@ -1,5 +1,32 @@
 # Auditoría de aceptación actual
 
+**Resultado D-097:** una sola generación con Luna medio solicitado creó
+[código, fuentes e informe originales](../experiments/development/bread_continuation_2026-09-30/attempt/),
+después de congelar plan y evaluador en `6a8018c`. La generación terminó
+sin errores/herramientas observadas; **el análisis basal falló** en su único
+replay sellado. Exigía espacios que no coinciden con la Tabla 1 extraída:
+código 2, stderr previsto y stdout vacío, sin timeout. La revisión de
+seguridad autorizó esa observación del negativo, sin aprobar su viabilidad.
+Los 25 cotejos aritméticos y 23 contratos quedaron sin medir; las tres
+variantes negativas quedaron sin ejecutar porque requieren baseline válido.
+No hay puntuación Q, equivalencia entre modelos ni resultado de campo.
+Otro proceso y un revisor verificaron los 27 archivos byte idénticos,
+replay bloqueado y conservación de siete archivos protegidos y 113 previos.
+Las 53 pruebas previas verifican el workflow/evaluador con CLI falsa y
+sandbox real, no la calidad del candidato. Uso local 57.670/7.206 tokens,
+coste e identidad efectiva sin autenticar. D-096 permanece inicial, con
+normas pendientes. **0/5** criterios demostrados; ninguna corrida de las 24.
+
+**Corrección D-098:** la [sonda real CLI/MCP](../experiments/development/bread_legacy_probe_2026-09-30.json)
+ya interpreta la revisión antigua como `legacy_unverified`. Descubre 21
+herramientas, compara siete operaciones y verifica las nueve cifras de los
+PDF, sobre copia temporal. Ambos replays saltan 19 pasos y se detienen
+por falta de revisión independiente verificada; el control inválido no
+escribe. Los nueve archivos originales conservan sus hashes y 16 pruebas
+pasaron también en revisión independiente. Esto corrige una expectativa
+obsoleta del auditor; no aporta aceptación humana, investigación empírica,
+impacto o comparación N/SDD/T. Veredicto global **0/5**.
+
 **Avance D-096:** una sola llamada CLI con Luna medio solicitado, después de
 congelar plan/código en `aa3e533`, produjo un [checkpoint inicial verificado](../experiments/development/prototype_checkpoint_compatibility_2026-09-30/outcome_inspection.json).
 El host local quedó habilitado; la traza no contiene el error D-095 ni ítems

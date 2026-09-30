@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "decision": "D-097",
+  "reviewed_at_utc": "2026-09-30T08:42:03.069552+00:00",
+  "classification": "independent_native_read_only_postresult_review",
+  "reviewer_task": "source_gate_review",
+  "verdict": "negative preserved without false approval",
+  "original_allowlist_files_verified": 27,
+  "original_vs_archive_byte_differences": 0,
+  "protected_files_verified": 7,
+  "previous_dossier_files_verified": 113,
+  "fixed_generation_code_plan_evaluator_tests_unchanged": true,
+  "fresh_status_original_and_archive": {
+    "exit_code": 1,
+    "state": "failed",
+    "generation_verified": true,
+    "baseline_verified": false,
+    "generation_allowed": false,
+    "replay_allowed": false,
+    "relaunch_allowed": false
+  },
+  "baseline": {
+    "exit_code": 2,
+    "launch_error": null,
+    "timed_out": false,
+    "stdout_bytes": 0,
+    "stderr": "analysis error: survey Table 1 passage audit failed\n",
+    "metrics_present": false
+  },
+  "arithmetic_checks_measured": 0,
+  "quantity_contracts_measured": 0,
+  "negative_variants_executed": 0,
+  "Q": null,
+  "counts_toward_required_24_runs": false,
+  "output_repairs_or_replacements": false,
+  "postreview_provider_calls": 0,
+  "auth_or_config_files_read": false,
+  "actual_original_prepare_generate_or_replay_called": false,
+  "open_p1_p2_in_supervisor_or_recording_scope": [],
+  "generated_candidate_blocking_findings": "retained in script_review.json; no viability approval",
+  "documentation_observation": {
+    "issue": "prospective README still promises result and says legacy probe pending",
+    "resolution": "append postresult evidence and later D098 fix, preserving prelaunch design sections"
+  },
+  "global_acceptance": "0/5",
+  "final_documentation_review": {
+    "scope": [
+      "README postresult appendix",
+      "docs/estado.md new headings",
+      "docs/validacion_actual.md new headings",
+      "docs/decisiones.md D097 and D098"
+    ],
+    "open_p1_p2": [],
+    "prospective_design_sections_preserved": true,
+    "generation_and_failed_baseline_distinguished": true,
+    "original27_and_two_empty_operational_files_distinguished": true,
+    "operational_file_sizes_and_pins_verified": true,
+    "repeated_tests_or_model_replay": false,
+    "auth_or_model_calls": false
+  }
+}

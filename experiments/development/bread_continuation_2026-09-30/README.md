@@ -70,3 +70,58 @@ funciones documentales verificaron las nueve cifras originales, pero su
 `main` requiere reconciliar esas expectativas antes de reutilizarlo como
 sonda de aceptación actual. D-097 usa un workflow propio y conserva esa
 brecha como pendiente; no atribuye aceptación al auditor histórico.
+
+## Resultado posterior al diseño congelado
+
+Las secciones anteriores registran el estado prospectivo del commit
+`6a8018c`, anterior a la generación. Este apartado incorpora la evidencia
+observada; no cambia el plan, evaluador, criterios ni candidato.
+
+Una sola CLI solicitó Luna medio y terminó sin errores ni herramientas
+observadas. Dejó el [script original](attempt/analysis.py), [fuentes](attempt/sources.json)
+y [reporte de 780 palabras](attempt/report.md). El modelo duró 134,356 s;
+el supervisor de generación, 134,488 s dentro de los 240 s registrados.
+Uso informado por la CLI local: 57.670 tokens de entrada y 7.206 de salida,
+incluidos 443 de razonamiento como desglose. Coste, modelo efectivo y
+telemetría carecen de atestación externa.
+
+La [revisión anterior al replay](script_review.json) declaró seguro el
+script para el sandbox offline, pero rechazó su viabilidad. Dos extractos
+de Tabla 1 exigen un espacio más del presente en el texto fijado. Se consumió
+el único replay registrado para observar ese negativo, sin editar el código:
+código **2**, sin error de lanzamiento o timeout, stdout vacío y [stderr](attempt/baseline.stderr.txt)
+`analysis error: survey Table 1 passage audit failed`. Duración del sandbox:
+0,076 s; supervisor del replay: 0,099 s. El prefijo de intérprete registrado
+y el script original coinciden con el payload sellado.
+
+No se creó `metrics.json`: los **25 cotejos y 23 contratos quedaron sin
+medir**, con puntuaciones nulas. Las tres variantes negativas quedaron sin
+ejecutar porque el evaluador exige `replayed`; no se atribuye rechazo
+semántico al fallo basal. La revisión estática también observó una unidad
+distinta del contrato y comprobación directa de sólo tres de siete filas,
+sin convertir estos hallazgos en una puntuación hipotética.
+
+El [archivo](archive_receipt.json) conserva 27 archivos públicos y salidas
+originales, byte idénticos. `run.lock` y `work/.gitkeep` son dos archivos
+operativos vacíos creados para releer el archivo desde Git; se registran
+por separado y no son outputs originales del modelo. Un proceso nuevo y un revisor verificaron los
+pins, `failed`, replay/relanzamiento bloqueados y ausencia de métricas o
+evaluaciones adicionales. El [resultado](outcome_inspection.json) distingue
+generación completada de análisis fallido. No hubo reparación, reemplazo,
+segunda llamada ni cambio del checkpoint inicial D-096. GOAL, motor,
+cinco ledgers y 113 archivos de dossiers anteriores siguen intactos.
+
+Las 53 pruebas previas del workflow/evaluador pasaron con CLI falsa y
+sandbox local real; no prueban la calidad del candidato. La aceptación
+permanece **0/5**, Q nulo y ninguna corrida de las 24. Luna produjo una
+propuesta inspeccionable, pero esta ronda no demuestra calidad equivalente.
+Para un diseño posterior queda planteado contrastar auditoría documental
+robusta ante espacios, todos los valores/unidades y siete filas, con errores
+cuya causa se pueda aislar. Este candidato no se relanza.
+
+La brecha adicional del auditor histórico se corrigió después en D-098,
+commit `c971090`: [sonda actual](../bread_legacy_probe_2026-09-30.json) y
+[validación independiente](../bread_legacy_probe_validation_2026-09-30.json).
+CLI/MCP operan sobre copia temporal, conservan nueve archivos originales
+y reconocen `legacy_unverified`, siguiente `review_phase` y falta de firma.
+Pasaron 16 pruebas; este fix no acepta fases o normas del caso alimentario.

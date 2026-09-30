@@ -1,5 +1,32 @@
 # Estado de reanudación
 
+**D-097 conservó un análisis nativo fallido:** el [workflow y plan](../experiments/development/bread_continuation_2026-09-30/)
+se congelaron en `6a8018c` antes de una sola generación con Luna medio
+solicitado. Produjo código, fuentes e informe de 780 palabras en 134,488 s
+de supervisor dentro de 240 s, sin errores ni herramientas observadas.
+La revisión previa consideró seguro el script para el sandbox, pero predijo
+un fallo al exigir espacios distintos de los textos fijados. Su único replay
+sellado confirmó código 2 y el error de Tabla 1, sin timeout ni métricas.
+**No se midieron los 25 cotejos ni los 23 contratos**, y las tres variantes
+negativas quedaron sin ejecutar. Se conservaron 27 archivos byte idénticos;
+otro proceso y el revisor confirmaron `failed` y replay/relanzamiento
+bloqueados. Uso local: 57.670 tokens de entrada y 7.206 de salida; los 443
+de razonamiento son un desglose de salida. No hubo reparación, reemplazo,
+fallback API, juicio Q o cambio del checkpoint D-096. Pasaron 53 pruebas
+del workflow/evaluador con CLI falsa y sandbox local real. Este resultado
+no demuestra calidad equivalente de Luna ni cuenta entre las 24 corridas;
+los cinco criterios siguen **No demostrados**.
+
+**D-098 corrigió la sonda documental del pan:** la [evidencia actual](../experiments/development/bread_legacy_probe_validation_2026-09-30.json)
+registra 16 pruebas repetidas por un revisor, 21 herramientas descubiertas
+y siete verificaciones CLI/MCP. Todas las operaciones usan una copia
+temporal y conservan los nueve archivos originales. `frame` está listo,
+pero su revisión histórica es `legacy_unverified`, sin aceptación o firma;
+la próxima acción es `review_phase`. Ambos replays saltan 19 pasos, no
+escriben eventos y se detienen por `independent_review_required`. No se
+añadieron revisión firmada o aprobación humana, ni se reescribieron
+informes históricos. Fix y evidencia en `c971090`; aceptación **0/5**.
+
 **D-096 creó un checkpoint inicial real:** el [plan y código](../experiments/development/prototype_checkpoint_compatibility_2026-09-30/)
 se congelaron en `aa3e533` antes de una sola llamada con Luna medio solicitado.
 Con el host empaquetado de Code Mode habilitado, el error observado en

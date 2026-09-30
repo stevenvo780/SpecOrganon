@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "decision": "D-097",
+  "scope": "read-only safety and source review before the one registered baseline replay",
+  "reviewers": ["root", "source_gate_review"],
+  "script_sha256": "2b37dee5b24a8957b86bb8fd648198d87a46a5027376dd00a891edad5fd0429b",
+  "script_bytes": 11204,
+  "safe_for_registered_offline_sandbox": true,
+  "viable_baseline_approved": false,
+  "replay_purpose": "observe and preserve the predicted failure without editing or replacing the original candidate",
+  "safety_observations": {
+    "imports": ["sys", "json", "hashlib", "math", "pathlib"],
+    "input_reads": "fixed public input filenames",
+    "writes": "stdout and stderr only",
+    "network_subprocess_or_secret_access_observed": false,
+    "all_three_proposal_strings_match_original_artifact_bytes": true
+  },
+  "findings": [
+    {
+      "severity": "blocking_baseline",
+      "line": 70,
+      "issue": "two raw survey Table 1 excerpts require 16 spaces where the pinned pdftotext output has 15",
+      "predicted_result": "ValueError: survey Table 1 passage audit failed, before metrics emission",
+      "repair_allowed": false
+    },
+    {
+      "severity": "output_contract",
+      "line": 81,
+      "issue": "milling.wheat_input.unit is kg wheat; the frozen projection requires kg",
+      "execution_or_counterfactual_score": "not measured"
+    },
+    {
+      "severity": "source_audit_scope",
+      "line": 68,
+      "issue": "only three of seven Table 1 rows have direct raw passage checks; claim passage presence does not independently validate every numerical value and unit"
+    }
+  ],
+  "normative_decisions_approved": 0,
+  "completed_phases": 0,
+  "provider_identity_authenticated": false,
+  "quality_equivalence_demonstrated": false,
+  "global_acceptance": "0/5"
+}
