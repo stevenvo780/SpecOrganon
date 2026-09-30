@@ -665,6 +665,16 @@ def run(path: str, manifest: dict[str, Any], actor: str) -> dict[str, Any]:
     return _invoke("run", path=path, manifest=manifest, actor=actor)
 
 
+@server.tool(
+    description="Audit declared incremental lot balances and wet/dry mass basis; no field authenticity or acceptance is established. Read-only, no case required."
+)
+def audit_lot_journal(journal: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return invoke("audit_lot_journal", journal=journal)
+    except (ValueError, TypeError) as exc:
+        raise ToolError(str(exc)) from exc
+
+
 def main() -> None:
     server.run(transport="stdio")
 

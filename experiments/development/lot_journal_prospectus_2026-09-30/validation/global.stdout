@@ -1,0 +1,748 @@
+........................................................................ [  2%]
+........................................................................ [  5%]
+........................................................................ [  8%]
+........................................................................ [ 11%]
+........................................................................ [ 14%]
+........................................................................ [ 16%]
+........................................................................ [ 19%]
+........................................................................ [ 22%]
+........................................................................ [ 25%]
+........................................................................ [ 28%]
+........................................................................ [ 30%]
+........................................................................ [ 33%]
+........................................................................ [ 36%]
+........................................................................ [ 39%]
+........................................................................ [ 42%]
+........................................................................ [ 45%]
+........................................................................ [ 47%]
+........................................................................ [ 50%]
+........................................................................ [ 53%]
+........................................................................ [ 56%]
+........................................................................ [ 59%]
+........................................................................ [ 61%]
+........................................................................ [ 64%]
+........................................................................ [ 67%]
+........................................................................ [ 70%]
+........................................................................ [ 73%]
+........................................................................ [ 75%]
+........................................................................ [ 78%]
+........................................................................ [ 81%]
+........................................................................ [ 84%]
+........................................................................ [ 87%]
+........................................................................ [ 90%]
+.....FFFFFFFFFF......FFFFFFFFFFF........................................ [ 92%]
+........................................................................ [ 95%]
+........................................................................ [ 98%]
+.......................................                                  [100%]
+=================================== FAILURES ===================================
+_________ test_prepare_preserves_packet_and_excludes_reference_answers _________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_prepare_preserves_packet_0')
+admission = None
+
+    def test_prepare_preserves_packet_and_excludes_reference_answers(tmp_path, admission):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:130: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+______ test_first_turn_exact_preservation_no_auto_replay_and_environment _______
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_first_turn_exact_preserva0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f48241681d0>
+admission = None
+
+    def test_first_turn_exact_preservation_no_auto_replay_and_environment(tmp_path, monkeypatch, admission):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+_____ test_two_turns_real_sealed_replay_no_code_replacement_or_third_call ______
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_two_turns_real_sealed_rep0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f482414a850>
+admission = None
+
+    def test_two_turns_real_sealed_replay_no_code_replacement_or_third_call(tmp_path, monkeypatch, admission):
+        _require_sandbox()
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+________ test_model_rejection_is_terminal_and_has_no_fallback[api_key] _________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_model_rejection_is_termin0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4822776e90>
+admission = None, behavior = 'api_key'
+
+    @pytest.mark.parametrize("behavior", ["api_key", "tool", "error", "zero", "updated_error"])
+    def test_model_rejection_is_terminal_and_has_no_fallback(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+__________ test_model_rejection_is_terminal_and_has_no_fallback[tool] __________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_model_rejection_is_termin1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4822772710>
+admission = None, behavior = 'tool'
+
+    @pytest.mark.parametrize("behavior", ["api_key", "tool", "error", "zero", "updated_error"])
+    def test_model_rejection_is_terminal_and_has_no_fallback(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+_________ test_model_rejection_is_terminal_and_has_no_fallback[error] __________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_model_rejection_is_termin2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f48227d1b90>
+admission = None, behavior = 'error'
+
+    @pytest.mark.parametrize("behavior", ["api_key", "tool", "error", "zero", "updated_error"])
+    def test_model_rejection_is_terminal_and_has_no_fallback(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+__________ test_model_rejection_is_terminal_and_has_no_fallback[zero] __________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_model_rejection_is_termin3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f48241cf950>
+admission = None, behavior = 'zero'
+
+    @pytest.mark.parametrize("behavior", ["api_key", "tool", "error", "zero", "updated_error"])
+    def test_model_rejection_is_terminal_and_has_no_fallback(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+_____ test_model_rejection_is_terminal_and_has_no_fallback[updated_error] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_model_rejection_is_termin4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f482417f390>
+admission = None, behavior = 'updated_error'
+
+    @pytest.mark.parametrize("behavior", ["api_key", "tool", "error", "zero", "updated_error"])
+    def test_model_rejection_is_terminal_and_has_no_fallback(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+_________________ test_safe_updated_message_event_is_accepted __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_safe_updated_message_even0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f482414cc90>
+admission = None
+
+    def test_safe_updated_message_event_is_accepted(tmp_path, monkeypatch, admission):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+____________ test_copies_cannot_add_generation_replay_or_final_call ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_copies_cannot_add_generat0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f48227952d0>
+admission = None
+
+    def test_copies_cannot_add_generation_replay_or_final_call(tmp_path, monkeypatch, admission):
+        _require_sandbox()
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:215: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+___ test_actual_toolkit_trace_has_six_puts_and_no_approval_or_advance[False] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_actual_toolkit_trace_has_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4824131e90>
+admission = None, leading_dash = False
+
+    @pytest.mark.parametrize("leading_dash", [False, True])
+    def test_actual_toolkit_trace_has_six_puts_and_no_approval_or_advance(tmp_path, monkeypatch, admission, leading_dash):
+        _require_sandbox()
+>       directory = _prepare(tmp_path, arm="T")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:266: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+___ test_actual_toolkit_trace_has_six_puts_and_no_approval_or_advance[True] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_actual_toolkit_trace_has_1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4824361e10>
+admission = None, leading_dash = True
+
+    @pytest.mark.parametrize("leading_dash", [False, True])
+    def test_actual_toolkit_trace_has_six_puts_and_no_approval_or_advance(tmp_path, monkeypatch, admission, leading_dash):
+        _require_sandbox()
+>       directory = _prepare(tmp_path, arm="T")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:266: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+___________ test_negative_analysis_can_inform_report_without_metrics ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_negative_analysis_can_inf0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f48241f2e10>
+admission = None
+
+    def test_negative_analysis_can_inform_report_without_metrics(tmp_path, monkeypatch, admission):
+        _require_sandbox()
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:292: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+_______________ test_second_turn_cannot_return_replacement_code ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_second_turn_cannot_return0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4823f53c90>
+admission = None
+
+    def test_second_turn_cannot_return_replacement_code(tmp_path, monkeypatch, admission):
+        _require_sandbox()
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:304: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+________ test_empty_final_report_is_terminal_failure_without_third_call ________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_empty_final_report_is_ter0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f48227c5010>
+admission = None
+
+    def test_empty_final_report_is_terminal_failure_without_third_call(tmp_path, monkeypatch, admission):
+        _require_sandbox()
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:317: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+_________________ test_tampered_artifact_does_not_remain_valid _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_tampered_artifact_does_no0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f482416e550>
+admission = None
+
+    def test_tampered_artifact_does_not_remain_valid(tmp_path, monkeypatch, admission):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:328: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+__________ test_second_call_receives_only_remaining_cumulative_budget __________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_second_call_receives_only0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4822795250>
+admission = None
+
+    def test_second_call_receives_only_remaining_cumulative_budget(tmp_path, monkeypatch, admission):
+        _require_sandbox()
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:338: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+_______ test_model_timeout_preserves_partial_trace_and_forbids_relaunch ________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_model_timeout_preserves_p0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4823262050>
+admission = None
+
+    def test_model_timeout_preserves_partial_trace_and_forbids_relaunch(tmp_path, monkeypatch, admission):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:365: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+____________ test_toolkit_launch_failure_is_attempted_not_executed _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_toolkit_launch_failure_is0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f48228abd90>
+admission = None
+
+    def test_toolkit_launch_failure_is_attempted_not_executed(tmp_path, monkeypatch, admission):
+        _require_sandbox()
+>       directory = _prepare(tmp_path, arm="T")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:385: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+________ test_consistent_total_rewrite_below_capture_times_is_rejected _________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_consistent_total_rewrite_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f48241ccf90>
+admission = None
+
+    def test_consistent_total_rewrite_below_capture_times_is_rejected(tmp_path, monkeypatch, admission):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:410: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+__________ test_successful_toolkit_cannot_lose_ledger_and_stay_valid ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1416/test_successful_toolkit_cannot0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f482416bb10>
+admission = None
+
+    def test_successful_toolkit_cannot_lose_ledger_and_stay_valid(tmp_path, monkeypatch, admission):
+        _require_sandbox()
+>       directory = _prepare(tmp_path, arm="T")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_subscription_method_trial.py:423: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_subscription_method_trial.py:103: in _prepare
+    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:262: in prepare
+    blobs = _blobs(repo, protocol, raw, arm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_subscription_method_trial.py:215: in _blobs
+    _pin(_read(repo / path), pin, relative)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'"""Command-line interface and shared dispatch to the Organon engine."""\n\nfrom __future__ import annotations\n\nimp...xc}", file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == "__main__":\n    raise SystemExit(main())\n'
+pin = {'bytes': 11494, 'sha256': '9c7d1a7744ad72d4e87f78b6002c63784b5bd541e104dabc872ca1f8156edb82'}
+label = 'src/specorganon/cli.py'
+
+    def _pin(raw: bytes, pin: dict, label: str) -> None:
+        if type(pin) is not dict or _record(raw) != {k: pin.get(k) for k in ("sha256", "bytes")}:
+>           raise TrialError(f"registered bytes changed: {label}")
+E           scripts.run_subscription_method_trial.TrialError: registered bytes changed: src/specorganon/cli.py
+
+scripts/run_subscription_method_trial.py:105: TrialError
+=========================== short test summary info ============================
+FAILED tests/test_subscription_method_trial.py::test_prepare_preserves_packet_and_excludes_reference_answers
+FAILED tests/test_subscription_method_trial.py::test_first_turn_exact_preservation_no_auto_replay_and_environment
+FAILED tests/test_subscription_method_trial.py::test_two_turns_real_sealed_replay_no_code_replacement_or_third_call
+FAILED tests/test_subscription_method_trial.py::test_model_rejection_is_terminal_and_has_no_fallback[api_key]
+FAILED tests/test_subscription_method_trial.py::test_model_rejection_is_terminal_and_has_no_fallback[tool]
+FAILED tests/test_subscription_method_trial.py::test_model_rejection_is_terminal_and_has_no_fallback[error]
+FAILED tests/test_subscription_method_trial.py::test_model_rejection_is_terminal_and_has_no_fallback[zero]
+FAILED tests/test_subscription_method_trial.py::test_model_rejection_is_terminal_and_has_no_fallback[updated_error]
+FAILED tests/test_subscription_method_trial.py::test_safe_updated_message_event_is_accepted
+FAILED tests/test_subscription_method_trial.py::test_copies_cannot_add_generation_replay_or_final_call
+FAILED tests/test_subscription_method_trial.py::test_actual_toolkit_trace_has_six_puts_and_no_approval_or_advance[False]
+FAILED tests/test_subscription_method_trial.py::test_actual_toolkit_trace_has_six_puts_and_no_approval_or_advance[True]
+FAILED tests/test_subscription_method_trial.py::test_negative_analysis_can_inform_report_without_metrics
+FAILED tests/test_subscription_method_trial.py::test_second_turn_cannot_return_replacement_code
+FAILED tests/test_subscription_method_trial.py::test_empty_final_report_is_terminal_failure_without_third_call
+FAILED tests/test_subscription_method_trial.py::test_tampered_artifact_does_not_remain_valid
+FAILED tests/test_subscription_method_trial.py::test_second_call_receives_only_remaining_cumulative_budget
+FAILED tests/test_subscription_method_trial.py::test_model_timeout_preserves_partial_trace_and_forbids_relaunch
+FAILED tests/test_subscription_method_trial.py::test_toolkit_launch_failure_is_attempted_not_executed
+FAILED tests/test_subscription_method_trial.py::test_consistent_total_rewrite_below_capture_times_is_rejected
+FAILED tests/test_subscription_method_trial.py::test_successful_toolkit_cannot_lose_ledger_and_stay_valid
+21 failed, 2538 passed in 324.17s (0:05:24)

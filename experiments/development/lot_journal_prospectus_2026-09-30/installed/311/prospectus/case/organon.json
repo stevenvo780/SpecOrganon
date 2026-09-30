@@ -1,0 +1,2003 @@
+{
+  "events": [
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "2d3907b1ce264b1c1d3f4fb999b54427b706820973d477d3db629ee339543758",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "p_seed",
+        "kind": "problem",
+        "text": "Investigar conservación de servicio alimentario inocuo en la cadena del pan estudiado y perjuicios por actor; eficacia de una intervención aún desconocida.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "ab53d1818862c2999f00c38fd650209b89bec82819696bf59f4b9a1b1a3a77d1",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_seed": 1
+        },
+        "id": "a_chain",
+        "kind": "actor",
+        "text": "Agricultores, trabajadores, molino, panadería, transporte, comercios, hogares, productores de envases, usuarios de coproductos y autoridades requieren consulta directa antes de un ensayo.",
+        "version": 1
+      },
+      "prev_hash": "2d3907b1ce264b1c1d3f4fb999b54427b706820973d477d3db629ee339543758",
+      "seq": 2
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "9c31847e47ffc51cb41eaad9d5af6c937cad50aca69f57dc44aa49ade4ed6d68",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_seed": 1
+        },
+        "id": "b_seed",
+        "kind": "boundary",
+        "text": "Recorrido documental histórico de cultivo, almacenamiento, molienda, transporte, panificación, comercio y hogares; sin un lote observado enlazado o campo autorizado.",
+        "version": 1
+      },
+      "prev_hash": "ab53d1818862c2999f00c38fd650209b89bec82819696bf59f4b9a1b1a3a77d1",
+      "seq": 3
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "c7f13e983fdaf4a1ffcb8a9761f1360d17448dc394bcd77050ad53984435c4ab",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_seed": 1
+        },
+        "id": "s_historical",
+        "kind": "assumption",
+        "text": "Las fuentes publicadas agregadas y autoinformes permiten formular preguntas; no representan línea base actual de lotes identificados ni efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "9c31847e47ffc51cb41eaad9d5af6c937cad50aca69f57dc44aa49ade4ed6d68",
+      "seq": 4
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "4fb8a049c2014ed041f5e6fc4dc0dfc55017211f2a21d0fe1d9f7c90df6362db",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_seed": 1,
+          "s_historical": 1
+        },
+        "id": "q_docs",
+        "kind": "question",
+        "text": "¿Qué cantidades, unidades, bases y desacuerdos internos reportan las fuentes fijadas, y qué falta medir en una cadena actual?",
+        "version": 1
+      },
+      "prev_hash": "c7f13e983fdaf4a1ffcb8a9761f1360d17448dc394bcd77050ad53984435c4ab",
+      "seq": 5
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "839bddeb2a7d71e2f1d6c011dd70a31f2b1117c8079862a62316fd32ccd23453",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "q_docs": 1
+        },
+        "id": "h_docs",
+        "kind": "hypothesis",
+        "text": "La transcripción de valores puede concordar con tablas publicadas sin que las bases o categorías permitan combinarse como tasas secuenciales o evidencia causal.",
+        "version": 1
+      },
+      "prev_hash": "4fb8a049c2014ed041f5e6fc4dc0dfc55017211f2a21d0fe1d9f7c90df6362db",
+      "seq": 6
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "0d4087b8c5ba516bf78a8ceca29edd70d6f2756fbd913d491c236c94235cc9e6",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Valores y filas publicados frente a la transcripción; sin brazo de intervención",
+          "method": "D100: PDF y extractor fijados, snapshots sellados, pasajes únicos y revisión de contrato",
+          "population": "Dos artículos archivados y sus transcripciones expuestas",
+          "uncertainty": "Agregados históricos, autoinformes, desacuerdos de prosa/tablas, host y bases interpretadas"
+        },
+        "deps": {
+          "h_docs": 1,
+          "q_docs": 1
+        },
+        "id": "pr_docs",
+        "kind": "protocol",
+        "text": "Repetir extracción PDF fijada y cotejo de pasajes, filas, unidades y bases antes de publicar evidencia documental.",
+        "version": 1
+      },
+      "prev_hash": "839bddeb2a7d71e2f1d6c011dd70a31f2b1117c8079862a62316fd32ccd23453",
+      "seq": 7
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "56fc9425db7a8403222952c5eb52d03f0cf6228eae45b15c51d686efff48ecd5",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_claims.json",
+          "date": "2026-09-30",
+          "locator": "source_claims.json",
+          "origin": "derived",
+          "source": "D100 transcripción de 17 valores",
+          "source_sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc"
+        },
+        "deps": {
+          "p_seed": 1,
+          "pr_docs": 1
+        },
+        "id": "e_bundle_claims",
+        "kind": "evidence",
+        "text": "D100 transcripción de 17 valores; sin aceptación humana o efecto de campo.",
+        "version": 1
+      },
+      "prev_hash": "0d4087b8c5ba516bf78a8ceca29edd70d6f2756fbd913d491c236c94235cc9e6",
+      "seq": 8
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "4bd7e600a26cecd816f02c830d03fb73e2f39275a655f952098e8f3b02662230",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "survey_table1.json",
+          "date": "2018-06-29",
+          "locator": "survey_table1.json",
+          "origin": "published",
+          "source": "https://doi.org/10.3390/su10072251",
+          "source_sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f"
+        },
+        "deps": {
+          "p_seed": 1,
+          "pr_docs": 1
+        },
+        "id": "e_bundle_table",
+        "kind": "evidence",
+        "text": "https://doi.org/10.3390/su10072251; sin aceptación humana o efecto de campo.",
+        "version": 1
+      },
+      "prev_hash": "56fc9425db7a8403222952c5eb52d03f0cf6228eae45b15c51d686efff48ecd5",
+      "seq": 9
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "1e35efd3de4786864657759bd5e4bcb2385dc86ae2fdf38f01ebc678baceb5a3",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "audit_contract.json",
+          "date": "2026-09-30",
+          "locator": "audit_contract.json",
+          "origin": "derived",
+          "source": "D100 contrato de pasajes revisado por Codex",
+          "source_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b"
+        },
+        "deps": {
+          "p_seed": 1,
+          "pr_docs": 1
+        },
+        "id": "e_bundle_contract",
+        "kind": "evidence",
+        "text": "D100 contrato de pasajes revisado por Codex; sin aceptación humana o efecto de campo.",
+        "version": 1
+      },
+      "prev_hash": "4bd7e600a26cecd816f02c830d03fb73e2f39275a655f952098e8f3b02662230",
+      "seq": 10
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "3b8a9c66c2b6c6a45485e32c4b8c317739b275747576f2b431a412d0ed9fa48f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "audit_report.json",
+          "date": "2026-09-30",
+          "locator": "audit_report.json",
+          "origin": "derived",
+          "source": "D100 repetición local del cotejo",
+          "source_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6"
+        },
+        "deps": {
+          "e_bundle_claims": 1,
+          "e_bundle_contract": 1,
+          "e_bundle_table": 1,
+          "p_seed": 1,
+          "pr_docs": 1
+        },
+        "id": "e_bundle_audit",
+        "kind": "evidence",
+        "text": "D100 repetición local del cotejo; sin aceptación humana o efecto de campo.",
+        "version": 1
+      },
+      "prev_hash": "1e35efd3de4786864657759bd5e4bcb2385dc86ae2fdf38f01ebc678baceb5a3",
+      "seq": 11
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "3466905ac468a40da0f23d079df1d82cc3659e7ecc7bf1eedd84baec15b8653a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": null,
+            "pdf_page": 6,
+            "printed_page": 6,
+            "row": "First paragraph",
+            "section": "4.2",
+            "table": null
+          },
+          "base": "One commercial loaf, bread mass after baking",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": null, \"pdf_page\": 6, \"printed_page\": 6, \"row\": \"First paragraph\", \"section\": \"4.2\", \"table\": null}",
+          "matched_sha256": "bde3568c4eab9cfcfc2108fc13e3c9bfb79ee84a35a87a00811850476781f6a6",
+          "metric_key": "piece_mass",
+          "origin": "published",
+          "page_sha256": "5d29103d11d98914fd358947bb61aaa4c88929628ebbad36a1b2c0e6ac9c621f",
+          "passage_sha256": "ca23f448b7b9822031fb838c0570fd88d0cc1708b42055d0ca59aa4cc524b305",
+          "provenance": "baking_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "g/piece",
+          "value": "736"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_piece_mass",
+        "kind": "evidence",
+        "text": "Publicado: piece_mass = 736 g/piece. Base: One commercial loaf, bread mass after baking. Procedencia: baking_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "3b8a9c66c2b6c6a45485e32c4b8c317739b275747576f2b431a412d0ed9fa48f",
+      "seq": 12
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "4a7ecb82759f28ed09c714a18434418a3da3b0b0499f4e929fbe69260cae6428",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": null,
+            "pdf_page": 6,
+            "printed_page": 6,
+            "row": "First paragraph",
+            "section": "4.3",
+            "table": null
+          },
+          "base": "Average wheat origin reported over several years",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": null, \"pdf_page\": 6, \"printed_page\": 6, \"row\": \"First paragraph\", \"section\": \"4.3\", \"table\": null}",
+          "matched_sha256": "ecc7fbe6e9a78010e5ddf9840b334d4158f8448ebde3bb91785d98624f7c6c7d",
+          "metric_key": "norway_wheat_share",
+          "origin": "published",
+          "page_sha256": "5d29103d11d98914fd358947bb61aaa4c88929628ebbad36a1b2c0e6ac9c621f",
+          "passage_sha256": "a10b4d35be4a268b9bb88c10dbf76a5b56a9d70c994d445ebc3043eda3c139f7",
+          "provenance": "mill_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "%",
+          "value": "65"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_norway_wheat_share",
+        "kind": "evidence",
+        "text": "Publicado: norway_wheat_share = 65 %. Base: Average wheat origin reported over several years. Procedencia: mill_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "3466905ac468a40da0f23d079df1d82cc3659e7ecc7bf1eedd84baec15b8653a",
+      "seq": 13
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "cbb0fe0421eccd3b9d10042191f2e84f0b4f3190bdc2d57502100d9a3af8d1d8",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Data",
+            "pdf_page": 7,
+            "printed_page": 7,
+            "row": "Mill energy consumption",
+            "section": "4.4",
+            "table": "2"
+          },
+          "base": "One tonne of flour produced",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Data\", \"pdf_page\": 7, \"printed_page\": 7, \"row\": \"Mill energy consumption\", \"section\": \"4.4\", \"table\": \"2\"}",
+          "matched_sha256": "fc71b444a308d1355b7bbbbe2390e5f75211a640c3dd1137ac5fe54c571704c2",
+          "metric_key": "mill_electricity",
+          "origin": "published",
+          "page_sha256": "1816f3d5f94685342a966bb9f58dd742ddfdb691f34fda2e284a5802fa522ca7",
+          "passage_sha256": "039c13ccd6b30ac9e1907b8fd6ba3bf077ef810a4e018dc52f5b4877ca14fe25",
+          "provenance": "mill_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "kWh/t_flour",
+          "value": "129"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_mill_electricity",
+        "kind": "evidence",
+        "text": "Publicado: mill_electricity = 129 kWh/t_flour. Base: One tonne of flour produced. Procedencia: mill_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "4a7ecb82759f28ed09c714a18434418a3da3b0b0499f4e929fbe69260cae6428",
+      "seq": 14
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "2825173516733b12565fd35cc8e5c8d9480b05f7f4d3d7b2e72311272ffc8a7a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Material Balance and Allocation Factors",
+            "pdf_page": 7,
+            "printed_page": 7,
+            "row": "Wheat flour products (% w/w)",
+            "section": "4.4",
+            "table": "3"
+          },
+          "base": "Wheat input to flour mill, mass fraction of bran output",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Material Balance and Allocation Factors\", \"pdf_page\": 7, \"printed_page\": 7, \"row\": \"Wheat flour products (% w/w)\", \"section\": \"4.4\", \"table\": \"3\"}",
+          "matched_sha256": "4379e38d747bcb3ee5ded4661fd20a775cd02b352134f84db613596eeff1729a",
+          "metric_key": "wheat_bran_mass_share",
+          "origin": "published",
+          "page_sha256": "1816f3d5f94685342a966bb9f58dd742ddfdb691f34fda2e284a5802fa522ca7",
+          "passage_sha256": "1db9d908544ddd86893ca797a92e85868ab02eb57ad292ba81991718e7aa7417",
+          "provenance": "mill_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "% w/w",
+          "value": "19.1"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_wheat_bran_mass_share",
+        "kind": "evidence",
+        "text": "Publicado: wheat_bran_mass_share = 19.1 % w/w. Base: Wheat input to flour mill, mass fraction of bran output. Procedencia: mill_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "cbb0fe0421eccd3b9d10042191f2e84f0b4f3190bdc2d57502100d9a3af8d1d8",
+      "seq": 15
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "1e631f678f2e0422fccd76382553e6f45f50630131301b7ce03780f15bc1be26",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Data",
+            "pdf_page": 8,
+            "printed_page": 8,
+            "row": "Transport from mill to baker",
+            "section": "4.6",
+            "table": "5"
+          },
+          "base": "Transport from mill to baker in >32 tonne truck",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Data\", \"pdf_page\": 8, \"printed_page\": 8, \"row\": \"Transport from mill to baker\", \"section\": \"4.6\", \"table\": \"5\"}",
+          "matched_sha256": "3d43b18dc865fcd0e6d89152563d48cc94db24c2268d830803b1fc960bc3fc86",
+          "metric_key": "mill_to_baker_distance",
+          "origin": "published",
+          "page_sha256": "fd156001abd49065cd9ae9a1dfb3b7e00423d0da0430c52221b4c74a6827beee",
+          "passage_sha256": "291e10e4fb71f5b04ea12baef677fab460f410650396883d4e35fc7975ce0862",
+          "provenance": "mill_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "km",
+          "value": "438"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_mill_to_baker_distance",
+        "kind": "evidence",
+        "text": "Publicado: mill_to_baker_distance = 438 km. Base: Transport from mill to baker in >32 tonne truck. Procedencia: mill_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "2825173516733b12565fd35cc8e5c8d9480b05f7f4d3d7b2e72311272ffc8a7a",
+      "seq": 16
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "a35bc1c8ed1da29663eb63a6e0f5e865f02ffaa41bf5aa88a943cf25ecd16c26",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Data",
+            "pdf_page": 8,
+            "printed_page": 8,
+            "row": "Baker energy consumption",
+            "section": "4.6",
+            "table": "5"
+          },
+          "base": "One commercial loaf of the studied bread",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Data\", \"pdf_page\": 8, \"printed_page\": 8, \"row\": \"Baker energy consumption\", \"section\": \"4.6\", \"table\": \"5\"}",
+          "matched_sha256": "95b30536c27f87d9b401c49f3a05e7d34f72a3821a00dbad8c0b9d2aa62eb448",
+          "metric_key": "bakery_electricity",
+          "origin": "published",
+          "page_sha256": "fd156001abd49065cd9ae9a1dfb3b7e00423d0da0430c52221b4c74a6827beee",
+          "passage_sha256": "291e10e4fb71f5b04ea12baef677fab460f410650396883d4e35fc7975ce0862",
+          "provenance": "baking_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "kWh/piece",
+          "value": "0.297"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_bakery_electricity",
+        "kind": "evidence",
+        "text": "Publicado: bakery_electricity = 0.297 kWh/piece. Base: One commercial loaf of the studied bread. Procedencia: baking_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "1e631f678f2e0422fccd76382553e6f45f50630131301b7ce03780f15bc1be26",
+      "seq": 17
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "2b5e3722b8b690033d62aec5c07925ea116e26655f32b23377468d586879a632",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Amount Wasted as % of Bread Entering the System",
+            "pdf_page": 8,
+            "printed_page": 8,
+            "row": "Retail waste",
+            "section": "4.9",
+            "table": "7"
+          },
+          "base": "Bread entering the system as named by Table 7",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Amount Wasted as % of Bread Entering the System\", \"pdf_page\": 8, \"printed_page\": 8, \"row\": \"Retail waste\", \"section\": \"4.9\", \"table\": \"7\"}",
+          "matched_sha256": "b5eea45e40324718f7dc1a451c83189bafdccf40dbc780d4e2babdc56ae0af44",
+          "metric_key": "retail_bread_waste",
+          "origin": "published",
+          "page_sha256": "fd156001abd49065cd9ae9a1dfb3b7e00423d0da0430c52221b4c74a6827beee",
+          "passage_sha256": "c5fbb7dfd773c35b473b05fa15c78bbb95924c386507902983372550af0f7eca",
+          "provenance": "baking_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "%",
+          "value": "11.4"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_retail_bread_waste",
+        "kind": "evidence",
+        "text": "Publicado: retail_bread_waste = 11.4 %. Base: Bread entering the system as named by Table 7. Procedencia: baking_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "a35bc1c8ed1da29663eb63a6e0f5e865f02ffaa41bf5aa88a943cf25ecd16c26",
+      "seq": 18
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "00ad4a7c92c098af5c26b17a25416af6c465e97e7a71893281b95ad95af16b99",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Amount Wasted as % of Bread Entering the System",
+            "pdf_page": 8,
+            "printed_page": 8,
+            "row": "Consumer waste",
+            "section": "4.9",
+            "table": "7"
+          },
+          "base": "Bread entering the system as named by Table 7",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Amount Wasted as % of Bread Entering the System\", \"pdf_page\": 8, \"printed_page\": 8, \"row\": \"Consumer waste\", \"section\": \"4.9\", \"table\": \"7\"}",
+          "matched_sha256": "1520f39917affc2f93a77561eb7c65adf0ffd6b8deb973f8682146e1cda69a6c",
+          "metric_key": "consumer_bread_waste_estimate",
+          "origin": "published",
+          "page_sha256": "fd156001abd49065cd9ae9a1dfb3b7e00423d0da0430c52221b4c74a6827beee",
+          "passage_sha256": "c5fbb7dfd773c35b473b05fa15c78bbb95924c386507902983372550af0f7eca",
+          "provenance": "authors_calculation_from_consumption_reference_3_and_wastage_reference_9",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "%",
+          "value": "8.2"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_consumer_bread_waste_estimate",
+        "kind": "evidence",
+        "text": "Publicado: consumer_bread_waste_estimate = 8.2 %. Base: Bread entering the system as named by Table 7. Procedencia: authors_calculation_from_consumption_reference_3_and_wastage_reference_9; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "2b5e3722b8b690033d62aec5c07925ea116e26655f32b23377468d586879a632",
+      "seq": 19
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "e6056fc2ac1745465086f3bfe59ec166dc791f101406d511016685332b30d227",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_survey.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Number of Respondents",
+            "pdf_page": 4,
+            "printed_page": 4,
+            "row": "Total",
+            "section": "3",
+            "table": "1"
+          },
+          "base": "Respondents answering a web survey about household bread wasting",
+          "classification": "reported",
+          "date": "2018-06-29",
+          "locator": "{\"column\": \"Number of Respondents\", \"pdf_page\": 4, \"printed_page\": 4, \"row\": \"Total\", \"section\": \"3\", \"table\": \"1\"}",
+          "matched_sha256": "d3301fa1ee676dc0baea76dfb8c37a0721c38d1c9b1d3accb0ef54580fc3aa89",
+          "metric_key": "survey_respondents",
+          "origin": "published",
+          "page_sha256": "9fc951dfc30c645f1e37cd1bd6a1428e854c38818a2f50803ad5921805fa0d3b",
+          "passage_sha256": "885c5e9adf070c142865e96c4d3a6aba3d56f0e501e769388033aadf0700d200",
+          "provenance": "web_survey_reported_frequency",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su10072251",
+          "source_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+          "unit": "respondents",
+          "value": "1000"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_survey_respondents",
+        "kind": "evidence",
+        "text": "Publicado: survey_respondents = 1000 respondents. Base: Respondents answering a web survey about household bread wasting. Procedencia: web_survey_reported_frequency; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "00ad4a7c92c098af5c26b17a25416af6c465e97e7a71893281b95ad95af16b99",
+      "seq": 20
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "6fe4239671195ed0bfdcd0de0d539c451bc27af58a057c8db5b412337f8cffb5",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": null,
+            "pdf_page": 6,
+            "printed_page": 6,
+            "row": "First paragraph",
+            "section": "4.3",
+            "table": null
+          },
+          "base": "Average wheat origin reported over several years",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": null, \"pdf_page\": 6, \"printed_page\": 6, \"row\": \"First paragraph\", \"section\": \"4.3\", \"table\": null}",
+          "matched_sha256": "ecc7fbe6e9a78010e5ddf9840b334d4158f8448ebde3bb91785d98624f7c6c7d",
+          "metric_key": "poland_wheat_share",
+          "origin": "published",
+          "page_sha256": "5d29103d11d98914fd358947bb61aaa4c88929628ebbad36a1b2c0e6ac9c621f",
+          "passage_sha256": "a10b4d35be4a268b9bb88c10dbf76a5b56a9d70c994d445ebc3043eda3c139f7",
+          "provenance": "mill_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "%",
+          "value": "35"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_poland_wheat_share",
+        "kind": "evidence",
+        "text": "Publicado: poland_wheat_share = 35 %. Base: Average wheat origin reported over several years. Procedencia: mill_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "e6056fc2ac1745465086f3bfe59ec166dc791f101406d511016685332b30d227",
+      "seq": 21
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "a2e1dc75515936b2bf81e5ef172268e00d09a6bdb163346a13783502daf94848",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Material Balance and Allocation Factors",
+            "pdf_page": 7,
+            "printed_page": 7,
+            "row": "Wheat flour products (% w/w)",
+            "section": "4.4",
+            "table": "3"
+          },
+          "base": "Wheat input to flour mill, mass fraction of refined flour output",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Material Balance and Allocation Factors\", \"pdf_page\": 7, \"printed_page\": 7, \"row\": \"Wheat flour products (% w/w)\", \"section\": \"4.4\", \"table\": \"3\"}",
+          "matched_sha256": "4379e38d747bcb3ee5ded4661fd20a775cd02b352134f84db613596eeff1729a",
+          "metric_key": "wheat_refined_flour_mass_share",
+          "origin": "published",
+          "page_sha256": "1816f3d5f94685342a966bb9f58dd742ddfdb691f34fda2e284a5802fa522ca7",
+          "passage_sha256": "1db9d908544ddd86893ca797a92e85868ab02eb57ad292ba81991718e7aa7417",
+          "provenance": "mill_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "% w/w",
+          "value": "67.1"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_wheat_refined_flour_mass_share",
+        "kind": "evidence",
+        "text": "Publicado: wheat_refined_flour_mass_share = 67.1 % w/w. Base: Wheat input to flour mill, mass fraction of refined flour output. Procedencia: mill_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "6fe4239671195ed0bfdcd0de0d539c451bc27af58a057c8db5b412337f8cffb5",
+      "seq": 22
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "7f624c438cf93e6ef8d154bf70d8c97074797c8e31688e7dc34904adc238ed36",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Material Balance and Allocation Factors",
+            "pdf_page": 7,
+            "printed_page": 7,
+            "row": "Wheat flour products (% w/w)",
+            "section": "4.4",
+            "table": "3"
+          },
+          "base": "Wheat input to flour mill, mass fraction of whole flour output",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Material Balance and Allocation Factors\", \"pdf_page\": 7, \"printed_page\": 7, \"row\": \"Wheat flour products (% w/w)\", \"section\": \"4.4\", \"table\": \"3\"}",
+          "matched_sha256": "4379e38d747bcb3ee5ded4661fd20a775cd02b352134f84db613596eeff1729a",
+          "metric_key": "wheat_whole_flour_mass_share",
+          "origin": "published",
+          "page_sha256": "1816f3d5f94685342a966bb9f58dd742ddfdb691f34fda2e284a5802fa522ca7",
+          "passage_sha256": "1db9d908544ddd86893ca797a92e85868ab02eb57ad292ba81991718e7aa7417",
+          "provenance": "mill_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "% w/w",
+          "value": "13.8"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_wheat_whole_flour_mass_share",
+        "kind": "evidence",
+        "text": "Publicado: wheat_whole_flour_mass_share = 13.8 % w/w. Base: Wheat input to flour mill, mass fraction of whole flour output. Procedencia: mill_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "a2e1dc75515936b2bf81e5ef172268e00d09a6bdb163346a13783502daf94848",
+      "seq": 23
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "6c1c51586ee83d928af2c8e9fb1855e7a445fbae01062c15106478aac2ac5d57",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Data",
+            "pdf_page": 8,
+            "printed_page": 8,
+            "row": "Baker energy consumption",
+            "section": "4.6",
+            "table": "5"
+          },
+          "base": "One commercial loaf of the studied bread",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Data\", \"pdf_page\": 8, \"printed_page\": 8, \"row\": \"Baker energy consumption\", \"section\": \"4.6\", \"table\": \"5\"}",
+          "matched_sha256": "95b30536c27f87d9b401c49f3a05e7d34f72a3821a00dbad8c0b9d2aa62eb448",
+          "metric_key": "bakery_natural_gas",
+          "origin": "published",
+          "page_sha256": "fd156001abd49065cd9ae9a1dfb3b7e00423d0da0430c52221b4c74a6827beee",
+          "passage_sha256": "291e10e4fb71f5b04ea12baef677fab460f410650396883d4e35fc7975ce0862",
+          "provenance": "baking_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "kWh/piece",
+          "value": "0.115"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_bakery_natural_gas",
+        "kind": "evidence",
+        "text": "Publicado: bakery_natural_gas = 0.115 kWh/piece. Base: One commercial loaf of the studied bread. Procedencia: baking_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "7f624c438cf93e6ef8d154bf70d8c97074797c8e31688e7dc34904adc238ed36",
+      "seq": 24
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "4c83159dbbfbc1e73db86e31bd101cf2de10afb234f1896df336a607345d074d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Material Balance and Allocation Factors",
+            "pdf_page": 7,
+            "printed_page": 7,
+            "row": "Wheat, economic allocation factors",
+            "section": "4.4",
+            "table": "3"
+          },
+          "base": "Economic allocation factor for refined flour in milling inventory",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Material Balance and Allocation Factors\", \"pdf_page\": 7, \"printed_page\": 7, \"row\": \"Wheat, economic allocation factors\", \"section\": \"4.4\", \"table\": \"3\"}",
+          "matched_sha256": "7c1e166472823ee6dfe2fc0fa25f16bc3956f77e901402dbfd73cac2b7bc4815",
+          "metric_key": "wheat_refined_flour_economic_allocation",
+          "origin": "published",
+          "page_sha256": "1816f3d5f94685342a966bb9f58dd742ddfdb691f34fda2e284a5802fa522ca7",
+          "passage_sha256": "1db9d908544ddd86893ca797a92e85868ab02eb57ad292ba81991718e7aa7417",
+          "provenance": "mill_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "%",
+          "value": "78.5"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_wheat_refined_flour_economic_allocation",
+        "kind": "evidence",
+        "text": "Publicado: wheat_refined_flour_economic_allocation = 78.5 %. Base: Economic allocation factor for refined flour in milling inventory. Procedencia: mill_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "6c1c51586ee83d928af2c8e9fb1855e7a445fbae01062c15106478aac2ac5d57",
+      "seq": 25
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "e67ab6aef4a11429156a4c291351acb44e2f4f22d7b0932743a5de148be00e17",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Material Balance and Allocation Factors",
+            "pdf_page": 7,
+            "printed_page": 7,
+            "row": "Wheat, economic allocation factors",
+            "section": "4.4",
+            "table": "3"
+          },
+          "base": "Economic allocation factor for whole flour in milling inventory",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Material Balance and Allocation Factors\", \"pdf_page\": 7, \"printed_page\": 7, \"row\": \"Wheat, economic allocation factors\", \"section\": \"4.4\", \"table\": \"3\"}",
+          "matched_sha256": "7c1e166472823ee6dfe2fc0fa25f16bc3956f77e901402dbfd73cac2b7bc4815",
+          "metric_key": "wheat_whole_flour_economic_allocation",
+          "origin": "published",
+          "page_sha256": "1816f3d5f94685342a966bb9f58dd742ddfdb691f34fda2e284a5802fa522ca7",
+          "passage_sha256": "1db9d908544ddd86893ca797a92e85868ab02eb57ad292ba81991718e7aa7417",
+          "provenance": "mill_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "%",
+          "value": "14.2"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_wheat_whole_flour_economic_allocation",
+        "kind": "evidence",
+        "text": "Publicado: wheat_whole_flour_economic_allocation = 14.2 %. Base: Economic allocation factor for whole flour in milling inventory. Procedencia: mill_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "4c83159dbbfbc1e73db86e31bd101cf2de10afb234f1896df336a607345d074d",
+      "seq": 26
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "acfa2b2460ffa2bfd30439e5e2cca3f0c8d193569c95da9fb5f965f7944c7796",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Material Balance and Allocation Factors",
+            "pdf_page": 7,
+            "printed_page": 7,
+            "row": "Wheat, economic allocation factors",
+            "section": "4.4",
+            "table": "3"
+          },
+          "base": "Economic allocation factor for bran in milling inventory",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Material Balance and Allocation Factors\", \"pdf_page\": 7, \"printed_page\": 7, \"row\": \"Wheat, economic allocation factors\", \"section\": \"4.4\", \"table\": \"3\"}",
+          "matched_sha256": "7c1e166472823ee6dfe2fc0fa25f16bc3956f77e901402dbfd73cac2b7bc4815",
+          "metric_key": "wheat_bran_economic_allocation",
+          "origin": "published",
+          "page_sha256": "1816f3d5f94685342a966bb9f58dd742ddfdb691f34fda2e284a5802fa522ca7",
+          "passage_sha256": "1db9d908544ddd86893ca797a92e85868ab02eb57ad292ba81991718e7aa7417",
+          "provenance": "mill_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "%",
+          "value": "7.3"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_wheat_bran_economic_allocation",
+        "kind": "evidence",
+        "text": "Publicado: wheat_bran_economic_allocation = 7.3 %. Base: Economic allocation factor for bran in milling inventory. Procedencia: mill_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "e67ab6aef4a11429156a4c291351acb44e2f4f22d7b0932743a5de148be00e17",
+      "seq": 27
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "172e69ac048e6f2097deaf7016cf2b8d7581bc35f8493853e491d64ddb1d421c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_lca.pdf",
+          "audit_contract_sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b",
+          "audit_report_sha256": "99982b3201f216631f014365b3533e8fd551f5777e3b407c534a320479ebe9d6",
+          "audited_locator": {
+            "column": "Amount Wasted as % of Bread Entering the System",
+            "pdf_page": 8,
+            "printed_page": 8,
+            "row": "Bakery waste",
+            "section": "4.9",
+            "table": "7"
+          },
+          "base": "Bread entering the system as named by Table 7",
+          "classification": "reported",
+          "date": "2018-12-21",
+          "locator": "{\"column\": \"Amount Wasted as % of Bread Entering the System\", \"pdf_page\": 8, \"printed_page\": 8, \"row\": \"Bakery waste\", \"section\": \"4.9\", \"table\": \"7\"}",
+          "matched_sha256": "7a677a32a5e74275756db2188fd62013ba55fd1bb76df0f7ffad4ee0c7bcaa1d",
+          "metric_key": "bakery_bread_waste",
+          "origin": "published",
+          "page_sha256": "fd156001abd49065cd9ae9a1dfb3b7e00423d0da0430c52221b4c74a6827beee",
+          "passage_sha256": "c5fbb7dfd773c35b473b05fa15c78bbb95924c386507902983372550af0f7eca",
+          "provenance": "baking_company_data",
+          "scope": "published_historical_documentary_quantity_not_current_lot",
+          "source": "https://doi.org/10.3390/su11010043",
+          "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+          "unit": "%",
+          "value": "3.3"
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "p_seed": 1,
+          "pr_docs": 1,
+          "s_historical": 1
+        },
+        "id": "e_bakery_bread_waste",
+        "kind": "evidence",
+        "text": "Publicado: bakery_bread_waste = 3.3 %. Base: Bread entering the system as named by Table 7. Procedencia: baking_company_data; dato documental sin efecto causal.",
+        "version": 1
+      },
+      "prev_hash": "acfa2b2460ffa2bfd30439e5e2cca3f0c8d193569c95da9fb5f965f7944c7796",
+      "seq": 28
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "a5b45708321d2ca193e58964ad5b5a225e5c7cc86cc1a2cef66e0dfafdaabc5f",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_bakery_bread_waste": 1,
+          "e_bakery_electricity": 1,
+          "e_bakery_natural_gas": 1,
+          "e_consumer_bread_waste_estimate": 1,
+          "e_mill_electricity": 1,
+          "e_mill_to_baker_distance": 1,
+          "e_norway_wheat_share": 1,
+          "e_piece_mass": 1,
+          "e_poland_wheat_share": 1,
+          "e_retail_bread_waste": 1,
+          "e_survey_respondents": 1,
+          "e_wheat_bran_economic_allocation": 1,
+          "e_wheat_bran_mass_share": 1,
+          "e_wheat_refined_flour_economic_allocation": 1,
+          "e_wheat_refined_flour_mass_share": 1,
+          "e_wheat_whole_flour_economic_allocation": 1,
+          "e_wheat_whole_flour_mass_share": 1,
+          "p_seed": 1
+        },
+        "id": "p_refined",
+        "kind": "problem",
+        "text": "Las cantidades históricas auditadas delimitan preguntas sobre pérdidas de servicio alimentario por etapa y actor; no prueban eficacia, inocuidad o una línea base actual.",
+        "version": 1
+      },
+      "prev_hash": "172e69ac048e6f2097deaf7016cf2b8d7581bc35f8493853e491d64ddb1d421c",
+      "seq": 29
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "dd4a312ad9aeeb7292f165fe27a26c0c0157ad6002a8f6048a89ce5fcb2cad71",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_bundle_audit": 1,
+          "e_bundle_table": 1,
+          "p_refined": 1
+        },
+        "id": "b_audited",
+        "kind": "boundary",
+        "text": "La receta publica 17 cantidades documentales y archiva las siete filas auditadas de encuesta. Múltiples entradas/salidas y coproductos permanecen distintos de desperdicio; no se reconstruye un lote ni se mezclan bases.",
+        "version": 1
+      },
+      "prev_hash": "a5b45708321d2ca193e58964ad5b5a225e5c7cc86cc1a2cef66e0dfafdaabc5f",
+      "seq": 30
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "8f22e66e320c1f1091d7a5ba7147feca346410e76aadef0837d55dbf16395dc5",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_chain": 1,
+          "e_wheat_bran_mass_share": 1,
+          "p_refined": 1
+        },
+        "id": "c_value",
+        "kind": "concept",
+        "text": "Valor alimentario propuesto: consumo inocuo y útil, nutrición, aceptación, recursos, costes y perjuicios por actor. Masa y precio no son equivalentes automáticos; salvado es coproducto.",
+        "version": 1
+      },
+      "prev_hash": "dd4a312ad9aeeb7292f165fe27a26c0c0157ad6002a8f6048a89ce5fcb2cad71",
+      "seq": 31
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "ffd8e7fff69ab13b5246185cd461a9b46c98a1809354fde668e5d30efe4b0716",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_chain": 1,
+          "p_refined": 1
+        },
+        "id": "f_mass",
+        "kind": "frame_option",
+        "text": "Formulación rival: reducir masa descartada; requiere examinar coproductos, cambios de humedad y daños desplazados, sin aceptar esos equivalentes por defecto.",
+        "version": 1
+      },
+      "prev_hash": "8f22e66e320c1f1091d7a5ba7147feca346410e76aadef0837d55dbf16395dc5",
+      "seq": 32
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "d0334477195ba84c1303a7fc067ca30cd5691959918c989c84664b17340a06ab",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_chain": 1,
+          "p_refined": 1
+        },
+        "id": "f_service",
+        "kind": "frame_option",
+        "text": "Formulación rival: conservar servicio alimentario inocuo efectivamente consumido y evaluar distribución de perjuicios entre etapas y actores.",
+        "version": 1
+      },
+      "prev_hash": "ffd8e7fff69ab13b5246185cd461a9b46c98a1809354fde668e5d30efe4b0716",
+      "seq": 33
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "c9e90446c63c8d0107ef8306ed75d85cdd4cdf4e6805f4323dd5352128529668",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_chain": 1,
+          "p_refined": 1
+        },
+        "id": "n_harm",
+        "kind": "norm",
+        "text": "Compromiso propuesto y pendiente de aprobación humana competente: no compensar mayor riesgo de inocuidad o perjuicios inadmisibles con menor descarte; valores, márgenes y consentimiento requieren consulta antes de ensayo.",
+        "version": 1
+      },
+      "prev_hash": "d0334477195ba84c1303a7fc067ca30cd5691959918c989c84664b17340a06ab",
+      "seq": 34
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "34e6fdce7875440f0ef75b953e0cd66bcd8f6f5033ed18522276fe40f80e5b2f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "piece_mass",
+          "unit": "g/piece"
+        },
+        "deps": {
+          "e_piece_mass": 1,
+          "n_harm": 1,
+          "p_refined": 1,
+          "pr_docs": 1
+        },
+        "id": "i_doc_mass",
+        "kind": "indicator",
+        "text": "Indicador documental de masa por pieza publicada; verifica transcripción, sin medir consumo útil, desperdicio o efecto de intervención.",
+        "version": 1
+      },
+      "prev_hash": "c9e90446c63c8d0107ef8306ed75d85cdd4cdf4e6805f4323dd5352128529668",
+      "seq": 35
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "1930aa4eebebea1abd91a42dda22c966355ae70ff301082dc0522f3da2058f15",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_bakery_electricity": 1,
+          "e_consumer_bread_waste_estimate": 1,
+          "e_mill_electricity": 1,
+          "e_wheat_bran_economic_allocation": 1,
+          "e_wheat_bran_mass_share": 1,
+          "h_docs": 1,
+          "pr_docs": 1
+        },
+        "id": "inf_bases",
+        "kind": "inference",
+        "text": "Las fracciones másicas de molienda, asignación económica, energía por harina/pan y desperdicio por base publicada no son cantidades intercambiables ni tasas condicionales de una misma cohorte.",
+        "version": 1
+      },
+      "prev_hash": "34e6fdce7875440f0ef75b953e0cd66bcd8f6f5033ed18522276fe40f80e5b2f",
+      "seq": 36
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "4f04e09557f995c74e5597283636b6528ce6d9b4a6cb2bba6fe27f8f4ea9d452",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "documentary_synthesis_not_field_effect",
+          "source_disagreements": [
+            {
+              "code": "survey_prose_table_category_disagreement",
+              "decision": "transcribe Table 1; preserve disagreement, no silent reconciliation",
+              "prose_bins": "0, 1–3, 4–6, 7–10, and more than 10",
+              "prose_page": 3,
+              "source": "survey",
+              "table_bins": [
+                "Zero slices",
+                "1–3 slices",
+                "4–6 slices",
+                "7–9 slices",
+                "10–12 slices",
+                "More than 12 slices",
+                "Do not know"
+              ],
+              "table_page": 4
+            },
+            {
+              "code": "lca_prose_table_cross_reference_disagreement",
+              "decision": "locate Table 7 on page 8; preserve prose cross-reference error",
+              "prose_page": 7,
+              "prose_table": "4",
+              "source": "lca",
+              "verified_table": "7"
+            }
+          ]
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "e_piece_mass": 1,
+          "inf_bases": 1,
+          "p_refined": 1
+        },
+        "id": "sy_documentary",
+        "kind": "synthesis",
+        "text": "Los pasajes auditados y balances normalizados sólo sustentan diseño de captura. Encuesta no identifica este pan; ni frescura ni tasas históricas miden eficacia de una intervención actual.",
+        "version": 1
+      },
+      "prev_hash": "1930aa4eebebea1abd91a42dda22c966355ae70ff301082dc0522f3da2058f15",
+      "seq": 37
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "2fb94248322e72a736f2c2529b4af698e5fc7012165ba7b75a6375d9c0262af9",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "source_disagreements": [
+            {
+              "code": "survey_prose_table_category_disagreement",
+              "decision": "transcribe Table 1; preserve disagreement, no silent reconciliation",
+              "prose_bins": "0, 1–3, 4–6, 7–10, and more than 10",
+              "prose_page": 3,
+              "source": "survey",
+              "table_bins": [
+                "Zero slices",
+                "1–3 slices",
+                "4–6 slices",
+                "7–9 slices",
+                "10–12 slices",
+                "More than 12 slices",
+                "Do not know"
+              ],
+              "table_page": 4
+            },
+            {
+              "code": "lca_prose_table_cross_reference_disagreement",
+              "decision": "locate Table 7 on page 8; preserve prose cross-reference error",
+              "prose_page": 7,
+              "prose_table": "4",
+              "source": "lca",
+              "verified_table": "7"
+            }
+          ]
+        },
+        "deps": {
+          "e_bundle_audit": 1,
+          "inf_bases": 1,
+          "p_refined": 1,
+          "sy_documentary": 1
+        },
+        "id": "u_sources",
+        "kind": "uncertainty",
+        "text": "Persisten desacuerdos de prosa y tablas, fuentes empresariales agregadas y autoinformes, sin pesajes por lote, consentimiento, comparador causal o custodia externa.",
+        "version": 1
+      },
+      "prev_hash": "4f04e09557f995c74e5597283636b6528ce6d9b4a6cb2bba6fe27f8f4ea9d452",
+      "seq": 38
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "67f7f1914b20151f374cb32da7db548efb82e07a05ceac105a533c15c2e1428d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "approved_equivalences": null
+        },
+        "deps": {
+          "a_chain": 1,
+          "p_refined": 1
+        },
+        "id": "n_service",
+        "kind": "norm",
+        "text": "Propuesta pendiente: acordar servicio alimentario inocuo y útil, nutrición, aceptación y acceso; pesos y equivalencias no fijados.",
+        "version": 1
+      },
+      "prev_hash": "2fb94248322e72a736f2c2529b4af698e5fc7012165ba7b75a6375d9c0262af9",
+      "seq": 39
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "4855263f0d28bd81d1150f072833d0ec6ad4dd06cbb50a947587d585b7fb73f0",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_chain": 1,
+          "p_refined": 1
+        },
+        "id": "n_permission",
+        "kind": "norm",
+        "text": "Propuesta pendiente: permisos, consentimiento, confidencialidad y revisión competente antes de recoger o asignar participantes/lotes.",
+        "version": 1
+      },
+      "prev_hash": "67f7f1914b20151f374cb32da7db548efb82e07a05ceac105a533c15c2e1428d",
+      "seq": 40
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "409e41705a0e0f65e0afae4189ea63c56be0eb504d4d79966485a4ff279d0abc",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_refined": 1,
+          "s_historical": 1
+        },
+        "id": "q_lots",
+        "kind": "question",
+        "text": "¿Qué lotes, entradas/salidas y consumo real permiten observar valor y perjuicios por actor sin usar venta, masa o frescura como sustitutos automáticos?",
+        "version": 1
+      },
+      "prev_hash": "4855263f0d28bd81d1150f072833d0ec6ad4dd06cbb50a947587d585b7fb73f0",
+      "seq": 41
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "0b1d19154e80e842f87ab558c0105937d0fbdff20eae02e3688e93b8c44a9c38",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "q_lots": 1
+        },
+        "id": "h_material",
+        "kind": "hypothesis",
+        "text": "Envase y rotación pueden modificar conservación, disponibilidad y costes; signo y magnitud del consumo útil y perjuicios permanecen desconocidos.",
+        "version": 1
+      },
+      "prev_hash": "409e41705a0e0f65e0afae4189ea63c56be0eb504d4d79966485a4ff279d0abc",
+      "seq": 42
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "cc00cbe068061751d83a6b5872b767a35b24e3be9a11e6859038406428b087d6",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Current baseline plus contemporaneous comparator; assignment unit, spillovers and analysis remain to be fixed prospectively",
+          "method": [
+            "pseudonymous_load_ids",
+            "timestamp_and_stage",
+            "actor_and_source_pointer",
+            "inputs_outputs_material_and_mass",
+            "wet_basis_and_dry_fraction_or_missing",
+            "measurement_uncertainty_and_calibration",
+            "storage_time_temperature_and_conditions",
+            "coproducts_water_added_evaporation_and_destinations",
+            "actual_consumption_not_sale_proxy",
+            "safety_nutrition_acceptance",
+            "costs_work_resources_and_harms_by_actor"
+          ],
+          "population": "Site, SKU, lots and consenting participants not yet identified",
+          "uncertainty": "Pilot variability, allocation, custody, consumption coverage and missingness not established"
+        },
+        "deps": {
+          "h_material": 1,
+          "n_permission": 1,
+          "q_lots": 1
+        },
+        "id": "pr_lots",
+        "kind": "protocol",
+        "text": "Borrador prospectivo para captura enlazada de cargas y posterior comparador; no estudio de campo iniciado.",
+        "version": 1
+      },
+      "prev_hash": "0b1d19154e80e842f87ab558c0105937d0fbdff20eae02e3688e93b8c44a9c38",
+      "seq": 43
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "0dc80d1c1a3e1bf6fcb3b2022b46b01cfc006f3fb7b0f9b5c086229f0e0dcb25",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "burdens": "Medición y participación también cuestan tiempo; variabilidad de demanda y lotes pendiente.",
+          "cost_estimate": null,
+          "efficacy_estimate": null,
+          "evidence_status": "mechanism_hypothesis_not_demonstrated",
+          "id": "o_control",
+          "mechanism": "Comparador contemporáneo documentado, sin reemplazarlo por tasas históricas.",
+          "name": "Práctica actual",
+          "selection": "unselected"
+        },
+        "deps": {
+          "n_harm": 1,
+          "n_service": 1,
+          "sy_documentary": 1
+        },
+        "id": "o_control",
+        "kind": "option",
+        "text": "Práctica actual: Comparador contemporáneo documentado, sin reemplazarlo por tasas históricas.",
+        "version": 1
+      },
+      "prev_hash": "cc00cbe068061751d83a6b5872b767a35b24e3be9a11e6859038406428b087d6",
+      "seq": 44
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "8b678ca2cd6f81356c96719f0617e18a5cf7acbde4d7775319ec238d10ae0be2",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "burdens": "Material/envase, energía, trabajo y acceso por actor; riesgos de inocuidad y de desplazar descarte al hogar.",
+          "cost_estimate": null,
+          "efficacy_estimate": null,
+          "evidence_status": "mechanism_hypothesis_not_demonstrated",
+          "id": "o_pack",
+          "mechanism": "Hipótesis: conservación cambia frescura y descarte; no se presume más consumo útil.",
+          "name": "Variante de envase/vida útil",
+          "selection": "unselected"
+        },
+        "deps": {
+          "n_harm": 1,
+          "n_service": 1,
+          "sy_documentary": 1
+        },
+        "id": "o_pack",
+        "kind": "option",
+        "text": "Variante de envase/vida útil: Hipótesis: conservación cambia frescura y descarte; no se presume más consumo útil.",
+        "version": 1
+      },
+      "prev_hash": "0dc80d1c1a3e1bf6fcb3b2022b46b01cfc006f3fb7b0f9b5c086229f0e0dcb25",
+      "seq": 45
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "d989b8db89c3063405b1ad7d6906f85b560d830766d09d4682290e1961a93c43",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "burdens": "Trabajo, costes y riesgo de transferir faltantes/devoluciones o menor acceso a hogares.",
+          "cost_estimate": null,
+          "efficacy_estimate": null,
+          "evidence_status": "mechanism_hypothesis_not_demonstrated",
+          "id": "o_rotation",
+          "mechanism": "Hipótesis: ajustar producción/rotación reduce excedentes; no se presume utilidad ni ausencia de desabastecimiento.",
+          "name": "Rotación e inventario",
+          "selection": "unselected"
+        },
+        "deps": {
+          "n_harm": 1,
+          "n_service": 1,
+          "sy_documentary": 1
+        },
+        "id": "o_rotation",
+        "kind": "option",
+        "text": "Rotación e inventario: Hipótesis: ajustar producción/rotación reduce excedentes; no se presume utilidad ni ausencia de desabastecimiento.",
+        "version": 1
+      },
+      "prev_hash": "8b678ca2cd6f81356c96719f0617e18a5cf7acbde4d7775319ec238d10ae0be2",
+      "seq": 46
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "232892b4dca130437302a991431bc015fb1b7c635779b422f34c969851e786a1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "costs": null,
+          "efficacy": null,
+          "selected": null
+        },
+        "deps": {
+          "o_control": 1,
+          "o_pack": 1,
+          "o_rotation": 1
+        },
+        "id": "cmp_material",
+        "kind": "comparison",
+        "text": "Tres alternativas sin ranking: costes, consumo útil, inocuidad y perjuicios no medidos. Cambios materiales y organizativos; ninguna variante se declara mejor.",
+        "version": 1
+      },
+      "prev_hash": "d989b8db89c3063405b1ad7d6906f85b560d830766d09d4682290e1961a93c43",
+      "seq": 47
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "9fbaa007eb6a753f4efcb8c21d07972fb563505e2984caeb63ae5b9929f8f05b",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "stop_before_assignment_if_missing": [
+            "site_and_participant_permission",
+            "competent_normative_approval",
+            "current_linked_baseline",
+            "source_custody_and_calibration",
+            "consumption_observation",
+            "assignment_unit_and_comparator",
+            "prospective_analysis_sample_size_thresholds_and_harm_margins"
+          ]
+        },
+        "deps": {
+          "n_harm": 1,
+          "o_pack": 1,
+          "o_rotation": 1
+        },
+        "id": "risk_displaced",
+        "kind": "risk",
+        "text": "Puede aumentar envase, trabajo, riesgo o descarte doméstico, o reducir acceso. Márgenes y condiciones competentes faltan; detener antes de asignar.",
+        "version": 1
+      },
+      "prev_hash": "232892b4dca130437302a991431bc015fb1b7c635779b422f34c969851e786a1",
+      "seq": 48
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "fd08a6c3cbe051fa300165c2209402cfae56a309633c80e08b9f4a09e53c3544",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "intervention_selected": null,
+          "normative_approval": null
+        },
+        "deps": {
+          "cmp_material": 1,
+          "e_bundle_audit": 1,
+          "n_harm": 1,
+          "n_permission": 1,
+          "n_service": 1
+        },
+        "id": "d_pending",
+        "kind": "decision",
+        "text": "Propuesta sin aprobar: desarrollar captura documental, mantener intervención no seleccionada y no desplegar hasta cumplir permisos, normas, baseline y diseño previo.",
+        "version": 1
+      },
+      "prev_hash": "9fbaa007eb6a753f4efcb8c21d07972fb563505e2984caeb63ae5b9929f8f05b",
+      "seq": 49
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "e9c40b6abbce580fc44973d09c3f991e58326a20f2043e79936dd3a74f331bf4",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "id": "r_capture",
+          "metric": "journal_contract_valid",
+          "objective": "Capture incremental lot operations without inventing experimental arms or periods",
+          "status": "prototype_available_only",
+          "unit": "dimensionless"
+        },
+        "deps": {
+          "d_pending": 1,
+          "e_bundle_audit": 1,
+          "n_harm": 1,
+          "n_permission": 1,
+          "n_service": 1,
+          "p_refined": 1
+        },
+        "id": "r_capture",
+        "kind": "requirement",
+        "text": "Capture incremental lot operations without inventing experimental arms or periods",
+        "version": 1
+      },
+      "prev_hash": "fd08a6c3cbe051fa300165c2209402cfae56a309633c80e08b9f4a09e53c3544",
+      "seq": 50
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:41+00:00",
+      "hash": "1ba3febb91558b4ba167289b9b4bcd696fc01ada0c2ebf893e176c962554dc58",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "field_measurement_available": false,
+          "metric": "journal_contract_valid",
+          "unit": "dimensionless"
+        },
+        "deps": {
+          "pr_lots": 1,
+          "r_capture": 1
+        },
+        "id": "i_r_capture",
+        "kind": "indicator",
+        "text": "Medida propuesta sin medición de campo: journal_contract_valid",
+        "version": 1
+      },
+      "prev_hash": "e9c40b6abbce580fc44973d09c3f991e58326a20f2043e79936dd3a74f331bf4",
+      "seq": 51
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:42+00:00",
+      "hash": "c4b4c478d86fc92d8f53fecd445da93136f1a2db8f0edef6328f6a21f94348e5",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "journal_contract_valid",
+          "reject": "Detener sin aprobación o datos necesarios; condición cuantitativa no registrada",
+          "status": "pending_not_approved",
+          "threshold": null
+        },
+        "deps": {
+          "i_r_capture": 1,
+          "r_capture": 1
+        },
+        "id": "c_r_capture",
+        "kind": "criterion",
+        "text": "Criterio pendiente de definición competente antes de resultados del piloto; no derivar umbral de porcentajes históricos.",
+        "version": 1
+      },
+      "prev_hash": "1ba3febb91558b4ba167289b9b4bcd696fc01ada0c2ebf893e176c962554dc58",
+      "seq": 52
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:42+00:00",
+      "hash": "61868ae442d089127ce2a84789aea84dc88623851033c1bbe85a0b2c41ba19fd",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "id": "r_basis",
+          "metric": "basis_and_missingness_preserved",
+          "objective": "Keep wet mass, dry matter, water and coproducts distinct; missing dry fractions remain pending",
+          "status": "prototype_available_only",
+          "unit": "dimensionless"
+        },
+        "deps": {
+          "d_pending": 1,
+          "e_bundle_audit": 1,
+          "n_harm": 1,
+          "n_permission": 1,
+          "n_service": 1,
+          "p_refined": 1
+        },
+        "id": "r_basis",
+        "kind": "requirement",
+        "text": "Keep wet mass, dry matter, water and coproducts distinct; missing dry fractions remain pending",
+        "version": 1
+      },
+      "prev_hash": "c4b4c478d86fc92d8f53fecd445da93136f1a2db8f0edef6328f6a21f94348e5",
+      "seq": 53
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:42+00:00",
+      "hash": "cf454c8ab365a5d0d8e110bbadcceaf2f99a2fb4f9836ae47ee40a3580be8a53",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "field_measurement_available": false,
+          "metric": "basis_and_missingness_preserved",
+          "unit": "dimensionless"
+        },
+        "deps": {
+          "pr_lots": 1,
+          "r_basis": 1
+        },
+        "id": "i_r_basis",
+        "kind": "indicator",
+        "text": "Medida propuesta sin medición de campo: basis_and_missingness_preserved",
+        "version": 1
+      },
+      "prev_hash": "61868ae442d089127ce2a84789aea84dc88623851033c1bbe85a0b2c41ba19fd",
+      "seq": 54
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:42+00:00",
+      "hash": "5e8b2e7e6e9efd8ba88a1a5f6010f6c4744c4a2bacaa1fb10cda154d303bf490",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "basis_and_missingness_preserved",
+          "reject": "Detener sin aprobación o datos necesarios; condición cuantitativa no registrada",
+          "status": "pending_not_approved",
+          "threshold": null
+        },
+        "deps": {
+          "i_r_basis": 1,
+          "r_basis": 1
+        },
+        "id": "c_r_basis",
+        "kind": "criterion",
+        "text": "Criterio pendiente de definición competente antes de resultados del piloto; no derivar umbral de porcentajes históricos.",
+        "version": 1
+      },
+      "prev_hash": "cf454c8ab365a5d0d8e110bbadcceaf2f99a2fb4f9836ae47ee40a3580be8a53",
+      "seq": 55
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:42+00:00",
+      "hash": "84e6a542fbb1c0dd295d5a8dbc5c200141c2ac9b4d11e95865a12d956ff763e0",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "id": "r_safety",
+          "metric": "competent_approval_and_harm_coverage",
+          "objective": "Competent safety/consent approval and harm coverage before assignment",
+          "status": "pending_human_and_site_evidence",
+          "unit": "dimensionless"
+        },
+        "deps": {
+          "d_pending": 1,
+          "e_bundle_audit": 1,
+          "n_harm": 1,
+          "n_permission": 1,
+          "n_service": 1,
+          "p_refined": 1
+        },
+        "id": "r_safety",
+        "kind": "requirement",
+        "text": "Competent safety/consent approval and harm coverage before assignment",
+        "version": 1
+      },
+      "prev_hash": "5e8b2e7e6e9efd8ba88a1a5f6010f6c4744c4a2bacaa1fb10cda154d303bf490",
+      "seq": 56
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:42+00:00",
+      "hash": "12c7cd9a31105a571bea489d76be7f491aea231f1bf0aaa9115e69e8492d93a6",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "field_measurement_available": false,
+          "metric": "competent_approval_and_harm_coverage",
+          "unit": "dimensionless"
+        },
+        "deps": {
+          "pr_lots": 1,
+          "r_safety": 1
+        },
+        "id": "i_r_safety",
+        "kind": "indicator",
+        "text": "Medida propuesta sin medición de campo: competent_approval_and_harm_coverage",
+        "version": 1
+      },
+      "prev_hash": "84e6a542fbb1c0dd295d5a8dbc5c200141c2ac9b4d11e95865a12d956ff763e0",
+      "seq": 57
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:42+00:00",
+      "hash": "3495e40a8bb699b54e2e282f74f53162be33aaf5218579965f551402fa7c2a0c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "competent_approval_and_harm_coverage",
+          "reject": "Detener sin aprobación o datos necesarios; condición cuantitativa no registrada",
+          "status": "pending_not_approved",
+          "threshold": null
+        },
+        "deps": {
+          "i_r_safety": 1,
+          "r_safety": 1
+        },
+        "id": "c_r_safety",
+        "kind": "criterion",
+        "text": "Criterio pendiente de definición competente antes de resultados del piloto; no derivar umbral de porcentajes históricos.",
+        "version": 1
+      },
+      "prev_hash": "12c7cd9a31105a571bea489d76be7f491aea231f1bf0aaa9115e69e8492d93a6",
+      "seq": 58
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:42+00:00",
+      "hash": "879a78f4eb483b8eb79d561ea2de7ff0d9f598d1ff9d8ff356f847374d48a85a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "id": "r_service",
+          "metric": "safe_useful_consumed_service",
+          "objective": "Evaluate safe useful consumption, nutrition, access, costs and displaced harms against baseline",
+          "status": "pending_field_evidence",
+          "unit": "pending_approved_equivalence"
+        },
+        "deps": {
+          "d_pending": 1,
+          "e_bundle_audit": 1,
+          "n_harm": 1,
+          "n_permission": 1,
+          "n_service": 1,
+          "p_refined": 1
+        },
+        "id": "r_service",
+        "kind": "requirement",
+        "text": "Evaluate safe useful consumption, nutrition, access, costs and displaced harms against baseline",
+        "version": 1
+      },
+      "prev_hash": "3495e40a8bb699b54e2e282f74f53162be33aaf5218579965f551402fa7c2a0c",
+      "seq": 59
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:43+00:00",
+      "hash": "7cfaac5b59aafc2608293b88b62b2762f7fc0c1522ba18a2d4a3eabc1f802532",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "field_measurement_available": false,
+          "metric": "safe_useful_consumed_service",
+          "unit": "pending_approved_equivalence"
+        },
+        "deps": {
+          "pr_lots": 1,
+          "r_service": 1
+        },
+        "id": "i_r_service",
+        "kind": "indicator",
+        "text": "Medida propuesta sin medición de campo: safe_useful_consumed_service",
+        "version": 1
+      },
+      "prev_hash": "879a78f4eb483b8eb79d561ea2de7ff0d9f598d1ff9d8ff356f847374d48a85a",
+      "seq": 60
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:43+00:00",
+      "hash": "85c14b3a8f869fb3b00759f197282202b2efc33995e0b833c8fa9c6684b2da92",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "safe_useful_consumed_service",
+          "reject": "Detener sin aprobación o datos necesarios; condición cuantitativa no registrada",
+          "status": "pending_not_approved",
+          "threshold": null
+        },
+        "deps": {
+          "i_r_service": 1,
+          "r_service": 1
+        },
+        "id": "c_r_service",
+        "kind": "criterion",
+        "text": "Criterio pendiente de definición competente antes de resultados del piloto; no derivar umbral de porcentajes históricos.",
+        "version": 1
+      },
+      "prev_hash": "7cfaac5b59aafc2608293b88b62b2762f7fc0c1522ba18a2d4a3eabc1f802532",
+      "seq": 61
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:43+00:00",
+      "hash": "f63a0b7aac0091980be42de3fdb86ec9a6620286d525e97771b19215aa1e7cc7",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "technical_support_prototype_not_field_intervention"
+        },
+        "deps": {
+          "r_basis": 1,
+          "r_capture": 1
+        },
+        "id": "impl_capture",
+        "kind": "implementation",
+        "text": "Prototipo de auditor incremental lot_journal y operaciones CLI/MCP; sólo consistencia declarada, no intervención material.",
+        "version": 1
+      },
+      "prev_hash": "85c14b3a8f869fb3b00759f197282202b2efc33995e0b833c8fa9c6684b2da92",
+      "seq": 62
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:43+00:00",
+      "hash": "d40dd8f7d464b6a92306aff8b0ce74aae1c7ef4cff63e500e5b6842e5298590b",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "command": "not executed as a signed case test",
+          "passed": false
+        },
+        "deps": {
+          "c_r_basis": 1,
+          "c_r_capture": 1,
+          "impl_capture": 1
+        },
+        "id": "t_capture",
+        "kind": "test",
+        "text": "El test del caso y aprobación quedan pendientes; las pruebas técnicas de biblioteca tienen recibos separados, sin firmar este ítem.",
+        "version": 1
+      },
+      "prev_hash": "f63a0b7aac0091980be42de3fdb86ec9a6620286d525e97771b19215aa1e7cc7",
+      "seq": 63
+    },
+    {
+      "actor": "agent:d102_prospectus_controller",
+      "at": "2026-09-30T15:45:44+00:00",
+      "hash": "3d22bb45efe6b6bb11819a1abefa796c2a5a8b9981742490a492215843aa5922",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": {
+            "status": "missing"
+          },
+          "claim_scope": "field",
+          "cost": {
+            "status": "missing"
+          },
+          "uncertainty": "Current linked baseline and effects absent",
+          "verdict": "no_demostrado"
+        },
+        "deps": {
+          "r_service": 1,
+          "risk_displaced": 1
+        },
+        "id": "as_field_pending",
+        "kind": "assessment",
+        "text": "Resolución de campo no demostrada: sin lote observado, baseline, resultado, autorización, umbral o atribución.",
+        "version": 1
+      },
+      "prev_hash": "d40dd8f7d464b6a92306aff8b0ce74aae1c7ef4cff63e500e5b6842e5298590b",
+      "seq": 64
+    }
+  ],
+  "project": {
+    "approval_policy": "signed",
+    "case_id": "cb6b2e85-300d-4d92-afc1-e894d9ec982c",
+    "created_at": "2026-09-30T15:45:41+00:00",
+    "created_by": "agent:d102_prospectus_controller",
+    "domain": "food",
+    "title": "D102 bread intervention prospectus; unapproved, no field results"
+  },
+  "schema": 1
+}

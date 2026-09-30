@@ -1,0 +1,732 @@
+{
+  "schema": 1,
+  "study_id": "D100",
+  "passed": true,
+  "scope": "published transcription fidelity, not field resolution or causal validity",
+  "verified_claims": 17,
+  "verified_survey_rows": 7,
+  "base_validation": "reviewed_contract_consistency",
+  "input_pins": {
+    "claims": {
+      "bytes": 9162,
+      "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc"
+    },
+    "table": {
+      "bytes": 1440,
+      "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f"
+    },
+    "contract": {
+      "bytes": 21825,
+      "sha256": "0c92095962c5078d4a9af5e49c47a480f1bad5f588b7ec53899cd680cc2d1a5b"
+    }
+  },
+  "source_extraction": {
+    "lca": {
+      "bytes": 2212666,
+      "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "text_sha256": "e65be3ae44b90aa7a78eabde032d874d97897db0ba458e8015e7c8f6d8c10582",
+      "pages": 20,
+      "extractor_version": "pdftotext version 24.02.0",
+      "extractor_path": "/usr/bin/pdftotext",
+      "extractor_sha256": "0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7",
+      "extractor_execution": "sealed_memfd_verified_binary",
+      "host_shared_libraries_authenticated": false
+    },
+    "survey": {
+      "bytes": 526604,
+      "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "text_sha256": "1ee82f5fe6c51981b640995d9ddcaebd1077cf0315f45744f5ffdd1981b514f3",
+      "pages": 15,
+      "extractor_version": "pdftotext version 24.02.0",
+      "extractor_path": "/usr/bin/pdftotext",
+      "extractor_sha256": "0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7",
+      "extractor_execution": "sealed_memfd_verified_binary",
+      "host_shared_libraries_authenticated": false
+    }
+  },
+  "claims": {
+    "piece_mass": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 6,
+        "printed_page": 6,
+        "section": "4.2",
+        "table": null,
+        "row": "First paragraph",
+        "column": null
+      },
+      "unit": "g/piece",
+      "base": "One commercial loaf, bread mass after baking",
+      "classification": "reported",
+      "provenance": "baking_company_data",
+      "value": "736",
+      "passage": "composition",
+      "passed": true
+    },
+    "norway_wheat_share": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 6,
+        "printed_page": 6,
+        "section": "4.3",
+        "table": null,
+        "row": "First paragraph",
+        "column": null
+      },
+      "unit": "%",
+      "base": "Average wheat origin reported over several years",
+      "classification": "reported",
+      "provenance": "mill_company_data",
+      "value": "65",
+      "passage": "origin",
+      "passed": true
+    },
+    "mill_electricity": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "2",
+        "row": "Mill energy consumption",
+        "column": "Data"
+      },
+      "unit": "kWh/t_flour",
+      "base": "One tonne of flour produced",
+      "classification": "reported",
+      "provenance": "mill_company_data",
+      "value": "129",
+      "passage": "mill",
+      "passed": true
+    },
+    "wheat_bran_mass_share": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat flour products (% w/w)",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "% w/w",
+      "base": "Wheat input to flour mill, mass fraction of bran output",
+      "classification": "reported",
+      "provenance": "mill_company_data",
+      "value": "19.1",
+      "passage": "mass",
+      "passed": true
+    },
+    "mill_to_baker_distance": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.6",
+        "table": "5",
+        "row": "Transport from mill to baker",
+        "column": "Data"
+      },
+      "unit": "km",
+      "base": "Transport from mill to baker in >32 tonne truck",
+      "classification": "reported",
+      "provenance": "mill_company_data",
+      "value": "438",
+      "passage": "distance",
+      "passed": true
+    },
+    "bakery_electricity": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.6",
+        "table": "5",
+        "row": "Baker energy consumption",
+        "column": "Data"
+      },
+      "unit": "kWh/piece",
+      "base": "One commercial loaf of the studied bread",
+      "classification": "reported",
+      "provenance": "baking_company_data",
+      "value": "0.297",
+      "passage": "bakery",
+      "passed": true
+    },
+    "retail_bread_waste": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.9",
+        "table": "7",
+        "row": "Retail waste",
+        "column": "Amount Wasted as % of Bread Entering the System"
+      },
+      "unit": "%",
+      "base": "Bread entering the system as named by Table 7",
+      "classification": "reported",
+      "provenance": "baking_company_data",
+      "value": "11.4",
+      "passage": "retail_bread_waste",
+      "passed": true
+    },
+    "consumer_bread_waste_estimate": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.9",
+        "table": "7",
+        "row": "Consumer waste",
+        "column": "Amount Wasted as % of Bread Entering the System"
+      },
+      "unit": "%",
+      "base": "Bread entering the system as named by Table 7",
+      "classification": "reported",
+      "provenance": "authors_calculation_from_consumption_reference_3_and_wastage_reference_9",
+      "value": "8.2",
+      "passage": "consumer_bread_waste_estimate",
+      "passed": true
+    },
+    "survey_respondents": {
+      "source": "survey",
+      "locator": {
+        "pdf_page": 4,
+        "printed_page": 4,
+        "section": "3",
+        "table": "1",
+        "row": "Total",
+        "column": "Number of Respondents"
+      },
+      "unit": "respondents",
+      "base": "Respondents answering a web survey about household bread wasting",
+      "classification": "reported",
+      "provenance": "web_survey_reported_frequency",
+      "value": "1000",
+      "passage": "survey_total",
+      "passed": true
+    },
+    "poland_wheat_share": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 6,
+        "printed_page": 6,
+        "section": "4.3",
+        "table": null,
+        "row": "First paragraph",
+        "column": null
+      },
+      "unit": "%",
+      "base": "Average wheat origin reported over several years",
+      "classification": "reported",
+      "provenance": "mill_company_data",
+      "value": "35",
+      "passage": "origin",
+      "passed": true
+    },
+    "wheat_refined_flour_mass_share": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat flour products (% w/w)",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "% w/w",
+      "base": "Wheat input to flour mill, mass fraction of refined flour output",
+      "classification": "reported",
+      "provenance": "mill_company_data",
+      "value": "67.1",
+      "passage": "mass",
+      "passed": true
+    },
+    "wheat_whole_flour_mass_share": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat flour products (% w/w)",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "% w/w",
+      "base": "Wheat input to flour mill, mass fraction of whole flour output",
+      "classification": "reported",
+      "provenance": "mill_company_data",
+      "value": "13.8",
+      "passage": "mass",
+      "passed": true
+    },
+    "bakery_natural_gas": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.6",
+        "table": "5",
+        "row": "Baker energy consumption",
+        "column": "Data"
+      },
+      "unit": "kWh/piece",
+      "base": "One commercial loaf of the studied bread",
+      "classification": "reported",
+      "provenance": "baking_company_data",
+      "value": "0.115",
+      "passage": "bakery",
+      "passed": true
+    },
+    "wheat_refined_flour_economic_allocation": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat, economic allocation factors",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "%",
+      "base": "Economic allocation factor for refined flour in milling inventory",
+      "classification": "reported",
+      "provenance": "mill_company_data",
+      "value": "78.5",
+      "passage": "economic",
+      "passed": true
+    },
+    "wheat_whole_flour_economic_allocation": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat, economic allocation factors",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "%",
+      "base": "Economic allocation factor for whole flour in milling inventory",
+      "classification": "reported",
+      "provenance": "mill_company_data",
+      "value": "14.2",
+      "passage": "economic",
+      "passed": true
+    },
+    "wheat_bran_economic_allocation": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat, economic allocation factors",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "%",
+      "base": "Economic allocation factor for bran in milling inventory",
+      "classification": "reported",
+      "provenance": "mill_company_data",
+      "value": "7.3",
+      "passage": "economic",
+      "passed": true
+    },
+    "bakery_bread_waste": {
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.9",
+        "table": "7",
+        "row": "Bakery waste",
+        "column": "Amount Wasted as % of Bread Entering the System"
+      },
+      "unit": "%",
+      "base": "Bread entering the system as named by Table 7",
+      "classification": "reported",
+      "provenance": "baking_company_data",
+      "value": "3.3",
+      "passage": "bakery_bread_waste",
+      "passed": true
+    }
+  },
+  "survey_rows": [
+    {
+      "key": "zero",
+      "label": "Zero slices",
+      "count": 429,
+      "reported_percent": "42.9",
+      "min_slices": 0,
+      "max_slices": 0,
+      "passage": "survey_zero",
+      "passed": true
+    },
+    {
+      "key": "one_to_three",
+      "label": "1–3 slices",
+      "count": 301,
+      "reported_percent": "30.1",
+      "min_slices": 1,
+      "max_slices": 3,
+      "passage": "survey_one_to_three",
+      "passed": true
+    },
+    {
+      "key": "four_to_six",
+      "label": "4–6 slices",
+      "count": 140,
+      "reported_percent": "14.0",
+      "min_slices": 4,
+      "max_slices": 6,
+      "passage": "survey_four_to_six",
+      "passed": true
+    },
+    {
+      "key": "seven_to_nine",
+      "label": "7–9 slices",
+      "count": 56,
+      "reported_percent": "5.6",
+      "min_slices": 7,
+      "max_slices": 9,
+      "passage": "survey_seven_to_nine",
+      "passed": true
+    },
+    {
+      "key": "ten_to_twelve",
+      "label": "10–12 slices",
+      "count": 22,
+      "reported_percent": "2.2",
+      "min_slices": 10,
+      "max_slices": 12,
+      "passage": "survey_ten_to_twelve",
+      "passed": true
+    },
+    {
+      "key": "more_than_twelve",
+      "label": "More than 12 slices",
+      "count": 19,
+      "reported_percent": "1.9",
+      "min_slices": 13,
+      "max_slices": null,
+      "passage": "survey_more_than_twelve",
+      "passed": true
+    },
+    {
+      "key": "do_not_know",
+      "label": "Do not know",
+      "count": 33,
+      "reported_percent": "3.3",
+      "min_slices": null,
+      "max_slices": null,
+      "passage": "survey_do_not_know",
+      "passed": true
+    }
+  ],
+  "passages": {
+    "composition": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 6,
+      "page_sha256": "5d29103d11d98914fd358947bb61aaa4c88929628ebbad36a1b2c0e6ac9c621f",
+      "passage_sha256": "ca23f448b7b9822031fb838c0570fd88d0cc1708b42055d0ca59aa4cc524b305",
+      "matched_sha256": "bde3568c4eab9cfcfc2108fc13e3c9bfb79ee84a35a87a00811850476781f6a6",
+      "normalization": "whitespace_only",
+      "groups": {
+        "piece_mass": "736"
+      },
+      "matched_text": "total mass of the bread itself was 736 grams"
+    },
+    "origin": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 6,
+      "page_sha256": "5d29103d11d98914fd358947bb61aaa4c88929628ebbad36a1b2c0e6ac9c621f",
+      "passage_sha256": "a10b4d35be4a268b9bb88c10dbf76a5b56a9d70c994d445ebc3043eda3c139f7",
+      "matched_sha256": "ecc7fbe6e9a78010e5ddf9840b334d4158f8448ebde3bb91785d98624f7c6c7d",
+      "normalization": "whitespace_only",
+      "groups": {
+        "norway_wheat_share": "65",
+        "poland_wheat_share": "35"
+      },
+      "matched_text": "average of 65% of the wheat has been coming from Norway and the remaining 35% from Poland"
+    },
+    "mill": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 7,
+      "page_sha256": "1816f3d5f94685342a966bb9f58dd742ddfdb691f34fda2e284a5802fa522ca7",
+      "passage_sha256": "039c13ccd6b30ac9e1907b8fd6ba3bf077ef810a4e018dc52f5b4877ca14fe25",
+      "matched_sha256": "fc71b444a308d1355b7bbbbe2390e5f75211a640c3dd1137ac5fe54c571704c2",
+      "normalization": "whitespace_only",
+      "groups": {
+        "mill_electricity": "129"
+      },
+      "matched_text": "Mill energy consumption 129 kWh electricity per ton of flour produced."
+    },
+    "mass": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 7,
+      "page_sha256": "1816f3d5f94685342a966bb9f58dd742ddfdb691f34fda2e284a5802fa522ca7",
+      "passage_sha256": "1db9d908544ddd86893ca797a92e85868ab02eb57ad292ba81991718e7aa7417",
+      "matched_sha256": "4379e38d747bcb3ee5ded4661fd20a775cd02b352134f84db613596eeff1729a",
+      "normalization": "whitespace_only",
+      "groups": {
+        "wheat_refined_flour_mass_share": "67.1",
+        "wheat_whole_flour_mass_share": "13.8",
+        "wheat_bran_mass_share": "19.1"
+      },
+      "matched_text": "Wheat flour products (% w/w) 67.1% refined flour, 13.8% whole flour, 19.1% bran."
+    },
+    "economic": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 7,
+      "page_sha256": "1816f3d5f94685342a966bb9f58dd742ddfdb691f34fda2e284a5802fa522ca7",
+      "passage_sha256": "1db9d908544ddd86893ca797a92e85868ab02eb57ad292ba81991718e7aa7417",
+      "matched_sha256": "7c1e166472823ee6dfe2fc0fa25f16bc3956f77e901402dbfd73cac2b7bc4815",
+      "normalization": "whitespace_only",
+      "groups": {
+        "wheat_refined_flour_economic_allocation": "78.5",
+        "wheat_whole_flour_economic_allocation": "14.2",
+        "wheat_bran_economic_allocation": "7.3"
+      },
+      "matched_text": "Wheat, economic allocation factors Refined flour 78.5%, whole flour 14.2%, bran 7.3%."
+    },
+    "distance": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 8,
+      "page_sha256": "fd156001abd49065cd9ae9a1dfb3b7e00423d0da0430c52221b4c74a6827beee",
+      "passage_sha256": "291e10e4fb71f5b04ea12baef677fab460f410650396883d4e35fc7975ce0862",
+      "matched_sha256": "3d43b18dc865fcd0e6d89152563d48cc94db24c2268d830803b1fc960bc3fc86",
+      "normalization": "whitespace_only",
+      "groups": {
+        "mill_to_baker_distance": "438"
+      },
+      "matched_text": "Transport from mill to baker 438 km on >32 tonne truck Mill company"
+    },
+    "bakery": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 8,
+      "page_sha256": "fd156001abd49065cd9ae9a1dfb3b7e00423d0da0430c52221b4c74a6827beee",
+      "passage_sha256": "291e10e4fb71f5b04ea12baef677fab460f410650396883d4e35fc7975ce0862",
+      "matched_sha256": "95b30536c27f87d9b401c49f3a05e7d34f72a3821a00dbad8c0b9d2aa62eb448",
+      "normalization": "whitespace_only",
+      "groups": {
+        "bakery_electricity": "0.297",
+        "bakery_natural_gas": "0.115"
+      },
+      "matched_text": "Baker energy consumption 0.297 kWh electricity and 0.115 kWh natural gas per bread Baking company"
+    },
+    "company_sources": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 6,
+      "page_sha256": "5d29103d11d98914fd358947bb61aaa4c88929628ebbad36a1b2c0e6ac9c621f",
+      "passage_sha256": "7214b4e4b8da64c9d25cd468304d420df130bf1515d1277fbdbe642f62ca3720",
+      "matched_sha256": "d2b77de471fbdc0e2646469d1b59c3e2803e626bb2f87bf239097f028b959970",
+      "normalization": "whitespace_only",
+      "groups": {
+        "supplier": "baking company"
+      },
+      "matched_text": "Data relating to bread (recipe, weight), packaging, baking process and transport to retail came from the baking company"
+    },
+    "survey_total": {
+      "source_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "page": 4,
+      "page_sha256": "9fc951dfc30c645f1e37cd1bd6a1428e854c38818a2f50803ad5921805fa0d3b",
+      "passage_sha256": "885c5e9adf070c142865e96c4d3a6aba3d56f0e501e769388033aadf0700d200",
+      "matched_sha256": "d3301fa1ee676dc0baea76dfb8c37a0721c38d1c9b1d3accb0ef54580fc3aa89",
+      "normalization": "whitespace_only",
+      "groups": {
+        "survey_respondents": "1000",
+        "total_percent": "100.0"
+      },
+      "matched_text": "Total 1000 100.0"
+    },
+    "survey_prose": {
+      "source_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "page": 3,
+      "page_sha256": "57af66900327bdfa153525c3abf05c3bfd6d88b232b5279ac62e82096f9dbf85",
+      "passage_sha256": "f20fcd0678aaf548e352b2f6194cd86d3cddc5afc3f0d96f771c7d14df6e04d9",
+      "matched_sha256": "fd7d99ad101509e59527df54d8ef112c68f80fc48bf9f8d9e05c3db8f9f3e018",
+      "normalization": "whitespace_only",
+      "groups": {
+        "bins": "0, 1–3, 4–6, 7–10, and more than 10"
+      },
+      "matched_text": "in categories ranging from 0, 1–3, 4–6, 7–10, and more than 10 per week."
+    },
+    "waste_cross_reference": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 7,
+      "page_sha256": "1816f3d5f94685342a966bb9f58dd742ddfdb691f34fda2e284a5802fa522ca7",
+      "passage_sha256": "1e3af78efec2affcedb3467d5d17c07fa69a6d915638c9133d991bff5d7aa9fa",
+      "matched_sha256": "a34221c1760ce8e61b435e28acc1f3a085f5f1d372fc416d2e17609ecf3784cd",
+      "normalization": "whitespace_only",
+      "groups": {
+        "table": "4"
+      },
+      "matched_text": "The wastage along the value chain of bread is shown in Table 4."
+    },
+    "bakery_bread_waste": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 8,
+      "page_sha256": "fd156001abd49065cd9ae9a1dfb3b7e00423d0da0430c52221b4c74a6827beee",
+      "passage_sha256": "c5fbb7dfd773c35b473b05fa15c78bbb95924c386507902983372550af0f7eca",
+      "matched_sha256": "7a677a32a5e74275756db2188fd62013ba55fd1bb76df0f7ffad4ee0c7bcaa1d",
+      "normalization": "whitespace_only",
+      "groups": {
+        "bakery_bread_waste": "3.3"
+      },
+      "matched_text": "Bakery waste 3.3 Baking company"
+    },
+    "retail_bread_waste": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 8,
+      "page_sha256": "fd156001abd49065cd9ae9a1dfb3b7e00423d0da0430c52221b4c74a6827beee",
+      "passage_sha256": "c5fbb7dfd773c35b473b05fa15c78bbb95924c386507902983372550af0f7eca",
+      "matched_sha256": "b5eea45e40324718f7dc1a451c83189bafdccf40dbc780d4e2babdc56ae0af44",
+      "normalization": "whitespace_only",
+      "groups": {
+        "retail_bread_waste": "11.4"
+      },
+      "matched_text": "Retail waste 11.4 Baking company"
+    },
+    "consumer_bread_waste_estimate": {
+      "source_sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "page": 8,
+      "page_sha256": "fd156001abd49065cd9ae9a1dfb3b7e00423d0da0430c52221b4c74a6827beee",
+      "passage_sha256": "c5fbb7dfd773c35b473b05fa15c78bbb95924c386507902983372550af0f7eca",
+      "matched_sha256": "1520f39917affc2f93a77561eb7c65adf0ffd6b8deb973f8682146e1cda69a6c",
+      "normalization": "whitespace_only",
+      "groups": {
+        "consumer_bread_waste_estimate": "8.2"
+      },
+      "matched_text": "Consumer waste 8.2"
+    },
+    "survey_zero": {
+      "source_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "page": 4,
+      "page_sha256": "9fc951dfc30c645f1e37cd1bd6a1428e854c38818a2f50803ad5921805fa0d3b",
+      "passage_sha256": "885c5e9adf070c142865e96c4d3a6aba3d56f0e501e769388033aadf0700d200",
+      "matched_sha256": "7cfd77173a792413747145bbd835843a56657252780c50efacc88a34db830746",
+      "normalization": "whitespace_only",
+      "groups": {
+        "count": "429",
+        "percent": "42.9"
+      },
+      "matched_text": "Zero slices 429 42.9"
+    },
+    "survey_one_to_three": {
+      "source_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "page": 4,
+      "page_sha256": "9fc951dfc30c645f1e37cd1bd6a1428e854c38818a2f50803ad5921805fa0d3b",
+      "passage_sha256": "885c5e9adf070c142865e96c4d3a6aba3d56f0e501e769388033aadf0700d200",
+      "matched_sha256": "9fb7070cf03bacccff7998f7aa36e02aa4e998432e8771d46e67a00a2061413b",
+      "normalization": "whitespace_only",
+      "groups": {
+        "count": "301",
+        "percent": "30.1"
+      },
+      "matched_text": "1–3 slices 301 30.1"
+    },
+    "survey_four_to_six": {
+      "source_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "page": 4,
+      "page_sha256": "9fc951dfc30c645f1e37cd1bd6a1428e854c38818a2f50803ad5921805fa0d3b",
+      "passage_sha256": "885c5e9adf070c142865e96c4d3a6aba3d56f0e501e769388033aadf0700d200",
+      "matched_sha256": "3eb913bd6b4868cb204348d4e20b3c2ae4a431ba42934722c4e9412e46d59b6b",
+      "normalization": "whitespace_only",
+      "groups": {
+        "count": "140",
+        "percent": "14.0"
+      },
+      "matched_text": "4–6 slices 140 14.0"
+    },
+    "survey_seven_to_nine": {
+      "source_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "page": 4,
+      "page_sha256": "9fc951dfc30c645f1e37cd1bd6a1428e854c38818a2f50803ad5921805fa0d3b",
+      "passage_sha256": "885c5e9adf070c142865e96c4d3a6aba3d56f0e501e769388033aadf0700d200",
+      "matched_sha256": "a106ed7045a55b05b511d8107f156f4b1779d93c58f81dad59a2384469cddfbb",
+      "normalization": "whitespace_only",
+      "groups": {
+        "count": "56",
+        "percent": "5.6"
+      },
+      "matched_text": "7–9 slices 56 5.6"
+    },
+    "survey_ten_to_twelve": {
+      "source_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "page": 4,
+      "page_sha256": "9fc951dfc30c645f1e37cd1bd6a1428e854c38818a2f50803ad5921805fa0d3b",
+      "passage_sha256": "885c5e9adf070c142865e96c4d3a6aba3d56f0e501e769388033aadf0700d200",
+      "matched_sha256": "d22b3fbc824385625b439d9e95232f7c8e2b0d9592939d06c8bbe242faeb7aa9",
+      "normalization": "whitespace_only",
+      "groups": {
+        "count": "22",
+        "percent": "2.2"
+      },
+      "matched_text": "10–12 slices 22 2.2"
+    },
+    "survey_more_than_twelve": {
+      "source_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "page": 4,
+      "page_sha256": "9fc951dfc30c645f1e37cd1bd6a1428e854c38818a2f50803ad5921805fa0d3b",
+      "passage_sha256": "885c5e9adf070c142865e96c4d3a6aba3d56f0e501e769388033aadf0700d200",
+      "matched_sha256": "002540b89f61b56ec2f2097b3a42e58632045756963de1dae034cb1477787432",
+      "normalization": "whitespace_only",
+      "groups": {
+        "count": "19",
+        "percent": "1.9"
+      },
+      "matched_text": "More than 12 slices 19 1.9"
+    },
+    "survey_do_not_know": {
+      "source_sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "page": 4,
+      "page_sha256": "9fc951dfc30c645f1e37cd1bd6a1428e854c38818a2f50803ad5921805fa0d3b",
+      "passage_sha256": "885c5e9adf070c142865e96c4d3a6aba3d56f0e501e769388033aadf0700d200",
+      "matched_sha256": "801d93a5432eb8899490a58ba197fca8cdec36b175232a314a530a06ad00901a",
+      "normalization": "whitespace_only",
+      "groups": {
+        "count": "33",
+        "percent": "3.3"
+      },
+      "matched_text": "Do not know 33 3.3"
+    }
+  },
+  "survey_total": 1000,
+  "warnings": [
+    {
+      "code": "survey_prose_table_category_disagreement",
+      "source": "survey",
+      "prose_page": 3,
+      "table_page": 4,
+      "prose_bins": "0, 1–3, 4–6, 7–10, and more than 10",
+      "table_bins": [
+        "Zero slices",
+        "1–3 slices",
+        "4–6 slices",
+        "7–9 slices",
+        "10–12 slices",
+        "More than 12 slices",
+        "Do not know"
+      ],
+      "decision": "transcribe Table 1; preserve disagreement, no silent reconciliation"
+    },
+    {
+      "code": "lca_prose_table_cross_reference_disagreement",
+      "source": "lca",
+      "prose_page": 7,
+      "prose_table": "4",
+      "verified_table": "7",
+      "decision": "locate Table 7 on page 8; preserve prose cross-reference error"
+    }
+  ],
+  "limits": [
+    "Numbers and table frequencies are extracted; semantic bases/provenance are consistency checks against a reviewed contract, not automatic semantic inference.",
+    "Published company aggregates and respondent self-reports do not identify a measured lot, causal effect, field baseline or approval.",
+    "Changing both trusted contract and sources requires a new independent review; local hashes are not external custody.",
+    "Only whitespace is normalized; different numbers, labels, dash types, bases and units are not normalized into agreement."
+  ],
+  "Q": null,
+  "field_intervention": false,
+  "global_acceptance": "0/5"
+}

@@ -1,5 +1,27 @@
 # Auditoría de aceptación actual
 
+**Diario y borrador D-102:** [evidencia y límites](../experiments/development/lot_journal_prospectus_2026-09-30/).
+La operación nativa nueva audita declaraciones incrementales con balance
+húmedo/seco, identidad declarada de transferencias y evaporación terminal.
+Missingness no se convierte en cero; hashes de fuente sólo son punteros.
+No exige inventar brazos/períodos ni establece cobertura hasta consumo.
+Un borrador de 64 puts enlaza tres opciones sin ranking, 54 consultas de
+valores y cuatro obligaciones; normas, decisiones, criterios y prueba del
+caso siguen pendientes. No hay baseline/result ni intervención seleccionada.
+Dos instalaciones offline 3.11/3.12 pasan seis negativos por CLI/MCP,
+nueve pares de gates y cuatro de trace; publican 64 y reintentan 0/64.
+No hay aceptación de fase. Pasaron 2560 pruebas globales, Ruff,
+compilación y smoke instalado 3.11 de 15 operaciones/22 tools. Focales
+nuevas: 118 en 3.11; 116 y dos skips MCP en Python 3.12 global, con MCP real
+en la sonda instalada. El primer global 2538 passed/21 failed se conserva:
+D-099 rechaza el nuevo árbol por contrato congelado. Sólo su fixture de
+tests usa módulos históricos verificados; no se reescriben ensayos ni pins.
+270 protegidos idénticos, dos interfaces cambiadas de forma explícita;
+artefactos y negativos previos conservados. El binding de preparación no
+es un controlador estricto de 64 puts; fuentes/ledger no son atómicos.
+Sin nueva comparación, Q, autoridad normativa o efecto de campo. Cinco
+criterios **No demostrados; 0/5**. La suite acredita mecánica técnica.
+
 **Receta D-101:** [evidencia instalada y límites](../experiments/development/audited_bread_recipe_2026-09-30/).
 Repite el cotejo D-100 y construye 37 ítems pendientes; valida identidad,
 prefijo exacto y efectos reales de transporte. Dos entornos con wheel D-100

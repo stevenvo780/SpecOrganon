@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "classification": "lot_journal_declared_only",
+  "journal_id": "D102_synthetic_control",
+  "events": [
+    {
+      "id": "milling",
+      "stage": "Synthetic milling",
+      "stage_role": "transformation",
+      "actor": "agent:synthetic_example",
+      "at_utc": "2026-09-30T08:00:00Z",
+      "inputs": [
+        {
+          "load_id": "normalized_wheat",
+          "material_id": "wheat",
+          "kind": "feed",
+          "mass": {
+            "value": 1000,
+            "unit": "kg",
+            "uncertainty": 0
+          },
+          "basis": "wet",
+          "dry_fraction": null
+        }
+      ],
+      "outputs": [
+        {
+          "load_id": "normalized_flour",
+          "material_id": "flour",
+          "kind": "product",
+          "mass": {
+            "value": 671,
+            "unit": "kg",
+            "uncertainty": 0
+          },
+          "basis": "wet",
+          "dry_fraction": null
+        },
+        {
+          "load_id": "normalized_whole",
+          "material_id": "whole_flour",
+          "kind": "product",
+          "mass": {
+            "value": 138,
+            "unit": "kg",
+            "uncertainty": 0
+          },
+          "basis": "wet",
+          "dry_fraction": null
+        },
+        {
+          "load_id": "normalized_bran",
+          "material_id": "bran",
+          "kind": "coproduct",
+          "mass": {
+            "value": 191,
+            "unit": "kg",
+            "uncertainty": 0
+          },
+          "basis": "wet",
+          "dry_fraction": null
+        }
+      ],
+      "balance_tolerance_kg": 0,
+      "source": {
+        "source_id": "synthetic_example_not_field_record",
+        "locator": "milling",
+        "observed_at_utc": "2026-09-30T08:00:00Z",
+        "method": "Synthetic arithmetic; no operation observed",
+        "record_sha256": "5745fb09576a8c8bcda19aa1be853eaa1a21caa08bd43a55b26ab49d9f99b37d"
+      }
+    },
+    {
+      "id": "baking",
+      "stage": "Synthetic baking",
+      "stage_role": "transformation",
+      "actor": "agent:synthetic_example",
+      "at_utc": "2026-09-30T09:00:00Z",
+      "inputs": [
+        {
+          "load_id": "normalized_flour",
+          "material_id": "flour",
+          "kind": "product",
+          "mass": {
+            "value": 671,
+            "unit": "kg",
+            "uncertainty": 0
+          },
+          "basis": "wet",
+          "dry_fraction": null
+        },
+        {
+          "load_id": "invented_ingredient",
+          "material_id": "ingredient",
+          "kind": "ingredient",
+          "mass": {
+            "value": 10000,
+            "unit": "g",
+            "uncertainty": 0
+          },
+          "basis": "wet",
+          "dry_fraction": null
+        },
+        {
+          "load_id": "invented_water",
+          "material_id": "water",
+          "kind": "water_addition",
+          "mass": {
+            "value": 0.2,
+            "unit": "t",
+            "uncertainty": 0
+          },
+          "basis": "wet",
+          "dry_fraction": 0
+        }
+      ],
+      "outputs": [
+        {
+          "load_id": "invented_bread",
+          "material_id": "bread",
+          "kind": "product",
+          "mass": {
+            "value": 761,
+            "unit": "kg",
+            "uncertainty": 0
+          },
+          "basis": "wet",
+          "dry_fraction": null
+        },
+        {
+          "load_id": "invented_evaporation",
+          "material_id": "water",
+          "kind": "evaporation",
+          "mass": {
+            "value": 120,
+            "unit": "kg",
+            "uncertainty": 0
+          },
+          "basis": "wet",
+          "dry_fraction": 0
+        }
+      ],
+      "balance_tolerance_kg": 0,
+      "source": {
+        "source_id": "synthetic_example_not_field_record",
+        "locator": "baking",
+        "observed_at_utc": "2026-09-30T09:00:00Z",
+        "method": "Synthetic arithmetic; no operation observed",
+        "record_sha256": "5745fb09576a8c8bcda19aa1be853eaa1a21caa08bd43a55b26ab49d9f99b37d"
+      }
+    }
+  ]
+}

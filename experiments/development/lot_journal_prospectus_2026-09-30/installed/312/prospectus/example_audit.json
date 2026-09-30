@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "classification": "lot_journal_audit_declared_only",
+  "journal_id": "D102_synthetic_control",
+  "valid": true,
+  "counts": {
+    "events": 2,
+    "loads": 8,
+    "external_inputs": 3,
+    "transfers": 1
+  },
+  "balances": [
+    {
+      "event_id": "milling",
+      "wet": {
+        "status": "balanced",
+        "input_kg": "1000",
+        "output_kg": "1000",
+        "residual_kg": "0",
+        "allowance_kg": "0"
+      },
+      "dry": {
+        "status": "pending_missing_dry_fraction"
+      }
+    },
+    {
+      "event_id": "baking",
+      "wet": {
+        "status": "balanced",
+        "input_kg": "881",
+        "output_kg": "881",
+        "residual_kg": "0",
+        "allowance_kg": "0"
+      },
+      "dry": {
+        "status": "pending_missing_dry_fraction"
+      }
+    }
+  ],
+  "unconsumed_output_load_ids": [
+    "invented_bread",
+    "invented_evaporation",
+    "normalized_bran",
+    "normalized_whole"
+  ],
+  "terminal_output_load_ids": [
+    "invented_evaporation"
+  ],
+  "capture_status": "incremental_declared_events_only",
+  "pending": {
+    "capture_completeness": "not_established",
+    "dry_balance_event_ids": [
+      "milling",
+      "baking"
+    ]
+  },
+  "observations_authenticated": false,
+  "field_scope_complete": false,
+  "execution_ready": false,
+  "criterion_3": {
+    "status": "not_assessed"
+  },
+  "notice": "Declared balances only. Source hashes are pointers; source bytes, physical identity, dry fractions, calibration and capture completeness are not authenticated. Dry uncertainty uses declared fractions as exact coefficients."
+}

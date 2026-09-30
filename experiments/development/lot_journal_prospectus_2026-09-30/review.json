@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "study_id": "D102",
+  "reviewer": "/root/source_gate_review",
+  "review_mode": "independent native agent, read-only; same host/UID, no external authority",
+  "scope": [
+    "lot journal and prospectus source design, existing tests and correction review",
+    "both installed receipts, original raw transport bytes and source/module pins",
+    "22 fixed historical modules and D099 test fixture without production broker changes",
+    "global original negative, final suite output and dossier narrative"
+  ],
+  "confirmed_fixed_findings": [
+    {
+      "issue": "Declared terminal evaporation could be consumed by a later event",
+      "resolution": "Reject later consumption; captured reusable water has explicit product load semantics",
+      "reported_reproduction_raw_streams_retained": false,
+      "regression_tests_retained": true
+    },
+    {
+      "issue": "Preparation could pin edited documentary claims after the first audit",
+      "resolution": "Revalidate original D101 packet and compare original pins before D102 binding; source737 injection rejected",
+      "reported_reproduction_raw_streams_retained": false,
+      "regression_tests_retained": true
+    }
+  ],
+  "installed_verification_each": {
+    "python_versions": ["3.11.15", "3.12.3"],
+    "raw_transport_lines": 48,
+    "binding_pins": "13/13 matched",
+    "installed_module_bytes": "lot_journal.py, cli.py, server.py equal current workspace",
+    "tools_discovered_by_real_client": 22,
+    "ledger_events": "64 item_put, no other events",
+    "mcp_replay": "0 applied /64 skipped",
+    "gate_pairs": 9,
+    "requirement_trace_pairs": 4,
+    "invalid_journal_controls_rejected_both_transports": 6,
+    "phase_acceptances": 0,
+    "Q": null
+  },
+  "wheel_sha256_verified": "e155d010a17a1235f071da6b0d89c1773b5dc92295a85251873f1880c448390b",
+  "historical_test_fixture": {
+    "fixed_commit": "0f8c651d15ccd6da99882abba901099fdae6486e",
+    "modules_checked_against_unchanged_plan": "22/22",
+    "current_changed_modules": ["src/specorganon/cli.py", "src/specorganon/server.py"],
+    "production_broker_diff": false,
+    "test_only_runtime_override": "PYTHONPATH for exact toolkit_cli argv[0] capture",
+    "current_source_rejection": "two prepare attempts rejected without destination/admission; live status rejected cli pin",
+    "focal_tests_each_python": 28,
+    "archived_completed_states_are_new_current_admission": false
+  },
+  "original_global_result": "21 failed, 2538 passed in324.17s; all21 historical source-pin failures",
+  "final_global_result": "2560 passed in313.87s",
+  "reviewer_reran_full_global_suite": false,
+  "initial_source_review_focal_tests_observed": 117,
+  "final_focal_count_after_worker_additional_test": 118,
+  "open_P1_or_P2_in_declared_scope": 0,
+  "final_receipt_and_preservation_check": {
+    "receipt_pins_matched": "97/97 before this review update; root refreshes this file pin",
+    "stable_protected_pins": "270/270 matched",
+    "historical_symlinks_checked": "15/15 link text against Git and resolved bytes against pins",
+    "intentional_interfaces": "2 current/historical byte pins matched",
+    "D099_originals": 147,
+    "D099_markers": 12,
+    "D099_modules_unchanged": 20,
+    "D099_frozen_dossier": 16,
+    "D100_evidence_code": 21,
+    "D101_artifacts_code": 94,
+    "D101_active_docs_before_and_after": 3,
+    "groups_checked_against_parent_and_current_tree": true,
+    "count_contradictions": 0
+  },
+  "limits": [
+    "list_tools raw response absent; 22 names recorded by actual client in receipt",
+    "before init directory checked; after init only ledger hash checked",
+    "13-file binding records preparation only; no strict64-put admission controller",
+    "sameUID changes after last pin remain possible; source and ledger not atomic",
+    "declared hashes, physical identity, dry fraction/calibration and capture completeness are unauthenticated",
+    "no human authority, field intervention, causal effect or quality equivalence"
+  ],
+  "human_approvals": 0,
+  "field_observations": 0,
+  "global_acceptance": "0/5"
+}

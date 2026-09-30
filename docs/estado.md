@@ -1,5 +1,30 @@
 # Estado de reanudación
 
+**D-102 añadió captura incremental y un borrador alimentario:**
+[dossier y límites](../experiments/development/lot_journal_prospectus_2026-09-30/).
+El auditor nativo CLI/MCP comprueba balances húmedos/secos declarados,
+transferencias y agua/coproductos; datos secos faltantes siguen pendientes
+y evaporación terminal no se reutiliza. No autentica fuentes o lotes.
+El borrador nuevo contiene 64 puts, 54 consultas actor×dimensión, tres
+alternativas sin ranking y cuatro obligaciones de ingeniería. Umbrales,
+aprobaciones, baseline, consumo y efectos siguen pendientes. Repite D-100
+17/7 y conserva dos desacuerdos; el ejemplo es aritmética sintética.
+Un wheel instalado en Python 3.11/3.12 fuera del árbol descubre 22
+herramientas, rechazan seis negativos por ambos transportes y cotejan nueve
+gates/cuatro trazas; CLI aplica 64, MCP 0/64. Todas las fases sin aceptar.
+Pasaron 2560 pruebas globales, Ruff, compilación y smoke instalado 3.11.
+Las 118 focales nuevas pasan en 3.11; en Python 3.12 global hay 116 y dos
+skips por dependencia MCP, cubierto por la sonda real instalada. El primer
+global 2538/21 falló por pins históricos D-099: tests usan ahora una snapshot
+verificada y prueban rechazo del árbol actual; broker/plan intactos.
+270 protegidos idénticos y dos interfaces actualizadas deliberadamente;
+outputs, casos, negativos y artefactos previos conservados. La preparación
+de 64 puts no tiene el controlador estricto de D-101 y persiste carrera por
+el mismo UID después del último pin. Sin nuevas llamadas experimentales,
+Q, aprobación humana, campo o corrida de las 24. **Aceptación 0/5**.
+Siguiente frente: baseline actual enlazado, autoridad/consentimiento del sitio
+y definición competente de métricas, márgenes y protocolo antes de asignar.
+
 **D-101 integró una receta alimentaria auditable:** [dossier y límites](../experiments/development/audited_bread_recipe_2026-09-30/).
 Prepara copias, repite D-100 y publica 37 ítems pendientes ligados a 17
 cantidades y siete filas archivadas. Memfd protege el manifiesto CLI; MCP

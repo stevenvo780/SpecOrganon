@@ -15,6 +15,41 @@ import pytest
 from scripts import run_subscription_method_trial as trial
 
 
+# The D099 protocol keeps its original source pins after later CLI additions.
+# This fixture tests those exact historical bytes without restoring the checkout.
+FROZEN_COMMIT = "0f8c651d15ccd6da99882abba901099fdae6486e"
+
+
+def _pin(raw):
+    return {"bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()}
+
+
+@pytest.fixture(scope="session")
+def frozen_repo(tmp_path_factory):
+    protocol_raw = trial.PLAN.read_bytes()
+    assert hashlib.sha256(protocol_raw).hexdigest() == trial.PLAN_SHA
+    protocol = json.loads(protocol_raw)
+    repository = tmp_path_factory.mktemp("d099-historical-repo")
+    for relative, expected in protocol["toolkit"]["source_files"].items():
+        raw = subprocess.run(
+            ["git", "show", f"{FROZEN_COMMIT}:{relative}"], cwd=trial.ROOT,
+            capture_output=True, check=True, timeout=10,
+        ).stdout
+        assert _pin(raw) == expected, relative
+        target = repository / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(raw)
+    for category in ("sources", "prompts"):
+        for expected in protocol[category].values():
+            relative = expected["path"]
+            raw = (trial.ROOT / relative).read_bytes()
+            assert _pin(raw) == {key: expected[key] for key in ("bytes", "sha256")}, relative
+            target = repository / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(raw)
+    return repository
+
+
 SCRIPT = """import csv, json, sys
 from pathlib import Path
 rows = list(csv.DictReader((Path(sys.argv[1]) / 'sample_first_complete_week.csv').open()))
@@ -43,8 +78,20 @@ def _proposal(script=SCRIPT, *, items=None):
 
 
 @pytest.fixture
-def admission(tmp_path, monkeypatch):
+def admission(tmp_path, monkeypatch, frozen_repo):
     monkeypatch.setenv(trial.ADMISSION_ENV, str(tmp_path / "admission"))
+    capture = trial._capture
+    toolkit_cli = json.loads(trial.PLAN.read_bytes())["toolkit"]["cli_path"]
+
+    def historical_toolkit_capture(argv, *args, **kwargs):
+        if argv[0] == toolkit_cli:
+            # The real fixed entry point imports this exact pinned package in
+            # local T tests; production authority and admission are unchanged.
+            kwargs["env"] = {**kwargs["env"], "PYTHONPATH": str(frozen_repo / "src")}
+        return capture(argv, *args, **kwargs)
+
+    monkeypatch.setattr(trial, "_capture", historical_toolkit_capture)
+    return frozen_repo
 
 
 def _fake_cli(tmp_path, monkeypatch, *, proposal=None, behavior="valid"):
@@ -98,9 +145,9 @@ for event in events:
     return bindir
 
 
-def _prepare(tmp_path, *, arm="N", name="run"):
+def _prepare(tmp_path, repository, *, arm="N", name="run"):
     directory = tmp_path / name
-    assert trial.prepare(trial.ROOT, directory, arm=arm)["state"] == "prepared"
+    assert trial.prepare(repository, directory, arm=arm)["state"] == "prepared"
     return directory
 
 
@@ -127,20 +174,40 @@ def _require_sandbox():
 
 
 def test_prepare_preserves_packet_and_excludes_reference_answers(tmp_path, admission):
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     prompt = (directory / "first.prompt.txt").read_bytes()
     assert (trial.ROOT / "cases/building_energy/task.md").read_bytes() in prompt
     assert (trial.ROOT / "cases/building_energy/source_manifest.json").read_bytes() in prompt
     assert (directory / "input/sample_first_complete_week.csv").stat().st_size == 612074
     assert b"118.28" not in prompt and b"reference.json" not in prompt
     assert not list(directory.rglob("*auth*"))
-    for target in (directory, trial.ROOT / "new-d099-run"):
+    assert json.loads((directory / "plan.json").read_bytes())["source_repo"] == str(admission)
+    for target in (directory, trial.ROOT / "new-d099-run", admission / "new-d099-run"):
         with pytest.raises(trial.TrialError):
-            trial.prepare(trial.ROOT, target, arm="N")
+            trial.prepare(admission, target, arm="N")
+
+
+def test_current_changed_toolkit_is_rejected_without_repinning_or_admission(tmp_path, admission):
+    protocol_raw = trial.PLAN.read_bytes()
+    protocol = json.loads(protocol_raw)
+    originals = {relative: (trial.ROOT / relative).read_bytes()
+                 for relative in protocol["toolkit"]["source_files"]}
+    changed = {relative for relative, raw in originals.items()
+               if _pin(raw) != protocol["toolkit"]["source_files"][relative]}
+    assert {"src/specorganon/cli.py", "src/specorganon/server.py"} <= changed
+    destination = tmp_path / "current-source-rejection"
+    for _ in range(2):
+        with pytest.raises(trial.TrialError, match="registered bytes changed"):
+            trial.prepare(trial.ROOT, destination, arm="N")
+        assert not destination.exists()
+        assert not (tmp_path / "admission").exists()
+        assert trial.PLAN.read_bytes() == protocol_raw
+        assert all((trial.ROOT / relative).read_bytes() == raw
+                   for relative, raw in originals.items())
 
 
 def test_first_turn_exact_preservation_no_auto_replay_and_environment(tmp_path, monkeypatch, admission):
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     proposal = _proposal()
     bindir = _fake_cli(tmp_path, monkeypatch, proposal=proposal)
     monkeypatch.setenv("OPENAI_API_KEY", "synthetic-not-a-credential")
@@ -158,7 +225,7 @@ def test_first_turn_exact_preservation_no_auto_replay_and_environment(tmp_path, 
 
 def test_two_turns_real_sealed_replay_no_code_replacement_or_third_call(tmp_path, monkeypatch, admission):
     _require_sandbox()
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     bindir = _fake_cli(tmp_path, monkeypatch)
     trial.generate(directory)
     original = (directory / "first.analysis.py").read_bytes()
@@ -193,7 +260,7 @@ def test_two_turns_real_sealed_replay_no_code_replacement_or_third_call(tmp_path
 
 @pytest.mark.parametrize("behavior", ["api_key", "tool", "error", "zero", "updated_error"])
 def test_model_rejection_is_terminal_and_has_no_fallback(tmp_path, monkeypatch, admission, behavior):
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     bindir = _fake_cli(tmp_path, monkeypatch, behavior=behavior)
     result = trial.generate(directory)
     assert result["state"] == "failed"
@@ -203,7 +270,7 @@ def test_model_rejection_is_terminal_and_has_no_fallback(tmp_path, monkeypatch, 
 
 
 def test_safe_updated_message_event_is_accepted(tmp_path, monkeypatch, admission):
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     bindir = _fake_cli(tmp_path, monkeypatch, behavior="updated_valid")
     result = trial.generate(directory)
     assert result["state"] == "awaiting_review", result["run"].get("error")
@@ -212,7 +279,7 @@ def test_safe_updated_message_event_is_accepted(tmp_path, monkeypatch, admission
 
 def test_copies_cannot_add_generation_replay_or_final_call(tmp_path, monkeypatch, admission):
     _require_sandbox()
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     bindir = _fake_cli(tmp_path, monkeypatch)
     prepared = tmp_path / "prepared-copy"
     shutil.copytree(directory, prepared)
@@ -263,7 +330,7 @@ def test_items_reject_invalid_graph_before_any_toolkit_call(change):
 @pytest.mark.parametrize("leading_dash", [False, True])
 def test_actual_toolkit_trace_has_six_puts_and_no_approval_or_advance(tmp_path, monkeypatch, admission, leading_dash):
     _require_sandbox()
-    directory = _prepare(tmp_path, arm="T")
+    directory = _prepare(tmp_path, admission, arm="T")
     items = _items()
     if leading_dash:
         items[0]["text"] = "--A literal problem statement starting with dashes"
@@ -289,7 +356,7 @@ def test_actual_toolkit_trace_has_six_puts_and_no_approval_or_advance(tmp_path, 
 
 def test_negative_analysis_can_inform_report_without_metrics(tmp_path, monkeypatch, admission):
     _require_sandbox()
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     bindir = _fake_cli(tmp_path, monkeypatch, proposal=_proposal("import sys\nprint('expected offline failure', file=sys.stderr)\nsys.exit(2)\n"))
     trial.generate(directory)
     result = trial.feedback(directory, reviewed_proposal_sha=_review_sha(directory))
@@ -301,7 +368,7 @@ def test_negative_analysis_can_inform_report_without_metrics(tmp_path, monkeypat
 
 def test_second_turn_cannot_return_replacement_code(tmp_path, monkeypatch, admission):
     _require_sandbox()
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     bindir = _fake_cli(tmp_path, monkeypatch, behavior="second_code")
     trial.generate(directory)
     trial.feedback(directory, reviewed_proposal_sha=_review_sha(directory))
@@ -314,7 +381,7 @@ def test_second_turn_cannot_return_replacement_code(tmp_path, monkeypatch, admis
 
 def test_empty_final_report_is_terminal_failure_without_third_call(tmp_path, monkeypatch, admission):
     _require_sandbox()
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     bindir = _fake_cli(tmp_path, monkeypatch, behavior="empty_final")
     trial.generate(directory)
     trial.feedback(directory, reviewed_proposal_sha=_review_sha(directory))
@@ -325,7 +392,7 @@ def test_empty_final_report_is_terminal_failure_without_third_call(tmp_path, mon
 
 
 def test_tampered_artifact_does_not_remain_valid(tmp_path, monkeypatch, admission):
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     _fake_cli(tmp_path, monkeypatch)
     trial.generate(directory)
     (directory / "first.analysis.py").write_text("print('changed')\n")
@@ -335,7 +402,7 @@ def test_tampered_artifact_does_not_remain_valid(tmp_path, monkeypatch, admissio
 
 def test_second_call_receives_only_remaining_cumulative_budget(tmp_path, monkeypatch, admission):
     _require_sandbox()
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     _fake_cli(tmp_path, monkeypatch)
     capture = trial._capture
     second_limits = []
@@ -362,7 +429,7 @@ def test_second_call_receives_only_remaining_cumulative_budget(tmp_path, monkeyp
 
 
 def test_model_timeout_preserves_partial_trace_and_forbids_relaunch(tmp_path, monkeypatch, admission):
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     bindir = _fake_cli(tmp_path, monkeypatch, behavior="timeout")
     capture = trial._capture
 
@@ -382,7 +449,7 @@ def test_model_timeout_preserves_partial_trace_and_forbids_relaunch(tmp_path, mo
 
 def test_toolkit_launch_failure_is_attempted_not_executed(tmp_path, monkeypatch, admission):
     _require_sandbox()
-    directory = _prepare(tmp_path, arm="T")
+    directory = _prepare(tmp_path, admission, arm="T")
     _fake_cli(tmp_path, monkeypatch, proposal=_proposal(items=_items()))
     capture = trial._capture
 
@@ -407,7 +474,7 @@ def test_toolkit_launch_failure_is_attempted_not_executed(tmp_path, monkeypatch,
 
 
 def test_consistent_total_rewrite_below_capture_times_is_rejected(tmp_path, monkeypatch, admission):
-    directory = _prepare(tmp_path)
+    directory = _prepare(tmp_path, admission)
     _fake_cli(tmp_path, monkeypatch)
     trial.generate(directory)
     state = json.loads((directory / "run.json").read_bytes())
@@ -420,7 +487,7 @@ def test_consistent_total_rewrite_below_capture_times_is_rejected(tmp_path, monk
 
 def test_successful_toolkit_cannot_lose_ledger_and_stay_valid(tmp_path, monkeypatch, admission):
     _require_sandbox()
-    directory = _prepare(tmp_path, arm="T")
+    directory = _prepare(tmp_path, admission, arm="T")
     _fake_cli(tmp_path, monkeypatch, proposal=_proposal(items=_items()))
     trial.generate(directory)
     trial.feedback(directory, reviewed_proposal_sha=_review_sha(directory))

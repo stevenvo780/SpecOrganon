@@ -1,10 +1,10 @@
 # Interfaces CLI y MCP
 
-Ambas interfaces llaman las mismas funciones de `specorganon.engine` y `specorganon.runner`. El directorio de un caso contiene `organon.json`, un registro de eventos versionado. Los resultados de la CLI se imprimen como JSON; los errores salen por stderr con código distinto de cero.
+Ambas interfaces comparten el motor, runner y auditor de lotes. El directorio de un caso contiene `organon.json`, un registro de eventos versionado. Los resultados de la CLI se imprimen como JSON; los errores salen por stderr con código distinto de cero.
 
 ## CLI
 
-Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 21 operaciones públicas:
+Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 22 operaciones públicas:
 
 | CLI | MCP | Función |
 | --- | --- | --- |
@@ -29,6 +29,7 @@ Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <coman
 | `trace` | `trace` | Recorrer dependencias de un ítem. |
 | `next-task` | `next_task` | Pedir el siguiente encargo acotado. |
 | `run` | `run` | Aplicar un manifiesto reanudable. |
+| `audit-lot-journal` | `audit_lot_journal` | Auditar balances incrementales declarados; lectura sin caso o ledger. |
 
 Ejemplo inicial para un caso real:
 
@@ -181,7 +182,7 @@ Para pruebas sintéticas se exige crear el caso explícitamente con `--approval-
 
 ## MCP por stdio
 
-El ejecutable es `.venv/bin/organon-mcp` (o `uv run organon-mcp`). Configúralo como servidor MCP con transporte `stdio`. Publica las 21 herramientas de la tabla. Los parámetros tienen los mismos nombres que las funciones del motor: `init` acepta `approval_policy` y `test_gate_policy`; `approval_challenge`, `phase_review_challenge`, `test_execution_challenge` y `test_observation_challenge` devuelven mensajes canónicos; `approve`, `review_phase`, `record_test_execution` y `record_test_observation` aceptan `signature`. `refs` es una lista de IDs; `data`, `report` y `receipt` son objetos JSON. En MCP, `run` recibe el objeto JSON `manifest` directamente, mientras que la CLI lo lee de `--manifest`. El servidor usa los mismos registros externos de aprobación y evaluación que la CLI para comprobar firmas; el cliente MCP no debe recibir una clave privada.
+El ejecutable es `.venv/bin/organon-mcp` (o `uv run organon-mcp`). Configúralo como servidor MCP con transporte `stdio`. Publica las 22 herramientas de la tabla. Los parámetros tienen los mismos nombres que las funciones del motor: `init` acepta `approval_policy` y `test_gate_policy`; `approval_challenge`, `phase_review_challenge`, `test_execution_challenge` y `test_observation_challenge` devuelven mensajes canónicos; `approve`, `review_phase`, `record_test_execution` y `record_test_observation` aceptan `signature`. `refs` es una lista de IDs; `data`, `report` y `receipt` son objetos JSON. En MCP, `run` recibe el objeto JSON `manifest` directamente, mientras que la CLI lo lee de `--manifest`. `audit_lot_journal` recibe `journal` sin ruta de caso y sólo comprueba declaraciones; [contrato de lectura](diario_lotes.md). El servidor usa los mismos registros externos de aprobación y evaluación que la CLI para comprobar firmas; el cliente MCP no debe recibir una clave privada.
 
 El [control de frontera stdio](../experiments/development/mcp_strict_wire_2026-09-27.json) lee cada línea en bytes, con un límite de 8 MiB, y rechaza UTF-8 inválido, claves duplicadas incluso anidadas o escapadas, valores no finitos, subdesbordamiento y pérdida decimal antes del parser del SDK. Comprueba la forma del sobre JSON-RPC y rechaza solicitudes que mezclen `method` con campos de respuesta, lotes, IDs inválidos y campos de sobre extra. En `tools/call`, `put.data`, `put.expected_deps`, `run.manifest`, `next_task.roles` y `test_execution_challenge.report`/`record_test_execution.report` deben llegar como objetos reales, y `put.refs` como lista; las versiones y `challenge_seq` requieren enteros reales, sin conversión de booleanos. Los rechazos se envían como errores JSON-RPC y no ejecutan la herramienta; una línea inválida no impide una petición válida posterior. Los valores de texto dentro de `data` siguen siendo contenido del caso y no se vuelven a interpretar como JSON. El control usa partes internas de `mcp==2.2.0`, versión fijada en el paquete y comprobada con cliente real y wheel instalado en Python 3.11 y 3.12. No autentica el origen del mensaje ni la evidencia que contiene.
 

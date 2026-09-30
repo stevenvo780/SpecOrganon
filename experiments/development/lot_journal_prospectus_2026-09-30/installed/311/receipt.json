@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "study_id": "D102",
+  "python": "3.11.15",
+  "installed_module": "/tmp/specorganon-D102-install-cfoi0az2/venv-311/lib/python3.11/site-packages/specorganon/lot_journal.py",
+  "installed_journal_sha256": "ce994e599fa36684038d81b8ea2133ba39de6039f3ecc6b9f20dc1338a06c7b6",
+  "probe_sha256": "bdaa694f95bfe124c9107b71d765ba9520a096cb7164f68b3d0c5fac8964280c",
+  "prepared": {
+    "state": "prepared",
+    "manifest_steps": 64,
+    "ledger_created": false,
+    "example_classification": "synthetic_arithmetic_not_observed_lot",
+    "execution_ready": false,
+    "global_acceptance": "0/5"
+  },
+  "journal_report": {
+    "balances": [
+      {
+        "dry": {
+          "status": "pending_missing_dry_fraction"
+        },
+        "event_id": "milling",
+        "wet": {
+          "allowance_kg": "0",
+          "input_kg": "1000",
+          "output_kg": "1000",
+          "residual_kg": "0",
+          "status": "balanced"
+        }
+      },
+      {
+        "dry": {
+          "status": "pending_missing_dry_fraction"
+        },
+        "event_id": "baking",
+        "wet": {
+          "allowance_kg": "0",
+          "input_kg": "881",
+          "output_kg": "881",
+          "residual_kg": "0",
+          "status": "balanced"
+        }
+      }
+    ],
+    "capture_status": "incremental_declared_events_only",
+    "classification": "lot_journal_audit_declared_only",
+    "counts": {
+      "events": 2,
+      "external_inputs": 3,
+      "loads": 8,
+      "transfers": 1
+    },
+    "criterion_3": {
+      "status": "not_assessed"
+    },
+    "execution_ready": false,
+    "field_scope_complete": false,
+    "journal_id": "D102_synthetic_control",
+    "notice": "Declared balances only. Source hashes are pointers; source bytes, physical identity, dry fractions, calibration and capture completeness are not authenticated. Dry uncertainty uses declared fractions as exact coefficients.",
+    "observations_authenticated": false,
+    "pending": {
+      "capture_completeness": "not_established",
+      "dry_balance_event_ids": [
+        "milling",
+        "baking"
+      ]
+    },
+    "schema": 1,
+    "terminal_output_load_ids": [
+      "invented_evaporation"
+    ],
+    "unconsumed_output_load_ids": [
+      "invented_bread",
+      "invented_evaporation",
+      "normalized_bran",
+      "normalized_whole"
+    ],
+    "valid": true
+  },
+  "mcp_tools": [
+    "advance",
+    "approval_challenge",
+    "approve",
+    "attest_field",
+    "audit_lot_journal",
+    "challenge",
+    "field_attestation_challenge",
+    "gate",
+    "init",
+    "next_task",
+    "phase_review_challenge",
+    "put",
+    "record_test_execution",
+    "record_test_observation",
+    "resolve_challenge",
+    "review",
+    "review_phase",
+    "run",
+    "status",
+    "test_execution_challenge",
+    "test_observation_challenge",
+    "trace"
+  ],
+  "mcp_tools_count": 22,
+  "invalid_journal_controls": {
+    "wet_balance": {
+      "cli_exit": 1,
+      "mcp_rejected": true,
+      "ledger_unchanged": true
+    },
+    "duplicate_load": {
+      "cli_exit": 1,
+      "mcp_rejected": true,
+      "ledger_unchanged": true
+    },
+    "basis": {
+      "cli_exit": 1,
+      "mcp_rejected": true,
+      "ledger_unchanged": true
+    },
+    "time": {
+      "cli_exit": 1,
+      "mcp_rejected": true,
+      "ledger_unchanged": true
+    },
+    "transfer": {
+      "cli_exit": 1,
+      "mcp_rejected": true,
+      "ledger_unchanged": true
+    },
+    "terminal_evaporation": {
+      "cli_exit": 1,
+      "mcp_rejected": true,
+      "ledger_unchanged": true
+    }
+  },
+  "gates": {
+    "build": {
+      "ready": false,
+      "accepted": false,
+      "blockers": [
+        "needs 1 valid test; has 0",
+        "previous phase is not currently accepted",
+        "t_capture: signed test needs a current successful signed execution receipt",
+        "t_capture: signed test needs a nonempty argv list of strings"
+      ]
+    },
+    "compare": {
+      "ready": false,
+      "accepted": false,
+      "blockers": [
+        "previous phase is not currently accepted"
+      ]
+    },
+    "critique": {
+      "ready": false,
+      "accepted": false,
+      "blockers": [
+        "n_harm requires a verified human approval",
+        "n_permission requires a verified human approval",
+        "n_service requires a verified human approval",
+        "previous phase is not currently accepted"
+      ]
+    },
+    "explain": {
+      "ready": false,
+      "accepted": false,
+      "blockers": [
+        "previous phase is not currently accepted"
+      ]
+    },
+    "frame": {
+      "ready": true,
+      "accepted": false,
+      "blockers": []
+    },
+    "observe": {
+      "ready": false,
+      "accepted": false,
+      "blockers": [
+        "previous phase is not currently accepted"
+      ]
+    },
+    "specify": {
+      "ready": false,
+      "accepted": false,
+      "blockers": [
+        "c_r_basis: criterion lacks threshold",
+        "c_r_capture: criterion lacks threshold",
+        "c_r_safety: criterion lacks threshold",
+        "c_r_service: criterion lacks threshold",
+        "d_pending requires a verified human approval",
+        "needs 1 valid criterion; has 0",
+        "previous phase is not currently accepted"
+      ]
+    },
+    "study": {
+      "ready": false,
+      "accepted": false,
+      "blockers": [
+        "previous phase is not currently accepted"
+      ]
+    },
+    "validate": {
+      "ready": false,
+      "accepted": false,
+      "blockers": [
+        "as_field_pending must link result and risk",
+        "needs 1 valid baseline; has 0",
+        "needs 1 valid result; has 0",
+        "previous phase is not currently accepted"
+      ]
+    }
+  },
+  "cli_applied": 64,
+  "mcp_replay_applied": 0,
+  "mcp_replay_skipped": 64,
+  "ledger_sha256": "b5a9507f9453bc46937f3b0c37a3a475f581aeda1d037800b05c6aabc375723a",
+  "journal_audits_and_queries_read_only": true,
+  "requirement_trace_pairs": 4,
+  "source_coverage": {
+    "published_numeric_claims": 17,
+    "archived_survey_rows": 7
+  },
+  "normative_approvals": 0,
+  "phase_acceptances": 0,
+  "field_observations": 0,
+  "source_authentication": false,
+  "Q": null,
+  "global_acceptance": "0/5",
+  "trace_sha256": "3fb8649a8e04292df2d82e5b9150ddf54099ab23a09d40608eefff0104769437"
+}

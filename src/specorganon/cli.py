@@ -45,6 +45,10 @@ def invoke(operation: str, **kwargs: Any) -> Any:
         from specorganon import runner
 
         return getattr(runner, RUNNER_OPERATIONS[operation])(**kwargs)
+    if operation == "audit_lot_journal":
+        from specorganon.lot_journal import audit_lot_journal
+
+        return audit_lot_journal(kwargs["journal"])
     raise ValueError(f"unknown operation: {operation}")
 
 
@@ -236,6 +240,10 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("path")
     run.add_argument("--manifest", type=Path, required=True, help="Path to a schema 1 JSON manifest")
     run.add_argument("--actor", required=True)
+    journal = commands.add_parser(
+        "audit-lot-journal", help="Audit declared incremental material records; does not certify field observations"
+    )
+    journal.add_argument("journal", type=Path, help="Bounded JSON file, or - for stdin")
     return parser
 
 
@@ -244,6 +252,10 @@ def main(argv: list[str] | None = None) -> int:
     args = vars(parser.parse_args(argv))
     command = args.pop("command").replace("-", "_")
     try:
+        if command == "audit_lot_journal":
+            from specorganon.lot_journal import read_journal
+
+            args["journal"] = read_journal(args["journal"])
         if command == "run":
             from specorganon.ledger import strict_json_loads
 
