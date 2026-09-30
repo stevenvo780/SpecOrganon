@@ -1,0 +1,45 @@
+{
+  "Q": null,
+  "additional_probe_attempts": 2,
+  "automatic_retry": false,
+  "classification": "bounded instrument correction prospectively registered after two retained preparation failures",
+  "correction": "retain all42events and parse item versions from40puts; verify exact kind/seq/hash of both historical phase events; update probe builder pin",
+  "counts_toward_required_24_runs": false,
+  "defect": "builder erroneously required every original event to be item_put; original has fixed historical review23 and advance24",
+  "fixed_source_ledger_sha256": "7cb7f451e953a02a7254edd2e6713ad7acc470181b2cc0966b5d9b88c51692e3",
+  "global_acceptance": "1/5",
+  "goal_complete": false,
+  "initial_failures": {
+    "311": {
+      "builder_error": "VariantError: source ledger contains an unexpected event",
+      "exit_code": 2,
+      "passed": false,
+      "puts_applied": 0,
+      "regular_files_archived": 7
+    },
+    "312": {
+      "builder_error": "VariantError: source ledger contains an unexpected event",
+      "exit_code": 2,
+      "passed": false,
+      "puts_applied": 0,
+      "regular_files_archived": 7
+    }
+  },
+  "initial_freeze_unchanged": true,
+  "initial_source_checkpoint": "d45dcbb",
+  "launcher_archive_correction": "explicit frozen-source choice and separate repaired prefixes; initial sources, reports, calls, archives and streams retained",
+  "observed_source_event_kinds": {
+    "item_put": 40,
+    "phase_advance": 1,
+    "phase_review": 1
+  },
+  "original_positive_case_changed": false,
+  "plan_contract_claims_thresholds_and_toolkit_unchanged": true,
+  "raw_source_rows_analyzed_by_D105": false,
+  "registered_at_utc": "2026-09-30T20:52:50.871587+00:00",
+  "remaining_controls_unchanged": true,
+  "runtime": "/tmp/specorganon-D105-repair-qm1hmbkd",
+  "schema": 1,
+  "study_id": "D105",
+  "total_probe_attempts_after_this_amendment": 4
+}
