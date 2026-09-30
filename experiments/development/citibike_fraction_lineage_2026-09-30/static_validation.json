@@ -1,0 +1,44 @@
+{
+  "all_passed": true,
+  "probes_executed": false,
+  "records": [
+    {
+      "argv": [
+        "/home/dev/.local/bin/ruff",
+        "check",
+        "scripts/build_citibike_fraction_variant.py",
+        "scripts/probe_citibike_fraction_variant.py",
+        "experiments/development/citibike_fraction_lineage_2026-09-30/execute_frozen.py",
+        "experiments/development/citibike_fraction_lineage_2026-09-30/archive_executed.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "All checks passed!\n"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D102-install-cfoi0az2/venv-311/bin/python",
+        "-I",
+        "-c",
+        "from pathlib import Path;import json,sys;paths=json.loads(sys.argv[1]);[compile(Path(p).read_bytes(),p,'exec') for p in paths];print(json.dumps({'compiled':len(paths),'version':sys.version.split()[0]}))",
+        "[\"scripts/build_citibike_fraction_variant.py\", \"scripts/probe_citibike_fraction_variant.py\", \"experiments/development/citibike_fraction_lineage_2026-09-30/execute_frozen.py\", \"experiments/development/citibike_fraction_lineage_2026-09-30/archive_executed.py\"]"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"compiled\": 4, \"version\": \"3.11.15\"}\n"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D102-install-cfoi0az2/venv-312/bin/python",
+        "-I",
+        "-c",
+        "from pathlib import Path;import json,sys;paths=json.loads(sys.argv[1]);[compile(Path(p).read_bytes(),p,'exec') for p in paths];print(json.dumps({'compiled':len(paths),'version':sys.version.split()[0]}))",
+        "[\"scripts/build_citibike_fraction_variant.py\", \"scripts/probe_citibike_fraction_variant.py\", \"experiments/development/citibike_fraction_lineage_2026-09-30/execute_frozen.py\", \"experiments/development/citibike_fraction_lineage_2026-09-30/archive_executed.py\"]"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"compiled\": 4, \"version\": \"3.12.3\"}\n"
+    }
+  ],
+  "schema": 1
+}
