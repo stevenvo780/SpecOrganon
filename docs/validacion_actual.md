@@ -1,5 +1,26 @@
 # Auditoría de aceptación actual
 
+## D-107 · Núcleo, paquete e historia de retiro
+
+[Evidencia](../experiments/development/indicator_retirement_2026-09-30/README.md).
+Wheel137581B SHA63c58a91…:24módulos src/site y1555archivos por Python3.11.15/3.12.3
+cotejados. Suite actual2674passed, Ruff/compile. 23operaciones positivas CLI/MCP
+por entorno, cuatro workflows firmados con9fases sintéticas/50–51eventos, controles
+y repetición real LandlockABI9. Su evaluación field sigue no_demostrado.
+
+Retiro: dos positivos por Python,62eventos/prefijo52,9puts+retiro,
+182capturas/52pares, seis controles y guards rechazados sin escritura. Origen,
+tipo/rechazo conservados; reemplazos tipados y enlace D106→inferencia→síntesis;
+cero fases aceptadas en Citi. Cuatro tar/596regulares y seis symlinks sólo metadata.
+Revisor independiente confirma efectos/origins/cadenas/archivos/publicación;
+sin P1/P2 abierto en el alcance revisado.
+
+C1 mantiene PASS sólo en el alcance técnico inventariado del wheel actual.
+C2–C5 No demostrados: tests no autentican humanidad/custodia, campo, Q o reserva24.
+Restauración exacta sin evento puede recuperar snapshot/avance previo: el motor
+no recuerda corrupción transitoria. Los resultados siguientes conservan sus
+alcances históricos y wheels específicos.
+
 **Fracciones y filas D-105/D-106:**
 [controles instalados](../experiments/development/citibike_fraction_lineage_2026-09-30/)
 y [reproducción desde raw](../experiments/development/citibike_raw_count_audit_2026-09-30/).

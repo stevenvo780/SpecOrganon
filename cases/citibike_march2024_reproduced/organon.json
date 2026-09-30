@@ -1,0 +1,1813 @@
+{
+  "events": [
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "52ce47995dd005e556565b89f3ebd6b24b2930b4155c994a733118374e5fd7a8",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "p_access",
+        "kind": "problem",
+        "text": "Estudiar qué informa una muestra histórica de estados de estaciones sobre la posibilidad declarada de iniciar y terminar un viaje, sin convertir estados del feed en intentos de personas ni en efecto de una intervención.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "fcf356b0d22bdd0ae05c454d5f04ddeb1597a31758f7ed2b9d2a272f7151ea54",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_access": 1
+        },
+        "id": "a_riders",
+        "kind": "actor",
+        "text": "Las personas que intentan alquilar o devolver bicicletas podrían experimentar barreras distintas; sus intentos fallidos no constan en esta muestra.",
+        "version": 1
+      },
+      "prev_hash": "52ce47995dd005e556565b89f3ebd6b24b2930b4155c994a733118374e5fd7a8",
+      "seq": 2
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "e2182b8b75e3c6a83628bf8d9ba4944d47d8487a8dd2fdacd932ee473fd1cca7",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_access": 1
+        },
+        "id": "a_operators",
+        "kind": "actor",
+        "text": "El operador, su personal y la administración de transporte podrían soportar costes y responsabilidades distintos si se cambiara la operación; este expediente no observa tal cambio.",
+        "version": 1
+      },
+      "prev_hash": "fcf356b0d22bdd0ae05c454d5f04ddeb1597a31758f7ed2b9d2a272f7151ea54",
+      "seq": 3
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "280f2f64dee9907d50ad243481e6a6b466612835991d0ce9407d1b4253bc58a1",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p_access": 1
+        },
+        "id": "b_sample",
+        "kind": "boundary",
+        "text": "Solo la muestra publicada de estados del 12 al 23 de marzo de 2024 y su reanálisis retrospectivo. La unidad es una fila estación-instantánea. Se excluyen junio de 2026, estación-minutos continuos, intentos fallidos e impacto causal.",
+        "version": 1
+      },
+      "prev_hash": "e2182b8b75e3c6a83628bf8d9ba4944d47d8487a8dd2fdacd932ee473fd1cca7",
+      "seq": 4
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "a8e14904fee150b9180c951a640316d989e98a06433e497da18e8dff2a867938",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-09-27",
+          "locator": "sample-data, dataset.parquet, commit 4c36513cf3842efe9a2940a78974bf45cb13fc0b",
+          "observation_window_utc": [
+            "2024-03-12T21:40:49Z",
+            "2024-03-23T14:49:01Z"
+          ],
+          "origin": "published",
+          "scope": "citibike_sample_march_2024",
+          "sha256_source": "661221e1f6fc01ba6475cee61597e432fc0858689195b6c12255a6c005b52fc4",
+          "source": "https://github.com/NYCComptroller/citi-bike-gbfs/blob/4c36513cf3842efe9a2940a78974bf45cb13fc0b/dataset.parquet"
+        },
+        "deps": {
+          "b_sample": 1
+        },
+        "id": "e_archive",
+        "kind": "evidence",
+        "text": "La oficina del contralor de Nueva York publicó en sample-data un Parquet de estados y código de análisis; se fijaron commit y hash de los bytes descargados, sin añadir el archivo bruto al repositorio.",
+        "version": 1
+      },
+      "prev_hash": "280f2f64dee9907d50ad243481e6a6b466612835991d0ce9407d1b4253bc58a1",
+      "seq": 5
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "570b1b6c4e8e69da271616b58105f8bb47e86261b19819de0a739abf63478f17",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_riders": 1,
+          "e_archive": 1,
+          "p_access": 1
+        },
+        "id": "c_service",
+        "kind": "concept",
+        "text": "Alquiler habilitado con alguna bicicleta y devolución habilitada con algún anclaje son dos estados distintos del feed; ninguno equivale a acceso efectivo de una persona.",
+        "version": 1
+      },
+      "prev_hash": "a8e14904fee150b9180c951a640316d989e98a06433e497da18e8dff2a867938",
+      "seq": 6
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "a288b757b38bac095f061f990ef58179ad279c89a0955501eba33370472c4630",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "b_sample": 1,
+          "e_archive": 1
+        },
+        "id": "s_flags",
+        "kind": "assumption",
+        "text": "Los enteros 0/1 del Parquet procesado representan los estados habilitado/deshabilitado del archivo; esta lectura solo aplica a esos bytes y no valida tipos del GBFS vivo.",
+        "version": 1
+      },
+      "prev_hash": "570b1b6c4e8e69da271616b58105f8bb47e86261b19819de0a739abf63478f17",
+      "seq": 7
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "8f1866552b09f125b231b43aca2a4f21568b5d3c1bf5b7f85134d188108802ae",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "c_service": 1,
+          "p_access": 1
+        },
+        "id": "f_rows",
+        "kind": "frame_option",
+        "text": "Encuadre A: describir por separado las filas estación-instantánea con alquiler y devolución habilitados, conservando la calidad y frecuencia de captura.",
+        "version": 1
+      },
+      "prev_hash": "a288b757b38bac095f061f990ef58179ad279c89a0955501eba33370472c4630",
+      "seq": 8
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "213bc0a52ab3743abd35b42a03b2c9c84c931553f432867a8696ee0d59179f1e",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_riders": 1,
+          "b_sample": 1,
+          "p_access": 1
+        },
+        "id": "f_user",
+        "kind": "frame_option",
+        "text": "Encuadre B: estimar acceso vivido por las personas; exigiría intentos de viaje y cobertura temporal que la muestra no tiene.",
+        "version": 1
+      },
+      "prev_hash": "8f1866552b09f125b231b43aca2a4f21568b5d3c1bf5b7f85134d188108802ae",
+      "seq": 9
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "06fdfb6f0cc48aad1e0b9898519308fe944953668939e5ff4da132b292bdd7d7",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a_operators": 1,
+          "a_riders": 1,
+          "p_access": 1
+        },
+        "id": "n_scope",
+        "kind": "norm",
+        "text": "Compromiso propuesto y pendiente de aprobación humana: no presentar estados discretos del feed como acceso efectivo ni ocultar estaciones, horarios o grupos perjudicados por una futura intervención.",
+        "version": 1
+      },
+      "prev_hash": "213bc0a52ab3743abd35b42a03b2c9c84c931553f432867a8696ee0d59179f1e",
+      "seq": 10
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "cbcf86a81accc38a5948a2fffc269133f1a9f2f9f8b871e78d18f69a3967daca",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "b_sample": 1,
+          "c_service": 1,
+          "p_access": 1
+        },
+        "id": "q_rows",
+        "kind": "question",
+        "text": "Entre filas con conteos físicamente compatibles con la capacidad declarada, ¿cuántas indican alquiler habilitado y bicicleta, y cuántas devolución habilitada y anclaje?",
+        "version": 1
+      },
+      "prev_hash": "06fdfb6f0cc48aad1e0b9898519308fe944953668939e5ff4da132b292bdd7d7",
+      "seq": 11
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "dbf19d7a38cb7e3b481c8f5e338655b5835da5f26953b94d20e4ffc71054a5b4",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "q_rows": 1,
+          "s_flags": 1
+        },
+        "id": "h_distinct",
+        "kind": "hypothesis",
+        "text": "Las dos fracciones descriptivas podrían diferir; contrastar sus conteos sirve para decidir si deben informarse por separado, sin tratar las filas repetidas como ensayos independientes.",
+        "version": 1
+      },
+      "prev_hash": "cbcf86a81accc38a5948a2fffc269133f1a9f2f9f8b871e78d18f69a3967daca",
+      "seq": 12
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "cc41483f94c5b34efb663627253a154d8dfc47db4bbd929bec011fc446ff5910",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "dos estados del mismo archivo, alquiler habilitado con bicicleta frente a devolución habilitada con anclaje; comparación descriptiva, no intervención",
+          "method": "cases/citibike/analyze_sample_status.py con pyarrow 21.0.0 y tzdata 2026.4; salida fijada en experiments/development/citibike_sample_status_2026-09-27.json",
+          "population": "filas estación-instantánea del Parquet publicado de marzo de 2024",
+          "uncertainty": "capturas irregulares, conteos superiores a capacidad, ausencia de last_reported por estación e intentos fallidos; no se calculan intervalos causales"
+        },
+        "deps": {
+          "e_archive": 1,
+          "h_distinct": 1,
+          "q_rows": 1
+        },
+        "id": "pr_reanalysis",
+        "kind": "protocol",
+        "text": "Reanálisis retrospectivo exploratorio de un resultado ya abierto: fijar SHA-256 del Parquet y del script, rechazar pares estación-instante duplicados y flags ajenos a 0/1, exigir capacidad positiva y conteos no negativos, excluir filas cuyos conteos individuales o conjuntos excedan la capacidad, contar ambos estados por separado e informar huecos de captura. Este registro no es prerregistro ni prueba causal.",
+        "version": 1
+      },
+      "prev_hash": "dbf19d7a38cb7e3b481c8f5e338655b5835da5f26953b94d20e4ffc71054a5b4",
+      "seq": 13
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "2d80faf3f37e1bc62a83cda5b1e2843c5209775a6f7fc033773d89a52f35fbe1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "station_snapshot_row_service_fraction_by_action",
+          "unit": "fraction [0,1]"
+        },
+        "deps": {
+          "n_scope": 1,
+          "p_access": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "i_rows",
+        "kind": "indicator",
+        "text": "Dos fracciones de filas estación-instantánea elegibles: alquiler habilitado con al menos una bicicleta y devolución habilitada con al menos un anclaje. El denominador común es el total de filas que pasan el control conservador.",
+        "version": 1
+      },
+      "prev_hash": "cc41483f94c5b34efb663627253a154d8dfc47db4bbd929bec011fc446ff5910",
+      "seq": 14
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "0edb0e4eaa026c6b7ac5c46d791ad15c33029b6b4befc54947699139cf77d57f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-09-27",
+          "locator": "quality.conservative_dock_rows",
+          "metric_key": "eligible_station_snapshot_rows",
+          "origin": "derived",
+          "scope": "citibike_sample_march_2024",
+          "script": "cases/citibike/analyze_sample_status.py",
+          "sha256_script": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+          "sha256_source": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+          "source": "experiments/development/citibike_sample_status_2026-09-27.json",
+          "unit": "station_snapshot_rows",
+          "value": 1809036
+        },
+        "deps": {
+          "e_archive": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "e_eligible",
+        "kind": "evidence",
+        "text": "El control conservador dejó 1.809.036 de 1.812.548 filas estación-instantánea como denominador descriptivo.",
+        "version": 1
+      },
+      "prev_hash": "2d80faf3f37e1bc62a83cda5b1e2843c5209775a6f7fc033773d89a52f35fbe1",
+      "seq": 15
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "1b0667524bd7f32a7ea466517cde5651a82b1fe376ee999d7b1e1df41766821b",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-09-27",
+          "locator": "snapshot_row_service.rental_enabled_with_bike",
+          "metric_key": "rental_enabled_with_bike",
+          "origin": "derived",
+          "scope": "citibike_sample_march_2024",
+          "script": "cases/citibike/analyze_sample_status.py",
+          "sha256_script": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+          "sha256_source": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+          "source": "experiments/development/citibike_sample_status_2026-09-27.json",
+          "unit": "station_snapshot_rows",
+          "value": 1725248
+        },
+        "deps": {
+          "e_eligible": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "e_rental",
+        "kind": "evidence",
+        "text": "En 1.725.248 filas elegibles constaban alquiler habilitado y al menos una bicicleta disponible.",
+        "version": 1
+      },
+      "prev_hash": "0edb0e4eaa026c6b7ac5c46d791ad15c33029b6b4befc54947699139cf77d57f",
+      "seq": 16
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "8e4cdbd53e53e7334574bba61e632ada74c116b745e6e1874a13d7bfe2d27217",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-09-27",
+          "locator": "snapshot_row_service.return_enabled_with_dock",
+          "metric_key": "return_enabled_with_dock",
+          "origin": "derived",
+          "scope": "citibike_sample_march_2024",
+          "script": "cases/citibike/analyze_sample_status.py",
+          "sha256_script": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+          "sha256_source": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+          "source": "experiments/development/citibike_sample_status_2026-09-27.json",
+          "unit": "station_snapshot_rows",
+          "value": 1682386
+        },
+        "deps": {
+          "e_eligible": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "e_return",
+        "kind": "evidence",
+        "text": "En 1.682.386 filas elegibles constaban devolución habilitada y al menos un anclaje disponible.",
+        "version": 1
+      },
+      "prev_hash": "1b0667524bd7f32a7ea466517cde5651a82b1fe376ee999d7b1e1df41766821b",
+      "seq": 17
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "ea35484f041d4fb446bc905cd6133bd3cf53815d0085fe35401246d92515268c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-09-27",
+          "locator": "quality.excluded_rows",
+          "metric_key": "excluded_station_snapshot_rows",
+          "origin": "derived",
+          "scope": "citibike_sample_march_2024",
+          "script": "cases/citibike/analyze_sample_status.py",
+          "sha256_script": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+          "sha256_source": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+          "source": "experiments/development/citibike_sample_status_2026-09-27.json",
+          "unit": "station_snapshot_rows",
+          "value": 3512
+        },
+        "deps": {
+          "e_archive": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "e_excluded",
+        "kind": "evidence",
+        "text": "Se excluyeron 3.512 filas cuyo conteo conjunto de bicicletas y anclajes disponibles superaba la capacidad declarada.",
+        "version": 1
+      },
+      "prev_hash": "8e4cdbd53e53e7334574bba61e632ada74c116b745e6e1874a13d7bfe2d27217",
+      "seq": 18
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "3ba95e8e4c7e6b51997b46ffac45388b37e9fce33246ef854cff45deef7a6504",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-09-27",
+          "locator": "gaps_over_30_minutes",
+          "metric_key": "snapshot_gaps_over_30_minutes",
+          "origin": "derived",
+          "scope": "citibike_sample_march_2024",
+          "script": "cases/citibike/analyze_sample_status.py",
+          "sha256_script": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+          "sha256_source": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+          "source": "experiments/development/citibike_sample_status_2026-09-27.json",
+          "unit": "snapshot_intervals",
+          "value": 37
+        },
+        "deps": {
+          "e_archive": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "e_gaps",
+        "kind": "evidence",
+        "text": "Hubo 37 intervalos entre capturas mayores de 30 minutos; el máximo fue 3.719 segundos.",
+        "version": 1
+      },
+      "prev_hash": "ea35484f041d4fb446bc905cd6133bd3cf53815d0085fe35401246d92515268c",
+      "seq": 19
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "f67914ad0fd4505ad10f0e36adf68f180d6cf3fd49050f448f4a8c3b097ade90",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_eligible": 1,
+          "e_excluded": 1,
+          "e_gaps": 1,
+          "e_rental": 1,
+          "e_return": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "inf_scope",
+        "kind": "inference",
+        "text": "Alquiler y devolución dan 1.725.248/1.809.036 y 1.682.386/1.809.036 filas elegibles, respectivamente. Los 37 huecos largos, 3.512 exclusiones y la falta de intentos fallidos impiden interpretar estas fracciones como estación-minutos continuos, acceso vivido o efecto de intervención.",
+        "version": 1
+      },
+      "prev_hash": "3ba95e8e4c7e6b51997b46ffac45388b37e9fce33246ef854cff45deef7a6504",
+      "seq": 20
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "d4831788f367455a03b78241c201c4561b1b1aa4d2af0de2aab811762740c962",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_archive": 1,
+          "e_rental": 1,
+          "e_return": 1,
+          "inf_scope": 1
+        },
+        "id": "syn_limit",
+        "kind": "synthesis",
+        "text": "La muestra confirma que el reanálisis puede separar estados de alquiler y devolución en otro dominio con fuentes y cálculo trazables. No compara intervenciones ni estima viajes frustrados; esas preguntas requieren un estudio distinto.",
+        "version": 1
+      },
+      "prev_hash": "f67914ad0fd4505ad10f0e36adf68f180d6cf3fd49050f448f4a8c3b097ade90",
+      "seq": 21
+    },
+    {
+      "actor": "agent:march_sample_author",
+      "at": "2026-09-27T02:14:41+00:00",
+      "hash": "4c8aa68b39493d902ce5dc85877956e381278c1c4a4a0ee2dbabfad8a4d97fa9",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "syn_limit": 1
+        },
+        "id": "unc_coverage",
+        "kind": "uncertainty",
+        "text": "No se verificó la verdad física de cada estado, `last_reported` por estación, cobertura temporal continua, demanda latente, desplazamiento territorial, daños o costes de una intervención. El protocolo se registró después de analizar la muestra.",
+        "version": 1
+      },
+      "prev_hash": "d4831788f367455a03b78241c201c4561b1b1aa4d2af0de2aab811762740c962",
+      "seq": 22
+    },
+    {
+      "actor": "agent:march_sample_reviewer",
+      "at": "2026-09-27T02:14:52+00:00",
+      "hash": "ddab73d4262c9691d4049cfbcc927e94d25abcccdb535c77909f0362396675b1",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "reason": "Independent native read-only review accepted the March 2024 problem, actors, scope and exclusions; no human norm or field result was approved",
+        "snapshot": "58bcba05af168f91dd278361d1c02ede9e59d5e200730071aa8598cdc27e2670",
+        "verdict": "accept"
+      },
+      "prev_hash": "4c8aa68b39493d902ce5dc85877956e381278c1c4a4a0ee2dbabfad8a4d97fa9",
+      "seq": 23
+    },
+    {
+      "actor": "agent:march_sample_reviewer",
+      "at": "2026-09-27T02:15:05+00:00",
+      "hash": "061f398b0d252550ff05501fd2c7e02a708ae438b35092b42bfa5b028e221355",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 23,
+        "snapshot": "58bcba05af168f91dd278361d1c02ede9e59d5e200730071aa8598cdc27e2670"
+      },
+      "prev_hash": "ddab73d4262c9691d4049cfbcc927e94d25abcccdb535c77909f0362396675b1",
+      "seq": 24
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:38:58+00:00",
+      "hash": "8f2d9f221eae61c4037c2aa51e637aa5b9c6f2d6d0507d70633b4439cefe33d2",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "station_snapshot_row_service_fraction_by_action",
+          "unit": "fraction [0,1]"
+        },
+        "deps": {
+          "e_eligible": 1,
+          "e_excluded": 1,
+          "e_gaps": 1,
+          "e_rental": 1,
+          "e_return": 1,
+          "n_scope": 1,
+          "p_access": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "i_rows",
+        "kind": "indicator",
+        "text": "Dos fracciones de filas estación-instantánea elegibles: alquiler habilitado con al menos una bicicleta y devolución habilitada con al menos un anclaje. El denominador común es el total de filas que pasan el control conservador. Las cinco evidencias derivadas quedan enlazadas explícitamente.",
+        "version": 2
+      },
+      "prev_hash": "061f398b0d252550ff05501fd2c7e02a708ae438b35092b42bfa5b028e221355",
+      "seq": 25
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:38:58+00:00",
+      "hash": "9a6615f66569a4d379cba2e47f1222bed2212a2b89b3c216497f13a9e246c919",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed"
+        },
+        "deps": {
+          "i_rows": 2,
+          "n_scope": 1,
+          "syn_limit": 1
+        },
+        "id": "o_rows_report",
+        "kind": "option",
+        "text": "Informar dos fracciones por filas elegibles con exclusiones y huecos visibles; no afirmar acceso vivido.",
+        "version": 1
+      },
+      "prev_hash": "8f2d9f221eae61c4037c2aa51e637aa5b9c6f2d6d0507d70633b4439cefe33d2",
+      "seq": 26
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:38:58+00:00",
+      "hash": "34f13fc165b5f8b15b8a885ee6bb471ef15b98533f4b6c6d8be3c293b986e792",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed"
+        },
+        "deps": {
+          "e_gaps": 1,
+          "n_scope": 1,
+          "syn_limit": 1
+        },
+        "id": "o_access_study",
+        "kind": "option",
+        "text": "Reservar las afirmaciones sobre acceso vivido para otro estudio con intentos y cobertura temporal.",
+        "version": 1
+      },
+      "prev_hash": "9a6615f66569a4d379cba2e47f1222bed2212a2b89b3c216497f13a9e246c919",
+      "seq": 27
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:38:58+00:00",
+      "hash": "bef807e22e5699292d2ef65a2e0f7c7a23e4cc4bad89ec80c21fed801f38aa75",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed"
+        },
+        "deps": {
+          "e_eligible": 1,
+          "e_gaps": 1,
+          "o_access_study": 1,
+          "o_rows_report": 1
+        },
+        "id": "cmp_reporting",
+        "kind": "comparison",
+        "text": "La primera opción permite reporte descriptivo acotado; la segunda exige nueva evidencia para acceso vivido. Ninguna prueba impacto.",
+        "version": 1
+      },
+      "prev_hash": "34f13fc165b5f8b15b8a885ee6bb471ef15b98533f4b6c6d8be3c293b986e792",
+      "seq": 28
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:38:58+00:00",
+      "hash": "b3149464a7c269a7e5e6ed518d5500c8369efc19f68f973d887f4de4edc3b410",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed"
+        },
+        "deps": {
+          "cmp_reporting": 1,
+          "e_eligible": 1,
+          "i_rows": 2,
+          "n_scope": 1
+        },
+        "id": "d_reporting",
+        "kind": "decision",
+        "text": "Decisión candidata de desarrollo, sin aprobación humana: usar solo el reporte descriptivo acotado hasta contar con otro estudio.",
+        "version": 1
+      },
+      "prev_hash": "bef807e22e5699292d2ef65a2e0f7c7a23e4cc4bad89ec80c21fed801f38aa75",
+      "seq": 29
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:38:59+00:00",
+      "hash": "6ce5b5694941ebe7337ea0dbb934c6ba0138c2eada883ad8a80b22587a37ef7d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed"
+        },
+        "deps": {
+          "d_reporting": 1,
+          "e_eligible": 1,
+          "e_excluded": 1,
+          "e_gaps": 1,
+          "e_rental": 1,
+          "e_return": 1,
+          "i_rows": 2
+        },
+        "id": "req_row_report",
+        "kind": "requirement",
+        "text": "Requisito candidato, no implementado: mostrar numeradores de alquiler y devolución sobre 1.809.036 filas elegibles, y advertir 3.512 exclusiones y 37 huecos largos.",
+        "version": 1
+      },
+      "prev_hash": "b3149464a7c269a7e5e6ed518d5500c8369efc19f68f973d887f4de4edc3b410",
+      "seq": 30
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:38:59+00:00",
+      "hash": "cd64ca5090c2bbd16322cc64fe67062695242b6f1a2db250b59d2435789fe12e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-09-27",
+          "locator": "quality.conservative_dock_rows",
+          "metric_key": "eligible_station_snapshot_rows",
+          "origin": "derived",
+          "scope": "citibike_sample_march_2024",
+          "script": "cases/citibike/analyze_sample_status.py",
+          "sha256_script": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+          "sha256_source": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+          "source": "experiments/development/citibike_sample_status_2026-09-27.json",
+          "unit": "station_snapshot_rows",
+          "value": 1809036
+        },
+        "deps": {
+          "e_archive": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "e_eligible",
+        "kind": "evidence",
+        "text": "El control conservador dejó 1.809.036 de 1.812.548 filas estación-instantánea como denominador descriptivo. Denominador reconfirmado contra el resultado publicado fijado.",
+        "version": 2
+      },
+      "prev_hash": "6ce5b5694941ebe7337ea0dbb934c6ba0138c2eada883ad8a80b22587a37ef7d",
+      "seq": 31
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:38:59+00:00",
+      "hash": "91112160f0e33606105d4f792d4232a557a0d5f3869908ccb4bd5cd83e587a79",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-09-27",
+          "locator": "snapshot_row_service.rental_enabled_with_bike",
+          "metric_key": "rental_enabled_with_bike",
+          "origin": "derived",
+          "scope": "citibike_sample_march_2024",
+          "script": "cases/citibike/analyze_sample_status.py",
+          "sha256_script": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+          "sha256_source": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+          "source": "experiments/development/citibike_sample_status_2026-09-27.json",
+          "unit": "station_snapshot_rows",
+          "value": 1725248
+        },
+        "deps": {
+          "e_eligible": 2,
+          "pr_reanalysis": 1
+        },
+        "id": "e_rental",
+        "kind": "evidence",
+        "text": "En 1.725.248 filas elegibles constaban alquiler habilitado y al menos una bicicleta disponible.",
+        "version": 2
+      },
+      "prev_hash": "cd64ca5090c2bbd16322cc64fe67062695242b6f1a2db250b59d2435789fe12e",
+      "seq": 32
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:38:59+00:00",
+      "hash": "5faac826516a2babb413823481352c8a46bd34b67f9e640b4436194961e55b5a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-09-27",
+          "locator": "snapshot_row_service.return_enabled_with_dock",
+          "metric_key": "return_enabled_with_dock",
+          "origin": "derived",
+          "scope": "citibike_sample_march_2024",
+          "script": "cases/citibike/analyze_sample_status.py",
+          "sha256_script": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+          "sha256_source": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+          "source": "experiments/development/citibike_sample_status_2026-09-27.json",
+          "unit": "station_snapshot_rows",
+          "value": 1682386
+        },
+        "deps": {
+          "e_eligible": 2,
+          "pr_reanalysis": 1
+        },
+        "id": "e_return",
+        "kind": "evidence",
+        "text": "En 1.682.386 filas elegibles constaban devolución habilitada y al menos un anclaje disponible.",
+        "version": 2
+      },
+      "prev_hash": "91112160f0e33606105d4f792d4232a557a0d5f3869908ccb4bd5cd83e587a79",
+      "seq": 33
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:39:00+00:00",
+      "hash": "92d36f683da70ef897217a9554c3634178e9cbaa58146942ba6bd388737fc8ce",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_eligible": 2,
+          "e_excluded": 1,
+          "e_gaps": 1,
+          "e_rental": 2,
+          "e_return": 2,
+          "pr_reanalysis": 1
+        },
+        "id": "inf_scope",
+        "kind": "inference",
+        "text": "Alquiler y devolución dan 1.725.248/1.809.036 y 1.682.386/1.809.036 filas elegibles, respectivamente. Los 37 huecos largos, 3.512 exclusiones y la falta de intentos fallidos impiden interpretar estas fracciones como estación-minutos continuos, acceso vivido o efecto de intervención.",
+        "version": 2
+      },
+      "prev_hash": "5faac826516a2babb413823481352c8a46bd34b67f9e640b4436194961e55b5a",
+      "seq": 34
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:39:00+00:00",
+      "hash": "00c49ee66ad1fbf8c9b2cf68daa37703d97bb950f432ec0016fb66dfc8adc405",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e_archive": 1,
+          "e_rental": 2,
+          "e_return": 2,
+          "inf_scope": 2
+        },
+        "id": "syn_limit",
+        "kind": "synthesis",
+        "text": "La muestra confirma que el reanálisis puede separar estados de alquiler y devolución en otro dominio con fuentes y cálculo trazables. No compara intervenciones ni estima viajes frustrados; esas preguntas requieren un estudio distinto.",
+        "version": 2
+      },
+      "prev_hash": "92d36f683da70ef897217a9554c3634178e9cbaa58146942ba6bd388737fc8ce",
+      "seq": 35
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:39:00+00:00",
+      "hash": "ce0d0c3f9df7e2a5ad14300e5090c3ac20187ae14c99fa2463645d046de2045c",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "syn_limit": 2
+        },
+        "id": "unc_coverage",
+        "kind": "uncertainty",
+        "text": "No se verificó la verdad física de cada estado, `last_reported` por estación, cobertura temporal continua, demanda latente, desplazamiento territorial, daños o costes de una intervención. El protocolo se registró después de analizar la muestra.",
+        "version": 2
+      },
+      "prev_hash": "00c49ee66ad1fbf8c9b2cf68daa37703d97bb950f432ec0016fb66dfc8adc405",
+      "seq": 36
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:39:00+00:00",
+      "hash": "c7c8e7fb540ab7ed67709aadf53ddd0a27cb7705a5e361b6959282a6610df68e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "station_snapshot_row_service_fraction_by_action",
+          "unit": "fraction [0,1]"
+        },
+        "deps": {
+          "e_eligible": 2,
+          "e_excluded": 1,
+          "e_gaps": 1,
+          "e_rental": 2,
+          "e_return": 2,
+          "n_scope": 1,
+          "p_access": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "i_rows",
+        "kind": "indicator",
+        "text": "Dos fracciones de filas estación-instantánea elegibles: alquiler habilitado con al menos una bicicleta y devolución habilitada con al menos un anclaje. El denominador común es el total de filas que pasan el control conservador. Las cinco evidencias derivadas quedan enlazadas explícitamente.",
+        "version": 3
+      },
+      "prev_hash": "ce0d0c3f9df7e2a5ad14300e5090c3ac20187ae14c99fa2463645d046de2045c",
+      "seq": 37
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:39:00+00:00",
+      "hash": "d9968da632b414216d9b9dee8833e0a2a4441b058155197ce47dbc211442d7d1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed"
+        },
+        "deps": {
+          "i_rows": 3,
+          "n_scope": 1,
+          "syn_limit": 2
+        },
+        "id": "o_rows_report",
+        "kind": "option",
+        "text": "Informar dos fracciones por filas elegibles con exclusiones y huecos visibles; no afirmar acceso vivido.",
+        "version": 2
+      },
+      "prev_hash": "c7c8e7fb540ab7ed67709aadf53ddd0a27cb7705a5e361b6959282a6610df68e",
+      "seq": 38
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:39:00+00:00",
+      "hash": "467d0398adab1cbd5f50ed3d46f5a1f9ab6d05b19b40a6af82e64f8cb4062dd1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed"
+        },
+        "deps": {
+          "e_gaps": 1,
+          "n_scope": 1,
+          "syn_limit": 2
+        },
+        "id": "o_access_study",
+        "kind": "option",
+        "text": "Reservar las afirmaciones sobre acceso vivido para otro estudio con intentos y cobertura temporal.",
+        "version": 2
+      },
+      "prev_hash": "d9968da632b414216d9b9dee8833e0a2a4441b058155197ce47dbc211442d7d1",
+      "seq": 39
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:39:01+00:00",
+      "hash": "29fd4eb429623a7a3533e17d162fe8abc7161d4287485d5558b16e1011bad03e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed"
+        },
+        "deps": {
+          "e_eligible": 2,
+          "e_gaps": 1,
+          "o_access_study": 2,
+          "o_rows_report": 2
+        },
+        "id": "cmp_reporting",
+        "kind": "comparison",
+        "text": "La primera opción permite reporte descriptivo acotado; la segunda exige nueva evidencia para acceso vivido. Ninguna prueba impacto.",
+        "version": 2
+      },
+      "prev_hash": "467d0398adab1cbd5f50ed3d46f5a1f9ab6d05b19b40a6af82e64f8cb4062dd1",
+      "seq": 40
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:39:01+00:00",
+      "hash": "327b7434fb507ea7b526adca75fa5d0c75d4f4a859b2f887569212334daa44e0",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed"
+        },
+        "deps": {
+          "cmp_reporting": 2,
+          "e_eligible": 2,
+          "i_rows": 3,
+          "n_scope": 1
+        },
+        "id": "d_reporting",
+        "kind": "decision",
+        "text": "Decisión candidata de desarrollo, sin aprobación humana: usar solo el reporte descriptivo acotado hasta contar con otro estudio.",
+        "version": 2
+      },
+      "prev_hash": "29fd4eb429623a7a3533e17d162fe8abc7161d4287485d5558b16e1011bad03e",
+      "seq": 41
+    },
+    {
+      "actor": "agent:march_indicator_lineage_probe",
+      "at": "2026-09-27T16:39:01+00:00",
+      "hash": "4585a56f27701d824de5d82f3e7f66428e5c5ee20efb97cdd23cce11cb96b620",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed"
+        },
+        "deps": {
+          "d_reporting": 2,
+          "e_eligible": 2,
+          "e_excluded": 1,
+          "e_gaps": 1,
+          "e_rental": 2,
+          "e_return": 2,
+          "i_rows": 3
+        },
+        "id": "req_row_report",
+        "kind": "requirement",
+        "text": "Requisito candidato, no implementado: mostrar numeradores de alquiler y devolución sobre 1.809.036 filas elegibles, y advertir 3.512 exclusiones y 37 huecos largos.",
+        "version": 2
+      },
+      "prev_hash": "327b7434fb507ea7b526adca75fa5d0c75d4f4a859b2f887569212334daa44e0",
+      "seq": 42
+    },
+    {
+      "actor": "agent:D105-installed-fraction-probe",
+      "at": "2026-09-30T20:55:37+00:00",
+      "hash": "6d9ac468f616a3039930f0f7febf06739a94dc353b7a5dd6831d9c01877ff15b",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "analysis_script_archive": "source_analysis.py",
+          "analysis_script_sha256": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+          "archive": "derived_ratios.json",
+          "claim_archive": "ratio_claim_rental.json",
+          "claim_sha256": "48813b54b7ce4d393b0a803f38f0caf1cc66a8717fbddc34f1157e31e949b666",
+          "contract_archive": "ratio_contract.json",
+          "contract_sha256": "44f016ce11b3e07ad0309221a5f9f285ea3d0b16c643328a5fc0f37dec705255",
+          "date": "2026-09-30",
+          "decimal_places": 24,
+          "denominator": {
+            "locator": "snapshot_row_service.denominator",
+            "observation_unit": "station_snapshot_row",
+            "population": "quality_eligible_citibike_station_snapshot_rows",
+            "quantity_id": "eligible_rows",
+            "time_scope": {
+              "end_utc": "2024-03-23T14:49:01Z",
+              "id": "citibike_sample_march_2024",
+              "start_utc": "2024-03-12T21:40:49Z"
+            },
+            "unit": "station_snapshot_rows",
+            "value": 1809036,
+            "value_type": "integer_count"
+          },
+          "denominator_locator": "snapshot_row_service.denominator",
+          "exact_ratio": {
+            "denominator": 452259,
+            "numerator": 431312
+          },
+          "exact_ratio_locator": "/results/0/exact_ratio",
+          "locator": "/results/0/representation/value",
+          "max_abs_representation_error": "5e-25",
+          "method": "specorganon.ratio_audit.audit_derived_ratio",
+          "method_module_sha256": "55bf8b9174d49985ce69b503b113541bc313f992ca4fced9532fb0f0201121d1",
+          "metric_key": "rental_enabled_with_bike_share_of_quality_eligible_rows",
+          "numerator": {
+            "locator": "snapshot_row_service.rental_enabled_with_bike",
+            "observation_unit": "station_snapshot_row",
+            "population": "quality_eligible_citibike_station_snapshot_rows",
+            "quantity_id": "rental_rows",
+            "time_scope": {
+              "end_utc": "2024-03-23T14:49:01Z",
+              "id": "citibike_sample_march_2024",
+              "start_utc": "2024-03-12T21:40:49Z"
+            },
+            "unit": "station_snapshot_rows",
+            "value": 1725248,
+            "value_type": "integer_count"
+          },
+          "numerator_locator": "snapshot_row_service.rental_enabled_with_bike",
+          "numeric_interpretation": "rounded representation of pinned published counts; not a field measurement",
+          "observation_unit": "station_snapshot_row",
+          "origin": "derived",
+          "population": "quality_eligible_citibike_station_snapshot_rows",
+          "published_report": "published_report.json",
+          "published_report_sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+          "representation_precision_is_not_measurement_accuracy": true,
+          "rounding": "ROUND_HALF_EVEN",
+          "sampling_uncertainty": "not estimated; irregular snapshots are not station-minute coverage",
+          "scope": "citibike_sample_march_2024",
+          "source": "derived_ratios.json",
+          "source_sha256": "1d44741bc49c899007db2989f92f0d584af49509085a050a2dde73d47c2007f7",
+          "source_truth_authenticated": false,
+          "subset_membership_verified_from_rows": false,
+          "time_scope": {
+            "end_utc": "2024-03-23T14:49:01Z",
+            "id": "citibike_sample_march_2024",
+            "start_utc": "2024-03-12T21:40:49Z"
+          },
+          "tolerance": "1e-24",
+          "unit": "fraction",
+          "value": "0.953683619342014199827975"
+        },
+        "deps": {
+          "e_eligible": 2,
+          "e_rental": 2,
+          "n_scope": 1,
+          "p_access": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "e_rental_fraction",
+        "kind": "evidence",
+        "text": "Fracción descriptiva rental_enabled_with_bike_share_of_quality_eligible_rows: 1725248/1809036 filas elegibles; racional reducido 431312/452259. El value decimal es una representación redondeada, no acceso efectivo ni resultado de intervención.",
+        "version": 1
+      },
+      "prev_hash": "4585a56f27701d824de5d82f3e7f66428e5c5ee20efb97cdd23cce11cb96b620",
+      "seq": 43
+    },
+    {
+      "actor": "agent:D105-installed-fraction-probe",
+      "at": "2026-09-30T20:55:37+00:00",
+      "hash": "c6ccc0a093b68cbf1f402c10ed77c4dbde0b05c35a7c4ec16d922ed19eeaf0d8",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "analysis_script_archive": "source_analysis.py",
+          "analysis_script_sha256": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+          "archive": "derived_ratios.json",
+          "claim_archive": "ratio_claim_return.json",
+          "claim_sha256": "013c4bd67e9168efb301148590acfa6f9a9466655ceac0f851d6d6c1fb325f30",
+          "contract_archive": "ratio_contract.json",
+          "contract_sha256": "44f016ce11b3e07ad0309221a5f9f285ea3d0b16c643328a5fc0f37dec705255",
+          "date": "2026-09-30",
+          "decimal_places": 24,
+          "denominator": {
+            "locator": "snapshot_row_service.denominator",
+            "observation_unit": "station_snapshot_row",
+            "population": "quality_eligible_citibike_station_snapshot_rows",
+            "quantity_id": "eligible_rows",
+            "time_scope": {
+              "end_utc": "2024-03-23T14:49:01Z",
+              "id": "citibike_sample_march_2024",
+              "start_utc": "2024-03-12T21:40:49Z"
+            },
+            "unit": "station_snapshot_rows",
+            "value": 1809036,
+            "value_type": "integer_count"
+          },
+          "denominator_locator": "snapshot_row_service.denominator",
+          "exact_ratio": {
+            "denominator": 904518,
+            "numerator": 841193
+          },
+          "exact_ratio_locator": "/results/1/exact_ratio",
+          "locator": "/results/1/representation/value",
+          "max_abs_representation_error": "5e-25",
+          "method": "specorganon.ratio_audit.audit_derived_ratio",
+          "method_module_sha256": "55bf8b9174d49985ce69b503b113541bc313f992ca4fced9532fb0f0201121d1",
+          "metric_key": "return_enabled_with_dock_share_of_quality_eligible_rows",
+          "numerator": {
+            "locator": "snapshot_row_service.return_enabled_with_dock",
+            "observation_unit": "station_snapshot_row",
+            "population": "quality_eligible_citibike_station_snapshot_rows",
+            "quantity_id": "return_rows",
+            "time_scope": {
+              "end_utc": "2024-03-23T14:49:01Z",
+              "id": "citibike_sample_march_2024",
+              "start_utc": "2024-03-12T21:40:49Z"
+            },
+            "unit": "station_snapshot_rows",
+            "value": 1682386,
+            "value_type": "integer_count"
+          },
+          "numerator_locator": "snapshot_row_service.return_enabled_with_dock",
+          "numeric_interpretation": "rounded representation of pinned published counts; not a field measurement",
+          "observation_unit": "station_snapshot_row",
+          "origin": "derived",
+          "population": "quality_eligible_citibike_station_snapshot_rows",
+          "published_report": "published_report.json",
+          "published_report_sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+          "representation_precision_is_not_measurement_accuracy": true,
+          "rounding": "ROUND_HALF_EVEN",
+          "sampling_uncertainty": "not estimated; irregular snapshots are not station-minute coverage",
+          "scope": "citibike_sample_march_2024",
+          "source": "derived_ratios.json",
+          "source_sha256": "1d44741bc49c899007db2989f92f0d584af49509085a050a2dde73d47c2007f7",
+          "source_truth_authenticated": false,
+          "subset_membership_verified_from_rows": false,
+          "time_scope": {
+            "end_utc": "2024-03-23T14:49:01Z",
+            "id": "citibike_sample_march_2024",
+            "start_utc": "2024-03-12T21:40:49Z"
+          },
+          "tolerance": "1e-24",
+          "unit": "fraction",
+          "value": "0.929990337395165159786759"
+        },
+        "deps": {
+          "e_eligible": 2,
+          "e_return": 2,
+          "n_scope": 1,
+          "p_access": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "e_return_fraction",
+        "kind": "evidence",
+        "text": "Fracción descriptiva return_enabled_with_dock_share_of_quality_eligible_rows: 1682386/1809036 filas elegibles; racional reducido 841193/904518. El value decimal es una representación redondeada, no acceso efectivo ni resultado de intervención.",
+        "version": 1
+      },
+      "prev_hash": "6d9ac468f616a3039930f0f7febf06739a94dc353b7a5dd6831d9c01877ff15b",
+      "seq": 44
+    },
+    {
+      "actor": "agent:D105-installed-fraction-probe",
+      "at": "2026-09-30T20:55:37+00:00",
+      "hash": "1d9dcafb68bbeb6c51c5202b2516c6c0c01b6bc8a87e369d0d368506d69d226b",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "decimal_places": 24,
+          "denominator": {
+            "locator": "snapshot_row_service.denominator",
+            "observation_unit": "station_snapshot_row",
+            "population": "quality_eligible_citibike_station_snapshot_rows",
+            "quantity_id": "eligible_rows",
+            "time_scope": {
+              "end_utc": "2024-03-23T14:49:01Z",
+              "id": "citibike_sample_march_2024",
+              "start_utc": "2024-03-12T21:40:49Z"
+            },
+            "unit": "station_snapshot_rows",
+            "value": 1809036,
+            "value_type": "integer_count"
+          },
+          "exact_ratio": {
+            "denominator": 452259,
+            "numerator": 431312
+          },
+          "max_abs_representation_error": "5e-25",
+          "metric": "rental_enabled_with_bike_share_of_quality_eligible_rows",
+          "numerator": {
+            "locator": "snapshot_row_service.rental_enabled_with_bike",
+            "observation_unit": "station_snapshot_row",
+            "population": "quality_eligible_citibike_station_snapshot_rows",
+            "quantity_id": "rental_rows",
+            "time_scope": {
+              "end_utc": "2024-03-23T14:49:01Z",
+              "id": "citibike_sample_march_2024",
+              "start_utc": "2024-03-12T21:40:49Z"
+            },
+            "unit": "station_snapshot_rows",
+            "value": 1725248,
+            "value_type": "integer_count"
+          },
+          "numeric_interpretation": "rounded representation of pinned published counts; not a field measurement",
+          "observation_unit": "station_snapshot_row",
+          "population": "quality_eligible_citibike_station_snapshot_rows",
+          "representation_precision_is_not_measurement_accuracy": true,
+          "rounding": "ROUND_HALF_EVEN",
+          "sampling_uncertainty": "not estimated; irregular snapshots are not station-minute coverage",
+          "time_scope": {
+            "end_utc": "2024-03-23T14:49:01Z",
+            "id": "citibike_sample_march_2024",
+            "start_utc": "2024-03-12T21:40:49Z"
+          },
+          "tolerance": "1e-24",
+          "unit": "fraction",
+          "value": "0.953683619342014199827975"
+        },
+        "deps": {
+          "e_rental_fraction": 1,
+          "n_scope": 1,
+          "p_access": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "i_rental_fraction",
+        "kind": "indicator",
+        "text": "Indicador escalar descriptivo: rental_enabled_with_bike_share_of_quality_eligible_rows; unidad fraction de filas elegibles, sin umbral de eficacia o aprobación normativa.",
+        "version": 1
+      },
+      "prev_hash": "c6ccc0a093b68cbf1f402c10ed77c4dbde0b05c35a7c4ec16d922ed19eeaf0d8",
+      "seq": 45
+    },
+    {
+      "actor": "agent:D105-installed-fraction-probe",
+      "at": "2026-09-30T20:55:37+00:00",
+      "hash": "7a066fe931a7674b685807641f06182c19d341c90fc81750f1247d70e8e89c23",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "decimal_places": 24,
+          "denominator": {
+            "locator": "snapshot_row_service.denominator",
+            "observation_unit": "station_snapshot_row",
+            "population": "quality_eligible_citibike_station_snapshot_rows",
+            "quantity_id": "eligible_rows",
+            "time_scope": {
+              "end_utc": "2024-03-23T14:49:01Z",
+              "id": "citibike_sample_march_2024",
+              "start_utc": "2024-03-12T21:40:49Z"
+            },
+            "unit": "station_snapshot_rows",
+            "value": 1809036,
+            "value_type": "integer_count"
+          },
+          "exact_ratio": {
+            "denominator": 904518,
+            "numerator": 841193
+          },
+          "max_abs_representation_error": "5e-25",
+          "metric": "return_enabled_with_dock_share_of_quality_eligible_rows",
+          "numerator": {
+            "locator": "snapshot_row_service.return_enabled_with_dock",
+            "observation_unit": "station_snapshot_row",
+            "population": "quality_eligible_citibike_station_snapshot_rows",
+            "quantity_id": "return_rows",
+            "time_scope": {
+              "end_utc": "2024-03-23T14:49:01Z",
+              "id": "citibike_sample_march_2024",
+              "start_utc": "2024-03-12T21:40:49Z"
+            },
+            "unit": "station_snapshot_rows",
+            "value": 1682386,
+            "value_type": "integer_count"
+          },
+          "numeric_interpretation": "rounded representation of pinned published counts; not a field measurement",
+          "observation_unit": "station_snapshot_row",
+          "population": "quality_eligible_citibike_station_snapshot_rows",
+          "representation_precision_is_not_measurement_accuracy": true,
+          "rounding": "ROUND_HALF_EVEN",
+          "sampling_uncertainty": "not estimated; irregular snapshots are not station-minute coverage",
+          "time_scope": {
+            "end_utc": "2024-03-23T14:49:01Z",
+            "id": "citibike_sample_march_2024",
+            "start_utc": "2024-03-12T21:40:49Z"
+          },
+          "tolerance": "1e-24",
+          "unit": "fraction",
+          "value": "0.929990337395165159786759"
+        },
+        "deps": {
+          "e_return_fraction": 1,
+          "n_scope": 1,
+          "p_access": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "i_return_fraction",
+        "kind": "indicator",
+        "text": "Indicador escalar descriptivo: return_enabled_with_dock_share_of_quality_eligible_rows; unidad fraction de filas elegibles, sin umbral de eficacia o aprobación normativa.",
+        "version": 1
+      },
+      "prev_hash": "1d9dcafb68bbeb6c51c5202b2516c6c0c01b6bc8a87e369d0d368506d69d226b",
+      "seq": 46
+    },
+    {
+      "actor": "agent:D105-installed-fraction-probe",
+      "at": "2026-09-30T20:55:37+00:00",
+      "hash": "6aaa5ea503fdd7eaad5b1e0b4e5c6325e0709e2777624a1f3afe711ab4bb23f1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "components": [
+            "i_rental_fraction",
+            "i_return_fraction"
+          ],
+          "legacy_indicator": "i_rows",
+          "legacy_indicator_untouched": true,
+          "legacy_indicator_version": 3,
+          "no_single_scalar_metric": true,
+          "supersedes_kind": "indicator"
+        },
+        "deps": {
+          "e_eligible": 2,
+          "e_excluded": 1,
+          "e_gaps": 1,
+          "e_rental": 2,
+          "e_return": 2,
+          "i_rental_fraction": 1,
+          "i_return_fraction": 1,
+          "n_scope": 1,
+          "p_access": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "s_rows_pair",
+        "kind": "synthesis",
+        "text": "Síntesis descriptiva del par de indicadores de alquiler y devolución; cada uno conserva su métrica escalar, denominador elegible y racional. Esta síntesis no tiene una métrica única ni afirma acceso vivido, cobertura temporal completa o eficacia.",
+        "version": 1
+      },
+      "prev_hash": "7a066fe931a7674b685807641f06182c19d341c90fc81750f1247d70e8e89c23",
+      "seq": 47
+    },
+    {
+      "actor": "agent:D105-installed-fraction-probe",
+      "at": "2026-09-30T20:55:37+00:00",
+      "hash": "788eb0f08ddeb47722b8de94856e89a3fa8d3003760664c853a09318b5eceeb4",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed",
+          "fraction_components": [
+            "i_rental_fraction",
+            "i_return_fraction"
+          ]
+        },
+        "deps": {
+          "i_rental_fraction": 1,
+          "i_return_fraction": 1,
+          "n_scope": 1,
+          "s_rows_pair": 1,
+          "syn_limit": 2
+        },
+        "id": "o_rows_report",
+        "kind": "option",
+        "text": "Informar dos fracciones por filas elegibles con exclusiones y huecos visibles; no afirmar acceso vivido. Variante candidata: usar los dos indicadores escalares auditados y su síntesis descriptiva; el racional exacto acompaña a la representación decimal acotada.",
+        "version": 3
+      },
+      "prev_hash": "6aaa5ea503fdd7eaad5b1e0b4e5c6325e0709e2777624a1f3afe711ab4bb23f1",
+      "seq": 48
+    },
+    {
+      "actor": "agent:D105-installed-fraction-probe",
+      "at": "2026-09-30T20:55:37+00:00",
+      "hash": "24780ce1e419743aa33fa3d5b868b18b792d2aa3a6e7fd3c1bff4f88ebf45bd5",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed",
+          "fraction_components": [
+            "i_rental_fraction",
+            "i_return_fraction"
+          ]
+        },
+        "deps": {
+          "e_eligible": 2,
+          "e_gaps": 1,
+          "o_access_study": 2,
+          "o_rows_report": 3,
+          "s_rows_pair": 1
+        },
+        "id": "cmp_reporting",
+        "kind": "comparison",
+        "text": "La primera opción permite reporte descriptivo acotado; la segunda exige nueva evidencia para acceso vivido. Ninguna prueba impacto. Variante candidata: usar los dos indicadores escalares auditados y su síntesis descriptiva; el racional exacto acompaña a la representación decimal acotada.",
+        "version": 3
+      },
+      "prev_hash": "788eb0f08ddeb47722b8de94856e89a3fa8d3003760664c853a09318b5eceeb4",
+      "seq": 49
+    },
+    {
+      "actor": "agent:D105-installed-fraction-probe",
+      "at": "2026-09-30T20:55:37+00:00",
+      "hash": "388d5745d7fb79e5e154ba8f819792ac88c1106e3e306033990ba4fb41534e6e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed",
+          "fraction_components": [
+            "i_rental_fraction",
+            "i_return_fraction"
+          ]
+        },
+        "deps": {
+          "cmp_reporting": 3,
+          "e_eligible": 2,
+          "i_rental_fraction": 1,
+          "i_return_fraction": 1,
+          "n_scope": 1,
+          "s_rows_pair": 1
+        },
+        "id": "d_reporting",
+        "kind": "decision",
+        "text": "Decisión candidata de desarrollo, sin aprobación humana: usar solo el reporte descriptivo acotado hasta contar con otro estudio. Variante candidata: usar los dos indicadores escalares auditados y su síntesis descriptiva; el racional exacto acompaña a la representación decimal acotada.",
+        "version": 3
+      },
+      "prev_hash": "24780ce1e419743aa33fa3d5b868b18b792d2aa3a6e7fd3c1bff4f88ebf45bd5",
+      "seq": 50
+    },
+    {
+      "actor": "agent:D105-installed-fraction-probe",
+      "at": "2026-09-30T20:55:37+00:00",
+      "hash": "bb7761b26cdc288e5dc0ba27f0cc78ce17f32b614bd3e612b32b2c9e79e68154",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed",
+          "fraction_components": [
+            "i_rental_fraction",
+            "i_return_fraction"
+          ]
+        },
+        "deps": {
+          "d_reporting": 3,
+          "e_eligible": 2,
+          "e_excluded": 1,
+          "e_gaps": 1,
+          "e_rental": 2,
+          "e_rental_fraction": 1,
+          "e_return": 2,
+          "e_return_fraction": 1,
+          "i_rental_fraction": 1,
+          "i_return_fraction": 1,
+          "s_rows_pair": 1
+        },
+        "id": "req_row_report",
+        "kind": "requirement",
+        "text": "Requisito candidato, no implementado: mostrar numeradores de alquiler y devolución sobre 1.809.036 filas elegibles, y advertir 3.512 exclusiones y 37 huecos largos. Variante candidata: usar los dos indicadores escalares auditados y su síntesis descriptiva; el racional exacto acompaña a la representación decimal acotada.",
+        "version": 3
+      },
+      "prev_hash": "388d5745d7fb79e5e154ba8f819792ac88c1106e3e306033990ba4fb41534e6e",
+      "seq": 51
+    },
+    {
+      "actor": "agent:D105-technical-negative-reviewer",
+      "at": "2026-09-30T20:55:38+00:00",
+      "hash": "760b423ca546b0092524d7f1a388d7f394254fa920daf889e791e367cc4ccb60",
+      "kind": "item_review",
+      "payload": {
+        "id": "i_rows",
+        "reason": "Technical rejection of legacy compound indicator; no normative decision or human approval",
+        "verdict": "reject",
+        "version": 3
+      },
+      "prev_hash": "bb7761b26cdc288e5dc0ba27f0cc78ce17f32b614bd3e612b32b2c9e79e68154",
+      "seq": 52
+    },
+    {
+      "actor": "agent:D107-technical-lifecycle",
+      "at": "2026-09-30T22:25:38+00:00",
+      "hash": "eae017c4744dd06b52565e30ebf7b0d078d6bc4bcbb41f512406a9b05bb951ed",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "D106_execution.json",
+          "classification": "exposed_development_documentary_reproduction",
+          "date": "2026-09-30",
+          "field_impact_assessed": false,
+          "locator": "D106 execution.json: exit_code/full_report_equal/subset_membership_verified_from_rows",
+          "origin": "derived",
+          "scope": "D106 reproduction of this pinned archived March2024 file only",
+          "source": "D106_execution.json",
+          "source_sha256": "8a11ffe7fd4c6bdcd0a56b5d34e5244cca4507c42a121e6e0d927fc2b1eed43b",
+          "source_truth_authenticated": false,
+          "subset_membership_verified_from_rows": true
+        },
+        "deps": {
+          "e_archive": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "e_D106_execution",
+        "kind": "evidence",
+        "text": "Documentary link to D106 execution.json: exit_code/full_report_equal/subset_membership_verified_from_rows; local reproduction does not establish physical source truth, efficacy or human approval.",
+        "version": 1
+      },
+      "prev_hash": "760b423ca546b0092524d7f1a388d7f394254fa920daf889e791e367cc4ccb60",
+      "seq": 53
+    },
+    {
+      "actor": "agent:D107-technical-lifecycle",
+      "at": "2026-09-30T22:25:38+00:00",
+      "hash": "28e16a6e323cb42e70d1fdb7730fe412309f8ac945272f3fa2da4b84a5807f03",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "source_analysis.py",
+          "classification": "exposed_development_documentary_reproduction",
+          "date": "2026-09-30",
+          "field_impact_assessed": false,
+          "locator": "Exact archived original analyzer bytes identified by D106 executed_analysis_source_pin",
+          "origin": "derived",
+          "scope": "D106 reproduction of this pinned archived March2024 file only",
+          "source": "source_analysis.py",
+          "source_sha256": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949",
+          "source_truth_authenticated": false,
+          "subset_membership_verified_from_rows": true
+        },
+        "deps": {
+          "e_D106_execution": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "e_D106_analyzer",
+        "kind": "evidence",
+        "text": "Documentary link to Exact archived original analyzer bytes identified by D106 executed_analysis_source_pin; local reproduction does not establish physical source truth, efficacy or human approval.",
+        "version": 1
+      },
+      "prev_hash": "eae017c4744dd06b52565e30ebf7b0d078d6bc4bcbb41f512406a9b05bb951ed",
+      "seq": 54
+    },
+    {
+      "actor": "agent:D107-technical-lifecycle",
+      "at": "2026-09-30T22:25:38+00:00",
+      "hash": "ad1b77179165c1211ea51563f81053bdc2a239226c68a96812ce6ac99a5b00ff",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "archive": "published_report.json",
+          "classification": "exposed_development_documentary_reproduction",
+          "date": "2026-09-30",
+          "field_impact_assessed": false,
+          "locator": "Full published JSON object reproduced by D106, not a newly collected measurement",
+          "origin": "derived",
+          "scope": "D106 reproduction of this pinned archived March2024 file only",
+          "source": "published_report.json",
+          "source_sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+          "source_truth_authenticated": false,
+          "subset_membership_verified_from_rows": true
+        },
+        "deps": {
+          "e_D106_analyzer": 1,
+          "e_D106_execution": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "e_D106_report",
+        "kind": "evidence",
+        "text": "Documentary link to Full published JSON object reproduced by D106, not a newly collected measurement; local reproduction does not establish physical source truth, efficacy or human approval.",
+        "version": 1
+      },
+      "prev_hash": "28e16a6e323cb42e70d1fdb7730fe412309f8ac945272f3fa2da4b84a5807f03",
+      "seq": 55
+    },
+    {
+      "actor": "agent:D107-technical-lifecycle",
+      "at": "2026-09-30T22:25:38+00:00",
+      "hash": "1f55008bd076b6ffb7da508a90e918da4c043b98e7e3eca8f0fb7ff67daeded0",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "exposed_documentary_inference",
+          "field_impact_assessed": false,
+          "independent_implementation": false,
+          "scope": "this archived file and D106 execution only",
+          "source_truth_authenticated": false,
+          "subset_membership_verified_from_rows": true
+        },
+        "deps": {
+          "e_D106_report": 1,
+          "e_eligible": 2,
+          "e_excluded": 1,
+          "e_gaps": 1,
+          "e_rental": 2,
+          "e_return": 2,
+          "inf_scope": 2,
+          "pr_reanalysis": 1
+        },
+        "id": "inf_D106_reproduction",
+        "kind": "inference",
+        "text": "D106 reproduced the complete archived report using the original pinned analyzer and pinned raw file. Its eligible mask and numerator membership were checked for that archive; irregular snapshots, exclusions and gaps still prohibit station-minute, lived-access or intervention-effect claims.",
+        "version": 1
+      },
+      "prev_hash": "ad1b77179165c1211ea51563f81053bdc2a239226c68a96812ce6ac99a5b00ff",
+      "seq": 56
+    },
+    {
+      "actor": "agent:D107-technical-lifecycle",
+      "at": "2026-09-30T22:25:38+00:00",
+      "hash": "09726afd7b668c79873543ac9f665b6d73667c1617a04c71c2f6ba13d573bd72",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "components": [
+            "i_rental_fraction",
+            "i_return_fraction"
+          ],
+          "documentary_reproduction": "D106",
+          "historical_source_flags_unchanged": true,
+          "legacy_indicator": "i_rows",
+          "legacy_indicator_untouched": true,
+          "legacy_indicator_version": 3,
+          "mask_verification_scope": "D106 pinned archived file; not physical source truth",
+          "no_single_scalar_metric": true,
+          "supersedes_kind": "indicator"
+        },
+        "deps": {
+          "e_D106_report": 1,
+          "e_eligible": 2,
+          "e_excluded": 1,
+          "e_gaps": 1,
+          "e_rental": 2,
+          "e_return": 2,
+          "i_rental_fraction": 1,
+          "i_return_fraction": 1,
+          "inf_D106_reproduction": 1,
+          "inf_scope": 2,
+          "n_scope": 1,
+          "p_access": 1,
+          "pr_reanalysis": 1
+        },
+        "id": "s_rows_pair",
+        "kind": "synthesis",
+        "text": "Síntesis descriptiva del par de indicadores de alquiler y devolución; cada uno conserva su métrica escalar, denominador elegible y racional. Esta síntesis no tiene una métrica única ni afirma acceso vivido, cobertura temporal completa o eficacia. Documentary D106 reproduction is now traced through the pair; human decision and field claims remain pending.",
+        "version": 2
+      },
+      "prev_hash": "1f55008bd076b6ffb7da508a90e918da4c043b98e7e3eca8f0fb7ff67daeded0",
+      "seq": 57
+    },
+    {
+      "actor": "agent:D107-technical-lifecycle",
+      "at": "2026-09-30T22:25:38+00:00",
+      "hash": "49eb89b347ffdf3c4833afeb4e0c1287208451ea93f7014b68747d4203308606",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed",
+          "fraction_components": [
+            "i_rental_fraction",
+            "i_return_fraction"
+          ]
+        },
+        "deps": {
+          "i_rental_fraction": 1,
+          "i_return_fraction": 1,
+          "n_scope": 1,
+          "s_rows_pair": 2,
+          "syn_limit": 2
+        },
+        "id": "o_rows_report",
+        "kind": "option",
+        "text": "Informar dos fracciones por filas elegibles con exclusiones y huecos visibles; no afirmar acceso vivido. Variante candidata: usar los dos indicadores escalares auditados y su síntesis descriptiva; el racional exacto acompaña a la representación decimal acotada. Documentary D106 reproduction is now traced through the pair; human decision and field claims remain pending.",
+        "version": 4
+      },
+      "prev_hash": "09726afd7b668c79873543ac9f665b6d73667c1617a04c71c2f6ba13d573bd72",
+      "seq": 58
+    },
+    {
+      "actor": "agent:D107-technical-lifecycle",
+      "at": "2026-09-30T22:25:38+00:00",
+      "hash": "6765511a5e1fd0648ef9b55e7c2231630e7fcd9608e15a4778c516084c7e02d2",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed",
+          "fraction_components": [
+            "i_rental_fraction",
+            "i_return_fraction"
+          ]
+        },
+        "deps": {
+          "e_eligible": 2,
+          "e_gaps": 1,
+          "o_access_study": 2,
+          "o_rows_report": 4,
+          "s_rows_pair": 2
+        },
+        "id": "cmp_reporting",
+        "kind": "comparison",
+        "text": "La primera opción permite reporte descriptivo acotado; la segunda exige nueva evidencia para acceso vivido. Ninguna prueba impacto. Variante candidata: usar los dos indicadores escalares auditados y su síntesis descriptiva; el racional exacto acompaña a la representación decimal acotada. Documentary D106 reproduction is now traced through the pair; human decision and field claims remain pending.",
+        "version": 4
+      },
+      "prev_hash": "49eb89b347ffdf3c4833afeb4e0c1287208451ea93f7014b68747d4203308606",
+      "seq": 59
+    },
+    {
+      "actor": "agent:D107-technical-lifecycle",
+      "at": "2026-09-30T22:25:38+00:00",
+      "hash": "89665fe24b176cf4183ba0b7864dbba212cb9cb2c2e2590fa247d9932923b82f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed",
+          "fraction_components": [
+            "i_rental_fraction",
+            "i_return_fraction"
+          ]
+        },
+        "deps": {
+          "cmp_reporting": 4,
+          "e_eligible": 2,
+          "i_rental_fraction": 1,
+          "i_return_fraction": 1,
+          "n_scope": 1,
+          "s_rows_pair": 2
+        },
+        "id": "d_reporting",
+        "kind": "decision",
+        "text": "Decisión candidata de desarrollo, sin aprobación humana: usar solo el reporte descriptivo acotado hasta contar con otro estudio. Variante candidata: usar los dos indicadores escalares auditados y su síntesis descriptiva; el racional exacto acompaña a la representación decimal acotada. Documentary D106 reproduction is now traced through the pair; human decision and field claims remain pending.",
+        "version": 4
+      },
+      "prev_hash": "6765511a5e1fd0648ef9b55e7c2231630e7fcd9608e15a4778c516084c7e02d2",
+      "seq": 60
+    },
+    {
+      "actor": "agent:D107-technical-lifecycle",
+      "at": "2026-09-30T22:25:38+00:00",
+      "hash": "8bff45f344be453f7bd3d73d5a6bb67c0836df84631e4a462504391731210b40",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "development_candidate",
+          "field_impact": "not_assessed",
+          "fraction_components": [
+            "i_rental_fraction",
+            "i_return_fraction"
+          ]
+        },
+        "deps": {
+          "d_reporting": 4,
+          "e_eligible": 2,
+          "e_excluded": 1,
+          "e_gaps": 1,
+          "e_rental": 2,
+          "e_rental_fraction": 1,
+          "e_return": 2,
+          "e_return_fraction": 1,
+          "i_rental_fraction": 1,
+          "i_return_fraction": 1,
+          "s_rows_pair": 2
+        },
+        "id": "req_row_report",
+        "kind": "requirement",
+        "text": "Requisito candidato, no implementado: mostrar numeradores de alquiler y devolución sobre 1.809.036 filas elegibles, y advertir 3.512 exclusiones y 37 huecos largos. Variante candidata: usar los dos indicadores escalares auditados y su síntesis descriptiva; el racional exacto acompaña a la representación decimal acotada. Documentary D106 reproduction is now traced through the pair; human decision and field claims remain pending.",
+        "version": 4
+      },
+      "prev_hash": "89665fe24b176cf4183ba0b7864dbba212cb9cb2c2e2590fa247d9932923b82f",
+      "seq": 61
+    },
+    {
+      "actor": "agent:D107-technical-lifecycle",
+      "at": "2026-09-30T22:25:39+00:00",
+      "hash": "a7a2d22699ca0fd7385c8dc925cc710b459ca23d9e6f3faecfad7f73ce3b8345",
+      "kind": "indicator_retire",
+      "payload": {
+        "id": "i_rows",
+        "reason": "Retire the rejected unused composite indicator with two version-pinned descriptive replacements; no human approval or semantic equivalence certification.",
+        "replacements": {
+          "i_rental_fraction": 1,
+          "i_return_fraction": 1
+        },
+        "review_seq": 52,
+        "version": 3
+      },
+      "prev_hash": "8bff45f344be453f7bd3d73d5a6bb67c0836df84631e4a462504391731210b40",
+      "seq": 62
+    }
+  ],
+  "project": {
+    "approval_policy": "signed",
+    "case_id": "4df9f84c-4340-4c88-81b5-110b33fd0e55",
+    "created_at": "2026-09-27T02:14:41+00:00",
+    "created_by": "agent:march_sample_author",
+    "domain": "movilidad compartida",
+    "title": "Disponibilidad declarada en una muestra histórica de estaciones, marzo de 2024"
+  },
+  "schema": 1
+}

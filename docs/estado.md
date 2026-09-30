@@ -1,5 +1,33 @@
 # Estado de reanudación
 
+**D-107 añade retiro versionado y enlaza la reproducción con el grafo:**
+[dossier/recibo](../experiments/development/indicator_retirement_2026-09-30/),
+[Citi62 publicado](../cases/citibike_march2024_reproduced/README.md) y
+[contrato](retiro_indicadores.md). Wheel137581B SHA63c58a91…:24módulos iguales
+a src/site en Python3.11/3.12. 23/23operaciones CLI/MCP; cuatro workflows
+signed_report/observed con9fases sintéticas/50–51eventos. Suite2674passed,
+Ruff/compile aprobados. Retiro con versiones/revisión/reemplazos conserva
+rechazo/historia; no oculta errores, consumidores o mínimos. Revisión signed
+excluye autores históricos y del retiro. Cambios reabren; restauración exacta
+sin evento duradero puede recuperar snapshots anteriores.
+
+Cada sonda conserva182capturas,52pares/seis controles y dos positivos62eventos
+con prefijo52. D106 queda como evidencia documental/inferencia; i_rows3 idéntico,
+retirado. Study/explain conservan sólo el bloqueo previo para los dos defectos
+D105 abordados. Citi sigue con cero fases aceptadas y normas/decisión sin aprobar.
+Cuatro tar/596regulares, seis symlinks sólo metadata; revisión independiente coteja
+bytes/cadenas/1555archivos por venv/23tools y nueve copias publicadas sin locks.
+Fallo uv-symlink conservado (cero builds), reparación acotada a26b15b; freeze474ed13
+precede cuatro ejecuciones exitosas sin retry. Build invocó alias de uv fijado
+antes/después, sin atestación atómica del exec.
+
+**Aceptación1/5; C1 técnico actualizado al wheel D107; C2–C5 No demostrados.**
+Sin Q, generación experimental, Luna nuevo, norma humana, campo, rerun de filas
+o corrida24. GOAL/matriz y evidencia histórica conservados. Notas D105/D106
+siguientes son históricas. Próximo: energía documental del pan103/184kWh/kg,
+aún no ejecutada; evaluación independiente, umbrales/baseline/autoridad de campo
+y comparaciones siguen pendientes.
+
 **D-105/D-106 añaden fracciones tipadas y repetición de filas:**
 [variante reproducible Citi52](../cases/citibike_march2024_fractions/),
 [ejecución y controles D-105](../experiments/development/citibike_fraction_lineage_2026-09-30/)
