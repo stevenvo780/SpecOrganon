@@ -1,0 +1,342 @@
+{
+  "accepted_versions": {},
+  "case_id": "D-F-BREAD-NORWAY",
+  "history": [
+    {
+      "action": "init",
+      "seq": 1,
+      "source": "/tmp/specorganon-D096-unxt_808/attempt/prototype_case.json"
+    }
+  ],
+  "mode": "graph",
+  "nodes": {
+    "e1": {
+      "claim": "Los porcentajes publicados de desperdicio de panadería, comercio y consumidores usan la base común indicada por la tabla 7 y no identifican pérdidas condicionales sucesivas de un mismo lote.",
+      "depends_on": [
+        "p1"
+      ],
+      "id": "e1",
+      "kind": "evidence",
+      "phase": "science",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "e2": {
+      "claim": "La encuesta mide rebanadas semanales que los hogares declaran descartar; no mide ingesta individual, masa descartada ni compradores identificados del producto del ACV.",
+      "depends_on": [
+        "p1"
+      ],
+      "id": "e2",
+      "kind": "evidence",
+      "phase": "science",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "e3": {
+      "claim": "La prosa metodológica de la encuesta y sus categorías en tabla 1 describen intervalos distintos; para las cotas se usarán las categorías de la tabla.",
+      "depends_on": [
+        "e2"
+      ],
+      "id": "e3",
+      "kind": "evidence",
+      "phase": "science",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "n1": {
+      "claim": "Tratar el valor de masa, el valor económico de coproductos y las transformaciones de desperdicio como conceptos distintos que requieren bases explícitas.",
+      "depends_on": [
+        "p1"
+      ],
+      "id": "n1",
+      "kind": "normative",
+      "phase": "philosophy",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "n2": {
+      "claim": "Proponer que un cambio de envase avance solo a un piloto condicionado, sujeto a aprobación de la autoridad humana competente y a evidencia local sobre factibilidad, inocuidad y perjuicios desplazados.",
+      "depends_on": [
+        "p1"
+      ],
+      "id": "n2",
+      "kind": "normative",
+      "phase": "philosophy",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "p1": {
+      "claim": "Construir un análisis reproducible de las cantidades y pérdidas de valor que pueden sostenerse con los artículos archivados, distinguiendo observaciones publicadas, cálculos, supuestos y límites.",
+      "depends_on": [],
+      "id": "p1",
+      "kind": "problem",
+      "phase": "philosophy",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "r1": {
+      "claim": "Auditar las cantidades transcritas de source_claims.json contra pasajes y localizadores de ambos PDF; informar discrepancias y separar ese cotejo de la comprobación de hashes.",
+      "depends_on": [
+        "e1",
+        "e2"
+      ],
+      "id": "r1",
+      "kind": "requirement",
+      "phase": "science",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "r10": {
+      "claim": "Diseñar evaluación prospectiva con unidad de asignación, comparador contemporáneo o justificación de diseño, ventana, resultado y denominador, muestreo, incertidumbre, faltantes, efectos adversos por actor, condiciones de parada y observación que refutaría la recomendación.",
+      "depends_on": [
+        "n2",
+        "r8"
+      ],
+      "id": "r10",
+      "kind": "requirement",
+      "phase": "engineering",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "r2": {
+      "claim": "Implementar analysis.py con biblioteca estándar, argumento posicional de directorio de entrada, validación de integridad y coherencia, errores por stderr con código no cero y JSON válido exclusivo por stdout.",
+      "depends_on": [
+        "r1"
+      ],
+      "id": "r2",
+      "kind": "requirement",
+      "phase": "engineering",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "r3": {
+      "claim": "Calcular salidas separadas de harina refinada, harina integral y salvado sobre 1 t de trigo, suma y residuo; distinguir fracciones de masa de factores de asignación económica y conservar la base publicada de electricidad del molino.",
+      "depends_on": [
+        "r1"
+      ],
+      "id": "r3",
+      "kind": "requirement",
+      "phase": "engineering",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "r4": {
+      "claim": "Normalizar electricidad y gas de panificación por kg de pan desde sus bases por pieza, declarando masa de pieza y procedimiento de conversión.",
+      "depends_on": [
+        "r1"
+      ],
+      "id": "r4",
+      "kind": "requirement",
+      "phase": "engineering",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "r5": {
+      "claim": "Calcular desde tabla 1 conteos, cotas inferiores y medias para todos y para respuestas conocidas, intervalo de medias del subconjunto cerrado, y determinar si hay cotas superiores finitas; documentar categoría abierta, desconocidos, denominadores e interpretación de rebanadas enteras.",
+      "depends_on": [
+        "e2",
+        "e3"
+      ],
+      "id": "r5",
+      "kind": "requirement",
+      "phase": "engineering",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "r6": {
+      "claim": "Generar metrics.json con magnitudes explícitas value, unit y base, valores no identificables como null con motivo, y resultados de auditoría de fuentes.",
+      "depends_on": [
+        "r2",
+        "r3",
+        "r4",
+        "r5"
+      ],
+      "id": "r6",
+      "kind": "requirement",
+      "phase": "engineering",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "r7": {
+      "claim": "Generar sources.json que vincule afirmaciones y cálculos con archivos, hashes, localizadores, unidades, bases, clasificación, entradas y fórmulas; identificar autoría o carácter propuesto de los supuestos.",
+      "depends_on": [
+        "r1",
+        "r3",
+        "r4",
+        "r5"
+      ],
+      "id": "r7",
+      "kind": "requirement",
+      "phase": "engineering",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "r8": {
+      "claim": "Proponer un requisito verificable de ingeniería para el piloto de envase, definido únicamente después de que la autoridad humana competente apruebe la decisión normativa y sus criterios de inocuidad y aceptación.",
+      "depends_on": [
+        "n2"
+      ],
+      "id": "r8",
+      "kind": "requirement",
+      "phase": "engineering",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "r9": {
+      "claim": "Preparar report.md dentro del límite de palabras: alcance, resultados y límites; actores y conflictos de valor; etapas y vacíos de datos; opciones sustanciales, mecanismos, factibilidad, costes, inocuidad y perjuicios desplazados.",
+      "depends_on": [
+        "n1",
+        "n2",
+        "r6",
+        "r7"
+      ],
+      "id": "r9",
+      "kind": "requirement",
+      "phase": "engineering",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "t1": {
+      "claim": "Verificar que la ejecución obligatoria `python3 analysis.py input > metrics.json` produce JSON válido, conserva las bases solicitadas y satisface los requisitos de integridad, coherencia y contenido.",
+      "depends_on": [
+        "r6",
+        "r7",
+        "r9",
+        "r10"
+      ],
+      "id": "t1",
+      "kind": "test_result",
+      "phase": "validation",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    },
+    "t2": {
+      "claim": "Mantener aprobación humana, mediciones pendientes, factibilidad e impacto real explícitamente pendientes; no inferir causalidad ni convertir rebanadas a masa, consumo o ingesta sin datos adicionales.",
+      "depends_on": [
+        "n2",
+        "r9",
+        "r10"
+      ],
+      "id": "t2",
+      "kind": "test_result",
+      "phase": "validation",
+      "risk": {
+        "effort": 3,
+        "impact": 3,
+        "uncertainty": 3
+      },
+      "stale": false,
+      "status": "pending",
+      "version": 1
+    }
+  },
+  "phase_status": {
+    "engineering": "not_started",
+    "philosophy": "not_started",
+    "science": "not_started",
+    "validation": "not_started"
+  },
+  "schema": 1
+}

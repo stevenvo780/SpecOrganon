@@ -1,0 +1,71 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "enum": [
+        "D-F-BREAD-NORWAY"
+      ],
+      "type": "string"
+    },
+    "nodes": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "claim": {
+            "type": "string"
+          },
+          "depends_on": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "problem",
+              "assumption",
+              "normative",
+              "evidence",
+              "requirement",
+              "test_result"
+            ],
+            "type": "string"
+          },
+          "phase": {
+            "enum": [
+              "philosophy",
+              "science",
+              "engineering",
+              "validation"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "phase",
+          "status",
+          "claim",
+          "depends_on"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "case_id",
+    "nodes"
+  ],
+  "type": "object"
+}

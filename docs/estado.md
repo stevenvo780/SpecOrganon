@@ -1,5 +1,21 @@
 # Estado de reanudación
 
+**D-096 creó un checkpoint inicial real:** el [plan y código](../experiments/development/prototype_checkpoint_compatibility_2026-09-30/)
+se congelaron en `aa3e533` antes de una sola llamada con Luna medio solicitado.
+Con el host empaquetado de Code Mode habilitado, el error observado en
+D-095 no apareció en esta traza. El prompt es byte idéntico; no se acredita igualdad
+del contexto interno completo. La CLI terminó en 27,071 s y el supervisor
+en 27,415 s dentro de 120 s. `init` real creó 18 nodos pendientes, dos normas,
+cuatro fases sin empezar y un solo evento de inicialización; un proceso
+nuevo verificó hashes y estado. Se conservaron 23 archivos idénticos y no
+se permite relanzar. Uso local: 17.576 tokens de entrada y 1.298 de salida;
+coste y versión efectiva sin autenticar. El parser ahora rechaza cualquier
+error explícito `item.*`, incluido `item.updated`; pasaron 281 pruebas del
+parser y 22 del supervisor, Ruff y compilación. La revisión cerró el falso
+verde reproducido. Esto permite continuar desde un estado pendiente;
+no evalúa calidad, no completa el caso alimentario ni cuenta entre las 24
+corridas. Los cinco criterios siguen **No demostrados**.
+
 **D-095 cerrado como desarrollo, con resultado negativo:** el puente managed
 respeta el plazo del calendario; commit `ca22ea6`, 172 pruebas y revisión
 independiente. El [supervisor y plan](../experiments/development/prototype_checkpoint_2026-09-30/)
@@ -10,9 +26,8 @@ de arranque de Code Mode por deshabilitar su host. El supervisor rechazó la
 traza antes de `init`; **no existe checkpoint**. Un proceso nuevo conserva
 `failed` y bloquea relanzar. Se archivaron 17 archivos idénticos, sin reparación
 ni reemplazo. Uso local: 17.576 tokens de entrada y 956 de salida; coste e
-identidad efectiva sin autenticar. Antes de otra ronda hay que registrar y
-revisar una configuración CLI compatible que no genere ese error, conservando
-este negativo. No cuenta entre las 24 corridas; veredicto **0/5**.
+identidad efectiva sin autenticar. D-096 registra una configuración nueva
+y conserva este negativo. No cuenta entre las 24 corridas; veredicto **0/5**.
 
 **Corte actual:** 2026-09-30 UTC. Objetivo íntegro en [GOAL.md](../GOAL.md), SHA-256 `e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36`. Rama `work/toolkit-foundation`; GOAL.md y los cinco ledgers reales permanecen intactos. El [gate D-093](../experiments/development/local_evidence_gate_2026-09-30/receipt.json) pasó **2114 pruebas globales**, Ruff y compilación. Un wheel con el motor final pasó instalación offline, `uv pip check` y la sonda de evidencia por CLI y MCP reales en Python 3.11 y 3.12; la revisión independiente repitió ambas pruebas instaladas sin skips. El [dossier D-E congelado](../experiments/development/energy_pilot/activation_dossier_2026-09-27.json) conserva sus hashes históricos y su NO-GO para llamadas. La [auditoría de aceptación](validacion_actual.md) mantiene **0/5 criterios demostrados**.
 

@@ -1,0 +1,526 @@
+Produce ONLY the initial prototype case JSON. Do not use tools, inspect files, approve decisions, perform scientific verification or complete the task. case_id=D-F-BREAD-NORWAY. 4 to 64 nodes, exact fields: id,kind,phase,status,claim,depends_on. Every status must be pending. Include philosophy/science/engineering/validation; at least one normative decision needing human approval and an engineering requirement depending on that norm. Unknown dependencies and cycles are forbidden. Use the public packet below as context. Propose work, never claim it was performed.
+
+PUBLIC task.md
+# D-F · Paquete visible de desarrollo: pan en Noruega
+
+**Pregunta común:** Con los dos artículos archivados, construí análisis reproducible de qué cantidades y pérdidas de valor pueden sostenerse; auditá cifras contra pasajes, balanceá salidas de molienda sobre 1 t de trigo y normalizá energía de panificación por kg, calculá cotas de descarte autodeclarado desde tabla 1 y decidí si cambiar envase merece solo piloto condicionado. Entregá código/métricas/fuentes/límites/diseño con comparador refutable.
+
+## Entrada común
+
+El paquete plano contiene `source_lca.pdf`, `source_survey.pdf`, `survey_table1.json`, `source_claims.json` y `source_manifest.json`, además de esta consigna. En cada ensayo, esos archivos se encuentran en `input/` y los entregables se escriben en la raíz del ensayo. El manifiesto registra cada nombre visible, su ruta de origen en el repositorio y sus bytes/SHA-256. Los nombres visibles se resuelven dentro del directorio de entrada; las rutas de origen documentan procedencia. Los PDF están archivados en el repositorio; no es necesario descargarlos. `source_claims.json` es una transcripción de cantidades publicadas, con fuente, localizador, unidad y base. Auditá esas cantidades contra los pasajes originales: no son mediciones nuevas.
+
+El ACV estudia un producto comercial y combina información empresarial agregada, datos de bases y cálculos de los autores. Sus porcentajes no identifican un lote observado sucesivamente en todas las etapas. La encuesta pregunta a personas por rebanadas que su hogar declara descartar por semana; no es una medida de ingesta individual ni de compradores identificados del producto del ACV. La prosa metodológica y la tabla 1 de la encuesta describen intervalos distintos: identificá la discrepancia y usá las categorías de la tabla para las cotas.
+
+Trabajá con las fuentes locales y Python estándar. Podés extraer texto de los PDF con `pdftotext`. No recurras a modelos adicionales, API, web ni trabajo de campo. La tarea produce análisis y diseño prospectivo.
+
+## Entrega común
+
+1. **`analysis.py`**, ejecutable con la biblioteca estándar de Python, debe aceptar el directorio de entrada como **argumento posicional**, leer `source_claims.json` y `survey_table1.json`, y emitir exclusivamente JSON válido por stdout. Resolvé los PDF, las transcripciones y `source_manifest.json` respecto de ese directorio. Desde la raíz del ensayo, la ejecución obligatoria es `python3 analysis.py input > metrics.json`, con `analysis.py` en esa raíz y las fuentes en `input/`. Validá la integridad de las entradas contra `source_manifest.json` usando sus nombres visibles relativos al directorio recibido, y la coherencia de unidades, categorías y conteos; los errores deben terminar con código no cero y mensaje por stderr.
+
+2. **`metrics.json`**, generado por ese script, debe tener campos explícitos y magnitudes con `value`, `unit` y `base`; para valores no identificables usá `null` más un motivo, sin NaN ni Infinity. Incluí:
+   - `milling`: entrada de trigo normalizada, salidas separadas de harina refinada, harina integral y salvado, suma de salidas y residuo del balance. Identificá por separado las fracciones de masa y los factores de asignación económica. Conservá la base original de la electricidad del molino; cualquier cambio de base adicional debe declarar su supuesto.
+   - `baking_energy`: masa por pieza, electricidad, gas natural y suma por kg de pan; conservá la base por pieza y el procedimiento de conversión.
+   - `survey`: conteos `total_respondents`, `known_respondents`, `unknown_respondents`, `open_category_respondents` y `closed_category_respondents`; cota inferior de rebanadas totales y media para todos los encuestados y para quienes respondieron una categoría conocida; intervalo de la media para el subconjunto de categorías cerradas; y existencia o ausencia de cota superior finita para todos y para respuestas conocidas. Explicá cómo tratás la categoría abierta, el desconocimiento y la interpretación de rebanadas enteras. El subconjunto cerrado tiene su propio denominador. Una cota con cantidades desconocidas no convierte esas cantidades en ceros observados.
+   - `source_audit`: cantidades auditadas, localizadores, discrepancias y resultado del cotejo. Distinguí cotejo del pasaje de una simple comprobación de hash.
+
+3. **`sources.json`** debe vincular cada afirmación cuantitativa usada y cada cálculo con los archivos de entrada, SHA-256, página/sección/tabla/fila pertinentes, unidad, base y clasificación (`reported`, `derived`, `assumption` o `pending`). Para cálculos indicá las entradas y fórmula; para supuestos identificá su autor o carácter de propuesta. Las afirmaciones de ausencia de efecto causal o datos faltantes deben explicar el alcance de la revisión, sin inventar una fuente.
+
+4. **`report.md`**, de hasta 1200 palabras, debe presentar el alcance del caso y los resultados con sus límites, actores y conflictos de valor. Distinguí valor de masa/precio, transformaciones de desperdicio, y observación publicada de inferencia o supuesto. Delimitá producción, almacenamiento, transporte, molienda, panificación, envase, comercio, hogar y usos de coproductos, con entradas y salidas pertinentes; señalá qué etapas carecen de datos enlazables. Compará al menos dos opciones sustanciales, sus mecanismos, factibilidad, costes, inocuidad y perjuicios desplazados. Explicá si el envase merece un piloto condicionado o qué evidencia falta para decidir; no atribuyas eficacia a estos artículos.
+
+Identificá al menos una decisión normativa propuesta **pendiente de aprobación de la autoridad humana competente**, los datos necesarios para acordarla y un requisito verificable de ingeniería que dependa de esa decisión. Proponé un diseño prospectivo con unidad de asignación, comparador contemporáneo o justificación de otro diseño identificable, ventana, resultado y denominador, muestreo, incertidumbre, faltantes, efectos adversos por actor y condiciones de parada/retirada. Expresá qué observación refutaría la recomendación. Separá cálculo reproducible, factibilidad de implementación e impacto real.
+
+No conviertas rebanadas a kg, porcentaje de consumo o ingesta sin datos adicionales; si explorás una conversión, presentala solo como escenario con supuestos explícitos. Una asociación observacional, un inventario de ACV o un escenario calculado no equivalen a un efecto causal medido. Toda aprobación y toda medición pendiente debe seguir declarada como pendiente.
+
+**Clasificación:** D-F, desarrollo expuesto. Los artículos y cantidades ya eran conocidos antes de preparar esta consigna. El paquete se congela antes de las nuevas corridas; no es una reserva confirmatoria ni demuestra por sí solo impacto alimentario real o ventaja de una metodología.
+
+PUBLIC source_claims.json
+{
+  "schema": 1,
+  "classification": "development_exposed_neutral_transcription",
+  "sources": {
+    "lca": {
+      "title": "Effects of Packaging and Food Waste Prevention by Consumers on the Environmental Impact of Production and Consumption of Bread in Norway",
+      "doi": "https://doi.org/10.3390/su11010043",
+      "visible_file": "source_lca.pdf",
+      "repository_source_path": "cases/bread_norway/source_lca.pdf",
+      "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "bytes": 2212666
+    },
+    "survey": {
+      "title": "Wasting of Fresh-Packed Bread by Consumers—Influence of Shopping Behavior, Storing, Handling, and Consumer Preferences",
+      "doi": "https://doi.org/10.3390/su10072251",
+      "visible_file": "source_survey.pdf",
+      "repository_source_path": "cases/bread_norway/source_survey.pdf",
+      "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "bytes": 526604
+    }
+  },
+  "claims": [
+    {
+      "key": "piece_mass",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 6,
+        "printed_page": 6,
+        "section": "4.2",
+        "table": null,
+        "row": "First paragraph",
+        "column": null
+      },
+      "unit": "g/piece",
+      "value": 736,
+      "base": "One commercial loaf, bread mass after baking",
+      "classification": "reported",
+      "provenance": "baking_company_data"
+    },
+    {
+      "key": "norway_wheat_share",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 6,
+        "printed_page": 6,
+        "section": "4.3",
+        "table": null,
+        "row": "First paragraph",
+        "column": null
+      },
+      "unit": "%",
+      "value": 65,
+      "base": "Average wheat origin reported over several years",
+      "classification": "reported",
+      "provenance": "mill_company_data"
+    },
+    {
+      "key": "mill_electricity",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "2",
+        "row": "Mill energy consumption",
+        "column": "Data"
+      },
+      "unit": "kWh/t_flour",
+      "value": 129,
+      "base": "One tonne of flour produced",
+      "classification": "reported",
+      "provenance": "mill_company_data"
+    },
+    {
+      "key": "wheat_bran_mass_share",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat flour products (% w/w)",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "% w/w",
+      "value": 19.1,
+      "base": "Wheat input to flour mill, mass fraction of bran output",
+      "classification": "reported",
+      "provenance": "mill_company_data"
+    },
+    {
+      "key": "mill_to_baker_distance",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.6",
+        "table": "5",
+        "row": "Transport from mill to baker",
+        "column": "Data"
+      },
+      "unit": "km",
+      "value": 438,
+      "base": "Transport from mill to baker in >32 tonne truck",
+      "classification": "reported",
+      "provenance": "mill_company_data"
+    },
+    {
+      "key": "bakery_electricity",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.6",
+        "table": "5",
+        "row": "Baker energy consumption",
+        "column": "Data"
+      },
+      "unit": "kWh/piece",
+      "value": 0.297,
+      "base": "One commercial loaf of the studied bread",
+      "classification": "reported",
+      "provenance": "baking_company_data"
+    },
+    {
+      "key": "retail_bread_waste",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.9",
+        "table": "7",
+        "row": "Retail waste",
+        "column": "Amount Wasted as % of Bread Entering the System"
+      },
+      "unit": "%",
+      "value": 11.4,
+      "base": "Bread entering the system as named by Table 7",
+      "classification": "reported",
+      "provenance": "baking_company_data"
+    },
+    {
+      "key": "consumer_bread_waste_estimate",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.9",
+        "table": "7",
+        "row": "Consumer waste",
+        "column": "Amount Wasted as % of Bread Entering the System"
+      },
+      "unit": "%",
+      "value": 8.2,
+      "base": "Bread entering the system as named by Table 7",
+      "classification": "reported",
+      "provenance": "authors_calculation_from_consumption_reference_3_and_wastage_reference_9"
+    },
+    {
+      "key": "survey_respondents",
+      "source": "survey",
+      "locator": {
+        "pdf_page": 4,
+        "printed_page": 4,
+        "section": "3",
+        "table": "1",
+        "row": "Total",
+        "column": "Number of Respondents"
+      },
+      "unit": "respondents",
+      "value": 1000,
+      "base": "Respondents answering a web survey about household bread wasting",
+      "classification": "reported",
+      "provenance": "web_survey_reported_frequency"
+    },
+    {
+      "key": "poland_wheat_share",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 6,
+        "printed_page": 6,
+        "section": "4.3",
+        "table": null,
+        "row": "First paragraph",
+        "column": null
+      },
+      "unit": "%",
+      "value": 35,
+      "base": "Average wheat origin reported over several years",
+      "classification": "reported",
+      "provenance": "mill_company_data"
+    },
+    {
+      "key": "wheat_refined_flour_mass_share",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat flour products (% w/w)",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "% w/w",
+      "value": 67.1,
+      "base": "Wheat input to flour mill, mass fraction of refined flour output",
+      "classification": "reported",
+      "provenance": "mill_company_data"
+    },
+    {
+      "key": "wheat_whole_flour_mass_share",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat flour products (% w/w)",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "% w/w",
+      "value": 13.8,
+      "base": "Wheat input to flour mill, mass fraction of whole flour output",
+      "classification": "reported",
+      "provenance": "mill_company_data"
+    },
+    {
+      "key": "bakery_natural_gas",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.6",
+        "table": "5",
+        "row": "Baker energy consumption",
+        "column": "Data"
+      },
+      "unit": "kWh/piece",
+      "value": 0.115,
+      "base": "One commercial loaf of the studied bread",
+      "classification": "reported",
+      "provenance": "baking_company_data"
+    },
+    {
+      "key": "wheat_refined_flour_economic_allocation",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat, economic allocation factors",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "%",
+      "value": 78.5,
+      "base": "Economic allocation factor for refined flour in milling inventory",
+      "classification": "reported",
+      "provenance": "mill_company_data"
+    },
+    {
+      "key": "wheat_whole_flour_economic_allocation",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat, economic allocation factors",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "%",
+      "value": 14.2,
+      "base": "Economic allocation factor for whole flour in milling inventory",
+      "classification": "reported",
+      "provenance": "mill_company_data"
+    },
+    {
+      "key": "wheat_bran_economic_allocation",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 7,
+        "printed_page": 7,
+        "section": "4.4",
+        "table": "3",
+        "row": "Wheat, economic allocation factors",
+        "column": "Material Balance and Allocation Factors"
+      },
+      "unit": "%",
+      "value": 7.3,
+      "base": "Economic allocation factor for bran in milling inventory",
+      "classification": "reported",
+      "provenance": "mill_company_data"
+    },
+    {
+      "key": "bakery_bread_waste",
+      "source": "lca",
+      "locator": {
+        "pdf_page": 8,
+        "printed_page": 8,
+        "section": "4.9",
+        "table": "7",
+        "row": "Bakery waste",
+        "column": "Amount Wasted as % of Bread Entering the System"
+      },
+      "unit": "%",
+      "value": 3.3,
+      "base": "Bread entering the system as named by Table 7",
+      "classification": "reported",
+      "provenance": "baking_company_data"
+    }
+  ]
+}
+
+PUBLIC source_manifest.json
+{
+  "schema": 1,
+  "case": "D-F",
+  "classification": "development_exposed_archived_food_case_not_a_causal_trial",
+  "visible_layout": "flat",
+  "files": [
+    {
+      "visible_file": "task.md",
+      "repository_source_path": "cases/bread_development/task.md",
+      "role": "common_task",
+      "bytes": 6887,
+      "sha256": "ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51"
+    },
+    {
+      "visible_file": "source_claims.json",
+      "repository_source_path": "cases/bread_development/source_claims.json",
+      "role": "neutral_quantitative_transcription",
+      "bytes": 9162,
+      "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc"
+    },
+    {
+      "visible_file": "source_lca.pdf",
+      "repository_source_path": "cases/bread_norway/source_lca.pdf",
+      "role": "archived_primary_article",
+      "bytes": 2212666,
+      "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32"
+    },
+    {
+      "visible_file": "source_survey.pdf",
+      "repository_source_path": "cases/bread_norway/source_survey.pdf",
+      "role": "archived_primary_article",
+      "bytes": 526604,
+      "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee"
+    },
+    {
+      "visible_file": "survey_table1.json",
+      "repository_source_path": "cases/bread_norway/survey_table1.json",
+      "role": "table_transcription",
+      "bytes": 1440,
+      "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f"
+    }
+  ],
+  "articles": [
+    {
+      "visible_file": "source_lca.pdf",
+      "title": "Effects of Packaging and Food Waste Prevention by Consumers on the Environmental Impact of Production and Consumption of Bread in Norway",
+      "authors": [
+        "Erik Svanes",
+        "Sofie Oestergaard",
+        "Ole Joergen Hanssen"
+      ],
+      "doi": "https://doi.org/10.3390/su11010043",
+      "published_date": "2018-12-21",
+      "journal_reference": "Sustainability 2019, 11, 43",
+      "functional_unit": {
+        "value": 1,
+        "unit": "kg_bread",
+        "base": "bread produced, distributed and consumed in Norway",
+        "locator": {
+          "pdf_page": 4,
+          "section": "3.2.1"
+        }
+      }
+    },
+    {
+      "visible_file": "source_survey.pdf",
+      "title": "Wasting of Fresh-Packed Bread by Consumers—Influence of Shopping Behavior, Storing, Handling, and Consumer Preferences",
+      "authors": [
+        "Sofie Østergaard",
+        "Ole Jørgen Hanssen"
+      ],
+      "doi": "https://doi.org/10.3390/su10072251",
+      "published_date": "2018-06-29",
+      "measure": "Respondent-estimated slices of fresh bread wasted from household per week",
+      "table_locator": {
+        "pdf_page": 4,
+        "printed_page": 4,
+        "table": "1"
+      }
+    }
+  ],
+  "transcription_verification": {
+    "date_utc": "2026-09-30",
+    "method": "Independent reading of text extracted from the archived PDF bytes using pdftotext -layout; no network source was fetched.",
+    "quantitative_claims": 17,
+    "passages_checked": [
+      {
+        "visible_file": "source_lca.pdf",
+        "pdf_pages": [
+          6
+        ],
+        "sections": [
+          "4.2",
+          "4.3"
+        ],
+        "fields": [
+          "piece_mass",
+          "norway_wheat_share",
+          "poland_wheat_share"
+        ]
+      },
+      {
+        "visible_file": "source_lca.pdf",
+        "pdf_pages": [
+          7
+        ],
+        "tables": [
+          "2",
+          "3"
+        ],
+        "fields": [
+          "mill_electricity",
+          "wheat_refined_flour_mass_share",
+          "wheat_whole_flour_mass_share",
+          "wheat_bran_mass_share",
+          "wheat_refined_flour_economic_allocation",
+          "wheat_whole_flour_economic_allocation",
+          "wheat_bran_economic_allocation"
+        ]
+      },
+      {
+        "visible_file": "source_lca.pdf",
+        "pdf_pages": [
+          8
+        ],
+        "tables": [
+          "5",
+          "7"
+        ],
+        "fields": [
+          "mill_to_baker_distance",
+          "bakery_electricity",
+          "bakery_natural_gas",
+          "bakery_bread_waste",
+          "retail_bread_waste",
+          "consumer_bread_waste_estimate"
+        ]
+      },
+      {
+        "visible_file": "source_survey.pdf",
+        "pdf_pages": [
+          3,
+          4
+        ],
+        "sections": [
+          "3"
+        ],
+        "tables": [
+          "1"
+        ],
+        "fields": [
+          "survey_respondents",
+          "survey_table1_all_seven_rows"
+        ]
+      }
+    ],
+    "survey_table_check": "All seven labels, counts and reported percentages in survey_table1.json agree with PDF page 4 Table 1; the methodological prose on PDF page 3 lists different interval boundaries."
+  },
+  "exposure": {
+    "status": "known_development_sources_and_quantities",
+    "scope": "The articles, quantitative inputs and previously archived table were exposed before this package was prepared. The neutral transcription adds published milling, gas and allocation entries from the same local articles.",
+    "freeze_rule": "Freeze task, transcription, manifest and external evaluator rubric in an identified Git revision before the new executions.",
+    "confirmatory_blinding": false
+  },
+  "limits": [
+    "Company aggregates and secondary calculations do not identify a single observed lot across stages.",
+    "Table 7 uses the common published base Bread Entering the System; its rows are not observations of sequential conditional loss rates.",
+    "Milling mass fractions and economic allocation factors have different meanings and bases.",
+    "Bakery energy is reported per loaf; mill electricity is reported per tonne of flour, not per tonne of wheat.",
+    "The survey concerns self-reported household weekly discard, not personal intake, weighed waste or identified consumers of the LCA product.",
+    "Table 1 contains an open upper category and a do-not-know category; no slice mass, consumption denominator or finite upper cap is supplied.",
+    "Only category frequencies are archived as structured data, not respondent-level records or current operational observations.",
+    "These sources cannot establish the causal efficacy or safety of a proposed packaging change."
+  ]
+}

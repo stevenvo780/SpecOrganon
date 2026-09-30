@@ -1,5 +1,18 @@
 # Auditoría de aceptación actual
 
+**Avance D-096:** una sola llamada CLI con Luna medio solicitado, después de
+congelar plan/código en `aa3e533`, produjo un [checkpoint inicial verificado](../experiments/development/prototype_checkpoint_compatibility_2026-09-30/outcome_inspection.json).
+El host local quedó habilitado; la traza no contiene el error D-095 ni ítems
+de herramienta. `init` y la lectura en proceso nuevo pasaron en 27,415 s de
+supervisor, con 18 nodos pendientes, dos normas sin aprobación y cuatro
+fases sin empezar. Se archivaron 23 archivos idénticos; no hubo reparación,
+reemplazo ni fallback API. El parser de uso se corrigió tras reproducir otro
+falso verde de error explícito; 281 pruebas del parser, 22 del supervisor y
+79 focales independientes pasaron. Es operatividad de un estado inicial,
+sin juicio de calidad, comparación N/SDD/T, coste autenticado, topes globales
+o impacto de campo. D-095 queda intacto como fallo. **0/5** criterios
+demostrados; esta ronda no cuenta entre las 24 corridas requeridas.
+
 **Avance D-095:** el [control del plazo del calendario](../experiments/development/prototype_checkpoint_2026-09-30/managed_validation.json)
 pasó 172 pruebas de presupuesto/sesión y revisión independiente. Cierra una
 discordancia del puente managed antes de escrituras o envíos; no unifica el
