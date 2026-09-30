@@ -12,6 +12,8 @@ import json
 import math
 import os
 import re
+import stat
+from contextlib import ExitStack
 from decimal import Decimal, InvalidOperation
 from fractions import Fraction
 from pathlib import Path
@@ -34,6 +36,10 @@ _METRIC_MAX_DIGITS = 256
 _METRIC_MAX_EXPONENT = 512
 _PRODUCT_MAX_OPERANDS = 64
 _PRODUCT_MAX_SPAN = 2048
+_SOURCE_SHA256 = re.compile(r"[0-9a-f]{64}\Z")
+_LOCAL_ARCHIVE_MAX_BYTES = 32 * 1024 * 1024
+_ARCHIVE_DIR_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC
+_ARCHIVE_FILE_FLAGS = os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW | os.O_CLOEXEC
 
 
 class MethodError(LedgerError):
@@ -42,6 +48,101 @@ class MethodError(LedgerError):
 
 def _hash(value: Any) -> str:
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def _archive_stat_identity(info: os.stat_result) -> tuple[int, ...]:
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_uid,
+            info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+
+def _local_archive_path_parts(value: Any) -> tuple[str, ...] | None:
+    """Require a canonical POSIX relative name before any filesystem lookup."""
+    if type(value) is not str or not value:
+        return None
+    try:
+        encoded_length = len(value.encode("utf-8"))
+    except UnicodeError:
+        return None
+    if (encoded_length > 4096
+            or value.startswith("/") or "\\" in value or re.match(r"^[A-Za-z]:", value)
+            or any(ord(char) < 32 for char in value)):
+        return None
+    parts = tuple(value.split("/"))
+    return parts if all(part not in {"", ".", ".."} for part in parts) else None
+
+
+def _local_archive_digest(case_path: str, parts: tuple[str, ...]) -> str:
+    """Hash a bounded, singly linked regular file through pinned directory fds.
+
+    No path component is followed through a symlink. Recheck every named entry
+    after reading to detect ordinary rename, replacement and in-place races.
+    This is a live byte check, not an independent source-custody attestation.
+    """
+    with ExitStack() as stack:
+        root_fd = os.open("/", _ARCHIVE_DIR_FLAGS)
+        stack.callback(os.close, root_fd)
+        parent_fd = root_fd
+        opened_dirs: list[tuple[int, str, int]] = []
+        for name in Path(case_path).parts[1:] + parts[:-1]:
+            directory_fd = os.open(name, _ARCHIVE_DIR_FLAGS, dir_fd=parent_fd)
+            stack.callback(os.close, directory_fd)
+            opened_dirs.append((parent_fd, name, directory_fd))
+            if (_archive_stat_identity(os.fstat(directory_fd)) !=
+                    _archive_stat_identity(os.stat(name, dir_fd=parent_fd, follow_symlinks=False))):
+                raise ValueError("local archive directory changed while opening")
+            parent_fd = directory_fd
+
+        name = parts[-1]
+        file_fd = os.open(name, _ARCHIVE_FILE_FLAGS, dir_fd=parent_fd)
+        stack.callback(os.close, file_fd)
+        before = os.fstat(file_fd)
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+            raise ValueError("local archive must be a singly linked regular file")
+        if before.st_size > _LOCAL_ARCHIVE_MAX_BYTES:
+            raise ValueError("local archive exceeds the 32 MiB size limit")
+        digest = hashlib.sha256()
+        total = 0
+        while chunk := os.read(file_fd, min(1024 * 1024, _LOCAL_ARCHIVE_MAX_BYTES - total + 1)):
+            total += len(chunk)
+            if total > _LOCAL_ARCHIVE_MAX_BYTES:
+                raise ValueError("local archive exceeds the 32 MiB size limit")
+            digest.update(chunk)
+        after = os.fstat(file_fd)
+        named = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        if (total != before.st_size or _archive_stat_identity(before) != _archive_stat_identity(after)
+                or _archive_stat_identity(before) != _archive_stat_identity(named)):
+            raise ValueError("local archive changed while hashing")
+        for directory_parent, directory_name, directory_fd in reversed(opened_dirs):
+            if (_archive_stat_identity(os.fstat(directory_fd)) !=
+                    _archive_stat_identity(os.stat(directory_name, dir_fd=directory_parent,
+                                                   follow_symlinks=False))):
+                raise ValueError("local archive directory changed while hashing")
+        return digest.hexdigest()
+
+
+def _local_archive_issues(case_path: str, data: dict[str, Any]) -> list[str]:
+    """Evaluate an opted-in source-byte contract in a signed case."""
+    archive_present = "archive" in data
+    digest_present = "source_sha256" in data
+    if not archive_present and not digest_present:
+        return []
+    if not archive_present or not digest_present:
+        return ["local archive requires both archive and source_sha256"]
+    parts = _local_archive_path_parts(data["archive"])
+    if parts is None:
+        return ["local archive path must be canonical and relative to the case"]
+    expected = data["source_sha256"]
+    if type(expected) is not str or _SOURCE_SHA256.fullmatch(expected) is None:
+        return ["local archive source_sha256 must be a lowercase SHA-256 digest"]
+    try:
+        actual = _local_archive_digest(case_path, parts)
+    except OSError:
+        return ["local archive is missing or unsafe to read"]
+    except ValueError as exc:
+        return [str(exc)]
+    if actual != expected:
+        return ["local archive bytes differ from source_sha256"]
+    return []
 
 
 def _project(path: str | Path) -> dict[str, Any]:
@@ -875,6 +976,47 @@ def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
                 issue = ("latest item review rejected this version" if dependent_id == item_id
                          else f"depends on rejected item review of {item_id}")
                 review_issues.setdefault(dependent_id, []).append(issue)
+    archive_issues: dict[str, list[str]] = {}
+    archive_dependency_issues: dict[str, list[str]] = {}
+    if state["project"]["approval_policy"] == "signed":
+        # One named archive cannot substantiate incompatible byte digests in
+        # the same case. Reject the declarations before reading a mutable file:
+        # separate reads could otherwise each see a different valid version.
+        declared: dict[str, set[str]] = {}
+        for item in items.values():
+            if item["kind"] != "evidence":
+                continue
+            archive = item["data"].get("archive")
+            expected = item["data"].get("source_sha256")
+            if (type(archive) is str and _local_archive_path_parts(archive) is not None
+                    and type(expected) is str and _SOURCE_SHA256.fullmatch(expected) is not None):
+                declared.setdefault(archive, set()).add(expected)
+        conflicting_archives = {archive for archive, digests in declared.items() if len(digests) > 1}
+        # Many evidence items may cite the same archived source. Cache only
+        # within this status calculation so each new read sees live bytes.
+        checks: dict[tuple[str, str], list[str]] = {}
+        for item_id, item in items.items():
+            if item["kind"] != "evidence":
+                continue
+            data = item["data"]
+            archive = data.get("archive")
+            expected = data.get("source_sha256")
+            if (type(archive) is str and archive in conflicting_archives
+                    and type(expected) is str and _SOURCE_SHA256.fullmatch(expected) is not None):
+                local_issues = ["local archive has conflicting source_sha256 declarations"]
+            elif type(archive) is str and type(expected) is str:
+                key = (archive, expected)
+                if key not in checks:
+                    checks[key] = _local_archive_issues(state["case_path"], data)
+                local_issues = checks[key]
+            else:
+                local_issues = _local_archive_issues(state["case_path"], data)
+            if local_issues:
+                archive_issues[item_id] = local_issues
+                for dependent_id in _dependents(items, item_id) - {item_id}:
+                    archive_dependency_issues.setdefault(dependent_id, []).append(
+                        f"depends on invalid local archive evidence {item_id}"
+                    )
     flags: dict[str, dict[str, Any]] = {}
     for item_id, item in items.items():
         issues = (_item_issues(item) if state["project"]["approval_policy"] == "fixture" or item["kind"] != "test"
@@ -884,7 +1026,8 @@ def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
         flag = {
             "stale": _stale(items, item_id),
             "contested": item_id in contested,
-            "issues": issues + automatic.get(item_id, []) + review_issues.get(item_id, []),
+            "issues": (issues + automatic.get(item_id, []) + review_issues.get(item_id, [])
+                       + archive_issues.get(item_id, []) + archive_dependency_issues.get(item_id, [])),
             "approved": (item_id, item["version"]) in state["approvals"],
             "approval_status": state["approval_statuses"].get((item_id, item["version"]), "missing"),
         }
