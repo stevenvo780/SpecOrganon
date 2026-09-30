@@ -1,0 +1,54 @@
+[
+  {
+    "argv": [
+      "/tmp/specorganon-D102-install-cfoi0az2/venv-312/bin/organon",
+      "put",
+      "/tmp/specorganon-D103-native-312-7o8846h5/case",
+      "a_A",
+      "--kind",
+      "actor",
+      "--text",
+      "Synthetic native writer A; no human authority",
+      "--actor",
+      "agent:native-D103-A",
+      "--expected-version",
+      "0",
+      "--expected-deps",
+      "{\"p_native\": 1}",
+      "--ref",
+      "p_native"
+    ],
+    "exit": 0,
+    "stdout": "{\"author\": \"agent:native-D103-A\", \"data\": {}, \"deps\": {\"p_native\": 1}, \"id\": \"a_A\", \"kind\": \"actor\", \"seq\": 2, \"text\": \"Synthetic native writer A; no human authority\", \"version\": 1}\n",
+    "stderr": "",
+    "start_monotonic_ns": 306693873606209,
+    "end_monotonic_ns": 306693931261752
+  },
+  {
+    "argv": [
+      "/tmp/specorganon-D102-install-cfoi0az2/venv-312/bin/organon",
+      "put",
+      "/tmp/specorganon-D103-native-312-7o8846h5/case",
+      "b_A",
+      "--kind",
+      "boundary",
+      "--text",
+      "Only installed pending-item coordination; no field intervention",
+      "--actor",
+      "agent:native-D103-A",
+      "--expected-version",
+      "0",
+      "--expected-deps",
+      "{\"p_native\": 1, \"a_A\": 1}",
+      "--ref",
+      "p_native",
+      "--ref",
+      "a_A"
+    ],
+    "exit": 0,
+    "stdout": "{\"author\": \"agent:native-D103-A\", \"data\": {}, \"deps\": {\"a_A\": 1, \"p_native\": 1}, \"id\": \"b_A\", \"kind\": \"boundary\", \"seq\": 4, \"text\": \"Only installed pending-item coordination; no field intervention\", \"version\": 1}\n",
+    "stderr": "",
+    "start_monotonic_ns": 306693931619166,
+    "end_monotonic_ns": 306693987409229
+  }
+]

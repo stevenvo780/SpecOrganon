@@ -1,0 +1,1631 @@
+[
+  {
+    "transport": "mcp",
+    "operation": "list_tools",
+    "response": {
+      "_meta": null,
+      "ttlMs": 0,
+      "cacheScope": "private",
+      "nextCursor": null,
+      "tools": [
+        {
+          "name": "init",
+          "title": null,
+          "description": "Create a case at path with a title, domain and actor label.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              },
+              "domain": {
+                "title": "Domain",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              },
+              "approval_policy": {
+                "default": "signed",
+                "title": "Approval Policy",
+                "type": "string"
+              },
+              "test_gate_policy": {
+                "default": "signed_report",
+                "title": "Test Gate Policy",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "title",
+              "domain",
+              "actor"
+            ],
+            "type": "object",
+            "title": "initArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "initDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "put",
+          "title": null,
+          "description": "Add or revise an evidence-linked case item; supply expected_version and expected_deps for guarded concurrent writes.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "kind": {
+                "title": "Kind",
+                "type": "string"
+              },
+              "text": {
+                "title": "Text",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              },
+              "refs": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Refs"
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Data"
+              },
+              "expected_version": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Expected Version"
+              },
+              "expected_deps": {
+                "anyOf": [
+                  {
+                    "additionalProperties": {
+                      "type": "integer"
+                    },
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Expected Deps"
+              }
+            },
+            "required": [
+              "path",
+              "id",
+              "kind",
+              "text",
+              "actor"
+            ],
+            "type": "object",
+            "title": "putArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "putDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "status",
+          "title": null,
+          "description": "Read the current case state.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path"
+            ],
+            "type": "object",
+            "title": "statusArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "statusDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "review",
+          "title": null,
+          "description": "Record an item review with a verdict and reason.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "verdict": {
+                "title": "Verdict",
+                "type": "string"
+              },
+              "reason": {
+                "title": "Reason",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "id",
+              "verdict",
+              "reason",
+              "actor"
+            ],
+            "type": "object",
+            "title": "reviewArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "reviewDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "approval_challenge",
+          "title": null,
+          "description": "Return canonical bytes for offline Ed25519 signing of an exact normative item revision.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "reason": {
+                "title": "Reason",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "id",
+              "reason",
+              "actor"
+            ],
+            "type": "object",
+            "title": "approval_challengeArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "approval_challengeDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "approve",
+          "title": null,
+          "description": "Record a normative approval; signed cases require a trusted Ed25519 signature.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "reason": {
+                "title": "Reason",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              },
+              "signature": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Signature"
+              }
+            },
+            "required": [
+              "path",
+              "id",
+              "reason",
+              "actor"
+            ],
+            "type": "object",
+            "title": "approveArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "approveDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "test_execution_challenge",
+          "title": null,
+          "description": "Return canonical bytes for offline Ed25519 signing of an external test execution report. No command is run.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "report": {
+                "additionalProperties": true,
+                "title": "Report",
+                "type": "object"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "id",
+              "report",
+              "actor"
+            ],
+            "type": "object",
+            "title": "test_execution_challengeArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "test_execution_challengeDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "record_test_execution",
+          "title": null,
+          "description": "Record a signed external test report for the current test revision. No command is run.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "report": {
+                "additionalProperties": true,
+                "title": "Report",
+                "type": "object"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              },
+              "signature": {
+                "title": "Signature",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "id",
+              "report",
+              "actor",
+              "signature"
+            ],
+            "type": "object",
+            "title": "record_test_executionArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "record_test_executionDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "test_observation_challenge",
+          "title": null,
+          "description": "Return canonical bytes for offline Ed25519 signing of an external test observation receipt. No command is run.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "receipt": {
+                "additionalProperties": true,
+                "title": "Receipt",
+                "type": "object"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "id",
+              "receipt",
+              "actor"
+            ],
+            "type": "object",
+            "title": "test_observation_challengeArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "test_observation_challengeDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "record_test_observation",
+          "title": null,
+          "description": "Record a signed external observation for the current test execution. No command is run.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "receipt": {
+                "additionalProperties": true,
+                "title": "Receipt",
+                "type": "object"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              },
+              "signature": {
+                "title": "Signature",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "id",
+              "receipt",
+              "actor",
+              "signature"
+            ],
+            "type": "object",
+            "title": "record_test_observationArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "record_test_observationDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "field_attestation_challenge",
+          "title": null,
+          "description": "Prepare case, item and source hashes for an independent field assessor's Ed25519 signature.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "reason": {
+                "title": "Reason",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              },
+              "source_manifest_path": {
+                "title": "Source Manifest Path",
+                "type": "string"
+              },
+              "report_path": {
+                "title": "Report Path",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "id",
+              "reason",
+              "actor",
+              "source_manifest_path",
+              "report_path"
+            ],
+            "type": "object",
+            "title": "field_attestation_challengeArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "field_attestation_challengeDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "attest_field",
+          "title": null,
+          "description": "Record a signed assessor statement. It does not unblock a decisive field verdict.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "reason": {
+                "title": "Reason",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              },
+              "source_manifest_path": {
+                "title": "Source Manifest Path",
+                "type": "string"
+              },
+              "report_path": {
+                "title": "Report Path",
+                "type": "string"
+              },
+              "signature": {
+                "title": "Signature",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "id",
+              "reason",
+              "actor",
+              "source_manifest_path",
+              "report_path",
+              "signature"
+            ],
+            "type": "object",
+            "title": "attest_fieldArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "attest_fieldDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "challenge",
+          "title": null,
+          "description": "Record a contradiction between two items.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "left": {
+                "title": "Left",
+                "type": "string"
+              },
+              "right": {
+                "title": "Right",
+                "type": "string"
+              },
+              "reason": {
+                "title": "Reason",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "left",
+              "right",
+              "reason",
+              "actor"
+            ],
+            "type": "object",
+            "title": "challengeArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "challengeDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "resolve_challenge",
+          "title": null,
+          "description": "Resolve a contradiction using an existing resolution item.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "challenge_seq": {
+                "title": "Challenge Seq",
+                "type": "integer"
+              },
+              "resolution_item": {
+                "title": "Resolution Item",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "challenge_seq",
+              "resolution_item",
+              "actor"
+            ],
+            "type": "object",
+            "title": "resolve_challengeArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "resolve_challengeDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "gate",
+          "title": null,
+          "description": "Evaluate the requirements for advancing a phase without changing state.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "phase": {
+                "title": "Phase",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "phase"
+            ],
+            "type": "object",
+            "title": "gateArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "gateDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "phase_review_challenge",
+          "title": null,
+          "description": "Return canonical bytes for offline Ed25519 signing of a phase review of the current snapshot.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "phase": {
+                "title": "Phase",
+                "type": "string"
+              },
+              "verdict": {
+                "title": "Verdict",
+                "type": "string"
+              },
+              "reason": {
+                "title": "Reason",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "phase",
+              "verdict",
+              "reason",
+              "actor"
+            ],
+            "type": "object",
+            "title": "phase_review_challengeArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "phase_review_challengeDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "review_phase",
+          "title": null,
+          "description": "Record a phase review; signed cases require a trusted Ed25519 reviewer signature.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "phase": {
+                "title": "Phase",
+                "type": "string"
+              },
+              "verdict": {
+                "title": "Verdict",
+                "type": "string"
+              },
+              "reason": {
+                "title": "Reason",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              },
+              "signature": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Signature"
+              }
+            },
+            "required": [
+              "path",
+              "phase",
+              "verdict",
+              "reason",
+              "actor"
+            ],
+            "type": "object",
+            "title": "review_phaseArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "review_phaseDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "advance",
+          "title": null,
+          "description": "Advance the requested phase only when the engine gate permits it.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "phase": {
+                "title": "Phase",
+                "type": "string"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "phase",
+              "actor"
+            ],
+            "type": "object",
+            "title": "advanceArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "advanceDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "trace",
+          "title": null,
+          "description": "Trace an item to its referenced inputs and dependents.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "id"
+            ],
+            "type": "object",
+            "title": "traceArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "traceDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "next_task",
+          "title": null,
+          "description": "Get bounded, versioned instructions for the next pending workflow task.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "roles": {
+                "anyOf": [
+                  {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Roles"
+              }
+            },
+            "required": [
+              "path"
+            ],
+            "type": "object",
+            "title": "next_taskArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "next_taskDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "run",
+          "title": null,
+          "description": "Apply a schema 1 workflow manifest; pause at human approval or independent review.",
+          "inputSchema": {
+            "properties": {
+              "path": {
+                "title": "Path",
+                "type": "string"
+              },
+              "manifest": {
+                "additionalProperties": true,
+                "title": "Manifest",
+                "type": "object"
+              },
+              "actor": {
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "manifest",
+              "actor"
+            ],
+            "type": "object",
+            "title": "runArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "runDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        },
+        {
+          "name": "audit_lot_journal",
+          "title": null,
+          "description": "Audit declared incremental lot balances and wet/dry mass basis; no field authenticity or acceptance is established. Read-only, no case required.",
+          "inputSchema": {
+            "properties": {
+              "journal": {
+                "additionalProperties": true,
+                "title": "Journal",
+                "type": "object"
+              }
+            },
+            "required": [
+              "journal"
+            ],
+            "type": "object",
+            "title": "audit_lot_journalArguments"
+          },
+          "execution": null,
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "audit_lot_journalDictOutput"
+          },
+          "icons": null,
+          "annotations": null,
+          "_meta": null
+        }
+      ],
+      "resultType": "complete"
+    }
+  },
+  {
+    "transport": "cli",
+    "operation": "status",
+    "argv": [
+      "/tmp/specorganon-D102-install-cfoi0az2/venv-312/bin/organon",
+      "status",
+      "/tmp/specorganon-D103-native-312-7o8846h5/case"
+    ],
+    "exit": 0,
+    "stdout": "{\"approval_trust\": \"unavailable\", \"field_attestation_trust\": \"unavailable\", \"field_attestations\": [], \"items\": {\"a_A\": {\"approval_status\": \"missing\", \"approved\": false, \"author\": \"agent:native-D103-A\", \"contested\": false, \"data\": {}, \"deps\": {\"p_native\": 1}, \"id\": \"a_A\", \"issues\": [], \"kind\": \"actor\", \"seq\": 2, \"stale\": false, \"text\": \"Synthetic native writer A; no human authority\", \"version\": 1}, \"a_B\": {\"approval_status\": \"missing\", \"approved\": false, \"author\": \"agent:native-D103-B\", \"contested\": false, \"data\": {}, \"deps\": {\"p_native\": 1}, \"id\": \"a_B\", \"issues\": [], \"kind\": \"actor\", \"seq\": 3, \"stale\": false, \"text\": \"Synthetic native writer B; no human authority\", \"version\": 1}, \"b_A\": {\"approval_status\": \"missing\", \"approved\": false, \"author\": \"agent:native-D103-A\", \"contested\": false, \"data\": {}, \"deps\": {\"a_A\": 1, \"p_native\": 1}, \"id\": \"b_A\", \"issues\": [], \"kind\": \"boundary\", \"seq\": 4, \"stale\": false, \"text\": \"Only installed pending-item coordination; no field intervention\", \"version\": 1}, \"b_B\": {\"approval_status\": \"missing\", \"approved\": false, \"author\": \"agent:native-D103-B\", \"contested\": false, \"data\": {}, \"deps\": {\"a_B\": 1, \"p_native\": 1}, \"id\": \"b_B\", \"issues\": [], \"kind\": \"boundary\", \"seq\": 5, \"stale\": false, \"text\": \"Only installed pending-item coordination; no field intervention\", \"version\": 1}, \"p_native\": {\"approval_status\": \"missing\", \"approved\": false, \"author\": \"agent:root-D103-312\", \"contested\": false, \"data\": {}, \"deps\": {}, \"id\": \"p_native\", \"issues\": [], \"kind\": \"problem\", \"seq\": 1, \"stale\": false, \"text\": \"Verify guarded installed native authorship; no field resolution\", \"version\": 1}}, \"open_challenges\": [], \"phase_review_history\": [], \"phase_review_trust\": \"unavailable\", \"phases\": {\"build\": {\"accepted\": false, \"advance_seq\": null, \"blockers\": [\"needs 1 valid implementation; has 0\", \"needs 1 valid test; has 0\", \"previous phase is not currently accepted\"], \"front\": \"engineering\", \"independent_review\": false, \"phase\": \"build\", \"ready\": false, \"review_provenance\": \"none\", \"review_signature_verified\": false, \"reviewed\": false, \"snapshot\": \"86e7e4bf767365ad64e21192a23ea93c4e968cc2c997312ff133cfe1a00f44a2\"}, \"compare\": {\"accepted\": false, \"advance_seq\": null, \"blockers\": [\"needs 1 valid comparison; has 0\", \"needs 1 valid risk; has 0\", \"needs 2 valid option; has 0\", \"previous phase is not currently accepted\"], \"front\": \"engineering\", \"independent_review\": false, \"phase\": \"compare\", \"ready\": false, \"review_provenance\": \"none\", \"review_signature_verified\": false, \"reviewed\": false, \"snapshot\": \"16e4c5494ca4c37df236d13a8e30520ef0c4f5e3319a03ecff7818b9749af4d1\"}, \"critique\": {\"accepted\": false, \"advance_seq\": null, \"blockers\": [\"needs 1 valid assumption; has 0\", \"needs 1 valid concept; has 0\", \"needs 1 valid norm; has 0\", \"needs 2 valid frame_option; has 0\", \"previous phase is not currently accepted\"], \"front\": \"philosophy\", \"independent_review\": false, \"phase\": \"critique\", \"ready\": false, \"review_provenance\": \"none\", \"review_signature_verified\": false, \"reviewed\": false, \"snapshot\": \"bb7b59e1cd8a1f270b8466fed1eaf5c3f9af5bbd2c73688d694a17113efad1b1\"}, \"explain\": {\"accepted\": false, \"advance_seq\": null, \"blockers\": [\"needs 1 valid synthesis; has 0\", \"needs 1 valid uncertainty; has 0\", \"previous phase is not currently accepted\"], \"front\": \"science\", \"independent_review\": false, \"phase\": \"explain\", \"ready\": false, \"review_provenance\": \"none\", \"review_signature_verified\": false, \"reviewed\": false, \"snapshot\": \"0a0c6bd681e7f67589eee109abc7929e127c7fe61563bce4768291922e54a203\"}, \"frame\": {\"accepted\": false, \"advance_seq\": null, \"blockers\": [], \"front\": \"philosophy\", \"independent_review\": false, \"phase\": \"frame\", \"ready\": true, \"review_provenance\": \"none\", \"review_signature_verified\": false, \"reviewed\": false, \"snapshot\": \"4ca269ef4a5c5c6d88e79a30f42cc53ce7ee718bf21ee559a73c21d3b490685c\"}, \"observe\": {\"accepted\": false, \"advance_seq\": null, \"blockers\": [\"needs 1 valid evidence; has 0\", \"needs 1 valid inference; has 0\", \"previous phase is not currently accepted\"], \"front\": \"science\", \"independent_review\": false, \"phase\": \"observe\", \"ready\": false, \"review_provenance\": \"none\", \"review_signature_verified\": false, \"reviewed\": false, \"snapshot\": \"68d843c513a81b2a4e5beeebc586b5b40f7bc58369d39f2e944a78bd60924067\"}, \"specify\": {\"accepted\": false, \"advance_seq\": null, \"blockers\": [\"needs 1 valid criterion; has 0\", \"needs 1 valid decision; has 0\", \"needs 1 valid requirement; has 0\", \"previous phase is not currently accepted\"], \"front\": \"engineering\", \"independent_review\": false, \"phase\": \"specify\", \"ready\": false, \"review_provenance\": \"none\", \"review_signature_verified\": false, \"reviewed\": false, \"snapshot\": \"9151c1f24392cc0293c729a66b762feb5e9121b859e9a554310b9d79018a6e7d\"}, \"study\": {\"accepted\": false, \"advance_seq\": null, \"blockers\": [\"needs 1 valid hypothesis; has 0\", \"needs 1 valid indicator; has 0\", \"needs 1 valid protocol; has 0\", \"needs 1 valid question; has 0\", \"previous phase is not currently accepted\"], \"front\": \"science\", \"independent_review\": false, \"phase\": \"study\", \"ready\": false, \"review_provenance\": \"none\", \"review_signature_verified\": false, \"reviewed\": false, \"snapshot\": \"a319b8ff70db5fc8e5e552c61c47d9b33bea62e36dee8104e881eda593d611c6\"}, \"validate\": {\"accepted\": false, \"advance_seq\": null, \"blockers\": [\"needs 1 valid assessment; has 0\", \"needs 1 valid baseline; has 0\", \"needs 1 valid result; has 0\", \"previous phase is not currently accepted\"], \"front\": \"validation\", \"independent_review\": false, \"phase\": \"validate\", \"ready\": false, \"review_provenance\": \"none\", \"review_signature_verified\": false, \"reviewed\": false, \"snapshot\": \"279619418846b9797270c2ef9eb1564053aaab7c194af15cfa7bc3a0a5db47d4\"}}, \"project\": {\"approval_policy\": \"signed\", \"case_id\": \"5e52bc90-8ab9-4ac7-a45c-09bc808c6c7e\", \"created_at\": \"2026-09-30T17:37:27+00:00\", \"created_by\": \"agent:root-D103-312\", \"domain\": \"synthetic\", \"title\": \"Current installed native coordination3.12, synthetic\"}, \"project_sha256\": \"5be9428623efa5ba068b915fca64c3e554d0a187d3738a032f263cd920b3ba4b\", \"revision\": 5, \"test_execution_history\": [], \"test_execution_trust\": \"unavailable\", \"test_observation_history\": [], \"test_observation_trust\": \"not_applicable\"}\n",
+    "stderr": ""
+  },
+  {
+    "transport": "mcp",
+    "operation": "status",
+    "arguments": {
+      "path": "/tmp/specorganon-D103-native-312-7o8846h5/case"
+    },
+    "response": {
+      "_meta": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"project\": {\n    \"approval_policy\": \"signed\",\n    \"case_id\": \"5e52bc90-8ab9-4ac7-a45c-09bc808c6c7e\",\n    \"created_at\": \"2026-09-30T17:37:27+00:00\",\n    \"created_by\": \"agent:root-D103-312\",\n    \"domain\": \"synthetic\",\n    \"title\": \"Current installed native coordination3.12, synthetic\"\n  },\n  \"project_sha256\": \"5be9428623efa5ba068b915fca64c3e554d0a187d3738a032f263cd920b3ba4b\",\n  \"revision\": 5,\n  \"approval_trust\": \"unavailable\",\n  \"phase_review_trust\": \"unavailable\",\n  \"test_execution_trust\": \"unavailable\",\n  \"test_execution_history\": [],\n  \"test_observation_trust\": \"not_applicable\",\n  \"test_observation_history\": [],\n  \"phase_review_history\": [],\n  \"field_attestation_trust\": \"unavailable\",\n  \"field_attestations\": [],\n  \"items\": {\n    \"p_native\": {\n      \"data\": {},\n      \"deps\": {},\n      \"id\": \"p_native\",\n      \"kind\": \"problem\",\n      \"text\": \"Verify guarded installed native authorship; no field resolution\",\n      \"version\": 1,\n      \"seq\": 1,\n      \"author\": \"agent:root-D103-312\",\n      \"stale\": false,\n      \"contested\": false,\n      \"issues\": [],\n      \"approved\": false,\n      \"approval_status\": \"missing\"\n    },\n    \"a_A\": {\n      \"data\": {},\n      \"deps\": {\n        \"p_native\": 1\n      },\n      \"id\": \"a_A\",\n      \"kind\": \"actor\",\n      \"text\": \"Synthetic native writer A; no human authority\",\n      \"version\": 1,\n      \"seq\": 2,\n      \"author\": \"agent:native-D103-A\",\n      \"stale\": false,\n      \"contested\": false,\n      \"issues\": [],\n      \"approved\": false,\n      \"approval_status\": \"missing\"\n    },\n    \"a_B\": {\n      \"data\": {},\n      \"deps\": {\n        \"p_native\": 1\n      },\n      \"id\": \"a_B\",\n      \"kind\": \"actor\",\n      \"text\": \"Synthetic native writer B; no human authority\",\n      \"version\": 1,\n      \"seq\": 3,\n      \"author\": \"agent:native-D103-B\",\n      \"stale\": false,\n      \"contested\": false,\n      \"issues\": [],\n      \"approved\": false,\n      \"approval_status\": \"missing\"\n    },\n    \"b_A\": {\n      \"data\": {},\n      \"deps\": {\n        \"a_A\": 1,\n        \"p_native\": 1\n      },\n      \"id\": \"b_A\",\n      \"kind\": \"boundary\",\n      \"text\": \"Only installed pending-item coordination; no field intervention\",\n      \"version\": 1,\n      \"seq\": 4,\n      \"author\": \"agent:native-D103-A\",\n      \"stale\": false,\n      \"contested\": false,\n      \"issues\": [],\n      \"approved\": false,\n      \"approval_status\": \"missing\"\n    },\n    \"b_B\": {\n      \"data\": {},\n      \"deps\": {\n        \"a_B\": 1,\n        \"p_native\": 1\n      },\n      \"id\": \"b_B\",\n      \"kind\": \"boundary\",\n      \"text\": \"Only installed pending-item coordination; no field intervention\",\n      \"version\": 1,\n      \"seq\": 5,\n      \"author\": \"agent:native-D103-B\",\n      \"stale\": false,\n      \"contested\": false,\n      \"issues\": [],\n      \"approved\": false,\n      \"approval_status\": \"missing\"\n    }\n  },\n  \"phases\": {\n    \"frame\": {\n      \"phase\": \"frame\",\n      \"front\": \"philosophy\",\n      \"ready\": true,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [],\n      \"snapshot\": \"4ca269ef4a5c5c6d88e79a30f42cc53ce7ee718bf21ee559a73c21d3b490685c\",\n      \"advance_seq\": null\n    },\n    \"critique\": {\n      \"phase\": \"critique\",\n      \"front\": \"philosophy\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid assumption; has 0\",\n        \"needs 1 valid concept; has 0\",\n        \"needs 1 valid norm; has 0\",\n        \"needs 2 valid frame_option; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"bb7b59e1cd8a1f270b8466fed1eaf5c3f9af5bbd2c73688d694a17113efad1b1\",\n      \"advance_seq\": null\n    },\n    \"study\": {\n      \"phase\": \"study\",\n      \"front\": \"science\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid hypothesis; has 0\",\n        \"needs 1 valid indicator; has 0\",\n        \"needs 1 valid protocol; has 0\",\n        \"needs 1 valid question; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"a319b8ff70db5fc8e5e552c61c47d9b33bea62e36dee8104e881eda593d611c6\",\n      \"advance_seq\": null\n    },\n    \"observe\": {\n      \"phase\": \"observe\",\n      \"front\": \"science\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid evidence; has 0\",\n        \"needs 1 valid inference; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"68d843c513a81b2a4e5beeebc586b5b40f7bc58369d39f2e944a78bd60924067\",\n      \"advance_seq\": null\n    },\n    \"explain\": {\n      \"phase\": \"explain\",\n      \"front\": \"science\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid synthesis; has 0\",\n        \"needs 1 valid uncertainty; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"0a0c6bd681e7f67589eee109abc7929e127c7fe61563bce4768291922e54a203\",\n      \"advance_seq\": null\n    },\n    \"compare\": {\n      \"phase\": \"compare\",\n      \"front\": \"engineering\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid comparison; has 0\",\n        \"needs 1 valid risk; has 0\",\n        \"needs 2 valid option; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"16e4c5494ca4c37df236d13a8e30520ef0c4f5e3319a03ecff7818b9749af4d1\",\n      \"advance_seq\": null\n    },\n    \"specify\": {\n      \"phase\": \"specify\",\n      \"front\": \"engineering\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid criterion; has 0\",\n        \"needs 1 valid decision; has 0\",\n        \"needs 1 valid requirement; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"9151c1f24392cc0293c729a66b762feb5e9121b859e9a554310b9d79018a6e7d\",\n      \"advance_seq\": null\n    },\n    \"build\": {\n      \"phase\": \"build\",\n      \"front\": \"engineering\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid implementation; has 0\",\n        \"needs 1 valid test; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"86e7e4bf767365ad64e21192a23ea93c4e968cc2c997312ff133cfe1a00f44a2\",\n      \"advance_seq\": null\n    },\n    \"validate\": {\n      \"phase\": \"validate\",\n      \"front\": \"validation\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid assessment; has 0\",\n        \"needs 1 valid baseline; has 0\",\n        \"needs 1 valid result; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"279619418846b9797270c2ef9eb1564053aaab7c194af15cfa7bc3a0a5db47d4\",\n      \"advance_seq\": null\n    }\n  },\n  \"open_challenges\": []\n}",
+          "annotations": null,
+          "_meta": null
+        }
+      ],
+      "structuredContent": {
+        "project": {
+          "approval_policy": "signed",
+          "case_id": "5e52bc90-8ab9-4ac7-a45c-09bc808c6c7e",
+          "created_at": "2026-09-30T17:37:27+00:00",
+          "created_by": "agent:root-D103-312",
+          "domain": "synthetic",
+          "title": "Current installed native coordination3.12, synthetic"
+        },
+        "project_sha256": "5be9428623efa5ba068b915fca64c3e554d0a187d3738a032f263cd920b3ba4b",
+        "revision": 5,
+        "approval_trust": "unavailable",
+        "phase_review_trust": "unavailable",
+        "test_execution_trust": "unavailable",
+        "test_execution_history": [],
+        "test_observation_trust": "not_applicable",
+        "test_observation_history": [],
+        "phase_review_history": [],
+        "field_attestation_trust": "unavailable",
+        "field_attestations": [],
+        "items": {
+          "p_native": {
+            "data": {},
+            "deps": {},
+            "id": "p_native",
+            "kind": "problem",
+            "text": "Verify guarded installed native authorship; no field resolution",
+            "version": 1,
+            "seq": 1,
+            "author": "agent:root-D103-312",
+            "stale": false,
+            "contested": false,
+            "issues": [],
+            "approved": false,
+            "approval_status": "missing"
+          },
+          "a_A": {
+            "data": {},
+            "deps": {
+              "p_native": 1
+            },
+            "id": "a_A",
+            "kind": "actor",
+            "text": "Synthetic native writer A; no human authority",
+            "version": 1,
+            "seq": 2,
+            "author": "agent:native-D103-A",
+            "stale": false,
+            "contested": false,
+            "issues": [],
+            "approved": false,
+            "approval_status": "missing"
+          },
+          "a_B": {
+            "data": {},
+            "deps": {
+              "p_native": 1
+            },
+            "id": "a_B",
+            "kind": "actor",
+            "text": "Synthetic native writer B; no human authority",
+            "version": 1,
+            "seq": 3,
+            "author": "agent:native-D103-B",
+            "stale": false,
+            "contested": false,
+            "issues": [],
+            "approved": false,
+            "approval_status": "missing"
+          },
+          "b_A": {
+            "data": {},
+            "deps": {
+              "a_A": 1,
+              "p_native": 1
+            },
+            "id": "b_A",
+            "kind": "boundary",
+            "text": "Only installed pending-item coordination; no field intervention",
+            "version": 1,
+            "seq": 4,
+            "author": "agent:native-D103-A",
+            "stale": false,
+            "contested": false,
+            "issues": [],
+            "approved": false,
+            "approval_status": "missing"
+          },
+          "b_B": {
+            "data": {},
+            "deps": {
+              "a_B": 1,
+              "p_native": 1
+            },
+            "id": "b_B",
+            "kind": "boundary",
+            "text": "Only installed pending-item coordination; no field intervention",
+            "version": 1,
+            "seq": 5,
+            "author": "agent:native-D103-B",
+            "stale": false,
+            "contested": false,
+            "issues": [],
+            "approved": false,
+            "approval_status": "missing"
+          }
+        },
+        "phases": {
+          "frame": {
+            "phase": "frame",
+            "front": "philosophy",
+            "ready": true,
+            "accepted": false,
+            "reviewed": false,
+            "independent_review": false,
+            "review_signature_verified": false,
+            "review_provenance": "none",
+            "blockers": [],
+            "snapshot": "4ca269ef4a5c5c6d88e79a30f42cc53ce7ee718bf21ee559a73c21d3b490685c",
+            "advance_seq": null
+          },
+          "critique": {
+            "phase": "critique",
+            "front": "philosophy",
+            "ready": false,
+            "accepted": false,
+            "reviewed": false,
+            "independent_review": false,
+            "review_signature_verified": false,
+            "review_provenance": "none",
+            "blockers": [
+              "needs 1 valid assumption; has 0",
+              "needs 1 valid concept; has 0",
+              "needs 1 valid norm; has 0",
+              "needs 2 valid frame_option; has 0",
+              "previous phase is not currently accepted"
+            ],
+            "snapshot": "bb7b59e1cd8a1f270b8466fed1eaf5c3f9af5bbd2c73688d694a17113efad1b1",
+            "advance_seq": null
+          },
+          "study": {
+            "phase": "study",
+            "front": "science",
+            "ready": false,
+            "accepted": false,
+            "reviewed": false,
+            "independent_review": false,
+            "review_signature_verified": false,
+            "review_provenance": "none",
+            "blockers": [
+              "needs 1 valid hypothesis; has 0",
+              "needs 1 valid indicator; has 0",
+              "needs 1 valid protocol; has 0",
+              "needs 1 valid question; has 0",
+              "previous phase is not currently accepted"
+            ],
+            "snapshot": "a319b8ff70db5fc8e5e552c61c47d9b33bea62e36dee8104e881eda593d611c6",
+            "advance_seq": null
+          },
+          "observe": {
+            "phase": "observe",
+            "front": "science",
+            "ready": false,
+            "accepted": false,
+            "reviewed": false,
+            "independent_review": false,
+            "review_signature_verified": false,
+            "review_provenance": "none",
+            "blockers": [
+              "needs 1 valid evidence; has 0",
+              "needs 1 valid inference; has 0",
+              "previous phase is not currently accepted"
+            ],
+            "snapshot": "68d843c513a81b2a4e5beeebc586b5b40f7bc58369d39f2e944a78bd60924067",
+            "advance_seq": null
+          },
+          "explain": {
+            "phase": "explain",
+            "front": "science",
+            "ready": false,
+            "accepted": false,
+            "reviewed": false,
+            "independent_review": false,
+            "review_signature_verified": false,
+            "review_provenance": "none",
+            "blockers": [
+              "needs 1 valid synthesis; has 0",
+              "needs 1 valid uncertainty; has 0",
+              "previous phase is not currently accepted"
+            ],
+            "snapshot": "0a0c6bd681e7f67589eee109abc7929e127c7fe61563bce4768291922e54a203",
+            "advance_seq": null
+          },
+          "compare": {
+            "phase": "compare",
+            "front": "engineering",
+            "ready": false,
+            "accepted": false,
+            "reviewed": false,
+            "independent_review": false,
+            "review_signature_verified": false,
+            "review_provenance": "none",
+            "blockers": [
+              "needs 1 valid comparison; has 0",
+              "needs 1 valid risk; has 0",
+              "needs 2 valid option; has 0",
+              "previous phase is not currently accepted"
+            ],
+            "snapshot": "16e4c5494ca4c37df236d13a8e30520ef0c4f5e3319a03ecff7818b9749af4d1",
+            "advance_seq": null
+          },
+          "specify": {
+            "phase": "specify",
+            "front": "engineering",
+            "ready": false,
+            "accepted": false,
+            "reviewed": false,
+            "independent_review": false,
+            "review_signature_verified": false,
+            "review_provenance": "none",
+            "blockers": [
+              "needs 1 valid criterion; has 0",
+              "needs 1 valid decision; has 0",
+              "needs 1 valid requirement; has 0",
+              "previous phase is not currently accepted"
+            ],
+            "snapshot": "9151c1f24392cc0293c729a66b762feb5e9121b859e9a554310b9d79018a6e7d",
+            "advance_seq": null
+          },
+          "build": {
+            "phase": "build",
+            "front": "engineering",
+            "ready": false,
+            "accepted": false,
+            "reviewed": false,
+            "independent_review": false,
+            "review_signature_verified": false,
+            "review_provenance": "none",
+            "blockers": [
+              "needs 1 valid implementation; has 0",
+              "needs 1 valid test; has 0",
+              "previous phase is not currently accepted"
+            ],
+            "snapshot": "86e7e4bf767365ad64e21192a23ea93c4e968cc2c997312ff133cfe1a00f44a2",
+            "advance_seq": null
+          },
+          "validate": {
+            "phase": "validate",
+            "front": "validation",
+            "ready": false,
+            "accepted": false,
+            "reviewed": false,
+            "independent_review": false,
+            "review_signature_verified": false,
+            "review_provenance": "none",
+            "blockers": [
+              "needs 1 valid assessment; has 0",
+              "needs 1 valid baseline; has 0",
+              "needs 1 valid result; has 0",
+              "previous phase is not currently accepted"
+            ],
+            "snapshot": "279619418846b9797270c2ef9eb1564053aaab7c194af15cfa7bc3a0a5db47d4",
+            "advance_seq": null
+          }
+        },
+        "open_challenges": []
+      },
+      "isError": false,
+      "resultType": "complete"
+    }
+  },
+  {
+    "transport": "cli",
+    "operation": "gate",
+    "argv": [
+      "/tmp/specorganon-D102-install-cfoi0az2/venv-312/bin/organon",
+      "gate",
+      "/tmp/specorganon-D103-native-312-7o8846h5/case",
+      "frame"
+    ],
+    "exit": 0,
+    "stdout": "{\"accepted\": false, \"advance_seq\": null, \"blockers\": [], \"front\": \"philosophy\", \"independent_review\": false, \"phase\": \"frame\", \"ready\": true, \"review_provenance\": \"none\", \"review_signature_verified\": false, \"reviewed\": false, \"snapshot\": \"4ca269ef4a5c5c6d88e79a30f42cc53ce7ee718bf21ee559a73c21d3b490685c\"}\n",
+    "stderr": ""
+  },
+  {
+    "transport": "mcp",
+    "operation": "gate",
+    "arguments": {
+      "path": "/tmp/specorganon-D103-native-312-7o8846h5/case",
+      "phase": "frame"
+    },
+    "response": {
+      "_meta": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"phase\": \"frame\",\n  \"front\": \"philosophy\",\n  \"ready\": true,\n  \"accepted\": false,\n  \"reviewed\": false,\n  \"independent_review\": false,\n  \"review_signature_verified\": false,\n  \"review_provenance\": \"none\",\n  \"blockers\": [],\n  \"snapshot\": \"4ca269ef4a5c5c6d88e79a30f42cc53ce7ee718bf21ee559a73c21d3b490685c\",\n  \"advance_seq\": null\n}",
+          "annotations": null,
+          "_meta": null
+        }
+      ],
+      "structuredContent": {
+        "phase": "frame",
+        "front": "philosophy",
+        "ready": true,
+        "accepted": false,
+        "reviewed": false,
+        "independent_review": false,
+        "review_signature_verified": false,
+        "review_provenance": "none",
+        "blockers": [],
+        "snapshot": "4ca269ef4a5c5c6d88e79a30f42cc53ce7ee718bf21ee559a73c21d3b490685c",
+        "advance_seq": null
+      },
+      "isError": false,
+      "resultType": "complete"
+    }
+  },
+  {
+    "transport": "cli",
+    "operation": "trace",
+    "argv": [
+      "/tmp/specorganon-D102-install-cfoi0az2/venv-312/bin/organon",
+      "trace",
+      "/tmp/specorganon-D103-native-312-7o8846h5/case",
+      "b_A"
+    ],
+    "exit": 0,
+    "stdout": "{\"ancestors\": [{\"approval_status\": \"missing\", \"approved\": false, \"author\": \"agent:native-D103-A\", \"contested\": false, \"data\": {}, \"deps\": {\"p_native\": 1}, \"id\": \"a_A\", \"issues\": [], \"kind\": \"actor\", \"seq\": 2, \"stale\": false, \"text\": \"Synthetic native writer A; no human authority\", \"version\": 1}, {\"approval_status\": \"missing\", \"approved\": false, \"author\": \"agent:root-D103-312\", \"contested\": false, \"data\": {}, \"deps\": {}, \"id\": \"p_native\", \"issues\": [], \"kind\": \"problem\", \"seq\": 1, \"stale\": false, \"text\": \"Verify guarded installed native authorship; no field resolution\", \"version\": 1}], \"dependents\": [], \"item\": {\"approval_status\": \"missing\", \"approved\": false, \"author\": \"agent:native-D103-A\", \"contested\": false, \"data\": {}, \"deps\": {\"a_A\": 1, \"p_native\": 1}, \"id\": \"b_A\", \"issues\": [], \"kind\": \"boundary\", \"seq\": 4, \"stale\": false, \"text\": \"Only installed pending-item coordination; no field intervention\", \"version\": 1}}\n",
+    "stderr": ""
+  },
+  {
+    "transport": "mcp",
+    "operation": "trace",
+    "arguments": {
+      "path": "/tmp/specorganon-D103-native-312-7o8846h5/case",
+      "id": "b_A"
+    },
+    "response": {
+      "_meta": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"item\": {\n    \"data\": {},\n    \"deps\": {\n      \"a_A\": 1,\n      \"p_native\": 1\n    },\n    \"id\": \"b_A\",\n    \"kind\": \"boundary\",\n    \"text\": \"Only installed pending-item coordination; no field intervention\",\n    \"version\": 1,\n    \"seq\": 4,\n    \"author\": \"agent:native-D103-A\",\n    \"stale\": false,\n    \"contested\": false,\n    \"issues\": [],\n    \"approved\": false,\n    \"approval_status\": \"missing\"\n  },\n  \"ancestors\": [\n    {\n      \"data\": {},\n      \"deps\": {\n        \"p_native\": 1\n      },\n      \"id\": \"a_A\",\n      \"kind\": \"actor\",\n      \"text\": \"Synthetic native writer A; no human authority\",\n      \"version\": 1,\n      \"seq\": 2,\n      \"author\": \"agent:native-D103-A\",\n      \"stale\": false,\n      \"contested\": false,\n      \"issues\": [],\n      \"approved\": false,\n      \"approval_status\": \"missing\"\n    },\n    {\n      \"data\": {},\n      \"deps\": {},\n      \"id\": \"p_native\",\n      \"kind\": \"problem\",\n      \"text\": \"Verify guarded installed native authorship; no field resolution\",\n      \"version\": 1,\n      \"seq\": 1,\n      \"author\": \"agent:root-D103-312\",\n      \"stale\": false,\n      \"contested\": false,\n      \"issues\": [],\n      \"approved\": false,\n      \"approval_status\": \"missing\"\n    }\n  ],\n  \"dependents\": []\n}",
+          "annotations": null,
+          "_meta": null
+        }
+      ],
+      "structuredContent": {
+        "item": {
+          "data": {},
+          "deps": {
+            "a_A": 1,
+            "p_native": 1
+          },
+          "id": "b_A",
+          "kind": "boundary",
+          "text": "Only installed pending-item coordination; no field intervention",
+          "version": 1,
+          "seq": 4,
+          "author": "agent:native-D103-A",
+          "stale": false,
+          "contested": false,
+          "issues": [],
+          "approved": false,
+          "approval_status": "missing"
+        },
+        "ancestors": [
+          {
+            "data": {},
+            "deps": {
+              "p_native": 1
+            },
+            "id": "a_A",
+            "kind": "actor",
+            "text": "Synthetic native writer A; no human authority",
+            "version": 1,
+            "seq": 2,
+            "author": "agent:native-D103-A",
+            "stale": false,
+            "contested": false,
+            "issues": [],
+            "approved": false,
+            "approval_status": "missing"
+          },
+          {
+            "data": {},
+            "deps": {},
+            "id": "p_native",
+            "kind": "problem",
+            "text": "Verify guarded installed native authorship; no field resolution",
+            "version": 1,
+            "seq": 1,
+            "author": "agent:root-D103-312",
+            "stale": false,
+            "contested": false,
+            "issues": [],
+            "approved": false,
+            "approval_status": "missing"
+          }
+        ],
+        "dependents": []
+      },
+      "isError": false,
+      "resultType": "complete"
+    }
+  },
+  {
+    "transport": "cli",
+    "operation": "next_task",
+    "argv": [
+      "/tmp/specorganon-D102-install-cfoi0az2/venv-312/bin/organon",
+      "next-task",
+      "/tmp/specorganon-D103-native-312-7o8846h5/case"
+    ],
+    "exit": 0,
+    "stdout": "{\"action\": \"review_phase\", \"actor\": null, \"approval_targets\": [], \"artifacts\": {\"items\": [{\"approved\": null, \"contested\": false, \"data\": \"{}\", \"id\": \"b_B\", \"issues\": [], \"kind\": \"boundary\", \"omitted_issues\": 0, \"omitted_refs\": 0, \"refs\": {\"a_B\": 1, \"p_native\": 1}, \"stale\": false, \"text\": \"Only installed pending-item coordination; no field intervention\", \"version\": 1}, {\"approved\": null, \"contested\": false, \"data\": \"{}\", \"id\": \"b_A\", \"issues\": [], \"kind\": \"boundary\", \"omitted_issues\": 0, \"omitted_refs\": 0, \"refs\": {\"a_A\": 1, \"p_native\": 1}, \"stale\": false, \"text\": \"Only installed pending-item coordination; no field intervention\", \"version\": 1}, {\"approved\": null, \"contested\": false, \"data\": \"{}\", \"id\": \"a_B\", \"issues\": [], \"kind\": \"actor\", \"omitted_issues\": 0, \"omitted_refs\": 0, \"refs\": {\"p_native\": 1}, \"stale\": false, \"text\": \"Synthetic native writer B; no human authority\", \"version\": 1}, {\"approved\": null, \"contested\": false, \"data\": \"{}\", \"id\": \"a_A\", \"issues\": [], \"kind\": \"actor\", \"omitted_issues\": 0, \"omitted_refs\": 0, \"refs\": {\"p_native\": 1}, \"stale\": false, \"text\": \"Synthetic native writer A; no human authority\", \"version\": 1}, {\"approved\": null, \"contested\": false, \"data\": \"{}\", \"id\": \"p_native\", \"issues\": [], \"kind\": \"problem\", \"omitted_issues\": 0, \"omitted_refs\": 0, \"refs\": {}, \"stale\": false, \"text\": \"Verify guarded installed native authorship; no field resolution\", \"version\": 1}], \"omitted\": 0}, \"blockers\": [], \"criteria\": {\"exit\": \"La formulaci\u00f3n nombra el da\u00f1o o necesidad, los afectados y el l\u00edmite de observaci\u00f3n.\", \"review\": \"Revisar exclusiones y formulaciones rivales.\", \"stop\": \"Detener si el problema no puede delimitarse o falta un actor afectado decisivo.\"}, \"front\": \"philosophy\", \"gate\": {\"accepted\": false, \"independent_review\": false, \"ready\": true, \"review_provenance\": \"none\", \"review_signature_verified\": false, \"reviewed\": false, \"snapshot\": \"4ca269ef4a5c5c6d88e79a30f42cc53ce7ee718bf21ee559a73c21d3b490685c\"}, \"inputs\": {\"items\": [], \"omitted\": 0}, \"inputs_description\": \"Encargo y contexto del caso.\", \"missing\": [], \"omitted_approval_targets\": 0, \"omitted_blockers\": 0, \"omitted_challenges\": 0, \"omitted_test_execution_targets\": 0, \"omitted_test_observation_targets\": 0, \"open_challenges\": [], \"phase\": \"frame\", \"phase_review_trust\": \"unavailable\", \"purpose\": \"Delimitar el problema, actores y frontera.\", \"revision\": 5, \"role\": \"reviewer\", \"role_label\": \"revisor\", \"status\": \"pending\", \"task\": \"Registrar fuera del caso la clave p\u00fablica de un revisor competente y distinto de los autores; despu\u00e9s pedir phase-review-challenge y registrar su firma.\", \"test_execution_targets\": [], \"test_execution_trust\": \"unavailable\", \"test_observation_targets\": [], \"test_observation_trust\": \"not_applicable\"}\n",
+    "stderr": ""
+  },
+  {
+    "transport": "mcp",
+    "operation": "next_task",
+    "arguments": {
+      "path": "/tmp/specorganon-D103-native-312-7o8846h5/case"
+    },
+    "response": {
+      "_meta": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"status\": \"pending\",\n  \"revision\": 5,\n  \"phase\": \"frame\",\n  \"front\": \"philosophy\",\n  \"purpose\": \"Delimitar el problema, actores y frontera.\",\n  \"role\": \"reviewer\",\n  \"role_label\": \"revisor\",\n  \"actor\": null,\n  \"action\": \"review_phase\",\n  \"task\": \"Registrar fuera del caso la clave p\u00fablica de un revisor competente y distinto de los autores; despu\u00e9s pedir phase-review-challenge y registrar su firma.\",\n  \"phase_review_trust\": \"unavailable\",\n  \"test_execution_trust\": \"unavailable\",\n  \"test_observation_trust\": \"not_applicable\",\n  \"inputs_description\": \"Encargo y contexto del caso.\",\n  \"inputs\": {\n    \"items\": [],\n    \"omitted\": 0\n  },\n  \"artifacts\": {\n    \"items\": [\n      {\n        \"id\": \"b_B\",\n        \"kind\": \"boundary\",\n        \"version\": 1,\n        \"text\": \"Only installed pending-item coordination; no field intervention\",\n        \"data\": \"{}\",\n        \"refs\": {\n          \"a_B\": 1,\n          \"p_native\": 1\n        },\n        \"omitted_refs\": 0,\n        \"stale\": false,\n        \"contested\": false,\n        \"issues\": [],\n        \"omitted_issues\": 0,\n        \"approved\": null\n      },\n      {\n        \"id\": \"b_A\",\n        \"kind\": \"boundary\",\n        \"version\": 1,\n        \"text\": \"Only installed pending-item coordination; no field intervention\",\n        \"data\": \"{}\",\n        \"refs\": {\n          \"a_A\": 1,\n          \"p_native\": 1\n        },\n        \"omitted_refs\": 0,\n        \"stale\": false,\n        \"contested\": false,\n        \"issues\": [],\n        \"omitted_issues\": 0,\n        \"approved\": null\n      },\n      {\n        \"id\": \"a_B\",\n        \"kind\": \"actor\",\n        \"version\": 1,\n        \"text\": \"Synthetic native writer B; no human authority\",\n        \"data\": \"{}\",\n        \"refs\": {\n          \"p_native\": 1\n        },\n        \"omitted_refs\": 0,\n        \"stale\": false,\n        \"contested\": false,\n        \"issues\": [],\n        \"omitted_issues\": 0,\n        \"approved\": null\n      },\n      {\n        \"id\": \"a_A\",\n        \"kind\": \"actor\",\n        \"version\": 1,\n        \"text\": \"Synthetic native writer A; no human authority\",\n        \"data\": \"{}\",\n        \"refs\": {\n          \"p_native\": 1\n        },\n        \"omitted_refs\": 0,\n        \"stale\": false,\n        \"contested\": false,\n        \"issues\": [],\n        \"omitted_issues\": 0,\n        \"approved\": null\n      },\n      {\n        \"id\": \"p_native\",\n        \"kind\": \"problem\",\n        \"version\": 1,\n        \"text\": \"Verify guarded installed native authorship; no field resolution\",\n        \"data\": \"{}\",\n        \"refs\": {},\n        \"omitted_refs\": 0,\n        \"stale\": false,\n        \"contested\": false,\n        \"issues\": [],\n        \"omitted_issues\": 0,\n        \"approved\": null\n      }\n    ],\n    \"omitted\": 0\n  },\n  \"missing\": [],\n  \"approval_targets\": [],\n  \"omitted_approval_targets\": 0,\n  \"test_execution_targets\": [],\n  \"omitted_test_execution_targets\": 0,\n  \"test_observation_targets\": [],\n  \"omitted_test_observation_targets\": 0,\n  \"criteria\": {\n    \"exit\": \"La formulaci\u00f3n nombra el da\u00f1o o necesidad, los afectados y el l\u00edmite de observaci\u00f3n.\",\n    \"review\": \"Revisar exclusiones y formulaciones rivales.\",\n    \"stop\": \"Detener si el problema no puede delimitarse o falta un actor afectado decisivo.\"\n  },\n  \"gate\": {\n    \"ready\": true,\n    \"reviewed\": false,\n    \"independent_review\": false,\n    \"review_signature_verified\": false,\n    \"review_provenance\": \"none\",\n    \"accepted\": false,\n    \"snapshot\": \"4ca269ef4a5c5c6d88e79a30f42cc53ce7ee718bf21ee559a73c21d3b490685c\"\n  },\n  \"blockers\": [],\n  \"omitted_blockers\": 0,\n  \"open_challenges\": [],\n  \"omitted_challenges\": 0\n}",
+          "annotations": null,
+          "_meta": null
+        }
+      ],
+      "structuredContent": {
+        "status": "pending",
+        "revision": 5,
+        "phase": "frame",
+        "front": "philosophy",
+        "purpose": "Delimitar el problema, actores y frontera.",
+        "role": "reviewer",
+        "role_label": "revisor",
+        "actor": null,
+        "action": "review_phase",
+        "task": "Registrar fuera del caso la clave p\u00fablica de un revisor competente y distinto de los autores; despu\u00e9s pedir phase-review-challenge y registrar su firma.",
+        "phase_review_trust": "unavailable",
+        "test_execution_trust": "unavailable",
+        "test_observation_trust": "not_applicable",
+        "inputs_description": "Encargo y contexto del caso.",
+        "inputs": {
+          "items": [],
+          "omitted": 0
+        },
+        "artifacts": {
+          "items": [
+            {
+              "id": "b_B",
+              "kind": "boundary",
+              "version": 1,
+              "text": "Only installed pending-item coordination; no field intervention",
+              "data": "{}",
+              "refs": {
+                "a_B": 1,
+                "p_native": 1
+              },
+              "omitted_refs": 0,
+              "stale": false,
+              "contested": false,
+              "issues": [],
+              "omitted_issues": 0,
+              "approved": null
+            },
+            {
+              "id": "b_A",
+              "kind": "boundary",
+              "version": 1,
+              "text": "Only installed pending-item coordination; no field intervention",
+              "data": "{}",
+              "refs": {
+                "a_A": 1,
+                "p_native": 1
+              },
+              "omitted_refs": 0,
+              "stale": false,
+              "contested": false,
+              "issues": [],
+              "omitted_issues": 0,
+              "approved": null
+            },
+            {
+              "id": "a_B",
+              "kind": "actor",
+              "version": 1,
+              "text": "Synthetic native writer B; no human authority",
+              "data": "{}",
+              "refs": {
+                "p_native": 1
+              },
+              "omitted_refs": 0,
+              "stale": false,
+              "contested": false,
+              "issues": [],
+              "omitted_issues": 0,
+              "approved": null
+            },
+            {
+              "id": "a_A",
+              "kind": "actor",
+              "version": 1,
+              "text": "Synthetic native writer A; no human authority",
+              "data": "{}",
+              "refs": {
+                "p_native": 1
+              },
+              "omitted_refs": 0,
+              "stale": false,
+              "contested": false,
+              "issues": [],
+              "omitted_issues": 0,
+              "approved": null
+            },
+            {
+              "id": "p_native",
+              "kind": "problem",
+              "version": 1,
+              "text": "Verify guarded installed native authorship; no field resolution",
+              "data": "{}",
+              "refs": {},
+              "omitted_refs": 0,
+              "stale": false,
+              "contested": false,
+              "issues": [],
+              "omitted_issues": 0,
+              "approved": null
+            }
+          ],
+          "omitted": 0
+        },
+        "missing": [],
+        "approval_targets": [],
+        "omitted_approval_targets": 0,
+        "test_execution_targets": [],
+        "omitted_test_execution_targets": 0,
+        "test_observation_targets": [],
+        "omitted_test_observation_targets": 0,
+        "criteria": {
+          "exit": "La formulaci\u00f3n nombra el da\u00f1o o necesidad, los afectados y el l\u00edmite de observaci\u00f3n.",
+          "review": "Revisar exclusiones y formulaciones rivales.",
+          "stop": "Detener si el problema no puede delimitarse o falta un actor afectado decisivo."
+        },
+        "gate": {
+          "ready": true,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_provenance": "none",
+          "accepted": false,
+          "snapshot": "4ca269ef4a5c5c6d88e79a30f42cc53ce7ee718bf21ee559a73c21d3b490685c"
+        },
+        "blockers": [],
+        "omitted_blockers": 0,
+        "open_challenges": [],
+        "omitted_challenges": 0
+      },
+      "isError": false,
+      "resultType": "complete"
+    }
+  }
+]

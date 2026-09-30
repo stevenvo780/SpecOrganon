@@ -1,5 +1,36 @@
 # Pruebas de coordinación de agentes reales
 
+## D-103: dos agentes sobre el wheel actual en ambos intérpretes
+
+[Dossier y recibos](../experiments/development/installed_complete_interface_2026-09-30/).
+Los threads nativos existentes `/root/subscription_method_broker_099` y
+`/root/source_gate_review` ejecutaron el CLI instalado del mismo wheel D-102
+en Python 3.11.15 y 3.12.3, en casos nuevos con política signed. Cada agente
+creó un actor y un límite con IDs disjuntos, versión esperada 0 y dependencias
+en versión 1. Antes de liberar los FIFOs, el supervisor verificó procesos
+vivos bloqueados en `wait_for_partner`, identidad del FIFO y ausencia de
+llamadas o cambios previos. Los cuatro ítems persisten una sola vez por
+entorno: cinco eventos con cadena válida, cuatro pares CLI/MCP de lectura
+sin escritura y descubrimiento real de 22 herramientas.
+
+Actividad de los procesos se solapó 184922046 ns en 3.11 y 173400743 ns en
+3.12; las mayores intersecciones de llamadas CLI fueron 64283469 y
+57624802 ns. El solapamiento fue inducido por la barrera, sin pausas
+artificiales entre puts. No mide calidad, coste, velocidad del modelo o
+ventaja frente a un agente. Modelo y esfuerzo efectivos no autenticados.
+Los recibos verifican 24 módulos y wheel antes/después; entorno mínimo
+conserva HOME original sin heredar tokens o copiar configuración.
+
+Los agentes sólo publicaron ítems pendientes: cero aprobaciones, revisiones
+o avances. La prueba separada signed_observed recorrió nueve fases con
+firmas sintéticas, ejecución/repetición real y artefactos conservados. GOAL
+y la matriz permiten separar esas coberturas. Una revisión independiente
+de `/root/prototype_checkpoint_supervisor` auditó ambas autorías y cerró C1
+en alcance técnico; la revisión de código de `/root/source_gate_review`
+excluyó sus propias escrituras B. No hay autoridad humana, impacto de campo
+ni comparación confirmatoria. **Aceptación actual: 1/5**, demás criterios
+No demostrados. Los registros siguientes conservan sus cortes históricos.
+
 **Corte:** 2026-09-26 UTC. Este registro documenta operaciones de subagentes nativos sobre ledgers reales del toolkit. No representa una comparación de modelos ni mide impacto de una intervención.
 
 ## Autor y revisor en un workflow completo

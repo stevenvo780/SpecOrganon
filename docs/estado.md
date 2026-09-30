@@ -1,5 +1,31 @@
 # Estado de reanudación
 
+**D-103 cierra el criterio 1 en alcance técnico:**
+[dossier, inventario y revisión independiente](../experiments/development/installed_complete_interface_2026-09-30/).
+Mismo wheel D-102 instalado fuera del árbol, Linux Python 3.11.15/3.12.3:
+22/22 operaciones positivas CLI/MCP por entorno, 24 módulos iguales al
+wheel y src, descubrimiento stdio real y efectos comprobados. Nueve fases
+signed_observed conservan 51 eventos, ejecución/observación y repetición
+real Landlock ABI 9. Dos agentes nativos guardan cuatro ítems únicos por
+entorno; ambos casos signed siguen sin aprobaciones, reviews o avances.
+Solapamiento inducido de 184922046/173400743 ns; cuatro pares de lectura
+CLI/MCP sin mutar por entorno. Smokes actuales cubren SIGKILL, recuperación,
+errores, persistencia y replay; todos los controles críticos inventariados
+pasan en ambos. Ocho tar conservan 196 archivos y streams originales.
+
+Los dos primeros capturadores fallaron tras tres tests passed por nodeid
+abreviado; se conservan recibos fallidos y enmienda. Agregador inicial
+fallido también conservado. Ruff/compile de scripts y pip check de 34
+paquetes por entorno pasan; no nuevo global (D-102: 2560 es evidencia
+anterior). GOAL/matriz no cambian. C1 no exige humanidad de claves o
+comparación confirmatoria: esos pendientes conservan sus ámbitos.
+**Aceptación actual: 1/5**, C2–C5 No demostrados. Claves sintéticas y mismo
+UID no acreditan autoridad, Q o impacto; smoke de 15 operaciones es resumen
+con código fijado, sin raw por llamada. Recibos antiguos 0/5 son históricos.
+Sin nuevas comparaciones, campo o corrida de las 24. Siguiente: auditar
+linaje de requisitos/indicadores y salidas de modelos conservadas; preparar
+evaluación independiente y baseline/autoridad reales.
+
 **D-102 añadió captura incremental y un borrador alimentario:**
 [dossier y límites](../experiments/development/lot_journal_prospectus_2026-09-30/).
 El auditor nativo CLI/MCP comprueba balances húmedos/secos declarados,

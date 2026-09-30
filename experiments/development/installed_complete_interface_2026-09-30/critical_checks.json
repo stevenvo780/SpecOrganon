@@ -1,0 +1,416 @@
+{
+  "schema": 1,
+  "criterion": 1,
+  "acceptance_matrix": "docs/protocolo_experimental.md section7 row criterion1",
+  "matrix_sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+  "threshold_unchanged": true,
+  "source": "existing frozen scripts plus D103 technical prospective plan; no field/human threshold inferred",
+  "per_python": {
+    "311": {
+      "smoke_receipt": "experiments/development/lot_journal_prospectus_2026-09-30/validation/smoke-311.stdout",
+      "smoke_boolean_assertions": {
+        "guarded_put": true,
+        "idempotent_replay": true,
+        "installed_package_from_site_packages": true,
+        "invalid_input_preserved_ledger": true,
+        "invalid_signatures_rejected": true,
+        "nonfinite_json_rejected": true,
+        "paired_cli_writers_preserved_items": true,
+        "same_case_signed_challenge_parity": true,
+        "sigkill_mcp_resume": true,
+        "signed_approval_verified": true,
+        "signed_cli_approval_verified": true,
+        "trust_removal_reopened": true,
+        "twin_case_replay_preserved_ledgers": true
+      },
+      "sigkill_checkpoint_events": 3,
+      "signed_receipt": "signed/311/final_retained/probe.stdout",
+      "signed_controls": {
+        "negative_controls": {
+          "invalid_test_execution_mcp_no_write": true,
+          "invalid_test_observation_mcp_no_write": true,
+          "unsigned_normative_mcp_no_write": true,
+          "unsigned_phase_cli_no_write": true,
+          "unsigned_test_execution_cli_no_write": true,
+          "unsigned_test_observation_cli_no_write": true
+        },
+        "bundle_tamper": {
+          "build_and_downstream_reopened": true,
+          "ledger_byte_identical": true,
+          "restoration_recovered_status": true
+        },
+        "input_tamper": {
+          "build_and_downstream_reopened": true,
+          "ledger_byte_identical": true,
+          "restoration_recovered_status": true
+        },
+        "executor_key_revocation": {
+          "build_and_downstream_reopened": true,
+          "ledger_byte_identical": true,
+          "restoration_recovered_status": true
+        },
+        "observer_key_revocation": {
+          "build_and_downstream_reopened": true,
+          "ledger_byte_identical": true,
+          "restoration_recovered_status": true
+        },
+        "reviewer_key_revocation": {
+          "all_phases_reopened": true,
+          "ledger_byte_identical": true,
+          "restoration_recovered_status": true
+        }
+      },
+      "signed_replay": {
+        "cli_applied": 0,
+        "ledger_byte_identical": true,
+        "mcp_applied": 0
+      },
+      "signed_event_counts": {
+        "approval": 2,
+        "item_put": 29,
+        "phase_advance": 9,
+        "phase_review": 9,
+        "test_execution": 1,
+        "test_observation": 1
+      },
+      "actual_local_repeat": {
+        "artifact_sha256": "d867700666eb780c245d75aa486d930856cf8bdc1c51c4c33cf033b8e7f33e94",
+        "audit_script_sha256": "0a86f352713c4be8362230f058d93f6e108830d714ceb936f381b720665f30e5",
+        "bundle_retained_through_replay": true,
+        "input_tree_sha256": "cac3e00155877831dc4c961659236676ec169f20e8abadf3ce4d3b083690f2ee",
+        "landlock_abi": 9,
+        "receipt_sha256": "87d2528e97278b516702c0a30ffabb594e582b8ac1ca598c25605b0833474911",
+        "stdout_sha256": "d867700666eb780c245d75aa486d930856cf8bdc1c51c4c33cf033b8e7f33e94"
+      },
+      "six_signed_transport_each_route": {
+        "cli": {
+          "attest_field": 1,
+          "field_attestation_challenge": 2,
+          "record_test_execution": 1,
+          "record_test_observation": 1,
+          "test_execution_challenge": 2,
+          "test_observation_challenge": 1
+        },
+        "mcp": {
+          "attest_field": 1,
+          "field_attestation_challenge": 1,
+          "record_test_execution": 1,
+          "record_test_observation": 1,
+          "test_execution_challenge": 2,
+          "test_observation_challenge": 2
+        }
+      },
+      "selected_test_outcomes": [
+        {
+          "duration": 0.0009750049794092774,
+          "error": null,
+          "outcome": "passed",
+          "phase": "setup",
+          "test": "::test_synthetic_attestation_report_cannot_authorize_field_success"
+        },
+        {
+          "duration": 2.346243002975825,
+          "error": null,
+          "outcome": "passed",
+          "phase": "call",
+          "test": "::test_synthetic_attestation_report_cannot_authorize_field_success"
+        },
+        {
+          "duration": 0.00017401296645402908,
+          "error": null,
+          "outcome": "passed",
+          "phase": "teardown",
+          "test": "::test_synthetic_attestation_report_cannot_authorize_field_success"
+        },
+        {
+          "duration": 0.0005307279643602669,
+          "error": null,
+          "outcome": "passed",
+          "phase": "setup",
+          "test": "::test_installed_cli_and_mcp_record_actual_synthetic_test"
+        },
+        {
+          "duration": 1.252672013011761,
+          "error": null,
+          "outcome": "passed",
+          "phase": "call",
+          "test": "::test_installed_cli_and_mcp_record_actual_synthetic_test"
+        },
+        {
+          "duration": 0.00022048299433663487,
+          "error": null,
+          "outcome": "passed",
+          "phase": "teardown",
+          "test": "::test_installed_cli_and_mcp_record_actual_synthetic_test"
+        },
+        {
+          "duration": 0.0009195740567520261,
+          "error": null,
+          "outcome": "passed",
+          "phase": "setup",
+          "test": "::test_valid_observation_roundtrips_through_cli_and_real_mcp"
+        },
+        {
+          "duration": 1.0461926959687844,
+          "error": null,
+          "outcome": "passed",
+          "phase": "call",
+          "test": "::test_valid_observation_roundtrips_through_cli_and_real_mcp"
+        },
+        {
+          "duration": 0.00018028297927230597,
+          "error": null,
+          "outcome": "passed",
+          "phase": "teardown",
+          "test": "::test_valid_observation_roundtrips_through_cli_and_real_mcp"
+        }
+      ],
+      "field_challenge_same_head": true,
+      "journal_negative_controls": {
+        "wet_balance": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        },
+        "duplicate_load": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        },
+        "basis": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        },
+        "time": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        },
+        "transfer": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        },
+        "terminal_evaporation": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        }
+      },
+      "journal_readonly": true,
+      "bread_gate_pairs": 9,
+      "requirement_trace_pairs": 4,
+      "public_positive_operations_each_route": 22,
+      "native_verification": "native/verification.json",
+      "native_guarded_items": 4,
+      "native_overlap_ns": 184922046
+    },
+    "312": {
+      "smoke_receipt": "experiments/development/installed_complete_interface_2026-09-30/smoke/312.stdout",
+      "smoke_boolean_assertions": {
+        "guarded_put": true,
+        "idempotent_replay": true,
+        "installed_package_from_site_packages": true,
+        "invalid_input_preserved_ledger": true,
+        "invalid_signatures_rejected": true,
+        "nonfinite_json_rejected": true,
+        "paired_cli_writers_preserved_items": true,
+        "same_case_signed_challenge_parity": true,
+        "sigkill_mcp_resume": true,
+        "signed_approval_verified": true,
+        "signed_cli_approval_verified": true,
+        "trust_removal_reopened": true,
+        "twin_case_replay_preserved_ledgers": true
+      },
+      "sigkill_checkpoint_events": 4,
+      "signed_receipt": "signed/312/final_retained/probe.stdout",
+      "signed_controls": {
+        "negative_controls": {
+          "invalid_test_execution_mcp_no_write": true,
+          "invalid_test_observation_mcp_no_write": true,
+          "unsigned_normative_mcp_no_write": true,
+          "unsigned_phase_cli_no_write": true,
+          "unsigned_test_execution_cli_no_write": true,
+          "unsigned_test_observation_cli_no_write": true
+        },
+        "bundle_tamper": {
+          "build_and_downstream_reopened": true,
+          "ledger_byte_identical": true,
+          "restoration_recovered_status": true
+        },
+        "input_tamper": {
+          "build_and_downstream_reopened": true,
+          "ledger_byte_identical": true,
+          "restoration_recovered_status": true
+        },
+        "executor_key_revocation": {
+          "build_and_downstream_reopened": true,
+          "ledger_byte_identical": true,
+          "restoration_recovered_status": true
+        },
+        "observer_key_revocation": {
+          "build_and_downstream_reopened": true,
+          "ledger_byte_identical": true,
+          "restoration_recovered_status": true
+        },
+        "reviewer_key_revocation": {
+          "all_phases_reopened": true,
+          "ledger_byte_identical": true,
+          "restoration_recovered_status": true
+        }
+      },
+      "signed_replay": {
+        "cli_applied": 0,
+        "ledger_byte_identical": true,
+        "mcp_applied": 0
+      },
+      "signed_event_counts": {
+        "approval": 2,
+        "item_put": 29,
+        "phase_advance": 9,
+        "phase_review": 9,
+        "test_execution": 1,
+        "test_observation": 1
+      },
+      "actual_local_repeat": {
+        "artifact_sha256": "d867700666eb780c245d75aa486d930856cf8bdc1c51c4c33cf033b8e7f33e94",
+        "audit_script_sha256": "0a86f352713c4be8362230f058d93f6e108830d714ceb936f381b720665f30e5",
+        "bundle_retained_through_replay": true,
+        "input_tree_sha256": "cac3e00155877831dc4c961659236676ec169f20e8abadf3ce4d3b083690f2ee",
+        "landlock_abi": 9,
+        "receipt_sha256": "180848e2d246878de1b8092adb5396a057867abc4a8d09db27a4b2c11973345a",
+        "stdout_sha256": "d867700666eb780c245d75aa486d930856cf8bdc1c51c4c33cf033b8e7f33e94"
+      },
+      "six_signed_transport_each_route": {
+        "cli": {
+          "attest_field": 1,
+          "field_attestation_challenge": 2,
+          "record_test_execution": 1,
+          "record_test_observation": 1,
+          "test_execution_challenge": 2,
+          "test_observation_challenge": 1
+        },
+        "mcp": {
+          "attest_field": 1,
+          "field_attestation_challenge": 1,
+          "record_test_execution": 1,
+          "record_test_observation": 1,
+          "test_execution_challenge": 2,
+          "test_observation_challenge": 2
+        }
+      },
+      "selected_test_outcomes": [
+        {
+          "duration": 0.0015016520046629012,
+          "error": null,
+          "outcome": "passed",
+          "phase": "setup",
+          "test": "::test_synthetic_attestation_report_cannot_authorize_field_success"
+        },
+        {
+          "duration": 2.5012334900093265,
+          "error": null,
+          "outcome": "passed",
+          "phase": "call",
+          "test": "::test_synthetic_attestation_report_cannot_authorize_field_success"
+        },
+        {
+          "duration": 0.00027655402664095163,
+          "error": null,
+          "outcome": "passed",
+          "phase": "teardown",
+          "test": "::test_synthetic_attestation_report_cannot_authorize_field_success"
+        },
+        {
+          "duration": 0.0006708799628540874,
+          "error": null,
+          "outcome": "passed",
+          "phase": "setup",
+          "test": "::test_installed_cli_and_mcp_record_actual_synthetic_test"
+        },
+        {
+          "duration": 1.0229873459902592,
+          "error": null,
+          "outcome": "passed",
+          "phase": "call",
+          "test": "::test_installed_cli_and_mcp_record_actual_synthetic_test"
+        },
+        {
+          "duration": 0.00012711196905001998,
+          "error": null,
+          "outcome": "passed",
+          "phase": "teardown",
+          "test": "::test_installed_cli_and_mcp_record_actual_synthetic_test"
+        },
+        {
+          "duration": 0.0005597480339929461,
+          "error": null,
+          "outcome": "passed",
+          "phase": "setup",
+          "test": "::test_valid_observation_roundtrips_through_cli_and_real_mcp"
+        },
+        {
+          "duration": 1.0118205780163407,
+          "error": null,
+          "outcome": "passed",
+          "phase": "call",
+          "test": "::test_valid_observation_roundtrips_through_cli_and_real_mcp"
+        },
+        {
+          "duration": 0.0002699639881029725,
+          "error": null,
+          "outcome": "passed",
+          "phase": "teardown",
+          "test": "::test_valid_observation_roundtrips_through_cli_and_real_mcp"
+        }
+      ],
+      "field_challenge_same_head": true,
+      "journal_negative_controls": {
+        "wet_balance": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        },
+        "duplicate_load": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        },
+        "basis": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        },
+        "time": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        },
+        "transfer": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        },
+        "terminal_evaporation": {
+          "cli_exit": 1,
+          "mcp_rejected": true,
+          "ledger_unchanged": true
+        }
+      },
+      "journal_readonly": true,
+      "bread_gate_pairs": 9,
+      "requirement_trace_pairs": 4,
+      "public_positive_operations_each_route": 22,
+      "native_verification": "native/312/verification.json",
+      "native_guarded_items": 4,
+      "native_overlap_ns": 173400743
+    }
+  },
+  "native_scope": "separate actual2-agent pending writes, not phase reviews",
+  "native_verification": {
+    "311": "native/verification.json",
+    "312": "native/312/verification.json"
+  },
+  "native_both_environments_complete": true
+}

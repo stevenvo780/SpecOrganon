@@ -1,0 +1,55 @@
+{
+  "recorded_at_utc": "2026-09-30T17:40:36.464955+00:00",
+  "agents": {
+    "A": "/root/subscription_method_broker_099",
+    "B": "/root/source_gate_review"
+  },
+  "sessions": {
+    "A": 69111,
+    "B": 93493
+  },
+  "model_and_effort": "inherited, not externally authenticated",
+  "ready_is_not_wait_proof": true,
+  "before": {
+    "A": {
+      "pid": 4082534,
+      "process_status": [
+        "Name:\tpython",
+        "State:\tS (sleeping)",
+        "Pid:\t4082534"
+      ],
+      "wchan": "wait_for_partner",
+      "observed_monotonic_ns": 306693873373637,
+      "fifo_device": 98,
+      "fifo_inode": 1074624635,
+      "no_calls_before_release": true
+    },
+    "B": {
+      "pid": 4083418,
+      "process_status": [
+        "Name:\tpython",
+        "State:\tS (sleeping)",
+        "Pid:\t4083418"
+      ],
+      "wchan": "wait_for_partner",
+      "observed_monotonic_ns": 306693873504968,
+      "fifo_device": 98,
+      "fifo_inode": 1074624636,
+      "no_calls_before_release": true
+    }
+  },
+  "releases": {
+    "A": {
+      "write_started_monotonic_ns": 306693873521808,
+      "write_finished_monotonic_ns": 306693873527718,
+      "bytes_written": 1
+    },
+    "B": {
+      "write_started_monotonic_ns": 306693873528448,
+      "write_finished_monotonic_ns": 306693873529768,
+      "bytes_written": 1
+    }
+  },
+  "ledger_before_sha256": "e6e5ac0a3bfaec6cab7e38355c8eb8ffe3c8131ddeee8785f5f7785148d65be2",
+  "descriptors_closed_monotonic_ns": 306693873531878
+}
