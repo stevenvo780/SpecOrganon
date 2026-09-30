@@ -1,5 +1,27 @@
 # Estado de reanudación
 
+**D-104 audita integridad de desarrollo:**
+[dossier, planes congelados y resultados](../experiments/development/method_integrity_audit_2026-09-30/).
+Banco original de 21 inyecciones pasa en Python 3.11/3.12 contra el mismo
+wheel D-102, sin omisiones: 42 ledgers conservados y cadenas recalculadas
+por revisor independiente. E06 sigue listo en study y bloqueado en specify.
+Auditor instalado lee 15 objetivos bread64/Citi42: cuatro indicadores nuevos
+del pan y el indicador de fracciones Citi no tienen evidencia con métrica y
+unidad exactas; bundles genéricos son provisionales. Masa documental del pan
+tiene una coincidencia exacta. Rutas estructurales, normas pendientes y
+umbrales sin definir no acreditan resolución; cero fases aceptadas.
+Tres programas originales D-099 se ejecutaron en copias con sólo el SHA
+manifestado incorrecto: N/T fallan antes de agregados; S devuelve flag falso
+y agregados. El contrato no exigía exit no cero; el comparador excluye los
+tres de admisión decisoria, sin Q o superioridad causal. 147 originales
+intactos; tres tar/265 archivos regulares y streams conservados.
+Revisión previa cerró pines autopreferentes, import mutable del sandbox y
+allowlist incompleta antes de ejecutar. Ruff/compile ambos Python pasan;
+ningún nuevo global, modelo experimental, ensayo de campo o corrida24.
+Producción/GOAL/matriz sin cambios: **aceptación 1/5; C2–C5 No demostrados**.
+Siguiente: variante Citi con fracciones derivadas y controles de invalidación,
+evidencia técnica de captura y preparación de evaluación independiente/campo.
+
 **D-103 cierra el criterio 1 en alcance técnico:**
 [dossier, inventario y revisión independiente](../experiments/development/installed_complete_interface_2026-09-30/).
 Mismo wheel D-102 instalado fuera del árbol, Linux Python 3.11.15/3.12.3:

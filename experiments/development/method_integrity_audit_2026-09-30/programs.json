@@ -1,0 +1,575 @@
+{
+  "schema": 1,
+  "study_id": "D104",
+  "classification": "development_posthoc_source_contradiction_no_method_verdict",
+  "output": "/tmp/specorganon-D104-db1al7wi/programs",
+  "started_at_utc": "2026-09-30T19:07:57.938646+00:00",
+  "passed": true,
+  "Q": null,
+  "cost": null,
+  "provider_calls": 0,
+  "method_winner_selected": false,
+  "causal_method_effect_assessed": false,
+  "counts_toward_required_24_runs": false,
+  "historical_conditions_replayed": false,
+  "field_intervention_authorized": false,
+  "human_approvals": 0,
+  "phase_advances": 0,
+  "criterion_4": "no_demostrado",
+  "arms": [
+    {
+      "arm": "N",
+      "started_at_utc": "2026-09-30T19:07:58.014745+00:00",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "-c",
+        "import csv\nimport datetime as dt\nimport hashlib\nimport json\nimport math\nimport pathlib\nimport sys\n\n\ndef main():\n    if len(sys.argv) != 2:\n        raise SystemExit('usage: analysis.py INPUT_DIRECTORY')\n    root = pathlib.Path(sys.argv[1])\n    csv_path = root / 'sample_first_complete_week.csv'\n    manifest_path = root / 'source_manifest.json'\n    manifest = json.loads(manifest_path.read_text(encoding='utf-8'))\n    raw = csv_path.read_bytes()\n    selection = manifest['selection']\n    digest = hashlib.sha256(raw).hexdigest()\n    if digest != selection['sample_sha256']:\n        raise ValueError('sample SHA-256 does not match manifest')\n    with csv_path.open('r', encoding='utf-8-sig', newline='') as f:\n        reader = csv.DictReader(f)\n        expected = selection['columns']\n        if reader.fieldnames != expected:\n            raise ValueError('CSV columns do not match manifest')\n        records = list(reader)\n    stamps = [dt.datetime.strptime(row['date'], '%Y-%m-%d %H:%M:%S') for row in records]\n    interval = int(selection['interval_minutes'])\n    continuous = all((b - a).total_seconds() == interval * 60 for a, b in zip(stamps, stamps[1:]))\n    if not records:\n        raise ValueError('CSV has no observations')\n    appliances_daily = {}\n    appliances_wh = 0.0\n    lights_wh = 0.0\n    for stamp, row in zip(stamps, records):\n        appliance = float(row['Appliances'])\n        lights = float(row['lights'])\n        if not math.isfinite(appliance) or not math.isfinite(lights):\n            raise ValueError('non-finite energy value')\n        appliances_wh += appliance\n        lights_wh += lights\n        day = stamp.strftime('%Y-%m-%d')\n        appliances_daily[day] = appliances_daily.get(day, 0.0) + appliance / 1000.0\n    appliances_kwh = appliances_wh / 1000.0\n    lights_kwh = lights_wh / 1000.0\n    result = {\n        'rows': len(records),\n        'first_timestamp': stamps[0].strftime('%Y-%m-%d %H:%M:%S'),\n        'last_timestamp': stamps[-1].strftime('%Y-%m-%d %H:%M:%S'),\n        'interval_minutes': interval,\n        'continuous': continuous,\n        'appliances_total_kwh': appliances_kwh,\n        'daily_appliances_kwh': appliances_daily,\n        'lights_total_kwh': lights_kwh,\n        'units': {\n            'appliances_total_kwh': 'kWh',\n            'daily_appliances_kwh': 'kWh',\n            'lights_total_kwh': 'kWh'\n        },\n        'sample_sha256': digest,\n        'manifest_rows_match': len(records) == selection['rows'],\n        'selection_bounds_match': (\n            stamps[0].strftime('%Y-%m-%d %H:%M:%S') == selection['start_inclusive'] and\n            stamps[-1] < dt.datetime.strptime(selection['end_exclusive'], '%Y-%m-%d %H:%M:%S')\n        )\n    }\n    print(json.dumps(result, allow_nan=False, separators=(',', ':')))\n\n\nif __name__ == '__main__':\n    main()\n",
+        "/tmp/specorganon-D104-db1al7wi/programs/N/input"
+      ],
+      "program": {
+        "bytes": 2812,
+        "sha256": "683e1725e28adea3061578d646f5c3af982b1458ef8bd7af98e7fc0922d89226"
+      },
+      "execution_source": "unmodified original source as Python -c argument",
+      "read_roots": [
+        "/tmp/specorganon-D104-db1al7wi/programs/N/input"
+      ],
+      "write_roots": [],
+      "timeout_seconds": 30,
+      "cpu_seconds": 10,
+      "address_space_bytes": 536870912,
+      "file_bytes_per_file": 2097152,
+      "runtime_roots": [
+        "/usr/bin/python3.12",
+        "/usr/lib/python3.12",
+        "/tmp/specorganon-D102-install-cfoi0az2/venv-312/lib/python3.12",
+        "/tmp/specorganon-D102-install-cfoi0az2/venv-312/lib/python3.12/site-packages",
+        "/tmp/specorganon-D102-install-cfoi0az2/venv-312/pyvenv.cfg",
+        "/usr/lib",
+        "/usr/lib64",
+        "/etc/ld.so.cache",
+        "/dev/urandom"
+      ],
+      "sandbox_api_invocations": 1,
+      "sandbox_result": {
+        "exit_code": 1,
+        "timed_out": false,
+        "launch_error": null,
+        "landlock_abi": 9,
+        "duration_seconds": 0.06474207900464535,
+        "sealed_executable_sha256": "e1efa562c2cc2e35521a5c9c9b9939921001ff8ca9708a13ef15ace68cc2ccd7"
+      },
+      "streams": {
+        "stdout.txt": {
+          "retained": true,
+          "pin": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "stderr.txt": {
+          "retained": true,
+          "pin": {
+            "bytes": 162,
+            "sha256": "082d169d63df7b03ed993f71b7caa90059f46c3dc4ea0cf88bd7b7f32e7c7a96"
+          }
+        }
+      },
+      "classification": {
+        "detected_conflict": true,
+        "aggregate_output": false,
+        "integrity_verified": false,
+        "decision_admission": false,
+        "observation": {
+          "signal": "SHA exception before aggregates in the pinned control flow",
+          "parsed_stdout": null,
+          "stdout_parse_error": null,
+          "infrastructure_ok": true,
+          "candidate_decision_output_observed": false,
+          "prior_to_aggregates_basis": "original static control flow plus exception stream"
+        },
+        "comparator": {
+          "source_conflict": "retained CSV SHA differs from mutated manifest SHA",
+          "integrity_verified": false,
+          "decision_admission": false,
+          "these_are_comparator_decisions_not_model_approval": true,
+          "zero_exit_with_false_flag_is_not_automatically_noncompliance": true,
+          "expected_local_observation": true,
+          "no_quality_or_causal_method_verdict": true
+        }
+      },
+      "snapshot_pins_after": {
+        "program.py": {
+          "bytes": 2812,
+          "sha256": "683e1725e28adea3061578d646f5c3af982b1458ef8bd7af98e7fc0922d89226"
+        },
+        "input/task.md": {
+          "bytes": 3166,
+          "sha256": "f6fed29bc6ce18631cff30710b25f30b9662e04f889f336cccda2869f0789b64"
+        },
+        "source_manifest.original.json": {
+          "bytes": 1874,
+          "sha256": "0e18340d130c495201e68c1c869bc2c6f49b35663176040aebb0d0d7d7bd1ee1"
+        },
+        "input/source_manifest.json": {
+          "bytes": 1874,
+          "sha256": "94a2570b9d6639894e0fe51e92a212b30b843dea27054379ba0bfa963660e864"
+        },
+        "input/sample_first_complete_week.csv": {
+          "bytes": 612074,
+          "sha256": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba"
+        }
+      },
+      "snapshot_bytes_unchanged": true,
+      "finished_at_utc": "2026-09-30T19:07:58.117665+00:00"
+    },
+    {
+      "arm": "S",
+      "started_at_utc": "2026-09-30T19:07:58.119411+00:00",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "-c",
+        "import csv, datetime as dt, hashlib, json, math, pathlib, sys\n\ndef main():\n    root = pathlib.Path(sys.argv[1])\n    sample = root / 'sample_first_complete_week.csv'\n    manifest_path = root / 'source_manifest.json'\n    manifest = json.loads(manifest_path.read_text(encoding='utf-8'))\n    raw = sample.read_bytes()\n    expected_hash = manifest['selection']['sample_sha256']\n    actual_hash = hashlib.sha256(raw).hexdigest()\n    expected_rows = int(manifest['selection']['rows'])\n    interval = int(manifest['selection']['interval_minutes'])\n    with sample.open('r', encoding='utf-8-sig', newline='') as f:\n        reader = csv.DictReader(f)\n        headers = reader.fieldnames or []\n        required = ('date', 'Appliances', 'lights')\n        if any(c not in headers for c in required):\n            raise ValueError('missing required CSV columns')\n        records = list(reader)\n    times = [dt.datetime.strptime(r['date'], '%Y-%m-%d %H:%M:%S') for r in records]\n    appliances = [float(r['Appliances']) for r in records]\n    lights = [float(r['lights']) for r in records]\n    if not all(math.isfinite(x) for x in appliances + lights):\n        raise ValueError('non-finite energy value')\n    deltas = [(b-a).total_seconds() for a, b in zip(times, times[1:])]\n    continuous = (len(times) == expected_rows and bool(times) and\n                  all(x == interval * 60 for x in deltas))\n    daily_wh = {}\n    for t, v in zip(times, appliances):\n        key = t.strftime('%Y-%m-%d')\n        daily_wh[key] = daily_wh.get(key, 0.0) + v\n    daily_kwh = {k: v / 1000.0 for k, v in sorted(daily_wh.items())}\n    result = {\n        'rows': len(records),\n        'first_timestamp': times[0].strftime('%Y-%m-%d %H:%M:%S') if times else '',\n        'last_timestamp': times[-1].strftime('%Y-%m-%d %H:%M:%S') if times else '',\n        'interval_minutes': interval,\n        'continuous': continuous,\n        'appliances_total_kwh': sum(appliances) / 1000.0,\n        'daily_appliances_kwh': daily_kwh,\n        'lights_total_kwh': sum(lights) / 1000.0,\n        'units': {'appliances_total_kwh': 'kWh', 'daily_appliances_kwh': 'kWh', 'lights_total_kwh': 'kWh'},\n        'sample_sha256': actual_hash,\n        'sample_hash_matches_manifest': actual_hash == expected_hash,\n        'rows_match_manifest': len(records) == expected_rows,\n        'timestamp_timezone': manifest['selection']['timestamp_timezone']\n    }\n    print(json.dumps(result, allow_nan=False, separators=(',', ':')))\n\nif __name__ == '__main__':\n    try:\n        main()\n    except Exception as exc:\n        print(json.dumps({'error': str(exc)}, allow_nan=False, separators=(',', ':')))\n",
+        "/tmp/specorganon-D104-db1al7wi/programs/S/input"
+      ],
+      "program": {
+        "bytes": 2631,
+        "sha256": "d5dc9bee91ad253f7785502fb56e317bb48a61af2caf48a45f9219d2a1d23c42"
+      },
+      "execution_source": "unmodified original source as Python -c argument",
+      "read_roots": [
+        "/tmp/specorganon-D104-db1al7wi/programs/S/input"
+      ],
+      "write_roots": [],
+      "timeout_seconds": 30,
+      "cpu_seconds": 10,
+      "address_space_bytes": 536870912,
+      "file_bytes_per_file": 2097152,
+      "runtime_roots": [
+        "/usr/bin/python3.12",
+        "/usr/lib/python3.12",
+        "/tmp/specorganon-D102-install-cfoi0az2/venv-312/lib/python3.12",
+        "/tmp/specorganon-D102-install-cfoi0az2/venv-312/lib/python3.12/site-packages",
+        "/tmp/specorganon-D102-install-cfoi0az2/venv-312/pyvenv.cfg",
+        "/usr/lib",
+        "/usr/lib64",
+        "/etc/ld.so.cache",
+        "/dev/urandom"
+      ],
+      "sandbox_api_invocations": 1,
+      "sandbox_result": {
+        "exit_code": 0,
+        "timed_out": false,
+        "launch_error": null,
+        "landlock_abi": 9,
+        "duration_seconds": 0.11004452704219148,
+        "sealed_executable_sha256": "e1efa562c2cc2e35521a5c9c9b9939921001ff8ca9708a13ef15ace68cc2ccd7"
+      },
+      "streams": {
+        "stdout.txt": {
+          "retained": true,
+          "pin": {
+            "bytes": 635,
+            "sha256": "11f2c5766baa3a3fb8660bed6006407ed1810cfaed1cbfd5249430ecd1f23688"
+          }
+        },
+        "stderr.txt": {
+          "retained": true,
+          "pin": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      "classification": {
+        "detected_conflict": true,
+        "aggregate_output": true,
+        "integrity_verified": false,
+        "decision_admission": false,
+        "observation": {
+          "signal": "false hash-match flag with descriptive aggregates",
+          "parsed_stdout": {
+            "rows": 1008,
+            "first_timestamp": "2016-01-12 00:00:00",
+            "last_timestamp": "2016-01-18 23:50:00",
+            "interval_minutes": 10,
+            "continuous": true,
+            "appliances_total_kwh": 118.28,
+            "daily_appliances_kwh": {
+              "2016-01-12": 12.34,
+              "2016-01-13": 13.97,
+              "2016-01-14": 21.8,
+              "2016-01-15": 18.05,
+              "2016-01-16": 18.04,
+              "2016-01-17": 20.55,
+              "2016-01-18": 13.53
+            },
+            "lights_total_kwh": 5.32,
+            "units": {
+              "appliances_total_kwh": "kWh",
+              "daily_appliances_kwh": "kWh",
+              "lights_total_kwh": "kWh"
+            },
+            "sample_sha256": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba",
+            "sample_hash_matches_manifest": false,
+            "rows_match_manifest": true,
+            "timestamp_timezone": "not specified by source CSV"
+          },
+          "stdout_parse_error": null,
+          "infrastructure_ok": true,
+          "candidate_decision_output_observed": false,
+          "prior_to_aggregates_basis": null
+        },
+        "comparator": {
+          "source_conflict": "retained CSV SHA differs from mutated manifest SHA",
+          "integrity_verified": false,
+          "decision_admission": false,
+          "these_are_comparator_decisions_not_model_approval": true,
+          "zero_exit_with_false_flag_is_not_automatically_noncompliance": true,
+          "expected_local_observation": true,
+          "no_quality_or_causal_method_verdict": true
+        }
+      },
+      "snapshot_pins_after": {
+        "program.py": {
+          "bytes": 2631,
+          "sha256": "d5dc9bee91ad253f7785502fb56e317bb48a61af2caf48a45f9219d2a1d23c42"
+        },
+        "input/task.md": {
+          "bytes": 3166,
+          "sha256": "f6fed29bc6ce18631cff30710b25f30b9662e04f889f336cccda2869f0789b64"
+        },
+        "source_manifest.original.json": {
+          "bytes": 1874,
+          "sha256": "0e18340d130c495201e68c1c869bc2c6f49b35663176040aebb0d0d7d7bd1ee1"
+        },
+        "input/source_manifest.json": {
+          "bytes": 1874,
+          "sha256": "94a2570b9d6639894e0fe51e92a212b30b843dea27054379ba0bfa963660e864"
+        },
+        "input/sample_first_complete_week.csv": {
+          "bytes": 612074,
+          "sha256": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba"
+        }
+      },
+      "snapshot_bytes_unchanged": true,
+      "finished_at_utc": "2026-09-30T19:07:58.256698+00:00"
+    },
+    {
+      "arm": "T",
+      "started_at_utc": "2026-09-30T19:07:58.258037+00:00",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "-c",
+        "import csv, datetime as dt, hashlib, json, math, pathlib, sys\n\nroot = pathlib.Path(sys.argv[1])\nmanifest_path = root / 'source_manifest.json'\ncsv_path = root / 'sample_first_complete_week.csv'\nmanifest_bytes = manifest_path.read_bytes()\nmanifest = json.loads(manifest_bytes)\ncsv_bytes = csv_path.read_bytes()\nactual_hash = hashlib.sha256(csv_bytes).hexdigest()\nexpected_hash = manifest['selection']['sample_sha256']\nif actual_hash != expected_hash:\n    raise ValueError('sample_sha256 mismatch')\ninterval = int(manifest['selection']['interval_minutes'])\nrows = []\nwith csv_path.open('r', newline='', encoding='utf-8') as f:\n    reader = csv.DictReader(f)\n    if not reader.fieldnames or not {'date', 'Appliances', 'lights'}.issubset(reader.fieldnames):\n        raise ValueError('required columns absent')\n    for row in reader:\n        timestamp = dt.datetime.strptime(row['date'], '%Y-%m-%d %H:%M:%S')\n        appliances = float(row['Appliances'])\n        lights = float(row['lights'])\n        if not math.isfinite(appliances) or not math.isfinite(lights):\n            raise ValueError('non-finite energy')\n        rows.append((timestamp, appliances, lights))\nif len(rows) != int(manifest['selection']['rows']):\n    raise ValueError('row count mismatch')\ncontinuous = all((b[0] - a[0]).total_seconds() == interval * 60 for a, b in zip(rows, rows[1:]))\nif not continuous:\n    raise ValueError('timestamp interval discontinuity')\nif rows[0][0].strftime('%Y-%m-%d %H:%M:%S') != manifest['selection']['start_inclusive']:\n    raise ValueError('unexpected first timestamp')\nif (rows[-1][0] + dt.timedelta(minutes=interval)).strftime('%Y-%m-%d %H:%M:%S') != manifest['selection']['end_exclusive']:\n    raise ValueError('unexpected final timestamp')\ndaily = {}\nfor timestamp, appliances, lights in rows:\n    day = timestamp.strftime('%Y-%m-%d')\n    daily[day] = daily.get(day, 0.0) + appliances\nappliances_kwh = sum(x[1] for x in rows) / 1000.0\nlights_kwh = sum(x[2] for x in rows) / 1000.0\nresult = {\n    'rows': len(rows),\n    'first_timestamp': rows[0][0].strftime('%Y-%m-%d %H:%M:%S'),\n    'last_timestamp': rows[-1][0].strftime('%Y-%m-%d %H:%M:%S'),\n    'interval_minutes': interval,\n    'continuous': continuous,\n    'appliances_total_kwh': appliances_kwh,\n    'daily_appliances_kwh': {k: v / 1000.0 for k, v in daily.items()},\n    'lights_total_kwh': lights_kwh,\n    'units': {'appliances_total_kwh': 'kWh', 'daily_appliances_kwh': 'kWh', 'lights_total_kwh': 'kWh'},\n    'sample_sha256': actual_hash,\n    'manifest_sha256': hashlib.sha256(manifest_bytes).hexdigest()\n}\nprint(json.dumps(result, allow_nan=False, separators=(',', ':')))\n",
+        "/tmp/specorganon-D104-db1al7wi/programs/T/input"
+      ],
+      "program": {
+        "bytes": 2635,
+        "sha256": "2a621b4aab86a246dbb4b9e4ac8b4a67a32e68ceb5922c383c6e3e4520d1fd45"
+      },
+      "execution_source": "unmodified original source as Python -c argument",
+      "read_roots": [
+        "/tmp/specorganon-D104-db1al7wi/programs/T/input"
+      ],
+      "write_roots": [],
+      "timeout_seconds": 30,
+      "cpu_seconds": 10,
+      "address_space_bytes": 536870912,
+      "file_bytes_per_file": 2097152,
+      "runtime_roots": [
+        "/usr/bin/python3.12",
+        "/usr/lib/python3.12",
+        "/tmp/specorganon-D102-install-cfoi0az2/venv-312/lib/python3.12",
+        "/tmp/specorganon-D102-install-cfoi0az2/venv-312/lib/python3.12/site-packages",
+        "/tmp/specorganon-D102-install-cfoi0az2/venv-312/pyvenv.cfg",
+        "/usr/lib",
+        "/usr/lib64",
+        "/etc/ld.so.cache",
+        "/dev/urandom"
+      ],
+      "sandbox_api_invocations": 1,
+      "sandbox_result": {
+        "exit_code": 1,
+        "timed_out": false,
+        "launch_error": null,
+        "landlock_abi": 9,
+        "duration_seconds": 0.06788234104169533,
+        "sealed_executable_sha256": "e1efa562c2cc2e35521a5c9c9b9939921001ff8ca9708a13ef15ace68cc2ccd7"
+      },
+      "streams": {
+        "stdout.txt": {
+          "retained": true,
+          "pin": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "stderr.txt": {
+          "retained": true,
+          "pin": {
+            "bytes": 110,
+            "sha256": "be139311a9c935dee1d22e0348760b87ef2f237e8db53f1a396e33eb31ca9f86"
+          }
+        }
+      },
+      "classification": {
+        "detected_conflict": true,
+        "aggregate_output": false,
+        "integrity_verified": false,
+        "decision_admission": false,
+        "observation": {
+          "signal": "SHA exception before aggregates in the pinned control flow",
+          "parsed_stdout": null,
+          "stdout_parse_error": null,
+          "infrastructure_ok": true,
+          "candidate_decision_output_observed": false,
+          "prior_to_aggregates_basis": "original static control flow plus exception stream"
+        },
+        "comparator": {
+          "source_conflict": "retained CSV SHA differs from mutated manifest SHA",
+          "integrity_verified": false,
+          "decision_admission": false,
+          "these_are_comparator_decisions_not_model_approval": true,
+          "zero_exit_with_false_flag_is_not_automatically_noncompliance": true,
+          "expected_local_observation": true,
+          "no_quality_or_causal_method_verdict": true
+        }
+      },
+      "snapshot_pins_after": {
+        "program.py": {
+          "bytes": 2635,
+          "sha256": "2a621b4aab86a246dbb4b9e4ac8b4a67a32e68ceb5922c383c6e3e4520d1fd45"
+        },
+        "input/task.md": {
+          "bytes": 3166,
+          "sha256": "f6fed29bc6ce18631cff30710b25f30b9662e04f889f336cccda2869f0789b64"
+        },
+        "source_manifest.original.json": {
+          "bytes": 1874,
+          "sha256": "0e18340d130c495201e68c1c869bc2c6f49b35663176040aebb0d0d7d7bd1ee1"
+        },
+        "input/source_manifest.json": {
+          "bytes": 1874,
+          "sha256": "94a2570b9d6639894e0fe51e92a212b30b843dea27054379ba0bfa963660e864"
+        },
+        "input/sample_first_complete_week.csv": {
+          "bytes": 612074,
+          "sha256": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba"
+        }
+      },
+      "snapshot_bytes_unchanged": true,
+      "finished_at_utc": "2026-09-30T19:07:58.350491+00:00"
+    }
+  ],
+  "same_uid_custody_authenticated": false,
+  "probe_source": {
+    "path": "/workspace/SpecOrganon/scripts/probe_analysis_source_contradiction.py",
+    "bytes": 25860,
+    "sha256": "f4e3571deed89c227710440af8bccc1527968568b25acb6a9445c3ed7e1663cf"
+  },
+  "python": {
+    "path": "/usr/bin/python3.12",
+    "version": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+    "bytes": 8020928,
+    "sha256": "e1efa562c2cc2e35521a5c9c9b9939921001ff8ca9708a13ef15ace68cc2ccd7"
+  },
+  "original_bytes_unchanged": true,
+  "sandbox_api_invocations": 3,
+  "finished_at_utc": "2026-09-30T19:07:58.373673+00:00",
+  "retained_files": {
+    "GOAL.snapshot.md": {
+      "bytes": 7273,
+      "sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36"
+    },
+    "N/input/sample_first_complete_week.csv": {
+      "bytes": 612074,
+      "sha256": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba"
+    },
+    "N/input/source_manifest.json": {
+      "bytes": 1874,
+      "sha256": "94a2570b9d6639894e0fe51e92a212b30b843dea27054379ba0bfa963660e864"
+    },
+    "N/input/task.md": {
+      "bytes": 3166,
+      "sha256": "f6fed29bc6ce18631cff30710b25f30b9662e04f889f336cccda2869f0789b64"
+    },
+    "N/metadata.json": {
+      "bytes": 6312,
+      "sha256": "5634536e9eab9b52c7793a4eb25135fa38fdd3643c88cf78c82ea28d4d4e8a44"
+    },
+    "N/mutation.json": {
+      "bytes": 380,
+      "sha256": "3d82db9c2bedc6f5e578539245eeaa414108810e96486d2abd64071802274314"
+    },
+    "N/pins.prepared.json": {
+      "bytes": 684,
+      "sha256": "098d88edb51f343feca80a91657c95b3889303e3f6d90e0b83ef2e56e85eda3e"
+    },
+    "N/program.py": {
+      "bytes": 2812,
+      "sha256": "683e1725e28adea3061578d646f5c3af982b1458ef8bd7af98e7fc0922d89226"
+    },
+    "N/program_review.json": {
+      "bytes": 800,
+      "sha256": "94cae47d26b332f6a8851e11c1c1346411820847eb4901113fcf5107a87e0ce9"
+    },
+    "N/source_manifest.original.json": {
+      "bytes": 1874,
+      "sha256": "0e18340d130c495201e68c1c869bc2c6f49b35663176040aebb0d0d7d7bd1ee1"
+    },
+    "N/started.json": {
+      "bytes": 3566,
+      "sha256": "1ddc8965bb1cde8cc9c448e628487fe462b2fb2fd787fd0f1c435fbdcf81c46b"
+    },
+    "N/stderr.txt": {
+      "bytes": 162,
+      "sha256": "082d169d63df7b03ed993f71b7caa90059f46c3dc4ea0cf88bd7b7f32e7c7a96"
+    },
+    "N/stdout.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "S/input/sample_first_complete_week.csv": {
+      "bytes": 612074,
+      "sha256": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba"
+    },
+    "S/input/source_manifest.json": {
+      "bytes": 1874,
+      "sha256": "94a2570b9d6639894e0fe51e92a212b30b843dea27054379ba0bfa963660e864"
+    },
+    "S/input/task.md": {
+      "bytes": 3166,
+      "sha256": "f6fed29bc6ce18631cff30710b25f30b9662e04f889f336cccda2869f0789b64"
+    },
+    "S/metadata.json": {
+      "bytes": 6960,
+      "sha256": "02e4403793b66961c78475f37aa21764a3dd2440a6fd07228587e6e1b9b87684"
+    },
+    "S/mutation.json": {
+      "bytes": 380,
+      "sha256": "3d82db9c2bedc6f5e578539245eeaa414108810e96486d2abd64071802274314"
+    },
+    "S/pins.prepared.json": {
+      "bytes": 684,
+      "sha256": "1cc8480819ab48f3755f0462c17c4ff05ffddb3a80f9a5d32d8e1f3bd09121dd"
+    },
+    "S/program.py": {
+      "bytes": 2631,
+      "sha256": "d5dc9bee91ad253f7785502fb56e317bb48a61af2caf48a45f9219d2a1d23c42"
+    },
+    "S/program_review.json": {
+      "bytes": 854,
+      "sha256": "7da32dfb38e8b2014f9f7b0eede1c0421f1245280bf15f05edba72a2766435ac"
+    },
+    "S/source_manifest.original.json": {
+      "bytes": 1874,
+      "sha256": "0e18340d130c495201e68c1c869bc2c6f49b35663176040aebb0d0d7d7bd1ee1"
+    },
+    "S/started.json": {
+      "bytes": 3367,
+      "sha256": "fb76b3251cd1b7878a26a591a8e71bf27c19d751cdeeb6f8a6d478e254d814fc"
+    },
+    "S/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "S/stdout.txt": {
+      "bytes": 635,
+      "sha256": "11f2c5766baa3a3fb8660bed6006407ed1810cfaed1cbfd5249430ecd1f23688"
+    },
+    "T/input/sample_first_complete_week.csv": {
+      "bytes": 612074,
+      "sha256": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba"
+    },
+    "T/input/source_manifest.json": {
+      "bytes": 1874,
+      "sha256": "94a2570b9d6639894e0fe51e92a212b30b843dea27054379ba0bfa963660e864"
+    },
+    "T/input/task.md": {
+      "bytes": 3166,
+      "sha256": "f6fed29bc6ce18631cff30710b25f30b9662e04f889f336cccda2869f0789b64"
+    },
+    "T/metadata.json": {
+      "bytes": 6117,
+      "sha256": "a76dca2935dc9afd9ef9bf606e44279280cc88f71feab710d1046b8e27209d76"
+    },
+    "T/mutation.json": {
+      "bytes": 380,
+      "sha256": "3d82db9c2bedc6f5e578539245eeaa414108810e96486d2abd64071802274314"
+    },
+    "T/pins.prepared.json": {
+      "bytes": 684,
+      "sha256": "49cde1033ba632772e83b86e08b668a0358a3083116392da5cd36abd534acbdf"
+    },
+    "T/program.py": {
+      "bytes": 2635,
+      "sha256": "2a621b4aab86a246dbb4b9e4ac8b4a67a32e68ceb5922c383c6e3e4520d1fd45"
+    },
+    "T/program_review.json": {
+      "bytes": 812,
+      "sha256": "4ecb0a986a0780ec5f2e78fe9dd7eaf46f4fb79a31013b79a3b61e4257ad0715"
+    },
+    "T/source_manifest.original.json": {
+      "bytes": 1874,
+      "sha256": "0e18340d130c495201e68c1c869bc2c6f49b35663176040aebb0d0d7d7bd1ee1"
+    },
+    "T/started.json": {
+      "bytes": 3371,
+      "sha256": "26deb213794bee5e9b2e719acb92a1ae715b6e03357d5b9a9c8269efe523a3be"
+    },
+    "T/stderr.txt": {
+      "bytes": 110,
+      "sha256": "be139311a9c935dee1d22e0348760b87ef2f237e8db53f1a396e33eb31ca9f86"
+    },
+    "T/stdout.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "common.snapshot.md": {
+      "bytes": 3552,
+      "sha256": "dd08557d5078a5bc58b1701e25d9653c3eefb886395629fe1f4e8e4531fa1582"
+    },
+    "comparator.json": {
+      "bytes": 839,
+      "sha256": "80815b9ae8a7cd09783640c49992b64ee6ed3d2774310af70571f2d1c0619397"
+    },
+    "d099.plan.snapshot.json": {
+      "bytes": 8035,
+      "sha256": "ec9c7d1a6359e91a8543e07872226c4d2009296e78b8c151843cc283dab24ed1"
+    },
+    "d099.receipt.snapshot.json": {
+      "bytes": 38716,
+      "sha256": "04334d8d0e9633ef560b8d07cc2ecd11b4fd086265ecc0f7e1a5452adb888bf7"
+    },
+    "local_replay_sandbox.py": {
+      "bytes": 27803,
+      "sha256": "6dc4c2c4b6abb1b0fea3a0af76d20f034c297bcb96df4bbb6da6557dbbdb1d32"
+    },
+    "pins.after.json": {
+      "bytes": 23061,
+      "sha256": "8c39da004611f1050c0c83dca162ecb3b9604f7d61aa3b3f60cfef76f48c2b96"
+    },
+    "pins.before.json": {
+      "bytes": 23061,
+      "sha256": "8c39da004611f1050c0c83dca162ecb3b9604f7d61aa3b3f60cfef76f48c2b96"
+    },
+    "probe.snapshot.py": {
+      "bytes": 25860,
+      "sha256": "f4e3571deed89c227710440af8bccc1527968568b25acb6a9445c3ed7e1663cf"
+    },
+    "run.started.json": {
+      "bytes": 297,
+      "sha256": "b0fba5bb761cbcc83b31b8e8f593a2c8f56360794fe60fab943aa36cb59af014"
+    }
+  }
+}

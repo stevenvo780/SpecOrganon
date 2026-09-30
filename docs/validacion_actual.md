@@ -1,5 +1,23 @@
 # Auditoría de aceptación actual
 
+**Integridad D-104:** [resultados y límites](../experiments/development/method_integrity_audit_2026-09-30/).
+Regresión de desarrollo 21/21 en cada Python 3.11/3.12 sobre wheel D-102,
+42 ledgers conservados/cadenas verificadas, grupos 6/6/6/3 sin skips.
+E06 conserva el bloqueo tardío en specify. No es el banco sellado final C2.
+Auditor de 15 objetivos separa rutas, coincidencias tipadas y metadata
+provisional: cuatro indicadores nuevos del pan e i_rows Citi carecen de
+evidencia con la misma métrica/unidad; masa documental tiene una. Autoridad,
+derivación suficiente y umbrales siguen pendientes, sin aceptación de fase.
+Tres programas conservados reciben copias con un SHA incorrecto: N/T
+excepción previa a agregados, S flag falso con agregados y exit0. El contrato
+permite salida diagnóstica; el comparador rechaza admisión de los tres, sin
+atribuirles una decisión científica. Posthoc/expuesto, una condición por
+programa, cero generaciones, sin Q/causalidad/modelo nuevo/corrida24.
+Revisión independiente coteja 265 archivos en tres tar y 147 originales
+D-099. Producción, GOAL y matriz intactos. **C1 técnico sigue cumplido;
+C2–C5 No demostrados; aceptación actual 1/5.** Ruff/compile de instrumentos
+en ambos Python, sin nueva suite global ni intervención de campo.
+
 **Cierre D-103:** [dossier y revisión independiente](../experiments/development/installed_complete_interface_2026-09-30/).
 C1 **Cumplido en alcance técnico** para el wheel D-102 en Linux con
 Python 3.11.15/3.12.3: 22/22 CLI/MCP, 24 módulos actuales iguales al wheel,
