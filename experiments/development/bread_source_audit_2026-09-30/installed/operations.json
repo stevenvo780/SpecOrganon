@@ -1,0 +1,142 @@
+[
+  {
+    "argv": [
+      "/home/dev/.local/bin/uv",
+      "build",
+      "--offline",
+      "--wheel",
+      "--out-dir",
+      "/tmp/specorganon-D100-final-install-14c3yoq_/dist",
+      "/workspace/SpecOrganon"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "Building wheel...\nSuccessfully built dist/specorganon-0.1.0-py3-none-any.whl\n"
+  },
+  {
+    "argv": [
+      "/home/dev/.local/bin/uv",
+      "venv",
+      "--offline",
+      "--no-project",
+      "--python",
+      "/workspace/SpecOrganon/.venv/bin/python",
+      "/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.11"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "Using CPython 3.11.15 interpreter at: /workspace/SpecOrganon/.venv/bin/python\nCreating virtual environment at: venv-3.11\n"
+  },
+  {
+    "argv": [
+      "/home/dev/.local/bin/uv",
+      "pip",
+      "install",
+      "--offline",
+      "--python",
+      "/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.11/bin/python",
+      "/tmp/specorganon-D100-final-install-14c3yoq_/dist/specorganon-0.1.0-py3-none-any.whl"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "Using Python 3.11.15 environment at: venv-3.11\nResolved 29 packages in 18ms\nPrepared 1 package in 3ms\nInstalled 29 packages in 38ms\n + annotated-types==0.8.0\n + anyio==4.15.1\n + attrs==26.1.0\n + cffi==2.1.1\n + click==8.5.0\n + cryptography==50.0.1\n + h11==0.16.0\n + httpcore2==2.13.1\n + httpx2==2.13.1\n + idna==3.20\n + jsonschema==4.26.0\n + jsonschema-specifications==2025.9.1\n + mcp==2.2.0\n + mcp-types==2.2.0\n + opentelemetry-api==1.45.0\n + pycparser==3.0\n + pydantic==2.13.5\n + pydantic-core==2.46.5\n + pyjwt==2.15.0\n + python-multipart==0.0.32\n + referencing==0.37.0\n + rpds-py==2026.6.3\n + specorganon==0.1.0 (from file:///tmp/specorganon-D100-final-install-14c3yoq_/dist/specorganon-0.1.0-py3-none-any.whl)\n + sse-starlette==3.4.11\n + starlette==1.7.0\n + truststore==0.10.4\n + typing-extensions==4.16.0\n + typing-inspection==0.4.4\n + uvicorn==0.54.0\n"
+  },
+  {
+    "argv": [
+      "/home/dev/.local/bin/uv",
+      "pip",
+      "check",
+      "--python",
+      "/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.11/bin/python"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "Using Python 3.11.15 environment at: venv-3.11\nChecked 29 packages in 0.86ms\nAll installed packages are compatible\n"
+  },
+  {
+    "argv": [
+      "/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.11/bin/python",
+      "-I",
+      "-c",
+      "import hashlib,json,sys,specorganon.source_passages as m; from pathlib import Path; print(json.dumps({\"module\":m.__file__,\"python\":sys.version.split()[0],\"module_sha256\":hashlib.sha256(Path(m.__file__).read_bytes()).hexdigest()}))"
+    ],
+    "exit": 0,
+    "stdout": "{\"module\": \"/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.11/lib/python3.11/site-packages/specorganon/source_passages.py\", \"python\": \"3.11.15\", \"module_sha256\": \"5d1e6ced5e82e4f0285b138acadc82817e097f5b0dfdd0a71d0d7729eb557459\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.11/bin/python",
+      "-I",
+      "/workspace/SpecOrganon/scripts/audit_bread_sources.py",
+      "--output",
+      "/tmp/specorganon-D100-final-install-14c3yoq_/result-3.11.json"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/home/dev/.local/bin/uv",
+      "venv",
+      "--offline",
+      "--no-project",
+      "--python",
+      "/usr/bin/python3",
+      "/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.12"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "Using CPython 3.12.3 interpreter at: /usr/bin/python3\nCreating virtual environment at: venv-3.12\n"
+  },
+  {
+    "argv": [
+      "/home/dev/.local/bin/uv",
+      "pip",
+      "install",
+      "--offline",
+      "--python",
+      "/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.12/bin/python",
+      "/tmp/specorganon-D100-final-install-14c3yoq_/dist/specorganon-0.1.0-py3-none-any.whl"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "Using Python 3.12.3 environment at: venv-3.12\nResolved 29 packages in 17ms\nInstalled 29 packages in 35ms\n + annotated-types==0.8.0\n + anyio==4.15.1\n + attrs==26.1.0\n + cffi==2.1.1\n + click==8.5.0\n + cryptography==50.0.1\n + h11==0.16.0\n + httpcore2==2.13.1\n + httpx2==2.13.1\n + idna==3.20\n + jsonschema==4.26.0\n + jsonschema-specifications==2025.9.1\n + mcp==2.2.0\n + mcp-types==2.2.0\n + opentelemetry-api==1.45.0\n + pycparser==3.0\n + pydantic==2.13.5\n + pydantic-core==2.46.5\n + pyjwt==2.15.0\n + python-multipart==0.0.32\n + referencing==0.37.0\n + rpds-py==2026.6.3\n + specorganon==0.1.0 (from file:///tmp/specorganon-D100-final-install-14c3yoq_/dist/specorganon-0.1.0-py3-none-any.whl)\n + sse-starlette==3.4.11\n + starlette==1.7.0\n + truststore==0.10.4\n + typing-extensions==4.16.0\n + typing-inspection==0.4.4\n + uvicorn==0.54.0\n"
+  },
+  {
+    "argv": [
+      "/home/dev/.local/bin/uv",
+      "pip",
+      "check",
+      "--python",
+      "/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.12/bin/python"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "Using Python 3.12.3 environment at: venv-3.12\nChecked 29 packages in 0.76ms\nAll installed packages are compatible\n"
+  },
+  {
+    "argv": [
+      "/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.12/bin/python",
+      "-I",
+      "-c",
+      "import hashlib,json,sys,specorganon.source_passages as m; from pathlib import Path; print(json.dumps({\"module\":m.__file__,\"python\":sys.version.split()[0],\"module_sha256\":hashlib.sha256(Path(m.__file__).read_bytes()).hexdigest()}))"
+    ],
+    "exit": 0,
+    "stdout": "{\"module\": \"/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.12/lib/python3.12/site-packages/specorganon/source_passages.py\", \"python\": \"3.12.3\", \"module_sha256\": \"5d1e6ced5e82e4f0285b138acadc82817e097f5b0dfdd0a71d0d7729eb557459\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/tmp/specorganon-D100-final-install-14c3yoq_/venv-3.12/bin/python",
+      "-I",
+      "/workspace/SpecOrganon/scripts/audit_bread_sources.py",
+      "--output",
+      "/tmp/specorganon-D100-final-install-14c3yoq_/result-3.12.json"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

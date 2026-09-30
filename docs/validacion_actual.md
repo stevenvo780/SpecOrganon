@@ -1,5 +1,18 @@
 # Auditoría de aceptación actual
 
+**Cotejo D-100:** el [auditor de pasajes](../experiments/development/bread_source_audit_2026-09-30/)
+verifica 17 afirmaciones y siete filas contra valores extraídos de PDF
+fijados, y conserva dos contradicciones de prosa/tablas. Un contrato revisado
+por Codex coteja unidad, base, procedencia y locadores; no infiere semántica
+o aporta aprobación humana. Se cerró un falso verde reproducido con extractor
+interpuesto por PATH mediante pin de binario y ejecución de sus bytes sellados.
+82 pruebas focales pasaron en Python 3.11 y 3.12, Ruff y dos instalaciones
+offline del wheel nuevo con módulo importado de site-packages y resultados
+byte idénticos. Se conservaron el corte anterior al arreglo y los casos previos.
+No hubo nueva evaluación global CLI/MCP, comparación metodológica, Q,
+intervención o corrida de las 24. Bibliotecas y host siguen sin atestación
+externa. Los cinco criterios finales permanecen **No demostrados**, **0/5**.
+
 **Resultado D-099:** el [recibo de la terna expuesta](../experiments/development/subscription_method_trial_2026-09-30/receipt.json)
 conserva seis invocaciones CLI con Luna medio solicitado, dos por brazo,
 después de congelar plan y broker. Los tres únicos replays sellados

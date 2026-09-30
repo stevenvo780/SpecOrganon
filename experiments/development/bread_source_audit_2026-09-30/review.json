@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "study_id": "D100",
+  "reviewer": "source_gate_review",
+  "reviewer_type": "native Codex agent; not a human quality judge or approver",
+  "scope": "independent reading of pinned local PDF pages, new passage primitive, adapter, contract and focal tests",
+  "claims_independently_read": 17,
+  "survey_rows_independently_read": 7,
+  "source_disagreements_preserved": 2,
+  "confirmed_defect": "PATH-controlled pdftotext could alter extracted text while PDF SHA and self-reported version remained unchanged",
+  "before_patch_observed": {"exit": 0, "passed": true, "altered_piece_mass": "737", "pdf_piece_mass": "736"},
+  "after_patch_observed": {"exit": 2, "reason": "PDF value differs from transcription: piece_mass"},
+  "defect_evidence_provenance": "reviewer observed temporary reproductions; no original JSON/stdout/stderr or altered-claim captures were persisted",
+  "closure": "reviewed absolute binary SHA, verified byte snapshot, sealed memfd execution, clean child environment, PDF snapshot; shared libraries and host remain explicit trusted dependencies",
+  "reviewer_focal_tests": {"passed": 81, "seconds": 1.86, "scope": "snapshot before the final worker test addition"},
+  "final_root_focal_tests": {"passed": 82, "python_3_11_seconds": 2.16, "python_3_12_seconds": 2.14},
+  "verdict": "no confirmed open P1/P2 within declared contract and host trust scope",
+  "semantic_contract_review": "native Codex source review and consistency checks, not autonomous semantic ground truth or competent human approval",
+  "Q": null,
+  "models_called_for_trials": 0,
+  "counts_toward_required_24_runs": false,
+  "global_acceptance": "0/5"
+}

@@ -1,5 +1,21 @@
 # Estado de reanudación
 
+**D-100 cotejó fuentes alimentarias:** [auditor y límites](../experiments/development/bread_source_audit_2026-09-30/).
+Un primitivo genérico nuevo extrae pasajes únicos de los mismos bytes PDF
+verificados; el adaptador coteja 17 afirmaciones y siete filas de Tabla 1,
+con valores extraídos y bases/procedencia de un contrato revisado por Codex.
+Conserva dos desacuerdos de prosa frente a tablas, sin reconciliarlos.
+La revisión detectó un falso positivo por extractor sustituido vía PATH;
+ahora el binario está fijado por SHA y ejecutado desde memfd sellado,
+con snapshot PDF y entorno limpio. Los positivos anteriores al arreglo
+siguen conservados como anteriores. Pasaron 82 pruebas en Python 3.11/3.12,
+Ruff y dos instalaciones offline del wheel final; el módulo vino de
+site-packages y ambos resultados fueron byte idénticos, 17/7 y dos avisos.
+Host/bibliotecas y contrato son límites explícitos, sin aprobación humana,
+Q, nuevas generaciones, campo o corrida de las 24. **Aceptación 0/5**.
+Siguiente frente: vincular estos cotejos a una receta alimentaria nueva y
+reanudable con trazabilidad y bloqueos normativos, manteniendo D-097 intacto.
+
 **D-099 completó una terna de desarrollo N/SDD/T:** [resultados y límites](../experiments/development/subscription_method_trial_2026-09-30/RESULTS.md).
 Plan en `3ab2982`, broker y pruebas en `842d618`, antes de seis invocaciones
 CLI con Luna medio solicitado. Cada brazo produjo código e informe, consumió
@@ -17,9 +33,9 @@ Pasaron 35 pruebas en Python 3.11 y 3.12 y Ruff antes de las generaciones.
 No Q, calidad equivalente, ganador, intervención o corrida de las 24;
 el tratamiento T es inicial, con todas las fases sin aceptar. Identidad
 efectiva, RPC, gasto y límites globales siguen sin autenticar. **0/5**.
-Siguiente frente: auditor de las 17 claims y siete filas alimentarias desde
-pasajes PDF, con valores, unidades, bases y negativos aislables; D-097 sigue
-fallido e intacto. El panel confirmatorio y la autoridad humana siguen pendientes.
+El cotejo posterior de las 17 claims y siete filas alimentarias se registra
+en D-100; D-097 sigue fallido e intacto. El panel confirmatorio y la autoridad
+humana siguen pendientes.
 
 **D-097 conservó un análisis nativo fallido:** el [workflow y plan](../experiments/development/bread_continuation_2026-09-30/)
 se congelaron en `6a8018c` antes de una sola generación con Luna medio
