@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "/tmp/specorganon-D102-install-cfoi0az2/venv-312/bin/python",
+    "-I",
+    "/workspace/SpecOrganon/scripts/probe_analysis_source_contradiction.py",
+    "/workspace/SpecOrganon",
+    "/tmp/specorganon-D104-db1al7wi/programs"
+  ],
+  "closed_findings": [
+    "sandbox helper copied then reread mutable snapshot in unsandboxed parent; fixed compile(raw) over previously verified bytes",
+    "AST conservative allowlist initially excluded any,str,items,append,issubset present in three fixed original programs; exact missing calls added",
+    "removed stale global0/5 declaration; criterion4 remains no_demostrado"
+  ],
+  "expected_model_calls": 0,
+  "expected_sandbox_calls": 3,
+  "global_acceptance": "1/5",
+  "historical_trials_changed": false,
+  "initial_freeze32pins_unchanged": true,
+  "instrument": {
+    "scripts/probe_analysis_source_contradiction.py": {
+      "bytes": 25860,
+      "sha256": "f4e3571deed89c227710440af8bccc1527968568b25acb6a9445c3ed7e1663cf"
+    }
+  },
+  "mutation": "exact single 64-byte manifest SHA value replacement in fresh copies; original serialization and CSV unchanged",
+  "no_method_causal_verdict": true,
+  "prelaunch_open_P1_P2": [],
+  "prior_freeze_commit": "c9d8744",
+  "program_diagnostic_runs_before_this_freeze": 0,
+  "recorded_at_utc": "2026-09-30T19:07:38.252417+00:00",
+  "registration_commit": "cfcaea4",
+  "review_scope": "independent native readonly prelaunch source review, not Q or external custody",
+  "reviewer": "/root/source_gate_review",
+  "schema": 1,
+  "stage": "before three source contradiction diagnostic runs",
+  "study_id": "D104"
+}
