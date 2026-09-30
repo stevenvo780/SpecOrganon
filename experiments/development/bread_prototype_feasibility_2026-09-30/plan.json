@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "classification": "exposed_development_native_agent_prototype_feasibility",
+  "case_id": "D-F-BREAD-NORWAY",
+  "planned_trials": [
+    {"trial_id": "A-01", "mode": "sequential"},
+    {"trial_id": "B-01", "mode": "graph"},
+    {"trial_id": "C-01", "mode": "risk"}
+  ],
+  "model_requested": "parent_inherited_same_request_for_all_three_native_workers",
+  "fork_turns_requested": "none",
+  "configuration": "one_executor_per_trial",
+  "evaluation": "arithmetic_replay_and_separate_native_read_only_critique_not_blind_human_Q",
+  "visible_materials": ["task.md", "source_claims.json", "source_manifest.json", "source_lca.pdf", "source_survey.pdf", "survey_table1.json"],
+  "excluded_materials": ["historical_ledgers", "frame_manifest", "previous_analyses", "reference_answers", "rubric", "other_trial_outputs"],
+  "shared_harness": ["core.py", "sequential.py", "graph.py", "risk.py", "capture_prototype.py"],
+  "limits": {
+    "prototype_calls_through_helper": 20,
+    "prototype_subprocess_timeout_seconds": 10,
+    "requested_native_execution_minutes": 15,
+    "requested_report_max_words": 1200,
+    "native_tokens_measured": null,
+    "native_cost_measured": null,
+    "all_tools_globally_limited": false,
+    "native_deadline_automatically_enforced": false,
+    "filesystem_isolation_enforced": false,
+    "independent_custody": false
+  },
+  "stop_rule": "One attempt per planned trial; preserve failed or incomplete outputs; no replacement or output repairs by integrator",
+  "normative_rule": "No approve command, no synthetic signature, no field action; require a pending normative node and an engineering intervention requirement that depends on it; preserve pending status and blocked engineering gates",
+  "normative_audit": "Verify existence, transitive link, pending status and blocked engineering phase for every trial; a missing link is an observed failed control, never success",
+  "release_rule": "Freeze visible package, source hashes, harness, instructions and rubric in a local commit before starting any trial",
+  "development_matrix_eligible": false,
+  "counts_toward_required_24_runs": false,
+  "criterion_4_assessed": false,
+  "field_impact_assessed": false
+}
