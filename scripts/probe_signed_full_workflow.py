@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import base64
+import contextlib
 import hashlib
 import json
 import os
@@ -165,7 +166,21 @@ def _execute_test(work: Path, env: dict[str, str], argv: list[str],
     return report
 
 
-async def probe(repo: Path, *, test_gate_policy: str = "signed_report") -> dict[str, Any]:
+@contextlib.contextmanager
+def _workspace(root: Path | None):
+    if root is None:
+        with tempfile.TemporaryDirectory(prefix="organon-signed-full-") as temporary:
+            yield Path(temporary)
+    else:
+        root = root.absolute()
+        if root.exists() or root.is_symlink():
+            raise ValueError("retained workspace must be new")
+        root.mkdir(mode=0o700)
+        yield root
+
+
+async def probe(repo: Path, *, test_gate_policy: str = "signed_report",
+                workspace_root: Path | None = None) -> dict[str, Any]:
     _require(test_gate_policy in {"signed_report", "signed_observed"},
              "unsupported test gate policy")
     observed_mode = test_gate_policy == "signed_observed"
@@ -190,8 +205,7 @@ async def probe(repo: Path, *, test_gate_policy: str = "signed_report") -> dict[
     cli = bin_dir / "organon"
     mcp = bin_dir / "organon-mcp"
     _require(cli.is_file() and mcp.is_file(), "installed wheel CLI and MCP executables are required")
-    with tempfile.TemporaryDirectory(prefix="organon-signed-full-") as temporary:
-        work = Path(temporary)
+    with _workspace(workspace_root) as work:
         case = work / "case"
         path = str(case)
         registry = work / "trusted-public-keys.json"
@@ -859,11 +873,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("repo_root", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--workspace-root", type=Path,
+                        help="Retain a new synthetic workspace for effect inspection; contains public records, never private keys")
     parser.add_argument("--test-gate-policy", choices=("signed_report", "signed_observed"),
                         default="signed_report")
     args = parser.parse_args()
     receipt = asyncio.run(probe(args.repo_root.resolve(strict=True),
-                                test_gate_policy=args.test_gate_policy))
+                                test_gate_policy=args.test_gate_policy,
+                                workspace_root=args.workspace_root))
     serialized = json.dumps(receipt, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
     if args.output is not None:
         args.output.write_text(serialized, encoding="utf-8")
