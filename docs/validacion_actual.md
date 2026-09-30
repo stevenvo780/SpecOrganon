@@ -1,5 +1,39 @@
 # Auditoría de aceptación actual
 
+**Fracciones y filas D-105/D-106:**
+[controles instalados](../experiments/development/citibike_fraction_lineage_2026-09-30/)
+y [reproducción desde raw](../experiments/development/citibike_raw_count_audit_2026-09-30/).
+Mismo wheel D-102,24módulos site/src iguales, Python3.11.15/3.12.3.
+Cada entorno aplica9puts CLI, replay MCP0/9,22tools y25pares CLI/MCP
+byte cotejados: cinco trazas/nueve gates/estado, controles de denominador y
+archive. Evidencias e indicadores tienen métrica/unidad literal común,
+valor decimal24 redondeado y racional separado; error≤5e-25 sólo de
+representación. Denominador con contenido idéntico revisado hace stale9
+descendientes; dos siblings vigentes. Archive alterado/eliminado invalida
+ramas y bloquea sin escrituras; exacta restitución recupera estado. Cuatro
+negativos por Python rechazados, incluido cambio de contrato con pin viejo,
+que verifica binding y no verdad semántica. Prefix42/chain52/publicación8files
+verificados independientemente; cuatro tar/240archivos y176capturas.
+Los dos iniciales failed quedan intactos: supuesto incorrecto42puts frente
+a40puts+dos eventos históricos; reparación prospectiva en nuevo destino.
+Study/explain siguen bloqueados por i_rows rechazado/síntesis sin enlace,
+además de fases previas; normas/decisión sin aprobar y cero fases aceptadas.
+
+D-106 usa el analizador histórico exacto sobre bytes Parquet de10.853.196B
+sellados con15 y doble hash. Una ejecución3.11 exit0 reproduce stdout/report
+histórico1599B SHA352ef988… sin cambios:1.812.548filas,1.809.036elegibles,
+1.725.248/1.682.386numeradores. Entorno offline nuevo y1382dep-files actuales
+verificados;30pines congelados intactos. Dos P2 de referencias/recibo cerrados
+antes de ejecutar y fuente inicial conservada, no ejecutada. Revisor distinto
+recalcula input/outputs/dependencias, sin reejecutar análisis. La pertenencia
+verificada es del archivo y regla descriptiva, no de la realidad física;
+no segunda implementación independiente, custodia externa, prerregistro del
+estudio, causalidad o campo. Evidencia raw sigue separada del ledger D-105.
+Ruff/compile pasan en ambos Python; sin nuevo global ni modelo experimental.
+**C1 técnico conservado; C2–C5 No demostrados, aceptación actual1/5.**
+La transferencia de mecanismos aquí observada es desarrollo expuesto, sin
+adjudicar generalización completa. GOAL/matriz/umbrales y24módulos intactos.
+
 **Integridad D-104:** [resultados y límites](../experiments/development/method_integrity_audit_2026-09-30/).
 Regresión de desarrollo 21/21 en cada Python 3.11/3.12 sobre wheel D-102,
 42 ledgers conservados/cadenas verificadas, grupos 6/6/6/3 sin skips.

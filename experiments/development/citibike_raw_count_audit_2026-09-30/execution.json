@@ -1,0 +1,71 @@
+{
+  "Q": null,
+  "all_repeated_dataset_reads_use_same_sealed_bytes": true,
+  "analyzer_launch_attempted": true,
+  "argv": [
+    "/tmp/specorganon-D106-raw-bdp0u2dw/venv/bin/python",
+    "-I",
+    "-c",
+    "import sys,importlib.metadata as md,zoneinfo; sys.dont_write_bytecode=True; assert sys.version_info[:2]==(3,11); assert md.version('pyarrow')=='21.0.0'; assert md.version('tzdata')=='2026.4'; zoneinfo.reset_tzpath(()); import pyarrow as pa; pa.set_cpu_count(2); pa.set_io_thread_count(2); raw=sys.stdin.buffer.read(); fd=int(sys.argv[1]); name=sys.argv[2]; sys.argv=[name,'/proc/self/fd/'+str(fd)]; exec(compile(raw,name,'exec'),{'__name__':'__main__','__file__':name,'__package__':None})",
+    "3",
+    "/workspace/SpecOrganon/cases/citibike/analyze_sample_status.py"
+  ],
+  "automatic_retry": false,
+  "classification": "exposed development reproduction of archived public Parquet counts; not final evaluation",
+  "counts": {
+    "quality": {
+      "bike_count_above_capacity_rows": 606,
+      "bike_plus_dock_above_capacity_rows": 3512,
+      "conservative_dock_rows": 1809036,
+      "dock_count_above_capacity_rows": 0,
+      "excluded_rows": 3512,
+      "negative_available_count_rows": 0,
+      "nonpositive_capacity_rows": 0
+    },
+    "rows": 1812548,
+    "snapshot_count": 820,
+    "snapshot_row_service": {
+      "denominator": 1809036,
+      "rental_enabled_with_bike": 1725248,
+      "return_enabled_with_dock": 1682386
+    },
+    "station_id_count": 2212
+  },
+  "dependency_files_unchanged": true,
+  "executed_analysis_source_pin": {
+    "bytes": 6786,
+    "sha256": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949"
+  },
+  "exit_code": 0,
+  "field_impact_assessed": false,
+  "finished_at_utc": "2026-09-30T20:55:37.498848+00:00",
+  "freeze_pin": {
+    "bytes": 7036,
+    "sha256": "60972f4e2acbf00bdbcbd329eab0652d11c7fe3b57f390839be3da4ebd615120"
+  },
+  "full_report_equal": true,
+  "input_git_blob_sha1": "6efe8e7cbf30591af1b9f4614be60a35650facdf",
+  "input_pin": {
+    "bytes": 10853196,
+    "sha256": "661221e1f6fc01ba6475cee61597e432fc0858689195b6c12255a6c005b52fc4"
+  },
+  "input_seals": 15,
+  "original_sources_unchanged": true,
+  "raw_descriptor_sealed_and_bytes_verified": true,
+  "row_analysis_executed": true,
+  "schema": 1,
+  "source_code_executed_from_verified_stdin": true,
+  "source_truth_authenticated": false,
+  "started_at_utc": "2026-09-30T20:55:36.543406+00:00",
+  "stderr_pin": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout_pin": {
+    "bytes": 1599,
+    "sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1"
+  },
+  "subset_membership_verified_from_rows": true,
+  "timeout_seconds": 60,
+  "wall_seconds": 0.9554048950085416
+}

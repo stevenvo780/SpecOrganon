@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "classification": "independent_metric_contract_retrospective_development",
+  "source_sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1",
+  "source_assertions": {
+    "classification": "published_historical_station_snapshot_analysis_development",
+    "criterion_5": "not_assessed",
+    "first_snapshot_utc": "2024-03-12T21:40:49Z",
+    "last_snapshot_utc": "2024-03-23T14:49:01Z"
+  },
+  "source_window": {
+    "start_locator": "first_snapshot_utc",
+    "end_locator": "last_snapshot_utc"
+  },
+  "quantities": {
+    "eligible_rows": {
+      "locator": "snapshot_row_service.denominator",
+      "value_type": "integer_count",
+      "unit": "station_snapshot_rows",
+      "observation_unit": "station_snapshot_row",
+      "population": "quality_eligible_citibike_station_snapshot_rows",
+      "time_scope": {
+        "id": "citibike_sample_march_2024",
+        "start_utc": "2024-03-12T21:40:49Z",
+        "end_utc": "2024-03-23T14:49:01Z"
+      }
+    },
+    "rental_rows": {
+      "locator": "snapshot_row_service.rental_enabled_with_bike",
+      "value_type": "integer_count",
+      "unit": "station_snapshot_rows",
+      "observation_unit": "station_snapshot_row",
+      "population": "quality_eligible_citibike_station_snapshot_rows",
+      "time_scope": {
+        "id": "citibike_sample_march_2024",
+        "start_utc": "2024-03-12T21:40:49Z",
+        "end_utc": "2024-03-23T14:49:01Z"
+      }
+    },
+    "return_rows": {
+      "locator": "snapshot_row_service.return_enabled_with_dock",
+      "value_type": "integer_count",
+      "unit": "station_snapshot_rows",
+      "observation_unit": "station_snapshot_row",
+      "population": "quality_eligible_citibike_station_snapshot_rows",
+      "time_scope": {
+        "id": "citibike_sample_march_2024",
+        "start_utc": "2024-03-12T21:40:49Z",
+        "end_utc": "2024-03-23T14:49:01Z"
+      }
+    }
+  },
+  "targets": {
+    "rental_service_fraction": {
+      "metric": "rental_enabled_with_bike_share_of_quality_eligible_rows",
+      "unit": "fraction",
+      "observation_unit": "station_snapshot_row",
+      "population": "quality_eligible_citibike_station_snapshot_rows",
+      "time_scope": {
+        "id": "citibike_sample_march_2024",
+        "start_utc": "2024-03-12T21:40:49Z",
+        "end_utc": "2024-03-23T14:49:01Z"
+      },
+      "numerator_quantity": "rental_rows",
+      "denominator_quantity": "eligible_rows",
+      "relation": "subset_fraction"
+    },
+    "return_service_fraction": {
+      "metric": "return_enabled_with_dock_share_of_quality_eligible_rows",
+      "unit": "fraction",
+      "observation_unit": "station_snapshot_row",
+      "population": "quality_eligible_citibike_station_snapshot_rows",
+      "time_scope": {
+        "id": "citibike_sample_march_2024",
+        "start_utc": "2024-03-12T21:40:49Z",
+        "end_utc": "2024-03-23T14:49:01Z"
+      },
+      "numerator_quantity": "return_rows",
+      "denominator_quantity": "eligible_rows",
+      "relation": "subset_fraction"
+    }
+  }
+}

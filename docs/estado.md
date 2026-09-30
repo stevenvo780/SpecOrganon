@@ -1,5 +1,44 @@
 # Estado de reanudación
 
+**D-105/D-106 añaden fracciones tipadas y repetición de filas:**
+[variante reproducible Citi52](../cases/citibike_march2024_fractions/),
+[ejecución y controles D-105](../experiments/development/citibike_fraction_lineage_2026-09-30/)
+y [reproducción de conteos D-106](../experiments/development/citibike_raw_count_audit_2026-09-30/).
+Dos evidencias e indicadores escalares conservan los racionales exactos,
+representación HALF_EVEN24 y error≤5e-25; no es un umbral de eficacia.
+El mismo wheel D-102 en Python3.11/3.12 aplica9puts por CLI y MCP releyó0/9:
+22tools,25pares por entorno,5trazas y9gates. Prefijo42 intacto,52eventos;
+reject técnico de i_rows3 no constituye aprobación humana. Denominador
+revisado con datos idénticos invalida9descendientes, excluidos/huecos siguen
+vigentes; alteración/eliminación del archive detectadas sin añadir eventos,
+restauración exacta. Cuatro negativos de contrato rechazados por entorno.
+Primeros dos intentos fallaron antes de puts: constructor asumía42puts y
+eran40puts+review23+advance24. Fuentes/streams/tar conservados; corrección
+acotada revisada y congelada antes de repetir en nuevos destinos. Cuatro
+tar conservan240archivos; cada positivo retiene88capturas, incluidas25
+comparaciones,32CLI,30MCP y preparación. No síntesis o fase completa:
+study sigue bloqueado por el indicador histórico rechazado; explain por
+s_rows_pair sin enlace de inferencia/evidencia, además de fases previas.
+
+D-106 descargó/preparó el Parquet público fijado y ejecutó una vez el
+analizador original desde bytes verificados sobre un memfd sellado15.
+Resultado exit0,stdout/report/histórico byteidénticos1599B:1.812.548filas,
+3.512excluidas,1.809.036elegibles, numeradores1.725.248/1.682.386,
+820snapshots y2.212estaciones. Entorno nuevo offline3.11/PyArrow21/tzdata2026.4:
+1382archivos públicos de dependencias idénticos. Dos P2 del lanzador
+se corrigieron antes de ejecutar; fuente inicial no ejecutada conservada.
+Revisiones independientes recalculan archivos, cadenas, pares y salida;
+ningún mismatch. D-106 verifica pertenencia a la máscara de estas filas,
+sin autenticar verdad física, acceso vivido o efecto de campo; no adjunta
+el resultado al ledger D-105 ni reescribe sus flags históricos.
+Producción24/GOAL/matriz intactos, sin global nuevo, Q, generación experimental,
+aprobación normativa, campo o corrida24. **Aceptación1/5; C2–C5 No demostrados.**
+Luna nuevo no arrancó por límite de threads; revisión reutilizó agente
+existente, sin atribuirle identidad de modelo no autenticada.
+Siguiente: resolver explícitamente retiro de indicadores y soporte de síntesis,
+ligar la repetición raw al grafo, y completar reserva/evaluación independiente,
+baseline, autoridad y métricas competentes de campo.
+
 **D-104 audita integridad de desarrollo:**
 [dossier, planes congelados y resultados](../experiments/development/method_integrity_audit_2026-09-30/).
 Banco original de 21 inyecciones pasa en Python 3.11/3.12 contra el mismo

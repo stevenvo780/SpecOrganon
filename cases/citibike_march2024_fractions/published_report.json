@@ -1,0 +1,38 @@
+{
+  "classification": "published_historical_station_snapshot_analysis_development",
+  "criterion_5": "not_assessed",
+  "first_snapshot_utc": "2024-03-12T21:40:49Z",
+  "gaps_over_30_minutes": 37,
+  "input_bytes": 10853196,
+  "input_sha256": "661221e1f6fc01ba6475cee61597e432fc0858689195b6c12255a6c005b52fc4",
+  "largest_gap_seconds": 3719,
+  "last_snapshot_utc": "2024-03-23T14:49:01Z",
+  "quality": {
+    "bike_count_above_capacity_rows": 606,
+    "bike_plus_dock_above_capacity_rows": 3512,
+    "conservative_dock_rows": 1809036,
+    "dock_count_above_capacity_rows": 0,
+    "excluded_rows": 3512,
+    "negative_available_count_rows": 0,
+    "nonpositive_capacity_rows": 0
+  },
+  "rows": 1812548,
+  "rows_per_snapshot_max": 2212,
+  "rows_per_snapshot_min": 2208,
+  "scope_limits": [
+    "Historical sample spans March 2024, not the June 2026 documentary case.",
+    "Irregular snapshots are not weighted as station-minutes.",
+    "The sample has no station-level last_reported or attempted rides.",
+    "Integer 0/1 flags are accepted only for this archived Parquet schema; this does not validate a live GBFS feed.",
+    "Feed availability is neither realized user access nor an intervention effect."
+  ],
+  "snapshot_count": 820,
+  "snapshot_row_service": {
+    "denominator": 1809036,
+    "rental_enabled_with_bike": 1725248,
+    "return_enabled_with_dock": 1682386
+  },
+  "source": "https://github.com/NYCComptroller/citi-bike-gbfs/blob/4c36513cf3842efe9a2940a78974bf45cb13fc0b/dataset.parquet",
+  "source_git_blob_sha1": "6efe8e7cbf30591af1b9f4614be60a35650facdf",
+  "station_id_count": 2212
+}
