@@ -34,8 +34,14 @@ intactos; instalado34/1555 por entorno. El build invocó el alias de uv: destino
 bytes comprobados antes/después, sin atestación atómica del exec.
 [Alcance](executable_resolution_scope.json).
 
-Fuentes/instrumentos `a071ab8`; freeze **`474ed13`**,432archivos y24módulos,
-anterior a cuatro lanzamientos. Un intento por instrumento/Python, sin retry.
+Fuentes/instrumentos `a071ab8`; freeze **`474ed13`**,432 hashes de archivos vivos
+y24módulos, anterior a cuatro lanzamientos. El commit conservó430 de esos432
+archivos: el `.gitignore` generado por el build excluyó ese mismo archivo y el
+wheel. La verificación final detectó la omisión; ambos se incorporan después,
+con sus bytes originales, en la publicación que contiene
+[commit_preservation_repair.json](commit_preservation_repair.json). Ningún
+experimento se repite ni se reescribe el freeze. Un intento por
+instrumento/Python, sin retry.
 Wheel137581B SHA256
 `63c58a91c3f174d41b8ca8b6ce21122f9aeb8f156005ad59767db4960c9f88e3`:
 [package](installed_repaired/specorganon-0.1.0-py3-none-any.whl).
@@ -89,9 +95,13 @@ cadenas/prefijos,52pares por entorno,1555archivos por venv,23operaciones,
 workflows y publicación. Ningún P1/P2 abierto en ese alcance.
 [Revisión atribuida](postrun_review.json) · [Recibo](receipt.json).
 
-Reproducir exige el commit474ed13, wheel fijado y nuevos destinos: markers impiden
-repetir estos intentos. Rutas/entornos son de esta máquina; otra repetición debe
-registrarlos prospectivamente y conservar hashes/código/datos.
+Reproducir exige las430 fuentes del commit474ed13, más los dos archivos públicos
+omitidos restaurados en esta publicación y verificados contra el freeze; el
+commit474ed13 por sí solo no contiene todos los inputs. Usar nuevos destinos:
+markers impiden repetir estos intentos. Rutas/entornos son de esta máquina;
+otra repetición debe registrar prospectivamente su checkout combinado,
+destinos y recibo, y conservar hashes/código/datos. Las comprobaciones que exigen
+un HEAD congelado necesitarán ese nuevo registro antes de ejecutar.
 
 ## Límites y siguiente
 
