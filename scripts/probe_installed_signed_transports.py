@@ -259,11 +259,15 @@ class TestReports:
         self.captures = captures
         self.reports: list[dict[str, Any]] = []
         self.collected: list[str] = []
+        self.collected_sources: list[dict[str, str]] = []
         self.collection_errors: list[str] = []
         self.case_roots: dict[str, str] = {}
 
     def pytest_collection_modifyitems(self, items):
         self.collected = [item.nodeid for item in items]
+        self.collected_sources = [{"nodeid": item.nodeid,
+                                   "path": str(item.path.resolve(strict=True)),
+                                   "name": item.name} for item in items]
 
     def pytest_collectreport(self, report):
         if report.failed:
@@ -361,6 +365,7 @@ def probe(repo: Path, output: Path, wheel: Path) -> dict[str, Any]:
             os.fsync(stdout.fileno())
             os.fsync(stderr.fileno())
         receipt.update(pytest_exit_code=exit_code, collected_tests=reports.collected,
+                       collected_test_sources=reports.collected_sources,
                        test_reports=reports.reports, collection_errors=reports.collection_errors)
         receipt["helper_paths_added"] = sorted(set(sys.path) - set(prior_path))
         receipt["helper_path_scope"] = "repository test helpers in-process; child Python environment injection cleared"
@@ -376,8 +381,14 @@ def probe(repo: Path, output: Path, wheel: Path) -> dict[str, Any]:
                                       "artifacts": _case_inventory(Path(root)) if root else []})
         _origins_still_installed(installed)
         _require(exit_code == 0 and not reports.collection_errors, "selected pytest run failed")
-        _require(len(reports.collected) == 3 and all(any(node.endswith(test) for node in reports.collected)
-                                                    for test in TESTS), "expected exactly three selected tests")
+        # With an external rootdir pytest can omit the source filename from
+        # nodeid. Bind selection to each collected item's actual source path
+        # and function name instead of interpreting that display identifier.
+        expected_sources = {(str((repo / "tests" / filename).resolve(strict=True)), name)
+                            for filename, name in (test.split("::", 1) for test in TESTS)}
+        actual_sources = {(source["path"], source["name"]) for source in reports.collected_sources}
+        _require(len(reports.collected_sources) == len(TESTS) and actual_sources == expected_sources,
+                 "expected exactly three selected tests")
         _require(len(reports.reports) == 9 and all(record["outcome"] == "passed" for record in reports.reports),
                  "each selected test must pass setup, call and teardown without skips")
         inventory = {transport: {operation: sum(record["transport"] == transport
