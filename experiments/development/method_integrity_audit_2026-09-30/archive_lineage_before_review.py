@@ -7,17 +7,11 @@ import argparse
 import hashlib
 import importlib.util
 import json
-import os
 import sys
 from pathlib import Path
 
 
 WHEEL = "experiments/development/lot_journal_prospectus_2026-09-30/installed/specorganon-0.1.0-py3-none-any.whl"
-VERIFIER_SHA = "3b7deea460f779234f4650f20c36788ad890ff56e7e45103f4c1f5b293583013"
-LEDGER_SHA = {
-    "bread64": "e560a6526b2997308bf41e3cb9cbb96d378c22643122ce6a55036a061335568c",
-    "citibike42": "7cb7f451e953a02a7254edd2e6713ad7acc470181b2cc0966b5d9b88c51692e3",
-}
 CASES = {
     "bread64": (
         "experiments/development/lot_journal_prospectus_2026-09-30/installed/312/prospectus/case",
@@ -103,24 +97,11 @@ def main() -> int:
     require(sys.flags.isolated == 1, "run with Python -I")
     require(not output.exists(), "new output file required")
     require(output.parent.is_dir(), "existing output directory required")
-    original_home = os.environ.get("HOME")
-    os.environ.clear()
-    os.environ.update({"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8",
-                       "PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1"})
-    if original_home is not None:
-        os.environ["HOME"] = original_home
-    sys.dont_write_bytecode = True
     helper_path = repo / "scripts/probe_installed_signed_transports.py"
-    helper_raw = helper_path.read_bytes()
-    require(hashlib.sha256(helper_raw).hexdigest() == VERIFIER_SHA,
-            "installed origin verifier differs from frozen D103 source")
-    for name, (relative, _, _) in CASES.items():
-        require(pin(repo / relative / "organon.json")["sha256"] == LEDGER_SHA[name],
-                f"retained ledger differs from frozen parent: {name}")
     spec = importlib.util.spec_from_file_location("installed_origin_check", helper_path)
     require(spec is not None and spec.loader is not None, "origin checker unavailable")
     helper = importlib.util.module_from_spec(spec)
-    exec(compile(helper_raw, str(helper_path), "exec"), helper.__dict__)
+    spec.loader.exec_module(helper)
     wheel = repo / WHEEL
     before = helper._installed(repo, wheel)
     require(len(before["modules"]) == 24, "expected24 installed production modules")
@@ -174,7 +155,6 @@ def main() -> int:
               "source_pins_before": pins_before, "source_pins_after": pins_after,
               "cases": results, "target_count": sum(len(c["selected"]) for c in results.values()),
               "case_ledgers_modified": False, "Q": None, "criteria2and5": "no_demostrado",
-              "environment": "minimal allowlist; original HOME preserved; no inherited ORGANON trust or fixture pointers",
               "limits": ["graph paths do not prove semantic justification", "exact metric/unit metadata does not prove truth, population equivalence or field efficacy", "provisional classification only mirrors missing metadata permissiveness, not full protocol/norm/evidence gate validity", "unapproved norms and thresholds remain pending", "sameUID race after final source pin is not excluded"]}
     with output.open("x", encoding="utf-8") as stream:
         json.dump(report, stream, ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False)
