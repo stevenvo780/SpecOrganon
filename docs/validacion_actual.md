@@ -3,8 +3,15 @@
 **Avance D-095:** el [control del plazo del calendario](../experiments/development/prototype_checkpoint_2026-09-30/managed_validation.json)
 pasó 172 pruebas de presupuesto/sesión y revisión independiente. Cierra una
 discordancia del puente managed antes de escrituras o envíos; no unifica el
-presupuesto entre agentes o proveedores. El ensayo prospectivo de checkpoint
-CLI aún no tiene resultado. Los cinco criterios siguen **No demostrados**.
+presupuesto entre agentes o proveedores. El [ensayo de checkpoint CLI](../experiments/development/prototype_checkpoint_2026-09-30/outcome_inspection.json)
+quedó **failed**: Luna medio solicitado produjo una propuesta pendiente válida,
+pero un error de arranque de Code Mode hizo que la regla congelada rechazara
+la traza. No hubo `init` ni checkpoint; un proceso nuevo verificó los archivos
+y mantuvo el fallo sin posibilidad de relanzar. Las 17 pruebas del supervisor
+usan modelo falso y prototipo real. Los contadores del helper no convierten
+el error de la ejecución real en éxito, ni autentican coste, versión efectiva
+o límites globales. No hay comparación de calidad ni corrida de la matriz24.
+Los cinco criterios siguen **No demostrados**.
 
 **Corte:** 2026-09-30 UTC. La [matriz prospectiva](protocolo_experimental.md#7-matriz-propuesta-antes-de-observar-resultados-confirmatorios) propone evidencias, procedimientos y umbrales antes de ensayos confirmatorios; sus decisiones normativas aún requieren aprobación humana y registro. Este archivo registra solo lo que se ejecutó; no modifica esos umbrales. `GOAL.md` permanece intacto.
 

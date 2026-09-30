@@ -1,12 +1,18 @@
 # Estado de reanudación
 
-**D-095 en curso:** el puente managed ya respeta el plazo del calendario al
-preparar, consultar y ejecutar. Commit local `ca22ea6`; 172 pruebas combinadas,
-Ruff, compilación y revisión independiente sin P1/P2 abiertos en esa corrección.
-El [plan del checkpoint inicial](../experiments/development/prototype_checkpoint_2026-09-30/plan.json)
-fija un intento CLI Luna medio/graph de 120 segundos; todavía está pendiente
-congelar y revisar el supervisor antes del lanzamiento. No cuenta entre las
-24 corridas ni altera el veredicto 0/5.
+**D-095 cerrado como desarrollo, con resultado negativo:** el puente managed
+respeta el plazo del calendario; commit `ca22ea6`, 172 pruebas y revisión
+independiente. El [supervisor y plan](../experiments/development/prototype_checkpoint_2026-09-30/)
+se congelaron en `0631922` tras 17 pruebas con CLI falsa y correcciones
+adversariales. La única tentativa real solicitó Luna medio/graph con 120 s:
+terminó en 21,127 s y produjo 15 nodos pendientes, pero la CLI emitió un error
+de arranque de Code Mode por deshabilitar su host. El supervisor rechazó la
+traza antes de `init`; **no existe checkpoint**. Un proceso nuevo conserva
+`failed` y bloquea relanzar. Se archivaron 17 archivos idénticos, sin reparación
+ni reemplazo. Uso local: 17.576 tokens de entrada y 956 de salida; coste e
+identidad efectiva sin autenticar. Antes de otra ronda hay que registrar y
+revisar una configuración CLI compatible que no genere ese error, conservando
+este negativo. No cuenta entre las 24 corridas; veredicto **0/5**.
 
 **Corte actual:** 2026-09-30 UTC. Objetivo íntegro en [GOAL.md](../GOAL.md), SHA-256 `e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36`. Rama `work/toolkit-foundation`; GOAL.md y los cinco ledgers reales permanecen intactos. El [gate D-093](../experiments/development/local_evidence_gate_2026-09-30/receipt.json) pasó **2114 pruebas globales**, Ruff y compilación. Un wheel con el motor final pasó instalación offline, `uv pip check` y la sonda de evidencia por CLI y MCP reales en Python 3.11 y 3.12; la revisión independiente repitió ambas pruebas instaladas sin skips. El [dossier D-E congelado](../experiments/development/energy_pilot/activation_dossier_2026-09-27.json) conserva sus hashes históricos y su NO-GO para llamadas. La [auditoría de aceptación](validacion_actual.md) mantiene **0/5 criterios demostrados**.
 

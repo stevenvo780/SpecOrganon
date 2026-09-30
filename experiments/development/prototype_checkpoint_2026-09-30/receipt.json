@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "decision": "D-095",
+  "recorded_at_utc": "2026-09-30T06:16:48.726564+00:00",
+  "classification": "local_budget_fix_and_failed_subscription_checkpoint_feasibility",
+  "freeze_commit": "063192217a3bf3a4a9c2bc2349532e74216d543f",
+  "managed_fix_commit": "ca22ea6",
+  "receipt_kind": "local_summary_not_detached_provider_attestation",
+  "validation": {
+    "managed_related_tests": 172,
+    "supervisor_tests": 17,
+    "provider_in_tests": "fake",
+    "local_init_and_timeout_processes": "real",
+    "ruff": "passed",
+    "compile": "passed",
+    "diff_check": "passed",
+    "global_suite_this_cut": "not_repeated; D093 historical2114"
+  },
+  "trial": {
+    "requested_model": "gpt-6-luna",
+    "requested_effort": "medium",
+    "requested_mode": "graph",
+    "active_limit_seconds": 120,
+    "actual_cli_generation_invocations": 1,
+    "replacement_attempts": 0,
+    "exit_code": 0,
+    "cli_wall_seconds": 20.781,
+    "supervisor_wall_seconds": 21.127,
+    "state": "failed",
+    "error": "CheckpointError: observed tool or unknown item",
+    "cause": "startup item error because code_mode_host disabled",
+    "prototype_initialized": false,
+    "checkpoint_ready": false,
+    "read_only_pending_proposal_nodes": 15,
+    "model_or_proposal_repaired": false,
+    "local_cli_usage": {
+      "input_tokens": 17576,
+      "cached_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 956,
+      "reasoning_output_tokens": 0
+    },
+    "provider_identity_authenticated": false,
+    "provider_request_count_attested": null,
+    "cost": null,
+    "api_key_environment_passed": false,
+    "existing_chatgpt_login_reported": true,
+    "authentication_material_copied": false,
+    "local_process_deadline_observed": true,
+    "hard_deadline_negative_test": "fake CLI actual local sleeping process",
+    "remote_cancellation_verified": false,
+    "tool_limit_preventively_enforced": false,
+    "global_run_limits_enforced": false,
+    "counts_toward_required_24_runs": false,
+    "quality_equivalence": "not_assessed",
+    "field_impact": "not_observed"
+  },
+  "preserved_files": {
+    "GOAL.md": {
+      "sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+      "matches_previous": true
+    },
+    "cases/mango/organon.json": {
+      "sha256": "a5bc7f92d080270ccd4eef54129c3406352155cc60d643695abfafcbfbfed315",
+      "matches_previous": true
+    },
+    "cases/citibike/organon.json": {
+      "sha256": "204b8094474113a52f2d271f5ae10e174979c66628e1753dc5df8e2b1e682678",
+      "matches_previous": true
+    },
+    "cases/citibike_march2024/organon.json": {
+      "sha256": "af6b95cc40c3b6b44c04c47b713fa8db4ff2339a2b1fffefdce53a720688ddc4",
+      "matches_previous": true
+    },
+    "cases/citibike_march2024_lineage/organon.json": {
+      "sha256": "7cb7f451e953a02a7254edd2e6713ad7acc470181b2cc0966b5d9b88c51692e3",
+      "matches_previous": true
+    },
+    "cases/bread_norway/organon.json": {
+      "sha256": "1c2795bc3a31ebf828991d8e87518028c340f303db5f3acc3b11fab04b88de23",
+      "matches_previous": true
+    },
+    "src/specorganon/engine.py": {
+      "sha256": "52b0a5ee102c695bd903723552c8654e0197100bf6afb8208794c93fc0fefa7d",
+      "matches_previous": true
+    }
+  },
+  "d094_and_food_sources_unchanged_vs_commit": "0ab70c0",
+  "independent_review": "review.json",
+  "next_work": "Register and review a new compatible CLI configuration; retain this failed attempt. Full comparative and field validation remain pending.",
+  "acceptance": {
+    "criterion_1": "not_demonstrated",
+    "criterion_2": "not_demonstrated",
+    "criterion_3": "not_demonstrated",
+    "criterion_4": "not_demonstrated",
+    "criterion_5": "not_demonstrated",
+    "demonstrated": 0,
+    "total": 5
+  },
+  "files": {
+    "experiments/development/prototype_checkpoint_2026-09-30/README.md": {
+      "sha256": "064c419252836f0ed2ca3b25144bb03de88cb00f286fd2e6ce17dcec3498f7a7",
+      "bytes": 5032
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/archive_receipt.json": {
+      "sha256": "dccf0fb230215c6234d6f7972d0a6aa9c2cdb5c9e28f2edf041357f740780938",
+      "bytes": 2736
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/harness/core.py": {
+      "sha256": "6bf67d5542ac4fb9b9b1f9bd1e122ddb4c3b0a29e2fe26d040f1c401a2828986",
+      "bytes": 16435
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/harness/graph.py": {
+      "sha256": "fc9ffb904a44b821e5b688fdf6fa1f4960d61ca1b46c10695aedc74b544bfcc4",
+      "bytes": 169
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/harness/risk.py": {
+      "sha256": "b8f4ea88217c50f396d9ad21f8543a2dc812ecf4eb74e9db8859f746f6cf4d82",
+      "bytes": 169
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/harness/sequential.py": {
+      "sha256": "9e0f2b66c73c5eb2070255256fa3faf3300d49fdf3322ac083ddea21bfdda3c5",
+      "bytes": 176
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/input/source_claims.json": {
+      "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc",
+      "bytes": 9162
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/input/source_lca.pdf": {
+      "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32",
+      "bytes": 2212666
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/input/source_manifest.json": {
+      "sha256": "83bdf5e7bc584971ca2446cf0fe6bd83dd4b9ea624a433fc54c5e5b3f89c4f3a",
+      "bytes": 6281
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/input/source_survey.pdf": {
+      "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee",
+      "bytes": 526604
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/input/survey_table1.json": {
+      "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f",
+      "bytes": 1440
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/input/task.md": {
+      "sha256": "ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51",
+      "bytes": 6887
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/model.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/model.stdout.jsonl": {
+      "sha256": "178de0620b1fa3325b76d3964c4f9bb6b5122d94c0d8dff83d2cb548ceb1c23f",
+      "bytes": 5442
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/plan.json": {
+      "sha256": "223581703003329920db9cbcfa8662c91f893b83788079377ed7bb0ff9015485",
+      "bytes": 3219
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/prompt.txt": {
+      "sha256": "7ba6d8df4373a6f4ddc29ba32275a56d24263da1175013e6b5755dd61e1f24bf",
+      "bytes": 22970
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/proposal.json": {
+      "sha256": "4a0d2bbe047f5a83850266ee832f9b579aa7bef344a365074c18fd90170bffb7",
+      "bytes": 4477
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/run.json": {
+      "sha256": "6d55460dea952505f4c3f6feb7c1608c99de9c1cc0f3d264d84d6c20fb8141b3",
+      "bytes": 3100
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/attempt/schema.json": {
+      "sha256": "67bf84e6f63a092b25b920bf5d0d83a870563ed70e69f4a2cf81db5c9f1c07a5",
+      "bytes": 1396
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/execution_status.json": {
+      "sha256": "d108ad822febee83298ae6953db6aa7ea9d63287f72709cd72eac83ddc738cb7",
+      "bytes": 5977
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/fresh_status.json": {
+      "sha256": "d108ad822febee83298ae6953db6aa7ea9d63287f72709cd72eac83ddc738cb7",
+      "bytes": 5977
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/launch_receipt.json": {
+      "sha256": "bf49fb52af8943e9c2ffdf6d83db1c893e6030e6c22de172f1e6410cc0417abd",
+      "bytes": 569
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/managed_validation.json": {
+      "sha256": "30e6a9260b45a365b2bd6b929b8581713b8e3ff4d685ef7b45b1b931c4a839c2",
+      "bytes": 1940
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/outcome_inspection.json": {
+      "sha256": "473350e3974ee31eb5175b7919919f1fb83035497faa0ba20c71bed198544041",
+      "bytes": 1869
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/plan.json": {
+      "sha256": "a738b51f649ba1d64a2f8c929d6a41925ed97f1935c20f52c887d613c3713969",
+      "bytes": 3671
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/prelaunch_environment.json": {
+      "sha256": "4c2fca6353dfdf39b79238e4158f1b556120286f511fb971a8657f7e9cfa55d8",
+      "bytes": 2088
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/prelaunch_review.json": {
+      "sha256": "141a84f372bc0244f2936be74509969ef784d06b28a5f30dbb0b2d6142c5cd0b",
+      "bytes": 1329
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/review.json": {
+      "sha256": "4098ccf4c857212faf825f15f362cc6810c09b426e34c60ffde5ceaac5a249cb",
+      "bytes": 899
+    },
+    "experiments/development/prototype_checkpoint_2026-09-30/supervisor_validation.json": {
+      "sha256": "fdc50579621f0b437669aa50810dce1c55adaeeab9a8d14e0d32194278b3a11f",
+      "bytes": 1790
+    }
+  }
+}

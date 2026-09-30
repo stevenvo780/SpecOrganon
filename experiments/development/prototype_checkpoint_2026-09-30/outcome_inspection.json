@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "decision": "D-095",
+  "classification": "posttrial_read_only_description_not_repaired_checkpoint",
+  "events": [
+    {
+      "event": "thread.started"
+    },
+    {
+      "event": "item.completed",
+      "item_type": "error",
+      "message": "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+    },
+    {
+      "event": "turn.started"
+    },
+    {
+      "event": "item.completed",
+      "item_type": "agent_message"
+    },
+    {
+      "event": "turn.completed"
+    }
+  ],
+  "proposal": {
+    "structurally_valid_pending_proposal": true,
+    "nodes": 15,
+    "normative_nodes": [
+      "n1",
+      "n2"
+    ],
+    "all_pending": true
+  },
+  "usage": {
+    "origin": "local_cli_jsonl_not_authenticated_provider_receipt",
+    "observed_model": null,
+    "final_status": null,
+    "denied_action_count": null,
+    "event_count": 5,
+    "observed_completed_tool_steps": null,
+    "observed_unfinished_tool_steps": null,
+    "observed_failed_agy_steps": null,
+    "observed_failed_codex_items_partial": 0,
+    "final_usage": {
+      "input_tokens": 17576,
+      "cached_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 956,
+      "reasoning_output_tokens": 0
+    },
+    "preterminal_step_usage": null,
+    "terminal_success": true,
+    "terminal_errors": [],
+    "complete": true,
+    "errors": []
+  },
+  "actual_supervisor_result": "failed",
+  "prototype_initialized": false,
+  "tool_items_observed": 0,
+  "error_items_observed": 1,
+  "failed_rule": "frozen item allowlist rejects error/unknown item",
+  "posttrial_evaluation_does_not_override_supervisor": true,
+  "replacement_attempts": 0,
+  "quality_comparison": "not_assessed",
+  "counts_toward_required_24_runs": false,
+  "global_run_limits_enforced": false
+}
