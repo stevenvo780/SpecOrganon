@@ -1,0 +1,372 @@
+.................F................FFFFF.                                 [100%]
+=================================== FAILURES ===================================
+____________ test_cli_retirement_records_one_event_and_no_approval _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1431/test_cli_retirement_records_on0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f673b208790>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f673b208cd0>
+
+    def test_cli_retirement_records_one_event_and_no_approval(tmp_path, monkeypatch, capsys):
+        case, arguments = _case(tmp_path, monkeypatch)
+        before = read_project(case)["events"]
+>       assert cli.main(_argv(arguments)) == 0
+E       assert 1 == 0
+E        +  where 1 = <function main at 0x7f673b68d940>(['retire-indicator', '/tmp/pytest-of-dev/pytest-1431/test_cli_retirement_records_on0/case', 'old', '--replacements', '{"new": 1}', '--expected-version', ...])
+E        +    where <function main at 0x7f673b68d940> = cli.main
+E        +    and   ['retire-indicator', '/tmp/pytest-of-dev/pytest-1431/test_cli_retirement_records_on0/case', 'old', '--replacements', '{"new": 1}', '--expected-version', ...] = _argv({'path': '/tmp/pytest-of-dev/pytest-1431/test_cli_retirement_records_on0/case', 'id': 'old', 'replacements': {'new': 1}, 'reason': 'Synthetic technical replacement', ...})
+
+tests/test_retirement_interfaces.py:148: AssertionError
+----------------------------- Captured stderr call -----------------------------
+organon: indicator retirement is blocked: replacement new lacks current typed numeric evidence on its normative protocol path; replacement new or its ancestors are not current and sound; source indicator ancestors are not current and sound
+_____________ test_mcp_direct_transport_records_actual_retirement ______________
+
+operation = 'retire_indicator'
+kwargs = {'path': '/proc/self/fd/14', 'id': 'old', 'replacements': {'new': 1}, 'reason': 'Synthetic technical replacement', ...}
+
+    def _invoke(operation: str, **kwargs: Any) -> dict[str, Any]:
+        try:
+            if operation == "init":
+                _validate_init(kwargs)
+            with _case_path(kwargs["path"], create=operation == "init") as pinned_path:
+                kwargs["path"] = pinned_path
+>               return invoke(operation, **kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+src/specorganon/server.py:427: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/cli.py:44: in invoke
+    return getattr(engine, ENGINE_OPERATIONS[operation])(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = '/proc/self/fd/14', id = 'old', replacements = {'new': 1}
+reason = 'Synthetic technical replacement', actor = 'agent:executor'
+expected_version = 1, expected_review_seq = 11
+
+    def retire_indicator(path: str | Path, id: str, replacements: dict[str, int], reason: str, actor: str,
+                         expected_version: int, expected_review_seq: int) -> dict[str, Any]:
+        """Retire one rejected indicator version without deleting it or approving norms.
+    
+        Replacement versions and the negative review are mandatory concurrency
+        guards. Lifecycle validity is re-evaluated on every read; consumers are never
+        rewritten, and the original rejection remains visible in item issues.
+        """
+        if type(reason) is not str or type(actor) is not str:
+            raise MethodError("indicator retirement needs an explicit reason and actor")
+        payload = {"id": id, "version": expected_version, "replacements": replacements,
+                   "review_seq": expected_review_seq, "reason": reason.strip()}
+        _validate_indicator_retirement(payload, actor)
+        state = _project(path)
+        flags = _flags(state)
+        issues = _indicator_retirement_issues(state, payload, flags)
+        if issues:
+>           raise MethodError("indicator retirement is blocked: " + "; ".join(issues))
+E           specorganon.engine.MethodError: indicator retirement is blocked: replacement new lacks current typed numeric evidence on its normative protocol path; replacement new or its ancestors are not current and sound; source indicator ancestors are not current and sound
+
+src/specorganon/engine.py:1641: MethodError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1431/test_mcp_direct_transport_reco0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f67391a4b50>
+
+    def test_mcp_direct_transport_records_actual_retirement(tmp_path, monkeypatch):
+        server = _server()
+        case, arguments = _case(tmp_path, monkeypatch)
+        monkeypatch.setenv("ORGANON_ROOT", str(tmp_path))
+        before = read_project(case)["events"]
+>       event = server.retire_indicator(**arguments)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_retirement_interfaces.py:197: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/server.py:506: in retire_indicator
+    return _invoke(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+operation = 'retire_indicator'
+kwargs = {'path': '/proc/self/fd/14', 'id': 'old', 'replacements': {'new': 1}, 'reason': 'Synthetic technical replacement', ...}
+
+    def _invoke(operation: str, **kwargs: Any) -> dict[str, Any]:
+        try:
+            if operation == "init":
+                _validate_init(kwargs)
+            with _case_path(kwargs["path"], create=operation == "init") as pinned_path:
+                kwargs["path"] = pinned_path
+                return invoke(operation, **kwargs)
+        except (ValueError, OSError, TypeError, RuntimeError) as exc:
+>           raise ToolError(str(exc)) from exc
+E           mcp.server.mcpserver.exceptions.ToolError: indicator retirement is blocked: replacement new lacks current typed numeric evidence on its normative protocol path; replacement new or its ancestors are not current and sound; source indicator ancestors are not current and sound
+
+src/specorganon/server.py:429: ToolError
+_______________ test_real_mcp_discovery_raw_failures_and_success _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1431/test_real_mcp_discovery_raw_fa0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6738fd9b10>
+
+    def test_real_mcp_discovery_raw_failures_and_success(tmp_path, monkeypatch):
+        _server()
+        case, arguments = _case(tmp_path, monkeypatch)
+        original = (case / "organon.json").read_bytes()
+    
+        async def exercise():
+            process = await asyncio.create_subprocess_exec(
+                sys.executable, "-m", "specorganon.server",
+                stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                env={"PATH": str(Path(sys.executable).parent) + ":/usr/bin:/bin", "LANG": "C.UTF-8",
+                     "PYTHONPATH": str(ROOT / "src"), "ORGANON_ROOT": str(tmp_path),
+                     "ORGANON_APPROVERS_FILE": str(tmp_path / "public-registry.json")},
+            )
+            assert process.stdin is not None and process.stdout is not None
+    
+            async def exchange(message):
+                raw = message if isinstance(message, str) else json.dumps(message)
+                process.stdin.write((raw + "\n").encode())
+                await process.stdin.drain()
+                line = await asyncio.wait_for(process.stdout.readline(), timeout=10)
+                assert line, "MCP process ended before response"
+                return json.loads(line)
+    
+            def request(id, args):
+                return {"jsonrpc": "2.0", "id": id, "method": "tools/call",
+                        "params": {"name": "retire_indicator", "arguments": args}}
+    
+            try:
+                initialized = await exchange({"jsonrpc": "2.0", "id": 1, "method": "initialize",
+                                              "params": {"protocolVersion": "2025-06-18", "capabilities": {},
+                                                         "clientInfo": {"name": "retirement-test", "version": "1"}}})
+                assert "result" in initialized
+                process.stdin.write(b'{"jsonrpc":"2.0","method":"notifications/initialized"}\n')
+                await process.stdin.drain()
+                listed = await exchange({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}})
+                tool = next(x for x in listed["result"]["tools"] if x["name"] == "retire_indicator")
+                schema = tool["inputSchema"]
+                assert set(arguments) <= set(schema["required"])
+                assert schema["properties"]["replacements"]["additionalProperties"]["type"] == "integer"
+                bad = copy.deepcopy(arguments)
+                bad["replacements"] = "MARKER"
+                duplicate = json.dumps(request(3, bad)).replace('"MARKER"', '{"new":1,"new":2}')
+                response = await exchange(duplicate)
+                assert response["error"]["code"] == -32700
+                assert (case / "organon.json").read_bytes() == original
+                for index, (field, value) in enumerate([
+                    ("replacements", {"new": True}), ("replacements", {"new": "1"}),
+                    ("expected_version", True), ("expected_review_seq", "1"),
+                ], 4):
+                    bad = copy.deepcopy(arguments)
+                    bad[field] = value
+                    response = await exchange(request(index, bad))
+                    assert response["error"]["code"] == -32602
+                    assert (case / "organon.json").read_bytes() == original
+                response = await exchange(request(8, arguments))
+                result = response["result"]
+                assert not result.get("isError", False), result
+                event = result.get("structuredContent") or json.loads(result["content"][0]["text"])
+                assert event == read_project(case)["events"][-1]
+                assert event["kind"] == "indicator_retire"
+                assert engine.get_state(case)["items"]["old"]["retired"] is True
+            finally:
+                process.stdin.close()
+                try:
+                    await asyncio.wait_for(process.wait(), timeout=10)
+                except asyncio.TimeoutError:
+                    process.terminate()
+                    await process.wait()
+    
+>       asyncio.run(exercise())
+
+tests/test_retirement_interfaces.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:190: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:654: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def exercise():
+        process = await asyncio.create_subprocess_exec(
+            sys.executable, "-m", "specorganon.server",
+            stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            env={"PATH": str(Path(sys.executable).parent) + ":/usr/bin:/bin", "LANG": "C.UTF-8",
+                 "PYTHONPATH": str(ROOT / "src"), "ORGANON_ROOT": str(tmp_path),
+                 "ORGANON_APPROVERS_FILE": str(tmp_path / "public-registry.json")},
+        )
+        assert process.stdin is not None and process.stdout is not None
+    
+        async def exchange(message):
+            raw = message if isinstance(message, str) else json.dumps(message)
+            process.stdin.write((raw + "\n").encode())
+            await process.stdin.drain()
+            line = await asyncio.wait_for(process.stdout.readline(), timeout=10)
+            assert line, "MCP process ended before response"
+            return json.loads(line)
+    
+        def request(id, args):
+            return {"jsonrpc": "2.0", "id": id, "method": "tools/call",
+                    "params": {"name": "retire_indicator", "arguments": args}}
+    
+        try:
+            initialized = await exchange({"jsonrpc": "2.0", "id": 1, "method": "initialize",
+                                          "params": {"protocolVersion": "2025-06-18", "capabilities": {},
+                                                     "clientInfo": {"name": "retirement-test", "version": "1"}}})
+            assert "result" in initialized
+            process.stdin.write(b'{"jsonrpc":"2.0","method":"notifications/initialized"}\n')
+            await process.stdin.drain()
+            listed = await exchange({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}})
+            tool = next(x for x in listed["result"]["tools"] if x["name"] == "retire_indicator")
+            schema = tool["inputSchema"]
+            assert set(arguments) <= set(schema["required"])
+            assert schema["properties"]["replacements"]["additionalProperties"]["type"] == "integer"
+            bad = copy.deepcopy(arguments)
+            bad["replacements"] = "MARKER"
+            duplicate = json.dumps(request(3, bad)).replace('"MARKER"', '{"new":1,"new":2}')
+            response = await exchange(duplicate)
+            assert response["error"]["code"] == -32700
+            assert (case / "organon.json").read_bytes() == original
+            for index, (field, value) in enumerate([
+                ("replacements", {"new": True}), ("replacements", {"new": "1"}),
+                ("expected_version", True), ("expected_review_seq", "1"),
+            ], 4):
+                bad = copy.deepcopy(arguments)
+                bad[field] = value
+                response = await exchange(request(index, bad))
+                assert response["error"]["code"] == -32602
+                assert (case / "organon.json").read_bytes() == original
+            response = await exchange(request(8, arguments))
+            result = response["result"]
+>           assert not result.get("isError", False), result
+E           AssertionError: {'content': [{'text': 'Error executing tool retire_indicator: indicator retirement is blocked: replacement new lacks c...rs are not current and sound; source indicator ancestors are not current and sound', 'type': 'text'}], 'isError': True}
+E           assert not True
+E            +  where True = <built-in method get of dict object at 0x7f67391564c0>('isError', False)
+E            +    where <built-in method get of dict object at 0x7f67391564c0> = {'content': [{'text': 'Error executing tool retire_indicator: indicator retirement is blocked: replacement new lacks c...rs are not current and sound; source indicator ancestors are not current and sound', 'type': 'text'}], 'isError': True}.get
+
+tests/test_retirement_interfaces.py:263: AssertionError
+________ test_runner_ignores_only_effective_retired_troubled_indicator _________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1431/test_runner_ignores_only_effec0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f67392f5350>
+
+    def test_runner_ignores_only_effective_retired_troubled_indicator(tmp_path, monkeypatch):
+        case, arguments = _case(tmp_path, monkeypatch)
+>       engine.retire_indicator(**arguments)
+
+tests/test_retirement_interfaces.py:291: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = '/tmp/pytest-of-dev/pytest-1431/test_runner_ignores_only_effec0/case'
+id = 'old', replacements = {'new': 1}
+reason = 'Synthetic technical replacement', actor = 'agent:executor'
+expected_version = 1, expected_review_seq = 11
+
+    def retire_indicator(path: str | Path, id: str, replacements: dict[str, int], reason: str, actor: str,
+                         expected_version: int, expected_review_seq: int) -> dict[str, Any]:
+        """Retire one rejected indicator version without deleting it or approving norms.
+    
+        Replacement versions and the negative review are mandatory concurrency
+        guards. Lifecycle validity is re-evaluated on every read; consumers are never
+        rewritten, and the original rejection remains visible in item issues.
+        """
+        if type(reason) is not str or type(actor) is not str:
+            raise MethodError("indicator retirement needs an explicit reason and actor")
+        payload = {"id": id, "version": expected_version, "replacements": replacements,
+                   "review_seq": expected_review_seq, "reason": reason.strip()}
+        _validate_indicator_retirement(payload, actor)
+        state = _project(path)
+        flags = _flags(state)
+        issues = _indicator_retirement_issues(state, payload, flags)
+        if issues:
+>           raise MethodError("indicator retirement is blocked: " + "; ".join(issues))
+E           specorganon.engine.MethodError: indicator retirement is blocked: replacement new lacks current typed numeric evidence on its normative protocol path; replacement new or its ancestors are not current and sound; source indicator ancestors are not current and sound
+
+src/specorganon/engine.py:1641: MethodError
+_______________ test_runner_minima_count_only_active_indicators ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1431/test_runner_minima_count_only_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f673919c450>
+
+    def test_runner_minima_count_only_active_indicators(tmp_path, monkeypatch):
+        case, arguments = _case(tmp_path, monkeypatch)
+>       engine.retire_indicator(**arguments)
+
+tests/test_retirement_interfaces.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = '/tmp/pytest-of-dev/pytest-1431/test_runner_minima_count_only_0/case'
+id = 'old', replacements = {'new': 1}
+reason = 'Synthetic technical replacement', actor = 'agent:executor'
+expected_version = 1, expected_review_seq = 11
+
+    def retire_indicator(path: str | Path, id: str, replacements: dict[str, int], reason: str, actor: str,
+                         expected_version: int, expected_review_seq: int) -> dict[str, Any]:
+        """Retire one rejected indicator version without deleting it or approving norms.
+    
+        Replacement versions and the negative review are mandatory concurrency
+        guards. Lifecycle validity is re-evaluated on every read; consumers are never
+        rewritten, and the original rejection remains visible in item issues.
+        """
+        if type(reason) is not str or type(actor) is not str:
+            raise MethodError("indicator retirement needs an explicit reason and actor")
+        payload = {"id": id, "version": expected_version, "replacements": replacements,
+                   "review_seq": expected_review_seq, "reason": reason.strip()}
+        _validate_indicator_retirement(payload, actor)
+        state = _project(path)
+        flags = _flags(state)
+        issues = _indicator_retirement_issues(state, payload, flags)
+        if issues:
+>           raise MethodError("indicator retirement is blocked: " + "; ".join(issues))
+E           specorganon.engine.MethodError: indicator retirement is blocked: replacement new lacks current typed numeric evidence on its normative protocol path; replacement new or its ancestors are not current and sound; source indicator ancestors are not current and sound
+
+src/specorganon/engine.py:1641: MethodError
+____________ test_runner_prior_context_excludes_retired_indicators _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1431/test_runner_prior_context_excl0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6739193390>
+
+    def test_runner_prior_context_excludes_retired_indicators(tmp_path, monkeypatch):
+        case, arguments = _case(tmp_path, monkeypatch)
+>       engine.retire_indicator(**arguments)
+
+tests/test_retirement_interfaces.py:325: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = '/tmp/pytest-of-dev/pytest-1431/test_runner_prior_context_excl0/case'
+id = 'old', replacements = {'new': 1}
+reason = 'Synthetic technical replacement', actor = 'agent:executor'
+expected_version = 1, expected_review_seq = 11
+
+    def retire_indicator(path: str | Path, id: str, replacements: dict[str, int], reason: str, actor: str,
+                         expected_version: int, expected_review_seq: int) -> dict[str, Any]:
+        """Retire one rejected indicator version without deleting it or approving norms.
+    
+        Replacement versions and the negative review are mandatory concurrency
+        guards. Lifecycle validity is re-evaluated on every read; consumers are never
+        rewritten, and the original rejection remains visible in item issues.
+        """
+        if type(reason) is not str or type(actor) is not str:
+            raise MethodError("indicator retirement needs an explicit reason and actor")
+        payload = {"id": id, "version": expected_version, "replacements": replacements,
+                   "review_seq": expected_review_seq, "reason": reason.strip()}
+        _validate_indicator_retirement(payload, actor)
+        state = _project(path)
+        flags = _flags(state)
+        issues = _indicator_retirement_issues(state, payload, flags)
+        if issues:
+>           raise MethodError("indicator retirement is blocked: " + "; ".join(issues))
+E           specorganon.engine.MethodError: indicator retirement is blocked: replacement new lacks current typed numeric evidence on its normative protocol path; replacement new or its ancestors are not current and sound; source indicator ancestors are not current and sound
+
+src/specorganon/engine.py:1641: MethodError
+=========================== short test summary info ============================
+FAILED tests/test_retirement_interfaces.py::test_cli_retirement_records_one_event_and_no_approval
+FAILED tests/test_retirement_interfaces.py::test_mcp_direct_transport_records_actual_retirement
+FAILED tests/test_retirement_interfaces.py::test_real_mcp_discovery_raw_failures_and_success
+FAILED tests/test_retirement_interfaces.py::test_runner_ignores_only_effective_retired_troubled_indicator
+FAILED tests/test_retirement_interfaces.py::test_runner_minima_count_only_active_indicators
+FAILED tests/test_retirement_interfaces.py::test_runner_prior_context_excludes_retired_indicators
+6 failed, 34 passed in 1.99s

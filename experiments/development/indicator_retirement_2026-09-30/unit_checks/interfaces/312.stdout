@@ -1,0 +1,315 @@
+.................FFFFFFsssssssssssssFFFF                                 [100%]
+=================================== FAILURES ===================================
+____________ test_cli_retirement_records_one_event_and_no_approval _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_retirement_records_on0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f000be428a0>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f000be40650>
+
+    def test_cli_retirement_records_one_event_and_no_approval(tmp_path, monkeypatch, capsys):
+>       case, arguments = _case(tmp_path, monkeypatch)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_retirement_interfaces.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_retirement_interfaces.py:80: in _case
+    engine.put_item(case, id, kind, f"Synthetic {kind}: {id}", refs, data, "agent:author")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_retirement_records_on0/case')
+id = 'p', kind = 'problem', text = 'Synthetic problem: p', refs = [], data = {}
+actor = 'agent:author'
+
+    def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+                 expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
+        if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+>           raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+E           specorganon.engine.MethodError: item id must start with a letter and contain 2–64 letters, digits, _ or -
+
+src/specorganon/engine.py:1549: MethodError
+__ test_cli_leaves_semantic_positive_validation_to_engine[expected_version-0] __
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_leaves_semantic_posit0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f000bf550a0>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f000bf54d70>
+field = 'expected_version', value = 0
+
+    @pytest.mark.parametrize("field,value", [
+        ("expected_version", 0), ("expected_review_seq", 0), ("replacements", {}),
+        ("replacements", {"new": 0}), ("replacements", {"new": -1}),
+    ])
+    def test_cli_leaves_semantic_positive_validation_to_engine(
+        tmp_path, monkeypatch, capsys, field, value,
+    ):
+>       case, arguments = _case(tmp_path, monkeypatch)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_retirement_interfaces.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_retirement_interfaces.py:80: in _case
+    engine.put_item(case, id, kind, f"Synthetic {kind}: {id}", refs, data, "agent:author")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_leaves_semantic_posit0/case')
+id = 'p', kind = 'problem', text = 'Synthetic problem: p', refs = [], data = {}
+actor = 'agent:author'
+
+    def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+                 expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
+        if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+>           raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+E           specorganon.engine.MethodError: item id must start with a letter and contain 2–64 letters, digits, _ or -
+
+src/specorganon/engine.py:1549: MethodError
+_ test_cli_leaves_semantic_positive_validation_to_engine[expected_review_seq-0] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_leaves_semantic_posit1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f000bfa2f60>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f000bfa0d70>
+field = 'expected_review_seq', value = 0
+
+    @pytest.mark.parametrize("field,value", [
+        ("expected_version", 0), ("expected_review_seq", 0), ("replacements", {}),
+        ("replacements", {"new": 0}), ("replacements", {"new": -1}),
+    ])
+    def test_cli_leaves_semantic_positive_validation_to_engine(
+        tmp_path, monkeypatch, capsys, field, value,
+    ):
+>       case, arguments = _case(tmp_path, monkeypatch)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_retirement_interfaces.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_retirement_interfaces.py:80: in _case
+    engine.put_item(case, id, kind, f"Synthetic {kind}: {id}", refs, data, "agent:author")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_leaves_semantic_posit1/case')
+id = 'p', kind = 'problem', text = 'Synthetic problem: p', refs = [], data = {}
+actor = 'agent:author'
+
+    def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+                 expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
+        if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+>           raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+E           specorganon.engine.MethodError: item id must start with a letter and contain 2–64 letters, digits, _ or -
+
+src/specorganon/engine.py:1549: MethodError
+_ test_cli_leaves_semantic_positive_validation_to_engine[replacements-value2] __
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_leaves_semantic_posit2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f000bfa0560>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f000bfa1070>
+field = 'replacements', value = {}
+
+    @pytest.mark.parametrize("field,value", [
+        ("expected_version", 0), ("expected_review_seq", 0), ("replacements", {}),
+        ("replacements", {"new": 0}), ("replacements", {"new": -1}),
+    ])
+    def test_cli_leaves_semantic_positive_validation_to_engine(
+        tmp_path, monkeypatch, capsys, field, value,
+    ):
+>       case, arguments = _case(tmp_path, monkeypatch)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_retirement_interfaces.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_retirement_interfaces.py:80: in _case
+    engine.put_item(case, id, kind, f"Synthetic {kind}: {id}", refs, data, "agent:author")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_leaves_semantic_posit2/case')
+id = 'p', kind = 'problem', text = 'Synthetic problem: p', refs = [], data = {}
+actor = 'agent:author'
+
+    def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+                 expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
+        if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+>           raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+E           specorganon.engine.MethodError: item id must start with a letter and contain 2–64 letters, digits, _ or -
+
+src/specorganon/engine.py:1549: MethodError
+_ test_cli_leaves_semantic_positive_validation_to_engine[replacements-value3] __
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_leaves_semantic_posit3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f000be388c0>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f000be38dd0>
+field = 'replacements', value = {'new': 0}
+
+    @pytest.mark.parametrize("field,value", [
+        ("expected_version", 0), ("expected_review_seq", 0), ("replacements", {}),
+        ("replacements", {"new": 0}), ("replacements", {"new": -1}),
+    ])
+    def test_cli_leaves_semantic_positive_validation_to_engine(
+        tmp_path, monkeypatch, capsys, field, value,
+    ):
+>       case, arguments = _case(tmp_path, monkeypatch)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_retirement_interfaces.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_retirement_interfaces.py:80: in _case
+    engine.put_item(case, id, kind, f"Synthetic {kind}: {id}", refs, data, "agent:author")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_leaves_semantic_posit3/case')
+id = 'p', kind = 'problem', text = 'Synthetic problem: p', refs = [], data = {}
+actor = 'agent:author'
+
+    def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+                 expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
+        if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+>           raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+E           specorganon.engine.MethodError: item id must start with a letter and contain 2–64 letters, digits, _ or -
+
+src/specorganon/engine.py:1549: MethodError
+_ test_cli_leaves_semantic_positive_validation_to_engine[replacements-value4] __
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_leaves_semantic_posit4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f000c0c08c0>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f000c0c0f50>
+field = 'replacements', value = {'new': -1}
+
+    @pytest.mark.parametrize("field,value", [
+        ("expected_version", 0), ("expected_review_seq", 0), ("replacements", {}),
+        ("replacements", {"new": 0}), ("replacements", {"new": -1}),
+    ])
+    def test_cli_leaves_semantic_positive_validation_to_engine(
+        tmp_path, monkeypatch, capsys, field, value,
+    ):
+>       case, arguments = _case(tmp_path, monkeypatch)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_retirement_interfaces.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_retirement_interfaces.py:80: in _case
+    engine.put_item(case, id, kind, f"Synthetic {kind}: {id}", refs, data, "agent:author")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_cli_leaves_semantic_posit4/case')
+id = 'p', kind = 'problem', text = 'Synthetic problem: p', refs = [], data = {}
+actor = 'agent:author'
+
+    def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+                 expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
+        if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+>           raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+E           specorganon.engine.MethodError: item id must start with a letter and contain 2–64 letters, digits, _ or -
+
+src/specorganon/engine.py:1549: MethodError
+________ test_runner_ignores_only_effective_retired_troubled_indicator _________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_runner_ignores_only_effec0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f000be3a000>
+
+    def test_runner_ignores_only_effective_retired_troubled_indicator(tmp_path, monkeypatch):
+>       case, arguments = _case(tmp_path, monkeypatch)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_retirement_interfaces.py:290: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_retirement_interfaces.py:80: in _case
+    engine.put_item(case, id, kind, f"Synthetic {kind}: {id}", refs, data, "agent:author")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_runner_ignores_only_effec0/case')
+id = 'p', kind = 'problem', text = 'Synthetic problem: p', refs = [], data = {}
+actor = 'agent:author'
+
+    def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+                 expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
+        if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+>           raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+E           specorganon.engine.MethodError: item id must start with a letter and contain 2–64 letters, digits, _ or -
+
+src/specorganon/engine.py:1549: MethodError
+_______________ test_runner_minima_count_only_active_indicators ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_runner_minima_count_only_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f000be38f50>
+
+    def test_runner_minima_count_only_active_indicators(tmp_path, monkeypatch):
+>       case, arguments = _case(tmp_path, monkeypatch)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_retirement_interfaces.py:308: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_retirement_interfaces.py:80: in _case
+    engine.put_item(case, id, kind, f"Synthetic {kind}: {id}", refs, data, "agent:author")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_runner_minima_count_only_0/case')
+id = 'p', kind = 'problem', text = 'Synthetic problem: p', refs = [], data = {}
+actor = 'agent:author'
+
+    def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+                 expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
+        if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+>           raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+E           specorganon.engine.MethodError: item id must start with a letter and contain 2–64 letters, digits, _ or -
+
+src/specorganon/engine.py:1549: MethodError
+____________ test_runner_prior_context_excludes_retired_indicators _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_runner_prior_context_excl0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f000be39dc0>
+
+    def test_runner_prior_context_excludes_retired_indicators(tmp_path, monkeypatch):
+>       case, arguments = _case(tmp_path, monkeypatch)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_retirement_interfaces.py:324: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_retirement_interfaces.py:80: in _case
+    engine.put_item(case, id, kind, f"Synthetic {kind}: {id}", refs, data, "agent:author")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_runner_prior_context_excl0/case')
+id = 'p', kind = 'problem', text = 'Synthetic problem: p', refs = [], data = {}
+actor = 'agent:author'
+
+    def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+                 expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
+        if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+>           raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+E           specorganon.engine.MethodError: item id must start with a letter and contain 2–64 letters, digits, _ or -
+
+src/specorganon/engine.py:1549: MethodError
+_______________ test_manifest_cannot_hide_retirement_in_a_batch ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_manifest_cannot_hide_reti0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f000be39130>
+
+    def test_manifest_cannot_hide_retirement_in_a_batch(tmp_path, monkeypatch):
+>       case, arguments = _case(tmp_path, monkeypatch)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_retirement_interfaces.py:334: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_retirement_interfaces.py:80: in _case
+    engine.put_item(case, id, kind, f"Synthetic {kind}: {id}", refs, data, "agent:author")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-dev/pytest-1429/test_manifest_cannot_hide_reti0/case')
+id = 'p', kind = 'problem', text = 'Synthetic problem: p', refs = [], data = {}
+actor = 'agent:author'
+
+    def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+                 expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
+        if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+>           raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+E           specorganon.engine.MethodError: item id must start with a letter and contain 2–64 letters, digits, _ or -
+
+src/specorganon/engine.py:1549: MethodError
+=========================== short test summary info ============================
+FAILED tests/test_retirement_interfaces.py::test_cli_retirement_records_one_event_and_no_approval
+FAILED tests/test_retirement_interfaces.py::test_cli_leaves_semantic_positive_validation_to_engine[expected_version-0]
+FAILED tests/test_retirement_interfaces.py::test_cli_leaves_semantic_positive_validation_to_engine[expected_review_seq-0]
+FAILED tests/test_retirement_interfaces.py::test_cli_leaves_semantic_positive_validation_to_engine[replacements-value2]
+FAILED tests/test_retirement_interfaces.py::test_cli_leaves_semantic_positive_validation_to_engine[replacements-value3]
+FAILED tests/test_retirement_interfaces.py::test_cli_leaves_semantic_positive_validation_to_engine[replacements-value4]
+FAILED tests/test_retirement_interfaces.py::test_runner_ignores_only_effective_retired_troubled_indicator
+FAILED tests/test_retirement_interfaces.py::test_runner_minima_count_only_active_indicators
+FAILED tests/test_retirement_interfaces.py::test_runner_prior_context_excludes_retired_indicators
+FAILED tests/test_retirement_interfaces.py::test_manifest_cannot_hide_retirement_in_a_batch
+10 failed, 17 passed, 13 skipped in 0.69s

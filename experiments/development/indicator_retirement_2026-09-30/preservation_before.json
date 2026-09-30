@@ -1,0 +1,668 @@
+{
+  "D105_D106_originals_unchanged": 97,
+  "GOAL_unchanged": true,
+  "base_commit": "167e4bf2d630e9f4195a1af1623e3b063db909ef",
+  "classification": "D107 preservation before installed probes and documentation update",
+  "deliberate_source_edits": [
+    "src/specorganon/cli.py",
+    "src/specorganon/engine.py",
+    "src/specorganon/runner.py",
+    "src/specorganon/server.py"
+  ],
+  "files": {
+    "cases/citibike_march2024_fractions/README.md": {
+      "bytes": 3760,
+      "sha256": "0b174f31d2e000d15b069dd5dc25673086e31506a57651f7fc121feb019dac41"
+    },
+    "cases/citibike_march2024_fractions/derived_ratios.json": {
+      "bytes": 5458,
+      "sha256": "1d44741bc49c899007db2989f92f0d584af49509085a050a2dde73d47c2007f7"
+    },
+    "cases/citibike_march2024_fractions/manifest.json": {
+      "bytes": 14624,
+      "sha256": "9ba139b24af2d1a7590e3f3d43e52db0f1ae2295e71d2dcbd9826d4250df4e17"
+    },
+    "cases/citibike_march2024_fractions/organon.json": {
+      "bytes": 60920,
+      "sha256": "4125263eededf05e67af31c1fa961ea36527883e2b8519a4feed4cbf6a692856"
+    },
+    "cases/citibike_march2024_fractions/published_report.json": {
+      "bytes": 1599,
+      "sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1"
+    },
+    "cases/citibike_march2024_fractions/ratio_claim_rental.json": {
+      "bytes": 408,
+      "sha256": "48813b54b7ce4d393b0a803f38f0caf1cc66a8717fbddc34f1157e31e949b666"
+    },
+    "cases/citibike_march2024_fractions/ratio_claim_return.json": {
+      "bytes": 408,
+      "sha256": "013c4bd67e9168efb301148590acfa6f9a9466655ceac0f851d6d6c1fb325f30"
+    },
+    "cases/citibike_march2024_fractions/ratio_contract.json": {
+      "bytes": 3023,
+      "sha256": "44f016ce11b3e07ad0309221a5f9f285ea3d0b16c643328a5fc0f37dec705255"
+    },
+    "cases/citibike_march2024_fractions/source_analysis.py": {
+      "bytes": 6786,
+      "sha256": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949"
+    },
+    "docs/decisiones.md": {
+      "bytes": 225962,
+      "sha256": "397901d5855d498160476da8d89ca82e3990335fa27c638eb3bfb8e941fc0773"
+    },
+    "docs/estado.md": {
+      "bytes": 101654,
+      "sha256": "a0eafdc1bff9554ffedbd364bc3c9ba3ee0c5b4bac7a06b93f1110cab2b4c5e0"
+    },
+    "docs/validacion_actual.md": {
+      "bytes": 115469,
+      "sha256": "15ad438ea27d7d6275a7c950a8030667170590e7addccc5126dacbf2743007ef"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/README.md": {
+      "bytes": 4722,
+      "sha256": "8e7ced2805bb120519053e4c86b7f7a2a0245074a1b6d4a3a5fdd1be8873bb08"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/agent_work.json": {
+      "bytes": 1377,
+      "sha256": "1604f97e034c170e082d9560395a8abe9cfb7b0a856f423993fee4a9e54a415a"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/archive_311.json": {
+      "bytes": 1401,
+      "sha256": "799094a7ad525c1c52a067eadc6744bf3e974d3f2c2994b577001e4a4430e3d6"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/archive_312.json": {
+      "bytes": 1401,
+      "sha256": "cb03d8484fbf95fb3857daadcde713da22eb0a4e36b5cdada73d702af1ae1043"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/archive_executed.py": {
+      "bytes": 3395,
+      "sha256": "0a5271db3d022b98e95707d885323fa6e0f9fbcaa48e9b37463e306a26dae6fe"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/archive_repaired_311.json": {
+      "bytes": 18448,
+      "sha256": "ba99323ebb8ca98a74af54969fac57cfe377bd32ff47624e50858d8ea726984e"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/archive_repaired_312.json": {
+      "bytes": 18448,
+      "sha256": "baa65d3f6749596819064f5180741d9067c8d3119854cf2ef443e9e896568ba7"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/execute_frozen.py": {
+      "bytes": 4605,
+      "sha256": "84437a0daa39ee09fe56f1800082a6c5a556448fe48ec66bfe97e9a895f1559f"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions/311.execution.json": {
+      "bytes": 1372,
+      "sha256": "9a83ed6ca78f898eb6021edfb423137cb2c37831aaff28912946a97b9378f565"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions/311.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions/311.stdout.log": {
+      "bytes": 243,
+      "sha256": "fe9f789637b5cb6ff835d8d7be796d3811c42259e8b07d3ce54b7ba3779296dd"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions/312.execution.json": {
+      "bytes": 1374,
+      "sha256": "897ddc4d511bba66211ae066af9d40e91f34ca54e052347d99eb1982dbe94dc9"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions/312.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions/312.stdout.log": {
+      "bytes": 243,
+      "sha256": "c8eae190db58ca6fff6f542891c94d8424703d68f0348827b3b46a79bd4d6426"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions_repaired/311.execution.json": {
+      "bytes": 1440,
+      "sha256": "ab018768f937aa59da207bf9cb185baf872a4925e80b6d54fa65d9a786b11549"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions_repaired/311.stderr.log": {
+      "bytes": 1678,
+      "sha256": "cfa28c4de78239dbb546e00ad1b18bd1c66d8313f07cadc6a53efa53ae8e8087"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions_repaired/311.stdout.log": {
+      "bytes": 177,
+      "sha256": "8d2d7ec38a71474de407bc8aa8f6c84287372af092a91070e5461923aa354522"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions_repaired/312.execution.json": {
+      "bytes": 1440,
+      "sha256": "d3e54926137356bfb11e92701c726be83540969261dcdc502b5c632afdca62fe"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions_repaired/312.stderr.log": {
+      "bytes": 1678,
+      "sha256": "cfa28c4de78239dbb546e00ad1b18bd1c66d8313f07cadc6a53efa53ae8e8087"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/executions_repaired/312.stdout.log": {
+      "bytes": 177,
+      "sha256": "6a232c4e2f2d8f58c112755f5d3c3089975e95b97bcdcb5cbc4e8a326847c952"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/initial_sources/archive_executed.py": {
+      "bytes": 2988,
+      "sha256": "0335afdcb876504df5886cfefcfc3c3e6eae3df0d372c8bf2bf051c573f7a938"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/initial_sources/build_citibike_fraction_variant.py": {
+      "bytes": 27028,
+      "sha256": "b138329c429bdce2268f71159eda7bfa036a5442469ed6cfee317530008c8b57"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/initial_sources/execute_frozen.py": {
+      "bytes": 4424,
+      "sha256": "cb3c42aeafb159ac879ea86b2ac6f43647ad8ea77c8f40c780a61d25e67d931c"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/initial_sources/probe_citibike_fraction_variant.py": {
+      "bytes": 31671,
+      "sha256": "5eac2cc89066cbfd733599659b35841857da893396011954fe10727ef7cb3337"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/installed_311.json": {
+      "bytes": 13580,
+      "sha256": "43d0922394121744d80ef270bcb1615dc30f24670203146f3f1459f94d8ad860"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/installed_311.tar.gz": {
+      "bytes": 13427,
+      "sha256": "e30c1b8c49af3c8d956772a939b638f31c8ba42cc23189ce4abe04931b9af24c"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/installed_312.json": {
+      "bytes": 13576,
+      "sha256": "c4a45c7029a9aeb27209627101e11ae7eb80d729a8219bb3615a4b8246bde5e9"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/installed_312.tar.gz": {
+      "bytes": 13439,
+      "sha256": "df530aca5ae3f25b41ea9da28d790dea0ae6832606c7e9cf2706c9fac68c56cd"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/plan.json": {
+      "bytes": 7486,
+      "sha256": "867e280ccf8d142f791d6231ff023b9c702ea30457a60e5bba62c2d0bcaccbc7"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/postrun_review.json": {
+      "bytes": 1727,
+      "sha256": "3bf465a2e0324c699822970744f412f61fc39527bfb9c443465c1793edd2f7bc"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/prelaunch_review.json": {
+      "bytes": 1252,
+      "sha256": "37c6541afa862ded8c717da84692e81db857894f8280dca6e4e6e399527678ef"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/prelaunch_review_repaired.json": {
+      "bytes": 1221,
+      "sha256": "9425f97dc750f5dd894db5c22fbe8770bedda987f4a444ea024317e8b8bf22d3"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/preservation_after_documentation.json": {
+      "bytes": 1878,
+      "sha256": "84baced5c4019d7d29c63969a2b8519e340af1efdfce247bfdee69d619311645"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/preservation_before.json": {
+      "bytes": 6436,
+      "sha256": "a7c17d6b21c9856b80e70d7fa2410a5c90bda21dc9903601458297a61ed2edd8"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/preservation_capture_failure.json": {
+      "bytes": 506,
+      "sha256": "b4f7600c5a005bce26154da413ebf73db2858519faec2d78a325c5e84d96854e"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/preservation_review.json": {
+      "bytes": 1347,
+      "sha256": "4770f234f5ae8a1d0ac9477922055f862f2c9b3e34cc6248aba6dc5a26590ba7"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/publication.json": {
+      "bytes": 1976,
+      "sha256": "5a9227cbda5060702e7b164ac980552c136bbf30bb77157e8f1ba0cd67ff7665"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/raw_source_preparation.json": {
+      "bytes": 981,
+      "sha256": "8a98927ea77353390b3aeebc6f84dd5424851564995b3b5e930622a8715e2aac"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/raw_source_preparation_plan.json": {
+      "bytes": 996,
+      "sha256": "c82333a6a9050235aab94f7ce015ee72721a1fef28057cf6ded9c307af45673b"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/repair_plan.json": {
+      "bytes": 1868,
+      "sha256": "af765b17db7d9f90e9497b75aacab364139fd3eddbda4baff0069021487c1e3d"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/repaired_311.json": {
+      "bytes": 329020,
+      "sha256": "6cde10edbcb50f5f17c3a7bed38b2c3e31e31be45ecc38bcdb0d145bd30a916d"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/repaired_311.tar.gz": {
+      "bytes": 288525,
+      "sha256": "cce1d5dd8f31c69e51f03b1568fb61c96451c18c64a1f601cdba7801a932aa71"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/repaired_312.json": {
+      "bytes": 329016,
+      "sha256": "fd394d777b6433a3ded3ec255f0223dd8c3f230edb9fd5b9b9f3739a23ae575f"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/repaired_312.tar.gz": {
+      "bytes": 288498,
+      "sha256": "c112a4545cbb9d21958d2f93b53e6963cfb80cebead63077d62573ba56ea2dd9"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/source_freeze.json": {
+      "bytes": 9199,
+      "sha256": "58361d83189882f2a017ad25f4f28d19bba7f526f350320e5e78d5f7a0fd6a39"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/source_freeze_amendment.json": {
+      "bytes": 13629,
+      "sha256": "dc9a3eece51521d4df5e008a01bd64b5f9faef9d4261ea622cfcffb56de361a7"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/source_review_stage1.json": {
+      "bytes": 1785,
+      "sha256": "380e57758c5c434b6e563e74c9385e4b19d801b0b3dbd9a5964a4cf00a06f83b"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/static_validation.json": {
+      "bytes": 2014,
+      "sha256": "5a090fca2be0e9bac8801fe876800f060be1395ead3ad4fff5cf39bac06ecedf"
+    },
+    "experiments/development/citibike_fraction_lineage_2026-09-30/static_validation_repaired.json": {
+      "bytes": 2285,
+      "sha256": "a431a37dc85c87d58643ae26fa7545ed9d431f10637f57ea935612b398a19484"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/README.md": {
+      "bytes": 2948,
+      "sha256": "c1e0657b4394be24105f12480c4f1cec34e0578b9dcabfd1c35e22086d8cb986"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/analysis.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/analysis.stdout.log": {
+      "bytes": 1599,
+      "sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/analysis_source.executed.py": {
+      "bytes": 6786,
+      "sha256": "e384b43d24bf2b928c1772c7781e38c8abbbface8f92bfb98dc5ad804b3bf949"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/environment_manifest.json": {
+      "bytes": 255941,
+      "sha256": "6d61af243ecd799761dfff92d65dcf5fc6ae342149f85bccf32f976ca367163d"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/environment_setup.json": {
+      "bytes": 16475,
+      "sha256": "1e02ccb943e71e6a543e33a96a524202e209aed7d7a8903b99639cc43b318824"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/execution.json": {
+      "bytes": 2776,
+      "sha256": "8a11ffe7fd4c6bdcd0a56b5d34e5244cca4507c42a121e6e0d927fc2b1eed43b"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/plan.json": {
+      "bytes": 3564,
+      "sha256": "e41d48b07a5c977b09e7f78de7cab8f58542f6d60a1072a6bc15cdec58186ee5"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/postrun_review.json": {
+      "bytes": 1726,
+      "sha256": "5f62982df70462aa5f66eabbd9d76b16b0267d596dfda7c2625840a0e6d1962b"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/prelaunch_review.json": {
+      "bytes": 903,
+      "sha256": "de621e0e9764503f8b711c6ee5d655fee6a0dc5b5d51c2b48c73f71898ed6079"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/report.json": {
+      "bytes": 1599,
+      "sha256": "352ef988b91813912d15c465ba1e597c76eedc1461c33b29afc928c9f88c7ee1"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/run_raw_counts.py": {
+      "bytes": 10113,
+      "sha256": "f2590a48925c36571609429783013da3df57bfec77666398d6808aea12f5883d"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/run_raw_counts.reviewed_initial.py": {
+      "bytes": 8697,
+      "sha256": "c719c9b1cc73b7b3113268840a909b3d0ad2edc0f15f397e71f698b6f70ccd50"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/01_uv_version.command.json": {
+      "bytes": 877,
+      "sha256": "76a9b5c2a0eddc14f119f8bf3ba9c118681e05f31c63c3aa29597c5874dbcf38"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/01_uv_version.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/01_uv_version.stdout": {
+      "bytes": 38,
+      "sha256": "a98b5a35b6ee949111fbbb44c7ebf9a4bdb3c5c726b329a67b3a8c4b64714746"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/02_venv.command.json": {
+      "bytes": 1076,
+      "sha256": "3fb1b9fa5247ff6047e43d29a537a8d7025ef7b615d00cf22dabeb5884c50479"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/02_venv.stderr": {
+      "bytes": 116,
+      "sha256": "bebc3c0df082496d62191990083fc911260c19144792ed79ec71a0485383a2bb"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/02_venv.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/03_install.command.json": {
+      "bytes": 1198,
+      "sha256": "9f44cb1cae9f8b58b5cafada6b5a07d3527350d56dca84ee5b2696525d40e59f"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/03_install.stderr": {
+      "bytes": 135,
+      "sha256": "06c43d5709f825696452a93ba26fbf6dadfef843c1f3a27373243f82aee8d7f8"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/03_install.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/04_manifest_before_check.command.json": {
+      "bytes": 4552,
+      "sha256": "a0fa888ed1c06b81de5715d6359bc2bac350010adcf050f71713f0983493cac9"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/04_manifest_before_check.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/04_manifest_before_check.stdout": {
+      "bytes": 224931,
+      "sha256": "df9670e8f6f41180890df59bc1f2020495322130dc04e8b96835390d4b7c7075"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/05_pip_check.command.json": {
+      "bytes": 1067,
+      "sha256": "e33508f0276edfaa7adc848aabf69c03eb2d9d9c66dec6174e63ce129e9f6a4e"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/05_pip_check.stderr": {
+      "bytes": 109,
+      "sha256": "9a3431081ef2acdc4d0c8c547e26f3f651b546f2bf5e2d762f883d3dd69ae6ea"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/05_pip_check.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/06_manifest_after_check.command.json": {
+      "bytes": 4550,
+      "sha256": "c3c439e7cd77f7b5bd22bd886dfc95d7cd935ee06876d004037ec52794355c97"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/06_manifest_after_check.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/06_manifest_after_check.stdout": {
+      "bytes": 224931,
+      "sha256": "df9670e8f6f41180890df59bc1f2020495322130dc04e8b96835390d4b7c7075"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/setup/prepare_environment.py": {
+      "bytes": 9880,
+      "sha256": "5edec5055cb71c4b79410bd82befad5e4421fa6120b34be04f0d8b78f591a42d"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/source_freeze.json": {
+      "bytes": 7036,
+      "sha256": "60972f4e2acbf00bdbcbd329eab0652d11c7fe3b57f390839be3da4ebd615120"
+    },
+    "experiments/development/citibike_raw_count_audit_2026-09-30/source_review_initial.json": {
+      "bytes": 880,
+      "sha256": "33ab84d08e8b6de3c5f9e09a05fd18fbac11d0126c7e7c6a0cd620d2a7679467"
+    },
+    "scripts/build_citibike_fraction_variant.py": {
+      "bytes": 27660,
+      "sha256": "d54b329dce6a6b0d53736ee8e00edfbce85949d4f6daa325d4817c7a002eee03"
+    },
+    "scripts/probe_citibike_fraction_variant.py": {
+      "bytes": 31671,
+      "sha256": "a86896d0b4669ee82b7f349bfacc37e47f610eabf8fa22ca2e000d9671525d5b"
+    }
+  },
+  "production_modules": {
+    "src/specorganon/__init__.py": {
+      "current": {
+        "bytes": 83,
+        "sha256": "cbfd011a2da30410ed99125aaf779fb4ad070c49834a5bbdd932a0125f269f56"
+      },
+      "historical": {
+        "bytes": 83,
+        "sha256": "cbfd011a2da30410ed99125aaf779fb4ad070c49834a5bbdd932a0125f269f56"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/anchor.py": {
+      "current": {
+        "bytes": 5406,
+        "sha256": "6e12048244f3d603b1d4f7c16d9284c78676dba207c195a69d1a8ba2a9947d1c"
+      },
+      "historical": {
+        "bytes": 5406,
+        "sha256": "6e12048244f3d603b1d4f7c16d9284c78676dba207c195a69d1a8ba2a9947d1c"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/approval.py": {
+      "current": {
+        "bytes": 10381,
+        "sha256": "25ccbf82aaf8fed4437e45de8050dd761efe6b945af3b3a59d4a453a4b37a4bf"
+      },
+      "historical": {
+        "bytes": 10381,
+        "sha256": "25ccbf82aaf8fed4437e45de8050dd761efe6b945af3b3a59d4a453a4b37a4bf"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/cli.py": {
+      "current": {
+        "bytes": 12997,
+        "sha256": "ef06bb4763d576d429a429301b0df7a13a1bcb61168bf30dda4cf28cbceb9d46"
+      },
+      "historical": {
+        "bytes": 12062,
+        "sha256": "eb1f710173018ef58b08ccec0ca56a76b895fe69108db1a135d32fbe4f877e5f"
+      },
+      "unchanged": false
+    },
+    "src/specorganon/engine.py": {
+      "current": {
+        "bytes": 114462,
+        "sha256": "679e3885d7e72bec8af8a032c5b3264acfd514c0962e13ea17b3bbbc8bd2c6cf"
+      },
+      "historical": {
+        "bytes": 105072,
+        "sha256": "52b0a5ee102c695bd903723552c8654e0197100bf6afb8208794c93fc0fefa7d"
+      },
+      "unchanged": false
+    },
+    "src/specorganon/field_adjusted_candidate.py": {
+      "current": {
+        "bytes": 24846,
+        "sha256": "88a70560fbe0907ad1e3cb3a2e25dabb7fc0c02eaa42db6f6cda3cad2178971c"
+      },
+      "historical": {
+        "bytes": 24846,
+        "sha256": "88a70560fbe0907ad1e3cb3a2e25dabb7fc0c02eaa42db6f6cda3cad2178971c"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/field_attestation.py": {
+      "current": {
+        "bytes": 16767,
+        "sha256": "62e2f75ee95bb1535c27be35cfb0cb175def146b380407de350ee5e2e20b10ba"
+      },
+      "historical": {
+        "bytes": 16767,
+        "sha256": "62e2f75ee95bb1535c27be35cfb0cb175def146b380407de350ee5e2e20b10ba"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/field_effect_analysis.py": {
+      "current": {
+        "bytes": 16005,
+        "sha256": "cf3ab0190e87702464e1482c95847a55af5f1ba46d9936bb74553fa66984ef9a"
+      },
+      "historical": {
+        "bytes": 16005,
+        "sha256": "cf3ab0190e87702464e1482c95847a55af5f1ba46d9936bb74553fa66984ef9a"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/field_flows.py": {
+      "current": {
+        "bytes": 64082,
+        "sha256": "112c3c3295224697c5b8d7c93841f411e8a6dc72c0dca1961bad6dcedd495dd7"
+      },
+      "historical": {
+        "bytes": 64082,
+        "sha256": "112c3c3295224697c5b8d7c93841f411e8a6dc72c0dca1961bad6dcedd495dd7"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/field_guardrails.py": {
+      "current": {
+        "bytes": 24760,
+        "sha256": "97f93030259db9d66ab88c858868bf481758c52a3e7dca410be044b196eab777"
+      },
+      "historical": {
+        "bytes": 24760,
+        "sha256": "97f93030259db9d66ab88c858868bf481758c52a3e7dca410be044b196eab777"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/field_power_sensitivity.py": {
+      "current": {
+        "bytes": 17014,
+        "sha256": "aa973e17ee4df24c8ba4b9a181967a92216cf9be24d7d36e08c8363beaee7e4e"
+      },
+      "historical": {
+        "bytes": 17014,
+        "sha256": "aa973e17ee4df24c8ba4b9a181967a92216cf9be24d7d36e08c8363beaee7e4e"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/field_source_content_audit.py": {
+      "current": {
+        "bytes": 38314,
+        "sha256": "1fb828ef82fbbe9c63efca3a2c8d32c9a716eb2aa2fca7f1421bfea4daead37f"
+      },
+      "historical": {
+        "bytes": 38314,
+        "sha256": "1fb828ef82fbbe9c63efca3a2c8d32c9a716eb2aa2fca7f1421bfea4daead37f"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/field_source_digest_audit.py": {
+      "current": {
+        "bytes": 13832,
+        "sha256": "820b3d1b310e80d002c74c9dcb54984449bc0fff3ba5079cdc1221818e6a3fbe"
+      },
+      "historical": {
+        "bytes": 13832,
+        "sha256": "820b3d1b310e80d002c74c9dcb54984449bc0fff3ba5079cdc1221818e6a3fbe"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/field_trial_design.py": {
+      "current": {
+        "bytes": 16425,
+        "sha256": "f0e937ba77d894e9f56088d7f80b6e3fef182a4b1c153e45a1f185b1a6407cb0"
+      },
+      "historical": {
+        "bytes": 16425,
+        "sha256": "f0e937ba77d894e9f56088d7f80b6e3fef182a4b1c153e45a1f185b1a6407cb0"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/ledger.py": {
+      "current": {
+        "bytes": 9726,
+        "sha256": "0d27ff5b65d5932229f88983878e55d986ae491c7272ed4ae9345d5434a17ea3"
+      },
+      "historical": {
+        "bytes": 9726,
+        "sha256": "0d27ff5b65d5932229f88983878e55d986ae491c7272ed4ae9345d5434a17ea3"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/lot_journal.py": {
+      "current": {
+        "bytes": 12804,
+        "sha256": "ce994e599fa36684038d81b8ea2133ba39de6039f3ecc6b9f20dc1338a06c7b6"
+      },
+      "historical": {
+        "bytes": 12804,
+        "sha256": "ce994e599fa36684038d81b8ea2133ba39de6039f3ecc6b9f20dc1338a06c7b6"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/ratio_audit.py": {
+      "current": {
+        "bytes": 15839,
+        "sha256": "55bf8b9174d49985ce69b503b113541bc313f992ca4fced9532fb0f0201121d1"
+      },
+      "historical": {
+        "bytes": 15839,
+        "sha256": "55bf8b9174d49985ce69b503b113541bc313f992ca4fced9532fb0f0201121d1"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/review_provenance.py": {
+      "current": {
+        "bytes": 3086,
+        "sha256": "3b2a59bd195a9b77819f716d35ba8527180235cd978030dc4b7351dc8dc033a3"
+      },
+      "historical": {
+        "bytes": 3086,
+        "sha256": "3b2a59bd195a9b77819f716d35ba8527180235cd978030dc4b7351dc8dc033a3"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/runner.py": {
+      "current": {
+        "bytes": 22403,
+        "sha256": "18ab94b777b2add61456fe3cda844d32de598206950b6f10bd942629c81f27e5"
+      },
+      "historical": {
+        "bytes": 22186,
+        "sha256": "24582016305fc9b7c415922808a43b93f79fac9a2d419d470984dd5975cb2681"
+      },
+      "unchanged": false
+    },
+    "src/specorganon/server.py": {
+      "current": {
+        "bytes": 26155,
+        "sha256": "e2af7bf22e43b0d0df03ce1ac72182d708ab95c842390ec5e9c27632310badb6"
+      },
+      "historical": {
+        "bytes": 24964,
+        "sha256": "9bea2809d8fbb7d178c67d79afcc6fd812cef9dfb2b049cea9f5463d58c9cd67"
+      },
+      "unchanged": false
+    },
+    "src/specorganon/source_passages.py": {
+      "current": {
+        "bytes": 7875,
+        "sha256": "5d1e6ced5e82e4f0285b138acadc82817e097f5b0dfdd0a71d0d7729eb557459"
+      },
+      "historical": {
+        "bytes": 7875,
+        "sha256": "5d1e6ced5e82e4f0285b138acadc82817e097f5b0dfdd0a71d0d7729eb557459"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/test_execution.py": {
+      "current": {
+        "bytes": 6931,
+        "sha256": "2952534b0b709513224e3bb25f155e282ed5dd63a41bf99e2fa0a1d2bf400d24"
+      },
+      "historical": {
+        "bytes": 6931,
+        "sha256": "2952534b0b709513224e3bb25f155e282ed5dd63a41bf99e2fa0a1d2bf400d24"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/test_observation.py": {
+      "current": {
+        "bytes": 20720,
+        "sha256": "02e5a316e44f90e67f75797624fd6f243b6516df4be3c9aa3b11974f6b2af5a0"
+      },
+      "historical": {
+        "bytes": 20720,
+        "sha256": "02e5a316e44f90e67f75797624fd6f243b6516df4be3c9aa3b11974f6b2af5a0"
+      },
+      "unchanged": true
+    },
+    "src/specorganon/workflow.py": {
+      "current": {
+        "bytes": 4239,
+        "sha256": "3f3980119743962a210beffdc2b0f8d845d53bb25a0cc3eace3eacaa347ad5f2"
+      },
+      "historical": {
+        "bytes": 4239,
+        "sha256": "3f3980119743962a210beffdc2b0f8d845d53bb25a0cc3eace3eacaa347ad5f2"
+      },
+      "unchanged": true
+    }
+  }
+}

@@ -1,0 +1,1106 @@
+{
+  "attempts_per_environment": 1,
+  "auth_copied": false,
+  "base_interpreters": {
+    "311": {
+      "bytes": 21721984,
+      "path": "/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/bin/python3.11",
+      "sha256": "8deffe5dd9ebcf98a062917a4e73bb8fbb7d5846f83dec01fb7506fd5d41c54e"
+    },
+    "312": {
+      "bytes": 8020928,
+      "path": "/usr/bin/python3.12",
+      "sha256": "e1efa562c2cc2e35521a5c9c9b9939921001ff8ca9708a13ef15ace68cc2ccd7"
+    }
+  },
+  "cache": "/home/dev/.cache/uv",
+  "commands": [
+    {
+      "argv": [
+        "/home/dev/.local/bin/uv",
+        "--version"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:55.962625+00:00",
+      "name": "00_uv_version",
+      "started_at_utc": "2026-09-30T21:45:55.956547+00:00",
+      "stderr": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/00_uv_version.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 38,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/00_uv_version.stdout",
+        "sha256": "a98b5a35b6ee949111fbbb44c7ebf9a4bdb3c5c726b329a67b3a8c4b64714746"
+      },
+      "wall_seconds_local": 0.006079856015276164
+    },
+    {
+      "argv": [
+        "/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/bin/python3.11",
+        "-I",
+        "-B",
+        "-c",
+        "import sys; print(sys.version.split()[0])"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:55.972879+00:00",
+      "name": "311_01_base_version",
+      "started_at_utc": "2026-09-30T21:45:55.963473+00:00",
+      "stderr": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_01_base_version.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 8,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_01_base_version.stdout",
+        "sha256": "db82937e1f1830581a9553c7814f5c5fcacb6dfdef8310b43e9a812c887acaf5"
+      },
+      "wall_seconds_local": 0.009415747015736997
+    },
+    {
+      "argv": [
+        "/home/dev/.local/bin/uv",
+        "--offline",
+        "--no-config",
+        "--no-python-downloads",
+        "--cache-dir",
+        "/home/dev/.cache/uv",
+        "venv",
+        "--python",
+        "/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/bin/python3.11",
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:55.981924+00:00",
+      "name": "311_02_venv",
+      "started_at_utc": "2026-09-30T21:45:55.973412+00:00",
+      "stderr": {
+        "bytes": 161,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_02_venv.stderr",
+        "sha256": "21bda700b5eb2637d6a38b7c1f9b7f72d17662acff32f8c65cae62c9bdd5bf9c"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_02_venv.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "wall_seconds_local": 0.008525348966941237
+    },
+    {
+      "argv": [
+        "/home/dev/.local/bin/uv",
+        "--offline",
+        "--no-config",
+        "--no-python-downloads",
+        "--cache-dir",
+        "/home/dev/.cache/uv",
+        "pip",
+        "install",
+        "--python",
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "--link-mode",
+        "copy",
+        "--keyring-provider",
+        "disabled",
+        "--no-build",
+        "mcp==2.2.0",
+        "cryptography>=41,<51",
+        "pytest>=8,<10"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:56.129863+00:00",
+      "name": "311_03_install",
+      "started_at_utc": "2026-09-30T21:45:55.982400+00:00",
+      "stderr": {
+        "bytes": 800,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_03_install.stderr",
+        "sha256": "fa94dd34a529a636e087a1bf910886ca07866871dff457afce7781fed0dbdd1c"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_03_install.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "wall_seconds_local": 0.14747591404011473
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nfrom pathlib import Path\nimport base64,hashlib,importlib.metadata as md,json,os,stat,sys\nvenv=Path(sys.prefix).resolve()\nexpected_python=sys.argv[1]\nversion=sys.version.split()[0]\nif version!=expected_python:raise RuntimeError('unexpected Python '+version)\ndistributions=sorted(md.distributions(),key=lambda d:d.metadata['Name'].lower())\nversions={d.metadata['Name'].lower():d.version for d in distributions}\nif 'specorganon' in versions:raise RuntimeError('specorganon must not be installed yet')\nif versions.get('mcp')!='2.2.0':raise RuntimeError('mcp version differs')\nif not 41<=int(versions['cryptography'].split('.')[0])<51:raise RuntimeError('cryptography outside declared range')\nif not 8<=int(versions['pytest'].split('.')[0])<10:raise RuntimeError('pytest outside declared range')\nout={'schema':1,'venv':str(venv),'python':{'version':version,'executable':sys.executable,'base_prefix':sys.base_prefix},'distributions':{},'files':{},'symlinks':[],'excluded_pycache':[],'record_validation':{'matched':0,'unhashed_entries':0,'mismatched':0},'specorganon_installed':False}\nfor d in distributions:\n name=d.metadata['Name'];filelist=d.files\n if filelist is None:raise RuntimeError('no RECORD file list for '+name)\n owned=[];nonregular=[]\n for rel in filelist:\n  p=Path(os.path.abspath(d.locate_file(rel)))\n  if not p.is_relative_to(venv):raise RuntimeError('distribution file outside venv '+str(p))\n  key=str(p.relative_to(venv))\n  if '__pycache__' in p.parts or p.suffix=='.pyc':\n   if p.exists():out['excluded_pycache'].append({'path':key,'distribution':name})\n   continue\n  s=p.lstat()\n  if stat.S_ISLNK(s.st_mode):\n   out['symlinks'].append({'path':key,'distribution':name,'target':p.readlink().as_posix()});continue\n  if not stat.S_ISREG(s.st_mode):nonregular.append(key);continue\n  if not p.resolve().is_relative_to(venv):raise RuntimeError('resolved distribution path outside venv '+key)\n  h=hashlib.sha256();size=0\n  with p.open('rb') as f:\n   for block in iter(lambda:f.read(1024*1024),b''):h.update(block);size+=len(block)\n  result={'bytes':size,'sha256':h.hexdigest()}\n  if key in out['files'] and out['files'][key]!=result:raise RuntimeError('conflicting file ownership '+key)\n  out['files'][key]=result;owned.append(key)\n  if rel.hash:\n   encoded=base64.urlsafe_b64encode(h.digest()).decode().rstrip('=')\n   if rel.hash.mode!='sha256' or rel.hash.value!=encoded or (rel.size is not None and rel.size!=size):\n    out['record_validation']['mismatched']+=1;raise RuntimeError('installed RECORD mismatch '+key)\n   out['record_validation']['matched']+=1\n  else:out['record_validation']['unhashed_entries']+=1\n out['distributions'][name.lower()]={'version':d.version,'metadata_origin':str(d._path),'installer':(d.read_text('INSTALLER') or '').strip(),'regular_file_count':len(owned),'regular_file_bytes':sum(out['files'][x]['bytes'] for x in owned),'nonregular_entries':nonregular}\nout['file_count']=len(out['files']);out['regular_file_bytes']=sum(x['bytes'] for x in out['files'].values());out['distribution_count']=len(out['distributions'])\nout['inventory_scope']='Regular public files listed by installed distribution RECORDs, including their public dist-info and scripts; no interpreter symlinks, symlink targets, pycache, environment secrets or source repository imports.'\nprint(json.dumps(out,sort_keys=True,ensure_ascii=False,allow_nan=False))\n",
+        "3.11.15"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:56.423745+00:00",
+      "name": "311_04_inventory_before_check",
+      "started_at_utc": "2026-09-30T21:45:56.130422+00:00",
+      "stderr": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_04_inventory_before_check.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 247394,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_04_inventory_before_check.stdout",
+        "sha256": "524cee41c84bf78875b72ce35937f282af6bd95b7237a453955f4a6ab80b24cc"
+      },
+      "wall_seconds_local": 0.2933337549911812
+    },
+    {
+      "argv": [
+        "/home/dev/.local/bin/uv",
+        "--offline",
+        "--no-config",
+        "--no-python-downloads",
+        "--cache-dir",
+        "/home/dev/.cache/uv",
+        "pip",
+        "check",
+        "--python",
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:56.432870+00:00",
+      "name": "311_05_pip_check",
+      "started_at_utc": "2026-09-30T21:45:56.425272+00:00",
+      "stderr": {
+        "bytes": 114,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_05_pip_check.stderr",
+        "sha256": "c5afd92e1d0ef70d519246644ebe0188e6451e8602dba0f42f9c4c93a90f75ac"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_05_pip_check.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "wall_seconds_local": 0.007598589989356697
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nfrom pathlib import Path\nimport base64,hashlib,importlib.metadata as md,json,os,stat,sys\nvenv=Path(sys.prefix).resolve()\nexpected_python=sys.argv[1]\nversion=sys.version.split()[0]\nif version!=expected_python:raise RuntimeError('unexpected Python '+version)\ndistributions=sorted(md.distributions(),key=lambda d:d.metadata['Name'].lower())\nversions={d.metadata['Name'].lower():d.version for d in distributions}\nif 'specorganon' in versions:raise RuntimeError('specorganon must not be installed yet')\nif versions.get('mcp')!='2.2.0':raise RuntimeError('mcp version differs')\nif not 41<=int(versions['cryptography'].split('.')[0])<51:raise RuntimeError('cryptography outside declared range')\nif not 8<=int(versions['pytest'].split('.')[0])<10:raise RuntimeError('pytest outside declared range')\nout={'schema':1,'venv':str(venv),'python':{'version':version,'executable':sys.executable,'base_prefix':sys.base_prefix},'distributions':{},'files':{},'symlinks':[],'excluded_pycache':[],'record_validation':{'matched':0,'unhashed_entries':0,'mismatched':0},'specorganon_installed':False}\nfor d in distributions:\n name=d.metadata['Name'];filelist=d.files\n if filelist is None:raise RuntimeError('no RECORD file list for '+name)\n owned=[];nonregular=[]\n for rel in filelist:\n  p=Path(os.path.abspath(d.locate_file(rel)))\n  if not p.is_relative_to(venv):raise RuntimeError('distribution file outside venv '+str(p))\n  key=str(p.relative_to(venv))\n  if '__pycache__' in p.parts or p.suffix=='.pyc':\n   if p.exists():out['excluded_pycache'].append({'path':key,'distribution':name})\n   continue\n  s=p.lstat()\n  if stat.S_ISLNK(s.st_mode):\n   out['symlinks'].append({'path':key,'distribution':name,'target':p.readlink().as_posix()});continue\n  if not stat.S_ISREG(s.st_mode):nonregular.append(key);continue\n  if not p.resolve().is_relative_to(venv):raise RuntimeError('resolved distribution path outside venv '+key)\n  h=hashlib.sha256();size=0\n  with p.open('rb') as f:\n   for block in iter(lambda:f.read(1024*1024),b''):h.update(block);size+=len(block)\n  result={'bytes':size,'sha256':h.hexdigest()}\n  if key in out['files'] and out['files'][key]!=result:raise RuntimeError('conflicting file ownership '+key)\n  out['files'][key]=result;owned.append(key)\n  if rel.hash:\n   encoded=base64.urlsafe_b64encode(h.digest()).decode().rstrip('=')\n   if rel.hash.mode!='sha256' or rel.hash.value!=encoded or (rel.size is not None and rel.size!=size):\n    out['record_validation']['mismatched']+=1;raise RuntimeError('installed RECORD mismatch '+key)\n   out['record_validation']['matched']+=1\n  else:out['record_validation']['unhashed_entries']+=1\n out['distributions'][name.lower()]={'version':d.version,'metadata_origin':str(d._path),'installer':(d.read_text('INSTALLER') or '').strip(),'regular_file_count':len(owned),'regular_file_bytes':sum(out['files'][x]['bytes'] for x in owned),'nonregular_entries':nonregular}\nout['file_count']=len(out['files']);out['regular_file_bytes']=sum(x['bytes'] for x in out['files'].values());out['distribution_count']=len(out['distributions'])\nout['inventory_scope']='Regular public files listed by installed distribution RECORDs, including their public dist-info and scripts; no interpreter symlinks, symlink targets, pycache, environment secrets or source repository imports.'\nprint(json.dumps(out,sort_keys=True,ensure_ascii=False,allow_nan=False))\n",
+        "3.11.15"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:56.599725+00:00",
+      "name": "311_06_inventory_after_check",
+      "started_at_utc": "2026-09-30T21:45:56.433383+00:00",
+      "stderr": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_06_inventory_after_check.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 247394,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_06_inventory_after_check.stdout",
+        "sha256": "524cee41c84bf78875b72ce35937f282af6bd95b7237a453955f4a6ab80b24cc"
+      },
+      "wall_seconds_local": 0.16635966900503263
+    },
+    {
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-B",
+        "-c",
+        "import sys; print(sys.version.split()[0])"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:56.617119+00:00",
+      "name": "312_01_base_version",
+      "started_at_utc": "2026-09-30T21:45:56.606431+00:00",
+      "stderr": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_01_base_version.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 7,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_01_base_version.stdout",
+        "sha256": "fa682ae9d943f5c8076e68335c9ba3ab4d063ad035c07ac6928653dd4ac50af7"
+      },
+      "wall_seconds_local": 0.01068827899871394
+    },
+    {
+      "argv": [
+        "/home/dev/.local/bin/uv",
+        "--offline",
+        "--no-config",
+        "--no-python-downloads",
+        "--cache-dir",
+        "/home/dev/.cache/uv",
+        "venv",
+        "--python",
+        "/usr/bin/python3.12",
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:56.627151+00:00",
+      "name": "312_02_venv",
+      "started_at_utc": "2026-09-30T21:45:56.618096+00:00",
+      "stderr": {
+        "bytes": 99,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_02_venv.stderr",
+        "sha256": "3afa180a911bcbc90f2ea805980b5d169e2573ecf5a3b4021301096a56f2f5a0"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_02_venv.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "wall_seconds_local": 0.009065743943210691
+    },
+    {
+      "argv": [
+        "/home/dev/.local/bin/uv",
+        "--offline",
+        "--no-config",
+        "--no-python-downloads",
+        "--cache-dir",
+        "/home/dev/.cache/uv",
+        "pip",
+        "install",
+        "--python",
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "--link-mode",
+        "copy",
+        "--keyring-provider",
+        "disabled",
+        "--no-build",
+        "mcp==2.2.0",
+        "cryptography>=41,<51",
+        "pytest>=8,<10"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:56.765067+00:00",
+      "name": "312_03_install",
+      "started_at_utc": "2026-09-30T21:45:56.628241+00:00",
+      "stderr": {
+        "bytes": 799,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_03_install.stderr",
+        "sha256": "3119e142897728af70b53bf70e27adcc7534e49094499f693b23ef61b0e906d1"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_03_install.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "wall_seconds_local": 0.1368361260392703
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nfrom pathlib import Path\nimport base64,hashlib,importlib.metadata as md,json,os,stat,sys\nvenv=Path(sys.prefix).resolve()\nexpected_python=sys.argv[1]\nversion=sys.version.split()[0]\nif version!=expected_python:raise RuntimeError('unexpected Python '+version)\ndistributions=sorted(md.distributions(),key=lambda d:d.metadata['Name'].lower())\nversions={d.metadata['Name'].lower():d.version for d in distributions}\nif 'specorganon' in versions:raise RuntimeError('specorganon must not be installed yet')\nif versions.get('mcp')!='2.2.0':raise RuntimeError('mcp version differs')\nif not 41<=int(versions['cryptography'].split('.')[0])<51:raise RuntimeError('cryptography outside declared range')\nif not 8<=int(versions['pytest'].split('.')[0])<10:raise RuntimeError('pytest outside declared range')\nout={'schema':1,'venv':str(venv),'python':{'version':version,'executable':sys.executable,'base_prefix':sys.base_prefix},'distributions':{},'files':{},'symlinks':[],'excluded_pycache':[],'record_validation':{'matched':0,'unhashed_entries':0,'mismatched':0},'specorganon_installed':False}\nfor d in distributions:\n name=d.metadata['Name'];filelist=d.files\n if filelist is None:raise RuntimeError('no RECORD file list for '+name)\n owned=[];nonregular=[]\n for rel in filelist:\n  p=Path(os.path.abspath(d.locate_file(rel)))\n  if not p.is_relative_to(venv):raise RuntimeError('distribution file outside venv '+str(p))\n  key=str(p.relative_to(venv))\n  if '__pycache__' in p.parts or p.suffix=='.pyc':\n   if p.exists():out['excluded_pycache'].append({'path':key,'distribution':name})\n   continue\n  s=p.lstat()\n  if stat.S_ISLNK(s.st_mode):\n   out['symlinks'].append({'path':key,'distribution':name,'target':p.readlink().as_posix()});continue\n  if not stat.S_ISREG(s.st_mode):nonregular.append(key);continue\n  if not p.resolve().is_relative_to(venv):raise RuntimeError('resolved distribution path outside venv '+key)\n  h=hashlib.sha256();size=0\n  with p.open('rb') as f:\n   for block in iter(lambda:f.read(1024*1024),b''):h.update(block);size+=len(block)\n  result={'bytes':size,'sha256':h.hexdigest()}\n  if key in out['files'] and out['files'][key]!=result:raise RuntimeError('conflicting file ownership '+key)\n  out['files'][key]=result;owned.append(key)\n  if rel.hash:\n   encoded=base64.urlsafe_b64encode(h.digest()).decode().rstrip('=')\n   if rel.hash.mode!='sha256' or rel.hash.value!=encoded or (rel.size is not None and rel.size!=size):\n    out['record_validation']['mismatched']+=1;raise RuntimeError('installed RECORD mismatch '+key)\n   out['record_validation']['matched']+=1\n  else:out['record_validation']['unhashed_entries']+=1\n out['distributions'][name.lower()]={'version':d.version,'metadata_origin':str(d._path),'installer':(d.read_text('INSTALLER') or '').strip(),'regular_file_count':len(owned),'regular_file_bytes':sum(out['files'][x]['bytes'] for x in owned),'nonregular_entries':nonregular}\nout['file_count']=len(out['files']);out['regular_file_bytes']=sum(x['bytes'] for x in out['files'].values());out['distribution_count']=len(out['distributions'])\nout['inventory_scope']='Regular public files listed by installed distribution RECORDs, including their public dist-info and scripts; no interpreter symlinks, symlink targets, pycache, environment secrets or source repository imports.'\nprint(json.dumps(out,sort_keys=True,ensure_ascii=False,allow_nan=False))\n",
+        "3.12.3"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:57.322152+00:00",
+      "name": "312_04_inventory_before_check",
+      "started_at_utc": "2026-09-30T21:45:56.883881+00:00",
+      "stderr": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_04_inventory_before_check.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 247331,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_04_inventory_before_check.stdout",
+        "sha256": "60709d540c41a009955deb8cc2c03dbfe826202cf46d7f5ecf22534aa5670820"
+      },
+      "wall_seconds_local": 0.43826664495281875
+    },
+    {
+      "argv": [
+        "/home/dev/.local/bin/uv",
+        "--offline",
+        "--no-config",
+        "--no-python-downloads",
+        "--cache-dir",
+        "/home/dev/.cache/uv",
+        "pip",
+        "check",
+        "--python",
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:57.334423+00:00",
+      "name": "312_05_pip_check",
+      "started_at_utc": "2026-09-30T21:45:57.324936+00:00",
+      "stderr": {
+        "bytes": 113,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_05_pip_check.stderr",
+        "sha256": "4c47f45bcfee8c1adc44218b7c71f0be83a8aa17b61471864b561d5cb0221751"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_05_pip_check.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "wall_seconds_local": 0.009492817975115031
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nfrom pathlib import Path\nimport base64,hashlib,importlib.metadata as md,json,os,stat,sys\nvenv=Path(sys.prefix).resolve()\nexpected_python=sys.argv[1]\nversion=sys.version.split()[0]\nif version!=expected_python:raise RuntimeError('unexpected Python '+version)\ndistributions=sorted(md.distributions(),key=lambda d:d.metadata['Name'].lower())\nversions={d.metadata['Name'].lower():d.version for d in distributions}\nif 'specorganon' in versions:raise RuntimeError('specorganon must not be installed yet')\nif versions.get('mcp')!='2.2.0':raise RuntimeError('mcp version differs')\nif not 41<=int(versions['cryptography'].split('.')[0])<51:raise RuntimeError('cryptography outside declared range')\nif not 8<=int(versions['pytest'].split('.')[0])<10:raise RuntimeError('pytest outside declared range')\nout={'schema':1,'venv':str(venv),'python':{'version':version,'executable':sys.executable,'base_prefix':sys.base_prefix},'distributions':{},'files':{},'symlinks':[],'excluded_pycache':[],'record_validation':{'matched':0,'unhashed_entries':0,'mismatched':0},'specorganon_installed':False}\nfor d in distributions:\n name=d.metadata['Name'];filelist=d.files\n if filelist is None:raise RuntimeError('no RECORD file list for '+name)\n owned=[];nonregular=[]\n for rel in filelist:\n  p=Path(os.path.abspath(d.locate_file(rel)))\n  if not p.is_relative_to(venv):raise RuntimeError('distribution file outside venv '+str(p))\n  key=str(p.relative_to(venv))\n  if '__pycache__' in p.parts or p.suffix=='.pyc':\n   if p.exists():out['excluded_pycache'].append({'path':key,'distribution':name})\n   continue\n  s=p.lstat()\n  if stat.S_ISLNK(s.st_mode):\n   out['symlinks'].append({'path':key,'distribution':name,'target':p.readlink().as_posix()});continue\n  if not stat.S_ISREG(s.st_mode):nonregular.append(key);continue\n  if not p.resolve().is_relative_to(venv):raise RuntimeError('resolved distribution path outside venv '+key)\n  h=hashlib.sha256();size=0\n  with p.open('rb') as f:\n   for block in iter(lambda:f.read(1024*1024),b''):h.update(block);size+=len(block)\n  result={'bytes':size,'sha256':h.hexdigest()}\n  if key in out['files'] and out['files'][key]!=result:raise RuntimeError('conflicting file ownership '+key)\n  out['files'][key]=result;owned.append(key)\n  if rel.hash:\n   encoded=base64.urlsafe_b64encode(h.digest()).decode().rstrip('=')\n   if rel.hash.mode!='sha256' or rel.hash.value!=encoded or (rel.size is not None and rel.size!=size):\n    out['record_validation']['mismatched']+=1;raise RuntimeError('installed RECORD mismatch '+key)\n   out['record_validation']['matched']+=1\n  else:out['record_validation']['unhashed_entries']+=1\n out['distributions'][name.lower()]={'version':d.version,'metadata_origin':str(d._path),'installer':(d.read_text('INSTALLER') or '').strip(),'regular_file_count':len(owned),'regular_file_bytes':sum(out['files'][x]['bytes'] for x in owned),'nonregular_entries':nonregular}\nout['file_count']=len(out['files']);out['regular_file_bytes']=sum(x['bytes'] for x in out['files'].values());out['distribution_count']=len(out['distributions'])\nout['inventory_scope']='Regular public files listed by installed distribution RECORDs, including their public dist-info and scripts; no interpreter symlinks, symlink targets, pycache, environment secrets or source repository imports.'\nprint(json.dumps(out,sort_keys=True,ensure_ascii=False,allow_nan=False))\n",
+        "3.12.3"
+      ],
+      "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+      "environment": {
+        "LANG": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-30T21:45:57.571929+00:00",
+      "name": "312_06_inventory_after_check",
+      "started_at_utc": "2026-09-30T21:45:57.335467+00:00",
+      "stderr": {
+        "bytes": 0,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_06_inventory_after_check.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 247331,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312_06_inventory_after_check.stdout",
+        "sha256": "60709d540c41a009955deb8cc2c03dbfe826202cf46d7f5ecf22534aa5670820"
+      },
+      "wall_seconds_local": 0.2364746980019845
+    }
+  ],
+  "dependencies_requested": [
+    "mcp==2.2.0",
+    "cryptography>=41,<51",
+    "pytest>=8,<10"
+  ],
+  "environment_allowlist": {
+    "LANG": "C.UTF-8",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "TZ": "UTC"
+  },
+  "environments": {
+    "311": {
+      "before_after_pip_check_identical": true,
+      "distribution_count": 33,
+      "distributions": {
+        "annotated-types": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/annotated_types-0.8.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 36539,
+          "regular_file_count": 9,
+          "version": "0.8.0"
+        },
+        "anyio": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/anyio-4.15.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 539391,
+          "regular_file_count": 55,
+          "version": "4.15.1"
+        },
+        "attrs": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/attrs-26.1.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 233865,
+          "regular_file_count": 37,
+          "version": "26.1.0"
+        },
+        "cffi": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/cffi-2.1.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 719366,
+          "regular_file_count": 34,
+          "version": "2.1.1"
+        },
+        "click": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/click-8.5.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 447891,
+          "regular_file_count": 24,
+          "version": "8.5.0"
+        },
+        "cryptography": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/cryptography-50.0.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 14954663,
+          "regular_file_count": 122,
+          "version": "50.0.1"
+        },
+        "h11": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/h11-0.16.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 104105,
+          "regular_file_count": 19,
+          "version": "0.16.0"
+        },
+        "httpcore2": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/httpcore2-2.13.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 301205,
+          "regular_file_count": 38,
+          "version": "2.13.1"
+        },
+        "httpx2": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/httpx2-2.13.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 406713,
+          "regular_file_count": 39,
+          "version": "2.13.1"
+        },
+        "idna": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/idna-3.20.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 342645,
+          "regular_file_count": 19,
+          "version": "3.20"
+        },
+        "iniconfig": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/iniconfig-2.3.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 18515,
+          "regular_file_count": 12,
+          "version": "2.3.0"
+        },
+        "jsonschema": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/jsonschema-4.26.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 476679,
+          "regular_file_count": 46,
+          "version": "4.26.0"
+        },
+        "jsonschema-specifications": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/jsonschema_specifications-2025.9.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 47479,
+          "regular_file_count": 30,
+          "version": "2025.9.1"
+        },
+        "mcp": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/mcp-2.2.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 1201084,
+          "regular_file_count": 132,
+          "version": "2.2.0"
+        },
+        "mcp-types": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/mcp_types-2.2.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 356392,
+          "regular_file_count": 15,
+          "version": "2.2.0"
+        },
+        "opentelemetry-api": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/opentelemetry_api-1.45.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 195965,
+          "regular_file_count": 49,
+          "version": "1.45.0"
+        },
+        "packaging": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/packaging-26.3.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 499357,
+          "regular_file_count": 31,
+          "version": "26.3"
+        },
+        "pluggy": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/pluggy-1.6.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 65997,
+          "regular_file_count": 16,
+          "version": "1.6.0"
+        },
+        "pycparser": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/pycparser-3.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 203921,
+          "regular_file_count": 15,
+          "version": "3.0"
+        },
+        "pydantic": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/pydantic-2.13.5.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 1894125,
+          "regular_file_count": 113,
+          "version": "2.13.5"
+        },
+        "pydantic_core": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/pydantic_core-2.46.5.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 5012322,
+          "regular_file_count": 12,
+          "version": "2.46.5"
+        },
+        "pygments": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/pygments-2.21.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 4621762,
+          "regular_file_count": 352,
+          "version": "2.21.0"
+        },
+        "pyjwt": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/pyjwt-2.15.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 121852,
+          "regular_file_count": 21,
+          "version": "2.15.0"
+        },
+        "pytest": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/pytest-9.1.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 1364472,
+          "regular_file_count": 93,
+          "version": "9.1.1"
+        },
+        "python-multipart": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/python_multipart-0.0.32.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 104421,
+          "regular_file_count": 15,
+          "version": "0.0.32"
+        },
+        "referencing": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/referencing-0.37.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 115554,
+          "regular_file_count": 21,
+          "version": "0.37.0"
+        },
+        "rpds-py": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/rpds_py-2026.6.3.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 1012737,
+          "regular_file_count": 11,
+          "version": "2026.6.3"
+        },
+        "sse-starlette": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/sse_starlette-3.4.11.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 44296,
+          "regular_file_count": 13,
+          "version": "3.4.11"
+        },
+        "starlette": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/starlette-1.7.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 269735,
+          "regular_file_count": 43,
+          "version": "1.7.0"
+        },
+        "truststore": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/truststore-0.10.4.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 61343,
+          "regular_file_count": 13,
+          "version": "0.10.4"
+        },
+        "typing-inspection": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/typing_inspection-0.4.4.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 54734,
+          "regular_file_count": 11,
+          "version": "0.4.4"
+        },
+        "typing_extensions": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/typing_extensions-4.16.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 182965,
+          "regular_file_count": 7,
+          "version": "4.16.0"
+        },
+        "uvicorn": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/lib/python3.11/site-packages/uvicorn-0.54.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 294766,
+          "regular_file_count": 54,
+          "version": "0.54.0"
+        }
+      },
+      "excluded_pycache_count": 0,
+      "file_count": 1521,
+      "inventory": {
+        "bytes": 282486,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311.inventory.json",
+        "sha256": "57b074f4351a30d5d5f25a899da1374a9fe75294ff9ce8a9f30d9e33c089b900"
+      },
+      "python": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+      "python_version": "3.11.15",
+      "record_validation": {
+        "matched": 1488,
+        "mismatched": 0,
+        "unhashed_entries": 33
+      },
+      "regular_file_bytes": 36306856,
+      "specorganon_installed": false,
+      "symlinks": [],
+      "venv": "/tmp/specorganon-D107-deps-re8v1j45/venv-311"
+    },
+    "312": {
+      "before_after_pip_check_identical": true,
+      "distribution_count": 33,
+      "distributions": {
+        "annotated-types": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/annotated_types-0.8.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 36539,
+          "regular_file_count": 9,
+          "version": "0.8.0"
+        },
+        "anyio": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/anyio-4.15.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 539391,
+          "regular_file_count": 55,
+          "version": "4.15.1"
+        },
+        "attrs": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/attrs-26.1.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 233865,
+          "regular_file_count": 37,
+          "version": "26.1.0"
+        },
+        "cffi": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/cffi-2.1.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 735726,
+          "regular_file_count": 34,
+          "version": "2.1.1"
+        },
+        "click": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/click-8.5.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 447891,
+          "regular_file_count": 24,
+          "version": "8.5.0"
+        },
+        "cryptography": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/cryptography-50.0.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 14954663,
+          "regular_file_count": 122,
+          "version": "50.0.1"
+        },
+        "h11": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/h11-0.16.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 104105,
+          "regular_file_count": 19,
+          "version": "0.16.0"
+        },
+        "httpcore2": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/httpcore2-2.13.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 301205,
+          "regular_file_count": 38,
+          "version": "2.13.1"
+        },
+        "httpx2": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/httpx2-2.13.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 406713,
+          "regular_file_count": 39,
+          "version": "2.13.1"
+        },
+        "idna": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/idna-3.20.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 342645,
+          "regular_file_count": 19,
+          "version": "3.20"
+        },
+        "iniconfig": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/iniconfig-2.3.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 18515,
+          "regular_file_count": 12,
+          "version": "2.3.0"
+        },
+        "jsonschema": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/jsonschema-4.26.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 476679,
+          "regular_file_count": 46,
+          "version": "4.26.0"
+        },
+        "jsonschema-specifications": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/jsonschema_specifications-2025.9.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 47479,
+          "regular_file_count": 30,
+          "version": "2025.9.1"
+        },
+        "mcp": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/mcp-2.2.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 1201084,
+          "regular_file_count": 132,
+          "version": "2.2.0"
+        },
+        "mcp-types": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/mcp_types-2.2.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 356392,
+          "regular_file_count": 15,
+          "version": "2.2.0"
+        },
+        "opentelemetry-api": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/opentelemetry_api-1.45.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 195965,
+          "regular_file_count": 49,
+          "version": "1.45.0"
+        },
+        "packaging": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/packaging-26.3.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 499357,
+          "regular_file_count": 31,
+          "version": "26.3"
+        },
+        "pluggy": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/pluggy-1.6.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 65997,
+          "regular_file_count": 16,
+          "version": "1.6.0"
+        },
+        "pycparser": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/pycparser-3.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 203921,
+          "regular_file_count": 15,
+          "version": "3.0"
+        },
+        "pydantic": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/pydantic-2.13.5.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 1894125,
+          "regular_file_count": 113,
+          "version": "2.13.5"
+        },
+        "pydantic_core": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/pydantic_core-2.46.5.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 5033210,
+          "regular_file_count": 12,
+          "version": "2.46.5"
+        },
+        "pygments": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/pygments-2.21.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 4621762,
+          "regular_file_count": 352,
+          "version": "2.21.0"
+        },
+        "pyjwt": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/pyjwt-2.15.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 121852,
+          "regular_file_count": 21,
+          "version": "2.15.0"
+        },
+        "pytest": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/pytest-9.1.1.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 1364472,
+          "regular_file_count": 93,
+          "version": "9.1.1"
+        },
+        "python-multipart": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/python_multipart-0.0.32.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 104421,
+          "regular_file_count": 15,
+          "version": "0.0.32"
+        },
+        "referencing": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/referencing-0.37.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 115554,
+          "regular_file_count": 21,
+          "version": "0.37.0"
+        },
+        "rpds-py": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/rpds_py-2026.6.3.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 996465,
+          "regular_file_count": 11,
+          "version": "2026.6.3"
+        },
+        "sse-starlette": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/sse_starlette-3.4.11.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 44296,
+          "regular_file_count": 13,
+          "version": "3.4.11"
+        },
+        "starlette": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/starlette-1.7.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 269735,
+          "regular_file_count": 43,
+          "version": "1.7.0"
+        },
+        "truststore": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/truststore-0.10.4.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 61343,
+          "regular_file_count": 13,
+          "version": "0.10.4"
+        },
+        "typing-inspection": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/typing_inspection-0.4.4.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 54734,
+          "regular_file_count": 11,
+          "version": "0.4.4"
+        },
+        "typing_extensions": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/typing_extensions-4.16.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 182965,
+          "regular_file_count": 7,
+          "version": "4.16.0"
+        },
+        "uvicorn": {
+          "installer": "uv",
+          "metadata_origin": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/lib/python3.12/site-packages/uvicorn-0.54.0.dist-info",
+          "nonregular_entries": [],
+          "regular_file_bytes": 294766,
+          "regular_file_count": 54,
+          "version": "0.54.0"
+        }
+      },
+      "excluded_pycache_count": 0,
+      "file_count": 1521,
+      "inventory": {
+        "bytes": 282423,
+        "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/312.inventory.json",
+        "sha256": "1029f187bb21dd00bcb27a964b4f6bf4fb5b01c2a950889c18d106f164060950"
+      },
+      "python": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+      "python_version": "3.12.3",
+      "record_validation": {
+        "matched": 1488,
+        "mismatched": 0,
+        "unhashed_entries": 33
+      },
+      "regular_file_bytes": 36327832,
+      "specorganon_installed": false,
+      "symlinks": [],
+      "venv": "/tmp/specorganon-D107-deps-re8v1j45/venv-312"
+    }
+  },
+  "executed_source_unchanged": true,
+  "existing_environments_modified": false,
+  "finished_at_utc": "2026-09-30T21:45:57.672332+00:00",
+  "home_inherited_or_remapped": false,
+  "independent_custody_authenticated": false,
+  "keyring_provider": "disabled",
+  "link_mode": "copy",
+  "no_build": true,
+  "no_config": true,
+  "no_python_downloads": true,
+  "offline": true,
+  "probe_executed": false,
+  "prospective_plan": {
+    "bytes": 6230,
+    "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/plan.md",
+    "registered_commit": "667a04b7e5a0d96e9df108757d068a26c5833b19",
+    "sha256": "a2b5da9e54340db8dc65d22c0370183ee0b0b935cec93af25efa31e9df19840d"
+  },
+  "pyproject": {
+    "bytes": 745,
+    "path": "/workspace/SpecOrganon/pyproject.toml",
+    "sha256": "94795ff3b3635a14291f08f0c94379218bbaf58a2bc274b7ae4385d78ee57eaa"
+  },
+  "retries": 0,
+  "retryable": false,
+  "runtime": "/tmp/specorganon-D107-deps-re8v1j45",
+  "schema": 1,
+  "source_after_setup": {
+    "bytes": 10905,
+    "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_prepare.py",
+    "sha256": "06ae34fa3a95061727caa790b23d757f2cc971813e8ae04ad46316b3bed647ee"
+  },
+  "source_before_first_subprocess": {
+    "bytes": 10905,
+    "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_prepare.py",
+    "sha256": "06ae34fa3a95061727caa790b23d757f2cc971813e8ae04ad46316b3bed647ee"
+  },
+  "source_git_freeze_claimed": false,
+  "specorganon_install_requested": false,
+  "started_at_utc": "2026-09-30T21:45:55.876896+00:00",
+  "status": "done",
+  "study_id": "D107",
+  "tests_executed": false,
+  "uv": {
+    "bytes": 60783384,
+    "path": "/home/dev/.local/bin/uv",
+    "sha256": "2856d1bf7e5bcfba7df20ae6f939340ae1f8022d2d103cada1a6da597df86e32"
+  }
+}

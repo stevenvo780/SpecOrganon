@@ -1,0 +1,140 @@
+.................F.....sssssssssssssFFF.                                 [100%]
+=================================== FAILURES ===================================
+____________ test_cli_retirement_records_one_event_and_no_approval _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1430/test_cli_retirement_records_on0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4da8ac51c0>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f4da8ac70e0>
+
+    def test_cli_retirement_records_one_event_and_no_approval(tmp_path, monkeypatch, capsys):
+        case, arguments = _case(tmp_path, monkeypatch)
+        before = read_project(case)["events"]
+>       assert cli.main(_argv(arguments)) == 0
+E       assert 1 == 0
+E        +  where 1 = <function main at 0x7f4da8c60f40>(['retire-indicator', '/tmp/pytest-of-dev/pytest-1430/test_cli_retirement_records_on0/case', 'old', '--replacements', '{"new": 1}', '--expected-version', ...])
+E        +    where <function main at 0x7f4da8c60f40> = cli.main
+E        +    and   ['retire-indicator', '/tmp/pytest-of-dev/pytest-1430/test_cli_retirement_records_on0/case', 'old', '--replacements', '{"new": 1}', '--expected-version', ...] = _argv({'actor': 'agent:executor', 'expected_review_seq': 11, 'expected_version': 1, 'id': 'old', ...})
+
+tests/test_retirement_interfaces.py:148: AssertionError
+----------------------------- Captured stderr call -----------------------------
+organon: indicator retirement is blocked: replacement new lacks current typed numeric evidence on its normative protocol path; replacement new or its ancestors are not current and sound; source indicator ancestors are not current and sound
+________ test_runner_ignores_only_effective_retired_troubled_indicator _________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1430/test_runner_ignores_only_effec0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4da8b0bce0>
+
+    def test_runner_ignores_only_effective_retired_troubled_indicator(tmp_path, monkeypatch):
+        case, arguments = _case(tmp_path, monkeypatch)
+>       engine.retire_indicator(**arguments)
+
+tests/test_retirement_interfaces.py:291: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = '/tmp/pytest-of-dev/pytest-1430/test_runner_ignores_only_effec0/case'
+id = 'old', replacements = {'new': 1}
+reason = 'Synthetic technical replacement', actor = 'agent:executor'
+expected_version = 1, expected_review_seq = 11
+
+    def retire_indicator(path: str | Path, id: str, replacements: dict[str, int], reason: str, actor: str,
+                         expected_version: int, expected_review_seq: int) -> dict[str, Any]:
+        """Retire one rejected indicator version without deleting it or approving norms.
+    
+        Replacement versions and the negative review are mandatory concurrency
+        guards. Lifecycle validity is re-evaluated on every read; consumers are never
+        rewritten, and the original rejection remains visible in item issues.
+        """
+        if type(reason) is not str or type(actor) is not str:
+            raise MethodError("indicator retirement needs an explicit reason and actor")
+        payload = {"id": id, "version": expected_version, "replacements": replacements,
+                   "review_seq": expected_review_seq, "reason": reason.strip()}
+        _validate_indicator_retirement(payload, actor)
+        state = _project(path)
+        flags = _flags(state)
+        issues = _indicator_retirement_issues(state, payload, flags)
+        if issues:
+>           raise MethodError("indicator retirement is blocked: " + "; ".join(issues))
+E           specorganon.engine.MethodError: indicator retirement is blocked: replacement new lacks current typed numeric evidence on its normative protocol path; replacement new or its ancestors are not current and sound; source indicator ancestors are not current and sound
+
+src/specorganon/engine.py:1641: MethodError
+_______________ test_runner_minima_count_only_active_indicators ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1430/test_runner_minima_count_only_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4da8b0a030>
+
+    def test_runner_minima_count_only_active_indicators(tmp_path, monkeypatch):
+        case, arguments = _case(tmp_path, monkeypatch)
+>       engine.retire_indicator(**arguments)
+
+tests/test_retirement_interfaces.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = '/tmp/pytest-of-dev/pytest-1430/test_runner_minima_count_only_0/case'
+id = 'old', replacements = {'new': 1}
+reason = 'Synthetic technical replacement', actor = 'agent:executor'
+expected_version = 1, expected_review_seq = 11
+
+    def retire_indicator(path: str | Path, id: str, replacements: dict[str, int], reason: str, actor: str,
+                         expected_version: int, expected_review_seq: int) -> dict[str, Any]:
+        """Retire one rejected indicator version without deleting it or approving norms.
+    
+        Replacement versions and the negative review are mandatory concurrency
+        guards. Lifecycle validity is re-evaluated on every read; consumers are never
+        rewritten, and the original rejection remains visible in item issues.
+        """
+        if type(reason) is not str or type(actor) is not str:
+            raise MethodError("indicator retirement needs an explicit reason and actor")
+        payload = {"id": id, "version": expected_version, "replacements": replacements,
+                   "review_seq": expected_review_seq, "reason": reason.strip()}
+        _validate_indicator_retirement(payload, actor)
+        state = _project(path)
+        flags = _flags(state)
+        issues = _indicator_retirement_issues(state, payload, flags)
+        if issues:
+>           raise MethodError("indicator retirement is blocked: " + "; ".join(issues))
+E           specorganon.engine.MethodError: indicator retirement is blocked: replacement new lacks current typed numeric evidence on its normative protocol path; replacement new or its ancestors are not current and sound; source indicator ancestors are not current and sound
+
+src/specorganon/engine.py:1641: MethodError
+____________ test_runner_prior_context_excludes_retired_indicators _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1430/test_runner_prior_context_excl0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4da8a65d60>
+
+    def test_runner_prior_context_excludes_retired_indicators(tmp_path, monkeypatch):
+        case, arguments = _case(tmp_path, monkeypatch)
+>       engine.retire_indicator(**arguments)
+
+tests/test_retirement_interfaces.py:325: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = '/tmp/pytest-of-dev/pytest-1430/test_runner_prior_context_excl0/case'
+id = 'old', replacements = {'new': 1}
+reason = 'Synthetic technical replacement', actor = 'agent:executor'
+expected_version = 1, expected_review_seq = 11
+
+    def retire_indicator(path: str | Path, id: str, replacements: dict[str, int], reason: str, actor: str,
+                         expected_version: int, expected_review_seq: int) -> dict[str, Any]:
+        """Retire one rejected indicator version without deleting it or approving norms.
+    
+        Replacement versions and the negative review are mandatory concurrency
+        guards. Lifecycle validity is re-evaluated on every read; consumers are never
+        rewritten, and the original rejection remains visible in item issues.
+        """
+        if type(reason) is not str or type(actor) is not str:
+            raise MethodError("indicator retirement needs an explicit reason and actor")
+        payload = {"id": id, "version": expected_version, "replacements": replacements,
+                   "review_seq": expected_review_seq, "reason": reason.strip()}
+        _validate_indicator_retirement(payload, actor)
+        state = _project(path)
+        flags = _flags(state)
+        issues = _indicator_retirement_issues(state, payload, flags)
+        if issues:
+>           raise MethodError("indicator retirement is blocked: " + "; ".join(issues))
+E           specorganon.engine.MethodError: indicator retirement is blocked: replacement new lacks current typed numeric evidence on its normative protocol path; replacement new or its ancestors are not current and sound; source indicator ancestors are not current and sound
+
+src/specorganon/engine.py:1641: MethodError
+=========================== short test summary info ============================
+FAILED tests/test_retirement_interfaces.py::test_cli_retirement_records_one_event_and_no_approval
+FAILED tests/test_retirement_interfaces.py::test_runner_ignores_only_effective_retired_troubled_indicator
+FAILED tests/test_retirement_interfaces.py::test_runner_minima_count_only_active_indicators
+FAILED tests/test_retirement_interfaces.py::test_runner_prior_context_excludes_retired_indicators
+4 failed, 23 passed, 13 skipped in 0.68s

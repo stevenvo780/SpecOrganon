@@ -4,7 +4,7 @@ Ambas interfaces comparten el motor, runner y auditor de lotes. El directorio de
 
 ## CLI
 
-Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 22 operaciones públicas:
+Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 23 operaciones públicas:
 
 | CLI | MCP | Función |
 | --- | --- | --- |
@@ -12,6 +12,7 @@ Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <coman
 | `put` | `put` | Añadir o revisar un ítem. |
 | `status` | `status` | Leer estado y confianza de aprobaciones. |
 | `review` | `review` | Revisar un ítem. |
+| `retire-indicator` | `retire_indicator` | Retirar un indicador rechazado sin consumidores, con reemplazos y revisión fijados por versión. |
 | `approval-challenge` | `approval_challenge` | Obtener el mensaje exacto para una firma offline. |
 | `approve` | `approve` | Registrar una aprobación normativa verificada. |
 | `test-execution-challenge` | `test_execution_challenge` | Obtener los bytes exactos de un reporte de ejecución de prueba para firma offline. |
@@ -52,6 +53,11 @@ Además se rechaza un literal como `0.1234567890123456789` si pasarlo por `float
 El manifiesto de ejemplo es una fixture inventada. Créala en un entorno de prueba con `ORGANON_ALLOW_FIXTURES=1 uv run organon init ./caso-sintetico --title "Prueba" --domain fixture --actor agent:ejecutor --approval-policy fixture`; sus decisiones `human:fixture` no son aprobaciones humanas. Mantén esa variable activa en los procesos de prueba que registren aprobaciones o evalúen compuertas. Las fases son `frame`, `critique`, `study`, `observe`, `explain`, `compare`, `specify`, `build` y `validate`. Los tipos de ítem y requisitos por fase están en [`workflow.py`](../src/specorganon/workflow.py).
 
 ## Aprobación firmada de un caso real
+
+El [retiro de indicadores](retiro_indicadores.md) conserva el origen y su rechazo
+en el historial. `--replacements`, `--expected-version` y `--expected-review-seq`
+son obligatorios; el retiro técnico requiere reemplazos con evidencia vigente.
+Los manifests siguen usando acciones `put` y `advance`.
 
 Al crear el caso, `init` guarda un `case_id` UUID y devuelve `project_sha256`, el digest de sus metadatos canónicos. `status` también lo expone. El operador comprueba de forma independiente el UUID, esos metadatos y la ruta absoluta canónica del caso antes de registrarlos fuera del repositorio. Configura `ORGANON_APPROVERS_FILE` con la **ruta absoluta** del archivo JSON de confianza en el entorno del proceso CLI o MCP. El esquema 2 registra cada caso por UUID, su ruta y `project_sha256`, y dentro de él mapea cada actor `human:<nombre>` a los 32 bytes crudos de su clave pública Ed25519 codificados en base64:
 

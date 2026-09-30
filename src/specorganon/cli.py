@@ -16,6 +16,7 @@ ENGINE_OPERATIONS = {
     "put": "put_item",
     "status": "get_state",
     "review": "review_item",
+    "retire_indicator": "retire_indicator",
     "approve": "approve",
     "approval_challenge": "approval_challenge",
     "test_execution_challenge": "test_execution_challenge",
@@ -76,6 +77,13 @@ def _json_expected_deps(raw: str) -> dict[str, Any]:
     return _strict_object(raw, "--expected-deps")
 
 
+def _json_replacements(raw: str) -> dict[str, int]:
+    replacements = _strict_object(raw, "--replacements")
+    if any(type(version) is not int for version in replacements.values()):
+        raise argparse.ArgumentTypeError("--replacements values must be integers, without coercion")
+    return replacements
+
+
 def _json_report(raw: str) -> dict[str, Any]:
     return _strict_object(raw, "--report")
 
@@ -122,6 +130,17 @@ def build_parser() -> argparse.ArgumentParser:
     review.add_argument("--verdict", required=True)
     review.add_argument("--reason", required=True)
     review.add_argument("--actor", required=True)
+
+    retirement = commands.add_parser(
+        "retire-indicator", help="Retire a rejected unused indicator with versioned replacements; no human approval"
+    )
+    retirement.add_argument("path")
+    retirement.add_argument("id")
+    retirement.add_argument("--replacements", type=_json_replacements, required=True)
+    retirement.add_argument("--expected-version", type=int, required=True)
+    retirement.add_argument("--expected-review-seq", type=int, required=True)
+    retirement.add_argument("--reason", required=True)
+    retirement.add_argument("--actor", required=True)
 
     approve = commands.add_parser("approve", help="Record human approval of an item")
     approve.add_argument("path")

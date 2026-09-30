@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+    "-I",
+    "-B",
+    "-c",
+    "\nfrom pathlib import Path\nimport base64,hashlib,importlib.metadata as md,json,os,stat,sys\nvenv=Path(sys.prefix).resolve()\nexpected_python=sys.argv[1]\nversion=sys.version.split()[0]\nif version!=expected_python:raise RuntimeError('unexpected Python '+version)\ndistributions=sorted(md.distributions(),key=lambda d:d.metadata['Name'].lower())\nversions={d.metadata['Name'].lower():d.version for d in distributions}\nif 'specorganon' in versions:raise RuntimeError('specorganon must not be installed yet')\nif versions.get('mcp')!='2.2.0':raise RuntimeError('mcp version differs')\nif not 41<=int(versions['cryptography'].split('.')[0])<51:raise RuntimeError('cryptography outside declared range')\nif not 8<=int(versions['pytest'].split('.')[0])<10:raise RuntimeError('pytest outside declared range')\nout={'schema':1,'venv':str(venv),'python':{'version':version,'executable':sys.executable,'base_prefix':sys.base_prefix},'distributions':{},'files':{},'symlinks':[],'excluded_pycache':[],'record_validation':{'matched':0,'unhashed_entries':0,'mismatched':0},'specorganon_installed':False}\nfor d in distributions:\n name=d.metadata['Name'];filelist=d.files\n if filelist is None:raise RuntimeError('no RECORD file list for '+name)\n owned=[];nonregular=[]\n for rel in filelist:\n  p=Path(os.path.abspath(d.locate_file(rel)))\n  if not p.is_relative_to(venv):raise RuntimeError('distribution file outside venv '+str(p))\n  key=str(p.relative_to(venv))\n  if '__pycache__' in p.parts or p.suffix=='.pyc':\n   if p.exists():out['excluded_pycache'].append({'path':key,'distribution':name})\n   continue\n  s=p.lstat()\n  if stat.S_ISLNK(s.st_mode):\n   out['symlinks'].append({'path':key,'distribution':name,'target':p.readlink().as_posix()});continue\n  if not stat.S_ISREG(s.st_mode):nonregular.append(key);continue\n  if not p.resolve().is_relative_to(venv):raise RuntimeError('resolved distribution path outside venv '+key)\n  h=hashlib.sha256();size=0\n  with p.open('rb') as f:\n   for block in iter(lambda:f.read(1024*1024),b''):h.update(block);size+=len(block)\n  result={'bytes':size,'sha256':h.hexdigest()}\n  if key in out['files'] and out['files'][key]!=result:raise RuntimeError('conflicting file ownership '+key)\n  out['files'][key]=result;owned.append(key)\n  if rel.hash:\n   encoded=base64.urlsafe_b64encode(h.digest()).decode().rstrip('=')\n   if rel.hash.mode!='sha256' or rel.hash.value!=encoded or (rel.size is not None and rel.size!=size):\n    out['record_validation']['mismatched']+=1;raise RuntimeError('installed RECORD mismatch '+key)\n   out['record_validation']['matched']+=1\n  else:out['record_validation']['unhashed_entries']+=1\n out['distributions'][name.lower()]={'version':d.version,'metadata_origin':str(d._path),'installer':(d.read_text('INSTALLER') or '').strip(),'regular_file_count':len(owned),'regular_file_bytes':sum(out['files'][x]['bytes'] for x in owned),'nonregular_entries':nonregular}\nout['file_count']=len(out['files']);out['regular_file_bytes']=sum(x['bytes'] for x in out['files'].values());out['distribution_count']=len(out['distributions'])\nout['inventory_scope']='Regular public files listed by installed distribution RECORDs, including their public dist-info and scripts; no interpreter symlinks, symlink targets, pycache, environment secrets or source repository imports.'\nprint(json.dumps(out,sort_keys=True,ensure_ascii=False,allow_nan=False))\n",
+    "3.11.15"
+  ],
+  "cwd": "/tmp/specorganon-D107-deps-re8v1j45",
+  "environment": {
+    "LANG": "C.UTF-8",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "TZ": "UTC"
+  },
+  "exit_code": 0,
+  "finished_at_utc": "2026-09-30T21:45:56.423745+00:00",
+  "name": "311_04_inventory_before_check",
+  "started_at_utc": "2026-09-30T21:45:56.130422+00:00",
+  "stderr": {
+    "bytes": 0,
+    "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_04_inventory_before_check.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 247394,
+    "path": "/workspace/SpecOrganon/experiments/development/indicator_retirement_2026-09-30/environment_setup/311_04_inventory_before_check.stdout",
+    "sha256": "524cee41c84bf78875b72ce35937f282af6bd95b7237a453955f4a6ab80b24cc"
+  },
+  "wall_seconds_local": 0.2933337549911812
+}

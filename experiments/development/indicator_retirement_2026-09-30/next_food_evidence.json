@@ -1,0 +1,52 @@
+{
+  "agent": "/root/acceptance_gap_priority_0927",
+  "business_record_date": "unknown",
+  "classification": "attributed read-only next-work exploration, not executed derivation or acceptance verdict",
+  "criterion2_or3_pass": false,
+  "declared_documentary_inputs": {
+    "bakery_electricity": {
+      "unit": "kWh/piece",
+      "value": "0.297"
+    },
+    "bakery_natural_gas": {
+      "unit": "kWh/piece",
+      "value": "0.115"
+    },
+    "piece_mass": {
+      "unit": "g/piece",
+      "value": "736"
+    }
+  },
+  "execution_performed": false,
+  "existing_items_versions": {
+    "e_bakery_electricity": 1,
+    "e_bakery_natural_gas": 1,
+    "e_piece_mass": 1,
+    "pr_docs": 1
+  },
+  "new_indicator_scope": "descriptive documentary indicator; no support for existing four intervention indicators",
+  "next_candidate": "documentary bakery energy per produced bread kg",
+  "not_inferred": [
+    "emissions",
+    "cost",
+    "useful energy",
+    "current baseline",
+    "causal intervention effect",
+    "human thresholds"
+  ],
+  "population": "commercial product studied in published paper, not a current field lot",
+  "proposed_exact_derivation": {
+    "denominator": 184,
+    "formula": "(0.297 + 0.115) / (736 / 1000)",
+    "numerator": 103,
+    "unit": "kWh/kg produced bread"
+  },
+  "publication_year": 2018,
+  "requires_before_execution": [
+    "read and pin current source case/claims/PDF/protocol",
+    "prospective derivation contract with units/population/time/representation precision",
+    "installed CLI/MCP controls with revision of each source",
+    "independent graph/measurement scope review"
+  ],
+  "source_case_events": 64
+}

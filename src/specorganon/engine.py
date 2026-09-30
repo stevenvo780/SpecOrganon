@@ -120,7 +120,7 @@ def _local_archive_digest(case_path: str, parts: tuple[str, ...]) -> str:
         return digest.hexdigest()
 
 
-def _local_archive_issues(case_path: str, data: dict[str, Any]) -> list[str]:
+def _local_archive_issues(case_path: str, data: dict[str, Any], *, check_contents: bool = True) -> list[str]:
     """Evaluate an opted-in source-byte contract in a signed case."""
     archive_present = "archive" in data
     digest_present = "source_sha256" in data
@@ -134,6 +134,8 @@ def _local_archive_issues(case_path: str, data: dict[str, Any]) -> list[str]:
     expected = data["source_sha256"]
     if type(expected) is not str or _SOURCE_SHA256.fullmatch(expected) is None:
         return ["local archive source_sha256 must be a lowercase SHA-256 digest"]
+    if not check_contents:
+        return []
     try:
         actual = _local_archive_digest(case_path, parts)
     except OSError:
@@ -202,6 +204,7 @@ def _project(path: str | Path) -> dict[str, Any]:
         "field_attestation_trust": field_trust_status,
         "field_attestations": [],
         "item_reviews": {},
+        "indicator_retirements": [],
         "challenges": {},
         "resolutions": {},
         "phase_reviews": [],
@@ -353,8 +356,21 @@ def _project(path: str | Path) -> dict[str, Any]:
             })
         elif kind == "item_review":
             state["item_reviews"][(payload["id"], payload["version"])] = {
-                "seq": seq, "actor": event["actor"], **payload
+                **payload, "seq": seq, "actor": event["actor"]
             }
+        elif kind == "indicator_retire":
+            _validate_indicator_retirement(payload, event["actor"])
+            # Historical validation must not open an archive whose bytes may
+            # have changed since this event. Live validity is evaluated below.
+            history_flags = _flags(state, check_archives=False, include_retirements=False)
+            if any(entry["id"] == payload["id"]
+                   and not _indicator_retirement_issues(state, entry, history_flags)
+                   for entry in state["indicator_retirements"]):
+                raise MethodError(f"indicator already effectively retired at sequence {seq}")
+            issues = _indicator_retirement_issues(state, payload, history_flags)
+            if issues:
+                raise MethodError(f"invalid indicator retirement at sequence {seq}: {'; '.join(issues)}")
+            state["indicator_retirements"].append({"seq": seq, "actor": event["actor"], **payload})
         elif kind == "challenge":
             state["challenges"][seq] = {"seq": seq, "actor": event["actor"], **payload}
         elif kind == "challenge_resolved":
@@ -408,7 +424,10 @@ def _phase_authors(state: dict[str, Any], phase: str) -> set[str]:
     """Keep earlier item-version authors in signed reviewer independence checks."""
     phase_items = (item for item in state["items"].values() if KIND_TO_PHASE[item["kind"]] == phase)
     if state["project"]["approval_policy"] == "signed":
-        return set().union(*(state["item_author_history"][item["id"]] for item in phase_items))
+        authors = set().union(*(state["item_author_history"][item["id"]] for item in phase_items))
+        if phase == "study":
+            authors.update(entry["actor"] for entry in state["indicator_retirements"])
+        return authors
     return {item["author"] for item in phase_items}
 
 
@@ -955,7 +974,8 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any],
     return issues
 
 
-def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
+def _flags(state: dict[str, Any], *, check_archives: bool = True,
+           include_retirements: bool = True) -> dict[str, dict[str, Any]]:
     items = state["items"]
     contested: set[str] = set()
     active_resolutions = _active_resolutions(state)
@@ -1007,10 +1027,10 @@ def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
             elif type(archive) is str and type(expected) is str:
                 key = (archive, expected)
                 if key not in checks:
-                    checks[key] = _local_archive_issues(state["case_path"], data)
+                    checks[key] = _local_archive_issues(state["case_path"], data, check_contents=check_archives)
                 local_issues = checks[key]
             else:
-                local_issues = _local_archive_issues(state["case_path"], data)
+                local_issues = _local_archive_issues(state["case_path"], data, check_contents=check_archives)
             if local_issues:
                 archive_issues[item_id] = local_issues
                 for dependent_id in _dependents(items, item_id) - {item_id}:
@@ -1072,7 +1092,104 @@ def _flags(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
                         else "signed test needs a current successful observed repeat receipt"
                     )
         flags[item_id] = flag
+    if include_retirements:
+        _annotate_indicator_retirements(state, flags)
     return flags
+
+
+def _validate_indicator_retirement(payload: Any, actor: Any) -> None:
+    if (type(payload) is not dict
+            or set(payload) != {"id", "version", "replacements", "review_seq", "reason"}
+            or type(payload["id"]) is not str or ITEM_ID.fullmatch(payload["id"]) is None
+            or type(payload["version"]) is not int or payload["version"] < 1
+            or type(payload["review_seq"]) is not int or payload["review_seq"] < 1
+            or type(payload["reason"]) is not str or not payload["reason"].strip()
+            or payload["reason"] != payload["reason"].strip()
+            or type(actor) is not str or not actor.strip()):
+        raise MethodError("indicator retirement needs valid id, positive version/review guards, reason and actor")
+    replacements = payload["replacements"]
+    if (type(replacements) is not dict or not 1 <= len(replacements) <= 32
+            or any(type(key) is not str or ITEM_ID.fullmatch(key) is None
+                   or type(version) is not int or version < 1 for key, version in replacements.items())):
+        raise MethodError("indicator replacements must map 1–32 IDs to positive integer versions")
+
+
+def _indicator_retirement_issues(state: dict, record: dict, flags: dict) -> list[str]:
+    """Evaluate one declaration without recursing through retirement validity.
+
+    A replacement with any retirement declared on its current version cannot
+    support another retirement, even if that earlier declaration is invalid.
+    This conservative policy prevents circular lifecycle support.
+    """
+    items = state["items"]
+    source = items.get(record["id"])
+    if source is None or source["kind"] != "indicator":
+        return ["only an existing indicator can be retired"]
+    if source["version"] != record["version"]:
+        return ["source indicator version changed"]
+    issues = []
+    review = state["item_reviews"].get((source["id"], source["version"]))
+    source_authors = (state["item_author_history"][source["id"]]
+                      if state["project"]["approval_policy"] == "signed" else {source["author"]})
+    if (review is None or review["verdict"] != "reject" or review["seq"] != record["review_seq"]
+            or type(review["version"]) is not int or review["version"] != source["version"]
+            or type(review["actor"]) is not str or not review["actor"].strip()
+            or review["actor"] in source_authors):
+        issues.append("source needs its current independent negative review at the expected sequence")
+    source_flag = flags[source["id"]]
+    if source_flag["stale"] or source_flag["contested"]:
+        issues.append("source indicator is stale or contested")
+    if source_flag["issues"] != ["latest item review rejected this version"]:
+        issues.append("source indicator must have only its current review rejection issue")
+    if any(source["id"] in item["deps"] for item in items.values()):
+        issues.append("source indicator has current consumers, including outdated references")
+    source_ancestors = _ancestors(items, source["id"]) - {source["id"]}
+    if any(flags[key]["stale"] or flags[key]["contested"] or flags[key]["issues"] for key in source_ancestors):
+        issues.append("source indicator ancestors are not current and sound")
+    roots = {key for key in source_ancestors if items[key]["kind"] in {"problem", "norm"}}
+    if not any(items[key]["kind"] == "problem" for key in roots) or not any(items[key]["kind"] == "norm" for key in roots):
+        issues.append("source indicator needs problem and normative roots")
+    covered = set()
+    for key, version in record["replacements"].items():
+        replacement = items.get(key)
+        if replacement is None or replacement["kind"] != "indicator" or replacement["version"] != version:
+            issues.append(f"replacement {key} is not an indicator at its declared current version")
+            continue
+        ancestors = _ancestors(items, key)
+        covered.update(ancestor for ancestor in ancestors if items[ancestor]["kind"] in {"problem", "norm"})
+        if source["id"] in ancestors:
+            issues.append(f"replacement {key} depends on the source or is the source")
+        if any(entry["id"] == key and entry["version"] == replacement["version"]
+               for entry in state["indicator_retirements"]):
+            issues.append(f"replacement {key} has a retirement declared on its current version")
+        if any(flags[ancestor]["stale"] or flags[ancestor]["contested"] or flags[ancestor]["issues"]
+               for ancestor in ancestors):
+            issues.append(f"replacement {key} or its ancestors are not current and sound")
+        if not _decisive_indicator_has_evidence(items, flags, replacement):
+            issues.append(f"replacement {key} lacks current typed numeric evidence on its normative protocol path")
+    if not roots <= covered:
+        issues.append("replacement union does not preserve every source problem and normative root")
+    return sorted(set(issues))
+
+
+def _annotate_indicator_retirements(state: dict, flags: dict) -> None:
+    latest = {entry["id"]: entry["seq"] for entry in state["indicator_retirements"]}
+    for flag in flags.values():
+        flag.update(retired=False, retirement_status="none", retirement_issues=[], retirement_history=[])
+    for entry in state["indicator_retirements"]:
+        issues = _indicator_retirement_issues(state, entry, flags)
+        if latest[entry["id"]] != entry["seq"]:
+            issues.append("superseded by a later retirement declaration")
+        public = {**entry, "effective": not issues, "issues": issues}
+        flag = flags[entry["id"]]
+        flag["retirement_history"].append(public)
+        if latest[entry["id"]] == entry["seq"]:
+            flag["retired"] = not issues
+            flag["retirement_issues"] = issues
+            flag["retirement_status"] = (
+                "superseded" if state["items"][entry["id"]]["version"] != entry["version"]
+                else "invalidated" if issues else "effective"
+            )
 
 
 def _has_path(items: dict[str, dict], item_id: str, kinds: set[str]) -> bool:
@@ -1188,7 +1305,8 @@ def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: boo
     blockers: list[str] = []
     if not previous_accepted:
         blockers.append("previous phase is not currently accepted")
-    in_phase = [item for item in items.values() if KIND_TO_PHASE[item["kind"]] == phase_id]
+    in_phase = [item for item in items.values() if KIND_TO_PHASE[item["kind"]] == phase_id
+                and not flags[item["id"]].get("retired", False)]
     for item in in_phase:
         item_id, flag = item["id"], flags[item["id"]]
         if flag["stale"]:
@@ -1252,7 +1370,7 @@ def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: boo
                 blockers.append(f"{item['id']} must link an option")
     elif phase_id == "specify":
         for indicator in items.values():
-            if indicator["kind"] != "indicator":
+            if indicator["kind"] != "indicator" or flags[indicator["id"]].get("retired", False):
                 continue
             if not _has_path(items, indicator["id"], {"evidence"}):
                 blockers.append(f"{indicator['id']} lacks a path to evidence before specification")
@@ -1346,6 +1464,11 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
         )
         snapshot_data = {"phase": phase.id, "items": items,
                          "previous_marker": previous_marker, "challenges": challenge_history}
+        if phase.id == "study" and state["indicator_retirements"]:
+            snapshot_data["indicator_retirements"] = sorted(
+                (entry for flag in flags.values() for entry in flag["retirement_history"]),
+                key=lambda entry: entry["seq"],
+            )
         if state["project"]["approval_policy"] == "signed":
             normative_ids = sorted(item_id for item_id in relevant_ids
                                    if state["items"][item_id]["kind"] in {"norm", "decision"})
@@ -1506,6 +1629,29 @@ def review_item(path: str | Path, id: str, verdict: str, reason: str, actor: str
     if actor == item["author"]:
         raise MethodError("item reviewer must differ from its author")
     return append_event(path, "item_review", {"id": id, "version": item["version"], "verdict": verdict, "reason": reason.strip()}, actor, expected_seq=state["revision"])
+
+
+def retire_indicator(path: str | Path, id: str, replacements: dict[str, int], reason: str, actor: str,
+                     expected_version: int, expected_review_seq: int) -> dict[str, Any]:
+    """Retire one rejected indicator version without deleting it or approving norms.
+
+    Replacement versions and the negative review are mandatory concurrency
+    guards. Lifecycle validity is re-evaluated on every read; consumers are never
+    rewritten, and the original rejection remains visible in item issues.
+    """
+    if type(reason) is not str or type(actor) is not str:
+        raise MethodError("indicator retirement needs an explicit reason and actor")
+    payload = {"id": id, "version": expected_version, "replacements": replacements,
+               "review_seq": expected_review_seq, "reason": reason.strip()}
+    _validate_indicator_retirement(payload, actor)
+    state = _project(path)
+    flags = _flags(state)
+    if flags.get(id, {}).get("retired", False):
+        raise MethodError("indicator is already effectively retired")
+    issues = _indicator_retirement_issues(state, payload, flags)
+    if issues:
+        raise MethodError("indicator retirement is blocked: " + "; ".join(issues))
+    return append_event(path, "indicator_retire", payload, actor.strip(), expected_seq=state["revision"])
 
 
 def _approval_target(state: dict[str, Any], id: str, reason: str, actor: str) -> dict[str, Any]:
@@ -1805,6 +1951,10 @@ def get_state(path: str | Path) -> dict[str, Any]:
                  if isinstance(entry["binding"], dict) else None}
                 for entry in state["field_attestations"]
             ],
+            "indicator_retirement_history": sorted(
+                (entry for flag in flags.values() for entry in flag["retirement_history"]),
+                key=lambda entry: entry["seq"],
+            ),
             "items": items, "phases": phases, "open_challenges": open_challenges}
 
 

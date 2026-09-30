@@ -1,0 +1,10 @@
+{
+  "classification": "attributed independent prospective contract review, not a runtime probe",
+  "reviewer": "/root/source_gate_review",
+  "implementation_executed": false,
+  "findings": [
+    {"severity": "P2", "risk": "Suppressing a rejected source could also suppress its own malformed metric/unit issue", "contract_change": "Source must have exactly the pinned negative review issue; other source issues forbid effective retirement"},
+    {"severity": "P2", "risk": "Checking live archive state while replaying historical retirement could make the whole ledger unreadable", "contract_change": "Separate historical schema/guards/graph validation from dynamic archive/flag effectiveness; status/trace remain readable after invalidation"}
+  ],
+  "status": "preventive requirements accepted for implementation and targeted tests; closure not yet runtime verified"
+}

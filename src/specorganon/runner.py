@@ -79,6 +79,10 @@ def _limited(items: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _retired_indicator(item: dict[str, Any]) -> bool:
+    return item["kind"] == "indicator" and item.get("retired", False) is True
+
+
 def _validate_roles(roles: dict[str, str] | None) -> dict[str, str]:
     if roles is None:
         return {}
@@ -113,7 +117,8 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
     status = state["phases"][phase.id]
     items = state["items"]
     current = sorted(
-        (item for item in items.values() if KIND_TO_PHASE[item["kind"]] == phase.id),
+        (item for item in items.values()
+         if KIND_TO_PHASE[item["kind"]] == phase.id and not _retired_indicator(item)),
         key=lambda item: item["seq"], reverse=True,
     )
     valid_counts = {
@@ -133,6 +138,7 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
         item for item in items.values()
         if PHASE_INDEX[KIND_TO_PHASE[item["kind"]]] < PHASE_INDEX[phase.id]
         and (item["id"] in priority_refs or item["kind"] in input_kinds)
+        and not _retired_indicator(item)
     ]
     prior.sort(key=lambda item: (
         0 if item["id"] in priority_refs else 1,

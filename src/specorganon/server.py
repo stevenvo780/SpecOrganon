@@ -180,6 +180,15 @@ def _validate_raw_tool_arguments(message: Any) -> None:
             type(value) is bool for value in dependencies.values()
         ):
             raise ValueError("expected_deps values must be integers, not booleans")
+    elif params.get("name") == "retire_indicator":
+        replacements = arguments.get("replacements")
+        if type(replacements) is not dict:
+            raise ValueError("retire_indicator.replacements must be a JSON object")
+        if any(type(version) is not int for version in replacements.values()):
+            raise ValueError("retire_indicator.replacements values must be integers, without coercion")
+        for field in ("expected_version", "expected_review_seq"):
+            if type(arguments.get(field)) is not int:
+                raise ValueError(f"retire_indicator.{field} must be an integer, without coercion")
     elif (
         params.get("name") in {"test_execution_challenge", "record_test_execution"}
         and "report" in arguments
@@ -484,6 +493,19 @@ def status(path: str) -> dict[str, Any]:
 def review(path: str, id: str, verdict: str, reason: str, actor: str) -> dict[str, Any]:
     return _invoke(
         "review", path=path, id=id, verdict=verdict, reason=reason, actor=actor
+    )
+
+
+@server.tool(
+    description="Retire a rejected unused indicator with pinned replacement versions and review; technical action, not human approval."
+)
+def retire_indicator(
+    path: str, id: str, replacements: dict[str, StrictInt], reason: str, actor: str,
+    expected_version: StrictInt, expected_review_seq: StrictInt,
+) -> dict[str, Any]:
+    return _invoke(
+        "retire_indicator", path=path, id=id, replacements=replacements, reason=reason,
+        actor=actor, expected_version=expected_version, expected_review_seq=expected_review_seq,
     )
 
 

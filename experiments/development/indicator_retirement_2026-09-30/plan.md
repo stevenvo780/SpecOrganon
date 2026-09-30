@@ -25,14 +25,18 @@ del par carece de inferencia y D106 todavía no pertenece a su grafo.
 - Sólo indicadores; jamás problemas, normas, decisiones, criterios o requisitos.
 - API `retire_indicator(path, id, replacements, reason, actor,
   expected_version, expected_review_seq)`, CLI `retire-indicator`, MCP
-  `organon_retire_indicator`. replacements es un objeto no vacío de IDs/versiones
+  `retire_indicator`. replacements es un objeto no vacío de IDs/versiones
   enteras positivas, hasta 32 entradas. Guards obligatorios, sin coerción de bool.
 - La versión actual del origen debe tener una última revisión negativa cuyo
   número de secuencia coincide con expected_review_seq. El motivo debe ser
   explícito. Esta acción técnica no autentica identidad humana ni aprueba normas.
+  En casos signed, el revisor negativo debe ser distinto de todos los autores
+  históricos del indicador. Los autores de retiros también cuentan como autores
+  de study para la independencia de su revisión firmada, aun si el retiro caduca.
 - El origen no puede estar stale/contested ni tener consumidores actuales,
   incluso consumidores con referencias desactualizadas. Sus ancestros deben
-  estar vigentes, sin errores. Sus problemas y normas deben conservarse entre
+  estar vigentes, sin errores. Su único issue debe ser el rechazo vigente: no
+  ocultar errores estructurales propios. Sus problemas y normas deben conservarse entre
   los ancestros actuales de los reemplazos; esta cobertura estructural no prueba
   equivalencia semántica.
 - Cada reemplazo es un indicador actual, sin stale/contested/issues, con evidencia
@@ -40,13 +44,19 @@ del par carece de inferencia y D106 todavía no pertenece a su grafo.
   No puede depender directa o transitivamente del origen, ser el origen ni estar
   retirado. No se reescriben consumidores ni se resuelven desafíos.
 - Evento append-only `indicator_retire` contiene versión del origen, versiones de
-  reemplazos, review_seq y motivo. El reducer valida también los eventos leídos.
+  reemplazos, review_seq y motivo. El reducer valida forma/guards/grafo históricos;
+  jamás invalida la lectura de toda la historia por el estado vivo de un archivo.
+  La vigencia actual se calcula aparte, conservando status/trace legibles.
 - El retiro deja de ser efectivo si cambia origen/revisión/reemplazo, aparece un
   consumidor, una contradicción o un error de evidencia/archivo. Origen, rechazo,
   eventos y motivos siguen visibles. Un reemplazo retirado tampoco sirve.
 - Gates y next_task omiten sólo retiros efectivos; no cuentan para mínimos de
   indicadores. La instantánea de la fase liga historia y estado del retiro para
   exigir revisión/advance nuevos. Ledgers sin retiros conservan sus snapshots.
+  La restauración exacta de un archivo sin ningún evento duradero puede recuperar
+  el snapshot anterior y sus reviews/advances: el motor no registra intervalos
+  de corrupción que nadie ancla. Los cambios con evento (revisión, desafío,
+  consumidor o nueva declaración) sí dejan historia y exigen review vigente.
 - El runner no añade acciones de retiro a manifests en esta iteración; el agente
   debe ejecutar la operación explícita CLI/MCP y después continuar el workflow.
 
@@ -66,6 +76,22 @@ desafíos/cobertura/minimums/snapshot y parser/transporte/next_task; Ruff y comp
 Una suite global por cambio de núcleo y regresión firmada existente. Wheel nuevo
 con inventario de producción y dos instalaciones externas 3.11/3.12. La evidencia
 C1 de D103 permanece ligada a su wheel anterior: no extrapolar al nuevo package.
+
+### Refresco del inventario C1, antes de declarar cobertura del wheel nuevo
+
+Se actualizará únicamente la lista pública de discovery del smoke existente para
+admitir retire_indicator. Sus 15 operaciones originales se repetirán una vez en
+cada entorno, conservando stdout/stderr y el script ejecutado. Un derivado explícito
+del capturador firmado D103 cambiará sólo pin/default de wheel y clasificación:
+repetirá los tres tests/seis operaciones firmadas por CLI/MCP con respuestas y
+efectos retenidos. Una llamada positiva al auditor de lotes por CLI/MCP con el
+mismo input completa las 22 operaciones previas; D107 aporta el retiro número 23.
+Se repetirán asimismo los workflows firmados signed_report/signed_observed con
+workspace retenido en ambos Python para comprobar fases, firmas y reapertura.
+Todos los instrumentos, tests/imports locales y nuevo wheel se fijan antes del
+lanzamiento. Un intento por instrumento/intérprete/modo; conservar fallos y no
+extrapolar a permisos, identidad humana o custodia externos. Completar cobertura
+requiere inspeccionar los efectos y revisión independiente, no sólo exit0.
 
 ## Variante Citi y controles prospectivos
 

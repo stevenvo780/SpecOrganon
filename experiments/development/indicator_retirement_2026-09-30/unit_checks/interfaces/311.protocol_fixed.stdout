@@ -1,0 +1,33 @@
+.................F......................                                 [100%]
+=================================== FAILURES ===================================
+____________ test_cli_retirement_records_one_event_and_no_approval _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1433/test_cli_retirement_records_on0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc1f41d2350>
+capsys = <_pytest.capture.CaptureFixture object at 0x7fc1f41e4850>
+
+    def test_cli_retirement_records_one_event_and_no_approval(tmp_path, monkeypatch, capsys):
+        case, arguments = _case(tmp_path, monkeypatch)
+        before = read_project(case)["events"]
+        assert cli.main(_argv(arguments)) == 0
+        event = json.loads(capsys.readouterr().out)
+        after = read_project(case)["events"]
+        assert after[:-1] == before
+        assert event == after[-1]
+        assert event["kind"] == "indicator_retire"
+        assert event["payload"]["replacements"] == {"new": 1}
+        assert engine.get_state(case)["items"]["old"]["retired"] is True
+        assert not any(e["kind"] in {"approval", "phase_review", "phase_advance"} for e in after)
+        frozen = (case / "organon.json").read_bytes()
+>       assert cli.main(_argv(arguments)) == 1
+E       assert 0 == 1
+E        +  where 0 = <function main at 0x7fc1f467d8a0>(['retire-indicator', '/tmp/pytest-of-dev/pytest-1433/test_cli_retirement_records_on0/case', 'old', '--replacements', '{"new": 1}', '--expected-version', ...])
+E        +    where <function main at 0x7fc1f467d8a0> = cli.main
+E        +    and   ['retire-indicator', '/tmp/pytest-of-dev/pytest-1433/test_cli_retirement_records_on0/case', 'old', '--replacements', '{"new": 1}', '--expected-version', ...] = _argv({'path': '/tmp/pytest-of-dev/pytest-1433/test_cli_retirement_records_on0/case', 'id': 'old', 'replacements': {'new': 1}, 'reason': 'Synthetic technical replacement', ...})
+
+tests/test_retirement_interfaces.py:161: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"actor": "agent:executor", "at": "2026-09-30T21:52:17+00:00", "hash": "a347b959743d702c93cad3997e04b1cf292b8533451f2d63bf70183545c4d3e1", "kind": "indicator_retire", "payload": {"id": "old", "reason": "Synthetic technical replacement", "replacements": {"new": 1}, "review_seq": 11, "version": 1}, "prev_hash": "27b3da0233d970c38d11c612086f96d45463f7b7f07137f3105c4a85994120ae", "seq": 13}
+=========================== short test summary info ============================
+FAILED tests/test_retirement_interfaces.py::test_cli_retirement_records_one_event_and_no_approval
+1 failed, 39 passed in 1.67s
