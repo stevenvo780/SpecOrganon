@@ -1,0 +1,99 @@
+{
+  "root": "/tmp/specorganon-D120-worker-attempt01-22c2qewl",
+  "sources_before": {
+    "scripts/measure_coordinated_runtime.py": "eae9446c0f6fa9cc1ddd76d3c3049e4f46d85e8b9903590d0d8ba9648e703cdd",
+    "tests/test_measure_coordinated_runtime.py": "1d5cfbbc45ccbd2e2ad74089aafa1aae47bf4e47de16fe66c2fe80fe326bfeb7"
+  },
+  "bootstrap_failure_observed": {
+    "argv": [
+      "python",
+      "-"
+    ],
+    "exit_code": 127,
+    "stderr": "/bin/bash: line 1: python: command not found\n"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_measure_coordinated_runtime.py",
+        "--basetemp",
+        "/tmp/specorganon-D120-worker-attempt01-22c2qewl/cases311"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.870986593014095,
+      "stdout": "/tmp/specorganon-D120-worker-attempt01-22c2qewl/01.stdout",
+      "stderr": "/tmp/specorganon-D120-worker-attempt01-22c2qewl/01.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_measure_coordinated_runtime.py",
+        "--basetemp",
+        "/tmp/specorganon-D120-worker-attempt01-22c2qewl/cases312"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.2272809090209194,
+      "stdout": "/tmp/specorganon-D120-worker-attempt01-22c2qewl/02.stdout",
+      "stderr": "/tmp/specorganon-D120-worker-attempt01-22c2qewl/02.stderr"
+    },
+    {
+      "argv": [
+        "/home/dev/.local/bin/ruff",
+        "check",
+        "scripts/measure_coordinated_runtime.py",
+        "tests/test_measure_coordinated_runtime.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.06719958502799273,
+      "stdout": "/tmp/specorganon-D120-worker-attempt01-22c2qewl/03.stdout",
+      "stderr": "/tmp/specorganon-D120-worker-attempt01-22c2qewl/03.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-c",
+        "import ast,pathlib,sys; [compile(ast.parse(pathlib.Path(p).read_bytes()),p,\"exec\") for p in sys.argv[1:]]",
+        "scripts/measure_coordinated_runtime.py",
+        "tests/test_measure_coordinated_runtime.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.06549434899352491,
+      "stdout": "/tmp/specorganon-D120-worker-attempt01-22c2qewl/04.stdout",
+      "stderr": "/tmp/specorganon-D120-worker-attempt01-22c2qewl/04.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-c",
+        "import ast,pathlib,sys; [compile(ast.parse(pathlib.Path(p).read_bytes()),p,\"exec\") for p in sys.argv[1:]]",
+        "scripts/measure_coordinated_runtime.py",
+        "tests/test_measure_coordinated_runtime.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.0700093109626323,
+      "stdout": "/tmp/specorganon-D120-worker-attempt01-22c2qewl/05.stdout",
+      "stderr": "/tmp/specorganon-D120-worker-attempt01-22c2qewl/05.stderr"
+    }
+  ],
+  "sources_after": {
+    "scripts/measure_coordinated_runtime.py": "eae9446c0f6fa9cc1ddd76d3c3049e4f46d85e8b9903590d0d8ba9648e703cdd",
+    "tests/test_measure_coordinated_runtime.py": "1d5cfbbc45ccbd2e2ad74089aafa1aae47bf4e47de16fe66c2fe80fe326bfeb7"
+  },
+  "source_unchanged": true,
+  "all_exit_zero": true
+}

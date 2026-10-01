@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "classification": "independent_prospective_plan_and_D119_API_review_not_final_implementation_verdict",
+  "plan_commit": "357ac439736de621e1d21dbb7f86d8a473ee4854",
+  "observed_HEAD": "357ac439736de621e1d21dbb7f86d8a473ee4854",
+  "plan_sha256": "dff2e8bb35ec84ff836c1d9021f7a3acb96095663dd464d90ca7fed97bae9811",
+  "GOAL_and_plan_read_in_full": true,
+  "plan_committed_bytes_equal_live": true,
+  "source_pins": [
+    {
+      "path": "GOAL.md",
+      "sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36"
+    },
+    {
+      "path": "scripts/managed_coordinated_prototype.py",
+      "sha256": "450949301f084a6512855bf38df092be2bfca61bf59e5e49469254031191ec28"
+    },
+    {
+      "path": "scripts/coordinated_prototype_runtime.py",
+      "sha256": "feb3429547dbdb05eef63fdb4efd6750121364b5dd74097655bd801483f2ec3a"
+    },
+    {
+      "path": "scripts/coordinated_prototype_broker.py",
+      "sha256": "1921ad220a9b9041ce103bd75b0f7f18c3fa1b39c311e8616dee0c3848e69ac4"
+    },
+    {
+      "path": "scripts/managed_parallel_wave.py",
+      "sha256": "82e517b374f4309008ed9b51d55cff4717123fcdc1491b87291a26b2bbe7fa32"
+    },
+    {
+      "path": "scripts/managed_wave_ledger.py",
+      "sha256": "78e423bc54a61f7702a238fa01d95b1f2708ede2b1d201b4a34d4e4730061d34"
+    },
+    {
+      "path": "scripts/managed_token_ledger.py",
+      "sha256": "1a02c425f3af19c1d4993911fdebfccfc8d6ada1a382ea4e5f582a9151cb4b4a"
+    },
+    {
+      "path": "scripts/managed_run_context.py",
+      "sha256": "a9e94ebddcaec0f141aaa82186b66a2d8a9af4faf43fdd543658e06f234b7bf2"
+    },
+    {
+      "path": "scripts/run_managed_conversation.py",
+      "sha256": "c93fd3a356c9c0f796d88f473a7f3fbfef10fde2cd7c6a2d5183f9f5185c5f56"
+    }
+  ],
+  "sample_runtime": "/tmp/specorganon-D119-integration311_02-ddvo36cs/A-D-F/run",
+  "raw_content_copied_to_report": false,
+  "plan_consistency": "Scope and missing-measurement claims are coherent; implementation-specific omissions above must be closed and checked after handoff.",
+  "confirmed_implementation_bugs": [],
+  "recommendations": [
+    {
+      "priority": "P2",
+      "topic": "Keep one coherent locked snapshot without nested run lock",
+      "fact": "Public runtime status acquires engine _run_lock; flock is acquired on a fresh fd each time. A wrapper that holds the same lock and then invokes that API risks blocking itself. A public status call followed by unlocked raw reads does not provide the selected atomic snapshot.",
+      "evidence": [
+        "scripts/managed_coordinated_prototype.py:625",
+        "scripts/run_managed_conversation.py:225",
+        "scripts/coordinated_prototype_runtime.py:248",
+        "experiments/development/coordinated_measurement_2026-10-01/plan.md:22"
+      ],
+      "recommendation": "Acquire original lock once around existing _load, mandatory wrapper guard, native completed-run replay/publication checks and all input reads; do not reacquire it through public status. Keep same exact registered interpreter.",
+      "suggested_test": "Completed fixture reconciliation terminates without nested-lock blocking; rejected paused/unpublished/foreign-interpreter runtime produces no success report."
+    },
+    {
+      "priority": "P2",
+      "topic": "Explicit sanitized projection for reports and errors",
+      "fact": "Runtime view includes delivery/delegation data, broker records retain arguments and output, and the original cost parser permits additional keys inside usage-detail objects. Copying a whole source dict can publish sensitive text.",
+      "evidence": [
+        "scripts/managed_coordinated_prototype.py:612",
+        "scripts/coordinated_prototype_broker.py:503",
+        "scripts/coordinated_prototype_broker.py:704",
+        "scripts/managed_token_ledger.py:120",
+        "experiments/development/coordinated_measurement_2026-10-01/plan.md:25"
+      ],
+      "recommendation": "Construct output fields individually with validated numeric values, bounded identifiers and hashes. Never include complete request/response/status/delivery/tool args/streams or raw detail groups. Use fixed error text without raw input values.",
+      "suggested_test": "Add sentinel strings to permissible unknown usage-detail fields and known private request/response/output fields; require absence from stdout, stderr and serialized result."
+    },
+    {
+      "priority": "P2",
+      "topic": "Semantic usage reconciliation beyond existing digest replay",
+      "fact": "Engine _response checks RAW hashes and receipt.settled==ledger record, but does not explicitly compare response usage and detail groups with the settlement record. Price ledger independently validates its own settlement.",
+      "evidence": [
+        "scripts/managed_coordinated_prototype.py:369",
+        "scripts/managed_wave_ledger.py:361",
+        "scripts/managed_parallel_wave.py:379",
+        "experiments/development/coordinated_measurement_2026-10-01/plan.md:31"
+      ],
+      "recommendation": "Extract the exact three numeric usage fields and the same two detail groups as original settlement; reject mismatch against receipt and ledger rather than trusting a native replay status or one copied total. Reject bool, negative, inconsistent input+output and cache/reasoning bounds.",
+      "suggested_test": "Independently corrupt response usage, receipt settlement, ledger record, role/model/effort and journal membership; each discrepancy rejects reconciliation."
+    },
+    {
+      "priority": "P2",
+      "topic": "Preserve conservative original per-request pricing and missing detail semantics",
+      "fact": "Original pricing aliases cached_tokens/cache_read_tokens, rejects disagreement, prices unclassified input at maximum declared input rate and applies integer ceil per request. Missing detail groups in final D119 synthetic responses are absent, not authenticated zero usage.",
+      "evidence": [
+        "scripts/managed_token_ledger.py:90",
+        "scripts/managed_token_ledger.py:110",
+        "scripts/managed_parallel_wave.py:382",
+        "experiments/development/coordinated_measurement_2026-10-01/plan.md:36"
+      ],
+      "recommendation": "Use frozen profile, recalculate each request with original formula, compare held_cost_micro_usd, sum already-rounded costs. Publish observed classification and coverage separately; incomplete aggregate cache/reasoning counts remain unknown. Never label unclassified input uncached or add reasoning/cache to total again.",
+      "suggested_test": "A fractional-price multi-request example distinguishes sum(ceil(each)) from ceil(sum); exercise aliases, partial absent groups, cache-write/read/uncached bounds and reasoning subset."
+    },
+    {
+      "priority": "P2",
+      "topic": "Validate local time values and distinguish clock domains",
+      "fact": "Send receipt timestamps are time.monotonic_ns; ledger send markers are time.time_ns. Tool receipt contains separate sandbox duration and enclosing host_elapsed_seconds. Native digest/replay bindings do not themselves provide semantic clock validation or boot identity.",
+      "evidence": [
+        "scripts/managed_parallel_wave.py:348",
+        "scripts/managed_wave_ledger.py:451",
+        "scripts/coordinated_prototype_broker.py:711",
+        "experiments/development/coordinated_measurement_2026-10-01/plan.md:44"
+      ],
+      "recommendation": "Require exact integer positive ns and ended>=started; reject bool, nonfinite, negative sandbox/host seconds. Sum local send, sandbox and host measures independently. Keep no clock/boot identity, global union and W explicit missing.",
+      "suggested_test": "Reject swapped/negative/bool timestamps and negative/bool/nonfinite durations; do not compare wall ns with monotonic ns or derive W from extrema."
+    },
+    {
+      "priority": "P2",
+      "topic": "Report exact local journal coverage without claiming full activity coverage",
+      "fact": "The same transport worker measures count_input but only successful sends receive model receipts. Tool duration does not include all replay/merge/human/provider work. D119 has one persistent ledger and multi-epoch request/role counters.",
+      "evidence": [
+        "scripts/managed_parallel_wave.py:342",
+        "scripts/managed_parallel_wave.py:386",
+        "scripts/managed_coordinated_prototype.py:425",
+        "scripts/managed_coordinated_prototype.py:482",
+        "experiments/development/coordinated_measurement_2026-10-01/plan.md:48"
+      ],
+      "recommendation": "Require exact request/response/receipt/ledger/timeline sets, all role turn counters and broker global tool ordinals/reservations/receipts. Label completeness only for observed local send/tool journals. Input counting duration, W, H, remote activity and study cost stay missing.",
+      "suggested_test": "Extra/missing/orphan journals, duplicate IDs or counters reject; multi-epoch A/B/C fixtures preserve global counts; all reports retain explicit missing measurements and formal=false."
+    }
+  ],
+  "formal_cells_executed": 0,
+  "final_verdict": "pending_code_reports_and_preservation_followup",
+  "repository_edits": "Only this new review report; no runtime/source/historical edits, tests or model calls."
+}

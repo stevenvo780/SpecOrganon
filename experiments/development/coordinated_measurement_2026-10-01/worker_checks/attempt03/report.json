@@ -1,0 +1,110 @@
+{
+  "root": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4",
+  "sources_before": {
+    "scripts/measure_coordinated_runtime.py": "a92ea44ed06476ca3fab379e434f95bace776243f21465a7db2918dee68a39b0",
+    "tests/test_measure_coordinated_runtime.py": "8979ed98c4cdbb663e5a414c5a4a0247c42001350093f916f3f6e2e465e32101"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_measure_coordinated_runtime.py",
+        "--basetemp",
+        "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/cases311"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "elapsed_seconds": 0.5656193820177577,
+      "stdout": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/01.stdout",
+      "stderr": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/01.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_measure_coordinated_runtime.py",
+        "--basetemp",
+        "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/cases312"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "elapsed_seconds": 0.5159930280060507,
+      "stdout": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/02.stdout",
+      "stderr": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/02.stderr"
+    },
+    {
+      "argv": [
+        "/home/dev/.local/bin/ruff",
+        "check",
+        "scripts/measure_coordinated_runtime.py",
+        "tests/test_measure_coordinated_runtime.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "elapsed_seconds": 0.01644288399256766,
+      "stdout": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/03.stdout",
+      "stderr": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/03.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-c",
+        "import ast,pathlib,sys; [compile(ast.parse(pathlib.Path(p).read_bytes()),p,\"exec\") for p in sys.argv[1:]]",
+        "scripts/measure_coordinated_runtime.py",
+        "tests/test_measure_coordinated_runtime.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "elapsed_seconds": 0.06511789903743193,
+      "stdout": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/04.stdout",
+      "stderr": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/04.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-c",
+        "import ast,pathlib,sys; [compile(ast.parse(pathlib.Path(p).read_bytes()),p,\"exec\") for p in sys.argv[1:]]",
+        "scripts/measure_coordinated_runtime.py",
+        "tests/test_measure_coordinated_runtime.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "elapsed_seconds": 0.06664199399529025,
+      "stdout": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/05.stdout",
+      "stderr": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/05.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "scripts/measure_coordinated_runtime.py",
+        "--run-dir",
+        "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/nonexistent-run"
+      ],
+      "exit_code": 2,
+      "expected_exit_code": 2,
+      "elapsed_seconds": 0.11503252701368183,
+      "stdout": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/06.stdout",
+      "stderr": "/tmp/specorganon-D120-worker-attempt03-2pc0y0k4/06.stderr"
+    }
+  ],
+  "sources_after": {
+    "scripts/measure_coordinated_runtime.py": "a92ea44ed06476ca3fab379e434f95bace776243f21465a7db2918dee68a39b0",
+    "tests/test_measure_coordinated_runtime.py": "8979ed98c4cdbb663e5a414c5a4a0247c42001350093f916f3f6e2e465e32101"
+  },
+  "source_unchanged": true,
+  "all_expected_exit": true
+}

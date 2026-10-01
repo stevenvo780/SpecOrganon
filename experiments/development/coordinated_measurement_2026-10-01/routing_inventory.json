@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "captured_at": "2026-10-01T16:07:05.932Z",
+  "source_tools": [
+    "ai-usage.get_ai_quotas",
+    "cloud-offload.listar_modelos_cloud"
+  ],
+  "observation_scope": "read_only_cli_inventory_no_generation_or_spending",
+  "allowed_routes": [
+    {
+      "model": "codex/gpt-5.3-codex-spark",
+      "provider": "codex",
+      "cli": "codex",
+      "cli_in_path": true,
+      "native_model": "gpt-5.3-codex-spark"
+    },
+    {
+      "model": "codex/gpt-5.6-luna",
+      "provider": "codex",
+      "cli": "codex",
+      "cli_in_path": true,
+      "native_model": "gpt-5.6-luna"
+    },
+    {
+      "model": "codex/gpt-5.6-sol",
+      "provider": "codex",
+      "cli": "codex",
+      "cli_in_path": true,
+      "native_model": "gpt-5.6-sol"
+    },
+    {
+      "model": "codex/gpt-5.6-terra",
+      "provider": "codex",
+      "cli": "codex",
+      "cli_in_path": true,
+      "native_model": "gpt-5.6-terra"
+    },
+    {
+      "model": "codex/gpt-6-astra",
+      "provider": "codex",
+      "cli": "codex",
+      "cli_in_path": true,
+      "native_model": "gpt-6-astra"
+    },
+    {
+      "model": "codex/gpt-6-luna",
+      "provider": "codex",
+      "cli": "codex",
+      "cli_in_path": true,
+      "native_model": "gpt-6-luna"
+    },
+    {
+      "model": "codex/gpt-6-sol",
+      "provider": "codex",
+      "cli": "codex",
+      "cli_in_path": true,
+      "native_model": "gpt-6-sol"
+    },
+    {
+      "model": "gemini/3.1-pro",
+      "provider": "gemini",
+      "cli": "agy",
+      "cli_in_path": true,
+      "native_model": "pro"
+    },
+    {
+      "model": "gemini/3.7-flash",
+      "provider": "gemini",
+      "cli": "agy",
+      "cli_in_path": true,
+      "native_model": "flash"
+    },
+    {
+      "model": "gemini/flash",
+      "provider": "gemini",
+      "cli": "agy",
+      "cli_in_path": true,
+      "native_model": "flash"
+    },
+    {
+      "model": "gemini/pro",
+      "provider": "gemini",
+      "cli": "agy",
+      "cli_in_path": true,
+      "native_model": "pro"
+    },
+    {
+      "model": "minimax/MiniMax-M2.7",
+      "provider": "minimax",
+      "cli": "opencode",
+      "cli_in_path": true,
+      "native_model": "minimax/MiniMax-M2.7"
+    },
+    {
+      "model": "minimax/MiniMax-M3",
+      "provider": "minimax",
+      "cli": "opencode",
+      "cli_in_path": true,
+      "native_model": "minimax/MiniMax-M3"
+    }
+  ],
+  "quota": {
+    "codex": {
+      "probe_ok": false,
+      "kind": "unknown",
+      "usable_quota_measurement": false,
+      "interpretation": "unknown_does_not_mean_zero_or_model_inactive"
+    },
+    "gemini": [
+      {
+        "label": "Gemini 5 horas",
+        "remaining_percent": 97,
+        "reset_at": "2026-10-01T18:50:05.909Z"
+      },
+      {
+        "label": "Gemini semanal",
+        "remaining_percent": 95,
+        "reset_at": "2026-10-07T13:21:05.909Z"
+      }
+    ],
+    "minimax": {
+      "usable_quota_measurement": false,
+      "interpretation": "no_separate_verified_minimax_window"
+    }
+  },
+  "native_luna_assignment": {
+    "agent": "/root/d119_next_measurement_intake",
+    "scope": "bounded_read_only_interface_inventory",
+    "quality_comparison": false
+  },
+  "readiness": {
+    "cli_inventory_verified": true,
+    "HTTP_Responses_route_authenticated": false,
+    "credential_contents_read": false,
+    "provider_usage_authenticated": false,
+    "tariff_or_invoice_verified": false,
+    "model_calls_for_this_inventory": 0,
+    "formal_cells_executed": 0
+  },
+  "limitations": [
+    "CLI presence does not authenticate Responses HTTP compatibility or credentials",
+    "Native agent work is separate from experimental R1 cells",
+    "Quota snapshot may change and does not authorize spending",
+    "No benchmark supports equal quality across models"
+  ]
+}
