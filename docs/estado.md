@@ -1,5 +1,30 @@
 # Estado de reanudación
 
+**D-111 integra un contexto de presupuesto y relevos por corrida:**
+[dossier](../experiments/development/shared_run_context_2026-10-01/README.md)
+y [contrato](presupuesto_solicitudes_modelo.md). Runner schema2: modelo/esfuerzo
+únicos, ledger y sesión/claim compartidos, segmentos secuenciales de líder,
+especialista y revisor. Checkpoint con CAS y fuentes/journals fijados; tokens,
+costo declarado, solicitudes, herramientas y tiempo no se reinician al cambiar
+de rol o proceso. Historial bruto privado por rol; solo entregables textuales
+seleccionados pasan entre roles. Lease revocado y guard antes/después de efectos;
+active incierto y cierre incompleto no pueden reanudarse.
+
+Freeze0498de3 precede gates finales: 89passed3.11/36passed3.12; Ruff/compilación
+aprobados, compatibilidad v1 y revisión independiente sin P1/P2 abierto en ese
+alcance. Tres P2 de código cerrados con fuentes originales preservadas; negativo
+del reloj2failed esperados antes del arreglo, luego10passed por Python. Primer
+foco de integración25passed es exploratorio, no el freeze. Dos archivos conservan
+4649regulares; symlinks/directorios solo metadata, sin imagen de sesión completa.
+GOAL/protocolo/24módulos/wheel intactos; helper v1 recibe guard opcional explícito.
+
+**1/5 en alcance técnico C1 D107; C2–C5 No demostrados.** Proveedores falsos y
+fixtures públicas, sin factura/identidad autenticadas, Q, 24celdas, jueces, normas,
+reserva nueva, campo o ejecución pagada. Siguiente: configuración y telemetría
+operativas de las 24celdas A/B/C × D-F/D-E × dos rondas × dos repeticiones;
+selección/freeze y custodia/evaluadores/sitio de campo independientes. Este
+control no sustituye esas dependencias. Los cortes siguientes son históricos.
+
 **D-110 corrige admisión antes de solicitudes del bridge:**
 [dossier](../experiments/development/bridge_model_admission_2026-10-01/README.md).
 Negativo pre-fix: dos copias textuales del mismo intento completaban2conteos/

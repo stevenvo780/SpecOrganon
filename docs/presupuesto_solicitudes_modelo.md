@@ -1,5 +1,46 @@
 # Despacho medido de una solicitud de desarrollo
 
+## Contexto común de una corrida (D-111)
+
+`scripts/run_managed_team.py` añade un plan optativo `schema:2` con segmentos
+de `leader`, `specialist` y `reviewer`. Comparte el ledger de tokens/costo,
+máximo de solicitudes, sesión sellada, herramientas y claim por intento. Cada
+invocación ejecuta un segmento y se detiene en una frontera conciliada; la
+siguiente presenta `--expected-checkpoint` con el SHA devuelto. Un checkpoint
+viejo o un cambio de fuentes/journals impide continuar. El bridge `schema:1`
+mantiene su contrato de dos turnos y ejecución única.
+
+El plan fija un modelo, esfuerzo, tier y perfil de precios para todos los
+roles. `share_from` enumera segmentos previos cuyos entregables **textuales**
+se incorporan al nuevo prompt con procedencia y SHA. El historial completo
+de respuesta, incluido razonamiento cifrado, se conserva y reconstruye solo
+para el mismo rol; no se pasa al revisor desde otros roles. No hay ejecución
+simultánea de solicitudes: el ledger sigue exigiendo conciliación de una
+reserva antes de otra.
+
+`scripts/managed_run_context.py` acumula tiempo activo entre segmentos y mide
+la espera pausada por separado; esa espera no implica intervención humana.
+La instancia activa se revoca al pausar/finalizar. Un proceso antiguo, un
+segmento activo interrumpido o una reserva incierta no obtienen otro saldo
+ni reenvío automático. Se comprueba plazo antes y después de operaciones y
+al cerrar; una respuesta tardía no da estado exitoso.
+
+La preparación local no adquiere claim. El primer segmento lo adquiere antes
+del primer conteo, y se comprueba en cada efecto posterior. El máximo de
+solicitudes Responses se comprueba antes del conteo; el techo de tokens/costo
+se conoce después de contar y se reserva antes de `send`. El conteo HTTP
+puede ocurrir aunque esa reserva no quepa. Ningún techo local constituye
+facturación autenticada o cancelación remota.
+
+El [dossier D-111](../experiments/development/shared_run_context_2026-10-01/README.md)
+conserva capturas offline, fuentes y revisión: 89 pruebas en Python 3.11 y
+36 en 3.12, Ruff y compilación aprobados. Roles y modelos de fixtures
+son etiquetas sintéticas. Este control local no acredita el ensayo de 24
+celdas, independencia humana, custodia de reserva o C4. La CLI `execute`
+requiere `--allow-paid-requests`; la verificación D-111 no lo usa para pagar.
+
+## Ruta de solicitud y conversación original
+
 `scripts/run_managed_response.py` ofrece una ruta **de desarrollo** para una
 solicitud de texto a OpenAI Responses. Usa el endpoint de
 [conteo de entrada](https://developers.openai.com/api/docs/guides/token-counting)
