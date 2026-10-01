@@ -1,5 +1,30 @@
 # Estado de reanudación
 
+**D-123 agrega entrada Responses futura y lectura de respuestas rechazadas:**
+[dossier](../experiments/development/authorized_route_entry_2026-10-01/README.md).
+Flag de gasto y declaración privada ligada a run/modelo/recursos/fuentes,
+guard antes del I/O real del hilo y clave leída sólo tras gates. Permiso local
+cooperativo, sin autenticar al humano. Espera local≤90/deadline nativo;
+resultados tardíos descartados, sin garantía de cancelación remota.
+Outcomes lee bajo lock/guard original; indeterminate no afirma replay completo
+ni reejecuta. Uso declarado y reservas son columnas alternativas.
+
+Plan080acba/freeze7246936: **74 pruebas por Python3.11/3.12**, Ruff/sintaxis/diff0,
+seis controles completos A/B/C nuevos,146CLI y110sends completos de fixture.
+Dos incomplete adicionales: costo declarado7µUSD y reserva133µUSD/133tokens
+por run, retenida sin publicación/reexec; ruta OpenAI sin permiso rechazada.
+Archivos por bytes/modos y fuentes intactas; D1215875/D122121 pins+recibos
+conservados y docs históricos Git. Fallo de lifecycle y dos timeouts600s
+preservados, con sus límites de captura; repetición completa verificada.
+
+**C1 técnico D107; C2–C5 No demostrado; 0/24 formales.** Sin clave real/API
+pagada/Q/campo. Luna hizo dos intakes cotejados; equivalencia de calidad no
+medida. Siguen elección/autorización/acceso/modelo efectivo, telemetría real,
+evaluación competente/H/costos completos. Próximo trabajo local:
+[ingreso de evaluaciones externas](../experiments/development/authorized_route_entry_2026-10-01/next_activation.md).
+Luego12R1→adaptación/freeze→12R2/selección→confirmación→campo/transferencia.
+Los cortes siguientes permanecen históricos.
+
 **D-122 prepara una propuesta concreta para doce R1 reales:**
 [dossier](../experiments/development/real_route_proposal_2026-10-01/README.md).
 Opciones Astra/Luna `high`, misma información/roles/recursos y política de

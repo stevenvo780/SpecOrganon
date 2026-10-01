@@ -1,5 +1,30 @@
 # Auditoría de aceptación actual
 
+## D-123 · Entrada controlada y desenlaces indeterminados
+
+[Dossier](../experiments/development/authorized_route_entry_2026-10-01/README.md):
+controlador separado sin modificar guards/ledger/claim/observación sellados.
+Step real exige flag/declaración privada exacta y origen oficial fijo; clave
+tras gates. Check dentro del hilo antes de I/O cierra carrera reproducida.
+Espera local≤90/deadline nativo, sin cancelación remota garantizada.
+Lector conserva reservas; uso/precio declarado no es factura ni costo completo.
+Guard indeterminate no se declara replay completo ni autoriza reejecución.
+
+Plan080acba/freeze7246936,74pruebas por Python3.11/3.12 y estáticos0.
+Seis controles completos A/B/C,146CLI/110sends completos de fixture;
+dos incomplete adicionales retienen133tokens/133µUSD cada uno y reportan
+7µUSD de uso declarado, sin sumar esas columnas. Ruta OpenAI sin permiso
+rechazada sin cambios. Fuentes before/after y archivos bytes/modos intactos;
+D1215875/D122121 pins+recibos preservados, cuatro docs históricos Git antes
+de avanzar este corte. Lifecycle inicial y dos timeouts600s se conservan;
+ninguno cuenta como PASS. Capturas03 completas pasan.
+
+**C1 técnico D107 preservado; C2–C5 No demostrado; 0/24 formales.**
+Sin proveedor real/claves/Q/autoridad/campo. Acceso/elección/gasto/snapshot/
+effort efectivo/telemetría/H y costos completos pendientes. Ingreso de
+evaluaciones externas puede prepararse localmente, sin inventar puntuaciones.
+Los cortes siguientes conservan su alcance histórico.
+
 ## D-122 · Propuesta de ruta real, sin R1
 
 [Dossier](../experiments/development/real_route_proposal_2026-10-01/README.md):

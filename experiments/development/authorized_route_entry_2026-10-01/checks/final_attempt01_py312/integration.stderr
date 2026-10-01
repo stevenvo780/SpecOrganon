@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspace/SpecOrganon/experiments/development/authorized_route_entry_2026-10-01/integration_checks.py", line 158, in <module>
+    main()
+  File "/workspace/SpecOrganon/experiments/development/authorized_route_entry_2026-10-01/integration_checks.py", line 88, in main
+    preview = cli([entry, "preflight", "--run-dir", run, "--observation-dir", obs,
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SpecOrganon/experiments/development/authorized_route_entry_2026-10-01/integration_checks.py", line 56, in cli
+    assert process.returncode == expected, (number, process.stdout.decode(), process.stderr.decode())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (4, '{"error": "authorization_or_runtime_gate_rejected", "formal_cell_executed": false, "quality_assessed": false, "human_identity_authenticated": false}\n', '')

@@ -1,0 +1,269 @@
+{
+  "classification": "independent_local_runtime_audit_not_R1",
+  "source_freeze_commit": "7246936d5a565b1019560dbcc4b063fe91a0cc82",
+  "source_freeze_sha256": "3f8b8fa3fc13ba194dc2dc080e87acb31699c9500010133599a81c463c8bced3",
+  "source_count": 8,
+  "environments": [
+    {
+      "python": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+      "captured_commands": 8,
+      "captured_tests": 74,
+      "captured_CLI": 73,
+      "archive": {
+        "verified_entries": 1720,
+        "archive_bytes": 14089330,
+        "archive_sha256": "086c8ae25ee21911a2df277d987e2b3c463a2432b6592eb43bdf9ffadc41eb24",
+        "original_unchanged": true,
+        "restore_authority": false
+      },
+      "all_archive_members_bytes_modes_origin_verified": true,
+      "reopen_count": 7,
+      "reopens_equal_and_whole_runtime_unchanged": true,
+      "runs": [
+        {
+          "arm": "A",
+          "requests": 19,
+          "tools": 11,
+          "tokens": 133,
+          "W_local_elapsed_ns": 233094040572,
+          "local_worker_send_overlap": false,
+          "native_report_sha256": "672d8868ab1ab6a49d40c8d3b44890c80e40184c2336731fc3951839a355d4ca"
+        },
+        {
+          "arm": "B",
+          "requests": 18,
+          "tools": 11,
+          "tokens": 126,
+          "W_local_elapsed_ns": 199475579888,
+          "local_worker_send_overlap": true,
+          "native_report_sha256": "9a9a229329acf4cd6ee0f13cee98e475fb5b4dee331d3643f5325c790d6fe540"
+        },
+        {
+          "arm": "C",
+          "requests": 18,
+          "tools": 11,
+          "tokens": 126,
+          "W_local_elapsed_ns": 203810050056,
+          "local_worker_send_overlap": true,
+          "native_report_sha256": "a4ebb9c4226ef5b3048ec74990bdca13e9ce1b3324275fe729f60f9b3bd8dc1d"
+        }
+      ],
+      "incomplete": {
+        "reported_cost_micro_usd": 7,
+        "native_held_cost_micro_usd": 133,
+        "native_held_tokens": 133,
+        "native_guard_verified": true,
+        "native_replay_verified": false,
+        "reexecution_authorized": false
+      },
+      "negative_CLI": [
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-I",
+            "-B",
+            "/workspace/SpecOrganon/scripts/authorized_coordinated_runtime.py",
+            "step-fixture",
+            "--run-dir",
+            "/tmp/specorganon-D123-final-s0s4sjdh/runtime/incomplete/run",
+            "--observation-dir",
+            "/tmp/specorganon-D123-final-s0s4sjdh/runtime/incomplete/observation",
+            "--expected-checkpoint",
+            "2505a2d181778a3448a7f2e6ed0d81abeeb4cbe5036b46d6fbaad5ed919cacf7",
+            "--local-http-fixture",
+            "http://127.0.0.1:43269/v1"
+          ],
+          "stdout_sha256": "71070e862150fd300ea669aaaf52133fe574f4cfee87d71844278bb797a1fc40"
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-I",
+            "-B",
+            "/workspace/SpecOrganon/scripts/authorized_coordinated_runtime.py",
+            "step-fixture",
+            "--run-dir",
+            "/tmp/specorganon-D123-final-s0s4sjdh/runtime/incomplete/run",
+            "--observation-dir",
+            "/tmp/specorganon-D123-final-s0s4sjdh/runtime/incomplete/observation",
+            "--expected-checkpoint",
+            "2505a2d181778a3448a7f2e6ed0d81abeeb4cbe5036b46d6fbaad5ed919cacf7",
+            "--local-http-fixture",
+            "http://127.0.0.1:43269/v1"
+          ],
+          "stdout_sha256": "b70559045293fd4725ca66f2951de1c0e59e55621aca6b8679ba1bb1911fa0b4"
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-I",
+            "-B",
+            "/workspace/SpecOrganon/scripts/authorized_coordinated_runtime.py",
+            "step",
+            "--run-dir",
+            "/tmp/specorganon-D123-final-s0s4sjdh/runtime/openai_unapproved/run",
+            "--observation-dir",
+            "/tmp/specorganon-D123-final-s0s4sjdh/runtime/openai_unapproved/observation",
+            "--expected-checkpoint",
+            "61dd9cf1820bcaba4fb4c198fbcd91a69e8ae616f2c89f079d53c0450d07af50",
+            "--operator-declaration",
+            "/tmp/specorganon-D123-final-s0s4sjdh/runtime/missing-declaration.json"
+          ],
+          "stdout_sha256": "b70559045293fd4725ca66f2951de1c0e59e55621aca6b8679ba1bb1911fa0b4"
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-I",
+            "-B",
+            "/workspace/SpecOrganon/scripts/authorized_coordinated_runtime.py",
+            "step-fixture",
+            "--run-dir",
+            "/tmp/specorganon-D123-final-s0s4sjdh/runtime/openai_unapproved/run",
+            "--observation-dir",
+            "/tmp/specorganon-D123-final-s0s4sjdh/runtime/openai_unapproved/observation",
+            "--expected-checkpoint",
+            "61dd9cf1820bcaba4fb4c198fbcd91a69e8ae616f2c89f079d53c0450d07af50",
+            "--local-http-fixture",
+            "http://127.0.0.1:1/v1"
+          ],
+          "stdout_sha256": "b70559045293fd4725ca66f2951de1c0e59e55621aca6b8679ba1bb1911fa0b4"
+        }
+      ]
+    },
+    {
+      "python": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+      "captured_commands": 8,
+      "captured_tests": 74,
+      "captured_CLI": 73,
+      "archive": {
+        "verified_entries": 1720,
+        "archive_bytes": 14089916,
+        "archive_sha256": "bb0bb36b17d3781fff3efc603c64747c887e8cc9f13d6fc6e6987df9655ca841",
+        "original_unchanged": true,
+        "restore_authority": false
+      },
+      "all_archive_members_bytes_modes_origin_verified": true,
+      "reopen_count": 7,
+      "reopens_equal_and_whole_runtime_unchanged": true,
+      "runs": [
+        {
+          "arm": "A",
+          "requests": 19,
+          "tools": 11,
+          "tokens": 133,
+          "W_local_elapsed_ns": 257260443194,
+          "local_worker_send_overlap": false,
+          "native_report_sha256": "29e73d57bce28c470a36e3dd233777a2c948cb51916596fe0e57fb4f2401659e"
+        },
+        {
+          "arm": "B",
+          "requests": 18,
+          "tools": 11,
+          "tokens": 126,
+          "W_local_elapsed_ns": 215901872474,
+          "local_worker_send_overlap": true,
+          "native_report_sha256": "58327a675d0690f9cfd7f816d68216655d0c7185f8130cbc05f4b8f011b3768a"
+        },
+        {
+          "arm": "C",
+          "requests": 18,
+          "tools": 11,
+          "tokens": 126,
+          "W_local_elapsed_ns": 234426118780,
+          "local_worker_send_overlap": true,
+          "native_report_sha256": "66665786a856a78707fb115710cdf62e4ff869d0a43064280671d10762240015"
+        }
+      ],
+      "incomplete": {
+        "reported_cost_micro_usd": 7,
+        "native_held_cost_micro_usd": 133,
+        "native_held_tokens": 133,
+        "native_guard_verified": true,
+        "native_replay_verified": false,
+        "reexecution_authorized": false
+      },
+      "negative_CLI": [
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-I",
+            "-B",
+            "/workspace/SpecOrganon/scripts/authorized_coordinated_runtime.py",
+            "step-fixture",
+            "--run-dir",
+            "/tmp/specorganon-D123-final-19re7oux/runtime/incomplete/run",
+            "--observation-dir",
+            "/tmp/specorganon-D123-final-19re7oux/runtime/incomplete/observation",
+            "--expected-checkpoint",
+            "7e5992f5bca2e0e7c55cd19cc63e8ef33da82fa773ace705d16c3b544b7b09ec",
+            "--local-http-fixture",
+            "http://127.0.0.1:42303/v1"
+          ],
+          "stdout_sha256": "d7a354987a01e9eced9bd3d66ce401914244c2322fef575b3fc40dc901586312"
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-I",
+            "-B",
+            "/workspace/SpecOrganon/scripts/authorized_coordinated_runtime.py",
+            "step-fixture",
+            "--run-dir",
+            "/tmp/specorganon-D123-final-19re7oux/runtime/incomplete/run",
+            "--observation-dir",
+            "/tmp/specorganon-D123-final-19re7oux/runtime/incomplete/observation",
+            "--expected-checkpoint",
+            "7e5992f5bca2e0e7c55cd19cc63e8ef33da82fa773ace705d16c3b544b7b09ec",
+            "--local-http-fixture",
+            "http://127.0.0.1:42303/v1"
+          ],
+          "stdout_sha256": "b70559045293fd4725ca66f2951de1c0e59e55621aca6b8679ba1bb1911fa0b4"
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-I",
+            "-B",
+            "/workspace/SpecOrganon/scripts/authorized_coordinated_runtime.py",
+            "step",
+            "--run-dir",
+            "/tmp/specorganon-D123-final-19re7oux/runtime/openai_unapproved/run",
+            "--observation-dir",
+            "/tmp/specorganon-D123-final-19re7oux/runtime/openai_unapproved/observation",
+            "--expected-checkpoint",
+            "2efa5ff320d1438cd7ba6adc840d9382dff2341a29338ae4d8888af40aebd18c",
+            "--operator-declaration",
+            "/tmp/specorganon-D123-final-19re7oux/runtime/missing-declaration.json"
+          ],
+          "stdout_sha256": "b70559045293fd4725ca66f2951de1c0e59e55621aca6b8679ba1bb1911fa0b4"
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-I",
+            "-B",
+            "/workspace/SpecOrganon/scripts/authorized_coordinated_runtime.py",
+            "step-fixture",
+            "--run-dir",
+            "/tmp/specorganon-D123-final-19re7oux/runtime/openai_unapproved/run",
+            "--observation-dir",
+            "/tmp/specorganon-D123-final-19re7oux/runtime/openai_unapproved/observation",
+            "--expected-checkpoint",
+            "2efa5ff320d1438cd7ba6adc840d9382dff2341a29338ae4d8888af40aebd18c",
+            "--local-http-fixture",
+            "http://127.0.0.1:1/v1"
+          ],
+          "stdout_sha256": "b70559045293fd4725ca66f2951de1c0e59e55621aca6b8679ba1bb1911fa0b4"
+        }
+      ]
+    }
+  ],
+  "all_CLI": 146,
+  "completed_requests": 110,
+  "incomplete_requests": 2,
+  "remote_HTTP_overlap_limit": "HTTP server trace was asserted by captured integration code but not archived; independently recomputed overlap is local observer send intervals.",
+  "formal_cells_executed": 0,
+  "quality_assessed": false,
+  "reviewer_new_provider_requests": 0
+}

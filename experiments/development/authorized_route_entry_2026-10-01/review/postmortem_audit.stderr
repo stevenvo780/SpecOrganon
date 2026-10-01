@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/workspace/SpecOrganon/experiments/development/authorized_route_entry_2026-10-01/review/audit_timeouts.py", line 127, in <module>
+    print(json.dumps(run(), sort_keys=True))
+                     ^^^^^
+  File "/workspace/SpecOrganon/experiments/development/authorized_route_entry_2026-10-01/review/audit_timeouts.py", line 41, in run
+    manifest = json.loads(read(folder / "runtimes_inventory.json"))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SpecOrganon/experiments/development/authorized_route_entry_2026-10-01/review/audit_timeouts.py", line 22, in read
+    metadata = path.lstat()
+               ^^^^^^^^^^^^
+  File "/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 1163, in lstat
+    return self.stat(follow_symlinks=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 1013, in stat
+    return os.stat(self, follow_symlinks=follow_symlinks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/SpecOrganon/experiments/development/authorized_route_entry_2026-10-01/checks/final_attempt02_py311/runtimes_inventory.json'

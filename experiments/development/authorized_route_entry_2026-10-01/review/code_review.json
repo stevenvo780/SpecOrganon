@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "verdict": "CODE_REVIEW_COMPLETE_PENDING_RUNTIME_GATES",
+  "final_acceptance_verdict": false,
+  "open_material_findings": [],
+  "formal_cells_executed": 0,
+  "paid_route_authorized": false,
+  "source_freeze_current_records_verified_live": 8,
+  "source_freeze_sha256": "517e40b0a060021f9639784b7778db89075c1645cfeb99bb0ec880c43c7a8778",
+  "source_pins": [
+    {
+      "path": "scripts/authorized_coordinated_runtime.py",
+      "bytes": 14354,
+      "sha256": "94625593d84a1ee0eb19edbe41a8862e5822a6efe37263288d0ad5f313ce61e3"
+    },
+    {
+      "path": "scripts/provider_outcome_accounting.py",
+      "bytes": 21837,
+      "sha256": "2b28a8dcc34564bf19a5e1d138b5673039c3baff7a005ff9c292f333a877f063"
+    },
+    {
+      "path": "tests/test_authorized_coordinated_runtime.py",
+      "bytes": 12033,
+      "sha256": "458f02743be8a5c2f708ead827306983e21459cc71deb71d9642b50c24ba8b99"
+    },
+    {
+      "path": "tests/test_provider_outcome_accounting.py",
+      "bytes": 25190,
+      "sha256": "25d6bf0dc0426b5a4add0f39b74951ae44d3cc06ebee08bb1020ff313b23bc2b"
+    },
+    {
+      "path": "experiments/development/authorized_route_entry_2026-10-01/archive_runtimes.py",
+      "bytes": 2298,
+      "sha256": "ac11678d2312bd3c0bc77aac72a56ca9659e7ffb478c29a0e09f9676ff38d456"
+    },
+    {
+      "path": "experiments/development/authorized_route_entry_2026-10-01/capture_checks.py",
+      "bytes": 2741,
+      "sha256": "71579c51f3630b87bea243d337d6f6ec74fab7e800cd70acaa24381b807a402b"
+    },
+    {
+      "path": "experiments/development/authorized_route_entry_2026-10-01/capture_final.py",
+      "bytes": 3891,
+      "sha256": "9e3c37a22e8ede0e6f9d6cc6b78dbbe8892887d0177709c2f6e25c744bd821b3"
+    },
+    {
+      "path": "experiments/development/authorized_route_entry_2026-10-01/integration_checks.py",
+      "bytes": 8963,
+      "sha256": "a155d465b20a4e668eed3500d41ac4b53dfc558673ff193569f5d23d4133e2ac"
+    }
+  ],
+  "closed_findings": [
+    {
+      "severity": "P2",
+      "finding": "Operator gate could be revoked between outer guard and Thread.start; fake send still occurred before post-I/O rejection.",
+      "file": "scripts/authorized_coordinated_runtime.py",
+      "lines": [
+        172,
+        176
+      ],
+      "firsthand_pure_reproduction": {
+        "scope": "fake protocol transport only; no network, credentials, runtime, real operator declaration or provider effects",
+        "fake_send_calls_before_fix": 1,
+        "approved_at_fake_IO": false,
+        "source_sha256": "15b3aa69df4c6df66c8792d0f2f6c219dd492dd0405c90bc0e8b679669375682",
+        "source_bytes_preserved": "review/authorized_source_probed.py",
+        "evidence": "review/authorization_revocation_probe.json"
+      },
+      "correction": "self.guard() now executes inside worker immediately before _RemainingTransport.operation, as well as after I/O and before return.",
+      "independent_postfix_reproduction": {
+        "fake_send_calls": 0,
+        "result_error": "provider_operation_failed",
+        "source_sha256_at_probe": "7bc3b1a39984be6f2b246339545deae7cea7af55c71addd64ae0e5585d34dcc1",
+        "command": "review/revocation_postfix.command.json",
+        "stdout": "review/revocation_postfix.stdout",
+        "stderr": "review/revocation_postfix.stderr"
+      },
+      "current_source_scope": "Current946255 source differs from independently probed7bc3 source only in the separate observation lifecycle preflight correction; worker pre-I/O guard remains unchanged.",
+      "regression_test": "tests/test_authorized_coordinated_runtime.py:test_gate_revoked_during_thread_scheduling_rejects_before_io"
+    },
+    {
+      "severity": "P2",
+      "finding": "Original preflight required observation ready, which is a completed native step, instead of startable released/paused.",
+      "origin": "Detected by root actual CLI integration, not initially detected by this reviewer.",
+      "file": "scripts/authorized_coordinated_runtime.py",
+      "lines": [
+        87
+      ],
+      "native_evidence": "coordinated_observation_journal.py:238 initializes released; :262/:436 allow released/paused for step; :304 maps completed native step to ready.",
+      "negative_capture": "checks/final_attempt01_py311/commands.json integration command exit1; root reports first four CLI controls stopped before HTTP. Runtime/raw/archive examination is reserved for final phase.",
+      "correction": "Current preflight allows observation released/paused and native prepared/paused; source-freeze records explicit supersession of e94a7d8.",
+      "verification": "Independent source comparison: current946255 is byte-exactly prior7bc3 with only ready condition replaced by released/paused. Actual succeeding CLI regression remains pending final gate review."
+    }
+  ],
+  "reviewed_controls": {
+    "preflight": "Original observation driver lock then native snapshot guard/replay/checkpoint, no environment key read or transport constructed; startable lifecycle correction inspected.",
+    "private_declaration": "Exact schema; duplicate keys rejected; canonical-byte binding equality distinguishes bool/int; expiry exact int≤24h; filename fixed; regular file0600/sameuid/singlelink/no-follow/nonblocking/bounded256KiB; fd/path identity and raw bytes retained for each gate.",
+    "real_route": "Paid flag literalTrue before preflight; declared OpenAIResponsesv1/default only; fixed official HTTPS origin/no redirect inherited native HTTP; credential environment read only after initial authorization gates; no keys in argv/artifacts/output.",
+    "fixture_route": "Loopback only, declared providerfixture, public synthetic token, explicit disabled urllib proxies, no paid credential environment.",
+    "deadline": "Independent queue wait deadline≤90 and native remaining deadline; originalHTTP I/O timeout bounded; slow fragments tested in source. Does not cancel remote/daemon execution; closed queue drops late results and D121 native observation leases remain intact.",
+    "outcome_reader": "One native run lock with directories/locks prechecked before lazy broker load; original guard before and after capture; native replay only prepared/paused/completed; bound receipts/current metrics for completed; indeterminate does not claim full replay.",
+    "pure_accounting": "Closed schema, canonical RAW bytes, exact types, schedule/descriptor/model/effort/price/ledger caps and request/receipt/SHA binding. Complete input+output=total, counted input match and maxoutput; original cache pricing/ceil/residual maximum; invalid or missing data unknown, not zero.",
+    "held_vs_usage": "Native held_tokens/held_cost preserved independently from declared reported usage cost. Aggregate columns explicitly alternative, not additive. Unmatched/missing responses make complete reported totals unknown without altering native commitment.",
+    "sanitization": "Report exposes digests/counts/fixed status codes, not RAW prompts, response content/id/error/private metadata or state reason. Unit sources contain explicit private sentinel checks. No price/provider/usage authentication or Q claimed.",
+    "native_effects": "No guard replacement, global monkeypatch, ledger settlement/recovery or lifecycle repair added. Local outcome reading does not authorize reexecution."
+  },
+  "helpers_static_review": {
+    "integration_checks.py": "Minimal subprocess ENV with no inherited API key; original prepare+release+new preflight/fixture-step/outcomes; A/B/C local HTTP overlap controls; incomplete retain/no-reexec; OpenAI unapproved and cross-fixture reject. Actual streams/results not yet audited.",
+    "capture_final.py": "Frozen source bytes retained and checked before/after; D122 existing verifier before/after; two new test files/Ruff/compile/local integrations; archive captures even failed integration. Does not erase failed first attempt.",
+    "archive_runtimes.py": "Finite directory/single-link regular-file inventory; no symlinks/FIFO accepted; archive names/modes/content hashes verified; originals compared before/after; no extraction/authority restoration.",
+    "final_gates": "Current final_attempt02 runs and archived actual runtime evidence await artifact-ready task; no polling or suites repeated by reviewer."
+  },
+  "verification_scope": {
+    "reviewer_provider_calls": 0,
+    "reviewer_real_credential_access": false,
+    "reviewer_native_runtime_calls": 0,
+    "reviewer_tests": "Only targeted fake transport reproduction before/after the identified scheduling revocation race; no suite execution.",
+    "root_worker_test_counts": "Owner-reported15 controller and59 accounting per interpreter; sources inspected, independent final stream/source checks remain pending.",
+    "no_global_final_PASS": true,
+    "no_R1_GO": true,
+    "C1": "technical_D107_preserved",
+    "C2_C5": "not_demonstrated",
+    "formal_acceptance": "0/24"
+  },
+  "remaining_limits": [
+    "Cooperative local declaration is not authenticated human identity/authority or permission for this session.",
+    "Actual account/model/snapshot/effort/usage/invoice/API entitlement unverified.",
+    "Local wait timeout is not remote cancellation or remote activity bound.",
+    "Held native reserves remain blocked after incomplete; declarative accounting does not settle or repair them.",
+    "8192 high sufficiency, independent quality/method evaluation, H/full study costs, reserve/field outcomes remain unproven.",
+    "Final runtime/archive/preservation and sealed index/HEAD evidence not yet independently verified."
+  ],
+  "ownership": "Only new artifacts under experiments/development/authorized_route_entry_2026-10-01/review/"
+}

@@ -1,5 +1,23 @@
 # Distancia hasta la validación de GOAL
 
+## Actualización D-123 · 2026-10-01 UTC
+
+La [entrada controlada](../experiments/development/authorized_route_entry_2026-10-01/README.md)
+ya permite futuros steps reales ligados a una declaración del operador;
+los gates sólo probaron loopback sintético y rechazo OpenAI sin permiso.
+74pruebas por Python3.11/3.12, seis controles completos A/B/C,
+146CLI/110sends completos más dos incomplete retenidos. Uso declarado7µUSD
+y reserva133µUSD son columnas alternativas por run, no sumables ni factura.
+Archivos y fuentes conservados; fallos/timeouts anteriores explícitos.
+
+La [puerta siguiente](../experiments/development/authorized_route_entry_2026-10-01/next_activation.md)
+mantiene pendientes elección/autorización/acceso, identidad/esfuerzo/consumo
+efectivos y evaluaciones externas con H/costos completos. El ingreso de
+evaluaciones puede adelantarse sin API y sin asignar Q. Espera local acotada
+no acredita cancelación remota; indeterminate no se reejecuta.
+**C1 técnico; C2–C5 No demostrado; 0/24.** Ningún gate autoriza gasto/R1.
+Los cortes anteriores siguen históricos.
+
 ## Actualización D-122 · 2026-10-01 UTC
 
 La [propuesta R1](../experiments/development/real_route_proposal_2026-10-01/README.md)

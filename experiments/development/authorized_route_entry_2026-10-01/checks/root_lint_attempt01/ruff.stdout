@@ -1,0 +1,183 @@
+F401 [*] `json` imported but unused
+  --> scripts/provider_outcome_accounting.py:11:8
+   |
+10 | import hashlib
+11 | import json
+   |        ^^^^
+12 | import re
+13 | from pathlib import Path
+   |
+help: Remove unused import: `json`
+
+E702 Multiple statements on one line (semicolon)
+  --> tests/test_authorized_coordinated_runtime.py:52:34
+   |
+50 |     def test_declaration_symlink_and_hardlink_rejected(self):
+51 |         actual = self.parent / "actual"
+52 |         actual.write_bytes(b"{}"); actual.chmod(0o600)
+   |                                  ^
+53 |         self.declaration.symlink_to(actual)
+54 |         with self.assertRaises(entry.AuthorizedRouteError):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> tests/test_authorized_coordinated_runtime.py:75:29
+   |
+74 |     def test_boolean_binding_cannot_equal_integer(self):
+75 |         value = self.value(); value["binding"]["ordinal"] = True
+   |                             ^
+76 |         with self.assertRaises(entry.AuthorizedRouteError):
+77 |             entry._validate_declaration(json.dumps(value).encode(), self.binding)
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> tests/test_authorized_coordinated_runtime.py:85:36
+   |
+83 |                     entry.execute_authorized_step(self.parent / "run", self.parent / "obs", self.declaration,
+84 |                                                   expected_checkpoint="a" * 64)
+85 |         preview.assert_not_called(); http.assert_not_called()
+   |                                    ^
+86 |
+87 |     def test_cross_route_rejected_before_declaration_environment_or_transport(self):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> tests/test_authorized_coordinated_runtime.py:95:40
+   |
+93 |                         entry.execute_authorized_step(self.parent / "run", self.parent / "obs", self.declaration,
+94 |                                                       expected_checkpoint="a" * 64, allow_paid_request=True)
+95 |         declaration.assert_not_called(); http.assert_not_called()
+   |                                        ^
+96 |
+97 |     def test_pending_approval_rejected_before_transport(self):
+   |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:98:29
+    |
+ 97 |     def test_pending_approval_rejected_before_transport(self):
+ 98 |         value = self.value(); value["decision"] = "not_approved"
+    |                             ^
+ 99 |         self.write(value)
+100 |         with patch.object(entry, "preflight", return_value={"binding": self.binding}), patch.object(entry, "OpenAIResponsesHTTP") as …
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:137:32
+    |
+135 |                 self.timeout = timeout_seconds
+136 |                 return 5
+137 |         transport = Transport(); calls = []
+    |                                ^
+138 |         proxy = entry.BoundedResponsesTransport(transport, lambda: calls.append(True), max_wait_seconds=0.5)
+139 |         payload = {"model": "fixture", "input": [{"role": "user", "content": "public"}]}
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:149:30
+    |
+147 |         class Transport:
+148 |             def send(self, _payload, *, timeout_seconds):
+149 |                 entered.set(); release.wait(1); done.set()
+    |                              ^
+150 |                 return {"late": True}
+151 |         proxy = entry.BoundedResponsesTransport(Transport(), lambda: None, max_wait_seconds=0.03)
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:149:47
+    |
+147 |         class Transport:
+148 |             def send(self, _payload, *, timeout_seconds):
+149 |                 entered.set(); release.wait(1); done.set()
+    |                                               ^
+150 |                 return {"late": True}
+151 |         proxy = entry.BoundedResponsesTransport(Transport(), lambda: None, max_wait_seconds=0.03)
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:157:22
+    |
+155 |         self.assertLess(time.monotonic() - started, 0.5)
+156 |         self.assertTrue(entered.is_set())
+157 |         release.set(); self.assertTrue(done.wait(1))
+    |                      ^
+158 |
+159 |     def test_transport_error_does_not_leak_exception_message(self):
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:185:40
+    |
+183 |                 self.rfile.read(int(self.headers["Content-Length"]))
+184 |                 body = b'{"id":"fixture","status":"incomplete"}'
+185 |                 self.send_response(200); self.send_header("Content-Length", str(len(body))); self.end_headers()
+    |                                        ^
+186 |                 try:
+187 |                     for byte in body:
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:185:92
+    |
+183 |                 self.rfile.read(int(self.headers["Content-Length"]))
+184 |                 body = b'{"id":"fixture","status":"incomplete"}'
+185 |                 self.send_response(200); self.send_header("Content-Length", str(len(body))); self.end_headers()
+    |                                                                                            ^
+186 |                 try:
+187 |                     for byte in body:
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:188:56
+    |
+186 |                 try:
+187 |                     for byte in body:
+188 |                         self.wfile.write(bytes([byte])); self.wfile.flush(); time.sleep(0.005)
+    |                                                        ^
+189 |                 except OSError:
+190 |                     pass
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:188:76
+    |
+186 |                 try:
+187 |                     for byte in body:
+188 |                         self.wfile.write(bytes([byte])); self.wfile.flush(); time.sleep(0.005)
+    |                                                                            ^
+189 |                 except OSError:
+190 |                     pass
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:194:76
+    |
+192 |                     done.set()
+193 |         server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+194 |         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
+    |                                                                            ^
+195 |         try:
+196 |             http = entry.OpenAIResponsesHTTP("public-synthetic-no-credential", base_url=f"http://127.0.0.1:{server.server_port}/v1")
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:204:30
+    |
+202 |             self.assertTrue(done.wait(2))
+203 |         finally:
+204 |             server.shutdown(); server.server_close(); thread.join(2)
+    |                              ^
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/test_authorized_coordinated_runtime.py:204:53
+    |
+202 |             self.assertTrue(done.wait(2))
+203 |         finally:
+204 |             server.shutdown(); server.server_close(); thread.join(2)
+    |                                                     ^
+    |
+
+Found 17 errors.
+[*] 1 fixable with the `--fix` option.

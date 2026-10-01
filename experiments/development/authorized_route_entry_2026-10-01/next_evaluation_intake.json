@@ -1,0 +1,40 @@
+{
+  "classification": "next_gate_readonly_intake_not_implemented",
+  "agent": "d119_next_measurement_intake",
+  "model": "gpt-6-luna",
+  "root_source_checks": [
+    {
+      "path": "experiments/development/coordinated_contract_2026-10-01/public_contract/rubric.json",
+      "sha256": "bf46f946eed27cf603477c8ec8cff31d7fa58098bac6444dffcff7a706fcac7b"
+    },
+    {
+      "path": "experiments/development/coordinated_contract_2026-10-01/public_contract/delivery_contract.json",
+      "sha256": "5bc13e976593d9edbd40b7378da21d6483ca0e0d0887ad63ecd3726b9afe0ab8"
+    },
+    {
+      "path": "docs/protocolo_experimental.md",
+      "sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341"
+    },
+    {
+      "path": "scripts/development_delivery_contract.py",
+      "sha256": "3c8b4102c023a2b2c64c2c1b266947f4dd5a50b3a3b0c567646302ad560007d5"
+    },
+    {
+      "path": "scripts/plan_coordinated_development.py",
+      "sha256": "7f37134191dbb220c86bf65e4c2141020f711ff74d34a25bafe7cf5c3296deb2"
+    }
+  ],
+  "findings": {
+    "Q": "D118 public rubric five integer dimensions0..20, sum; independent human review pending; automated_Q false",
+    "structural_checker": "delivery_contract checker_assigns_Q false; conformance does not give Q or normative approval",
+    "confirmatory_protocol": "separate from DEV; independent judges/blinding/arbitration/verified custody and human cost tracking required",
+    "next_local_candidate": "Validate ingress of externally supplied blinded human evaluations; never generate scores or authenticate a person by declaration alone"
+  },
+  "prohibitions": [
+    "no reservation opening",
+    "no real model requests",
+    "no synthetic score promoted to Q",
+    "no protocol edits"
+  ],
+  "formal_cells_executed": 0
+}
