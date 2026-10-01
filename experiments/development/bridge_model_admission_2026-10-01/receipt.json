@@ -1,0 +1,358 @@
+{
+  "schema": "specorganon.bridge_admission_receipt.v1",
+  "classification": "local_cooperative_admission_regression_with_fake_provider",
+  "verified_at_utc": "2026-10-01 00:38:59 UTC",
+  "base_commit": "0e31be06615ebfff2c794a31c329f039d7373412",
+  "prospective_plan_commit": "ecd7ca51fa002c39e4a3e9bcc6c02d023f375892",
+  "passed_within_scoped_defect": true,
+  "baseline": {
+    "expected_pytest_exit": 1,
+    "per_copy_counts": 2,
+    "per_copy_sends": 2,
+    "original_bridge_sha256": "113af53cedaeff029f708aa72c1cdf336c7cd90885dd1f17769ddc37a932806b",
+    "archive_regular_files": 77,
+    "archive_sha256": "285cb15495d067f2cb541fa10aae7499b260409a720616abe9425f261f432820",
+    "archive_empty_directories_preserved": false
+  },
+  "post_fix": {
+    "first_copy": {
+      "counts": 2,
+      "sends": 2
+    },
+    "blocked_copy": {
+      "counts": 0,
+      "sends": 0,
+      "ledger_unchanged": true
+    },
+    "checks": [
+      "same-attempt all-text copies",
+      "two-process local exclusion",
+      "foreign/altered claim",
+      "claim tamper between count and send or later count",
+      "interruption after claim",
+      "existing sealed-tool bridge positive"
+    ]
+  },
+  "gates": {
+    "python311": {
+      "passed": 46,
+      "reported_pytest_seconds": 16.63
+    },
+    "python312": {
+      "passed": 8,
+      "deselected": 20,
+      "reported_pytest_seconds": 4.58
+    },
+    "ruff": true,
+    "in_memory_compile": [
+      "3.11",
+      "3.12"
+    ],
+    "diff_check": true,
+    "independent_static_and_capture_review": true,
+    "diff_check_scope": "Code, documentation and metadata; raw log capture whitespace intentionally retained."
+  },
+  "negative_history": {
+    "initial_focal": {
+      "passed": 44,
+      "failed": 2,
+      "reason": "Incorrect new assertions about existing status rejection behavior; only those assertions changed.",
+      "test_sha256": "9242c32e2708f8fddfa6be7ba91ae89686e3ba89d28596e9f7bae7a9faf3ba15",
+      "test_bytes_separately_preserved": false,
+      "hash_and_logs_preserved": true
+    },
+    "metadata_partial_error_record_preserved": true,
+    "missing_python_launcher_exit": 127,
+    "missing_launcher_started_pytest": false,
+    "whole_index_diff_check": {
+      "exit_code": 2,
+      "cause": "Four trailing whitespace warnings in the preserved initial failed pytest stdout; source/docs/metadata scoped check passed.",
+      "raw_capture_modified": false
+    }
+  },
+  "production_changes": 0,
+  "GOAL_and_protocol_unchanged": true,
+  "core_wheel_rebuilt": false,
+  "global_suite_repeated": false,
+  "real_provider_requests": 0,
+  "field_operations": 0,
+  "normative_human_approvals": 0,
+  "required24_cells_executed": 0,
+  "activation_status": "no_go",
+  "criteria": {
+    "C1": "fulfilled within inventoried D107 technical installed scope",
+    "C2": "no_demostrado",
+    "C3": "no_demostrado",
+    "C4": "no_demostrado",
+    "C5": "no_demostrado"
+  },
+  "file_count": 53,
+  "files": {
+    "GOAL.md": {
+      "bytes": 7273,
+      "sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36"
+    },
+    "docs/estado.md": {
+      "bytes": 108302,
+      "sha256": "e1dd68cfc857a6f279c1627507961e4d6d07e9e267551970ab01fbb868ed5eb6"
+    },
+    "docs/presupuesto_solicitudes_modelo.md": {
+      "bytes": 13591,
+      "sha256": "088f0ba99f06bb88f31fe66748abc160458ac7d6cee7f221ef45658a6dbf9be8"
+    },
+    "docs/protocolo_experimental.md": {
+      "bytes": 47390,
+      "sha256": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341"
+    },
+    "experiments/development/activation_readiness_2026-09-30/receipt.json": {
+      "bytes": 3512,
+      "sha256": "f60e2019d2a31564672987d2df8c3278a24f82dac608c060e5261544f62dc3c6"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/README.md": {
+      "bytes": 4575,
+      "sha256": "9828eaf400e19efbddeeeb481ac5182b905074630248c24af99c07838996afc4"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/baseline_archive.json": {
+      "bytes": 15699,
+      "sha256": "f1ca3d7cf778db372125e1e0fa18e91f3acd5ae5d633f3b571915d9e3f3142cf"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/baseline_negative.tar.gz": {
+      "bytes": 37237,
+      "sha256": "285cb15495d067f2cb541fa10aae7499b260409a720616abe9425f261f432820"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/plan.md": {
+      "bytes": 2330,
+      "sha256": "e995a585f89ab4d2b45889150eb0a45203efe9a661d7dd11958444fb749ed1bf"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/review.json": {
+      "bytes": 2120,
+      "sha256": "8dfdf6d7d1037dbff4deaaff05faf76ed3eeb0c27e22360493221cc285a10f4b"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/.gitignore": {
+      "bytes": 154,
+      "sha256": "869cea91c34bb1d17f060c31942c06f4d38a425d8548dae4fb46de21be032b56"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline/run_managed_tool_conversation.py": {
+      "bytes": 48454,
+      "sha256": "113af53cedaeff029f708aa72c1cdf336c7cd90885dd1f17769ddc37a932806b"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline/source_pins.json": {
+      "bytes": 436,
+      "sha256": "6af0bc2acf2e283120be097c114312eefadb74fa529aab76bc7dd6fd3f066ad1"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline/source_pins_complete.json": {
+      "bytes": 840,
+      "sha256": "9f46d393c8353277fb78cc09c2c6fd0e5e7017312e1601137cb3e2027e063729"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline/test_run_managed_tool_conversation.py": {
+      "bytes": 19683,
+      "sha256": "8ea9957366d90b529cb90af55b9f3b2179a83604deb11f7f4407b9cd93cf02db"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline_negative.json": {
+      "bytes": 1197,
+      "sha256": "15128da51aa301329a41d6913cfe4ee54a120287932b2aa922b49fd11fb94b05"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline_negative.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline_negative.stdout": {
+      "bytes": 2679,
+      "sha256": "01f8eb0fcc6b201c791c0afb0123a519d17b37e01c244b88cc95198e98231398"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_311.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_311.stdout": {
+      "bytes": 22,
+      "sha256": "6b52a9154c996530d26850e65ae71bcdccc4ca1cc4e629a3e7d894022a314e67"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_311_final.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_311_final.stdout": {
+      "bytes": 34,
+      "sha256": "9fd53d6d3a56461f7e835077af18cfb6c8168448bcbef628c7fbbea1653d7535"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_312.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_312.stdout": {
+      "bytes": 21,
+      "sha256": "e8d3eb913137036dfd11fbd2e48f8d9ae96e5eb33eea0956f02e56679fc3f5ab"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_312_final.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_312_final.stdout": {
+      "bytes": 33,
+      "sha256": "8269a314d9237c52adb8fb6c0f47ec95f447d9f6554acebeb0beda2017d36c4f"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/diff_check_final.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/diff_check_final.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/final_launcher_failure.json": {
+      "bytes": 220,
+      "sha256": "35cae772de61b512e39fada04c45e94ac17fccdf3fc9cdb4b93ef9c37b04a8c5"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311.json": {
+      "bytes": 1052,
+      "sha256": "5bffdcb82b73b27677e8b5516716e61d160fc05f403331844c053a68b57ccf11"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311.stderr": {
+      "bytes": 83,
+      "sha256": "ea280c81e3991ea678ccbafd9bc4acc9fcbcb72380339b4c5990ae309f201611"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311.stdout": {
+      "bytes": 6064,
+      "sha256": "a1223190cfd2807017b5fb9e23b1ad64377f64520c88d525cc8d748a85c4ef40"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311_final.json": {
+      "bytes": 939,
+      "sha256": "8f9d75928bcd75607a0732fb637f008ad0a3b620a311cf0886738d096e4443cd"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311_final.stderr": {
+      "bytes": 83,
+      "sha256": "ea280c81e3991ea678ccbafd9bc4acc9fcbcb72380339b4c5990ae309f201611"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311_final.stdout": {
+      "bytes": 344,
+      "sha256": "0d6d4f0ba0efd7b565339c233a561c8554a78c1f903433c14beca09f1ce18ad1"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_312.json": {
+      "bytes": 1102,
+      "sha256": "eac0185121016ff75f6abbcd2a3fb0dd446a8a4bc4d9e91bf29adfa1c0296ed9"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_312.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_312.stdout": {
+      "bytes": 319,
+      "sha256": "83e337d6e1fd3d40e3ea16b94247181449f31efb708e506794452be39690ff41"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/ruff.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/ruff.stdout": {
+      "bytes": 19,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/ruff_final.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/ruff_final.stdout": {
+      "bytes": 19,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/static_checks.json": {
+      "bytes": 1920,
+      "sha256": "d94afd6661eca77cfd423034d640f06d7c20ef33d5c88bc71c83ff08e02dc94d"
+    },
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/static_checks_final.json": {
+      "bytes": 2663,
+      "sha256": "445ecd51481dffc95e52768b94063517c370888cbe4b9f8c14fcf16a7e0fe0a9"
+    },
+    "scripts/local_run_admission.py": {
+      "bytes": 14055,
+      "sha256": "74749dd39432d5f7672a35b164be5ea7fdcad39f7f74d7ffe85af6c8814ee253"
+    },
+    "scripts/managed_token_ledger.py": {
+      "bytes": 28823,
+      "sha256": "1a02c425f3af19c1d4993911fdebfccfc8d6ada1a382ea4e5f582a9151cb4b4a"
+    },
+    "scripts/run_managed_conversation.py": {
+      "bytes": 25585,
+      "sha256": "c93fd3a356c9c0f796d88f473a7f3fbfef10fde2cd7c6a2d5183f9f5185c5f56"
+    },
+    "scripts/run_managed_response.py": {
+      "bytes": 22297,
+      "sha256": "17bcf4b6eda84d071eac5c43cbd2ab2e299e210be50939a4345f1b3e30fa7794"
+    },
+    "scripts/run_managed_tool_conversation.py": {
+      "bytes": 50547,
+      "sha256": "9dc2bc466f2484730a5efbbe4f49f9615b0578981e8bbf3b7a7f05dcdbbcf5f4"
+    },
+    "scripts/staged_tool_session.py": {
+      "bytes": 65262,
+      "sha256": "c8d9b44b46db092c0f938d0f19842e4e1ecbd379f2b27207c218523f86f9cc75"
+    },
+    "tests/test_local_run_admission.py": {
+      "bytes": 28487,
+      "sha256": "40926552a7fb920c78df57533e2b9ebd7349db0934c6dbccb1118597cfec2ef8"
+    },
+    "tests/test_run_managed_tool_conversation.py": {
+      "bytes": 31458,
+      "sha256": "51671b7cdc688ab7b293e66a04a297bb0f8b212fdda7f0bed25eef495c7ba3cc"
+    },
+    "tests/test_staged_tool_session.py": {
+      "bytes": 63773,
+      "sha256": "cb92b4f4c68d21af456e1653e6fd82edd5d41d0128f7b4b68d5098afbc28a6aa"
+    }
+  },
+  "publication_paths": [
+    "docs/estado.md",
+    "docs/presupuesto_solicitudes_modelo.md",
+    "experiments/development/bridge_model_admission_2026-10-01/README.md",
+    "experiments/development/bridge_model_admission_2026-10-01/baseline_archive.json",
+    "experiments/development/bridge_model_admission_2026-10-01/baseline_negative.tar.gz",
+    "experiments/development/bridge_model_admission_2026-10-01/plan.md",
+    "experiments/development/bridge_model_admission_2026-10-01/review.json",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/.gitignore",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline/run_managed_tool_conversation.py",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline/source_pins.json",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline/source_pins_complete.json",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline/test_run_managed_tool_conversation.py",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline_negative.json",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline_negative.stderr",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline_negative.stdout",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_311.stderr",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_311.stdout",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_311_final.stderr",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_311_final.stdout",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_312.stderr",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_312.stdout",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_312_final.stderr",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/compile_312_final.stdout",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/diff_check_final.stderr",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/diff_check_final.stdout",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/final_launcher_failure.json",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311.json",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311.stderr",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311.stdout",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311_final.json",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311_final.stderr",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311_final.stdout",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_312.json",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_312.stderr",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_312.stdout",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/ruff.stderr",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/ruff.stdout",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/ruff_final.stderr",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/ruff_final.stdout",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/static_checks.json",
+    "experiments/development/bridge_model_admission_2026-10-01/unit_checks/static_checks_final.json",
+    "scripts/run_managed_tool_conversation.py",
+    "tests/test_run_managed_tool_conversation.py"
+  ],
+  "limitations": [
+    "Same UID and local admission root; cooperative model execution only.",
+    "No authentication of provider identity, version, effort, real usage/bill or remote cancellation.",
+    "No global multi-agent/model/provider enforcement, human pause or resumable handoff.",
+    "Simple adapters and opaque CLI unchanged.",
+    "Initial focal test source bytes unavailable; retained hash/logs are not exact source reconstruction.",
+    "Synthetic fixture case labels are not real reserved inputs.",
+    "Large pytest workspaces remain local; only essential records and baseline regular archive are published locally."
+  ]
+}

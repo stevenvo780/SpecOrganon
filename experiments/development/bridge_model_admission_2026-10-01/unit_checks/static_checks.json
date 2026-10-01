@@ -1,0 +1,43 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "ruff",
+        "check",
+        "--no-cache",
+        "scripts/run_managed_tool_conversation.py",
+        "tests/test_run_managed_tool_conversation.py"
+      ],
+      "exit_code": 0,
+      "label": "ruff",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-c",
+        "from pathlib import Path; import sys; paths=('scripts/run_managed_tool_conversation.py', 'tests/test_run_managed_tool_conversation.py'); [compile(Path(p).read_bytes(),p,\"exec\") for p in paths]; print(sys.version.split()[0], \"syntax passed\")"
+      ],
+      "exit_code": 0,
+      "label": "compile_311",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "6b52a9154c996530d26850e65ae71bcdccc4ca1cc4e629a3e7d894022a314e67"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-c",
+        "from pathlib import Path; import sys; paths=('scripts/run_managed_tool_conversation.py', 'tests/test_run_managed_tool_conversation.py'); [compile(Path(p).read_bytes(),p,\"exec\") for p in paths]; print(sys.version.split()[0], \"syntax passed\")"
+      ],
+      "exit_code": 0,
+      "label": "compile_312",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e8d3eb913137036dfd11fbd2e48f8d9ae96e5eb33eea0956f02e56679fc3f5ab"
+    }
+  ],
+  "source_pins": {
+    "scripts/run_managed_tool_conversation.py": "9dc2bc466f2484730a5efbbe4f49f9615b0578981e8bbf3b7a7f05dcdbbcf5f4",
+    "tests/test_run_managed_tool_conversation.py": "9242c32e2708f8fddfa6be7ba91ae89686e3ba89d28596e9f7bae7a9faf3ba15"
+  }
+}

@@ -209,3 +209,21 @@ límites, fallo de envío, muerte del proceso hijo durante `send` y alteración 
 un archivo. No ensayan apagón del host,
 plazo largo real ni garantías del dispositivo de almacenamiento. El journal
 tampoco tiene custodia externa frente a cambios coherentes del mismo usuario.
+
+## D-110: admisión antes de conteo y envío en el bridge
+
+El [corte D-110](../experiments/development/bridge_model_admission_2026-10-01/README.md)
+corrige una brecha del bridge con herramienta: antes, dos copias textuales del
+mismo calendario/run/attempt podían ejecutar respuestas con ledgers diferentes
+porque el claim se adquiría al llamar una herramienta. Ahora se adquiere dentro
+del plazo activo antes del primer conteo y se comprueba antes de cada conteo y
+envío, usando el owner y el registro de admisión existentes. La copia rechazada
+no llega al transporte ni cambia su presupuesto.
+
+Pasaron 46 pruebas focales en Python 3.11 y ocho seleccionadas en 3.12, incluidos
+copias textuales, carrera entre procesos, claim ajeno/alterado, interrupción y
+herramienta sellada. El negativo original y los fallos intermedios se conservan;
+los bytes del test del primer focal fallido no se guardaron y no se reconstruyen.
+Todas las llamadas usan proveedores falsos. Es exclusión cooperativa local;
+faltan el contexto compartido entre agentes, pausa/relevo, otras rutas y
+telemetría/coste efectivos. No cambia el NO-GO del ensayo ni demuestra C4.

@@ -1,0 +1,63 @@
+{
+  "schema": "specorganon.native_code_review.v1",
+  "review_date_utc": "2026-10-01",
+  "reviewer_task": "/root/source_gate_review",
+  "classification": "independent_native_workspace_review_not_human_or_external_custody",
+  "source_pins": {
+    "scripts/run_managed_tool_conversation.py": "9dc2bc466f2484730a5efbbe4f49f9615b0578981e8bbf3b7a7f05dcdbbcf5f4",
+    "tests/test_run_managed_tool_conversation.py": "51671b7cdc688ab7b293e66a04a297bb0f8b212fdda7f0bed25eef495c7ba3cc"
+  },
+  "baseline": {
+    "original_source_bytes_match_git": true,
+    "pre_fix_duplicate_calls_per_copy": {
+      "counts": 2,
+      "sends": 2
+    },
+    "fake_transport": true,
+    "sequential_fixture_only": true
+  },
+  "static_checks": [
+    "Canonical claim acquired within active deadline after durable started marker and before dispatch",
+    "Claim and deadline revalidated before each count_input/send",
+    "Historical prepared unclaimed session remains usable",
+    "Errors after start are indeterminate without automatic retry; interruption leaves started",
+    "No new schema, registry or production motor change"
+  ],
+  "dynamic_checks": {
+    "python311": {
+      "passed": 46,
+      "exit_code": 0,
+      "reported_seconds": 16.63
+    },
+    "python312": {
+      "passed": 8,
+      "deselected": 20,
+      "exit_code": 0,
+      "reported_seconds": 4.58
+    },
+    "capture_sha256_verified": true,
+    "static_command_streams_verified": 8,
+    "static_command_exit_codes": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "post_fix_losing_copy": {
+      "counts": 0,
+      "sends": 0,
+      "ledger_unchanged": true
+    }
+  },
+  "remaining_findings": {
+    "P1": 0,
+    "P2": 0,
+    "scope": "Reviewed local admission defect only"
+  },
+  "limitations": [
+    "Intermediate test source bytes not retained before changing two status expectations; only hash/logs retained.",
+    "Missing python launcher exited127 before pytest; metadata records the error.",
+    "Local same-UID cooperative registry, not actual provider identity/billing/global limits.",
+    "No new model requests, Q, human decision, field or required24 cell."
+  ]
+}

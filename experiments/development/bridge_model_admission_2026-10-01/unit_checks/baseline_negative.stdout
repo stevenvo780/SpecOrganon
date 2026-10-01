@@ -1,0 +1,39 @@
+{"classification": "synthetic_duplicate_all_text_admission_control", "first_fake_counts": 2, "first_fake_sends": 2, "first_state": "completed", "real_provider_calls": 0, "second_fake_counts": 2, "second_fake_sends": 2, "second_ledger_unchanged": false, "second_rejected": false}
+F
+=================================== FAILURES ===================================
+___________ test_two_stage_copies_all_text_only_one_reaches_provider ___________
+
+tmp_path = PosixPath('/workspace/SpecOrganon/experiments/development/bridge_model_admission_2026-10-01/unit_checks/baseline_negative_workspace/test_two_stage_copies_all_text0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f971359c810>
+
+    def test_two_stage_copies_all_text_only_one_reaches_provider(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        first, plan, schedule = _prepare(tmp_path, monkeypatch)
+        second = _second_stage_run(tmp_path, first, plan, schedule)
+        first_transport = FakeTransport(plan["model"], [[_message("First text")], [_message("Final text")]])
+        second_transport = FakeTransport(plan["model"], [[_message("Copied text")], [_message("Copied final")]])
+        second_before = _tree_bytes(second)
+        result = bridge.execute_tool_conversation(first, first_transport)
+        assert result["state"] == "completed"
+        rejected = False
+        try:
+            bridge.execute_tool_conversation(second, second_transport)
+        except (bridge.ToolConversationError, bridge.SessionError, admission.AdmissionError):
+            rejected = True
+        print(json.dumps({
+            "classification": "synthetic_duplicate_all_text_admission_control",
+            "real_provider_calls": 0, "first_state": result["state"], "second_rejected": rejected,
+            "first_fake_counts": len(first_transport.counts), "first_fake_sends": len(first_transport.sends),
+            "second_fake_counts": len(second_transport.counts), "second_fake_sends": len(second_transport.sends),
+            "second_ledger_unchanged": (second / "ledger" / "ledger.json").read_bytes()
+                == second_before[Path("ledger/ledger.json")],
+        }, sort_keys=True))
+>       assert rejected, "copied scheduled attempt reached the fake provider without a tool claim"
+E       AssertionError: copied scheduled attempt reached the fake provider without a tool claim
+E       assert False
+
+tests/test_run_managed_tool_conversation.py:167: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_run_managed_tool_conversation.py::test_two_stage_copies_all_text_only_one_reaches_provider
+1 failed in 0.93s

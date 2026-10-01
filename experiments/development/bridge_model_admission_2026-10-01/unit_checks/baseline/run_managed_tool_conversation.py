@@ -19,7 +19,6 @@ import time
 from pathlib import Path
 from typing import Any
 
-import local_run_admission as admission
 from managed_token_ledger import (
     BudgetError, CostBudgetExhausted, TokenBudgetExhausted, TokenLedger,
 )
@@ -58,29 +57,6 @@ STATE_KEYS = {
 
 class ToolConversationError(ValueError):
     """The prepared tool conversation cannot proceed safely."""
-
-
-class _ClaimedTransport(_DeadlineTransport):
-    """Recheck the staged attempt owner before each provider operation."""
-
-    def __init__(self, transport: ResponseTransport, deadline: float,
-                 claim_args: dict[str, Any], expected_claim: str) -> None:
-        super().__init__(transport, deadline)
-        self.claim_args = claim_args
-        self.expected_claim = expected_claim
-
-    def _require_claim(self) -> None:
-        self.check()
-        if admission.require_claim(**self.claim_args) != self.expected_claim:
-            raise ToolConversationError("local admission claim differs from prepared tool session")
-
-    def count_input(self, payload: dict[str, Any]) -> int:
-        self._require_claim()
-        return super().count_input(payload)
-
-    def send(self, payload: dict[str, Any]) -> dict[str, Any]:
-        self._require_claim()
-        return super().send(payload)
 
 
 def _sha(data: bytes) -> str:
@@ -535,26 +511,10 @@ def execute_tool_conversation(
         _write_state(run_dir, state)
         started_at = time.monotonic()
         deadline = started_at + state["active_limit_seconds"]
+        bounded = _DeadlineTransport(transport, deadline)
         history: list[dict[str, Any]] = []
         try:
             with _deadline(state["active_limit_seconds"]):
-                schedule, digest = _schedule_at(Path(state["schedule_path"]))
-                if digest != state["schedule_bytes_sha256"]:
-                    raise ToolConversationError("schedule changed before model admission")
-                claim_args = {
-                    "schedule_sha256": schedule["schedule_sha256"], "run_id": plan["run_id"],
-                    "selected_owner": admission.owner("staged", Path(state["stage_dir"]),
-                                                       Path(state["session_dir"])),
-                    "root_descriptor": {key: tool_status[key] for key in (
-                        "local_run_admission_root", "local_run_admission_root_identity",
-                        "local_run_admission_scope",
-                    )},
-                    "attempt_number": tool_status["attempt_number"],
-                }
-                expected_claim = tool_status["local_run_claim_sha256"]
-                if admission.acquire_staged_claim(**claim_args) != expected_claim:
-                    raise ToolConversationError("local admission claim differs from prepared tool session")
-                bounded = _ClaimedTransport(transport, deadline, claim_args, expected_claim)
                 for turn, item in enumerate(plan["turns"], 1):
                     history.append({"role": "user", "content": item["user"]})
                     while True:

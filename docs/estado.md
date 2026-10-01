@@ -1,5 +1,22 @@
 # Estado de reanudación
 
+**D-110 corrige admisión antes de solicitudes del bridge:**
+[dossier](../experiments/development/bridge_model_admission_2026-10-01/README.md).
+Negativo pre-fix: dos copias textuales del mismo intento completaban2conteos/
+2envíos falsos cada una. El bridge adquiere claim dentro del plazo activo antes
+del primer conteo y lo revalida antes de cada conteo/envío. Copia bloqueada0/0,
+ledger intacto; concurrencia, alteraciones e interrupción cubiertas. Python3.11
+46passed y subset3.12 8passed/20deselected; Ruff/compile/diff de código pasan, revisión
+independiente sinP1/P2. Planecd7ca5; source9dc2bc…/test51671b… estables.
+Originales/negativos/77miembros de archivo conservados. Primer focal44pass/2fail
+por expectativas erróneas de status: logs/hash conservados, bytes del test
+intermedio no guardados; launcher127 previo a pytest separado. Scope local
+cooperativo, sin identidad/coste/cancelación remotos ni límites globales.
+Producción/wheel/GOAL/protocolo intactos, sin nuevos proveedores reales,
+normas humanas, reserva/campo o celdas24. **1/5; C2–C5 No demostrados.**
+Sigue pendiente el contexto común de presupuesto/admisión del ensayo y las
+dependencias externas concretas de D109. Los cortes siguientes son históricos.
+
 **D-109 ordena la activación del ensayo pendiente:**
 [dossier](../experiments/development/activation_readiness_2026-09-30/README.md)
 y [puertas actualizadas](activacion_validacion.md). Inventario no ejecutable de

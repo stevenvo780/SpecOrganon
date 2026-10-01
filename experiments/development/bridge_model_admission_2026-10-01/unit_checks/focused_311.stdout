@@ -1,0 +1,101 @@
+{"classification": "synthetic_duplicate_all_text_admission_control", "first_fake_counts": 2, "first_fake_sends": 2, "first_state": "completed", "real_provider_calls": 0, "second_fake_counts": 0, "second_fake_sends": 0, "second_ledger_unchanged": true, "second_rejected": true}
+.FF...........................................
+=================================== FAILURES ===================================
+_ test_foreign_or_altered_claim_rejects_before_first_provider_operation[foreign] _
+
+tmp_path = PosixPath('/workspace/SpecOrganon/experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311_workspace/test_foreign_or_altered_claim_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f472b049f90>
+claim_kind = 'foreign'
+
+    @pytest.mark.parametrize("claim_kind", ["foreign", "altered"])
+    def test_foreign_or_altered_claim_rejects_before_first_provider_operation(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, claim_kind: str,
+    ) -> None:
+        run_dir, plan, schedule = _prepare(tmp_path, monkeypatch)
+        arguments, path = _claim_arguments(run_dir, schedule, plan)
+        if claim_kind == "foreign":
+            foreign = arguments | {"selected_owner": admission.owner(
+                "staged", tmp_path / "foreign-stage", tmp_path / "foreign-session",
+            )}
+            admission.publish_claim(**foreign)
+        else:
+            admission.acquire_staged_claim(**arguments)
+            value = json.loads(path.read_bytes())
+            value["run_id"] = "altered-synthetic-run"
+            path.write_bytes(admission._canonical(value))
+        before = _tree_bytes(run_dir)
+        transport = FakeTransport(plan["model"], [])
+        with pytest.raises(bridge.ToolConversationError, match="no longer empty and ready"):
+            bridge.execute_tool_conversation(run_dir, transport)
+        assert transport.counts == transport.sends == []
+        assert _tree_bytes(run_dir) == before
+>       status = bridge.read_tool_conversation_status(run_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_run_managed_tool_conversation.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+run_dir = PosixPath('/workspace/SpecOrganon/experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311_workspace/test_foreign_or_altered_claim_0/managed-tool')
+
+    def read_tool_conversation_status(run_dir: Path) -> dict[str, Any]:
+        run_dir = Path(run_dir)
+        with _run_lock(run_dir):
+            plan, state, tool_status, ledger = _load(run_dir)
+            if state["state"] == "prepared" and (
+                tool_status["status"] != "ready" or tool_status["reserved_tool_calls"] != 0
+            ):
+>               raise ToolConversationError("prepared tool session is no longer empty and ready")
+E               run_managed_tool_conversation.ToolConversationError: prepared tool session is no longer empty and ready
+
+scripts/run_managed_tool_conversation.py:882: ToolConversationError
+_ test_foreign_or_altered_claim_rejects_before_first_provider_operation[altered] _
+
+tmp_path = PosixPath('/workspace/SpecOrganon/experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311_workspace/test_foreign_or_altered_claim_1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f472b0ef250>
+claim_kind = 'altered'
+
+    @pytest.mark.parametrize("claim_kind", ["foreign", "altered"])
+    def test_foreign_or_altered_claim_rejects_before_first_provider_operation(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, claim_kind: str,
+    ) -> None:
+        run_dir, plan, schedule = _prepare(tmp_path, monkeypatch)
+        arguments, path = _claim_arguments(run_dir, schedule, plan)
+        if claim_kind == "foreign":
+            foreign = arguments | {"selected_owner": admission.owner(
+                "staged", tmp_path / "foreign-stage", tmp_path / "foreign-session",
+            )}
+            admission.publish_claim(**foreign)
+        else:
+            admission.acquire_staged_claim(**arguments)
+            value = json.loads(path.read_bytes())
+            value["run_id"] = "altered-synthetic-run"
+            path.write_bytes(admission._canonical(value))
+        before = _tree_bytes(run_dir)
+        transport = FakeTransport(plan["model"], [])
+        with pytest.raises(bridge.ToolConversationError, match="no longer empty and ready"):
+            bridge.execute_tool_conversation(run_dir, transport)
+        assert transport.counts == transport.sends == []
+        assert _tree_bytes(run_dir) == before
+>       status = bridge.read_tool_conversation_status(run_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_run_managed_tool_conversation.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+run_dir = PosixPath('/workspace/SpecOrganon/experiments/development/bridge_model_admission_2026-10-01/unit_checks/focused_311_workspace/test_foreign_or_altered_claim_1/managed-tool')
+
+    def read_tool_conversation_status(run_dir: Path) -> dict[str, Any]:
+        run_dir = Path(run_dir)
+        with _run_lock(run_dir):
+            plan, state, tool_status, ledger = _load(run_dir)
+            if state["state"] == "prepared" and (
+                tool_status["status"] != "ready" or tool_status["reserved_tool_calls"] != 0
+            ):
+>               raise ToolConversationError("prepared tool session is no longer empty and ready")
+E               run_managed_tool_conversation.ToolConversationError: prepared tool session is no longer empty and ready
+
+scripts/run_managed_tool_conversation.py:882: ToolConversationError
+=========================== short test summary info ============================
+FAILED tests/test_run_managed_tool_conversation.py::test_foreign_or_altered_claim_rejects_before_first_provider_operation[foreign]
+FAILED tests/test_run_managed_tool_conversation.py::test_foreign_or_altered_claim_rejects_before_first_provider_operation[altered]
+2 failed, 44 passed in 42.47s
