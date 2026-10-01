@@ -1,7 +1,7 @@
 """Build public A/B/C round-one preparations; never contact a model provider.
 
-This adapter is development only. C has no parallel executor here; participant
-analysis and PDF passage extraction still need separate isolated execution.
+This adapter is development only. C has no parallel executor here. Config v2
+opts into a separate read-only analysis tool and common PDF text derivations.
 Preparing twelve attempts does not execute twelve of the required 24 cells.
 """
 
@@ -17,10 +17,15 @@ from pathlib import Path
 from typing import Any
 
 from case_package import pack_package
+from development_analysis_inputs import build_text_inputs
+from development_analysis_tool import build_analysis_tool
 from development_method_tool import build_tool
 from managed_token_ledger import _canonical as ledger_canonical
 from managed_token_ledger import _price_profile
-from plan_development_round import compile_schedule, validate_schedule
+from plan_development_round import (
+    MANIFEST_SCHEMA, MANIFEST_SCHEMA_V2, SCHEDULE_SCHEMA_V2,
+    compile_schedule, validate_schedule,
+)
 from preflight_assets import preflight
 from run_managed_team import prepare_team
 from stage_released_run import stage_released_run
@@ -79,6 +84,16 @@ TASK_CONTRACT = """Read case/task.md and follow its original deliverables and so
 Use the fixed alternative and original core through the sealed tool. Normative nodes start pending and cannot be approved by this adapter.
 This is an unsealed development preparation. It does not authorize paid calls, reserved inputs or field work and cannot count as a completed formal cell.
 """
+ANALYSIS_COMMON = COMMON.replace(
+    "PDF passage extraction and executing delivered analysis.py are pending separate isolated capabilities; state these limits.\n",
+    "Read the shared full PDF texts and every page listed in text_extract_manifest.json. Original source manifests remain unchanged.\n"
+    "Use development_analysis with the current analysis.py SHA256. It reads case/inputs/work and cannot write them. "
+    "The host publishes metrics.json only after strict finite JSON object validation; validate source passages and calculations independently.\n"
+    "The fixed analysis argv is [analysis.py, case_dir]. This is a NEW common D-E adaptation; its historical task did not prescribe argv or JSON. "
+    "Use standard library only, no subprocess or network. Emit only a JSON object to stdout. "
+    "Participant errors and invalid JSON consume one call and return feedback; revise your own code before retrying.\n",
+).replace("Write appends UTF-8 deliverable chunks at exact byte offsets.",
+          "Write appends UTF-8 deliverable chunks at exact byte offsets. replace(path,expected_sha256,content) replaces an allowlisted deliverable with a bounded UTF-8 chunk after a digest check; append further chunks as needed.")
 
 
 class PreparationError(ValueError):
@@ -147,8 +162,9 @@ def _new_file(path: Path, raw: bytes) -> None:
         os.fsync(stream.fileno())
 
 
-def _capsules(destination: Path) -> tuple[list[dict], dict[str, str], list[dict]]:
+def _capsules(destination: Path, *, analysis: bool = False) -> tuple[list[dict], dict[str, str], list[dict]]:
     cases, paths, source_pins = [], {}, []
+    extracted = build_text_inputs(destination / "text_extracts") if analysis else None
     for case_id, sources in CASE_INPUTS.items():
         capsule = destination / case_id
         capsule.mkdir(mode=0o700)
@@ -160,6 +176,13 @@ def _capsules(destination: Path) -> tuple[list[dict], dict[str, str], list[dict]
             record = {"path": name, "sha256": _sha(raw), "bytes": len(raw)}
             files.append(record)
             source_pins.append({**record, "path": source})
+        if case_id == "D-F" and extracted is not None:
+            for record in extracted["files"]:
+                raw = _read(destination / "text_extracts" / record["path"])
+                if _sha(raw) != record["sha256"] or len(raw) != record["bytes"]:
+                    raise PreparationError("common extracted input changed before packaging")
+                _new_file(capsule / record["path"], raw)
+                files.append(dict(record))
         deliverables = ["analysis.py", "report.md"]
         if case_id == "D-F":
             deliverables.insert(1, "sources.json")
@@ -178,8 +201,11 @@ def build_round(destination: Path, configuration: dict[str, Any]) -> dict[str, A
     """Create public byte-bound assets and a round-one schedule, without execution."""
     required = {"schema", "seed", "model", "price_profile", "per_run_limits",
                 "max_model_requests", "cost_limit_micro_usd"}
-    if (type(configuration) is not dict or set(configuration) != required
-            or type(configuration["schema"]) is not int or configuration["schema"] != 1
+    analysis = type(configuration) is dict and configuration.get("schema") == 2
+    if (type(configuration) is not dict
+            or set(configuration) != required | ({"analysis_profile"} if analysis else set())
+            or type(configuration["schema"]) is not int or configuration["schema"] not in {1, 2}
+            or analysis and configuration["analysis_profile"] != "read_only_v1"
             or type(configuration["model"]) is not dict):
         raise PreparationError("preparation configuration fields are invalid")
     profile = _price_profile(configuration["price_profile"])
@@ -195,7 +221,7 @@ def build_round(destination: Path, configuration: dict[str, Any]) -> dict[str, A
     protocol = _pinned_source("docs/protocolo_experimental.md")
     # Validate metadata before creating any output; content hashes are replaced below.
     prospective = {
-        "schema": "specorganon.development_round_manifest.v1", "round": 1,
+        "schema": MANIFEST_SCHEMA_V2 if analysis else MANIFEST_SCHEMA, "round": 1,
         "seed": configuration["seed"], "protocol_sha256": _sha(protocol),
         "cases": [{"case_id": case_id, "package_sha256": "0" * 64}
                   for case_id in CASE_INPUTS],
@@ -214,13 +240,14 @@ def build_round(destination: Path, configuration: dict[str, Any]) -> dict[str, A
     destination.mkdir(mode=0o700)
     assets = destination / "assets"
     assets.mkdir(mode=0o700)
-    prospective["cases"], case_paths, pins = _capsules(assets)
+    prospective["cases"], case_paths, pins = _capsules(assets, analysis=analysis)
     tool = assets / "method_tool"
     build_tool(tool, core_path=ROOT / "prototypes/core.py")
     if _read(ROOT / "prototypes/core.py") != core:
         raise PreparationError("core changed while building tool")
     tool_sha = _sha(_read(tool))
-    texts = {"task_contract": TASK_CONTRACT.encode(), "common_prompt": COMMON.encode()}
+    texts = {"task_contract": TASK_CONTRACT.encode(),
+             "common_prompt": (ANALYSIS_COMMON if analysis else COMMON).encode()}
     input_paths: dict[str, Any] = {}
     for role, raw in texts.items():
         _new_file(assets / role, raw)
@@ -240,6 +267,14 @@ def build_round(destination: Path, configuration: dict[str, Any]) -> dict[str, A
               "generic_tools": [{"id": "method", "version": "development-original-core-v1",
                                  "executable_sha256": tool_sha}],
               "limits": configuration["per_run_limits"]}
+    if analysis:
+        analyzer = build_analysis_tool(assets / "analysis_tool")
+        policy["schema"] = 2
+        policy["generic_tools"][0]["profile"] = "workspace"
+        policy["generic_tools"].append({
+            "id": "analysis", "version": "development-readonly-analysis-v1",
+            "executable_sha256": analyzer["sha256"], "profile": "analysis_readonly",
+        })
     raw_policy = _bytes(policy)
     _new_file(assets / "tool_policy", raw_policy)
     prospective["inputs"]["tool_policy"] = {"sha256": _sha(raw_policy)}
@@ -261,6 +296,10 @@ def build_round(destination: Path, configuration: dict[str, Any]) -> dict[str, A
                 "pending": ["isolated_participant_analysis", "shared_pdf_passage_extraction",
                             "actual_C_parallel_executor", "real_round_one_results",
                             "round_two_adaptation_and_freeze", "provider_authorization_and_telemetry"]}
+    if analysis:
+        metadata.update(analysis_profile="read_only_v1", analysis_tool_sha256=analyzer["sha256"],
+                        common_text_derivation=_sha(_read(assets / "text_extracts/text_extract_manifest.json")))
+        metadata["pending"] = metadata["pending"][2:]
     _new_file(destination / "preparation.json", _bytes(metadata))
     preflight(schedule, asset_map)
     return metadata
@@ -283,8 +322,19 @@ def prepare_cell(bundle: Path, run_id: str, destination: Path) -> dict[str, Any]
     preflight(schedule, assets)
     tool = bundle / "assets" / "method_tool"
     policy = _read_schedule(assets["inputs"]["tool_policy"])
-    if _sha(_read(tool)) != policy["generic_tools"][0]["executable_sha256"]:
+    analysis = schedule["schema"] == SCHEDULE_SCHEMA_V2
+    if policy.get("schema") != (2 if analysis else 1):
+        raise PreparationError("tool policy schema differs from development schedule version")
+    method_entry = next((entry for entry in policy["generic_tools"] if entry["id"] == "method"), None)
+    if method_entry is None or _sha(_read(tool)) != method_entry["executable_sha256"]:
         raise PreparationError("method tool differs from frozen policy")
+    if analysis:
+        analyzer = bundle / "assets/analysis_tool"
+        entry = next((entry for entry in policy["generic_tools"] if entry["id"] == "analysis"), None)
+        if (policy.get("schema") != 2 or entry is None or entry.get("profile") != "analysis_readonly"
+                or method_entry.get("profile") != "workspace"
+                or _sha(_read(analyzer)) != entry["executable_sha256"]):
+            raise PreparationError("analysis tool or profile differs from frozen policy")
     _private_parent(destination)
     destination.mkdir(mode=0o700)
     release, stage, managed = (destination / name for name in ("release", "stage", "managed"))
@@ -304,12 +354,20 @@ def prepare_cell(bundle: Path, run_id: str, destination: Path) -> dict[str, Any]
                 {"role": "leader", "user": "Deliver allowlisted files in chunks if possible. Summarize actual method state, evidence and unresolved approvals/capabilities; never declare this a completed formal cell.",
                  "max_output_tokens": max_output, "share_from": [1]}],
             "functions": [{"type": "function", "name": "development_method",
-                           "description": COMMON, "parameters": {
+                           "description": ANALYSIS_COMMON if analysis else COMMON, "parameters": {
                                "type": "object", "properties": {"request": {"type": "string"}},
                                "required": ["request"], "additionalProperties": False},
                            "strict": True, "tool_id": "method", "executable": str(tool)}],
             "max_model_requests": schedule["max_model_requests"],
             "max_tool_calls": limits["tool_calls"], "tool_wall_seconds": 4}
+    if analysis:
+        plan["functions"].append({
+            "type": "function", "name": "development_analysis",
+            "description": "Execute fixed work/analysis.py with [analysis.py,case_dir], read only; host validates JSON and publishes metrics. No normative approval.",
+            "parameters": {"type": "object", "properties": {"script_sha256": {"type": "string"}},
+                           "required": ["script_sha256"], "additionalProperties": False},
+            "strict": True, "tool_id": "analysis", "executable": str(analyzer),
+        })
     if run["effort_provider_value"] is not None:
         plan["reasoning"] = {"effort": run["effort_provider_value"]}
     result = prepare_team(

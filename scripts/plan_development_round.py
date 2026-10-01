@@ -21,6 +21,9 @@ from typing import Any
 
 SCHEDULE_SCHEMA = "specorganon.development_round_schedule.v1"
 MANIFEST_SCHEMA = "specorganon.development_round_manifest.v1"
+SCHEDULE_SCHEMA_V2 = "specorganon.development_round_schedule.v2"
+MANIFEST_SCHEMA_V2 = "specorganon.development_round_manifest.v2"
+SCHEDULE_SCHEMAS = {SCHEDULE_SCHEMA, SCHEDULE_SCHEMA_V2}
 CLASSIFICATION = "development_round_preparation_unsealed"
 CASE_IDS = ("D-F", "D-E")
 ARMS = ("A", "B", "C")
@@ -107,8 +110,9 @@ def _reference(value: Any, name: str) -> dict[str, str]:
 def validate_manifest(raw: Any) -> dict[str, Any]:
     """Validate and normalize the complete public round 1 manifest."""
     source = _object(raw, "manifest", MANIFEST_KEYS)
-    if type(source["schema"]) is not str or source["schema"] != MANIFEST_SCHEMA:
+    if type(source["schema"]) is not str or source["schema"] not in {MANIFEST_SCHEMA, MANIFEST_SCHEMA_V2}:
         raise DevelopmentPlanError("invalid development manifest schema")
+    extended = source["schema"] == MANIFEST_SCHEMA_V2
     if type(source["round"]) is not int or source["round"] != 1:
         raise DevelopmentPlanError("only round 1 is supported; round 2 needs frozen round 1 evidence")
     seed = _integer(source["seed"], "seed", 0, 2**64 - 1)
@@ -163,16 +167,16 @@ def validate_manifest(raw: Any) -> dict[str, Any]:
     model["price_profile_sha256"] = _sha256(model_source["price_profile_sha256"], "model.price_profile_sha256")
     limits = _object(source["per_run_limits"], "per_run_limits", {"measured_tokens", "active_seconds", "tool_calls"})
     return {
-        "schema": MANIFEST_SCHEMA, "round": 1, "seed": seed,
+        "schema": source["schema"], "round": 1, "seed": seed,
         "protocol_sha256": _sha256(source["protocol_sha256"], "protocol_sha256"),
         "cases": cases, "inputs": validated_inputs, "alternatives": alternatives,
         "model": model,
         "per_run_limits": {
             "measured_tokens": _integer(limits["measured_tokens"], "measured_tokens", 1, 80_000),
             "active_seconds": _integer(limits["active_seconds"], "active_seconds", 1, 5_400),
-            "tool_calls": _integer(limits["tool_calls"], "tool_calls", 1, 16),
+            "tool_calls": _integer(limits["tool_calls"], "tool_calls", 1, 64 if extended else 16),
         },
-        "max_model_requests": _integer(source["max_model_requests"], "max_model_requests", 2, 32),
+        "max_model_requests": _integer(source["max_model_requests"], "max_model_requests", 2, 128 if extended else 32),
         "cost_limit_micro_usd": _integer(source["cost_limit_micro_usd"], "cost_limit_micro_usd", 0),
     }
 
@@ -217,7 +221,8 @@ def compile_schedule(raw: Any) -> dict[str, Any]:
             run_sha256 = digest(run)
             runs.append({**run, "run_id": "dev-" + run_sha256[:24], "run_sha256": run_sha256})
     schedule = {
-        "schema": SCHEDULE_SCHEMA, "classification": CLASSIFICATION,
+        "schema": (SCHEDULE_SCHEMA_V2 if manifest["schema"] == MANIFEST_SCHEMA_V2
+                   else SCHEDULE_SCHEMA), "classification": CLASSIFICATION,
         "manifest": manifest, "seed": manifest["seed"],
         "protocol_sha256": manifest["protocol_sha256"], "input_sha256": input_sha256,
         "models": [model], "cases": manifest["cases"], "inputs": manifest["inputs"],

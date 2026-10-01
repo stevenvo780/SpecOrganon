@@ -1,7 +1,7 @@
 """One-shot, offline-development bridge between Responses and sealed staged tools.
 
-Prepare binds an independent schedule, a staged run, one strict primitive
-function, executable bytes, and a declared price profile. Execute sends a
+Prepare binds an independent schedule, a staged run, strict primitive
+functions, executable bytes, and a declared price profile. Execute sends a
 two-turn conversation once with a shared token/cost ledger and process deadline.
 The local journal is same-UID evidence, not external custody or a provider bill.
 """
@@ -36,7 +36,7 @@ from run_staged_local_tool import MAX_EXECUTABLE_BYTES
 from staged_tool_session import (
     MAX_TOOL_ARGS_BYTES, SessionError, call_tool, create_session, resume_session,
 )
-from tool_policy import MAX_POLICY_BYTES, _read_bounded_file
+from tool_policy import MAX_POLICY_BYTES, _read_bounded_file, execution_profile
 from verify_released_run import _read_schedule
 
 
@@ -46,6 +46,10 @@ MAX_REQUESTS = 32
 MAX_TOOL_CALLS = 16
 MAX_ACTIVE_SECONDS = 5_400
 MAX_TOKENS = 80_000
+DEVELOPMENT_SCHEMAS = {
+    "specorganon.development_round_schedule.v1",
+    "specorganon.development_round_schedule.v2",
+}
 STATE_KEYS = {
     "schema", "state", "reason", "plan_sha256", "schedule_path",
     "schedule_bytes_sha256", "run_id", "model", "stage_dir", "session_dir",
@@ -143,30 +147,38 @@ def _validate_plan(raw: Any, schedule: dict[str, Any]) -> dict[str, Any]:
                    or type(item["max_output_tokens"]) is not int
                    or item["max_output_tokens"] < 1 for item in turns)):
         raise ToolConversationError("plan needs exactly two bounded text user turns")
+    extended = schedule.get("schema") == "specorganon.development_round_schedule.v2"
     if (type(raw["max_model_requests"]) is not int
-            or not 2 <= raw["max_model_requests"] <= MAX_REQUESTS
+            or not 2 <= raw["max_model_requests"] <= (128 if extended else MAX_REQUESTS)
             or type(raw["max_tool_calls"]) is not int
-            or not 0 <= raw["max_tool_calls"] <= MAX_TOOL_CALLS
+            or not 0 <= raw["max_tool_calls"] <= (64 if extended else MAX_TOOL_CALLS)
             or raw["max_tool_calls"] > schedule["per_run_limits"]["tool_calls"]
             or type(raw["tool_wall_seconds"]) not in (int, float)
             or not 0 < raw["tool_wall_seconds"] <= 300):
         raise ToolConversationError("model, tool, or tool wall cap is invalid")
-    if (schedule.get("schema") == "specorganon.development_round_schedule.v1"
+    if (schedule.get("schema") in DEVELOPMENT_SCHEMAS
             and raw["max_model_requests"] > schedule["max_model_requests"]):
         raise ToolConversationError("model request cap exceeds development schedule")
     functions = raw["functions"]
-    if type(functions) is not list or len(functions) != 1 or type(functions[0]) is not dict:
-        raise ToolConversationError("this bridge supports exactly one sealed function")
-    function = functions[0]
-    if set(function) != {"type", "name", "description", "parameters", "strict",
-                         "tool_id", "executable"}:
-        raise ToolConversationError("function declaration or local binding is invalid")
-    _absolute(Path(function["executable"]), "tool executable")
+    if type(functions) is not list or not 1 <= len(functions) <= 8:
+        raise ToolConversationError("bridge requires one through eight sealed functions")
+    if not extended and len(functions) != 1:
+        raise ToolConversationError("legacy schedules require exactly one sealed function")
+    for function in functions:
+        if type(function) is not dict or set(function) != {
+            "type", "name", "description", "parameters", "strict", "tool_id", "executable",
+        } or any(type(function[key]) is not str or not function[key]
+                 for key in ("name", "tool_id", "executable")):
+            raise ToolConversationError("function declaration or local binding is invalid")
+        _absolute(Path(function["executable"]), "tool executable")
+    if any(len({function[key] for function in functions}) != len(functions)
+           for key in ("name", "tool_id", "executable")):
+        raise ToolConversationError("function names, tool ids and executables must be unique")
     request = {
         "model": raw["model"], "service_tier": "default",
         "input": [{"role": "user", "content": turns[0]["user"]}],
         "max_output_tokens": turns[0]["max_output_tokens"],
-        "tools": [_provider_tool(function)], "parallel_tool_calls": False,
+        "tools": [_provider_tool(function) for function in functions], "parallel_tool_calls": False,
     }
     for key in optional:
         if key in raw:
@@ -183,6 +195,12 @@ def _tool_binding(stage: Path, schedule: dict[str, Any], function: dict[str, Any
     if _sha(policy_bytes) != schedule["inputs"]["tool_policy"]["sha256"]:
         raise ToolConversationError("staged policy differs from independent schedule")
     policy = json.loads(policy_bytes, object_pairs_hook=_unique_pairs)
+    if (schedule.get("schema") == "specorganon.development_round_schedule.v2"
+            and policy.get("schema") != 2):
+        raise ToolConversationError("development v2 requires the opt-in per-tool policy v2")
+    if (schedule.get("schema") != "specorganon.development_round_schedule.v2"
+            and policy.get("schema") != 1):
+        raise ToolConversationError("legacy conversation schedules require policy v1")
     entry = next((item for item in policy["generic_tools"]
                   if item["id"] == function["tool_id"]), None)
     if entry is None:
@@ -192,8 +210,35 @@ def _tool_binding(stage: Path, schedule: dict[str, Any], function: dict[str, Any
     digest = _sha(raw)
     if digest != entry["executable_sha256"] or not os.access(executable, os.X_OK):
         raise ToolConversationError("function executable differs from sealed policy")
-    return {"name": function["name"], "tool_id": function["tool_id"],
-            "executable": str(executable), "executable_sha256": digest}
+    binding = {"name": function["name"], "tool_id": function["tool_id"],
+               "executable": str(executable), "executable_sha256": digest}
+    if policy["schema"] == 2:
+        binding["execution_profile"] = execution_profile(entry)
+    return binding
+
+
+def _plan_tool_binding(stage: Path, schedule: dict[str, Any],
+                       functions: list[dict[str, Any]]) -> dict[str, Any]:
+    bindings = {function["name"]: _tool_binding(stage, schedule, function)
+                for function in functions}
+    # Keep the durable v1 single-function representation byte compatible.
+    return next(iter(bindings.values())) if len(bindings) == 1 else {"functions": bindings}
+
+
+def _function_for(functions: list[dict[str, Any]], name: str) -> dict[str, Any]:
+    selected = [function for function in functions if function["name"] == name]
+    if len(selected) != 1:
+        raise ToolConversationError("function name has no unique sealed binding")
+    return selected[0]
+
+
+def _bound_function(state: dict[str, Any], function: dict[str, Any]) -> dict[str, str]:
+    bindings = state["tool_binding"]
+    binding = (bindings.get("functions", {}).get(function["name"])
+               if "functions" in bindings else bindings)
+    if type(binding) is not dict or binding.get("name") != function["name"]:
+        raise ToolConversationError("prepared function binding differs from selected name")
+    return binding
 
 
 def _check_cost(state: dict[str, Any], ledger: TokenLedger, plan: dict[str, Any]) -> dict[str, Any]:
@@ -269,7 +314,7 @@ def _load(run_dir: Path) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]
     session = _absolute(Path(state["session_dir"]), "session path")
     if session != run_dir / "tool_session":
         raise ToolConversationError("tool session path differs from run directory")
-    binding = _tool_binding(stage, schedule, plan["functions"][0])
+    binding = _plan_tool_binding(stage, schedule, plan["functions"])
     if binding != state["tool_binding"]:
         raise ToolConversationError("sealed executable binding changed")
     manifest = _file_bytes(session / "session.json", MAX_JSON_BYTES, "session manifest")
@@ -314,12 +359,12 @@ def prepare_tool_conversation(
             or type(cost_limit_micro_usd) is not int or cost_limit_micro_usd < 0
             or type(price_profile) is not dict or price_profile.get("model") != validated["model"]):
         raise ToolConversationError("token, time, or declared cost ceiling is invalid")
-    if schedule.get("schema") == "specorganon.development_round_schedule.v1":
+    if schedule.get("schema") in DEVELOPMENT_SCHEMAS:
         from plan_development_round import validate_runtime_budget
         validate_runtime_budget(
             schedule, max_model_requests=validated["max_model_requests"],
             cost_limit_micro_usd=cost_limit_micro_usd, price_profile=price_profile)
-    binding = _tool_binding(stage, schedule, validated["functions"][0])
+    binding = _plan_tool_binding(stage, schedule, validated["functions"])
     if run_dir.exists():
         raise FileExistsError("run directory already exists")
     run_dir.mkdir(mode=0o700)
@@ -364,7 +409,7 @@ def _request(plan: dict[str, Any], history: list[dict[str, Any]], turn: int) -> 
         "model": plan["model"], "service_tier": "default",
         "input": history.copy(),
         "max_output_tokens": plan["turns"][turn - 1]["max_output_tokens"],
-        "tools": [_provider_tool(plan["functions"][0])],
+        "tools": [_provider_tool(function) for function in plan["functions"]],
         "parallel_tool_calls": False,
     }
     for key in ("instructions", "reasoning"):
@@ -373,7 +418,7 @@ def _request(plan: dict[str, Any], history: list[dict[str, Any]], turn: int) -> 
     return _validated_request(request)
 
 
-def _response_kind(response: dict[str, Any], function: dict[str, Any]) -> tuple[str, dict[str, Any] | None]:
+def _response_kind(response: dict[str, Any], functions: dict[str, Any] | list[dict[str, Any]]) -> tuple[str, dict[str, Any] | None]:
     output = response.get("output")
     if type(output) is not list or not output:
         return "unsupported", None
@@ -383,7 +428,7 @@ def _response_kind(response: dict[str, Any], function: dict[str, Any]) -> tuple[
         return "unsupported", None
     if calls:
         call = calls[0]
-        if (output[-1] is not call or call.get("name") != function["name"]
+        if (output[-1] is not call
                 or type(call.get("call_id")) is not str or not call["call_id"]
                 or call.get("status", "completed") != "completed"):
             return "unsupported", None
@@ -394,8 +439,10 @@ def _response_kind(response: dict[str, Any], function: dict[str, Any]) -> tuple[
                     or not preceding["encrypted_content"]):
                 return "unsupported", None
         try:
+            function = _function_for([functions] if type(functions) is dict else functions,
+                                     call.get("name"))
             parsed = _parse_function_arguments(_provider_tool(function), call.get("arguments"))
-        except DispatchError:
+        except (DispatchError, ToolConversationError):
             return "unsupported", None
         if len(_json_bytes(parsed)) > MAX_TOOL_ARGS_BYTES:
             return "unsupported", None
@@ -434,6 +481,45 @@ def _tool_stream(path: Path, expected: Path) -> tuple[str, str]:
     return decoded, _sha(raw)
 
 
+def _profile_stream(path: Path, expected: Path, binding: dict[str, str],
+                    terminal: dict[str, Any], stream: str) -> tuple[str, str]:
+    """Keep raw receipts while bounding participant diagnostics in model context."""
+    if binding.get("execution_profile") != "analysis_readonly":
+        return _tool_stream(path, expected)
+    if path != expected:
+        raise ToolConversationError("analysis stream differs from numbered session call")
+    raw = _file_bytes(expected, 8 * 1024 * 1024, "analysis stream")
+    info = expected.stat()
+    if stat.S_IMODE(info.st_mode) != 0o600 or info.st_uid != os.geteuid():
+        raise ToolConversationError("analysis stream is not private")
+    digest = _sha(raw)
+    if stream == "stdout":
+        if (terminal.get("analysis_stdout_bytes") != len(raw)
+                or terminal.get("analysis_stdout_sha256") != digest):
+            raise ToolConversationError("analysis stdout differs from host validation receipt")
+        if terminal.get("analysis_status") == "valid":
+            if len(raw) > 128 * 1024:
+                raise ToolConversationError("validated analysis output exceeds JSON cap")
+            try:
+                return raw.decode("utf-8"), digest
+            except UnicodeError as exc:
+                raise ToolConversationError("validated analysis JSON is not UTF-8") from exc
+        return json.dumps({
+            "analysis_status": terminal.get("analysis_status"),
+            "diagnostic": terminal.get("analysis_diagnostic"),
+            "raw_stdout_bytes": len(raw), "raw_stdout_sha256": digest,
+        }, sort_keys=True, ensure_ascii=True), digest
+    return raw[:4096].decode("utf-8", errors="replace"), digest
+
+
+def _check_terminal_binding(terminal: dict[str, Any], binding: dict[str, str]) -> None:
+    if (terminal.get("tool_id") != binding["tool_id"]
+            or terminal.get("executable_sha256") != binding["executable_sha256"]
+            or "execution_profile" in binding
+            and terminal.get("execution_profile") != binding["execution_profile"]):
+        raise ToolConversationError("tool terminal differs from selected sealed binding")
+
+
 def _invoke_tool(
     run_dir: Path, plan: dict[str, Any], state: dict[str, Any],
     schedule: dict[str, Any], request_index: int, turn: int,
@@ -452,7 +538,10 @@ def _invoke_tool(
     wall_seconds = min(float(plan["tool_wall_seconds"]), remaining - 1.0)
     if wall_seconds <= 0:
         raise TokenBudgetExhausted("active deadline exhausted before tool launch")
-    function = plan["functions"][0]
+    function = _function_for(plan["functions"], call["name"])
+    binding = _bound_function(state, function)
+    if _tool_binding(stage, schedule, function) != binding:
+        raise ToolConversationError("selected sealed function changed before reservation")
     arguments = _parse_function_arguments(_provider_tool(function), call["arguments"])
     arguments_sha = _sha(_json_bytes(arguments))
     reservation = {
@@ -463,6 +552,8 @@ def _invoke_tool(
         "request_sha256": request_sha, "response_sha256": response_sha,
         "session_call_number": next_number,
     }
+    if "execution_profile" in binding:
+        reservation["execution_profile"] = binding["execution_profile"]
     name = f"{next_number:04d}.json"
     reservation_path = run_dir / "tool_reservations" / name
     _new_private_file(reservation_path, _canonical(reservation))
@@ -483,6 +574,7 @@ def _invoke_tool(
             or terminal.get("tool_id") != function["tool_id"]
             or terminal.get("tool_args_sha256") != arguments_sha):
         raise ToolConversationError("tool terminal identity or arguments differ")
+    _check_terminal_binding(terminal, binding)
     terminal_sha = _sha(terminal_raw)
     receipt: dict[str, Any] = {
         **reservation, "reservation_sha256": _sha(reservation_path.read_bytes()),
@@ -497,8 +589,9 @@ def _invoke_tool(
             if reported is None:
                 streams[stream] = ""
             else:
-                value, digest = _tool_stream(
-                    Path(reported), session / "calls" / f"{next_number:06d}" / stream
+                value, digest = _profile_stream(
+                    Path(reported), session / "calls" / f"{next_number:06d}" / stream,
+                    binding, terminal, stream,
                 )
                 streams[stream] = value
                 receipt[f"{stream}_sha256"] = digest
@@ -609,7 +702,7 @@ def execute_tool_conversation(
                         if result["provider_status"] != "completed":
                             _finish(run_dir, state, "truncated", "provider_incomplete", started_at)
                             return _snapshot(run_dir, plan, state, ledger)
-                        kind, call = _response_kind(response, plan["functions"][0])
+                        kind, call = _response_kind(response, plan["functions"])
                         if kind == "unsupported":
                             _finish(run_dir, state, "truncated", "unsupported_response", started_at)
                             return _snapshot(run_dir, plan, state, ledger)
@@ -739,7 +832,10 @@ def _snapshot(run_dir: Path, plan: dict[str, Any], state: dict[str, Any],
         if len(calls) != 1:
             raise ToolConversationError("tool reservation lacks one originating function call")
         call = calls[0]
-        parsed = _parse_function_arguments(_provider_tool(plan["functions"][0]),
+        function = _function_for(plan["functions"], call["name"])
+        binding = _bound_function(state, function)
+        _check_terminal_binding(terminal, binding)
+        parsed = _parse_function_arguments(_provider_tool(function),
                                            call["arguments"])
         args_sha = _sha(_json_bytes(parsed))
         if (reservation.get("run_id") != plan["run_id"]
@@ -750,11 +846,15 @@ def _snapshot(run_dir: Path, plan: dict[str, Any], state: dict[str, Any],
                 or terminal.get("call_number") != number
                 or reservation.get("call_id") != call.get("call_id")
                 or receipt.get("call_id") != call.get("call_id")
+                or reservation.get("name") != function["name"]
+                or reservation.get("tool_id") != binding["tool_id"]
+                or "execution_profile" in binding
+                and reservation.get("execution_profile") != binding["execution_profile"]
                 or reservation.get("arguments_sha256") != args_sha
                 or terminal.get("tool_args_sha256") != args_sha
                 or terminal.get("tool_id") != reservation.get("tool_id")
                 or terminal.get("executable_sha256")
-                != state["tool_binding"]["executable_sha256"]
+                != binding["executable_sha256"]
                 or receipt.get("terminal_sha256") != _sha(terminal_raw)
                 or receipt.get("reservation_sha256")
                 != _sha((run_dir / "tool_reservations" / name).read_bytes())
@@ -766,7 +866,8 @@ def _snapshot(run_dir: Path, plan: dict[str, Any], state: dict[str, Any],
             expected_sha = receipt.get(f"{stream}_sha256")
             if expected_sha is not None:
                 expected = session / "calls" / f"{number:06d}" / stream
-                value, digest = _tool_stream(Path(terminal[stream]), expected)
+                value, digest = _profile_stream(Path(terminal[stream]), expected,
+                                               binding, terminal, stream)
                 if digest != expected_sha:
                     raise ToolConversationError("tool stream digest changed")
                 streams[stream] = value
@@ -801,11 +902,17 @@ def _snapshot(run_dir: Path, plan: dict[str, Any], state: dict[str, Any],
                  if source is not None else [])
         if len(calls) != 1:
             raise ToolConversationError("pending tool reservation lacks a model call")
-        parsed = _parse_function_arguments(_provider_tool(plan["functions"][0]),
+        function = _function_for(plan["functions"], calls[0]["name"])
+        binding = _bound_function(state, function)
+        parsed = _parse_function_arguments(_provider_tool(function),
                                            calls[0]["arguments"])
         if (pending.get("run_id") != plan["run_id"]
                 or pending.get("tool_call_number") != state["tool_calls_completed"] + 1
                 or pending.get("call_id") != calls[0].get("call_id")
+                or pending.get("name") != function["name"]
+                or pending.get("tool_id") != binding["tool_id"]
+                or "execution_profile" in binding
+                and pending.get("execution_profile") != binding["execution_profile"]
                 or pending.get("arguments_sha256") != _sha(_json_bytes(parsed))
                 or pending.get("request_sha256")
                 != _sha(_json_bytes(request_by_index[index]))
@@ -828,7 +935,7 @@ def _snapshot(run_dir: Path, plan: dict[str, Any], state: dict[str, Any],
         response = response_by_index[index]
         if response["status"] != "completed":
             break
-        kind, call = _response_kind(response, plan["functions"][0])
+        kind, call = _response_kind(response, plan["functions"])
         if kind == "unsupported":
             break
         history.extend(response["output"])

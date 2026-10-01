@@ -92,6 +92,43 @@ def test_validated_policy_bytes_expose_tool_declarations_without_execution(
         )
 
 
+def test_v2_profiles_are_fixed_per_tool_and_v1_defaults_to_workspace() -> None:
+    legacy = _policy()
+    assert inspector.execution_profile(legacy["generic_tools"][0]) == "workspace"
+    upgraded = copy.deepcopy(legacy)
+    upgraded["schema"] = 2
+    upgraded["generic_tools"][0]["profile"] = "workspace"
+    upgraded["generic_tools"][1]["profile"] = "analysis_readonly"
+    data = json.dumps(upgraded, sort_keys=True).encode()
+    parsed = inspector.validate_tool_policy_bytes(
+        data, expected_limits=upgraded["limits"])
+    assert parsed == upgraded
+    assert [inspector.execution_profile(item) for item in parsed["generic_tools"]] == [
+        "workspace", "analysis_readonly"]
+
+
+@pytest.mark.parametrize("change", ["missing", "unknown", "non_string", "roots", "v1_profile"])
+def test_profile_declarations_cannot_expand_sandbox_rights(change: str) -> None:
+    policy = _policy()
+    if change != "v1_profile":
+        policy["schema"] = 2
+        for item in policy["generic_tools"]:
+            item["profile"] = "analysis_readonly"
+    if change == "missing":
+        del policy["generic_tools"][0]["profile"]
+    elif change == "unknown":
+        policy["generic_tools"][0]["profile"] = "arbitrary_write"
+    elif change == "non_string":
+        policy["generic_tools"][0]["profile"] = ["analysis_readonly"]
+    elif change == "roots":
+        policy["write_roots"] = ["/work", "/case"]
+    else:
+        policy["generic_tools"][0]["profile"] = "analysis_readonly"
+    with pytest.raises(inspector.ToolPolicyError):
+        inspector.validate_tool_policy_bytes(
+            json.dumps(policy).encode(), expected_limits=policy["limits"])
+
+
 def test_pinned_policy_bytes_share_path_validation_and_bounds(tmp_path: Path) -> None:
     policy = _policy()
     path = tmp_path / "tool_policy"
@@ -210,7 +247,7 @@ def test_malformed_or_factual_policy_content_rejected(
     if change == "schema_bool":
         policy["schema"] = True
     elif change == "schema_number":
-        policy["schema"] = 2
+        policy["schema"] = 3
     elif change == "classification":
         policy["classification"] = "enforced"
     elif change == "runtime_uppercase":

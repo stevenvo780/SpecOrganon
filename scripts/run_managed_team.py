@@ -31,7 +31,8 @@ from run_managed_response import (
 )
 from run_managed_tool_conversation import (
     ToolConversationError, _file_bytes, _invoke_tool, _request, _response_kind,
-    _schedule_at, _tool_binding, _tool_stream, _validate_plan as _validate_bridge_plan,
+    DEVELOPMENT_SCHEMAS, _bound_function, _check_terminal_binding, _function_for,
+    _plan_tool_binding, _profile_stream, _schedule_at, _validate_plan as _validate_bridge_plan,
 )
 from staged_tool_session import create_session, resume_session
 
@@ -99,7 +100,7 @@ def _validate_plan(raw: Any, schedule: dict[str, Any]) -> dict[str, Any]:
     segments = raw["segments"]
     if type(segments) is not list or not 2 <= len(segments) <= MAX_SEGMENTS:
         raise TeamError("team plan requires 2 to 32 segments")
-    if (schedule.get("schema") == "specorganon.development_round_schedule.v1"
+    if (schedule.get("schema") in DEVELOPMENT_SCHEMAS
             and any(type(segment) is dict and segment.get("role") != "leader"
                     for segment in segments)):
         raise TeamError("development round schedule declares a solo leader")
@@ -217,12 +218,12 @@ def prepare_team(
             or type(cost_limit_micro_usd) is not int or cost_limit_micro_usd < 0
             or type(price_profile) is not dict or price_profile.get("model") != validated["model"]):
         raise TeamError("team token, active time, or cost ceiling is invalid")
-    if schedule.get("schema") == "specorganon.development_round_schedule.v1":
+    if schedule.get("schema") in DEVELOPMENT_SCHEMAS:
         from plan_development_round import validate_runtime_budget
         validate_runtime_budget(
             schedule, max_model_requests=validated["max_model_requests"],
             cost_limit_micro_usd=cost_limit_micro_usd, price_profile=price_profile)
-    binding = _tool_binding(stage, schedule, validated["functions"][0])
+    binding = _plan_tool_binding(stage, schedule, validated["functions"])
     sources = _source_closure()
     if run_dir.exists():
         raise FileExistsError("team run directory already exists")
@@ -314,7 +315,7 @@ def _load(run_dir: Path) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]
     session = _absolute(Path(state["session_dir"]), "session directory")
     if session != run_dir / "tool_session":
         raise TeamError("tool session is not in the team run directory")
-    binding = _tool_binding(stage, schedule, plan["functions"][0])
+    binding = _plan_tool_binding(stage, schedule, plan["functions"])
     if binding != state["tool_binding"]:
         raise TeamError("sealed function binding changed")
     manifest = _file_bytes(session / "session.json", MAX_JSON_BYTES, "tool session manifest")
@@ -358,14 +359,21 @@ def _verify_tool_receipt(
     terminal_path = Path(state["session_dir"]) / "calls" / f"{number:06d}" / "terminal.json"
     terminal_raw = _file_bytes(terminal_path, MAX_JSON_BYTES, "tool terminal")
     terminal = json.loads(terminal_raw)
+    function = _function_for(plan["functions"], call["name"])
+    binding = _bound_function(state, function)
+    _check_terminal_binding(terminal, binding)
     parsed = _parse_function_arguments(
-        {key: plan["functions"][0][key] for key in
+        {key: function[key] for key in
          ("type", "name", "description", "parameters", "strict")}, call["arguments"])
     args_sha = _sha(_json_bytes(parsed))
     if (reservation.get("run_id") != plan["run_id"]
             or reservation.get("tool_call_number") != number
             or reservation.get("request_index") != request_index
             or reservation.get("call_id") != call["call_id"]
+            or reservation.get("name") != function["name"]
+            or reservation.get("tool_id") != binding["tool_id"]
+            or "execution_profile" in binding
+            and reservation.get("execution_profile") != binding["execution_profile"]
             or reservation.get("arguments_sha256") != args_sha
             or reservation.get("request_sha256") != request_sha
             or reservation.get("response_sha256") != response_sha
@@ -376,7 +384,7 @@ def _verify_tool_receipt(
             or terminal.get("run_id") != plan["run_id"]
             or terminal.get("call_number") != number
             or terminal.get("tool_args_sha256") != args_sha
-            or terminal.get("executable_sha256") != state["tool_binding"]["executable_sha256"]):
+            or terminal.get("executable_sha256") != binding["executable_sha256"]):
         raise TeamError("tool reservation, provider call, and sealed terminal differ")
     streams: dict[str, str] = {}
     for stream in ("stdout", "stderr"):
@@ -387,7 +395,7 @@ def _verify_tool_receipt(
                 raise TeamError("tool stream receipt is inconsistent")
         else:
             expected = Path(state["session_dir"]) / "calls" / f"{number:06d}" / stream
-            value, digest = _tool_stream(Path(reported), expected)
+            value, digest = _profile_stream(Path(reported), expected, binding, terminal, stream)
             if receipt.get(f"{stream}_sha256") != digest:
                 raise TeamError("tool stream digest differs")
             streams[stream] = value
@@ -468,7 +476,7 @@ def _audit_completed(
                 raise TeamError("model request, response, receipt, or ledger differs")
             if response["status"] != "completed":
                 raise TeamError("completed segment has an incomplete provider response")
-            kind, call = _response_kind(response, plan["functions"][0])
+            kind, call = _response_kind(response, plan["functions"])
             if kind == "unsupported":
                 raise TeamError("completed segment has unsupported provider output")
             history.extend(response["output"])
@@ -512,7 +520,7 @@ def _guard_operation(
             or _sha(_file_bytes(run_dir / "plan.json", MAX_JSON_BYTES, "team plan"))
             != state["plan_sha256"]):
         raise TeamError("frozen schedule or plan changed during segment")
-    if (_tool_binding(Path(state["stage_dir"]), schedule, plan["functions"][0])
+    if (_plan_tool_binding(Path(state["stage_dir"]), schedule, plan["functions"])
             != state["tool_binding"]
             or _sha(_file_bytes(Path(state["session_dir"]) / "session.json",
                                MAX_JSON_BYTES, "tool session manifest"))
@@ -668,7 +676,7 @@ def execute_team_segment(
                 _write_state(run_dir, state)
                 if result["provider_status"] != "completed":
                     raise TeamError("provider returned an incomplete response")
-                kind, call = _response_kind(response, plan["functions"][0])
+                kind, call = _response_kind(response, plan["functions"])
                 if kind == "unsupported":
                     raise TeamError("provider returned unsupported team output")
                 history.extend(response["output"])

@@ -42,6 +42,8 @@ POLICY_FIELDS = frozenset(
     }
 )
 TOOL_FIELDS = frozenset({"id", "version", "executable_sha256"})
+TOOL_FIELDS_V2 = TOOL_FIELDS | {"profile"}
+EXECUTION_PROFILES = frozenset({"workspace", "analysis_readonly"})
 LIMIT_FIELDS = frozenset({"measured_tokens", "active_seconds", "tool_calls"})
 POLICY_CLASSIFICATION = "common_tool_policy_development_unenforced"
 INSPECTION_CLASSIFICATION = "development_tool_policy_inspection_unenforced"
@@ -198,8 +200,8 @@ def _limits(value: Any, label: str) -> dict[str, int]:
 
 def _validate_policy(raw: Any) -> dict[str, Any]:
     policy = _exact_object(raw, "tool policy", POLICY_FIELDS)
-    if type(policy["schema"]) is not int or policy["schema"] != 1:
-        raise ToolPolicyError("tool policy schema must be integer 1")
+    if type(policy["schema"]) is not int or policy["schema"] not in (1, 2):
+        raise ToolPolicyError("tool policy schema must be integer 1 or 2")
     if (
         type(policy["classification"]) is not str
         or policy["classification"] != POLICY_CLASSIFICATION
@@ -219,7 +221,8 @@ def _validate_policy(raw: Any) -> dict[str, Any]:
     seen: set[str] = set()
     for index, raw_tool in enumerate(tools):
         label = f"generic_tools[{index}]"
-        tool = _exact_object(raw_tool, label, TOOL_FIELDS)
+        tool = _exact_object(raw_tool, label,
+                             TOOL_FIELDS_V2 if policy["schema"] == 2 else TOOL_FIELDS)
         tool_id = tool["id"]
         if type(tool_id) is not str or TOOL_ID_RE.fullmatch(tool_id) is None:
             raise ToolPolicyError(f"{label}.id must be a simple lowercase ID")
@@ -230,8 +233,23 @@ def _validate_policy(raw: Any) -> dict[str, Any]:
         if type(version) is not str or not version.strip():
             raise ToolPolicyError(f"{label}.version must be nonempty")
         _sha256(tool["executable_sha256"], f"{label}.executable_sha256")
+        if policy["schema"] == 2 and (
+            type(tool["profile"]) is not str
+            or tool["profile"] not in EXECUTION_PROFILES
+        ):
+            raise ToolPolicyError(f"{label}.profile is not a fixed execution profile")
     _limits(policy["limits"], "tool policy limits")
     return policy
+
+
+def execution_profile(selected: dict[str, Any]) -> str:
+    """Resolve a validated tool's fixed host capability, retaining v1 behavior."""
+    if type(selected) is not dict or set(selected) not in (TOOL_FIELDS, TOOL_FIELDS_V2):
+        raise ToolPolicyError("selected tool fields are invalid")
+    profile = selected.get("profile", "workspace")
+    if type(profile) is not str or profile not in EXECUTION_PROFILES:
+        raise ToolPolicyError("selected tool profile is invalid")
+    return profile
 
 
 def validate_tool_policy_bytes(

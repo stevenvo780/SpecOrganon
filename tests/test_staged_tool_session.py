@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import local_replay_sandbox as sandbox  # noqa: E402
 import local_run_admission as admission  # noqa: E402
 import local_block_release_gate as gate  # noqa: E402
+import development_analysis_tool as analysis_tool  # noqa: E402
 import plan_confirmatory  # noqa: E402
 import preflight_assets  # noqa: E402
 import run_staged_local_tool as one_shot  # noqa: E402
@@ -76,11 +77,12 @@ def _tool(path: Path, body: str) -> None:
 def _stage(
     tmp_path: Path, *, first_body: str = FIRST, cap: int = 2,
     retry: bool = False, gated_first: bool = False,
+    analyzer_tool: Path | None = None, second_body: str = SECOND,
 ) -> tuple[dict, Path, str, Path, Path, Path, tuple[bytes, ...]]:
     first = tmp_path / "first_tool"
     second = tmp_path / "second_tool"
     _tool(first, first_body)
-    _tool(second, SECOND)
+    _tool(second, second_body)
     schedule, assets, schedule_path, hidden = fixture._fixture(tmp_path)
     policy_path = Path(assets["inputs"]["tool_policy"])
     policy = json.loads(policy_path.read_text(encoding="utf-8"))
@@ -88,6 +90,15 @@ def _stage(
         {"id": "first", "version": "1", "executable_sha256": _sha(first.read_bytes())},
         {"id": "second", "version": "1", "executable_sha256": _sha(second.read_bytes())},
     ]
+    if analyzer_tool is not None:
+        policy["schema"] = 2
+        for item in policy["generic_tools"]:
+            item["profile"] = "workspace"
+        policy["generic_tools"].append({
+            "id": "analysis", "version": "read-only-v1",
+            "executable_sha256": _sha(analyzer_tool.read_bytes()),
+            "profile": "analysis_readonly",
+        })
     policy["limits"]["tool_calls"] = cap
     policy_bytes = json.dumps(policy, sort_keys=True).encode("utf-8")
     policy_path.write_bytes(policy_bytes)
@@ -1391,3 +1402,188 @@ def test_active_reservation_and_concurrent_call_lock(
     assert not errors
     assert not thread.is_alive()
     assert sorted(path.name for path in (session / "calls").iterdir()) == ["000001"]
+
+
+def _analysis_writer(source: str) -> str:
+    return f"""
+import os, sys
+from pathlib import Path
+work = Path(sys.argv[3])
+for name, content in (("analysis.py", {source!r}),
+                      ("method_state.json", '{{"normative":"pending"}}'),
+                      ("proposal.json", '{{"source":"fixture"}}'),
+                      ("report.md", "fixture report\\n")):
+    fd = os.open(work / name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, 'w', encoding='utf-8') as stream:
+        stream.write(content)
+"""
+
+
+def _analysis_rewriter(source: str) -> str:
+    return f"""
+import os, sys
+from pathlib import Path
+path = Path(sys.argv[3]) / 'analysis.py'
+fd = os.open(path, os.O_WRONLY | os.O_TRUNC | os.O_NOFOLLOW)
+with os.fdopen(fd, 'w', encoding='utf-8') as stream:
+    stream.write({source!r})
+"""
+
+
+def _analysis_fixture(tmp_path: Path, source: str, *, cap: int = 4,
+                      replacement: str | None = None) -> tuple[dict, str, Path, Path, Path, Path]:
+    analyzer = tmp_path / "analysis_tool"
+    analysis_tool.build_analysis_tool(analyzer)
+    schedule, _, run_id, stage, first, second, _ = _stage(
+        tmp_path, first_body=_analysis_writer(source), cap=cap,
+        analyzer_tool=analyzer,
+        second_body=_analysis_rewriter(replacement or source),
+    )
+    session = tmp_path / "session"
+    session_runner.create_session(schedule, run_id, stage, session)
+    first_receipt = session_runner.call_tool(
+        schedule, run_id, stage, session, "first", first, wall_seconds=3)
+    assert first_receipt["status"] == "success"
+    return schedule, run_id, stage, session, analyzer, second
+
+
+def _run_analysis(schedule: dict, run_id: str, stage: Path, session: Path,
+                  analyzer: Path, *, wall_seconds: float = 3) -> dict:
+    digest = _sha((stage / "work" / "analysis.py").read_bytes())
+    return session_runner.call_tool(
+        schedule, run_id, stage, session, "analysis", analyzer,
+        tool_args={"script_sha256": digest}, wall_seconds=wall_seconds,
+    )
+
+
+def test_analysis_profile_protects_method_case_and_journal_and_publishes_metrics(
+    tmp_path: Path, available_sandbox: None,
+) -> None:
+    source = """
+import json, os, sys
+from pathlib import Path
+case = Path(sys.argv[1]); work = case.parent / 'work'
+paths = {'state': work / 'method_state.json', 'proposal': work / 'proposal.json',
+         'case': case / 'task.md', 'journal': case.parent.parent / 'session' / 'touched'}
+result = {}
+for name, path in paths.items():
+    try:
+        fd = os.open(path, os.O_WRONLY | os.O_TRUNC)
+    except OSError:
+        result[name] = 'denied'
+    else:
+        os.close(fd); result[name] = 'unexpected_write'
+print(json.dumps(result))
+"""
+    schedule, run_id, stage, session, analyzer, _ = _analysis_fixture(tmp_path, source)
+    before = {name: (stage / "work" / name).read_bytes()
+              for name in ("method_state.json", "proposal.json")}
+    case_before = (stage / "case" / "task.md").read_bytes()
+    receipt = _run_analysis(schedule, run_id, stage, session, analyzer)
+    assert receipt["status"] == "success" and receipt["execution_profile"] == "analysis_readonly"
+    assert receipt["analysis_status"] == "valid"
+    metrics = json.loads((stage / "work" / "metrics.json").read_text())
+    assert metrics == {name: "denied" for name in ("state", "proposal", "case", "journal")}
+    assert receipt["analysis_metrics_sha256"] == _sha((stage / "work" / "metrics.json").read_bytes())
+    assert receipt["analysis_work_readonly_unchanged"] is True
+    assert (stage / "case" / "task.md").read_bytes() == case_before
+    assert all((stage / "work" / name).read_bytes() == raw for name, raw in before.items())
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "ready"
+
+
+@pytest.mark.parametrize("replacement", ["print('not json')\n",
+                                               "print('{\"x\":1,\"x\":2}')\n",
+                                               "print('{\"x\":NaN}')\n"])
+def test_invalid_reanalysis_spends_call_and_retires_prior_metrics(
+    tmp_path: Path, available_sandbox: None, replacement: str,
+) -> None:
+    schedule, run_id, stage, session, analyzer, second = _analysis_fixture(
+        tmp_path, "print('{\"value\":1}')\n", replacement=replacement)
+    assert _run_analysis(schedule, run_id, stage, session, analyzer)["analysis_status"] == "valid"
+    assert (stage / "work" / "metrics.json").exists()
+    assert session_runner.call_tool(
+        schedule, run_id, stage, session, "second", second, wall_seconds=3)["status"] == "success"
+    invalid = _run_analysis(schedule, run_id, stage, session, analyzer)
+    assert invalid["status"] == "success" and invalid["analysis_status"] == "invalid_json"
+    assert invalid["analysis_metrics_sha256"] is None
+    assert not (stage / "work" / "metrics.json").exists()
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "exhausted"
+
+
+def test_analysis_source_arg_must_match_latest_work_receipt_before_reservation(
+    tmp_path: Path, available_sandbox: None,
+) -> None:
+    schedule, run_id, stage, session, analyzer, _ = _analysis_fixture(
+        tmp_path, "print('{}')\n", cap=2)
+    with pytest.raises(session_runner.SessionError, match="differs from tool arguments"):
+        session_runner.call_tool(
+            schedule, run_id, stage, session, "analysis", analyzer,
+            tool_args={"script_sha256": "0" * 64}, wall_seconds=3)
+    assert sorted(path.name for path in (session / "calls").iterdir()) == ["000001"]
+    assert _run_analysis(schedule, run_id, stage, session, analyzer)["analysis_status"] == "valid"
+    with pytest.raises(session_runner.SessionError, match="cap exhausted"):
+        _run_analysis(schedule, run_id, stage, session, analyzer)
+
+
+def test_participant_failure_is_feedback_but_timeout_blocks(
+    tmp_path: Path, available_sandbox: None,
+) -> None:
+    schedule, run_id, stage, session, analyzer, second = _analysis_fixture(
+        tmp_path, "raise RuntimeError('fixture failure')\n",
+        replacement="while True: pass\n")
+    failed = _run_analysis(schedule, run_id, stage, session, analyzer)
+    assert failed["status"] == "success" and failed["analysis_status"] == "participant_failed"
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "ready"
+    assert session_runner.call_tool(
+        schedule, run_id, stage, session, "second", second, wall_seconds=3)["status"] == "success"
+    timed = _run_analysis(schedule, run_id, stage, session, analyzer, wall_seconds=1)
+    assert timed["status"] in {"timeout", "tool_failure"}
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "blocked"
+
+
+def test_oversized_analysis_stdout_is_bounded_feedback_with_raw_journal(
+    tmp_path: Path, available_sandbox: None,
+) -> None:
+    schedule, run_id, stage, session, analyzer, _ = _analysis_fixture(
+        tmp_path, "print('x' * (128 * 1024 + 1))\n", cap=3)
+    receipt = _run_analysis(schedule, run_id, stage, session, analyzer)
+    raw = (session / "calls" / "000002" / "stdout").read_bytes()
+    assert len(raw) > 128 * 1024
+    assert receipt["status"] == "success" and receipt["analysis_status"] == "error"
+    assert receipt["analysis_stdout_bytes"] == len(raw)
+    assert receipt["analysis_stdout_sha256"] == _sha(raw)
+    assert receipt["analysis_metrics_sha256"] is None
+    assert not (stage / "work" / "metrics.json").exists()
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "ready"
+
+
+@pytest.mark.parametrize("source", ["import sys\nsys.exit(79)\n",
+                                    "import os\nos._exit(79)\n"])
+def test_participant_exit_79_consumes_call_and_allows_repair(
+    tmp_path: Path, available_sandbox: None, source: str,
+) -> None:
+    schedule, run_id, stage, session, analyzer, second = _analysis_fixture(
+        tmp_path, source, cap=4, replacement="print('{\"repaired\":true}')\n")
+    receipt = _run_analysis(schedule, run_id, stage, session, analyzer)
+    raw = (session / "calls" / "000002" / "stdout").read_bytes()
+    assert receipt["exit_code"] == 79
+    assert receipt["status"] == "success"
+    assert receipt["analysis_status"] == "participant_failed"
+    assert receipt["analysis_stdout_bytes"] == len(raw)
+    assert receipt["analysis_stdout_sha256"] == _sha(raw)
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "ready"
+    assert session_runner.call_tool(
+        schedule, run_id, stage, session, "second", second, wall_seconds=3)["status"] == "success"
+    repaired = _run_analysis(schedule, run_id, stage, session, analyzer)
+    assert repaired["status"] == "success" and repaired["analysis_status"] == "valid"
+    assert json.loads((stage / "work" / "metrics.json").read_text()) == {"repaired": True}
+
+
+def test_analysis_receipt_or_metrics_tamper_blocks_replay(
+    tmp_path: Path, available_sandbox: None,
+) -> None:
+    schedule, run_id, stage, session, analyzer, _ = _analysis_fixture(
+        tmp_path, "print('{\"metric\":2}')\n", cap=3)
+    assert _run_analysis(schedule, run_id, stage, session, analyzer)["analysis_status"] == "valid"
+    (stage / "work" / "metrics.json").write_text('{"metric":999}\n')
+    assert session_runner.resume_session(schedule, run_id, stage, session)["status"] == "blocked"

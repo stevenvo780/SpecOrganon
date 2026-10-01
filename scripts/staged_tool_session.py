@@ -78,6 +78,7 @@ from tool_policy import (
     _open_directory_chain,
     _read_bounded_file,
     _same_file_state,
+    execution_profile,
     validate_tool_policy_bytes,
 )
 from verify_released_run import ReleaseVerificationError, _read_schedule
@@ -105,6 +106,8 @@ MAX_JOURNAL_BYTES = 4 * 1024 * 1024
 MAX_CALLS = 10000
 MAX_TOOL_ARGS_BYTES = 16 * 1024
 MAX_TOOL_ARGS_DEPTH = 32
+MAX_ANALYSIS_SCRIPT_BYTES = 256 * 1024
+MAX_ANALYSIS_JSON_BYTES = 128 * 1024
 
 
 class SessionError(ValueError):
@@ -215,16 +218,17 @@ def _parse_tool_args_json(raw: str) -> dict[str, Any]:
 def _assert_sandbox_config_fits(
     argv: list[str], stage: Path, runtime_roots: tuple[Path, ...],
     cpu_seconds: int, address_space_bytes: int, file_bytes_per_file: int,
+    *, read_roots: list[Path] | None = None,
+    write_roots: list[Path] | None = None,
 ) -> None:
     """Mirror the sandbox's bounded config before admission spends the call."""
     try:
-        reads = _roots([stage / "case", stage / "inputs"], directories_only=False)
-        writes = _roots([stage / "work"], directories_only=True)
+        reads = _roots(read_roots if read_roots is not None else
+                       [stage / "case", stage / "inputs"], directories_only=False)
+        writes = _roots(write_roots if write_roots is not None else
+                        [stage / "work"], directories_only=True)
         runtimes = _roots(runtime_roots, directories_only=False, allow_char_device=True)
-        child_env = _validate_env(
-            {"HOME": str(stage / "work"), "TMPDIR": str(stage / "work")},
-            writes, stage / "case",
-        )
+        child_env = _validate_env(None, writes, stage / "case")
         config = {
             "argv": argv, "read_roots": reads, "write_roots": writes,
             "runtime_roots": runtimes, "env": child_env,
@@ -501,11 +505,158 @@ def _is_sha256(value: Any) -> bool:
     return type(value) is str and len(value) == 64 and all(char in "0123456789abcdef" for char in value)
 
 
+def _analysis_source(
+    stage: Path, work_before: dict[str, Any], tool_args: dict[str, Any] | None,
+    calls: list[tuple[dict[str, Any] | None, dict[str, Any] | None]],
+) -> tuple[str, str | None]:
+    """Bind the source and any previous host-owned metrics before a new call."""
+    if (type(tool_args) is not dict or set(tool_args) != {"script_sha256"}
+            or not _is_sha256(tool_args["script_sha256"])):
+        raise SessionError("analysis tool requires one exact script_sha256 argument")
+    source = next((item for item in work_before["files"]
+                   if item["path"] == "analysis.py"), None)
+    if (source is None or not 0 < source["bytes"] <= MAX_ANALYSIS_SCRIPT_BYTES
+            or source["sha256"] != tool_args["script_sha256"]):
+        raise SessionError("analysis.py is absent, oversized, or differs from tool arguments")
+    raw = _read_bounded_file(stage / "work" / "analysis.py", "analysis source",
+                             MAX_ANALYSIS_SCRIPT_BYTES)
+    info = os.stat(stage / "work" / "analysis.py", follow_symlinks=False)
+    if (not raw or len(raw) != source["bytes"]
+            or hashlib.sha256(raw).hexdigest() != source["sha256"]
+            or stat.S_IMODE(info.st_mode) != 0o600 or info.st_nlink != 1):
+        raise SessionError("analysis source identity or private mode differs")
+    old_metrics = next((item for item in work_before["files"]
+                        if item["path"] == "metrics.json"), None)
+    if old_metrics is None:
+        return source["sha256"], None
+    prior_sha = next((terminal.get("analysis_metrics_sha256") for _, terminal in reversed(calls)
+                      if terminal is not None and terminal.get("analysis_status") == "valid"), None)
+    if prior_sha != old_metrics["sha256"]:
+        raise SessionError("existing metrics.json lacks matching host analysis provenance")
+    return source["sha256"], prior_sha
+
+
+def _analysis_output(path: Path, exit_code: int, maximum_file_bytes: int
+                     ) -> tuple[str, str, int, str, dict[str, Any] | None]:
+    """Classify untrusted participant stdout, retaining its exact journal bytes."""
+    raw = _read_bounded_file(path, "analysis stdout", maximum_file_bytes)
+    digest = hashlib.sha256(raw).hexdigest()
+    if exit_code != 0:
+        return "participant_failed", "participant process exited nonzero", len(raw), digest, None
+    if len(raw) > MAX_ANALYSIS_JSON_BYTES:
+        return "error", "analysis stdout exceeds 128 KiB", len(raw), digest, None
+    try:
+        decoded = raw.decode("utf-8")
+    except UnicodeError:
+        return "error", "analysis stdout is not UTF-8", len(raw), digest, None
+
+    def unique(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate JSON key")
+            result[key] = value
+        return result
+
+    def finite(value: str) -> float:
+        parsed = float(value)
+        if not math.isfinite(parsed):
+            raise ValueError("nonfinite JSON number")
+        return parsed
+
+    try:
+        value = json.loads(decoded, object_pairs_hook=unique,
+                           parse_float=finite,
+                           parse_constant=lambda _value: (_ for _ in ()).throw(
+                               ValueError("nonfinite JSON value")))
+        if type(value) is not dict or len(_canonical_bytes(value, newline=True)) > MAX_ANALYSIS_JSON_BYTES:
+            raise ValueError("analysis result is not a bounded JSON object")
+    except (UnicodeError, ValueError, OverflowError, RecursionError, TypeError):
+        return "invalid_json", "analysis stdout is not a strict finite JSON object", len(raw), digest, None
+    return "valid", "analysis result is a strict JSON object", len(raw), digest, value
+
+
+def _publish_analysis_metrics(work: Path, value: dict[str, Any] | None,
+                              old_sha: str | None) -> str | None:
+    """Replace or retire only a prior host-authored metrics file after sandbox exit."""
+    path = work / "metrics.json"
+    if old_sha is not None:
+        raw = _read_bounded_file(path, "previous host metrics", MAX_ANALYSIS_JSON_BYTES)
+        info = os.stat(path, follow_symlinks=False)
+        if (hashlib.sha256(raw).hexdigest() != old_sha
+                or stat.S_IMODE(info.st_mode) != 0o600 or info.st_nlink != 1):
+            raise SessionError("previous host metrics changed before retirement")
+    elif path.exists() or path.is_symlink():
+        raise SessionError("unexpected metrics.json appeared before host publication")
+    if value is None:
+        if old_sha is not None:
+            os.unlink(path)
+            _fsync_directory(work)
+        return None
+    temporary = work / f".metrics-{secrets.token_hex(16)}"
+    digest = _write_json(temporary, value)
+    os.replace(temporary, path)
+    _fsync_directory(work)
+    return digest
+
+
 def _valid_terminal(
     terminal: dict[str, Any], reservation: dict[str, Any], run: dict[str, Any],
     schedule: dict[str, Any], reservation_sha256: str,
-    deliverables: list[str], call_dir: Path,
+    deliverables: list[str], call_dir: Path, policy: dict[str, Any],
 ) -> bool:
+    selected = next((item for item in policy["generic_tools"]
+                     if item["id"] == reservation.get("tool_id")), None)
+    if selected is None or selected["executable_sha256"] != reservation.get("executable_sha256"):
+        return False
+    profile = execution_profile(selected)
+    if policy["schema"] == 2:
+        if (reservation.get("execution_profile") != profile
+                or terminal.get("execution_profile") != profile):
+            return False
+    elif "execution_profile" in reservation or "execution_profile" in terminal:
+        return False
+    if profile == "analysis_readonly":
+        if (not _is_sha256(reservation.get("analysis_script_sha256"))
+                or terminal.get("analysis_script_sha256") != reservation["analysis_script_sha256"]
+                or terminal.get("analysis_status") not in
+                {None, "valid", "participant_failed", "invalid_json", "error"}
+                or type(terminal.get("analysis_diagnostic")) is not str
+                or len(terminal["analysis_diagnostic"]) > 160
+                or type(terminal.get("analysis_work_readonly_unchanged")) is not bool
+                or not _is_sha256(terminal.get("analysis_work_after_child_sha256"))
+                or type(terminal.get("analysis_stdout_bytes")) is not int
+                or terminal["analysis_stdout_bytes"] < 0
+                or not _is_sha256(terminal.get("analysis_stdout_sha256"))):
+            return False
+        if terminal["status"] == "success":
+            if (terminal["analysis_status"] is None
+                    or terminal["analysis_work_readonly_unchanged"] is not True
+                    or terminal["analysis_work_after_child_sha256"]
+                    != reservation["work_before_sha256"]):
+                return False
+            try:
+                observed_status, observed_diagnostic, size, digest, parsed = _analysis_output(
+                    call_dir / "stdout", terminal["exit_code"],
+                    reservation["limits_applied"]["file_bytes_per_file"])
+            except (OSError, ToolPolicyError, ValueError, TypeError, KeyError):
+                return False
+            if (terminal["analysis_status"] != observed_status
+                    or terminal["analysis_diagnostic"] != observed_diagnostic
+                    or terminal["analysis_stdout_bytes"] != size
+                    or terminal["analysis_stdout_sha256"] != digest):
+                return False
+            expected_metrics = (hashlib.sha256(_canonical_bytes(parsed, newline=True)).hexdigest()
+                                if parsed is not None else None)
+            output_metrics = next((item["sha256"] for item in terminal.get("outputs", [])
+                                   if type(item) is dict and item.get("path") == "metrics.json"), None)
+            if (terminal.get("analysis_metrics_sha256") != expected_metrics
+                    or output_metrics != expected_metrics):
+                return False
+        elif terminal.get("analysis_status") is not None:
+            return False
+    elif any(key.startswith("analysis_") for key in (*reservation, *terminal)):
+        return False
     duration = terminal.get("local_elapsed_seconds")
     debit = terminal.get("active_seconds_charged")
     outputs = terminal.get("outputs")
@@ -539,7 +690,9 @@ def _valid_terminal(
     timed_out = terminal.get("timed_out")
     launch_error = terminal.get("launch_error")
     if status == "success" and (
-        exit_code != 0 or type(exit_code) is not int or timed_out is not False
+        (exit_code != 0 if profile != "analysis_readonly"
+         else type(exit_code) is not int)
+        or type(exit_code) is not int or timed_out is not False
         or launch_error is not None or sealed is not True or complete is not True
         or terminal.get("stage_unchanged_after_run") is not True
         or terminal.get("executable_unchanged_after_run") is not True
@@ -555,6 +708,11 @@ def _valid_terminal(
     if status == "stage_or_executable_mutated" and (
         terminal.get("stage_unchanged_after_run") is True
         and terminal.get("executable_unchanged_after_run") is True
+    ):
+        return False
+    if status == "readonly_work_mutated" and (
+        profile != "analysis_readonly"
+        or terminal.get("analysis_work_readonly_unchanged") is not False
     ):
         return False
     for stream in ("stdout", "stderr"):
@@ -573,6 +731,18 @@ def _valid_terminal(
             if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid()
                 or stat.S_IMODE(info.st_mode) != 0o600):
                 return False
+    if profile == "analysis_readonly":
+        stream = call_dir / "stdout"
+        try:
+            raw_stream = (_read_bounded_file(stream, "analysis stdout",
+                                             reservation["limits_applied"]["file_bytes_per_file"])
+                          if stream.exists() else b"")
+        except (OSError, ToolPolicyError, TypeError, KeyError, ValueError):
+            return False
+        if (terminal["analysis_stdout_bytes"] != len(raw_stream)
+                or terminal["analysis_stdout_sha256"] != hashlib.sha256(raw_stream).hexdigest()
+                or (status != "success" and terminal.get("analysis_metrics_sha256") is not None)):
+            return False
     return (
         terminal.get("schema") == SCHEMA
         and terminal.get("classification") == CLASSIFICATION
@@ -595,6 +765,7 @@ def _valid_terminal(
         and status in {
             "success", "timeout", "launch_failure", "tool_failure",
             "output_inventory_incomplete", "stage_or_executable_mutated",
+            "readonly_work_mutated",
         }
         and type(terminal.get("output_inventory_complete")) is bool
         and type(terminal.get("stage_unchanged_after_run")) is bool
@@ -674,6 +845,12 @@ def _read_state(
         or not 0 < manifest["wall_budget_seconds"] <= MAX_SESSION_WALL_SECONDS):
         raise SessionError("session budget or creation time is invalid")
     _check_anchor(stage, session, schedule, run, manifest)
+    policy_data = _read_bounded_file(stage / "inputs" / "tool_policy",
+                                     "staged tool policy", MAX_POLICY_BYTES)
+    if hashlib.sha256(policy_data).hexdigest() != manifest["policy_sha256"]:
+        raise SessionError("staged tool policy changed after session creation")
+    policy = validate_tool_policy_bytes(
+        policy_data, expected_limits=schedule["per_run_limits"])
     calls_root = session / "calls"
     _check_private_directory(calls_root)
     all_names = sorted(path.name for path in calls_root.iterdir())
@@ -725,6 +902,16 @@ def _read_state(
                 or not _is_sha256(reservation.get("executable_sha256"))
                 or type(reservation.get("tool_id")) is not str
                 or type(reservation.get("tool_version")) is not str
+                or (selected := next((item for item in policy["generic_tools"]
+                                      if item["id"] == reservation.get("tool_id")), None)) is None
+                or reservation.get("tool_version") != selected["version"]
+                or reservation.get("executable_sha256") != selected["executable_sha256"]
+                or (policy["schema"] == 2 and reservation.get("execution_profile")
+                    != execution_profile(selected))
+                or (policy["schema"] == 1 and "execution_profile" in reservation)
+                or (execution_profile(selected) == "analysis_readonly" and
+                    (not _is_sha256(reservation.get("analysis_script_sha256"))
+                     or "tool_args_sha256" not in reservation))
                 or ("tool_args_sha256" in reservation
                     and not _is_sha256(reservation["tool_args_sha256"]))
                 or type(reservation.get("reserved_at_ns")) is not int
@@ -742,7 +929,7 @@ def _read_state(
             reservation_digest = hashlib.sha256(_canonical_bytes(reservation, newline=True)).hexdigest()
             if not _valid_terminal(
                 terminal, reservation, run, schedule, reservation_digest,
-                manifest["deliverables"], call_dir,
+                manifest["deliverables"], call_dir, policy,
             ):
                 if number != len(names):
                     raise SessionError("invalid terminal receipt precedes another call")
@@ -798,6 +985,8 @@ def _read_state(
     if blocked_reason is None and last is not None and (last.get("output_inventory_complete") is not True
                               or last.get("stage_unchanged_after_run") is not True
                               or last.get("status") == "stage_or_executable_mutated"
+                              or (last.get("execution_profile") == "analysis_readonly"
+                                  and last.get("status") != "success")
                               or last.get("active_budget_overrun") is True):
         blocked_reason = "previous receipt cannot establish a complete, unchanged continuation"
     exhausted_reason = None
@@ -1016,6 +1205,12 @@ def call_tool(
         selected = next((item for item in policy["generic_tools"] if item["id"] == tool_id), None)
         if selected is None:
             raise SessionError("tool_id is absent from staged generic_tools")
+        profile = execution_profile(selected)
+        analysis_script_sha: str | None = None
+        old_metrics_sha: str | None = None
+        if profile == "analysis_readonly":
+            analysis_script_sha, old_metrics_sha = _analysis_source(
+                stage, work_before, tool_args, calls)
         tool_bytes = _read_bounded_file(tool, "tool executable", MAX_EXECUTABLE_BYTES)
         executable_sha256 = hashlib.sha256(tool_bytes).hexdigest()
         if executable_sha256 != selected["executable_sha256"]:
@@ -1025,10 +1220,16 @@ def call_tool(
         sandbox_argv = [str(tool), str(stage / "case"), str(stage / "inputs"), str(stage / "work")]
         if canonical_args is not None:
             sandbox_argv.append(canonical_args.decode("ascii"))
+        read_roots = [stage / "case", stage / "inputs"]
+        write_roots = [stage / "work"]
+        if profile == "analysis_readonly":
+            read_roots.append(stage / "work")
+            write_roots = []
         runtime_roots = default_python_runtime_roots()
         _assert_sandbox_config_fits(
             sandbox_argv, stage, runtime_roots, cpu_seconds,
             address_space_bytes, file_bytes_per_file,
+            read_roots=read_roots, write_roots=write_roots,
         )
         now_ns = time.time_ns()
         wall_elapsed = _wall_elapsed(manifest["created_ns"], now_ns)
@@ -1082,6 +1283,9 @@ def call_tool(
             "previous_terminal_sha256": previous_digest,
             "reserved_at_ns": now_ns, "tool_id": tool_id,
             "tool_version": selected["version"], "executable_sha256": executable_sha256,
+            **({"execution_profile": profile} if policy["schema"] == 2 else {}),
+            **({"analysis_script_sha256": analysis_script_sha}
+               if analysis_script_sha is not None else {}),
             **({"tool_args_sha256": tool_args_sha256} if tool_args_sha256 is not None else {}),
             "policy_sha256": policy_sha256, "immutable_snapshot_sha256": _digest(snapshot),
             "work_before_sha256": _digest(work_before),
@@ -1120,13 +1324,13 @@ def call_tool(
                 try:
                     result = run_sandboxed(
                         argv=sandbox_argv,
-                        cwd=stage / "case", read_roots=[stage / "case", stage / "inputs"],
-                        write_roots=[stage / "work"], runtime_roots=runtime_roots,
+                        cwd=stage / "case", read_roots=read_roots,
+                        write_roots=write_roots, runtime_roots=runtime_roots,
                         stdout_path=call_dir / "stdout", stderr_path=call_dir / "stderr",
                         timeout_seconds=float(wall_seconds), cpu_seconds=cpu_seconds,
                         address_space_bytes=address_space_bytes,
                         file_bytes_per_file=file_bytes_per_file,
-                        env={"HOME": str(stage / "work"), "TMPDIR": str(stage / "work")},
+                        env=None,
                         sealed_executable_bytes=tool_bytes,
                         sealed_executable_sha256=executable_sha256,
                         launch_deadline_utc_ns=launch_deadline_ns,
@@ -1137,7 +1341,7 @@ def call_tool(
             launch_error = f"{type(exc).__name__}: {exc}"
         if result is not None:
             launch_error = result.launch_error
-        work_after = _work_inventory(stage)
+        child_work = _work_inventory(stage)
         try:
             stage_unchanged = _immutable_snapshot(stage) == snapshot
         except (LocalToolError, OSError):
@@ -1152,6 +1356,28 @@ def call_tool(
                   and result.launch_error is None)
         if result is not None and not sealed and launch_error is None:
             launch_error = "sealed executable launch was not confirmed"
+        analysis_status: str | None = None
+        analysis_diagnostic = "analysis did not complete"
+        analysis_stdout_bytes = 0
+        analysis_stdout_sha = hashlib.sha256(b"").hexdigest()
+        analysis_metrics_sha: str | None = None
+        readonly_unchanged = child_work["complete"] and _digest(child_work) == _digest(work_before)
+        if profile == "analysis_readonly":
+            stream = call_dir / "stdout"
+            if stream.exists():
+                raw_stream = _read_bounded_file(stream, "analysis stdout", file_bytes_per_file)
+                analysis_stdout_bytes = len(raw_stream)
+                analysis_stdout_sha = hashlib.sha256(raw_stream).hexdigest()
+            if (sealed and result is not None and not result.timed_out
+                    and type(result.exit_code) is int and result.exit_code >= 0
+                    and readonly_unchanged
+                    and stage_unchanged and executable_unchanged):
+                (analysis_status, analysis_diagnostic, analysis_stdout_bytes,
+                 analysis_stdout_sha, parsed) = _analysis_output(
+                    stream, result.exit_code, file_bytes_per_file)
+                analysis_metrics_sha = _publish_analysis_metrics(
+                    stage / "work", parsed, old_metrics_sha)
+        work_after = _work_inventory(stage) if profile == "analysis_readonly" else child_work
         deliverables = manifest["deliverables"]
         output_paths = {entry["path"] for entry in work_after["files"]}
         deliverables_present = (
@@ -1163,8 +1389,13 @@ def call_tool(
             status = "timeout"
         elif launch_error is not None:
             status = "launch_failure"
-        elif result is None or result.exit_code != 0:
+        elif profile == "analysis_readonly" and not readonly_unchanged:
+            status = "readonly_work_mutated"
+        elif profile == "analysis_readonly" and result is not None and type(result.exit_code) is int and result.exit_code < 0:
             status = "tool_failure"
+        elif result is None or result.exit_code != 0:
+            status = ("success" if profile == "analysis_readonly" and analysis_status is not None
+                      else "tool_failure")
         elif not work_after["complete"]:
             status = "output_inventory_incomplete"
         else:
@@ -1180,6 +1411,16 @@ def call_tool(
             "run_id": run_id, "run_sha256": run["run_sha256"],
             "schedule_sha256": schedule["schedule_sha256"],
             "tool_id": tool_id, "tool_version": selected["version"],
+            **({"execution_profile": profile} if policy["schema"] == 2 else {}),
+            **({"analysis_script_sha256": analysis_script_sha,
+                "analysis_status": analysis_status,
+                "analysis_diagnostic": analysis_diagnostic,
+                "analysis_stdout_bytes": analysis_stdout_bytes,
+                "analysis_stdout_sha256": analysis_stdout_sha,
+                "analysis_metrics_sha256": analysis_metrics_sha,
+                "analysis_work_readonly_unchanged": bool(readonly_unchanged),
+                "analysis_work_after_child_sha256": _digest(child_work)}
+               if profile == "analysis_readonly" else {}),
             **({"tool_args_sha256": tool_args_sha256} if tool_args_sha256 is not None else {}),
             "executable_sha256": executable_sha256,
             "sealed_executable_sha256": result.sealed_executable_sha256 if result else None,

@@ -360,6 +360,38 @@ def write_deliverable(request, work, deliverables):
             "sha256": sha(regular(path, MAX_FILE))}
 
 
+def replace_deliverable(request, inputs, work, deliverables):
+    exact(request, ("op", "path", "expected_sha256", "content"))
+    policy = strict_json(regular(inputs / "tool_policy", 128 * 1024))
+    if type(policy) is not dict or policy.get("schema") != 2:
+        raise ToolError("deliverable replacement requires the opt-in v2 policy")
+    name = safe_name(request["path"])
+    if name not in WRITABLE or name not in deliverables:
+        raise ToolError("replace path is not an allowed deliverable")
+    expected, content = request["expected_sha256"], request["content"]
+    if (type(expected) is not str or re.fullmatch(r"[0-9a-f]{64}", expected) is None
+            or type(content) is not str):
+        raise ToolError("replacement content or expected digest is invalid")
+    raw = content.encode("utf-8")
+    if not raw or len(raw) > MAX_CHUNK:
+        raise ToolError("replacement chunk exceeds limit")
+    path = work / name
+    if sha(regular(path, MAX_FILE)) != expected:
+        raise ToolError("deliverable differs from expected replacement digest")
+    temporary = work / f".replace-{name}-{os.getpid()}"
+    private_new(temporary, raw)
+    if sha(regular(path, MAX_FILE)) != expected:
+        raise ToolError("deliverable changed before replacement")
+    os.replace(temporary, path)
+    folder = os.open(work, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(folder)
+    finally:
+        os.close(folder)
+    return {"path": name, "bytes": len(raw), "previous_sha256": expected,
+            "sha256": sha(regular(path, MAX_FILE))}
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     try:
@@ -390,6 +422,8 @@ def main(argv=None):
             code, details = 0, read_public(request, case, public)
         elif op == "write":
             code, details = 0, write_deliverable(request, work, deliverables)
+        elif op == "replace":
+            code, details = 0, replace_deliverable(request, inputs, work, deliverables)
         elif op == "analyze":
             raise ToolError("analysis execution is disabled; use an independently isolated evaluator")
         else:

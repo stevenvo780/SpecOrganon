@@ -48,7 +48,7 @@ from typing import Any
 
 from analyze_confirmatory import AnalysisError, _validate_schedule
 from plan_development_round import (
-    SCHEDULE_SCHEMA as DEVELOPMENT_SCHEMA,
+    SCHEDULE_SCHEMAS as DEVELOPMENT_SCHEMAS,
     DevelopmentPlanError,
     asset_paths as development_asset_paths,
     validate_schedule as validate_development_schedule,
@@ -80,7 +80,7 @@ def _absolute_file_path(raw: Any, label: str) -> Path:
 
 
 def _candidate_schedule(raw: Any) -> dict[str, Any]:
-    if type(raw) is dict and raw.get("schema") == DEVELOPMENT_SCHEMA:
+    if type(raw) is dict and raw.get("schema") in DEVELOPMENT_SCHEMAS:
         try:
             return validate_development_schedule(raw)
         except DevelopmentPlanError as exc:
@@ -104,7 +104,7 @@ def _candidate_schedule(raw: Any) -> dict[str, Any]:
 
 
 def _asset_paths(schedule: dict[str, Any], raw: Any) -> tuple[dict[str, Path], dict[str, str]]:
-    if schedule.get("schema") == DEVELOPMENT_SCHEMA:
+    if schedule.get("schema") in DEVELOPMENT_SCHEMAS:
         try:
             return development_asset_paths(schedule, raw)
         except DevelopmentPlanError as exc:
@@ -313,7 +313,7 @@ def preflight(
 ) -> dict[str, Any]:
     """Check all bound bytes; optionally create one new, narrowly scoped release."""
     schedule = _candidate_schedule(copy.deepcopy(schedule_raw))
-    if schedule.get("schema") == DEVELOPMENT_SCHEMA and gate_root is not None:
+    if schedule.get("schema") in DEVELOPMENT_SCHEMAS and gate_root is not None:
         raise PreflightError("development round preparation cannot use a confirmatory gate")
     paths, digests = _asset_paths(schedule, assets_raw)
     if (run_id is None) != (output_dir is None):
