@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "/workspace/SpecOrganon/experiments/development/parallel_analysis_2026-10-01/verify_traces.py", line 102, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/SpecOrganon/experiments/development/parallel_analysis_2026-10-01/verify_traces.py", line 38, in main
+    status = read_c_analysis_wave_status(run)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SpecOrganon/scripts/c_parallel_analysis.py", line 200, in read_c_analysis_wave_status
+    result = read_analysis_wave_status(run_dir)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SpecOrganon/scripts/managed_parallel_analysis.py", line 128, in read_analysis_wave_status
+    broker = AnalysisParallelToolBroker(run_dir, plan["branch_manifest"])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/SpecOrganon/scripts/parallel_tool_broker.py", line 263, in __init__
+    self.manifest = self._manifest()
+                    ^^^^^^^^^^^^^^^^
+  File "/workspace/SpecOrganon/scripts/parallel_analysis_broker.py", line 204, in _manifest
+    _analysis_functions(branch)
+  File "/workspace/SpecOrganon/scripts/parallel_analysis_broker.py", line 96, in _analysis_functions
+    raise BrokerError("analysis function differs from the exact D113 launcher")
+parallel_tool_broker.BrokerError: analysis function differs from the exact D113 launcher

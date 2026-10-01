@@ -1,5 +1,24 @@
 # Despacho medido de una solicitud de desarrollo
 
+## Análisis protegido en ramas privadas (D-116)
+
+`managed_parallel_analysis.py` y `c_parallel_analysis.py` inyectan un broker
+opt-in sobre el engine D115 sin cambiar sus bytes. Dos herramientas, reparación
+CAS y reviewer consumen el mismo ledger/contexto/claim y límites totales. Los
+inventarios separan el participante readonly de la publicación/retirada host;
+las métricas quedan obsoletas al cambiar cualquier entrada no métrica de work.
+Preflight rechaza policy ausente/incorrecta antes de preparar efectos.
+
+[Dossier](../experiments/development/parallel_analysis_2026-10-01/README.md):
+114 pruebas por intérprete, seis corridas originales con HTTP sintético y tools
+reales,11requests/8tools/143tokens reportados por fixture; sin telemetría/factura
+autenticadas ni Q. Consulta con el mismo intérprete del launcher registrado.
+El perfil conserva un grafo caller inicial y NO habilita las24 celdas: falta
+arrancar desde work vacío con bootstrap del líder dentro del presupuesto padre,
+coordinación declarada A/B/C, contrato/rúbrica común y ruta/autorización real.
+El protocolo§2 no impone solo; no se relabelan sus calendarios existentes.
+Las secciones siguientes conservan contratos y límites de cortes históricos.
+
 ## Conversaciones con herramientas privadas (D-115)
 
 `managed_parallel_tools.py` añade el perfil optativo parallel_tool_wave_v2:

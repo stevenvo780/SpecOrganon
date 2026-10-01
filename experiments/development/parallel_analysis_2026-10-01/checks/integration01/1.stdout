@@ -1,0 +1,113 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____ test_original_sources_http_repair_same_budget_and_fresh_status[D-F] ______
+
+tmp_path = PosixPath('/tmp/specorganon-D116-integration01-ojjfnntl/cases/test_original_sources_http_rep0')
+case_id = 'D-F'
+
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    def test_original_sources_http_repair_same_budget_and_fresh_status(tmp_path, case_id):
+        state, case, inputs, config = fixture(tmp_path / "inputs", case_id)
+        original, run = state.read_bytes(), tmp_path / "run"
+        result = c.prepare_c_analysis_wave(run, state, case, inputs, config,
+                                          admission_root=tmp_path / "admissions")
+        checkpoints = [result]
+        with server(run) as (address, trace):
+            transports = {task: LocalHTTP(address) for task in ("c-task-1", "c-task-2", "reviewer")}
+            for step in range(5):
+                old = result
+                result = c.execute_c_analysis_wave_step(run, transports,
+                                                       expected_checkpoint=result["checkpoint_sha256"])
+                checkpoints.append(result)
+                assert result["context"]["active_seconds"] >= old["context"]["active_seconds"]
+                fresh = cli(tmp_path, run, "status")
+                assert fresh["checkpoint_sha256"] == result["checkpoint_sha256"]
+                if step < 4:
+>                   assert result["state"] == "paused", result
+E                   AssertionError: {'classification': 'development_parallel_analysis_wave_unsealed', 'execution_profile': 'parallel_analysis_wave_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E                   assert 'indeterminate' == 'paused'
+E                     
+E                     - paused
+E                     + indeterminate
+
+experiments/development/parallel_analysis_2026-10-01/integration_checks.py:288: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "init", "case_id": "D-F", "ok": true}
+_____ test_original_sources_http_repair_same_budget_and_fresh_status[D-E] ______
+
+tmp_path = PosixPath('/tmp/specorganon-D116-integration01-ojjfnntl/cases/test_original_sources_http_rep1')
+case_id = 'D-E'
+
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    def test_original_sources_http_repair_same_budget_and_fresh_status(tmp_path, case_id):
+        state, case, inputs, config = fixture(tmp_path / "inputs", case_id)
+        original, run = state.read_bytes(), tmp_path / "run"
+        result = c.prepare_c_analysis_wave(run, state, case, inputs, config,
+                                          admission_root=tmp_path / "admissions")
+        checkpoints = [result]
+        with server(run) as (address, trace):
+            transports = {task: LocalHTTP(address) for task in ("c-task-1", "c-task-2", "reviewer")}
+            for step in range(5):
+                old = result
+                result = c.execute_c_analysis_wave_step(run, transports,
+                                                       expected_checkpoint=result["checkpoint_sha256"])
+                checkpoints.append(result)
+                assert result["context"]["active_seconds"] >= old["context"]["active_seconds"]
+                fresh = cli(tmp_path, run, "status")
+                assert fresh["checkpoint_sha256"] == result["checkpoint_sha256"]
+                if step < 4:
+>                   assert result["state"] == "paused", result
+E                   AssertionError: {'classification': 'development_parallel_analysis_wave_unsealed', 'execution_profile': 'parallel_analysis_wave_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E                   assert 'indeterminate' == 'paused'
+E                     
+E                     - paused
+E                     + indeterminate
+
+experiments/development/parallel_analysis_2026-10-01/integration_checks.py:288: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "init", "case_id": "D-E", "ok": true}
+______________ test_original_energy_cli_repair_and_reconstruction ______________
+
+tmp_path = PosixPath('/tmp/specorganon-D116-integration01-ojjfnntl/cases/test_original_energy_cli_repai0')
+
+    def test_original_energy_cli_repair_and_reconstruction(tmp_path):
+        state, case, inputs, config = fixture(tmp_path / "inputs", "D-E")
+        original, run, config_path = state.read_bytes(), tmp_path / "run", tmp_path / "config.json"
+        config_path.write_text(json.dumps(config))
+        result = cli(tmp_path, run, "prepare", "--state", state, "--case-dir", case,
+                     "--inputs-dir", inputs, "--config", config_path,
+                     "--admission-root", tmp_path / "admissions")
+        with server(run) as (address, trace):
+            for _ in range(5):
+>               result = cli(tmp_path, run, "step", "--expected-checkpoint", result["checkpoint_sha256"],
+                             "--local-http-fixture", address)
+
+experiments/development/parallel_analysis_2026-10-01/integration_checks.py:304: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/tmp/specorganon-D116-integration01-ojjfnntl/cases/test_original_energy_cli_repai0')
+run = PosixPath('/tmp/specorganon-D116-integration01-ojjfnntl/cases/test_original_energy_cli_repai0/run')
+command = 'step'
+args = ('--expected-checkpoint', '1e4c9e9ae42cae565fda409e285abc814aa1bf219607f86b67f85e6fab3c646d', '--local-http-fixture', 'http://127.0.0.1:37211')
+
+    def cli(root: Path, run: Path, command: str, *args):
+        process = subprocess.run([sys.executable, "-B", str(ROOT / "scripts/c_parallel_analysis.py"),
+                                  command, "--run-dir", str(run), *map(str, args)],
+                                 capture_output=True, text=True, check=False, timeout=35)
+        name = f"cli-{command}-{len(list(root.glob('cli-*.json'))):02d}.json"
+        (root / name).write_text(json.dumps({"argv": process.args, "returncode": process.returncode,
+            "stdout": process.stdout, "stderr": process.stderr}, indent=2) + "\n")
+>       assert process.returncode == 0, process.stdout + process.stderr
+E       AssertionError: {"error": "ParallelToolsError: started or terminal tool wave never reexecutes", "formal_cell_executed": false}
+E         
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python', '-B', '/workspace/SpecOrganon/script...r": "ParallelToolsError: started or terminal tool wave never reexecutes", "formal_cell_executed": false}\n', stderr='').returncode
+
+experiments/development/parallel_analysis_2026-10-01/integration_checks.py:193: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "init", "case_id": "D-E", "ok": true}
+=========================== short test summary info ============================
+FAILED experiments/development/parallel_analysis_2026-10-01/integration_checks.py::test_original_sources_http_repair_same_budget_and_fresh_status[D-F]
+FAILED experiments/development/parallel_analysis_2026-10-01/integration_checks.py::test_original_sources_http_repair_same_budget_and_fresh_status[D-E]
+FAILED experiments/development/parallel_analysis_2026-10-01/integration_checks.py::test_original_energy_cli_repair_and_reconstruction
+3 failed in 137.11s (0:02:17)

@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "classification": "D116_adapter_engine_mechanical_handoff_not_formal_cell",
+  "sources": [
+    {
+      "path": "scripts/managed_parallel_analysis.py",
+      "bytes": 7647,
+      "sha256": "26ab8a861aca27fe337c04baeaa3dcabd69e8f0681c1df51a52e49a6dd8be4ff"
+    },
+    {
+      "path": "scripts/c_parallel_analysis.py",
+      "bytes": 14802,
+      "sha256": "5cc8e2d3b4243a7697f747037cd4905efbee07d8fc2b90cfe7375838295b7690"
+    },
+    {
+      "path": "tests/test_managed_parallel_analysis.py",
+      "bytes": 3074,
+      "sha256": "c7f11deae6b393a96cead0b8d572e30d6ee79ef40c40e7e499c4dbac86201e6d"
+    },
+    {
+      "path": "tests/test_c_parallel_analysis.py",
+      "bytes": 12494,
+      "sha256": "b7b4bf36273da2b3d9d919817acc24b88bf96be8eddab784207fe014d846b146"
+    }
+  ],
+  "checks": [
+    {
+      "path": "experiments/development/parallel_analysis_2026-10-01/worker_checks/engine-py311-attempt01/report.json",
+      "all_exit_zero": false,
+      "source_unchanged": true,
+      "runtime_root": "/tmp/specorganon-D116-engine-py311-attempt01-7f7y0i9k/cases"
+    },
+    {
+      "path": "experiments/development/parallel_analysis_2026-10-01/worker_checks/engine-py311-attempt02/report.json",
+      "all_exit_zero": true,
+      "source_unchanged": true,
+      "runtime_root": "/tmp/specorganon-D116-engine-py311-attempt02-ast7bco3/cases"
+    },
+    {
+      "path": "experiments/development/parallel_analysis_2026-10-01/worker_checks/engine-py311-attempt03/report.json",
+      "all_exit_zero": true,
+      "source_unchanged": true,
+      "runtime_root": "/tmp/specorganon-D116-engine-py311-attempt03-bypbt7lk/cases"
+    },
+    {
+      "path": "experiments/development/parallel_analysis_2026-10-01/worker_checks/engine-py312-attempt01/report.json",
+      "all_exit_zero": true,
+      "source_unchanged": true,
+      "runtime_root": "/tmp/specorganon-D116-engine-py312-attempt01-s5qwsdu7/cases"
+    }
+  ],
+  "api": [
+    "prepare_analysis_wave",
+    "execute_analysis_wave_step",
+    "read_analysis_wave_status",
+    "prepare_c_analysis_wave",
+    "execute_c_analysis_wave_step",
+    "read_c_analysis_wave_status"
+  ],
+  "limits": [
+    "Caller supplies the initial graph; parent workflow from empty work remains pending.",
+    "No provider, paid model, reserved case, normative approval or comparable formal development cell executed.",
+    "Full positive 13-case Python 3.11 gate predates final CAS policy preflight; six final preflight negatives passed on both interpreters. Root owns final unified gates on frozen sources."
+  ],
+  "runtime_sources_stable": true,
+  "original_modules_modified": false
+}

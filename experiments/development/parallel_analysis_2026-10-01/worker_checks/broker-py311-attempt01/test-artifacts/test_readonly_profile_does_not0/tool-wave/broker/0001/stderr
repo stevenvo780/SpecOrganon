@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/proc/self/fd/12", line 12, in <module>
+    target.write_text(request["content"], encoding="utf-8")
+  File "/home/dev/.local/share/uv/python/cpython-3.11-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 1078, in write_text
+    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev/.local/share/uv/python/cpython-3.11-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/workspace/SpecOrganon/experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py311-attempt01/test-artifacts/test_readonly_profile_does_not0/branches/stages/c-task-1/work/answer.txt'

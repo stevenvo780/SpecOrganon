@@ -1,0 +1,38 @@
+{
+  "classification": "raw_tamper_artifact_whitespace_preserved",
+  "commands": [
+    {
+      "name": "broad",
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_code": 2,
+      "stdout": "broad.stdout",
+      "stderr": "broad.stderr"
+    },
+    {
+      "name": "scoped",
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        "scripts",
+        "tests",
+        "docs",
+        "experiments/development/parallel_analysis_2026-10-01/archive_runtimes.py",
+        "experiments/development/parallel_analysis_2026-10-01/capture_checks.py",
+        "experiments/development/parallel_analysis_2026-10-01/integration_checks.py",
+        "experiments/development/parallel_analysis_2026-10-01/verify_traces.py"
+      ],
+      "exit_code": 0,
+      "stdout": "scoped.stdout",
+      "stderr": "scoped.stderr"
+    }
+  ],
+  "only_raw_evidence_whitespace": true
+}

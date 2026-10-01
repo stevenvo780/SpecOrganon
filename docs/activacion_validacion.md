@@ -1,6 +1,6 @@
 # Distancia hasta la validación de GOAL
 
-**Corte:** 2026-10-01 UTC, revisión D-115 después de D-114. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). El [inventario D-109 de24 celdas](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json), las [preparaciones D-113](../experiments/development/isolated_analysis_2026-10-01/README.md) y las [ramas privadas D-115](../experiments/development/parallel_tools_2026-10-01/README.md) son desarrollo mecánico: cero celdas formales. Este documento no cambia umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
+**Corte:** 2026-10-01 UTC, revisión D-116. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). El [inventario D-109 de24 celdas](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json), las [preparaciones D-113](../experiments/development/isolated_analysis_2026-10-01/README.md) y las [ramas con análisis D-116](../experiments/development/parallel_analysis_2026-10-01/README.md) son desarrollo mecánico: cero celdas formales. Este documento no cambia umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
 
 | Criterio de GOAL | Evidencia actual | Puerta pendiente |
 | --- | --- | --- |
@@ -14,20 +14,23 @@
 
 ## Puerta 0: cerrar el desarrollo antes de abrir la reserva
 
-D-115 conecta conversaciones privadas, herramientas selladas con ownership y
-merge obligatorio bajo el presupuesto/plazo común de D-114. Pasaron272 pruebas
-por Python3.11/3.12 y seis corridas HTTP/CLI sintéticas distintas, con efectos
-reales en branches y estado reunido nuevo. No hubo modelo/proveedor real ni
-celda formal. El wrapper C todavía expone sólo el driver de método: incorporar
-el análisis/métricas D113 y ligar preparaciones comparables sigue pendiente,
-antes de fijar el registro común. No reinterpreta calendarios DEV solo/tríos.
+D-116 conecta el analizador D113 a las ramas privadas D115: métricas validadas,
+retirada, reparación CAS y export sólo si las entradas siguen vigentes, bajo un
+presupuesto/claim común. Pasaron114 pruebas por Python3.11/3.12 y seis corridas
+originales HTTP/CLI con herramientas reales/respuestas sintéticas; sin modelo
+experimental autenticado ni celda formal. El grafo sigue aportado por el caller.
+Falta el runtime padre desde work vacío con bootstrap real del líder sin abrir
+otro ledger/claim y coordinación comparable declarada para A/B/C. Protocolo§2
+no impone solo; el compilador D112 sí, por decisión local. No se relabelan esos
+calendarios ni se regala un seed exclusivo a C para las24.
 
 D-110–D-113 añaden admisión antes de efectos, contexto compartido, preparaciones
 originales y análisis con estado protegido. D-113 conservó fuentes e inventarios,
 verificó seis trazas de fixtures por intérprete y cuatro CLI de preparación:
 470passed3.11/178passed3.12, proveedor falso. Se resolvieron análisis aislado y
-lectura común de PDF; falta su integración en C con herramientas y contrato/rúbrica comunes sin
-respuestas, entregados antes de R1, más ruta/modelo/telemetría/autorización. El
+lectura común de PDF; D116 añade su integración mecánica en C. Faltan arranque
+comparable y contrato/rúbrica comunes sin respuestas, entregados antes de R1,
+más ruta/modelo/telemetría/autorización. El
 oráculo D-113 valida su contrato de fixtures, no Q ni cualquier output de tarea.
 Los topes locales compartidos no autentican consumo/precio/cancelación remotos.
 

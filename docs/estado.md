@@ -1,5 +1,31 @@
 # Estado de reanudación
 
+**D-116 integra análisis protegido y métricas frescas en las ramas de C:**
+[dossier](../experiments/development/parallel_analysis_2026-10-01/README.md).
+Manifest v2 y adapter nuevos sobre D115 intacto; mismo ledger/contexto/claim,
+CAS de reparación y presupuesto sin reset. Host valida JSON, publica/retira
+métricas y replay conserva before/after-child/after-host reales. Export sólo
+con script y todo work no métricos vigentes; preflight de política antes de
+crear run/branches. Consulta desde proceso nuevo con intérprete registrado.
+Freeze `088bd2a`: **114 passed por Python 3.11/3.12**, Ruff/compile/diff0,
+52 pines fuente/71 base intactos y 50 copias before/after por gate. Seis trazas
+distintas de fuentes originales D-F/D-E HTTP/CLI con 11requests/8tools/143tokens
+reportados por fixtures; JSON inválido reparado, dos métricas frescas, normas
+pending y grafo original intacto. Archivo 9.739 regulares/3.580 blobs/8.445.310B
+SHAfaaa70c… cotejado entero por root/revisor; sin P1/P2 abierto en alcance.
+Fallos de fixture/policy, claim glob y afinidad de intérprete conservados.
+
+**C1 técnico D107 vigente; C2–C5 No demostrado; formales 0/24.** El grafo
+inicial aún lo aporta el caller: este perfil no prepara una comparación justa.
+Siguiente: runtime padre desde work vacío, `init` real del líder sin abrir otro
+ledger/claim, coordinación prospectiva comparable A/B/C. Protocolo§2 permite
+coordinación; el solo del compilador D112 es una decisión local, no mandato.
+Después contrato/rúbrica común sin respuestas, ruta/modelo/effort/versiones/
+telemetría/autorización, R1/R2 reales y selección; siguen panel/custodia/jueces/
+autoridades/banco sellado/campo/transferencia. Luna sólo hizo el inventario de
+preservación, cotejado por root; no fue ensayo de calidad. GOAL/protocolo/
+producción/core/wheel/casos originales intactos. Los cortes siguientes son históricos.
+
 **D-115 ejecuta herramientas en ramas privadas e integra sus efectos:**
 [dossier](../experiments/development/parallel_tools_2026-10-01/README.md).
 Perfil nuevo con conversaciones privadas y pausas CAS, un claim padre,

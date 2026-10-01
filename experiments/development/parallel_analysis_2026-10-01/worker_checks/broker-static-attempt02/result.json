@@ -1,0 +1,36 @@
+{
+  "checks": [
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "ruff",
+        "check",
+        "scripts/parallel_analysis_broker.py",
+        "tests/test_parallel_analysis_broker.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-c",
+        "from pathlib import Path\ncompile(Path('scripts/parallel_analysis_broker.py').read_bytes(), 'scripts/parallel_analysis_broker.py', 'exec')\ncompile(Path('tests/test_parallel_analysis_broker.py').read_bytes(), 'tests/test_parallel_analysis_broker.py', 'exec')"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-c",
+        "from pathlib import Path\ncompile(Path('scripts/parallel_analysis_broker.py').read_bytes(), 'scripts/parallel_analysis_broker.py', 'exec')\ncompile(Path('tests/test_parallel_analysis_broker.py').read_bytes(), 'tests/test_parallel_analysis_broker.py', 'exec')"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "owned_sha256": {
+    "scripts/parallel_analysis_broker.py": "b297da51c6341439fffc3f434f2b2613959df0dd75f165a14c0ee1155add841d",
+    "tests/test_parallel_analysis_broker.py": "b06fb46713f42b37427412411a28e89de1d87069d47cb898ed05da899206227f"
+  },
+  "originals_preserved": true
+}

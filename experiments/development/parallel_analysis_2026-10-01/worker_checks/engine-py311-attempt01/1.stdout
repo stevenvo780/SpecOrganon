@@ -1,0 +1,55 @@
+......FF.....                                                            [100%]
+=================================== FAILURES ===================================
+_______________ test_failed_analysis_cas_repair_no_budget_reset ________________
+
+tmp_path = PosixPath('/tmp/specorganon-D116-engine-py311-attempt01-7f7y0i9k/cases/test_failed_analysis_cas_repai0')
+
+    def test_failed_analysis_cas_repair_no_budget_reset(tmp_path):
+        sandbox()
+        run, status, _ = prepare(tmp_path, turns=5)
+        first = [write(BAD), analyze(BAD), replace(BAD, GOOD), analyze(GOOD), None]
+        report = {"name": "development_method", "arguments": {"request": json.dumps({
+            "op": "write", "path": "report.md", "offset": 0, "content": "Public repair fixture."})}}
+        second = [write(GOOD), analyze(GOOD), report, analyze(GOOD), None]
+        transports = adapters(first, second)
+        checkpoints = []
+        for _ in range(5):
+            status = step(run, status, transports)
+>           assert status["state"] in {"paused", "completed"}, status
+E           AssertionError: {'classification': 'development_parallel_analysis_wave_unsealed', 'execution_profile': 'parallel_analysis_wave_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E           assert 'indeterminate' in {'completed', 'paused'}
+
+tests/test_c_parallel_analysis.py:176: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "init", "case_id": "D116-public-fixture", "ok": true}
+______ test_work_change_makes_old_metrics_stale_not_exported[source_cas] _______
+
+tmp_path = PosixPath('/tmp/specorganon-D116-engine-py311-attempt01-7f7y0i9k/cases/test_work_change_makes_old_met0')
+mutation = 'source_cas'
+
+    @pytest.mark.parametrize("mutation", ["source_cas", "report_write"])
+    def test_work_change_makes_old_metrics_stale_not_exported(tmp_path, mutation):
+        sandbox()
+        run, status, _ = prepare(tmp_path, turns=4)
+        newer = "print('{\"public_fixture_value\":2}')\n"
+        change = replace(GOOD, newer) if mutation == "source_cas" else {
+            "name": "development_method", "arguments": {"request": json.dumps({
+                "op": "write", "path": "report.md", "offset": 0, "content": "Changed after analysis."})}}
+        transports = adapters([write(GOOD), analyze(GOOD), change, None],
+                              [write(GOOD), analyze(GOOD), change, None])
+        for _ in range(4):
+            status = step(run, status, transports)
+            assert status["state"] in {"paused", "completed"}, status
+>       assert status["merge_result"]["analysis_artifacts"] == []
+E       AssertionError: assert [{'task_id': ...e.json', ...}] == []
+E         
+E         Left contains 2 more items, first extra item: {'task_id': 'c-task-1', 'metrics_path': '/tmp/specorganon-D116-engine-py311-attempt01-7f7y0i9k/cases/test_work_change_...ngine-py311-attempt01-7f7y0i9k/cases/test_work_change_makes_old_met0/run/merge/analysis/c-task-1/provenance.json', ...}
+E         Use -v to get more diff
+
+tests/test_c_parallel_analysis.py:201: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "init", "case_id": "D116-public-fixture", "ok": true}
+=========================== short test summary info ============================
+FAILED tests/test_c_parallel_analysis.py::test_failed_analysis_cas_repair_no_budget_reset
+FAILED tests/test_c_parallel_analysis.py::test_work_change_makes_old_metrics_stale_not_exported[source_cas]
+2 failed, 11 passed in 237.73s (0:03:57)

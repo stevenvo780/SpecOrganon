@@ -1,0 +1,33 @@
+{
+  "classification": "observed_environment_probes_not_test_gates",
+  "results": [
+    {
+      "command": [
+        "/tmp/specorganon-d086-py311/bin/python3.11",
+        "-c",
+        "import sys, pytest; print(sys.version); print(pytest.__version__)"
+      ],
+      "exit_code": 1,
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'pytest'\n"
+    },
+    {
+      "command": [
+        "/tmp/specorganon-parity-venv-20260926/bin/python",
+        "-c",
+        "import sys, pytest; print(sys.version); print(pytest.__version__)"
+      ],
+      "exit_code": 1,
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'pytest'\n"
+    },
+    {
+      "command": [
+        "/tmp/specorganon-ratio-audit-review-venv2/bin/python",
+        "-c",
+        "import sys, pytest; print(sys.version); print(pytest.__version__)"
+      ],
+      "exit_code": 1,
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'pytest'\n"
+    }
+  ],
+  "note": "Recorded prior tool outputs. No packages were installed. These probes did not have source snapshots."
+}

@@ -1,0 +1,38 @@
+{
+  "cwd": "/workspace/SpecOrganon",
+  "commands": [
+    [
+      "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_managed_parallel_analysis.py",
+      "tests/test_c_parallel_analysis.py",
+      "--basetemp",
+      "/tmp/specorganon-D116-engine-py311-attempt03-bypbt7lk/cases",
+      "-k",
+      "test_invalid_tool_policy_no_branch_preparation"
+    ],
+    [
+      "ruff",
+      "check",
+      "scripts/managed_parallel_analysis.py",
+      "scripts/c_parallel_analysis.py",
+      "tests/test_managed_parallel_analysis.py",
+      "tests/test_c_parallel_analysis.py",
+      "experiments/development/parallel_analysis_2026-10-01/worker_checks/capture_engine.py"
+    ],
+    [
+      "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print('syntax OK')",
+      "scripts/managed_parallel_analysis.py",
+      "scripts/c_parallel_analysis.py",
+      "tests/test_managed_parallel_analysis.py",
+      "tests/test_c_parallel_analysis.py"
+    ]
+  ]
+}

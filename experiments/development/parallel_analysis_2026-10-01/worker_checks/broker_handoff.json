@@ -1,0 +1,105 @@
+{
+  "api": [
+    "prepare_analysis_branch_manifest(root, specifications)",
+    "AnalysisParallelToolBroker(run_dir, binding)",
+    "current_metrics(task_id) -> dict | None"
+  ],
+  "checks": [
+    {
+      "attempt": "experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py312-attempt01",
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_parallel_analysis_broker.py",
+        "--maxfail=2",
+        "--basetemp=/workspace/SpecOrganon/experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py312-attempt01/test-artifacts"
+      ],
+      "result": {
+        "exit_code": 0,
+        "python": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+        "runtime_root": "/workspace/SpecOrganon/experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py312-attempt01/test-artifacts"
+      },
+      "stderr": "",
+      "stdout": "...............................                                          [100%]\n31 passed in 49.11s\n"
+    },
+    {
+      "attempt": "experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py311-attempt01",
+      "command": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_parallel_analysis_broker.py",
+        "tests/test_parallel_tool_broker.py",
+        "--maxfail=2",
+        "--basetemp=/workspace/SpecOrganon/experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py311-attempt01/test-artifacts"
+      ],
+      "result": {
+        "exit_code": 0,
+        "python": "3.11.15 (main, Jul 18 2026, 17:02:49) [Clang 22.1.3 ]",
+        "runtime_root": "/workspace/SpecOrganon/experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py311-attempt01/test-artifacts"
+      },
+      "stderr": "",
+      "stdout": "........................................                                 [100%]\n40 passed in 57.45s\n"
+    },
+    {
+      "attempt": "experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py312-attempt02",
+      "command": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_parallel_analysis_broker.py",
+        "--maxfail=2",
+        "--basetemp=/workspace/SpecOrganon/experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py312-attempt02/test-artifacts"
+      ],
+      "result": {
+        "exit_code": 0,
+        "python": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+        "runtime_root": "/workspace/SpecOrganon/experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py312-attempt02/test-artifacts"
+      },
+      "stderr": "",
+      "stdout": "..................................                                       [100%]\n34 passed in 63.94s (0:01:03)\n"
+    },
+    {
+      "attempt": "experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py311-attempt02",
+      "command": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_parallel_analysis_broker.py",
+        "--maxfail=2",
+        "--basetemp=/workspace/SpecOrganon/experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py311-attempt02/test-artifacts"
+      ],
+      "result": {
+        "exit_code": 0,
+        "python": "3.11.15 (main, Jul 18 2026, 17:02:49) [Clang 22.1.3 ]",
+        "runtime_root": "/workspace/SpecOrganon/experiments/development/parallel_analysis_2026-10-01/worker_checks/broker-py311-attempt02/test-artifacts"
+      },
+      "stderr": "",
+      "stdout": "..................................                                       [100%]\n34 passed in 66.60s (0:01:06)\n"
+    }
+  ],
+  "classification": "D116_worker_broker_handoff_not_formal_evaluation",
+  "formal_cells_executed": 0,
+  "originals": "broker-static-attempt02/originals.json",
+  "owned_sha256": {
+    "scripts/parallel_analysis_broker.py": "b297da51c6341439fffc3f434f2b2613959df0dd75f165a14c0ee1155add841d",
+    "tests/test_parallel_analysis_broker.py": "b06fb46713f42b37427412411a28e89de1d87069d47cb898ed05da899206227f"
+  },
+  "preserved_environment_probes": "preliminary_probes.json",
+  "preserved_failed_static_runner": "broker-static-attempt01/result.json",
+  "remaining": "Root integration and independent review after implementation barrier",
+  "static_checks": "broker-static-attempt02/result.json"
+}

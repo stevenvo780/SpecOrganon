@@ -1,0 +1,25 @@
+#!/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python
+import json
+import sys
+from pathlib import Path
+
+case, inputs, work = map(Path, sys.argv[1:4])
+outer = json.loads(sys.argv[4])
+request = json.loads(outer["request"])
+operation = request["op"]
+if operation == "write":
+    target = work / "answer.txt"
+    target.write_text(request["content"], encoding="utf-8")
+    result = {"ok": True, "method_exit_code": 0, "method_state_sha256": "1" * 64}
+elif operation == "cross":
+    try:
+        Path(request["path"]).read_text(encoding="utf-8")
+    except PermissionError:
+        result = {"ok": False, "denied": True}
+    else:
+        result = {"ok": True, "denied": False}
+elif operation == "read":
+    result = {"ok": True, "text": (work / "answer.txt").read_text(encoding="utf-8")}
+else:
+    result = {"ok": False}
+print(json.dumps(result, sort_keys=True, separators=(",", ":")))

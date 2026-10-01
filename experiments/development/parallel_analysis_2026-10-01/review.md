@@ -1,0 +1,19 @@
+# D116 — revisión independiente acotada
+
+Revisé el contrato prospectivo, el adaptador, el wrapper C, el broker, sus pruebas y las capturas finales. No edité fuentes ni ejecuté modelos, proveedores, pruebas o herramientas del caso. No queda un P1/P2 confirmado en este alcance.
+
+## Evidencia comprobada
+
+- `source_freeze.json`: 52/52 rutas coinciden en tamaño, SHA-256 y bytes con el árbol vivo y Git `088bd2a57416ced67c5e60d2fc1379d36404ccb8`. `baseline_pins.json`: 71/71 coinciden con el árbol vivo y el HEAD anterior `d27936cd1cd25c8ac2abacb6070f291655a983b5`.
+- El preflight de `c_parallel_analysis.py` exige archivo regular sin seguir enlaces, JSON estricto de hasta 128 KiB y `schema` de tipo entero igual a 2 antes de crear `run` o `branches`. Seis negativos cubren ausencia, esquema 1, booleano, clave duplicada, número no finito y enlace simbólico, con cero directorios de corrida, ramas o claim.
+- El broker registra reserva global y recibo por llamada, verifica streams e inventarios antes/durante/después de cada análisis y liga las métricas al SHA del script y al inventario completo de entradas no métricas. Un error ordinario o JSON inválido retira métricas anteriores; un efecto incierto deja reserva pendiente y bloquea publicación. La prueba de cambio posterior en `report.md` comprueba que la métrica vieja no se exporta hasta reanalizar.
+- `checks/final311/report.json` y `checks/final312/report.json` registran respectivamente 114 passed en 459,84 s y 114 passed en 447,65 s. En ambos, pytest, Ruff, compilación y `git diff --check` salen 0; las 50 fuentes capturadas antes y después son idénticas. No repetí esos gates.
+- Cotejé las seis rutas físicas de `verified_traces.json`: D-F HTTP, D-E HTTP y D-E CLI por intérprete. Cada runtime conserva estado `completed`, once requests, ocho recibos de herramienta, un claim local, una salida de análisis inválida seguida de reparación y dos métricas exportadas cuyos SHA y SHA de recibo coinciden con los archivos. Son respuestas sintéticas y cálculos documentales; los 143 tokens por traza son declarados por el fixture.
+- Una primera verificación con el Python predeterminado falló al consultar ambas capturas; su stderr sólo consta en la conversación y no se conserva como archivo original. El dossier conserva una reproducción posterior con `/usr/bin/python3`, salida 1 y su propio traceback, porque el launcher D113 fija el intérprete exacto. Las verificaciones con los intérpretes 3.11 y 3.12 correspondientes salieron 0, tres trazas cada una. El error de invocación no se clasifica como prueba positiva ni como defecto de la ejecución original.
+- Reabrí `archives/runtimes.tar.gz`, SHA-256 `faaa70c21c2c4b95aee5da8faec2cd35aab5de83e914df4eaefea50d19f3ce07`, y comprobé sus 3.580 blobs por tamaño, SHA-256 y modo. Contrasté los 9.739 registros regulares y 4.899 entradas de directorio/enlace de ocho roots con originales mediante `lstat` y `readlink`: cero discrepancias. El archivo es contenido e inventario, no una restauración de sesión o autoridad.
+
+## Límites y veredicto
+
+El perfil recibe un grafo inicial del caller. No demuestra bootstrap comparable desde work vacío, identidad o esfuerzo del modelo, factura, calidad Q, aprobación normativa/humana, custodia independiente, campo o resolución causal. No contabiliza ninguna de las 24 celdas formales. C1 técnico previo conserva su evidencia; C2–C5 permanecen **No demostrado**. El aislamiento no protege frente a un actor hostil con el mismo UID.
+
+Veredicto D116: la integración mecánica opt-in, la reparación CAS bajo presupuesto común y la exportación de métricas vigentes tienen evidencia positiva acotada; no hallé un P1/P2 abierto en código o capturas revisadas. La siguiente dependencia para comparabilidad es un runtime padre desde work vacío con `init` del líder dentro del mismo ledger, contexto y claim.
