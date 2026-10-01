@@ -1,0 +1,54 @@
+{
+  "schema": "specorganon.native_review_record.v1",
+  "classification": "native_workspace_independent_review_not_human_custody",
+  "review_date_utc": "2026-10-01",
+  "reviewer_task": "/root/source_gate_review",
+  "verified_model_identity": null,
+  "scope": [
+    "README.md",
+    "docs/activacion_validacion.md",
+    "docs/estado.md",
+    "docs/panel_modelos_preliminar.md",
+    "experiments/development/activation_readiness_2026-09-30/plan.md",
+    "experiments/development/activation_readiness_2026-09-30/README.md",
+    "experiments/development/activation_readiness_2026-09-30/planned_development_cells.json",
+    "experiments/development/activation_readiness_2026-09-30/provider_readiness.json"
+  ],
+  "initial_verdict": {
+    "P1": 0,
+    "P2": 1
+  },
+  "finding": {
+    "severity": "P2",
+    "topic": "Missing MiniMax-M3.1-Flash-Preview channel restriction",
+    "source": "https://platform.minimax.io/docs/api-reference/responses-create",
+    "restriction": "M Plan and MiniMax Code only for now",
+    "resolution": "Added explicit restriction to metadata, dossier README, model panel and activation document; no ordinary pay-as-you-go access or local route claimed.",
+    "status": "resolved"
+  },
+  "original_reviewed_sha256": {
+    "docs/activacion_validacion.md": "15997962622804772921a02c0a90771305c4248295667e80e74890beb9dbf792",
+    "docs/panel_modelos_preliminar.md": "39eb5a0505c15129c5bf5d3b943abb07db19224d25d251ebada8e3ab7080c180",
+    "experiments/development/activation_readiness_2026-09-30/README.md": "fb55bddd71a24c289b1cf21704bc1d49856f453e8400e909e511d871a73ac054",
+    "experiments/development/activation_readiness_2026-09-30/provider_readiness.json": "1a354ade82f39493ef3ad06ab1625aac7f0a43ae1830ab8c2a02a46e6c673961"
+  },
+  "original_reviewed_bytes_separately_archived": false,
+  "corrected_reviewed_sha256": {
+    "docs/activacion_validacion.md": "20cd9a9acf3812bb30ad5d2e61443a882a6882e3ead6e9e70ffcd19effefbd39",
+    "docs/panel_modelos_preliminar.md": "47e78338a6ad8e35a4cc6a72c7e842ca815912504ebed7ece2605a7d1986cbeb",
+    "experiments/development/activation_readiness_2026-09-30/README.md": "e68722b242c4111272b792dbf403feb400e07dce559df75b8857a74a4e0eba23",
+    "experiments/development/activation_readiness_2026-09-30/provider_readiness.json": "524702540eab677f283961c22c203c7164a2dcc5331769f903ecbb13497e31f4"
+  },
+  "checks": [
+    "24 unique complete development cells, zero executed, distinct from N/S/T",
+    "Existing local links and unchanged GOAL/protocol SHA256",
+    "No false GO, Q, field, human authorization or reclassification",
+    "Published Standard rates and conditional arithmetic checked against official sources",
+    "Restriction correction rechecked without repeating closed tests"
+  ],
+  "final_verdict": {
+    "P1": 0,
+    "P2": 0,
+    "scope": "No remaining P1/P2 in reviewed documentary scope; no acceptance of C2-C5."
+  }
+}

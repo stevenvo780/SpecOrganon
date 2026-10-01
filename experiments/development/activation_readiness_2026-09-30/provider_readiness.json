@@ -1,0 +1,335 @@
+{
+  "schema": "specorganon.public_provider_readiness.v1",
+  "classification": "read_only_metadata_not_access_or_execution_proof",
+  "audited_date_utc": "2026-09-30",
+  "quota_capture_utc": "2026-09-30T23:44:20.784Z",
+  "quotas": {
+    "codex": {
+      "probe_ok": false,
+      "probe_available": false,
+      "remaining_percent": null,
+      "interpretation": "Probe stale/unreliable; not evidence that native Codex is unusable or quota exhausted."
+    },
+    "gemini_via_antigravity": {
+      "probe_ok": true,
+      "probe_available": true,
+      "windows": [
+        {
+          "label": "Gemini 5 horas",
+          "remaining_percent": 98,
+          "reset_at": "2026-10-01T03:50:20.784Z"
+        },
+        {
+          "label": "Gemini semanal",
+          "remaining_percent": 98,
+          "reset_at": "2026-10-07T13:21:20.784Z"
+        }
+      ],
+      "interpretation": "Subscription quota snapshot only; not API access, billing or model telemetry."
+    },
+    "minimax": {
+      "verified_quota": null,
+      "interpretation": "No provider-specific quota conclusion made."
+    }
+  },
+  "cloud_route_inventory": {
+    "tool": "mcp__cloud_offload__listar_modelos_cloud",
+    "server_version": "2.0.0",
+    "observation": "Public advertised routes and CLI presence only; no generation, credentials or configuration files opened.",
+    "authorized_routes": [
+      {
+        "model": "codex/gpt-5.3-codex-spark",
+        "provider": "codex",
+        "cli": "codex",
+        "native_label": "gpt-5.3-codex-spark",
+        "cli_present": true
+      },
+      {
+        "model": "codex/gpt-5.6-luna",
+        "provider": "codex",
+        "cli": "codex",
+        "native_label": "gpt-5.6-luna",
+        "cli_present": true
+      },
+      {
+        "model": "codex/gpt-5.6-sol",
+        "provider": "codex",
+        "cli": "codex",
+        "native_label": "gpt-5.6-sol",
+        "cli_present": true
+      },
+      {
+        "model": "codex/gpt-5.6-terra",
+        "provider": "codex",
+        "cli": "codex",
+        "native_label": "gpt-5.6-terra",
+        "cli_present": true
+      },
+      {
+        "model": "codex/gpt-6-astra",
+        "provider": "codex",
+        "cli": "codex",
+        "native_label": "gpt-6-astra",
+        "cli_present": true
+      },
+      {
+        "model": "codex/gpt-6-luna",
+        "provider": "codex",
+        "cli": "codex",
+        "native_label": "gpt-6-luna",
+        "cli_present": true
+      },
+      {
+        "model": "codex/gpt-6-sol",
+        "provider": "codex",
+        "cli": "codex",
+        "native_label": "gpt-6-sol",
+        "cli_present": true
+      },
+      {
+        "model": "gemini/3.1-pro",
+        "provider": "gemini",
+        "cli": "agy",
+        "native_label": "pro",
+        "cli_present": true
+      },
+      {
+        "model": "gemini/3.7-flash",
+        "provider": "gemini",
+        "cli": "agy",
+        "native_label": "flash",
+        "cli_present": true
+      },
+      {
+        "model": "gemini/flash",
+        "provider": "gemini",
+        "cli": "agy",
+        "native_label": "flash",
+        "cli_present": true
+      },
+      {
+        "model": "gemini/pro",
+        "provider": "gemini",
+        "cli": "agy",
+        "native_label": "pro",
+        "cli_present": true
+      },
+      {
+        "model": "minimax/MiniMax-M2.7",
+        "provider": "minimax",
+        "cli": "opencode",
+        "native_label": "minimax/MiniMax-M2.7",
+        "cli_present": true
+      },
+      {
+        "model": "minimax/MiniMax-M3",
+        "provider": "minimax",
+        "cli": "opencode",
+        "native_label": "minimax/MiniMax-M3",
+        "cli_present": true
+      }
+    ],
+    "codex_internal_work_policy": "Use native subagents; this metadata read does not authorize Codex-to-Codex cloud delegation."
+  },
+  "gemini_local_catalog": {
+    "command": "agy models",
+    "timeout_seconds": 25,
+    "exit_code": 0,
+    "offered_gemini_entries": [
+      {
+        "id": "gemini-3.8-flash-high",
+        "label": "Gemini 3.8 Flash (High)"
+      },
+      {
+        "id": "gemini-3.8-flash-medium",
+        "label": "Gemini 3.8 Flash (Medium)"
+      },
+      {
+        "id": "gemini-3.8-flash-low",
+        "label": "Gemini 3.8 Flash (Low)"
+      },
+      {
+        "id": "gemini-3.7-flash-high",
+        "label": "Gemini 3.7 Flash (High)"
+      },
+      {
+        "id": "gemini-3.7-flash-medium",
+        "label": "Gemini 3.7 Flash (Medium)"
+      },
+      {
+        "id": "gemini-3.7-flash-low",
+        "label": "Gemini 3.7 Flash (Low)"
+      },
+      {
+        "id": "gemini-3.6-flash-high",
+        "label": "Gemini 3.6 Flash (High)"
+      },
+      {
+        "id": "gemini-3.6-flash-medium",
+        "label": "Gemini 3.6 Flash (Medium)"
+      },
+      {
+        "id": "gemini-3.6-flash-low",
+        "label": "Gemini 3.6 Flash (Low)"
+      },
+      {
+        "id": "gemini-3.1-pro-high",
+        "label": "Gemini 3.1 Pro (High)"
+      },
+      {
+        "id": "gemini-3.1-pro-low",
+        "label": "Gemini 3.1 Pro (Low)"
+      }
+    ],
+    "not_enumerated": [
+      "gemini-3.5-flash-lite"
+    ],
+    "interpretation": "Offered CLI labels are not authenticated API model IDs, versions or effective thinking settings."
+  },
+  "official_capability_observations": [
+    {
+      "provider": "OpenAI",
+      "model_id": "gpt-6-luna",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6-luna",
+      "documented_efforts": [
+        "none",
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "account_access_verified": false,
+      "effective_identity_version_verified": false,
+      "per_request_telemetry_verified": false
+    },
+    {
+      "provider": "OpenAI",
+      "model_id": "gpt-6-sol",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6-sol",
+      "documented_efforts": [
+        "none",
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "account_access_verified": false,
+      "effective_identity_version_verified": false,
+      "per_request_telemetry_verified": false
+    },
+    {
+      "provider": "OpenAI",
+      "model_id": "gpt-6-astra",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6-astra",
+      "documented_efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "account_access_verified": false,
+      "effective_identity_version_verified": false,
+      "per_request_telemetry_verified": false
+    },
+    {
+      "provider": "Google",
+      "model_ids": [
+        "gemini-3.8-flash",
+        "gemini-3.5-flash-lite"
+      ],
+      "sources": [
+        "https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash",
+        "https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite",
+        "https://ai.google.dev/gemini-api/docs/thinking"
+      ],
+      "documented_low_high": true,
+      "account_api_access_verified": false,
+      "effective_identity_version_verified": false,
+      "per_request_telemetry_verified": false
+    },
+    {
+      "provider": "MiniMax",
+      "model_id": "MiniMax-M3.1-Flash-Preview",
+      "source": "https://platform.minimax.io/docs/api-reference/responses-create",
+      "documented_low_high_changes_depth": true,
+      "documented_current_channel_restriction": "M Plan and MiniMax Code only; ordinary pay-as-you-go API availability is not established for this preview.",
+      "route_advertised_by_local_tool": false,
+      "account_access_verified": false,
+      "effective_identity_version_verified": false,
+      "per_request_telemetry_verified": false,
+      "interpretation": "New documentary candidate restricted to M Plan/MiniMax Code; no ordinary pay-as-you-go route is established. M3 non-none enables reasoning without tuning depth and M2.x remains fixed."
+    }
+  ],
+  "tariff_observations": {
+    "billing_scope": "Published Standard API text rates per million tokens, short context <=272K; not a Codex/Antigravity subscription price or verified account tariff.",
+    "sources": {
+      "OpenAI": "https://developers.openai.com/api/docs/pricing",
+      "Google": "https://ai.google.dev/gemini-api/docs/pricing"
+    },
+    "models": {
+      "gpt-6-luna": {
+        "input_usd": "0.10",
+        "cached_input_usd": "0.01",
+        "cache_write_usd": "0.125",
+        "output_usd": "0.50"
+      },
+      "gpt-6-sol": {
+        "input_usd": "2.00",
+        "cached_input_usd": "0.20",
+        "cache_write_usd": "2.50",
+        "output_usd": "10.00"
+      },
+      "gpt-6-astra": {
+        "input_usd": "10.00",
+        "cached_input_usd": "1.00",
+        "cache_write_usd": "12.50",
+        "output_usd": "50.00"
+      },
+      "gemini-3.8-flash": {
+        "input_usd": "0.75",
+        "cached_input_usd": "0.075",
+        "output_including_thinking_usd": "3.75",
+        "rate_valid_through": "2026-12-31",
+        "next_input_usd": "1.50",
+        "next_output_usd": "7.50",
+        "next_rate_from": "2027-01-01"
+      }
+    },
+    "excludes": [
+      "tool calls",
+      "cache storage duration",
+      "humans",
+      "field",
+      "taxes",
+      "regional or processing-tier premiums"
+    ],
+    "conditional_development_arithmetic": {
+      "planned_cells": 24,
+      "proposed_tokens_per_cell": 80000,
+      "total_proposed_tokens": 1920000,
+      "assumption": "If the aggregate measured input+output including reasoning/cache stays within 80000 per cell, every token is charged once at no more than the listed maximum Standard short-context text rate. Homogeneous hypothetical model assignments; not a selected panel, actual invoice or full-study quote.",
+      "homogeneous_token_only_upper_usd": {
+        "gpt-6-luna": "0.96",
+        "gpt-6-sol": "19.20",
+        "gpt-6-astra": "96.00",
+        "gemini-3.8-flash": "7.20"
+      },
+      "full_study_projection": null,
+      "spend_authorized_usd": 0
+    }
+  },
+  "frozen_panel": null,
+  "activation_status": "no_go",
+  "experimental_model_generations_in_this_audit": 0,
+  "paid_generation_requests_in_this_audit": 0,
+  "unresolved": [
+    "Verified model access/identity/version/effective effort and capacity levels",
+    "Common preventive resource enforcement across all agents/tools/providers",
+    "Authenticated per-request usage and account tariffs/billing",
+    "Independent review/custody/authority and final judges",
+    "Explicit owner authorization before paid requests or field work"
+  ]
+}

@@ -1,5 +1,25 @@
 # Estado de reanudación
 
+**D-109 ordena la activación del ensayo pendiente:**
+[dossier](../experiments/development/activation_readiness_2026-09-30/README.md)
+y [puertas actualizadas](activacion_validacion.md). Inventario no ejecutable de
+24 celdas: A/B/C × D-F/D-E × dos rondas × dos repeticiones; cero ejecutadas.
+Se separan de N/SDD/toolkit y de los pilotos expuestos. Se corrige el resumen
+obsoleto de activación: **1/5, C1 técnico D107/23 operaciones; C2–C5 No demostrados**.
+Cuotas y catálogos son observaciones públicas; Codex carece de sonda fiable,
+Gemini ofrece etiquetas bajo/alto y MiniMax M3.1 añade una opción documental
+de esfuerzo que aún no anuncia la herramienta local. No se congela panel,
+reclasifica historial ni autoriza gasto. Tarifas API y cotas aritméticas de
+tokens se distinguen de suscripción, factura y presupuesto completo.
+
+Siguiente trabajo: integrar admisión/topes por corrida entre agentes,
+solicitudes y herramientas; fijar configuración prospectiva de las 24 celdas.
+Después de dos rondas y selección, congelar el candidato y pasar a custodia,
+reserva y evaluación independiente. Faltan acceso/telemetría efectivos,
+recursos y autoridad humanos, jueces y sitio alimentario. Sin nuevos modelos
+experimentales, Q, firmas humanas, campo ni pruebas globales en D109.
+Los cortes y sus resultados siguientes son históricos identificados.
+
 **D-108 enlaza energía documental con el grafo alimentario:**
 [dossier](../experiments/development/bread_energy_derivation_2026-09-30/README.md)
 y [Pan68 publicado](../cases/bread_documentary_energy/README.md).
