@@ -35,6 +35,7 @@ _KEYS = {
     "held_active_seconds", "reason_sha256", "ledger_sha256", "inventory_sha256",
     "checkpoint_sha256",
 }
+_WAVE_KEYS = _KEYS | {"ledger_kind", "ledger_schema"}
 
 
 class RunContextError(ValueError):
@@ -186,6 +187,17 @@ def _checkpoint(state: dict) -> str:
                             if key != "checkpoint_sha256"}))
 
 
+def _ledger(state: dict):
+    """Closed selection from durable state; never infer a ledger from its file."""
+    if state["schema"] == 1:
+        return TokenLedger(Path(state["ledger_dir"]))
+    if (state["schema"] == 2 and state["ledger_kind"] == "wave_v1"
+            and state["ledger_schema"] == 3):
+        from managed_wave_ledger import WaveLedger
+        return WaveLedger(Path(state["ledger_dir"]))
+    raise RunContextError("context ledger selector is invalid")
+
+
 class RunContext:
     """One serial lease and durable checkpoints around an existing ledger."""
 
@@ -200,7 +212,7 @@ class RunContext:
     @classmethod
     def create(cls, context_dir: Path, ledger_dir: Path, bindings: dict, *,
                active_limit_seconds: float, max_tool_calls: int, roles: list[str],
-               journal_roots: list[Path]) -> RunContext:
+               journal_roots: list[Path], ledger_kind: str = "token") -> RunContext:
         context_dir, ledger_dir = _path(context_dir), _path(ledger_dir)
         limit = _finite(active_limit_seconds, "active limit", positive=True)
         if (type(max_tool_calls) is not int or max_tool_calls < 0
@@ -209,12 +221,22 @@ class RunContext:
                 or len(set(roles)) != len(roles)):
             raise RunContextError("tool cap or roles are invalid")
         pinned = _bindings(bindings)
+        if type(ledger_kind) is not str or ledger_kind not in {"token", "wave_v1"}:
+            raise RunContextError("context ledger kind is invalid")
+        selector = {}
+        if ledger_kind == "wave_v1":
+            selector = {"ledger_kind": "wave_v1", "ledger_schema": 3}
+            for key, value in selector.items():
+                if key in pinned and (type(pinned[key]) is not type(value) or pinned[key] != value):
+                    raise RunContextError("ledger selector conflicts with bindings")
+                pinned[key] = value
         roots = _roots(context_dir, journal_roots)
-        budget = TokenLedger(ledger_dir).status()
+        schema = 2 if selector else 1
+        budget = _ledger({"schema": schema, "ledger_dir": str(ledger_dir), **selector}).status()
         if budget["blocked"]:
             raise RunContextError("cannot attach a blocked ledger")
         state = {
-            "schema": 1, "state": "prepared", "revision": 0, "cursor": 0,
+            "schema": schema, **selector, "state": "prepared", "revision": 0, "cursor": 0,
             "bindings": pinned, "bindings_sha256": _sha(_canonical(pinned)),
             "ledger_dir": str(ledger_dir), "roles": list(roles), "journal_roots": roots,
             "active_limit_seconds": limit, "max_tool_calls": max_tool_calls,
@@ -237,7 +259,8 @@ class RunContext:
 
     def _read(self) -> dict:
         state = _read_json(self.directory / "run.json")
-        if (set(state) != _KEYS or type(state["schema"]) is not int or state["schema"] != 1
+        if (type(state.get("schema")) is not int or state["schema"] not in {1, 2}
+                or set(state) != (_KEYS if state["schema"] == 1 else _WAVE_KEYS)
                 or type(state["state"]) is not str or state["state"] not in _STATES
                 or any(type(state[key]) is not int or state[key] < 0
                        for key in ("revision", "cursor", "max_tool_calls"))):
@@ -249,6 +272,14 @@ class RunContext:
                 or state["bindings_sha256"] != _sha(_canonical(state["bindings"]))
                 or state["checkpoint_sha256"] != _checkpoint(state)):
             raise RunContextError("context binding or checkpoint digest changed")
+        if state["schema"] == 2 and (
+            state["ledger_kind"] != "wave_v1" or type(state["ledger_schema"]) is not int
+            or state["ledger_schema"] != 3
+            or state["bindings"].get("ledger_kind") != "wave_v1"
+            or type(state["bindings"].get("ledger_schema")) is not int
+            or state["bindings"].get("ledger_schema") != 3
+        ):
+            raise RunContextError("wave ledger selector or binding changed")
         _path(state["ledger_dir"])
         if _roots(self.directory, state["journal_roots"]) != state["journal_roots"]:
             raise RunContextError("context journal roots changed")
@@ -302,14 +333,18 @@ class RunContext:
         return len(names[0])
 
     def _capture(self, state: dict, *, frozen: bool, reconcile: bool) -> tuple[dict, int]:
-        ledger = TokenLedger(Path(state["ledger_dir"]))
-        # Keep the ledger lock across its status and raw-byte digest.
-        with ledger._locked():
-            raw = ledger._read_unlocked()
-            ledger_sha = _sha(_canonical(raw))
-        budget = ledger.status()
-        if budget["requests"] != raw["requests"]:
-            raise RunContextError("ledger changed while capturing its checkpoint")
+        ledger = _ledger(state)
+        if state["schema"] == 2:
+            # Wave status and the digest of its actual bytes share one lock.
+            budget = ledger.snapshot()
+            ledger_sha = budget["ledger_sha256"]
+        else:
+            with ledger._locked():
+                raw = ledger._read_unlocked()
+                ledger_sha = _sha(_canonical(raw))
+            budget = ledger.status()
+            if budget["requests"] != raw["requests"]:
+                raise RunContextError("ledger changed while capturing its checkpoint")
         inventory = (_inventory(state["journal_roots"]) if frozen or reconcile
                      else state["inventory_sha256"])
         tools = self._tools(self.directory.parent, state["max_tool_calls"], reconcile=reconcile)
@@ -356,7 +391,7 @@ class RunContext:
         if self._closing():
             exposed = "indeterminate"
             held = max(held, state["active_limit_seconds"] - state["active_seconds"])
-        return {
+        view = {
             "state": exposed, "stored_state": state["state"],
             "checkpoint_sha256": state["checkpoint_sha256"], "cursor": state["cursor"],
             "revision": state["revision"], "role": state["role"],
@@ -368,6 +403,9 @@ class RunContext:
             "tools_reserved": tools, "max_tool_calls": state["max_tool_calls"], "budget": budget,
             "identity_authenticated": False, "cost_authenticated": False,
         }
+        if state["schema"] == 2:
+            view.update(ledger_kind=state["ledger_kind"], ledger_schema=state["ledger_schema"])
+        return view
 
     def status(self) -> dict:
         with _run_lock(self.directory):
@@ -484,6 +522,6 @@ class RunContext:
             state["checkpoint_sha256"] = _checkpoint(state)
             _write_state(self.directory, state)
             self._lease = None
-            budget = TokenLedger(Path(state["ledger_dir"])).status()
+            budget = _ledger(state).status()
             tools = len(list((self.directory.parent / "tool_reservations").iterdir()))
             return self._view(state, budget, tools)
