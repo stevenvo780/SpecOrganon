@@ -1,5 +1,30 @@
 # Auditoría de aceptación actual
 
+## D-120 · Conciliación de mediciones locales
+
+[Dossier](../experiments/development/coordinated_measurement_2026-10-01/README.md).
+Lector independiente: una captura bajo lock original, guard/replay/publicación
+D119, uso y liquidación concordantes, coste declarado redondeado por request,
+herramientas ligadas y tiempos locales separados. Salida por allowlist, sin
+prompts/RAW textual/argumentos. Caché y razonamiento son subconjuntos;
+ausencia desconocida, no cero. La API pura no prueba ejecución del guard.
+
+Freeze `8576cc6`: 92 registros y 93 con el propio freeze; **51 pruebas por Python 3.11/3.12**,
+Ruff/sintaxis/diff exit 0 y fuentes/HEAD estables. Doce lecturas CLI reales de los
+runtimes sintéticos D119: 113 requests, 69 tools y 791 tokens declarados por entorno,
+calendarios distintos. Inventarios before/after iguales; 2283 pins D119
+preservados durante capturas. Cuatro docs activos avanzan después, con bytes
+históricos conservados enGit `c64169c`. Tres huecos PURE cerrados; no bypass
+CLI afirmado. El primer intento conserva hashes pero no fuentes originales;
+los siguientes sí. Revisión y receipt en el dossier.
+
+**C1 técnico D107 preservado; C2–C5 No demostrado; 0/24 formales.**
+Sin nuevos sends/tools ni modelo experimental. W/H, conteo/actividad remota,
+costes de herramientas/revisión/puntuación/estudio, proveedor/effort/tarifa/
+factura verificables y Q permanecen pendientes. No ventaja comparativa,
+autoridad humana, campo o reserva demostrados. Los cortes siguientes son
+históricos.
+
 ## D-119 · Runtime persistente de desarrollo coordinado
 
 [Dossier](../experiments/development/coordinated_runtime_2026-10-01/README.md).

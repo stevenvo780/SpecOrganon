@@ -1,5 +1,31 @@
 # Estado de reanudación
 
+**D-120 concilia mediciones locales del runtime coordinado:**
+[dossier](../experiments/development/coordinated_measurement_2026-10-01/README.md).
+Lector separado con un lock original, guard/replay/publicación nativos,
+conjuntos exactos request/response/receipt/ledger y herramientas. Uso y coste
+declarado se cotejan por request/rol/brazo; caché y razonamiento no se cuentan
+dos veces. Faltantes y alcances de send/sandbox/host/contexto quedan explícitos.
+La API pura no afirma que haya ejecutado el guard; el CLI sí verifica ese
+control local, sin autenticar proveedor, tarifa o factura.
+
+Plan `357ac43`, freeze `8576cc6`: 92 registros y 93 con el propio freeze.
+**51 pruebas nuevas por Python 3.11/3.12**, Ruff/sintaxis/diff exit 0 y fuentes/HEAD
+iguales antes/después. Doce CLI de lectura sobre D119 terminado, sin
+reejecución: 113 requests, 69 tools y 791 tokens sintéticos conciliados por entorno;
+calendarios distintos. Todos los inventarios originales y 2283 pins D119
+iguales antes/después de las capturas. Sólo después avanzan cuatro docs
+activos; originales enGit `c64169c`, dossiers/fuentes/casos/GOAL intactos.
+Tres gaps PURE reproducidos y cerrados con negativos; fuentes/streams
+conservados y limitación del intento01 sin bytes originales explícita.
+
+**C1 técnico D107 preservado; C2–C5 No demostrado; 0/24 formales.**
+Sin nuevas llamadas a modelo/tools, Q, autoridad humana o campo. Siguen W
+prospectivo/H/conteo/actividad remota y ruta real autorizada con precios/uso
+verificables; después 12 R1→adaptación/freeze→12 R2/selección, reserva y campo/
+transferencia. Luna realizó inventario acotado, sin comparación de calidad.
+Los cortes siguientes conservan su alcance histórico.
+
 **D-119 implementa el runtime persistente coordinado A/B/C:**
 [dossier](../experiments/development/coordinated_runtime_2026-10-01/README.md).
 Work vacío/init original del líder, delegaciones repetidas, replay/merge,

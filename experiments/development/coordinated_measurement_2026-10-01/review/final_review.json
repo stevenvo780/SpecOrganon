@@ -1,0 +1,435 @@
+{
+  "schema": 1,
+  "classification": "independent_adversarial_local_D120_measurement_review_not_GOAL_acceptance",
+  "status": "done",
+  "retryable": false,
+  "verdict": "PASS_local_scope",
+  "open_material_findings": [],
+  "closed_findings": [
+    {
+      "severity": "P2",
+      "topic": "PURE reserved input and actual usage could disagree",
+      "original_evidence": "review/early_pure_probe.json; source19b660; fixture input20 versus response10 accepted",
+      "correction": "scripts/measure_coordinated_runtime.py:290",
+      "verified": "Exact input comparison and output cap; frozen51 tests and independent corrected PURE rejection."
+    },
+    {
+      "severity": "P2",
+      "topic": "PURE bool tool receipt ordinal could equal integer reservation",
+      "original_evidence": "review/early_pure_probe.json: global_ordinal True versus1 accepted with coherent hashes",
+      "correction": "scripts/measure_coordinated_runtime.py:389",
+      "verified": "Type-preserving serialization comparison and exact receipt ordinal/schema types; negative rejects."
+    },
+    {
+      "severity": "P2",
+      "topic": "PURE leader tool epoch could be nonzero",
+      "original_evidence": "review/early_pure_probe.json: leader epoch2 accepted; no CLI bypass demonstrated",
+      "correction": "scripts/measure_coordinated_runtime.py:404",
+      "verified": "Leader epoch0 and worker timeline epoch; independent leader/worker negatives reject."
+    },
+    {
+      "severity": "P2",
+      "topic": "Measurement capture lacked D120 source and HEAD before/after binding",
+      "correction": "experiments/development/coordinated_measurement_2026-10-01/capture_measurements.py:37",
+      "verified": "Source+self93 inventories equal freeze/live/Git8576 and HEAD before==after for all three captures."
+    },
+    {
+      "severity": "P2",
+      "topic": "Sealer hardcoded twelve runtime reads without exact matrix/flags check",
+      "correction": "experiments/development/coordinated_measurement_2026-10-01/seal_evidence.py:73",
+      "verified": "Actual12commands/12measurements exact matrix, nativeflags and coords required; independent all12 projection/aggregate audit completed."
+    }
+  ],
+  "prospective_plan_commit": "357ac439736de621e1d21dbb7f86d8a473ee4854",
+  "source_freeze_commit": "8576cc6b7f9caf472ddcf6136c1bda7f5feff3b4",
+  "source_freeze_sha256": "95a36c73ecc7cd0eb32244f9ab02df534830ddc2e1722d456d92478a5e61cc1d",
+  "source_pins_verified_live_and_Git": 92,
+  "external_extractor_verified": true,
+  "source_capture_pins_including_self": 93,
+  "gates": [
+    {
+      "name": "final311",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/final311/report.json",
+        "bytes": 3798,
+        "sha256": "ae8e35770506334f0f750a3c72cb1c81610113328fc9ca48139cdf3fb6801cdc"
+      },
+      "commands": 4,
+      "HEAD_before_after_equal_freeze": true,
+      "sources_before_after_equal_live_Git": true,
+      "D119_records_verified_before_after": 2283
+    },
+    {
+      "name": "final312",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/final312/report.json",
+        "bytes": 3801,
+        "sha256": "9b9c3744b8460147c15e875b4ded8945d801ace40178f697ccc9d2cfe42aeed1"
+      },
+      "commands": 4,
+      "HEAD_before_after_equal_freeze": true,
+      "sources_before_after_equal_live_Git": true,
+      "D119_records_verified_before_after": 2283
+    },
+    {
+      "name": "integration02",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/report.json",
+        "bytes": 13185,
+        "sha256": "17618478b0f09f41be5af3e39eaef04e8ccc7eeebbefb44c51b9a9a475fe3b12"
+      },
+      "commands": 12,
+      "HEAD_before_after_equal_freeze": true,
+      "sources_before_after_equal_live_Git": true,
+      "D119_records_verified_before_after": 2283
+    }
+  ],
+  "tests_per_interpreter": 51,
+  "all_twenty_command_stream_pairs_sha_size_verified": true,
+  "all_twelve_CLI_argv_use_exact_registered_interpreter": true,
+  "all_twelve_original_recorded_runtime_inventory_modes_bytes_and_directories_verified_current": true,
+  "all_twelve_reports_independently_reconciled_from_original_journals": true,
+  "independent_recalculation_scope": [
+    "exact request/response/receipt/ledger sets and SHA",
+    "actual response usage and settlement/reservation equality",
+    "cache/reasoning known versus missing counts",
+    "original conservative input price formula and integer ceil per request then sum",
+    "exact tool response-call/reservation/receipt identities and hashes, role-specific epoch",
+    "sandbox/host receipts and streamSHA; durations separated",
+    "context active/paused/held accounting and missing-measurement flags",
+    "global and by-role aggregate totals and all12 evidence summary records"
+  ],
+  "independent_calculation_execution_evidence": "exec_command chunk735e8a exit0; direct JSON/Git/hash arithmetic, no reader, CLI, model or runtime reexecution",
+  "rows": [
+    {
+      "interpreter": "311",
+      "arm": "A",
+      "case": "D-F",
+      "run_id": "dev-coord-36bd3a2c24082e3bf8a3e1a8",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/311/A-D-F.measurement.json",
+        "bytes": 34614,
+        "sha256": "eb710d055d57dafb051b21a905553e938b5821a1e3c5d42bab75e5b44bb7bd77"
+      },
+      "runtime_inventory_entries_verified": 363,
+      "requests": 20,
+      "tools": 12,
+      "synthetic_tokens": 140,
+      "declared_micro_usd": 140,
+      "native_guard_replay_publication_verified": true
+    },
+    {
+      "interpreter": "311",
+      "arm": "A",
+      "case": "D-E",
+      "run_id": "dev-coord-8826ef95e37a12160e28e436",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/311/A-D-E.measurement.json",
+        "bytes": 33027,
+        "sha256": "6332f018107d828a8042406350c1f7a96c6afe8a2029a7cf3a3e49fe89672d91"
+      },
+      "runtime_inventory_entries_verified": 231,
+      "requests": 19,
+      "tools": 11,
+      "synthetic_tokens": 133,
+      "declared_micro_usd": 133,
+      "native_guard_replay_publication_verified": true
+    },
+    {
+      "interpreter": "311",
+      "arm": "B",
+      "case": "D-F",
+      "run_id": "dev-coord-45a4301ba5b38b0aa8433a4f",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/311/B-D-F.measurement.json",
+        "bytes": 33868,
+        "sha256": "9d619526034760726b9363aaff0519dd9fb6cc7eb9aff5ddd07e4d2752f1a3de"
+      },
+      "runtime_inventory_entries_verified": 360,
+      "requests": 19,
+      "tools": 12,
+      "synthetic_tokens": 133,
+      "declared_micro_usd": 133,
+      "native_guard_replay_publication_verified": true
+    },
+    {
+      "interpreter": "311",
+      "arm": "B",
+      "case": "D-E",
+      "run_id": "dev-coord-fa19b45dc81c4938f3523112",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/311/B-D-E.measurement.json",
+        "bytes": 32279,
+        "sha256": "2668f9dec04aed64d625e673fae0c4bb983b29dfbfc56cc047aef4fe29919f9f"
+      },
+      "runtime_inventory_entries_verified": 226,
+      "requests": 18,
+      "tools": 11,
+      "synthetic_tokens": 126,
+      "declared_micro_usd": 126,
+      "native_guard_replay_publication_verified": true
+    },
+    {
+      "interpreter": "311",
+      "arm": "C",
+      "case": "D-F",
+      "run_id": "dev-coord-d41e273ba685b44fed255925",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/311/C-D-F.measurement.json",
+        "bytes": 33869,
+        "sha256": "42fde2eb1296df208c691054556299573c2ccb110f1e75fdcfc6ad5acfeba367"
+      },
+      "runtime_inventory_entries_verified": 360,
+      "requests": 19,
+      "tools": 12,
+      "synthetic_tokens": 133,
+      "declared_micro_usd": 133,
+      "native_guard_replay_publication_verified": true
+    },
+    {
+      "interpreter": "311",
+      "arm": "C",
+      "case": "D-E",
+      "run_id": "dev-coord-8f139b8604c17f8f56138742",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/311/C-D-E.measurement.json",
+        "bytes": 32273,
+        "sha256": "60d6d166fe961628293a81cb62ee6c2d22e8415540947b56f6ba48effb00e35f"
+      },
+      "runtime_inventory_entries_verified": 226,
+      "requests": 18,
+      "tools": 11,
+      "synthetic_tokens": 126,
+      "declared_micro_usd": 126,
+      "native_guard_replay_publication_verified": true
+    },
+    {
+      "interpreter": "312",
+      "arm": "A",
+      "case": "D-F",
+      "run_id": "dev-coord-015d527dc3651cb41096925a",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/312/A-D-F.measurement.json",
+        "bytes": 34610,
+        "sha256": "70f9f32d1ce6ed4a92dffe22c264fbde685fe9e9c979f65589d8106e3f426cd5"
+      },
+      "runtime_inventory_entries_verified": 363,
+      "requests": 20,
+      "tools": 12,
+      "synthetic_tokens": 140,
+      "declared_micro_usd": 140,
+      "native_guard_replay_publication_verified": true
+    },
+    {
+      "interpreter": "312",
+      "arm": "A",
+      "case": "D-E",
+      "run_id": "dev-coord-5f62ff7513c95691bc58807f",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/312/A-D-E.measurement.json",
+        "bytes": 33025,
+        "sha256": "bdb9072e372c552c00d72474682b47e5fe1610066d51e032190e8867db9035c5"
+      },
+      "runtime_inventory_entries_verified": 231,
+      "requests": 19,
+      "tools": 11,
+      "synthetic_tokens": 133,
+      "declared_micro_usd": 133,
+      "native_guard_replay_publication_verified": true
+    },
+    {
+      "interpreter": "312",
+      "arm": "B",
+      "case": "D-F",
+      "run_id": "dev-coord-5cd245bcf8832c698ea39f3c",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/312/B-D-F.measurement.json",
+        "bytes": 33874,
+        "sha256": "f14f981896b7a0f6be1080f61d787287488e6b34eab2f889d9b0903331e1e3b1"
+      },
+      "runtime_inventory_entries_verified": 360,
+      "requests": 19,
+      "tools": 12,
+      "synthetic_tokens": 133,
+      "declared_micro_usd": 133,
+      "native_guard_replay_publication_verified": true
+    },
+    {
+      "interpreter": "312",
+      "arm": "B",
+      "case": "D-E",
+      "run_id": "dev-coord-635cd83a72430a53d0b63c9b",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/312/B-D-E.measurement.json",
+        "bytes": 32271,
+        "sha256": "b850baa818e7b8092b5ea204fd853a8351bafa25472badbcdeada5f758986faa"
+      },
+      "runtime_inventory_entries_verified": 226,
+      "requests": 18,
+      "tools": 11,
+      "synthetic_tokens": 126,
+      "declared_micro_usd": 126,
+      "native_guard_replay_publication_verified": true
+    },
+    {
+      "interpreter": "312",
+      "arm": "C",
+      "case": "D-F",
+      "run_id": "dev-coord-07c6a7c06b685172e7d3aa4f",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/312/C-D-F.measurement.json",
+        "bytes": 33869,
+        "sha256": "ca50c1e8b816586b608eb176c972cb45be367959abb81e150649fcf2ee7cc55e"
+      },
+      "runtime_inventory_entries_verified": 360,
+      "requests": 19,
+      "tools": 12,
+      "synthetic_tokens": 133,
+      "declared_micro_usd": 133,
+      "native_guard_replay_publication_verified": true
+    },
+    {
+      "interpreter": "312",
+      "arm": "C",
+      "case": "D-E",
+      "run_id": "dev-coord-b0b33478d627731354e5728b",
+      "report": {
+        "path": "experiments/development/coordinated_measurement_2026-10-01/checks/integration02/312/C-D-E.measurement.json",
+        "bytes": 32268,
+        "sha256": "b6de49e14191c6130f2d601dc6ec043acf401e650da8cebc9cfaa0dcc2b22847"
+      },
+      "runtime_inventory_entries_verified": 226,
+      "requests": 18,
+      "tools": 11,
+      "synthetic_tokens": 126,
+      "declared_micro_usd": 126,
+      "native_guard_replay_publication_verified": true
+    }
+  ],
+  "summaries": [
+    {
+      "interpreter": "311",
+      "requests": 113,
+      "tools": 69,
+      "synthetic_tokens": 791,
+      "declared_micro_usd": 791
+    },
+    {
+      "interpreter": "312",
+      "requests": 113,
+      "tools": 69,
+      "synthetic_tokens": 791,
+      "declared_micro_usd": 791
+    }
+  ],
+  "safety_and_sanitization": {
+    "report_field_allowlists_inspected": true,
+    "no_participant_prompts_text_tool_arguments_or_stream_bytes_in_measurements": true,
+    "private_sentinels_absent_from_all_twelve_stdout_and_unit_positive_reports": true,
+    "native_rejection_errors_fixed_and_sanitized": true,
+    "one_original_run_lock_no_nested_reacquisition": true,
+    "invalid_prechecks_probe": {
+      "path": "experiments/development/coordinated_measurement_2026-10-01/review/invalid_precheck_probe.json",
+      "bytes": 3016,
+      "sha256": "0af4cc4264253c44870c5463cdc3fea0dc3bf7ace2c8bec6cdddbe63e54cc64c"
+    },
+    "six_invalid_new_temp_entries_rejected_before_lazy_load_without_any_inventory_mutation": true
+  },
+  "preservation": {
+    "prior_D119_commit": "c64169c15c5cbe6dd35c5fc4c25704fc042332a7",
+    "D119_receipt_sha256": "cd41baa29e59e1e75d7ed9e46412e0885b13c0b02e72629ea1af1dc55ab28b07",
+    "all_D119_pins_unchanged_at_gates_and_CLI_capture": 2283,
+    "current_D119_pins_preserved_live_after_active_docs_update": 2279,
+    "historical_active_doc_pins_verified_from_Git_c641": 4,
+    "changes_outside_D120_prefix": [
+      "scripts/measure_coordinated_runtime.py",
+      "tests/test_measure_coordinated_runtime.py",
+      "docs/estado.md",
+      "docs/decisiones.md",
+      "docs/activacion_validacion.md",
+      "docs/validacion_actual.md"
+    ],
+    "GOAL_protocol_core_product_wheel_cases_and_D119_dossier_sources_unchanged": true
+  },
+  "documentation_pins": [
+    {
+      "path": "experiments/development/coordinated_measurement_2026-10-01/README.md",
+      "bytes": 5655,
+      "sha256": "d6bd604b67c03480561aada998f0ad8994494b0482a69a671491c7106ddf5d46"
+    },
+    {
+      "path": "experiments/development/coordinated_measurement_2026-10-01/evidence.json",
+      "bytes": 8452,
+      "sha256": "0f449b41741adc447d744676996d91566c2c262926e9e6180fa872153b55b69f"
+    },
+    {
+      "path": "experiments/development/coordinated_measurement_2026-10-01/attempts.md",
+      "bytes": 1557,
+      "sha256": "131a0abfe311b4f74c1e18941703921b82bf6997cb4fdd7091cb7e6087242cde"
+    },
+    {
+      "path": "docs/estado.md",
+      "bytes": 125278,
+      "sha256": "48ddace4940065ffede807c764ca6322a9e5640c6abb1a1efb0e912057625e99"
+    },
+    {
+      "path": "docs/decisiones.md",
+      "bytes": 255458,
+      "sha256": "38ddff847abbdc5cc2e905fca9c1637393a10e245493e16e2b9ac14b7d564a0a"
+    },
+    {
+      "path": "docs/activacion_validacion.md",
+      "bytes": 24803,
+      "sha256": "d4f5b76d9c92feb315f59077ad00a6c3123f1b83276e886a8196833bd83c1d1c"
+    },
+    {
+      "path": "docs/validacion_actual.md",
+      "bytes": 123289,
+      "sha256": "6a895e152d39e6266d61257b0e2a0112778ab655169a400833717c48bbfbd83c"
+    }
+  ],
+  "negative_provenance": {
+    "original_reader19b660_bytes_preserved": {
+      "path": "experiments/development/coordinated_measurement_2026-10-01/review/early_reader_19b660.source.txt",
+      "bytes": 28754,
+      "sha256": "19b660c58d581c571c079c3d1492a9b4d0da6d6888546ec561cc0023d41ec8bf"
+    },
+    "initial_PURE_probes": {
+      "path": "experiments/development/coordinated_measurement_2026-10-01/review/early_pure_probe.json",
+      "bytes": 4635,
+      "sha256": "aa60590044926425067426c5681b61e611289412428d0cb096ceefbb16db3dca"
+    },
+    "candidate_PURE_recheck": {
+      "path": "experiments/development/coordinated_measurement_2026-10-01/review/early_candidate_recheck.json",
+      "bytes": 2769,
+      "sha256": "4c13ee8b4864ae6b6c80d72fb60ae5a4e29f7cb190770cb2f217f3274d082e90"
+    },
+    "worker_attempt01_source_bytes_not_recovered_only_SHA_and_streams": true,
+    "worker_attempt02_03_actual_sources_and_streams_preserved": true,
+    "no_claimed_CLI_bypass_from_PURE_probes": true
+  },
+  "acceptance": {
+    "C1": "technical_D107_preserved_no_expansion_from_D120",
+    "C2": "not_demonstrated",
+    "C3": "not_demonstrated",
+    "C4": "not_demonstrated",
+    "C5": "not_demonstrated",
+    "formal_cells_executed": 0,
+    "formal_cells_total": 24,
+    "quality_assessed": false,
+    "normative_approval": false,
+    "paid_route_authorized": false
+  },
+  "limitations": [
+    "All historical response usage and prices are synthetic local declarations. 791 tokens and791microUSD per environment are arithmetic results, not provider invoices or authenticated usage.",
+    "Only observed local send/tool journals have exact coverage. Full activity coverage, count_input timing, identified-clock W, human H, remote activity and total study/tool/review/scoring cost remain missing.",
+    "Send durations are per-request monotonic differences summed; sandbox and enclosing host are separate sums, not additive independent activity. Context leases/pauses are local accounting. No global clock union, comparative time/cost advantage, effort effectiveness, identity or Q is demonstrated.",
+    "Pure reconcile_snapshot validates declared private snapshots and does not attest native replay. CLI invokes snapshot_runtime with original mandatory wrapper guard, native replay and completed valid publication; same-UID cooperative locking/hashes do not authenticate hostile custody.",
+    "The twelve reads revisit six synthetic arm/case/replica1 coordinates in two interpreter environments with disjoint run IDs/calendars; no new runtime/model/tool effects or formal experimental repetition.",
+    "CLI/quotas inventory and bounded Luna inventory do not establish an authenticated Responses route, spending permission, pricing or a quality benchmark.",
+    "Real authorized route/measurement,12R1, prospective adaptation/freeze and12R2/selection, independent reserved confirmation/judges/custody/human authorities, causal food-chain field evidence and reserved transfer remain pending."
+  ],
+  "repository_edits": "Only new review evidence and reports; no code/source/historical modifications or commits",
+  "review_writer_note": "An initial report-writer invocation failed Python syntax before any execution or IO; corrected locally in this invocation. No target runtime failure or source modification.",
+  "post_receipt_index_HEAD_self_coverage_review": "pending_parent_finite_followup"
+}

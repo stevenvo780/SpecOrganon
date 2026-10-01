@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "classification": "independent_candidate_PURE_probe_and_helper_review_not_final_acceptance",
+  "argv": [
+    "python3",
+    "-B",
+    "-"
+  ],
+  "sources_before": {
+    "scripts/measure_coordinated_runtime.py": "a92ea44ed06476ca3fab379e434f95bace776243f21465a7db2918dee68a39b0",
+    "tests/test_measure_coordinated_runtime.py": "8979ed98c4cdbb663e5a414c5a4a0247c42001350093f916f3f6e2e465e32101"
+  },
+  "sources_after": {
+    "scripts/measure_coordinated_runtime.py": "a92ea44ed06476ca3fab379e434f95bace776243f21465a7db2918dee68a39b0",
+    "tests/test_measure_coordinated_runtime.py": "8979ed98c4cdbb663e5a414c5a4a0247c42001350093f916f3f6e2e465e32101"
+  },
+  "source_unchanged": true,
+  "probe_results": [
+    {
+      "probe": "valid_baseline",
+      "accepted": true,
+      "native_guard_claimed": false,
+      "private_sentinel_exported": false
+    },
+    {
+      "probe": "reserved_input_mismatch",
+      "accepted": false,
+      "error": "counted input or output reservation disagrees with usage"
+    },
+    {
+      "probe": "tool_receipt_bool_ordinal",
+      "accepted": false,
+      "error": "tool reservation and receipt disagree"
+    },
+    {
+      "probe": "leader_tool_epoch_nonzero",
+      "accepted": false,
+      "error": "leader tool epoch must be original broker epoch zero"
+    },
+    {
+      "probe": "worker_tool_epoch_mismatch",
+      "accepted": false,
+      "error": "tool request epoch disagrees"
+    }
+  ],
+  "helpers_inspected": [
+    {
+      "path": "experiments/development/coordinated_measurement_2026-10-01/capture_checks.py",
+      "sha256": "4be28f5de5cc41ae0ca8f8c588edc3e882e4f403cddaeb0ca0cfc544e0a98f77"
+    },
+    {
+      "path": "experiments/development/coordinated_measurement_2026-10-01/capture_measurements.py",
+      "sha256": "cc84f031aa6992119a25340130cc4a596831400f61ce79299307ae7be0ce0789"
+    },
+    {
+      "path": "experiments/development/coordinated_measurement_2026-10-01/seal_evidence.py",
+      "sha256": "f3939ea42f6a2c631afe29c02be609fcea31bb015e0d709c36934f640f7d5d46"
+    }
+  ],
+  "closure_observed": [
+    "reserved input matches actual usage and output stays inside reservation",
+    "tool reservation/receipt identities use type-preserving equality; receipt ordinals/schema are exact ints",
+    "leader tool epoch is0; worker epoch matches model timeline",
+    "capture_measurements records source freeze plus self and HEAD before/after",
+    "sealer requires12commands and12measurement rows with exact matrix and native guard verified"
+  ],
+  "initial_stdout_probe_source_archived": "review/early_reader_19b660.source.txt",
+  "native_CLI_bypass_demonstrated": false,
+  "model_calls": 0,
+  "tools_executed": 0,
+  "final_verdict": "pending_frozen_gates_twelve_readonly_CLI_and_documentation"
+}

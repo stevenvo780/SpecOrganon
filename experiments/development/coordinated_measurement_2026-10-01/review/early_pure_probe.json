@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "classification": "independent_early_mutable_source_PURE_API_probe_not_CLI_bypass_or_final_verdict",
+  "source_sha256": "19b660c58d581c571c079c3d1492a9b4d0da6d6888546ec561cc0023d41ec8bf",
+  "exact_source_bytes_archived": "experiments/development/coordinated_measurement_2026-10-01/review/early_reader_19b660.source.txt",
+  "source_copy_origin": "/tmp/specorganon-D120-worker-attempt02-ljrsuftx/sources_before/scripts/measure_coordinated_runtime.py",
+  "tests_sha256_at_execution": "d267616161226315eee8d44183f78eb0d1e0c6bf5025a6f167d60994c226f204",
+  "argv": [
+    "python3",
+    "-B",
+    "-"
+  ],
+  "cwd": "/workspace/SpecOrganon",
+  "stdin": "import importlib.util,pathlib,json,copy,hashlib\np=pathlib.Path('tests/test_measure_coordinated_runtime.py');s=importlib.util.spec_from_file_location('D120_independent_pure_probe',p);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);reader=m.reader\nresults=[]\nfor kind in ['baseline_reserved_input_mismatch','tool_receipt_bool_ordinal','tool_epoch_timeline_mismatch']:\n snap=m.snapshot.__wrapped__()\n if kind!='baseline_reserved_input_mismatch':\n  name='0001.json';reservation=json.loads(snap['journals']['tool_reservations'][name]);receipt=json.loads(snap['journals']['tool_receipts'][name])\n  if kind=='tool_receipt_bool_ordinal': receipt['global_ordinal']=True\n  else: reservation['epoch']=receipt['epoch']=2;m.seal(snap,'tool_reservations',name,reservation);receipt['reservation_sha256']=reader._sha(snap['journals']['tool_reservations'][name])\n  m.seal(snap,'tool_receipts',name,receipt)\n try:\n  report=reader.reconcile_snapshot(snap);results.append({'probe':kind,'accepted':True,'native_guard_claimed':report.get('native_D119_guard_replay_publication_verified',False),'exact_coverage':report['coverage'],'tool_epoch':report['tools'][0]['epoch'],'reserved_input':snap['budget']['requests']['leader-turn-0001']['input_tokens'],'response_input':report['requests'][0]['input_tokens']})\n except reader.MeasurementError as e:results.append({'probe':kind,'accepted':False,'error':str(e)})\nprint(json.dumps({'reader_sha256':hashlib.sha256(pathlib.Path('scripts/measure_coordinated_runtime.py').read_bytes()).hexdigest(),'tests_sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'pure_probes_only':True,'results':results},indent=2))\n",
+  "exit_code": 0,
+  "stdout_capture": "experiments/development/coordinated_measurement_2026-10-01/review/early_pure_probe.stdout",
+  "stdout_sha256": "1e95874fc096ee35aac15f8c078eb2c3745cdd239371dcfa0a4eb6e32484e741",
+  "stderr": "",
+  "capture_provenance": "Original successful exec_command output chunk c8f1ea; stdout transcribed exactly from tool result. No rerun on changed live sources.",
+  "results": [
+    {
+      "probe": "baseline_reserved_input_mismatch",
+      "accepted": true,
+      "native_guard_claimed": false,
+      "exact_coverage": {
+        "request_response_receipt_ledger_exact": true,
+        "tool_reservation_receipt_response_exact": true,
+        "full_activity_coverage": false
+      },
+      "tool_epoch": 1,
+      "reserved_input": 20,
+      "response_input": 10
+    },
+    {
+      "probe": "tool_receipt_bool_ordinal",
+      "accepted": true,
+      "native_guard_claimed": false,
+      "exact_coverage": {
+        "request_response_receipt_ledger_exact": true,
+        "tool_reservation_receipt_response_exact": true,
+        "full_activity_coverage": false
+      },
+      "tool_epoch": 1,
+      "reserved_input": 20,
+      "response_input": 10
+    },
+    {
+      "probe": "tool_epoch_timeline_mismatch",
+      "accepted": true,
+      "native_guard_claimed": false,
+      "exact_coverage": {
+        "request_response_receipt_ledger_exact": true,
+        "tool_reservation_receipt_response_exact": true,
+        "full_activity_coverage": false
+      },
+      "tool_epoch": 2,
+      "reserved_input": 20,
+      "response_input": 10
+    }
+  ],
+  "epoch_correction": "Probe mutated leader tool epoch to2, which is invalid because original broker always uses epoch0 for leader. Workers must equal model timeline epoch. Initial test fixture leader epoch1 was also invalid; literal leader==timeline is not the required rule.",
+  "limits": [
+    "Only reconcile_snapshot called on declared synthetic dicts. No snapshot_runtime, CLI, native guard, ledger/file modifications or model calls.",
+    "Native guard may reject inconsistencies before the CLI reaches reconciliation; no CLI bypass demonstrated.",
+    "Sources remain mutable and fixes are in progress; these observations pin the original source bytes only."
+  ],
+  "next_step": "Recheck fixes with frozen code and final reports."
+}
