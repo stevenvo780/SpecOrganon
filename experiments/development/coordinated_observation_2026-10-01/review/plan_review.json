@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "classification": "independent_prospective_D121_plan_and_frozen_native_API_review",
+  "plan_commit": "d8bbae86b7e9dcddc80959a96bf6bee747c7bae1",
+  "plan_sha256": "4c12bb69103446551b576ab2818c16cd4e2362648932fa232dd7b381fca560bc",
+  "GOAL_and_plan_read_in_full": true,
+  "plan_committed_bytes_equal_live": true,
+  "source_pins": [
+    {
+      "path": "GOAL.md",
+      "sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36"
+    },
+    {
+      "path": "scripts/managed_parallel_wave.py",
+      "sha256": "82e517b374f4309008ed9b51d55cff4717123fcdc1491b87291a26b2bbe7fa32"
+    },
+    {
+      "path": "scripts/managed_coordinated_prototype.py",
+      "sha256": "450949301f084a6512855bf38df092be2bfca61bf59e5e49469254031191ec28"
+    },
+    {
+      "path": "scripts/coordinated_prototype_runtime.py",
+      "sha256": "feb3429547dbdb05eef63fdb4efd6750121364b5dd74097655bd801483f2ec3a"
+    },
+    {
+      "path": "scripts/coordinated_prototype_broker.py",
+      "sha256": "1921ad220a9b9041ce103bd75b0f7f18c3fa1b39c311e8616dee0c3848e69ac4"
+    },
+    {
+      "path": "scripts/managed_run_context.py",
+      "sha256": "a9e94ebddcaec0f141aaa82186b66a2d8a9af4faf43fdd543658e06f234b7bf2"
+    },
+    {
+      "path": "scripts/run_managed_conversation.py",
+      "sha256": "c93fd3a356c9c0f796d88f473a7f3fbfef10fde2cd7c6a2d5183f9f5185c5f56"
+    },
+    {
+      "path": "scripts/run_managed_response.py",
+      "sha256": "17bcf4b6eda84d071eac5c43cbd2ab2e299e210be50939a4345f1b3e30fa7794"
+    },
+    {
+      "path": "scripts/measure_coordinated_runtime.py",
+      "sha256": "a92ea44ed06476ca3fab379e434f95bace776243f21465a7db2918dee68a39b0"
+    }
+  ],
+  "plan_consistency": "Local observed clocks and intervals, cooperative custody limits, pure/native distinction and no formal acceptance are explicit. Risks below are implementation gates, not observed implementation failures.",
+  "confirmed_implementation_bugs": [],
+  "risks": [
+    {
+      "priority": "P1",
+      "topic": "Instrument the actual transport path and broker instance exactly once",
+      "facts": [
+        "RemainingTransport.operation bypasses HTTP subclass overrides by calling OpenAIResponsesHTTP methods directly for isinstance matches.",
+        "Engine execute creates its own broker via _load; it is different from a prior snapshot instance. Guard is invoked repeatedly during one step."
+      ],
+      "evidence": [
+        "scripts/managed_parallel_wave.py:269",
+        "scripts/managed_coordinated_prototype.py:648",
+        "scripts/managed_coordinated_prototype.py:725"
+      ],
+      "recommendation": "Use a protocol proxy rather than HTTP subclass; hook invoke only on actual broker passed to native guard, idempotently per instance. Preserve original bound callable, delegate exactly once and touch no global/class functions.",
+      "bounded_test": "Real HTTP-like adapter and a fake transport both produce one observed count/send; repeated guard calls do not nest broker wrappers or execute tool twice; independent broker instances remain unchanged."
+    },
+    {
+      "priority": "P1",
+      "topic": "Observation persistence must consume native timeout instead of extending it",
+      "facts": [
+        "RemainingTransport computes remaining budget before passing timeout_seconds to non-HTTP transports.",
+        "Native broker recomputes context.deadline remaining before sandbox launch. Durable observer begin/end adds real elapsed work."
+      ],
+      "evidence": [
+        "scripts/managed_parallel_wave.py:255",
+        "scripts/managed_parallel_wave.py:272",
+        "scripts/coordinated_prototype_broker.py:681"
+      ],
+      "recommendation": "Fix observer forwarding deadline before journal I/O; recompute remaining after persistence and reject exhaustion before forwarding. Use the original deadline-aware HTTP bridge and leave original broker context deadline unchanged. Late effect completion does not establish cancellation.",
+      "bounded_test": "Artificially delayed journal begin decreases forwarded timeout; exhausted allowance delegates zero times; native context deadline remains equal; callback after fail cannot append a successful end."
+    },
+    {
+      "priority": "P1",
+      "topic": "Keep lock ordering and checkpoint CAS consistent across direct callers and crashes",
+      "facts": [
+        "Public native execute acquires run lock itself and uses context.begin(expected_checkpoint) CAS.",
+        "Observation driver lock serializes participating wrappers but cannot serialize callers using the native API directly. Native context failure states never reexecute."
+      ],
+      "evidence": [
+        "scripts/managed_coordinated_prototype.py:647",
+        "scripts/managed_coordinated_prototype.py:663",
+        "scripts/managed_run_context.py:417",
+        "scripts/run_managed_conversation.py:225"
+      ],
+      "recommendation": "Use one run-lock acquisition per snapshot, release it before public execute, and never read runtime under event lock. Require exact prior/next checkpoints, cursor and global role IDs; any stale native CAS or unexplained progress closes observer uncertain. Never resume a journal left active after interrupted effect. Journal paths must be outside bound runtime and immutable input roots.",
+      "bounded_test": "Competing wrapper driver fails fast; direct native caller advancement causes coverage/CAS rejection; no event\u2192run deadlock; interrupted active observation reopens uncertain; failed release on historical completed run creates no observation."
+    },
+    {
+      "priority": "P2",
+      "topic": "Expose only locally observed release-to-delivery W and valid clock-contained intervals",
+      "facts": [
+        "Native send receipt monotonic timestamps surround transport invocation, including observer callbacks. Ledger send markers instead use wall time.",
+        "Native sandbox/host receipt duration has a narrower boundary than whole broker.invoke; observation overhead and pauses are inside local release-to-delivery."
+      ],
+      "evidence": [
+        "scripts/managed_parallel_wave.py:348",
+        "scripts/managed_parallel_wave.py:388",
+        "scripts/managed_wave_ledger.py:451",
+        "scripts/coordinated_prototype_broker.py:688",
+        "scripts/coordinated_prototype_broker.py:711"
+      ],
+      "recommendation": "Bind release to prepared cursor0/zero journals and finish to actual completed native publication plus exact D120 measurement SHA. Check same boot/declared monotonic clock, typed nonregressing ns, interval containment and all callback identities. Union same-clock intervals without double counting; keep wall deltas separate and allow wall adjustments. Label W locally observed including observation/pause overhead; outside-union time is neither human nor CPU. No W for uncertain or unfinished journal.",
+      "bounded_test": "Boot change and monotonic regression reject; wall regression leaves valid monotonic elapsed; overlapping intervals merge correctly; observer send interval fits its exact native receipt; tool host/sandbox remain separate; unfinished journal does not invent delivery."
+    },
+    {
+      "priority": "P2",
+      "topic": "Callback revocation, mutable results and lifecycle errors must not leak RAW or fake completeness",
+      "facts": [
+        "Native batch uses daemon workers and stop flags, so callbacks can return after the controlling step has timed out.",
+        "Native execute can return an indeterminate view containing reason derived from exception text instead of propagating the original error. Payloads and returned dicts can be mutable."
+      ],
+      "evidence": [
+        "scripts/managed_parallel_wave.py:427",
+        "scripts/managed_parallel_wave.py:450",
+        "scripts/managed_coordinated_prototype.py:784",
+        "scripts/managed_coordinated_prototype.py:789"
+      ],
+      "recommendation": "Revoke step token durably on every failure or non-paused/non-completed result. Invalid/closed begin must not delegate; late end returns false without writes, including after reopen. Require final exact observed count/send/tool sets, count==ledger input, canonical response/result digests and role-specific native tool epochs. Journal stores only validated identities/hashes/numeric data/fixed error categories; never copy native reason, exception message, payload, output, tool arguments or transport credentials. Snapshot/check mutable payload/result bytes across the delegated call.",
+      "bounded_test": "Blocked transport completes after fail and journal bytes stay identical; paused/completed are the only successful native states; mutation/digest disagreement rejects finalization; raw/credential sentinels never appear in journal, stdout or stderr."
+    }
+  ],
+  "parent_followup": "Root acknowledged protocol proxy, deadline before observer I/O and idempotent hook on broker supplied by guard. Implementation/freeze verification remains pending.",
+  "final_verdict": "pending_implementation_freeze_gates_and_six_mechanical_integrations",
+  "formal_cells_executed": 0,
+  "C1": "technical_preserved",
+  "C2_C5": "not_demonstrated",
+  "remote_activity_authenticated": false,
+  "W_custody_authenticated": false,
+  "Q_demonstrated": false,
+  "repository_edits": "Only this new review report. No implementation/historical edits, execution of runtimes, tests, models or external spending."
+}
