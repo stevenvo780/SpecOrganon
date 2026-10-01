@@ -1,0 +1,36 @@
+..F
+=================================== FAILURES ===================================
+___________ test_real_prototype_operations_preserve_pending_norm[B] ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1444/test_real_prototype_operations1')
+alternative = 'B'
+
+    @pytest.mark.parametrize("alternative", ["A", "B", "C"])
+    def test_real_prototype_operations_preserve_pending_norm(
+        tmp_path: Path, alternative: str,
+    ) -> None:
+        tool, case, inputs, work = _stage(tmp_path, alternative)
+        code, initial, err = _call(tool, case, inputs, work,
+                                    {"op": "init", "nodes": _nodes()})
+        assert code == 0 and err == "" and initial is not None
+        assert initial["ok"] and initial["method_exit_code"] == 0
+        assert initial["mode"] == {"A": "sequential", "B": "graph", "C": "risk"}[alternative]
+        assert initial["proposal_sha256"] == hashlib.sha256((work / "proposal.json").read_bytes()).hexdigest()
+        assert initial["method_state_sha256"] == hashlib.sha256((work / "method_state.json").read_bytes()).hexdigest()
+        assert (work / "method_state.json").is_file()
+        for node in ("P", "A"):
+            code, changed, _ = _call(tool, case, inputs, work,
+                                     {"op": "revise", "id": node, "status": "supported",
+                                      "reason": "Public fixture evidence only"})
+            assert code == 0 and changed is not None and changed["ok"]
+        for phase in ("philosophy", "science"):
+            code, advanced, _ = _call(tool, case, inputs, work,
+                                      {"op": "advance", "phase": phase})
+>           assert code == 0 and advanced is not None and advanced["ok"]
+E           AssertionError: assert (0 == 0 and {'alternative': 'B', 'arm_prompt_sha256': '1ce3abf40cf8f2635c4a00a6275f646a2a73947105b39a4fd702162779089066', 'case_id': 'D-E-PUBLIC', 'case_manifest_sha256': '11e7acdd42562cb05c1045170b18750602c39ae5f0187c80a1620ce2f8ea09db', ...} is not None and False)
+
+tests/test_development_method_tool.py:113: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_development_method_tool.py::test_real_prototype_operations_preserve_pending_norm[B]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 passed in 0.51s

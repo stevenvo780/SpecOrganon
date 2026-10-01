@@ -1,0 +1,72 @@
+.F
+=================================== FAILURES ===================================
+_ test_original_cases_actual_methods_one_ledger_resume_and_chunk_delivery[A-D-F] _
+
+tmp_path = PosixPath('/tmp/specorganon-D112-int01/test_original_cases_actual_met0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f9a4a756390>
+case_id = 'D-F', arm = 'A'
+
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    @pytest.mark.parametrize("arm", ["A", "B", "C"])
+    def test_original_cases_actual_methods_one_ledger_resume_and_chunk_delivery(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, case_id: str, arm: str,
+    ) -> None:
+        monkeypatch.setenv(admission.ROOT_ENV, str(tmp_path / "admissions"))
+        bundle = tmp_path / "bundle"
+        adapter.build_round(bundle, configuration())
+        schedule = json.loads((bundle / "schedule.json").read_text())
+        run = next(item for item in schedule["runs"]
+                   if item["case_id"] == case_id and item["arm"] == arm and item["replica"] == 1)
+        attempt = tmp_path / "attempt"
+        prepared = adapter.prepare_cell(bundle, run["run_id"], attempt)
+        assert prepared["state"] == "prepared" and prepared["budget"]["request_count"] == 0
+        assert verify_stage(schedule, run["run_id"], attempt / "stage")["execution_ready"] is False
+        # 21KB delivery exceeds one tool-argument envelope: three counted chunks.
+        chunks = ["public synthetic result\n" + "x" * 6976, "y" * 7000, "z" * 7000]
+        requests = [
+            {"op": "read", "path": "task.md", "offset": 0, "length": 4096},
+            {"op": "init", "nodes": nodes()},
+            {"op": "advance", "phase": "philosophy"},
+        ]
+        offset = 0
+        for chunk in chunks:
+            requests.append({"op": "write", "path": "report.md", "offset": offset, "content": chunk})
+            offset += len(chunk.encode())
+        requests.append({"op": "plan", "budget": 2} if arm == "C" else {"op": "status"})
+        first_transport = FakeTransport(run["model_id"],
+                                        [[call(request, index)] for index, request in enumerate(requests, 1)]
+                                        + [[_message("mechanical partial delivery; normative pending")]])
+        first = team.execute_team_segment(attempt / "managed", first_transport,
+                                          prepared["checkpoint_sha256"])
+        assert first["state"] == "paused" and first["cursor"] == 1
+        assert first["tool_calls_completed"] == len(requests)
+>       state = json.loads((attempt / "stage/work/method_state.json").read_text())
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_prepare_development_round.py:119: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/specorganon-D112-int01/test_original_cases_actual_met0/attempt/stage/work/method_state.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/specorganon-D112-int01/test_original_cases_actual_met0/attempt/stage/work/method_state.json'
+
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1044: FileNotFoundError
+=========================== short test summary info ============================
+FAILED tests/test_prepare_development_round.py::test_original_cases_actual_methods_one_ledger_resume_and_chunk_delivery[A-D-F]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 1 passed in 13.69s

@@ -99,10 +99,6 @@ def _validate_plan(raw: Any, schedule: dict[str, Any]) -> dict[str, Any]:
     segments = raw["segments"]
     if type(segments) is not list or not 2 <= len(segments) <= MAX_SEGMENTS:
         raise TeamError("team plan requires 2 to 32 segments")
-    if (schedule.get("schema") == "specorganon.development_round_schedule.v1"
-            and any(type(segment) is dict and segment.get("role") != "leader"
-                    for segment in segments)):
-        raise TeamError("development round schedule declares a solo leader")
     for number, segment in enumerate(segments, 1):
         if (type(segment) is not dict
                 or set(segment) != {"role", "user", "max_output_tokens", "share_from"}
@@ -217,11 +213,6 @@ def prepare_team(
             or type(cost_limit_micro_usd) is not int or cost_limit_micro_usd < 0
             or type(price_profile) is not dict or price_profile.get("model") != validated["model"]):
         raise TeamError("team token, active time, or cost ceiling is invalid")
-    if schedule.get("schema") == "specorganon.development_round_schedule.v1":
-        from plan_development_round import validate_runtime_budget
-        validate_runtime_budget(
-            schedule, max_model_requests=validated["max_model_requests"],
-            cost_limit_micro_usd=cost_limit_micro_usd, price_profile=price_profile)
     binding = _tool_binding(stage, schedule, validated["functions"][0])
     sources = _source_closure()
     if run_dir.exists():

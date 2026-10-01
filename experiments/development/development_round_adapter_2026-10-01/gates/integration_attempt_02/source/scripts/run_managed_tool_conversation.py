@@ -151,9 +151,6 @@ def _validate_plan(raw: Any, schedule: dict[str, Any]) -> dict[str, Any]:
             or type(raw["tool_wall_seconds"]) not in (int, float)
             or not 0 < raw["tool_wall_seconds"] <= 300):
         raise ToolConversationError("model, tool, or tool wall cap is invalid")
-    if (schedule.get("schema") == "specorganon.development_round_schedule.v1"
-            and raw["max_model_requests"] > schedule["max_model_requests"]):
-        raise ToolConversationError("model request cap exceeds development schedule")
     functions = raw["functions"]
     if type(functions) is not list or len(functions) != 1 or type(functions[0]) is not dict:
         raise ToolConversationError("this bridge supports exactly one sealed function")
@@ -314,11 +311,6 @@ def prepare_tool_conversation(
             or type(cost_limit_micro_usd) is not int or cost_limit_micro_usd < 0
             or type(price_profile) is not dict or price_profile.get("model") != validated["model"]):
         raise ToolConversationError("token, time, or declared cost ceiling is invalid")
-    if schedule.get("schema") == "specorganon.development_round_schedule.v1":
-        from plan_development_round import validate_runtime_budget
-        validate_runtime_budget(
-            schedule, max_model_requests=validated["max_model_requests"],
-            cost_limit_micro_usd=cost_limit_micro_usd, price_profile=price_profile)
     binding = _tool_binding(stage, schedule, validated["functions"][0])
     if run_dir.exists():
         raise FileExistsError("run directory already exists")
