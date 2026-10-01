@@ -1,0 +1,138 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_deadline_crossing_during_checkpoint_never_leaves_resumable_or_invalid_state[False] _
+
+tmp_path = PosixPath('/workspace/SpecOrganon/experiments/development/shared_run_context_2026-10-01/unit_context_checks/attempt_01/workspace/test_deadline_crossing_during_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fdbf63754d0>
+fail_compensation = False
+
+    @pytest.mark.parametrize("fail_compensation", [False, True])
+    def test_deadline_crossing_during_checkpoint_never_leaves_resumable_or_invalid_state(
+        tmp_path: Path, monkeypatch, fail_compensation: bool,
+    ) -> None:
+        clock = Clock()
+        monkeypatch.setattr(context, "time", clock)
+        ctx, _ = _create(tmp_path)
+        _begin(ctx)
+        clock.sequence = [19, 19.5, 21, 21]
+        original_write = context._write_state
+    
+        def write(directory, state):
+            if fail_compensation and state["state"] == "indeterminate":
+                raise OSError("synthetic compensatory persistence failure")
+            original_write(directory, state)
+    
+        monkeypatch.setattr(context, "_write_state", write)
+        with pytest.raises((context.RunContextError, OSError)):
+            ctx.finish(1)
+>       fresh = context.RunContext(tmp_path / "context")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_run_context.py:260: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/development/shared_run_context_2026-10-01/unit_context_checks/attempt_01/scripts/managed_run_context.py:198: in __init__
+    self._read()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <preserved_run_context.RunContext object at 0x7fdbf6798b50>
+
+    def _read(self) -> dict:
+        state = _read_json(self.directory / "run.json")
+        if (set(state) != _KEYS or type(state["schema"]) is not int or state["schema"] != 1
+                or type(state["state"]) is not str or state["state"] not in _STATES
+                or any(type(state[key]) is not int or state[key] < 0
+                       for key in ("revision", "cursor", "max_tool_calls"))):
+            raise RunContextError("context state has an invalid shape")
+        for key in ("bindings_sha256", "ledger_sha256", "inventory_sha256", "checkpoint_sha256"):
+            if type(state[key]) is not str or _DIGEST.fullmatch(state[key]) is None:
+                raise RunContextError("context digest is invalid")
+        if (_bindings(state["bindings"]) != state["bindings"]
+                or state["bindings_sha256"] != _sha(_canonical(state["bindings"]))
+                or state["checkpoint_sha256"] != _checkpoint(state)):
+            raise RunContextError("context binding or checkpoint digest changed")
+        _path(state["ledger_dir"])
+        if _roots(self.directory, state["journal_roots"]) != state["journal_roots"]:
+            raise RunContextError("context journal roots changed")
+        roles = state["roles"]
+        if (type(roles) is not list or not 1 <= len(roles) <= 64 or len(set(roles)) != len(roles)
+                or any(type(role) is not str or _ROLE.fullmatch(role) is None for role in roles)):
+            raise RunContextError("context roles are invalid")
+        limit = _finite(state["active_limit_seconds"], "active limit", positive=True)
+        active = _finite(state["active_seconds"], "active seconds")
+        held = _finite(state["held_active_seconds"], "held active seconds")
+        _finite(state["paused_seconds"], "paused seconds")
+        if active > limit or held > limit - active:
+>           raise RunContextError("context active time exceeds its cap")
+E           preserved_run_context.RunContextError: context active time exceeds its cap
+
+experiments/development/shared_run_context_2026-10-01/unit_context_checks/attempt_01/scripts/managed_run_context.py:264: RunContextError
+_ test_deadline_crossing_during_checkpoint_never_leaves_resumable_or_invalid_state[True] _
+
+tmp_path = PosixPath('/workspace/SpecOrganon/experiments/development/shared_run_context_2026-10-01/unit_context_checks/attempt_01/workspace/test_deadline_crossing_during_1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fdbf6377050>
+fail_compensation = True
+
+    @pytest.mark.parametrize("fail_compensation", [False, True])
+    def test_deadline_crossing_during_checkpoint_never_leaves_resumable_or_invalid_state(
+        tmp_path: Path, monkeypatch, fail_compensation: bool,
+    ) -> None:
+        clock = Clock()
+        monkeypatch.setattr(context, "time", clock)
+        ctx, _ = _create(tmp_path)
+        _begin(ctx)
+        clock.sequence = [19, 19.5, 21, 21]
+        original_write = context._write_state
+    
+        def write(directory, state):
+            if fail_compensation and state["state"] == "indeterminate":
+                raise OSError("synthetic compensatory persistence failure")
+            original_write(directory, state)
+    
+        monkeypatch.setattr(context, "_write_state", write)
+        with pytest.raises((context.RunContextError, OSError)):
+            ctx.finish(1)
+>       fresh = context.RunContext(tmp_path / "context")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_run_context.py:260: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/development/shared_run_context_2026-10-01/unit_context_checks/attempt_01/scripts/managed_run_context.py:198: in __init__
+    self._read()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <preserved_run_context.RunContext object at 0x7fdbf6894450>
+
+    def _read(self) -> dict:
+        state = _read_json(self.directory / "run.json")
+        if (set(state) != _KEYS or type(state["schema"]) is not int or state["schema"] != 1
+                or type(state["state"]) is not str or state["state"] not in _STATES
+                or any(type(state[key]) is not int or state[key] < 0
+                       for key in ("revision", "cursor", "max_tool_calls"))):
+            raise RunContextError("context state has an invalid shape")
+        for key in ("bindings_sha256", "ledger_sha256", "inventory_sha256", "checkpoint_sha256"):
+            if type(state[key]) is not str or _DIGEST.fullmatch(state[key]) is None:
+                raise RunContextError("context digest is invalid")
+        if (_bindings(state["bindings"]) != state["bindings"]
+                or state["bindings_sha256"] != _sha(_canonical(state["bindings"]))
+                or state["checkpoint_sha256"] != _checkpoint(state)):
+            raise RunContextError("context binding or checkpoint digest changed")
+        _path(state["ledger_dir"])
+        if _roots(self.directory, state["journal_roots"]) != state["journal_roots"]:
+            raise RunContextError("context journal roots changed")
+        roles = state["roles"]
+        if (type(roles) is not list or not 1 <= len(roles) <= 64 or len(set(roles)) != len(roles)
+                or any(type(role) is not str or _ROLE.fullmatch(role) is None for role in roles)):
+            raise RunContextError("context roles are invalid")
+        limit = _finite(state["active_limit_seconds"], "active limit", positive=True)
+        active = _finite(state["active_seconds"], "active seconds")
+        held = _finite(state["held_active_seconds"], "held active seconds")
+        _finite(state["paused_seconds"], "paused seconds")
+        if active > limit or held > limit - active:
+>           raise RunContextError("context active time exceeds its cap")
+E           preserved_run_context.RunContextError: context active time exceeds its cap
+
+experiments/development/shared_run_context_2026-10-01/unit_context_checks/attempt_01/scripts/managed_run_context.py:264: RunContextError
+=========================== short test summary info ============================
+FAILED tests/test_managed_run_context.py::test_deadline_crossing_during_checkpoint_never_leaves_resumable_or_invalid_state[False]
+FAILED tests/test_managed_run_context.py::test_deadline_crossing_during_checkpoint_never_leaves_resumable_or_invalid_state[True]
+2 failed, 8 deselected in 0.29s

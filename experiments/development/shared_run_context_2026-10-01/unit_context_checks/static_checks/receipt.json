@@ -1,0 +1,74 @@
+{
+  "cwd": "/workspace/SpecOrganon",
+  "commands": [
+    {
+      "label": "ruff",
+      "argv": [
+        "ruff",
+        "check",
+        "scripts/managed_run_context.py",
+        "tests/test_managed_run_context.py"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 0.0081931859604083,
+      "streams": {
+        "stdout": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "compile_311",
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-c",
+        "from pathlib import Path; import sys; [compile(Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print(sys.version.split()[0]+' syntax passed in memory')",
+        "scripts/managed_run_context.py",
+        "tests/test_managed_run_context.py"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 0.01838856900576502,
+      "streams": {
+        "stdout": "f02e526d205c9bda1013ef90c6505fa1ae292bce9e7add21f78158db7639c99c",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "compile_312",
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-c",
+        "from pathlib import Path; import sys; [compile(Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print(sys.version.split()[0]+' syntax passed in memory')",
+        "scripts/managed_run_context.py",
+        "tests/test_managed_run_context.py"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 0.022252295049838722,
+      "streams": {
+        "stdout": "96999780532c57c73c1c9c60347b747032f6f9e2cfbac0bee6acc0b7ee52e0fe",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "diff_check",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "scripts/managed_run_context.py",
+        "tests/test_managed_run_context.py"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 0.001636404951568693,
+      "streams": {
+        "stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "source_pins": {
+    "scripts/managed_run_context.py": "522df24e5d33dbe4898bef4005c62246c3df23995f7fb7239fcdfa6e33d5ae41",
+    "tests/test_managed_run_context.py": "fd15f6e4add42fcfcfaa6c871911c1230ce2cdd4c7da60898b5140516ca19d5d"
+  },
+  "compile_writes_pyc": false
+}
