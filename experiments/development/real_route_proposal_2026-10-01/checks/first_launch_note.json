@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "classification": "failed_local_verifier_launch_tool_report_only",
+  "argv": ["/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python", "-I", "-B", "experiments/development/coordinated_observation_2026-10-01/seal_evidence.py", "verify"],
+  "exit_code": 1,
+  "error_observed": "ModuleNotFoundError: No module named 'capture_checks'",
+  "cause": "isolated mode omits script directory required by this existing dossier-local import",
+  "original_stdout_stderr_files_retained": false,
+  "evidence_limit": "first tool output was not saved as original byte streams; this note records its observed error, not a capture or complete traceback",
+  "correction": "use -I -B with explicit original dossier sys.path and runpy bootstrap; do not alter historical sealer",
+  "subsequent_capture": "baseline_before/command.json",
+  "provider_requests": 0
+}

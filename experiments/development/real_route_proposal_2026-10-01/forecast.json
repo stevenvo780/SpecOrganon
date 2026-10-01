@@ -1,0 +1,230 @@
+{
+  "arithmetic": {
+    "forecast_is_expected_usage": false,
+    "per_cell_formula": "ceil(80000 * max(input_rate,cached_input_rate,cache_write_rate,output_rate) / 1000000) + 128",
+    "rounding": "Integer microUSD; original settlement rounds upward per request. Reserve an upper allowance of 1 microUSD per request, at most 128 microUSD per cell, then multiply the cell bound by 12.",
+    "rounding_allowance_micro_usd_for_12_cells": 1536,
+    "rounding_allowance_micro_usd_per_cell": 128,
+    "rounding_allowance_micro_usd_per_request": 1
+  },
+  "candidates": [
+    {
+      "account_access": null,
+      "actual_model_version": null,
+      "actual_provider": null,
+      "candidate": "astra",
+      "capability_tier_declared": "frontier",
+      "conditional_ceiling_within_proposed_local_budget": true,
+      "conditional_max_rate_micro_usd_per_million": 50000000,
+      "conditional_model_token_ceiling_micro_usd_for_12_cells": 48001536,
+      "conditional_model_token_ceiling_micro_usd_per_cell": 4000128,
+      "conditional_model_token_ceiling_usd_for_12_cells": "48.001536",
+      "conditional_model_token_ceiling_usd_per_cell": "4.000128",
+      "configuration_path": "candidates/astra/configuration.json",
+      "effective_effort": null,
+      "family_declared": "openai",
+      "model_documentation_url": "https://developers.openai.com/api/docs/models/gpt-6-astra",
+      "model_id_declared": "gpt-6-astra",
+      "model_snapshot_pinned": false,
+      "model_version_declared_alias": "gpt-6-astra",
+      "price_profile_declared": {
+        "cache_write_rate_micro_usd_per_million": 12500000,
+        "cached_input_rate_micro_usd_per_million": 1000000,
+        "input_rate_micro_usd_per_million": 10000000,
+        "model": "gpt-6-astra",
+        "output_rate_micro_usd_per_million": 50000000
+      },
+      "proposed_local_model_budget_micro_usd_for_12_cells": 60000000,
+      "proposed_local_model_budget_micro_usd_per_cell": 5000000,
+      "proposed_local_model_budget_usd_for_12_cells": "60.00",
+      "proposed_local_model_budget_usd_per_cell": "5.00",
+      "quality_equivalence_demonstrated": false,
+      "runtime_configuration_path": "candidates/astra/runtime_configuration.json",
+      "unknown_execution_reason": "Proposal only; no provider, credentials, account access, served identity, effort, or API calls were exercised or authenticated.",
+      "verified_API_calls": null
+    },
+    {
+      "account_access": null,
+      "actual_model_version": null,
+      "actual_provider": null,
+      "candidate": "luna",
+      "capability_tier_declared": "efficient",
+      "conditional_ceiling_within_proposed_local_budget": true,
+      "conditional_max_rate_micro_usd_per_million": 500000,
+      "conditional_model_token_ceiling_micro_usd_for_12_cells": 481536,
+      "conditional_model_token_ceiling_micro_usd_per_cell": 40128,
+      "conditional_model_token_ceiling_usd_for_12_cells": "0.481536",
+      "conditional_model_token_ceiling_usd_per_cell": "0.040128",
+      "configuration_path": "candidates/luna/configuration.json",
+      "effective_effort": null,
+      "family_declared": "openai",
+      "model_documentation_url": "https://developers.openai.com/api/docs/models/gpt-6-luna",
+      "model_id_declared": "gpt-6-luna",
+      "model_snapshot_pinned": false,
+      "model_version_declared_alias": "gpt-6-luna",
+      "price_profile_declared": {
+        "cache_write_rate_micro_usd_per_million": 125000,
+        "cached_input_rate_micro_usd_per_million": 10000,
+        "input_rate_micro_usd_per_million": 100000,
+        "model": "gpt-6-luna",
+        "output_rate_micro_usd_per_million": 500000
+      },
+      "proposed_local_model_budget_micro_usd_for_12_cells": 600000,
+      "proposed_local_model_budget_micro_usd_per_cell": 50000,
+      "proposed_local_model_budget_usd_for_12_cells": "0.60",
+      "proposed_local_model_budget_usd_per_cell": "0.05",
+      "quality_equivalence_demonstrated": false,
+      "runtime_configuration_path": "candidates/luna/runtime_configuration.json",
+      "unknown_execution_reason": "Proposal only; no provider, credentials, account access, served identity, effort, or API calls were exercised or authenticated.",
+      "verified_API_calls": null
+    }
+  ],
+  "classification": "prospective_real_route_proposal_not_authorized_not_executed",
+  "common_limits_per_cell": {
+    "active_seconds": 5400,
+    "max_model_requests": 128,
+    "measured_tokens": 80000,
+    "shared_across_all_roles": true,
+    "tool_calls": 64
+  },
+  "common_roles": {
+    "max_epochs": 8,
+    "max_model_turns": {
+      "leader": 32,
+      "reviewer": 1,
+      "worker-1": 32,
+      "worker-2": 32
+    },
+    "max_output_tokens_each": 8192,
+    "reason": "The declared 128-request envelope is conservative; the four role turn caps sum to 97. Output allowances are reservations, not permission to exceed the shared 80000 measured tokens.",
+    "role_count": 4,
+    "roles": [
+      "leader",
+      "worker-1",
+      "worker-2",
+      "reviewer"
+    ],
+    "sum_of_role_turn_caps": 97,
+    "tool_wall_seconds": 30
+  },
+  "comparable_development_cell": false,
+  "cost_authenticated": false,
+  "effort_authenticated": false,
+  "envelope_for_one_selected_candidate_12_cells": {
+    "active_seconds": 64800,
+    "max_model_requests": 1536,
+    "measured_tokens": 960000,
+    "roles_per_cell": 4,
+    "shared_cell_budget_not_multiplied_by_role_count": true,
+    "tool_calls": 768,
+    "W_local_elapsed_seconds": null,
+    "W_reason": "Local active accounting is not release-to-delivery elapsed; no runtime was released."
+  },
+  "execution_performed": false,
+  "formal_cell_executed": false,
+  "full_cost_complete": false,
+  "missing_costs": {
+    "human_intervention": {
+      "micro_usd": null,
+      "reason": "H and a human hourly rate have not been prospectively measured or priced."
+    },
+    "independent_evaluation": {
+      "micro_usd": null,
+      "reason": "Independent review/scoring effort and price have not been established."
+    },
+    "regional_processing": {
+      "micro_usd": null,
+      "reason": "Actual regional/FedRAMP endpoint, eligibility and any uplift have not been verified."
+    },
+    "remote_input_counting": {
+      "micro_usd": null,
+      "reason": "No real input-count transport or its billing behavior has been exercised."
+    },
+    "taxes": {
+      "micro_usd": null,
+      "reason": "Applicable taxes and invoicing jurisdiction have not been verified."
+    },
+    "tools": {
+      "micro_usd": null,
+      "reason": "No prices or billing evidence for local method/analysis tools or other tools."
+    },
+    "total_study": {
+      "micro_usd": null,
+      "reason": "Only conditional model-token ceilings are calculated; required full cost components remain unknown."
+    }
+  },
+  "model_version_authenticated": false,
+  "order_comparability": {
+    "literal_between_candidate_order_guaranteed": false,
+    "planning_clarification": "planning_clarification.md",
+    "reason": "Original D118 order hashes include declared model identity/version and manifest. Preserve derived within-model A/B/C block orders; no cross-model performance comparison or opportunistic order adjustment is proposed.",
+    "same_original_order_policy": true,
+    "same_seed": true
+  },
+  "paid_route_authorized": false,
+  "price_scope": {
+    "cache_partition": "Cache read and cache write are subsets of input. Ordinary input = input minus cache read minus cache write; do not add cache tokens to input. Unknown input classes remain unknown and are priced conservatively by the original ledger.",
+    "conditional_measured_cell_input_output_total_below_long_context_threshold": true,
+    "conditions": "Bounds apply only if actual counted and reported text input plus output obey the 80000 shared cap and these verified Standard short-context rates without regional/FedRAMP uplift apply. Local balances do not enforce remote billing, fix a served model snapshot, or authenticate provider usage.",
+    "context": "short",
+    "currency": "USD",
+    "includes_regional_or_FedRAMP_premiums": false,
+    "includes_taxes": false,
+    "includes_tool_or_human_or_evaluation_costs": false,
+    "long_context_input_threshold_tokens": 272000,
+    "modalities": "text",
+    "processing": "Standard",
+    "reasoning_partition": "Reasoning tokens are part of output tokens; never add them again to output or total.",
+    "sources": [
+      "https://developers.openai.com/api/docs/models/gpt-6-astra",
+      "https://developers.openai.com/api/docs/models/gpt-6-luna",
+      "https://developers.openai.com/api/docs/pricing",
+      "https://developers.openai.com/api/docs/guides/prompt-caching"
+    ],
+    "token_rate_unit": "integer microUSD per 1000000 tokens"
+  },
+  "provider_identity_authenticated": false,
+  "provider_route_declared": {
+    "api": "responses",
+    "provider": "openai",
+    "service_tier": "default",
+    "version": "v1"
+  },
+  "Q_demonstrated": false,
+  "quality_assessed": false,
+  "recorded_date_utc": "2026-10-01",
+  "risks_and_missing_evidence": [
+    "High reasoning effort with max_output_tokens 8192 may truncate output; sufficiency is not demonstrated.",
+    "Published aliases in version are local declarations, not pinned served snapshots.",
+    "Account/model/Responses access and input-count transport remain unverified.",
+    "Actual provider usage, cache partitions, served model version and effective effort remain unauthenticated.",
+    "Incomplete responses and budget/cap rejection require conservative accounting; no retry capacity is assumed.",
+    "No independent quality assessment or capability equivalence between candidates has been demonstrated."
+  ],
+  "round_design": {
+    "arms": [
+      "A",
+      "B",
+      "C"
+    ],
+    "arms_per_block": 3,
+    "blocks": 4,
+    "cases": [
+      "D-F",
+      "D-E"
+    ],
+    "cells": 12,
+    "repetitions_per_arm_case": 2,
+    "round": 1,
+    "seed": 122
+  },
+  "schema": 1,
+  "selection": {
+    "candidate_count": 2,
+    "cells_if_one_candidate_is_selected_and_authorized": 12,
+    "execute_both_candidates": false,
+    "reason": "Two options for one R1; preparing two options does not propose 24 executions.",
+    "selected_candidate": null
+  },
+  "usage_authenticated": false
+}

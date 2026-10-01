@@ -1,5 +1,24 @@
 # Estado de reanudación
 
+**D-122 prepara una propuesta concreta para doce R1 reales:**
+[dossier](../experiments/development/real_route_proposal_2026-10-01/README.md).
+Opciones Astra/Luna `high`, misma información/roles/recursos y política de
+orden original; alias declarado no acredita snapshot. Cuatro bundles
+build/verify originales por Python 3.11/3.12, doce celdas cada uno; cero
+envíos/runtimes/claims/R1. Tarifa Standard actual y cota condicional de sólo
+tokens de modelo: USD 48,001536 Astra o 0,481536 Luna por doce celdas.
+Saldos locales propuestos USD 60/0,60, ninguno autorizado; costes completos
+desconocidos y calidad relativa no medida. Luna hizo inventario acotado.
+
+D121 5.879 pins+receipt iguales antes/después del build, antes de avanzar
+estos docs; cortes históricos en Git `9f90b79`. Faltan acceso/elección del
+dueño, entrypoint real conservando guards/observación, binding modelo servido,
+conteo/uso/incomplete, capacidad `high`/8192 y evaluación independiente.
+[Puertas concretas](../experiments/development/real_route_proposal_2026-10-01/readiness.md).
+**C1 técnico D107; C2–C5 No demostrado; 0/24 formales.** No se ha seleccionado
+ni autorizado una ruta. Sigue 12 R1→adaptación/freeze→12 R2/selección,
+confirmación independiente, campo causal y transferencia.
+
 **D-121 observa prospectivamente una ejecución coordinada local:**
 [dossier](../experiments/development/coordinated_observation_2026-10-01/README.md).
 Journal separado de eventos/clocks/boot, locks distintos, tokens revocables;

@@ -1,5 +1,19 @@
 # Distancia hasta la validación de GOAL
 
+## Actualización D-122 · 2026-10-01 UTC
+
+La [propuesta R1](../experiments/development/real_route_proposal_2026-10-01/README.md)
+ya fija opciones Astra/Luna `high`, recursos comunes, cuatro bundles
+build/verify originales y cotas condicionales de tokens de modelo.
+Saldo propuesto: USD 60 Astra o USD 0,60 Luna para doce R1, sin selección
+ni autorización. No son costes completos ni evidencia de calidad.
+El [registro de puertas](../experiments/development/real_route_proposal_2026-10-01/readiness.md)
+identifica transporte real, alias/snapshot, uso/incomplete, capacidad,
+evaluación y decisiones del dueño. No se ha ejecutado una celda formal:
+**C1 técnico; C2–C5 No demostrado; 0/24.** El corte D121 siguiente permanece
+como historia; sus capacidades locales siguen vigentes y sus pendientes de
+tarifas/configuración se precisan aquí sin declarar la ruta operativa.
+
 **Corte:** 2026-10-01 UTC, revisión D-121. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). El [inventario D-109 de 24 celdas](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json), el [contrato común D-118](../experiments/development/coordinated_contract_2026-10-01/README.md), el [runtime persistente D-119](../experiments/development/coordinated_runtime_2026-10-01/README.md), el [lector D-120](../experiments/development/coordinated_measurement_2026-10-01/README.md) y el [observador D-121](../experiments/development/coordinated_observation_2026-10-01/README.md) son desarrollo mecánico: cero celdas formales. Este documento no cambia umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
 
 | Criterio de GOAL | Evidencia actual | Puerta pendiente |

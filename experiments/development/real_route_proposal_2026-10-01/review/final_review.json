@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "verdict": "PASS_local_scope",
+  "scope": "offline_real_route_proposal_only_not_R1_authorization",
+  "open_material_findings": [],
+  "formal_cells_executed": 0,
+  "formal_acceptance": "0/24",
+  "R1_GO": false,
+  "paid_route_authorized": false,
+  "acceptance": {
+    "C1": "technical_D107_preserved",
+    "C2": "not_demonstrated",
+    "C3": "not_demonstrated",
+    "C4": "not_demonstrated",
+    "C5": "not_demonstrated"
+  },
+  "independent_checks": {
+    "existing_original_CLI_verifies_readonly": 4,
+    "verify_exit_codes": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "verify_stdout_byte_identical_to_original_captures": true,
+    "original_builds_observed_in_preserved_captures": 4,
+    "builds_rerun_by_reviewer": 0,
+    "pure_runtime_role_descriptor_validations": 48,
+    "bundle_inventory_entries_each": 111,
+    "regular_files_each": 106,
+    "directories_including_root_each": 5,
+    "whole_bundle_bytes_and_filesystem_modes_before_after_equal": true,
+    "pairwise_semantic_comparisons": 6,
+    "same_twelve_case_replica_arm_coordinates": true,
+    "same_case_materials_contracts_prompts_role_configuration_and_resources": true,
+    "same_original_compiler_and_sources": true,
+    "original_model_dependent_orders_preserved": true,
+    "four_sets_of_twelve_ids_pairwise_disjoint": true,
+    "interpreter_launcher_difference_only_shebang": true,
+    "D121_live_non_active_doc_pins_verified": 5875,
+    "D121_live_root_receipt_sha256": "76c59b7597884ee0517a88836dffc377658a5bf1fe91e512e9dd1d6f0f35ec22",
+    "D121_receipt_bytes": 1853998,
+    "four_active_docs_historical_Git_verified_at": "9f90b79b75c087ea5e9c6ab87f270880e7fb684a",
+    "D118_live_source_records_verified": 62,
+    "D118_external_extractor_verified": true,
+    "native_role_turn_cap_accumulates_across_epochs": true,
+    "role_turn_cap_evidence": "managed_coordinated_prototype.py:324 initializes turns once; :447/:478 reconstruct and compare accumulated history; :552 resets finished only; :694 checks persistent turns; :736 increments persistent turns. Sum 32+32+32+1=97 is a conservative successful-request ceiling, while forecast deliberately uses global128.",
+    "reviewer_Ruff_and_compile_311_312_exit_zero": true,
+    "protected_changes_only_D122_dossier_and_four_active_docs": true
+  },
+  "conditional_model_token_bounds": {
+    "assumptions": [
+      "80000 measured input+output tokens shared across all roles per cell",
+      "at most128 requests per cell",
+      "Standard short-context text rates without regional/FedRAMP premium",
+      "complete compatible counted/reported billed token telemetry",
+      "cache-read/cache-write are alternative input partitions; reasoning is included in output"
+    ],
+    "formula": "ceil(80000 * max(all four rates in microUSD per million) / 1000000) + 128 microUSD per cell; multiply by12",
+    "astra": {
+      "rates_input_read_write_output_micro_usd_per_million": [
+        10000000,
+        1000000,
+        12500000,
+        50000000
+      ],
+      "cell_micro_usd": 4000128,
+      "twelve_cells_micro_usd": 48001536,
+      "proposed_cell_cap_micro_usd": 5000000,
+      "proposed_twelve_cap_micro_usd": 60000000
+    },
+    "luna": {
+      "rates_input_read_write_output_micro_usd_per_million": [
+        100000,
+        10000,
+        125000,
+        500000
+      ],
+      "cell_micro_usd": 40128,
+      "twelve_cells_micro_usd": 481536,
+      "proposed_cell_cap_micro_usd": 50000,
+      "proposed_twelve_cap_micro_usd": 600000
+    },
+    "missing_full_cost_components_imputed_zero": false,
+    "expected_usage_or_invoice": false,
+    "one_selected_option_only_not_sum_of_options": true
+  },
+  "closed_findings": [
+    {
+      "severity": "P2",
+      "finding": "Original plan required literal same order across candidates although original compiler derives order from model identity and input-bound block IDs.",
+      "resolution": "planning_clarification.md committed2685095 before builds preserves original compiler/order and requires same coordinates, materials, roles and resources; no inter-model experimental comparison or outcome-based adjustment."
+    }
+  ],
+  "remaining_execution_gates": [
+    "Current step CLI accepts only declared loopback fixtures; real authorized entrypoint preserving D119 guards and D121 observation remains pending.",
+    "Published alias in version is not a pinned served snapshot or account entitlement; effective effort/model/provider identity remain unauthenticated.",
+    "Coordinator decodes completed/exact-model responses before settlement; incomplete or different served ID can leave an unresolved reservation despite provider cost. This was read in code, not reproduced remotely.",
+    "8192 max_output_tokens includes reasoning and formatting; sufficiency for high is unknown. Official initial25k recommendation is guidance, not a mandatory minimum or evidence of inevitable failure.",
+    "Real input-count compatibility, usage/cache partitions, applicable premiums and billing remain unverified.",
+    "Independent evaluation, human effort, tool/count/tax/field/total-study costs, quality and capacity remain unknown.",
+    "Owner must choose one option/interpreter and authorize concrete spend; actual R1 freeze follows closure of execution gates. No R2/reserve/field is authorized."
+  ],
+  "sanitization_and_effect_scope": {
+    "reviewer_provider_or_model_calls": 0,
+    "reviewer_credential_files_read": false,
+    "runtime_prepare_release_step_claim_invoked_by_reviewer": false,
+    "root_capture_runner_invokes_only_original_build_verify_and_pure_validation": true,
+    "new_bundles_are_preparation_assets_not_runtimes_or_authority": true,
+    "review_artifacts_store_hashes_declarations_and_CLI_metadata_not_case_RAW_copies": true,
+    "bundles_complete_only_at_recorded_temporary_roots_not_portable_archives": true
+  },
+  "evidence": {
+    "independent_reports": [
+      "review/audit311_attempt02/report.json",
+      "review/audit312_attempt02/report.json"
+    ],
+    "pairwise_report": "review/cross_comparison.json",
+    "static_report": "review/auditor_static01/report.json",
+    "original_capture_reports": [
+      "checks/build311_attempt01/report.json",
+      "checks/build312_attempt01/report.json"
+    ],
+    "current_active_docs": [
+      {
+        "path": "docs/activacion_validacion.md",
+        "historical_sha256": "86494a8a5fe898d35ae5f679a6443c43ca4ad20f631cf45514df3791d8f26b9e",
+        "current_sha256": "ddda92f760bed05324d56a66fb41397effdeded99f4d7bd05bdf03b9f8cef78d",
+        "old_content_preserved_exactly_with_new_append_or_header": true
+      },
+      {
+        "path": "docs/decisiones.md",
+        "historical_sha256": "7c9d2ef272fec1217906760969e6d6c8e6d9a00763ed2aaaaa9c8a71d4428e5f",
+        "current_sha256": "68994ae487a30e5516a4a92bd2584b7f3a684f1661770bca72723b8dc3c782fa",
+        "old_content_preserved_exactly_with_new_append_or_header": true
+      },
+      {
+        "path": "docs/estado.md",
+        "historical_sha256": "9aa9f61cae5b63acd9470e2ebc827c386804b9ca08b9a7ff65b89f6fda992298",
+        "current_sha256": "e1b7d732e953051bb04a59bdae780d826869dad69ce7ca8092e1b77af37b5329",
+        "old_content_preserved_exactly_with_new_append_or_header": true
+      },
+      {
+        "path": "docs/validacion_actual.md",
+        "historical_sha256": "95f673b0fd33eee854238da01fa2b06c6a9fcaef21a7bbd0ac167791ce6f9d48",
+        "current_sha256": "1f73bf0b67dc1c8486d17ef34ef5e0bb19e477f38cf1ac2556065bb33991956f",
+        "old_content_preserved_exactly_with_new_append_or_header": true
+      }
+    ],
+    "capture_runner_sha256": "62c3a5b1857443c0e551aed526595bd14c958ec32aed0e8a2c581851f4184d4a",
+    "auditor_source_sha256": "16689aedb17af1cbf4351ac7243a2b6ede69dbfbe503b9344e1ea2ad1c95664a",
+    "comparison_source_sha256": "19bd05a9d0fe8d338865da8e1ad202466d86b8e8619d354b28781f78844a3016"
+  },
+  "evidence_limits": [
+    "First root sealer import error and first worker relative-path error are disclosed tool reports without original complete byte streams; not treated as successful captures or product/schema failures.",
+    "Reviewer attempt01 incorrectly equated Git100644 with filesystem0644. Existing private0600 fixture files are valid non-executable Git100644; source/error/command preserved. Corrected reviewer compares actual filesystem modes before/after and Git mode semantics. No bundle verify occurred in failed attempt01.",
+    "cross_comparison.json found zero directly pinned historical schedule.json files. Its empty-set disjointness is not evidence of novelty relative to every historical runtime ID; verified identity claim is twelve unique IDs per new bundle and48 pairwise-disjoint IDs across four proposed bundles.",
+    "Subscription CLI inventory/quota and prior synthetic runs do not authenticate Responses API entitlement, spend, remote activity, custody or quality.",
+    "New compact sealer inspected statically using original D118 pin/index/blob helpers and fixed D121 receipt preservation. Receipt, exact final indexed coverage and commit HEAD verification are pending separate read-only closure; this verdict does not claim they already passed."
+  ],
+  "sealer_static_review": {
+    "material_objection_for_current_regular_file_scope": false,
+    "root_receipt_not_yet_verified": true,
+    "index_and_HEAD_final_check_reserved": true
+  },
+  "reviewer_changes_only": "experiments/development/real_route_proposal_2026-10-01/review/"
+}

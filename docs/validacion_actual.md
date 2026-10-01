@@ -1,5 +1,21 @@
 # Auditoría de aceptación actual
 
+## D-122 · Propuesta de ruta real, sin R1
+
+[Dossier](../experiments/development/real_route_proposal_2026-10-01/README.md):
+cuatro build/verify originales —Astra/Luna `high` × Python 3.11/3.12—,
+configuración nativa validada para doce celdas en cada uno; no runtimes,
+claims, conteos/envíos remotos ni nuevas celdas formales. Precios actuales
+separados de cotas condicionales del modelo; costes completos y calidad
+desconocidos. No se suman ambas opciones, no hay selección ni gasto autorizado.
+
+Los 5.879 pins+receipt D121 pasan antes/después del build; cuatro docs
+activos históricos en `9f90b79` antes de este corte. Las rutas `step` siguen
+fixture; acceso real, snapshot, esfuerzo efectivo, conteo/uso/incomplete,
+capacidad `high`/8192 y evaluación independiente deben cerrarse antes de R1.
+Documentación/API pública no acredita acceso de cuenta ni factura.
+**C1 técnico D107 preservado; C2–C5 No demostrado; 0/24 formales.**
+
 ## D-121 · Observación prospectiva local
 
 [Dossier](../experiments/development/coordinated_observation_2026-10-01/README.md).

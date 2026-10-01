@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "verified_date_utc": "2026-10-01",
+  "method": "official_pages_opened_via_web_tool; derived_facts_only",
+  "account_access_verified": false,
+  "sources": [
+    {
+      "url": "https://developers.openai.com/api/docs/models/gpt-6-astra",
+      "facts": ["Responses and function calling documented", "high effort documented", "Standard short-context USD per million input/read/write/output: 10/1/12.5/50", "page does not establish an available dated snapshot for this account"]
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/models/gpt-6-luna",
+      "facts": ["Responses and function calling documented", "high effort documented", "Standard short-context USD per million input/read/write/output: 0.10/0.01/0.125/0.50", "regional processing may add 10 percent", "page does not establish an available dated snapshot for this account"]
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/pricing",
+      "facts": ["Standard tariff confirmed separately from Batch/Flex/Fast", "prompts over 272000 input tokens have different whole-request rates", "regional and other processing premiums require their applicable tariff"]
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/prompt-caching",
+      "facts": ["cache-write rate replaces ordinary input rate for those tokens; not an additive fee", "Responses usage exposes cached_tokens and cache_write_tokens inside input_tokens_details", "input total includes these categories"]
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/token-counting",
+      "facts": ["POST /v1/responses/input_tokens documented", "response contains integer input_tokens and object response.input_tokens", "same input format as Responses; actual candidate/account compatibility not tested"]
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/reasoning",
+      "facts": ["max_output_tokens covers reasoning, visible output and non-visible formatting", "incomplete may occur before visible output while incurring cost", "guide recommends initially reserving at least 25000 tokens for reasoning and output"]
+    }
+  ],
+  "provider_inventory_snapshot": {
+    "captured_at_utc": "2026-10-01T18:42:58.139Z",
+    "codex_quota": "unknown: unsuccessful probe, no windows; not inferred zero",
+    "gemini_antigravity_remaining_percent": {"five_hour": 96, "weekly": 95},
+    "minimax_separate_quota": null,
+    "allowed_cli_routes_present": ["codex/gpt-6-astra", "codex/gpt-6-luna", "gemini/3.1-pro", "gemini/3.7-flash", "minimax/MiniMax-M3", "minimax/MiniMax-M2.7"],
+    "scope": "subscription CLI inventory only; not Responses API entitlement, billing or authorization",
+    "prohibited_routes_invoked": false,
+    "raw_authentication_files_read": false
+  }
+}
