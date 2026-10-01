@@ -80,7 +80,8 @@ def run_controls(output):
         (output / f"{index}.stderr").write_bytes(result.stderr)
         assert result.returncode == expected and result.stderr == b""
         assert SENTINEL.encode() not in result.stdout + result.stderr
-        assert before == snapshot(case)
+        after = snapshot(case)
+        assert before == after
         report = json.loads(result.stdout)
         assert report["Q_demonstrated"] is False and report["quality_verified"] is False
         assert report["acceptance_assessed"] is False
@@ -104,7 +105,8 @@ def run_controls(output):
                               "quality_verified": False, "acceptance_assessed": False}
         records.append({"name": name, "argv": command, "expected_exit": expected, "exit_code": result.returncode,
                         "stdout_sha256": sha(result.stdout), "stderr_sha256": sha(result.stderr),
-                        "original_files_unchanged": True, "raw_rating_sha256": sha(raw), "report": report})
+                        "original_files_unchanged": True, "original_snapshots_before": before,
+                        "original_snapshots_after": after, "raw_rating_sha256": sha(raw), "report": report})
     assert sha(pretty) != sha(compact) and json.loads(pretty) == json.loads(compact)
     value = {"classification": "synthetic_real_CLI_only_not_human_judgment", "python": sys.executable,
              "original_root": str(original_root), "commands": records, "actual_cli_calls": len(records),

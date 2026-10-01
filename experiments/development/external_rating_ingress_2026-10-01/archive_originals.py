@@ -23,6 +23,12 @@ def _require(condition):
         raise ArchiveOriginalsError("archive_or_verification_rejected")
 
 
+def _absolute_path(path):
+    value = Path(path)
+    _require(".." not in value.parts)
+    return value.absolute()
+
+
 def _directory(path):
     for component in (*reversed(path.parents), path):
         _require(stat.S_ISDIR(component.lstat().st_mode))
@@ -60,7 +66,7 @@ def _helper():
 
 def archive_originals(root: Path, output: Path, manifest: Path) -> dict:
     try:
-        root, output, manifest = (Path(path).absolute() for path in (root, output, manifest))
+        root, output, manifest = (_absolute_path(path) for path in (root, output, manifest))
         _tree(root)
         _require(output != manifest)
         for path in (output, manifest):
@@ -75,7 +81,7 @@ def archive_originals(root: Path, output: Path, manifest: Path) -> dict:
 
 def verify_originals(archive_path: Path, manifest: Path) -> dict:
     try:
-        archive_path, manifest = Path(archive_path).absolute(), Path(manifest).absolute()
+        archive_path, manifest = (_absolute_path(path) for path in (archive_path, manifest))
         for path in (archive_path, manifest):
             _directory(path.parent)
             _file(path)
