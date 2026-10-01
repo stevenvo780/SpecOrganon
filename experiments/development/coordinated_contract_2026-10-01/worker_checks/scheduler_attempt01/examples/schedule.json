@@ -1,0 +1,521 @@
+{
+  "block_count": 4,
+  "cases": [
+    {
+      "case_id": "D-F",
+      "package_sha256": "9d04b2dc2d23925f5196562351eafd7da6b766e8b9fec4f900e6fb6401e0f279"
+    },
+    {
+      "case_id": "D-E",
+      "package_sha256": "265e4bc03275a3eb996979d97db2cdd27891c12ff44fa536edf1b138e8005c01"
+    }
+  ],
+  "classification": "development_coordinated_round_preparation_unsealed",
+  "coordination": {
+    "bootstrap": {
+      "init": "leader",
+      "work": "empty"
+    },
+    "budget": "single_parent",
+    "max_concurrent_worker_requests": 2,
+    "profile": "leader_two_workers_reviewer_v1",
+    "reviewer": {
+      "serial": true,
+      "tools": false
+    },
+    "roles": [
+      "leader",
+      "worker-1",
+      "worker-2",
+      "reviewer"
+    ],
+    "sharing": "public_artifacts_only",
+    "workers": 2
+  },
+  "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+  "cost_limit_micro_usd": 0,
+  "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+  "inputs": {
+    "arm_prompts": {
+      "A": {
+        "sha256": "2847a3e8ce295d435814452364c0d5ce010b5058f0f4bab44d69ec119446fd5d"
+      },
+      "B": {
+        "sha256": "659f1bbcd67a40b6df1a540b8005fb125ed9baf4cf1c2c91afe140465e6dbcd5"
+      },
+      "C": {
+        "sha256": "28a5cd8c440e071e07b6fefb48b686c6ca52d78633ccf2d3ce92b47be5031567"
+      }
+    },
+    "common_prompt": {
+      "sha256": "4a0a917281103bf69d4ac3ed101e601f79cf513721a780406dae787ab6934ff0"
+    },
+    "task_contract": {
+      "sha256": "0668fdbbcc8c7b89628d48d0300f0a58c05fac01f39b4a10b5d1be85f1f9bbc0"
+    },
+    "tool_policy": {
+      "sha256": "97dfef4792fdc68b417037029d303c829e254a0e2ffef89cdf955f8045f02441"
+    }
+  },
+  "manifest": {
+    "base": {
+      "alternatives": [
+        {
+          "alternative": "A",
+          "core_sha256": "2ca50f1ca50807b8da25999b02b8652a7fc7ae87a40856726f6f053a1ae60afd",
+          "mode": "sequential"
+        },
+        {
+          "alternative": "B",
+          "core_sha256": "2ca50f1ca50807b8da25999b02b8652a7fc7ae87a40856726f6f053a1ae60afd",
+          "mode": "graph"
+        },
+        {
+          "alternative": "C",
+          "core_sha256": "2ca50f1ca50807b8da25999b02b8652a7fc7ae87a40856726f6f053a1ae60afd",
+          "mode": "risk"
+        }
+      ],
+      "cases": [
+        {
+          "case_id": "D-F",
+          "package_sha256": "9d04b2dc2d23925f5196562351eafd7da6b766e8b9fec4f900e6fb6401e0f279"
+        },
+        {
+          "case_id": "D-E",
+          "package_sha256": "265e4bc03275a3eb996979d97db2cdd27891c12ff44fa536edf1b138e8005c01"
+        }
+      ],
+      "cost_limit_micro_usd": 0,
+      "inputs": {
+        "arm_prompts": {
+          "A": {
+            "sha256": "2847a3e8ce295d435814452364c0d5ce010b5058f0f4bab44d69ec119446fd5d"
+          },
+          "B": {
+            "sha256": "659f1bbcd67a40b6df1a540b8005fb125ed9baf4cf1c2c91afe140465e6dbcd5"
+          },
+          "C": {
+            "sha256": "28a5cd8c440e071e07b6fefb48b686c6ca52d78633ccf2d3ce92b47be5031567"
+          }
+        },
+        "common_prompt": {
+          "sha256": "4a0a917281103bf69d4ac3ed101e601f79cf513721a780406dae787ab6934ff0"
+        },
+        "task_contract": {
+          "sha256": "0668fdbbcc8c7b89628d48d0300f0a58c05fac01f39b4a10b5d1be85f1f9bbc0"
+        },
+        "tool_policy": {
+          "sha256": "97dfef4792fdc68b417037029d303c829e254a0e2ffef89cdf955f8045f02441"
+        }
+      },
+      "max_model_requests": 128,
+      "model": {
+        "effort": "default",
+        "effort_provider_value": null,
+        "family": "fixture",
+        "model_id": "offline-fixture-model",
+        "price_profile_sha256": "0935cfceaf91a57f025aa8604874a056456b2aa618f94088e6528ad0097c91c8",
+        "tier": "fixture",
+        "version": "fixture-v1"
+      },
+      "per_run_limits": {
+        "active_seconds": 5400,
+        "measured_tokens": 80000,
+        "tool_calls": 64
+      },
+      "protocol_sha256": "e1a5e52bc5ef24b281b1228dc96ecb745cb53950cc4f020f5767de230295ad29",
+      "round": 1,
+      "schema": "specorganon.development_round_manifest.v2",
+      "seed": 118
+    },
+    "coordination": {
+      "bootstrap": {
+        "init": "leader",
+        "work": "empty"
+      },
+      "budget": "single_parent",
+      "max_concurrent_worker_requests": 2,
+      "profile": "leader_two_workers_reviewer_v1",
+      "reviewer": {
+        "serial": true,
+        "tools": false
+      },
+      "roles": [
+        "leader",
+        "worker-1",
+        "worker-2",
+        "reviewer"
+      ],
+      "sharing": "public_artifacts_only",
+      "workers": 2
+    },
+    "provider_route": {
+      "api": "responses",
+      "provider": "fixture",
+      "service_tier": "default",
+      "version": "fixture-v1"
+    },
+    "runtime_policy": {
+      "sha256": "750ba7badb8d088ed730efaf4bc35daa77a448e8fdaf4bf42041933b9a825c8b"
+    },
+    "schema": "specorganon.coordinated_development_manifest.v1",
+    "shared_contract": {
+      "coordination_prompt": {
+        "sha256": "25ee7701b4cb8af434067c9bcf2f70ce1ce5b1d6fc1c492f5e1ee48002b63d71"
+      },
+      "delivery": {
+        "sha256": "b4af39d5b65a14849e885a9d65f0efe4f4e689989689c28c16cfcb3a6e78db5a"
+      },
+      "rubric": {
+        "sha256": "49672f0ef3b3a542b3b86b475936cc9adf1ddf60369e9b120ba33900294c99d8"
+      }
+    },
+    "source_freeze_sha256": "72a1344b4f2092493141bb7e037d6294883f4ee2aa75b7ef433190a91b1c4f20"
+  },
+  "max_model_requests": 128,
+  "models": [
+    {
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "model_id": "offline-fixture-model",
+      "price_profile_sha256": "0935cfceaf91a57f025aa8604874a056456b2aa618f94088e6528ad0097c91c8",
+      "tier": "fixture",
+      "version": "fixture-v1"
+    }
+  ],
+  "per_run_limits": {
+    "active_seconds": 5400,
+    "measured_tokens": 80000,
+    "tool_calls": 64
+  },
+  "protocol_sha256": "e1a5e52bc5ef24b281b1228dc96ecb745cb53950cc4f020f5767de230295ad29",
+  "provider_route": {
+    "api": "responses",
+    "provider": "fixture",
+    "service_tier": "default",
+    "version": "fixture-v1"
+  },
+  "run_count": 12,
+  "runs": [
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "A",
+      "block_id": "dev-coord-block-48db76407bd2819cae887269",
+      "case_id": "D-F",
+      "case_package_sha256": "9d04b2dc2d23925f5196562351eafd7da6b766e8b9fec4f900e6fb6401e0f279",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "sequential",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 1,
+      "release_block_order": 1,
+      "replica": 2,
+      "round": 1,
+      "run_id": "dev-coord-3d1b2dc4200bf86309fbfcab",
+      "run_sha256": "3d1b2dc4200bf86309fbfcab48012b9431a1f74221534cfa22d8d593e5e1eb56",
+      "stratum_id": "dev-coord-stratum-0a0703a34bced9da228b8eef",
+      "tier": "fixture"
+    },
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "C",
+      "block_id": "dev-coord-block-48db76407bd2819cae887269",
+      "case_id": "D-F",
+      "case_package_sha256": "9d04b2dc2d23925f5196562351eafd7da6b766e8b9fec4f900e6fb6401e0f279",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "risk",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 2,
+      "release_block_order": 1,
+      "replica": 2,
+      "round": 1,
+      "run_id": "dev-coord-7e63d2648c5984672c90a8b7",
+      "run_sha256": "7e63d2648c5984672c90a8b72a31f49f8db726c5ee7b12ea94cd7fcfc03c2dd1",
+      "stratum_id": "dev-coord-stratum-0a0703a34bced9da228b8eef",
+      "tier": "fixture"
+    },
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "B",
+      "block_id": "dev-coord-block-48db76407bd2819cae887269",
+      "case_id": "D-F",
+      "case_package_sha256": "9d04b2dc2d23925f5196562351eafd7da6b766e8b9fec4f900e6fb6401e0f279",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "graph",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 3,
+      "release_block_order": 1,
+      "replica": 2,
+      "round": 1,
+      "run_id": "dev-coord-e5ad96d6ab2f568632e9e57e",
+      "run_sha256": "e5ad96d6ab2f568632e9e57e9ff6e678fa593c398d1a541c3257a421953adcd7",
+      "stratum_id": "dev-coord-stratum-0a0703a34bced9da228b8eef",
+      "tier": "fixture"
+    },
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "B",
+      "block_id": "dev-coord-block-b4a510081b14a6f1ad73de42",
+      "case_id": "D-F",
+      "case_package_sha256": "9d04b2dc2d23925f5196562351eafd7da6b766e8b9fec4f900e6fb6401e0f279",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "graph",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 1,
+      "release_block_order": 2,
+      "replica": 1,
+      "round": 1,
+      "run_id": "dev-coord-098feffaa30f910dd9810556",
+      "run_sha256": "098feffaa30f910dd981055627c69dfc543f984e32503c5005d06a3e86ba93a4",
+      "stratum_id": "dev-coord-stratum-0a0703a34bced9da228b8eef",
+      "tier": "fixture"
+    },
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "A",
+      "block_id": "dev-coord-block-b4a510081b14a6f1ad73de42",
+      "case_id": "D-F",
+      "case_package_sha256": "9d04b2dc2d23925f5196562351eafd7da6b766e8b9fec4f900e6fb6401e0f279",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "sequential",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 2,
+      "release_block_order": 2,
+      "replica": 1,
+      "round": 1,
+      "run_id": "dev-coord-689ded77487d30fd0744f472",
+      "run_sha256": "689ded77487d30fd0744f472faea93d0d2e5b64a5da7157cd6457277eea8ea49",
+      "stratum_id": "dev-coord-stratum-0a0703a34bced9da228b8eef",
+      "tier": "fixture"
+    },
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "C",
+      "block_id": "dev-coord-block-b4a510081b14a6f1ad73de42",
+      "case_id": "D-F",
+      "case_package_sha256": "9d04b2dc2d23925f5196562351eafd7da6b766e8b9fec4f900e6fb6401e0f279",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "risk",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 3,
+      "release_block_order": 2,
+      "replica": 1,
+      "round": 1,
+      "run_id": "dev-coord-2d1fee48d858bf29b9e9224e",
+      "run_sha256": "2d1fee48d858bf29b9e9224ee55d61fb2d9f88cc3d996cdc7a49159b17ddafc6",
+      "stratum_id": "dev-coord-stratum-0a0703a34bced9da228b8eef",
+      "tier": "fixture"
+    },
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "B",
+      "block_id": "dev-coord-block-69c6fbd592d974bd239d905a",
+      "case_id": "D-E",
+      "case_package_sha256": "265e4bc03275a3eb996979d97db2cdd27891c12ff44fa536edf1b138e8005c01",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "graph",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 1,
+      "release_block_order": 3,
+      "replica": 1,
+      "round": 1,
+      "run_id": "dev-coord-9221f7b6c10e595af1c673fa",
+      "run_sha256": "9221f7b6c10e595af1c673fac5c884c9d812b35f4dadf55258de0f41c2c66ce7",
+      "stratum_id": "dev-coord-stratum-7ac555c406b26407b1dd107e",
+      "tier": "fixture"
+    },
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "C",
+      "block_id": "dev-coord-block-69c6fbd592d974bd239d905a",
+      "case_id": "D-E",
+      "case_package_sha256": "265e4bc03275a3eb996979d97db2cdd27891c12ff44fa536edf1b138e8005c01",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "risk",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 2,
+      "release_block_order": 3,
+      "replica": 1,
+      "round": 1,
+      "run_id": "dev-coord-3f458e2cd3dd8ccc5bd8f8c6",
+      "run_sha256": "3f458e2cd3dd8ccc5bd8f8c647b5df349fb526290844bbbe87e6e86211854d2d",
+      "stratum_id": "dev-coord-stratum-7ac555c406b26407b1dd107e",
+      "tier": "fixture"
+    },
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "A",
+      "block_id": "dev-coord-block-69c6fbd592d974bd239d905a",
+      "case_id": "D-E",
+      "case_package_sha256": "265e4bc03275a3eb996979d97db2cdd27891c12ff44fa536edf1b138e8005c01",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "sequential",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 3,
+      "release_block_order": 3,
+      "replica": 1,
+      "round": 1,
+      "run_id": "dev-coord-aae155ff6776e5729a0ba14e",
+      "run_sha256": "aae155ff6776e5729a0ba14e9bf6247bebb79841463dc70ae66338f80eb1efd6",
+      "stratum_id": "dev-coord-stratum-7ac555c406b26407b1dd107e",
+      "tier": "fixture"
+    },
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "C",
+      "block_id": "dev-coord-block-0801b91eaf53735d8dd175c9",
+      "case_id": "D-E",
+      "case_package_sha256": "265e4bc03275a3eb996979d97db2cdd27891c12ff44fa536edf1b138e8005c01",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "risk",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 1,
+      "release_block_order": 4,
+      "replica": 2,
+      "round": 1,
+      "run_id": "dev-coord-6f923f1a2bc6dac047bc330d",
+      "run_sha256": "6f923f1a2bc6dac047bc330d01704f8540e8ea5092e763564b3725b86dfad20c",
+      "stratum_id": "dev-coord-stratum-7ac555c406b26407b1dd107e",
+      "tier": "fixture"
+    },
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "A",
+      "block_id": "dev-coord-block-0801b91eaf53735d8dd175c9",
+      "case_id": "D-E",
+      "case_package_sha256": "265e4bc03275a3eb996979d97db2cdd27891c12ff44fa536edf1b138e8005c01",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "sequential",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 2,
+      "release_block_order": 4,
+      "replica": 2,
+      "round": 1,
+      "run_id": "dev-coord-5bbc954844d6f03f23c1c141",
+      "run_sha256": "5bbc954844d6f03f23c1c1417820bf2adda7c3a2197420d04eaeaf17638962e1",
+      "stratum_id": "dev-coord-stratum-7ac555c406b26407b1dd107e",
+      "tier": "fixture"
+    },
+    {
+      "agent_count": 4,
+      "agents": "leader_two_workers_reviewer_v1",
+      "arm": "B",
+      "block_id": "dev-coord-block-0801b91eaf53735d8dd175c9",
+      "case_id": "D-E",
+      "case_package_sha256": "265e4bc03275a3eb996979d97db2cdd27891c12ff44fa536edf1b138e8005c01",
+      "case_reference_sha256": null,
+      "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+      "mode": "graph",
+      "model_id": "offline-fixture-model",
+      "model_version": "fixture-v1",
+      "order_position": 3,
+      "release_block_order": 4,
+      "replica": 2,
+      "round": 1,
+      "run_id": "dev-coord-b7bccbcbcb78856bb0348c5a",
+      "run_sha256": "b7bccbcbcb78856bb0348c5acda664832f90b2f1af4262853bfd1ab8d5c5169e",
+      "stratum_id": "dev-coord-stratum-7ac555c406b26407b1dd107e",
+      "tier": "fixture"
+    }
+  ],
+  "runtime_policy": {
+    "sha256": "750ba7badb8d088ed730efaf4bc35daa77a448e8fdaf4bf42041933b9a825c8b"
+  },
+  "schedule_sha256": "6f9e8a589de78bcf10d5276268bd299c5bd6af29be75691edbc584321a68467f",
+  "schema": "specorganon.coordinated_development_schedule.v1",
+  "seed": 118,
+  "shared_contract": {
+    "coordination_prompt": {
+      "sha256": "25ee7701b4cb8af434067c9bcf2f70ce1ce5b1d6fc1c492f5e1ee48002b63d71"
+    },
+    "delivery": {
+      "sha256": "b4af39d5b65a14849e885a9d65f0efe4f4e689989689c28c16cfcb3a6e78db5a"
+    },
+    "rubric": {
+      "sha256": "49672f0ef3b3a542b3b86b475936cc9adf1ddf60369e9b120ba33900294c99d8"
+    }
+  },
+  "source_freeze_sha256": "72a1344b4f2092493141bb7e037d6294883f4ee2aa75b7ef433190a91b1c4f20"
+}

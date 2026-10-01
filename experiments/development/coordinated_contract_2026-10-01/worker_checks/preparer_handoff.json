@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "classification": "coordinated_development_preparer_offline_handoff",
+  "state": "ready_for_parent_freeze_and_independent_review",
+  "ownership": [
+    "scripts/prepare_coordinated_development.py",
+    "tests/test_prepare_coordinated_development.py",
+    "experiments/development/coordinated_contract_2026-10-01/worker_checks/preparer_*"
+  ],
+  "sources": [
+    {
+      "path": "scripts/prepare_coordinated_development.py",
+      "sha256": "7c9e9fe8e361ce4a764c7a810928358c403be91ccd5475a7dd0c7f0b21c0f311"
+    },
+    {
+      "path": "tests/test_prepare_coordinated_development.py",
+      "sha256": "6e1a0377ea28aac09f7a3b224fc6d38e7da115aca3e58c65a51da9970a8f1a07"
+    },
+    {
+      "path": "experiments/development/coordinated_contract_2026-10-01/worker_checks/preparer_capture.py",
+      "sha256": "602b49d15d153db3a9e3976d8057cdadfc80bfc04dd8dbec1b2e4c132476d096"
+    }
+  ],
+  "api": {
+    "build": "build_coordinated_round(destination: Path, configuration: dict, contract_dir: Path, source_freeze_sha256: str) -> dict",
+    "verify": "verify_coordinated_bundle(bundle: Path) -> dict",
+    "error": "CoordinatedPreparationError(ValueError); original validators may raise their own ValueError subtype",
+    "build_cli": [
+      "PYTHON",
+      "-I",
+      "-B",
+      "scripts/prepare_coordinated_development.py",
+      "build",
+      "--destination",
+      "NEW_ABSOLUTE_EXTERNAL_PATH",
+      "--configuration",
+      "ABSOLUTE_CONFIGURATION_JSON",
+      "--contract-dir",
+      "ABSOLUTE_PUBLIC_CONTRACT_DIRECTORY",
+      "--source-freeze-sha256",
+      "DECLARED_SHA256"
+    ],
+    "verify_cli": [
+      "PYTHON",
+      "-I",
+      "-B",
+      "scripts/prepare_coordinated_development.py",
+      "verify",
+      "--bundle",
+      "ABSOLUTE_BUNDLE"
+    ]
+  },
+  "configuration_exact_keys": [
+    "schema",
+    "seed",
+    "model",
+    "price_profile",
+    "per_run_limits",
+    "max_model_requests",
+    "cost_limit_micro_usd",
+    "provider_route"
+  ],
+  "configuration_schema": 1,
+  "output": {
+    "root_files": [
+      "configuration.json",
+      "schedule.json",
+      "assets.json",
+      "price_profile.json",
+      "bundle.json"
+    ],
+    "directories": [
+      "assets",
+      "assets/D-F",
+      "assets/D-E",
+      "assets/text_extracts"
+    ],
+    "assets_common": [
+      "delivery_contract.json",
+      "rubric.json",
+      "coordination_prompt.md",
+      "method_tool",
+      "analysis_tool",
+      "task_contract",
+      "common_prompt",
+      "tool_policy",
+      "runtime_policy.json",
+      "prompt_A",
+      "prompt_B",
+      "prompt_C"
+    ],
+    "packages": [
+      "assets/D-F.zip",
+      "assets/D-E.zip"
+    ],
+    "case_sources": "Original six D-F and three D-E files byte exact; D-F also receives every common PDF fulltext/page/manifest derivation.",
+    "result_scope": "preparation_and_byte_verification_only",
+    "prepared_cell_count": 12,
+    "formal_cells_executed": 0
+  },
+  "verification": [
+    "Pure strict configuration/contract validation and fixed source pins before creating destination",
+    "Absolute real directory chains; private owned output parent; new destination disjoint from checkout/contracts",
+    "Original capsules and original sealed method/analyzer builders; no participant analysis or model execution",
+    "Closed bounded inventory of directories and single-link regular files; symlinks/FIFO/extras/missing entries fail closed",
+    "Exact scheduler recompile and canonical configuration/price/contract/prompt/tool bytes",
+    "ZIP regular content inspection via BytesIO without extraction; complete original capsule content and independent PDF derivation reconstruction",
+    "Source closure and all output inventory rechecked after verification"
+  ],
+  "gates": [
+    {
+      "python": "3.11",
+      "attempt": "worker_checks/preparer_py311_attempt01",
+      "tests_passed": 39,
+      "pytest_duration_seconds": 86.03,
+      "pytest_exit_code": 0,
+      "ruff_exit_code": 0,
+      "compile_exit_code": 0,
+      "sources_unchanged": true,
+      "runtime_root": "/tmp/specorganon-D118-preparer-_fi1fttd"
+    },
+    {
+      "python": "3.12",
+      "attempt": "worker_checks/preparer_py312_attempt01",
+      "tests_passed": 39,
+      "pytest_duration_seconds": 76.1,
+      "pytest_exit_code": 0,
+      "ruff_exit_code": 0,
+      "compile_exit_code": 0,
+      "sources_unchanged": true,
+      "runtime_root": "/tmp/specorganon-D118-preparer-5s_p94tf"
+    }
+  ],
+  "historical_failures": [],
+  "coverage": [
+    "Twelve R1 combinations, shared case bytes for A/B/C and distinct original modes",
+    "Repeated same-interpreter build yields identical calendar; real CLI build and fresh-process verify",
+    "Configuration types/model-price/route/cost, public contract/freezereference failures before output creation",
+    "Physical source/contracts overlaps and symlink aliases fail before creation; altered original input pin fails before creation",
+    "Source/tool/price/contract/policy/package/calendar tamper; missing/extras/directory/symlink/FIFO",
+    "Rewriting inventory hashes cannot legitimize altered semantic source/tool/prompt/policy bytes",
+    "Changed original public contract prevents verification; repeated destination preserves existing bytes"
+  ],
+  "limits": [
+    "The source_freeze_sha256 is a caller-declared reference bound into the calendar, not authenticated external custody.",
+    "Verification requires the captured original checkout, archived extraction inputs/tool and public contract_dir still present with identical bytes.",
+    "Generated launcher bytes include the recorded interpreter path; equal builds are deterministic under the same interpreter, while different paths legitimately change tool-policy/calendar hashes.",
+    "Tool executable bytes are verified; preparation does not authenticate a complete runtime image or provider/model identity.",
+    "New coordinated A/B/C runtime adapters and D117 C schedule binding remain pending. No claims, ledger, context, run state or execution admission are created.",
+    "No participant code was executed, no provider/auth/payment/field/reserved input was used, no Q or normative acceptance was assigned.",
+    "Positive and intended negative CLI calls execute inside pytest; gate command/streams are retained, rather than a separate archive of every internal subprocess stream."
+  ],
+  "next_action": "Parent independent review and unified source freeze/gates; then prospective coordinated runtime binding and real R1 executions."
+}

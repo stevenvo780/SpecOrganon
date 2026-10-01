@@ -1,0 +1,116 @@
+{
+  "base": {
+    "alternatives": [
+      {
+        "alternative": "A",
+        "core_sha256": "2ca50f1ca50807b8da25999b02b8652a7fc7ae87a40856726f6f053a1ae60afd",
+        "mode": "sequential"
+      },
+      {
+        "alternative": "B",
+        "core_sha256": "2ca50f1ca50807b8da25999b02b8652a7fc7ae87a40856726f6f053a1ae60afd",
+        "mode": "graph"
+      },
+      {
+        "alternative": "C",
+        "core_sha256": "2ca50f1ca50807b8da25999b02b8652a7fc7ae87a40856726f6f053a1ae60afd",
+        "mode": "risk"
+      }
+    ],
+    "cases": [
+      {
+        "case_id": "D-F",
+        "package_sha256": "9d04b2dc2d23925f5196562351eafd7da6b766e8b9fec4f900e6fb6401e0f279"
+      },
+      {
+        "case_id": "D-E",
+        "package_sha256": "265e4bc03275a3eb996979d97db2cdd27891c12ff44fa536edf1b138e8005c01"
+      }
+    ],
+    "cost_limit_micro_usd": 0,
+    "inputs": {
+      "arm_prompts": {
+        "A": {
+          "sha256": "2847a3e8ce295d435814452364c0d5ce010b5058f0f4bab44d69ec119446fd5d"
+        },
+        "B": {
+          "sha256": "659f1bbcd67a40b6df1a540b8005fb125ed9baf4cf1c2c91afe140465e6dbcd5"
+        },
+        "C": {
+          "sha256": "28a5cd8c440e071e07b6fefb48b686c6ca52d78633ccf2d3ce92b47be5031567"
+        }
+      },
+      "common_prompt": {
+        "sha256": "4a0a917281103bf69d4ac3ed101e601f79cf513721a780406dae787ab6934ff0"
+      },
+      "task_contract": {
+        "sha256": "0668fdbbcc8c7b89628d48d0300f0a58c05fac01f39b4a10b5d1be85f1f9bbc0"
+      },
+      "tool_policy": {
+        "sha256": "97dfef4792fdc68b417037029d303c829e254a0e2ffef89cdf955f8045f02441"
+      }
+    },
+    "max_model_requests": 128,
+    "model": {
+      "effort": "default",
+      "effort_provider_value": null,
+      "family": "fixture",
+      "model_id": "offline-fixture-model",
+      "price_profile_sha256": "0935cfceaf91a57f025aa8604874a056456b2aa618f94088e6528ad0097c91c8",
+      "tier": "fixture",
+      "version": "fixture-v1"
+    },
+    "per_run_limits": {
+      "active_seconds": 5400,
+      "measured_tokens": 80000,
+      "tool_calls": 64
+    },
+    "protocol_sha256": "e1a5e52bc5ef24b281b1228dc96ecb745cb53950cc4f020f5767de230295ad29",
+    "round": 1,
+    "schema": "specorganon.development_round_manifest.v2",
+    "seed": 118
+  },
+  "coordination": {
+    "bootstrap": {
+      "init": "leader",
+      "work": "empty"
+    },
+    "budget": "single_parent",
+    "max_concurrent_worker_requests": 2,
+    "profile": "leader_two_workers_reviewer_v1",
+    "reviewer": {
+      "serial": true,
+      "tools": false
+    },
+    "roles": [
+      "leader",
+      "worker-1",
+      "worker-2",
+      "reviewer"
+    ],
+    "sharing": "public_artifacts_only",
+    "workers": 2
+  },
+  "provider_route": {
+    "api": "responses",
+    "provider": "fixture",
+    "service_tier": "default",
+    "version": "fixture-v1"
+  },
+  "runtime_policy": {
+    "sha256": "750ba7badb8d088ed730efaf4bc35daa77a448e8fdaf4bf42041933b9a825c8b"
+  },
+  "schema": "specorganon.coordinated_development_manifest.v1",
+  "shared_contract": {
+    "coordination_prompt": {
+      "sha256": "25ee7701b4cb8af434067c9bcf2f70ce1ce5b1d6fc1c492f5e1ee48002b63d71"
+    },
+    "delivery": {
+      "sha256": "b4af39d5b65a14849e885a9d65f0efe4f4e689989689c28c16cfcb3a6e78db5a"
+    },
+    "rubric": {
+      "sha256": "49672f0ef3b3a542b3b86b475936cc9adf1ddf60369e9b120ba33900294c99d8"
+    }
+  },
+  "source_freeze_sha256": "72a1344b4f2092493141bb7e037d6294883f4ee2aa75b7ef433190a91b1c4f20"
+}

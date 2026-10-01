@@ -1,5 +1,30 @@
 # Estado de reanudación
 
+**D-118 fija contrato y preparación comunes para desarrollo coordinado A/B/C:**
+[dossier](../experiments/development/coordinated_contract_2026-10-01/README.md).
+Calendario NUEVO de 12 IDs R1/cuatro bloques: líder, dos workers y reviewer,
+mismo modelo/esfuerzo/acceso/saldo padre. Modos y cuatro fases originales
+conservados; calendario solo anterior intacto. Build/verify usa 6+3 fuentes
+originales, 38 derivados PDF comunes, herramientas y contrato/rúbrica públicos
+sin cifras resueltas. Checker valida estructura/procedencia formal sin ejecutar
+participante, autenticar métricas o asignar Q. Descriptor concordante sólo
+declara binding: runtime_authenticated/execution_authorized siguen false.
+Freeze `6a36197`, 62 pines repo y extractor externo: **265 passed por Python
+3.11/3.12**, Ruff/compile/diff0, 63 registros before/after por gate intactos.
+Dos integraciones CLI reales de preparación: 106 archivos verificados, 12
+IDs, seis fixtures estructurales, 12 bindings y cuatro rechazos por intérprete;
+cero requests de modelo y celdas formales. Luna inventarió 103 rutas históricas,
+cotejadas íntegramente por root y revisor. Evidencia y revisión final en dossier.
+
+**C1 técnico D107 preservado; C2–C5 No demostrado; formales 0/24.** Faltan
+runtimes coordinados A/B, continuidad/binding C con el calendario nuevo,
+medición auténtica de consumo y suma de actividad, rutas/autorización; luego
+12 R1→adaptación/freeze→12 R2/selección. Digest de freeze/prompt declarado no
+autentica runtime/custodia ni autoriza gasto. Siguen panel, reserva, jueces,
+autoridades, campo y transferencia. Protocolo §2 no impone solo ni nueve fases
+a prototipos; §3 N/S/T conserva solo/trío. GOAL/protocolo/core/producción/wheel/
+casos y dossiers anteriores intactos. Los cortes siguientes son históricos.
+
 **D-117 arranca C desde work vacío dentro de un único runtime padre:**
 [dossier](../experiments/development/parent_analysis_2026-10-01/README.md).
 El líder lee un bloque del caso, crea el grafo con init sellado real y publica

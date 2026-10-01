@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "case": "D-F",
+  "classification": "development_exposed_archived_food_case_not_a_causal_trial",
+  "visible_layout": "flat",
+  "files": [
+    {
+      "visible_file": "task.md",
+      "repository_source_path": "cases/bread_development/task.md",
+      "role": "common_task",
+      "bytes": 6887,
+      "sha256": "ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51"
+    },
+    {
+      "visible_file": "source_claims.json",
+      "repository_source_path": "cases/bread_development/source_claims.json",
+      "role": "neutral_quantitative_transcription",
+      "bytes": 9162,
+      "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc"
+    },
+    {
+      "visible_file": "source_lca.pdf",
+      "repository_source_path": "cases/bread_norway/source_lca.pdf",
+      "role": "archived_primary_article",
+      "bytes": 2212666,
+      "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32"
+    },
+    {
+      "visible_file": "source_survey.pdf",
+      "repository_source_path": "cases/bread_norway/source_survey.pdf",
+      "role": "archived_primary_article",
+      "bytes": 526604,
+      "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee"
+    },
+    {
+      "visible_file": "survey_table1.json",
+      "repository_source_path": "cases/bread_norway/survey_table1.json",
+      "role": "table_transcription",
+      "bytes": 1440,
+      "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f"
+    }
+  ],
+  "articles": [
+    {
+      "visible_file": "source_lca.pdf",
+      "title": "Effects of Packaging and Food Waste Prevention by Consumers on the Environmental Impact of Production and Consumption of Bread in Norway",
+      "authors": [
+        "Erik Svanes",
+        "Sofie Oestergaard",
+        "Ole Joergen Hanssen"
+      ],
+      "doi": "https://doi.org/10.3390/su11010043",
+      "published_date": "2018-12-21",
+      "journal_reference": "Sustainability 2019, 11, 43",
+      "functional_unit": {
+        "value": 1,
+        "unit": "kg_bread",
+        "base": "bread produced, distributed and consumed in Norway",
+        "locator": {
+          "pdf_page": 4,
+          "section": "3.2.1"
+        }
+      }
+    },
+    {
+      "visible_file": "source_survey.pdf",
+      "title": "Wasting of Fresh-Packed Bread by Consumers—Influence of Shopping Behavior, Storing, Handling, and Consumer Preferences",
+      "authors": [
+        "Sofie Østergaard",
+        "Ole Jørgen Hanssen"
+      ],
+      "doi": "https://doi.org/10.3390/su10072251",
+      "published_date": "2018-06-29",
+      "measure": "Respondent-estimated slices of fresh bread wasted from household per week",
+      "table_locator": {
+        "pdf_page": 4,
+        "printed_page": 4,
+        "table": "1"
+      }
+    }
+  ],
+  "transcription_verification": {
+    "date_utc": "2026-09-30",
+    "method": "Independent reading of text extracted from the archived PDF bytes using pdftotext -layout; no network source was fetched.",
+    "quantitative_claims": 17,
+    "passages_checked": [
+      {
+        "visible_file": "source_lca.pdf",
+        "pdf_pages": [
+          6
+        ],
+        "sections": [
+          "4.2",
+          "4.3"
+        ],
+        "fields": [
+          "piece_mass",
+          "norway_wheat_share",
+          "poland_wheat_share"
+        ]
+      },
+      {
+        "visible_file": "source_lca.pdf",
+        "pdf_pages": [
+          7
+        ],
+        "tables": [
+          "2",
+          "3"
+        ],
+        "fields": [
+          "mill_electricity",
+          "wheat_refined_flour_mass_share",
+          "wheat_whole_flour_mass_share",
+          "wheat_bran_mass_share",
+          "wheat_refined_flour_economic_allocation",
+          "wheat_whole_flour_economic_allocation",
+          "wheat_bran_economic_allocation"
+        ]
+      },
+      {
+        "visible_file": "source_lca.pdf",
+        "pdf_pages": [
+          8
+        ],
+        "tables": [
+          "5",
+          "7"
+        ],
+        "fields": [
+          "mill_to_baker_distance",
+          "bakery_electricity",
+          "bakery_natural_gas",
+          "bakery_bread_waste",
+          "retail_bread_waste",
+          "consumer_bread_waste_estimate"
+        ]
+      },
+      {
+        "visible_file": "source_survey.pdf",
+        "pdf_pages": [
+          3,
+          4
+        ],
+        "sections": [
+          "3"
+        ],
+        "tables": [
+          "1"
+        ],
+        "fields": [
+          "survey_respondents",
+          "survey_table1_all_seven_rows"
+        ]
+      }
+    ],
+    "survey_table_check": "All seven labels, counts and reported percentages in survey_table1.json agree with PDF page 4 Table 1; the methodological prose on PDF page 3 lists different interval boundaries."
+  },
+  "exposure": {
+    "status": "known_development_sources_and_quantities",
+    "scope": "The articles, quantitative inputs and previously archived table were exposed before this package was prepared. The neutral transcription adds published milling, gas and allocation entries from the same local articles.",
+    "freeze_rule": "Freeze task, transcription, manifest and external evaluator rubric in an identified Git revision before the new executions.",
+    "confirmatory_blinding": false
+  },
+  "limits": [
+    "Company aggregates and secondary calculations do not identify a single observed lot across stages.",
+    "Table 7 uses the common published base Bread Entering the System; its rows are not observations of sequential conditional loss rates.",
+    "Milling mass fractions and economic allocation factors have different meanings and bases.",
+    "Bakery energy is reported per loaf; mill electricity is reported per tonne of flour, not per tonne of wheat.",
+    "The survey concerns self-reported household weekly discard, not personal intake, weighed waste or identified consumers of the LCA product.",
+    "Table 1 contains an open upper category and a do-not-know category; no slice mass, consumption denominator or finite upper cap is supplied.",
+    "Only category frequencies are archived as structured data, not respondent-level records or current operational observations.",
+    "These sources cannot establish the causal efficacy or safety of a proposed packaging change."
+  ]
+}

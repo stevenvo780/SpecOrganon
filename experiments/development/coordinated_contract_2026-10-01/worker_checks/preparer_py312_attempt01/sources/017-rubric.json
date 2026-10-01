@@ -1,0 +1,89 @@
+{
+  "schema": "specorganon.development_public_rubric.v1",
+  "classification": "public_development_rubric_no_reference_answers",
+  "delivery_semantic_sha256": "ebbf1f7559f160514ba55fa19bb108db52ced8bef7a6debb87f97f9f4f83381e",
+  "dimensions": [
+    {
+      "id": "formulation",
+      "scope": "Scope, actors, concepts, value conflicts and proposed human decisions",
+      "range": [
+        0,
+        20
+      ],
+      "anchors": {
+        "0": "No defensible framing or actor/value analysis",
+        "10": "Relevant framing with material omissions or unresolved conflicts",
+        "20": "Justified framing and actors, explicit value conflicts, competent decisions identified as pending"
+      }
+    },
+    {
+      "id": "evidence",
+      "scope": "Sources, inference, units, uncertainty and missing data",
+      "range": [
+        0,
+        20
+      ],
+      "anchors": {
+        "0": "Unsupported factual claims or uncheckable calculations",
+        "10": "Partly checked evidence with explicit remaining gaps",
+        "20": "Independently checkable sources and calculations, justified inference, units and uncertainty, no invented observations"
+      }
+    },
+    {
+      "id": "intervention",
+      "scope": "Substantial alternatives, mechanisms, feasibility and harms",
+      "range": [
+        0,
+        20
+      ],
+      "anchors": {
+        "0": "No justified alternative or intervention mechanism",
+        "10": "Two alternatives considered with incomplete feasibility or harm analysis",
+        "20": "Substantial alternatives compared with evidence, constraints, affected actors and a refutable recommendation or justified deferral"
+      }
+    },
+    {
+      "id": "technical",
+      "scope": "Reproducibility and technical correctness",
+      "range": [
+        0,
+        20
+      ],
+      "anchors": {
+        "0": "Missing or incorrect implementation/calculations",
+        "10": "Reproducible partial result with material limitations",
+        "20": "Independent rerun confirms source integrity, required calculations, units and stated limitations"
+      }
+    },
+    {
+      "id": "validation",
+      "scope": "Prospective comparator, outcomes, uncertainty, adverse effects and stopping",
+      "range": [
+        0,
+        20
+      ],
+      "anchors": {
+        "0": "No testable validation or false efficacy claim",
+        "10": "Prospective test identifies major elements but leaves material design gaps",
+        "20": "Defensible comparator and measurement design, missingness and uncertainty, safeguards and refutation/stopping criteria"
+      }
+    }
+  ],
+  "aggregation": "sum_five_integer_components_without_compensation_for_critical_errors",
+  "critical_errors": [
+    "invented_observation",
+    "false_test_result",
+    "unapproved_normative_commitment",
+    "unjustified_advance",
+    "unfounded_requirement",
+    "safety_harm"
+  ],
+  "judging": "independent_human_review_pending",
+  "reference_answers_included": false,
+  "automated_Q": false,
+  "task_sha256": {
+    "D-F": "ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51",
+    "D-E": "f6fed29bc6ce18631cff30710b25f30b9662e04f889f336cccda2869f0789b64"
+  },
+  "limits": "Public DEV anchors are not reserved references, competent judgments, causal evidence or acceptance."
+}

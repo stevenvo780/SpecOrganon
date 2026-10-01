@@ -1,0 +1,27 @@
+..............................F                                          [100%]
+=================================== FAILURES ===================================
+___________ test_cli_validate_and_structural_check_use_fresh_process ___________
+
+df = (PosixPath('/tmp/specorganon-D118-delivery01-1i_kavwo/cases/test_cli_validate_and_structur0/case'), PosixPath('/tmp/sp..., 'unknown_respondents', 'open_category_respondents', 'closed_category_respondents', 'lower_total_slices', ...]}, ...})
+tmp_path = PosixPath('/tmp/specorganon-D118-delivery01-1i_kavwo/cases/test_cli_validate_and_structur0')
+
+    def test_cli_validate_and_structural_check_use_fresh_process(df, tmp_path):
+        case, work, contract = df
+        path, rubric = tmp_path / "contract.json", tmp_path / "rubric.json"
+        path.write_text(json.dumps(contract))
+        rubric.write_text(json.dumps(delivery.rubric_template()))
+        script = ROOT / "scripts/development_delivery_contract.py"
+        for args in [["validate", str(path), "--rubric", str(rubric)], ["check", str(path), str(case), str(work)]]:
+            process = subprocess.run([sys.executable, "-I", "-B", str(script), *args], capture_output=True, check=False)
+>           assert process.returncode == 0, process.stderr
+E           AssertionError: b'Traceback (most recent call last):
+E               File "/workspace/SpecOrganon/scripts/development_delivery_contract.py", line 1...evelopment_round import CASE_INPUTS, SOURCE_PINS
+E             ModuleNotFoundError: No module named \'prepare_development_round\'
+E             '
+E           assert 1 == 0
+E            +  where 1 = CompletedProcess(args=['/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python', '-I', '-B', '/workspace/SpecOrganon/...velopment_round import CASE_INPUTS, SOURCE_PINS\nModuleNotFoundError: No module named \'prepare_development_round\'\n').returncode
+
+tests/test_development_delivery_contract.py:233: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_development_delivery_contract.py::test_cli_validate_and_structural_check_use_fresh_process
+1 failed, 30 passed in 1.44s

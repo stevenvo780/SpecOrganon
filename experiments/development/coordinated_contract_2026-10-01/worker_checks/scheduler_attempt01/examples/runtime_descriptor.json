@@ -1,0 +1,110 @@
+{
+  "coordinates": {
+    "agent_count": 4,
+    "agents": "leader_two_workers_reviewer_v1",
+    "arm": "A",
+    "block_id": "dev-coord-block-48db76407bd2819cae887269",
+    "case_id": "D-F",
+    "case_package_sha256": "9d04b2dc2d23925f5196562351eafd7da6b766e8b9fec4f900e6fb6401e0f279",
+    "case_reference_sha256": null,
+    "coordination_sha256": "9bff227b92ee6e9537e8a56dd5d26767ac9d4ffaf3389f6afad991d1ab5b46a0",
+    "effort": "default",
+    "effort_provider_value": null,
+    "family": "fixture",
+    "input_sha256": "e569a41d7e6b69b55757ef63a28d5d82a94a4db37eb9a9c3afb868c903b6ed12",
+    "mode": "sequential",
+    "model_id": "offline-fixture-model",
+    "model_version": "fixture-v1",
+    "order_position": 1,
+    "release_block_order": 1,
+    "replica": 2,
+    "round": 1,
+    "stratum_id": "dev-coord-stratum-0a0703a34bced9da228b8eef",
+    "tier": "fixture"
+  },
+  "coordination": {
+    "bootstrap": {
+      "init": "leader",
+      "work": "empty"
+    },
+    "budget": "single_parent",
+    "max_concurrent_worker_requests": 2,
+    "profile": "leader_two_workers_reviewer_v1",
+    "reviewer": {
+      "serial": true,
+      "tools": false
+    },
+    "roles": [
+      "leader",
+      "worker-1",
+      "worker-2",
+      "reviewer"
+    ],
+    "sharing": "public_artifacts_only",
+    "workers": 2
+  },
+  "cost_limit_micro_usd": 0,
+  "execution_profile": "coordinated_development_parent_v1",
+  "inputs": {
+    "arm_prompts": {
+      "A": {
+        "sha256": "2847a3e8ce295d435814452364c0d5ce010b5058f0f4bab44d69ec119446fd5d"
+      },
+      "B": {
+        "sha256": "659f1bbcd67a40b6df1a540b8005fb125ed9baf4cf1c2c91afe140465e6dbcd5"
+      },
+      "C": {
+        "sha256": "28a5cd8c440e071e07b6fefb48b686c6ca52d78633ccf2d3ce92b47be5031567"
+      }
+    },
+    "common_prompt": {
+      "sha256": "4a0a917281103bf69d4ac3ed101e601f79cf513721a780406dae787ab6934ff0"
+    },
+    "task_contract": {
+      "sha256": "0668fdbbcc8c7b89628d48d0300f0a58c05fac01f39b4a10b5d1be85f1f9bbc0"
+    },
+    "tool_policy": {
+      "sha256": "97dfef4792fdc68b417037029d303c829e254a0e2ffef89cdf955f8045f02441"
+    }
+  },
+  "max_model_requests": 128,
+  "model": {
+    "effort": "default",
+    "effort_provider_value": null,
+    "family": "fixture",
+    "model_id": "offline-fixture-model",
+    "price_profile_sha256": "0935cfceaf91a57f025aa8604874a056456b2aa618f94088e6528ad0097c91c8",
+    "tier": "fixture",
+    "version": "fixture-v1"
+  },
+  "per_run_limits": {
+    "active_seconds": 5400,
+    "measured_tokens": 80000,
+    "tool_calls": 64
+  },
+  "provider_route": {
+    "api": "responses",
+    "provider": "fixture",
+    "service_tier": "default",
+    "version": "fixture-v1"
+  },
+  "run_id": "dev-coord-3d1b2dc4200bf86309fbfcab",
+  "run_sha256": "3d1b2dc4200bf86309fbfcab48012b9431a1f74221534cfa22d8d593e5e1eb56",
+  "runtime_policy": {
+    "sha256": "750ba7badb8d088ed730efaf4bc35daa77a448e8fdaf4bf42041933b9a825c8b"
+  },
+  "schedule_sha256": "6f9e8a589de78bcf10d5276268bd299c5bd6af29be75691edbc584321a68467f",
+  "schema": 1,
+  "shared_contract": {
+    "coordination_prompt": {
+      "sha256": "25ee7701b4cb8af434067c9bcf2f70ce1ce5b1d6fc1c492f5e1ee48002b63d71"
+    },
+    "delivery": {
+      "sha256": "b4af39d5b65a14849e885a9d65f0efe4f4e689989689c28c16cfcb3a6e78db5a"
+    },
+    "rubric": {
+      "sha256": "49672f0ef3b3a542b3b86b475936cc9adf1ddf60369e9b120ba33900294c99d8"
+    }
+  },
+  "source_freeze_sha256": "72a1344b4f2092493141bb7e037d6294883f4ee2aa75b7ef433190a91b1c4f20"
+}

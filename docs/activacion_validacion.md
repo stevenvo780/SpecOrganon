@@ -1,6 +1,6 @@
 # Distancia hasta la validación de GOAL
 
-**Corte:** 2026-10-01 UTC, revisión D-117. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). El [inventario D-109 de24 celdas](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json), las [preparaciones D-113](../experiments/development/isolated_analysis_2026-10-01/README.md) y el [runtime padre D-117](../experiments/development/parent_analysis_2026-10-01/README.md) son desarrollo mecánico: cero celdas formales. Este documento no cambia umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
+**Corte:** 2026-10-01 UTC, revisión D-118. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). El [inventario D-109 de24 celdas](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json), las [preparaciones D-113](../experiments/development/isolated_analysis_2026-10-01/README.md), el [runtime padre D-117](../experiments/development/parent_analysis_2026-10-01/README.md) y el [contrato común D-118](../experiments/development/coordinated_contract_2026-10-01/README.md) son desarrollo mecánico: cero celdas formales. Este documento no cambia umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
 
 | Criterio de GOAL | Evidencia actual | Puerta pendiente |
 | --- | --- | --- |
@@ -14,13 +14,23 @@
 
 ## Puerta 0: cerrar el desarrollo antes de abrir la reserva
 
+D-118 implementa contrato/rúbrica públicos, paquete de información común y un
+calendario nuevo de 12 IDs R1 con cuatro roles iguales A/B/C. Freeze `6a36197`:
+265 pruebas por Python3.11/3.12 y dos integraciones de preparación CLI,
+106 archivos y seis fixtures de estructura por intérprete; no participant/Q.
+El binding coteja metadata declarada; no acredita runtime, proveedor o permiso.
+Faltan adapters coordinados A/B y continuidad/binding C, control de uso/suma
+de actividad efectiva y rutas autorizadas antes de iniciar R1. El digest del
+freeze y el prompt deben cotejarse con la publicación específica en la futura
+admisión. R2 continúa pendiente de R1 y adaptación congelada prospectivamente.
+
 D-117 cierra el bootstrap C desde work vacío: el líder crea el grafo por init
 sellado y comparte ledger/contexto/claim con las ramas D116, reviewer y merge.
 Pasaron 98 pruebas por Python 3.11/3.12 y seis trazas originales HTTP/CLI con
 herramientas reales y respuestas sintéticas: 14 requests/10 tools cada una,
 incluidos 3 requests/2 tools del líder. Ya no recibe un grafo del caller.
-Ese cierre mecánico no acredita nueve fases completas, coordinación/contrato/
-rúbrica comunes A/B/C, consumo/actividad remotos, proveedor o celda formal.
+Ese cierre mecánico no acredita nueve fases completas, runtimes coordinados
+comparables A/B/C, consumo/actividad remotos, proveedor o celda formal.
 El prototipo y el motor metodológico tienen modelos de fases distintos; su
 continuidad necesita un contrato explícito. Protocolo §2 exige las24 corridas,
 sin imponer solo ni las nueve fases internas del toolkit a cada prototipo.
@@ -32,8 +42,8 @@ originales y análisis con estado protegido. D-113 conservó fuentes e inventari
 verificó seis trazas de fixtures por intérprete y cuatro CLI de preparación:
 470passed3.11/178passed3.12, proveedor falso. Se resolvieron análisis aislado y
 lectura común de PDF; D116 integra análisis y D117 añade arranque sin seed
-externo en C. Faltan preparación comparable y contrato/rúbrica comunes sin respuestas, entregados antes de R1,
-más ruta/modelo/telemetría/autorización. El
+externo en C. D118 fija preparación y contrato/rúbrica comunes sin respuestas;
+faltan ejecución coordinada comparable y ruta/modelo/telemetría/autorización. El
 oráculo D-113 valida su contrato de fixtures, no Q ni cualquier output de tarea.
 Los topes locales compartidos no autentican consumo/precio/cancelación remotos.
 

@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "records": [
+    {
+      "command": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_prepare_coordinated_development.py",
+        "--basetemp",
+        "/tmp/specorganon-D118-preparer-5s_p94tf/pytest",
+        "-x"
+      ],
+      "duration_seconds": 76.5591737870127,
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "ruff",
+        "check",
+        "scripts/prepare_coordinated_development.py",
+        "tests/test_prepare_coordinated_development.py",
+        "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/preparer_capture.py"
+      ],
+      "duration_seconds": 0.011270298971794546,
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import pathlib; [compile(pathlib.Path(p).read_bytes(), p, 'exec') for p in ['scripts/prepare_coordinated_development.py', 'tests/test_prepare_coordinated_development.py']]"
+      ],
+      "duration_seconds": 0.03287577902665362,
+      "exit_code": 0
+    }
+  ],
+  "runtime_root": "/tmp/specorganon-D118-preparer-5s_p94tf",
+  "schema": 1,
+  "scope": "offline_preparer_gate",
+  "sources_unchanged": true
+}

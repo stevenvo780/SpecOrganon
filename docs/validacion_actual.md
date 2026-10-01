@@ -1,5 +1,26 @@
 # Auditoría de aceptación actual
 
+## D-118 · Preparación coordinada común, sin nuevas celdas evaluadas
+
+[Dossier](../experiments/development/coordinated_contract_2026-10-01/README.md).
+Freeze `6a36197` conserva 62 fuentes y extractor externo; 103 rutas D117
+verificadas por root y revisor. Pasaron **265 pruebas por Python 3.11/3.12**
+con Ruff/compile/diff0 y fuentes estables. Se preparan 12 IDs nuevos R1 de
+cuatro roles; CLI reales build/verify/validate/check cotejan 106 archivos y
+seis fixtures estructurales por intérprete, sin requests de modelo.
+
+Contrato/rúbrica e información común están implementados y ligados al
+calendario. Los métodos originales y su coordinación aún necesitan runtimes
+A/B y continuidad/binding C. El checker no ejecuta `analysis.py`, no autentica
+metrics.json ni verifica pasajes/calidad; los valores nulos motivados no son
+resultados. El freeze/prompt declarado no autoriza admisión pagada ni prueba
+identidad/efectivo esfuerzo, uso o actividad. R2 permanece bloqueada.
+
+**C1 técnico D107 preservado; C2–C5 No demostrado; 0/24 formales.** No se
+repitió instalación/global2674/wheel ni se modificó el producto. Siguen
+ejecuciones comparables R1/R2, selección, reserva/custodia/jueces/autoridades,
+campo y transferencia. Los cortes siguientes conservan su alcance histórico.
+
 ## D-108 · Derivación alimentaria y conservación
 
 [Dossier](../experiments/development/bread_energy_derivation_2026-09-30/README.md):

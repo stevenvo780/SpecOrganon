@@ -1,0 +1,257 @@
+{
+  "api": [
+    "validate_provider_route(raw)",
+    "validate_manifest(raw)",
+    "compile_schedule(raw)",
+    "validate_schedule(raw)",
+    "runtime_descriptor(schedule,run_id)",
+    "validate_runtime_binding(schedule,run_id,descriptor)",
+    "canonical_bytes(value)",
+    "digest(value)"
+  ],
+  "attempts": [
+    {
+      "commands": [
+        {
+          "command": [
+            "/usr/bin/python3",
+            "-m",
+            "ruff",
+            "check",
+            "scripts/plan_coordinated_development.py",
+            "tests/test_plan_coordinated_development.py"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.027794837951660156,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/01-result.json",
+          "runtime_root": null
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-c",
+            "from pathlib import Path; import sys; [compile(Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print(sys.version)",
+            "scripts/plan_coordinated_development.py",
+            "tests/test_plan_coordinated_development.py"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.030653715133666992,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/02-result.json",
+          "runtime_root": null
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "tests/test_plan_coordinated_development.py",
+            "--basetemp=/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/test-artifacts-311"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.34627532958984375,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/03-result.json",
+          "runtime_root": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/test-artifacts-311"
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-B",
+            "-c",
+            "from pathlib import Path; import sys; [compile(Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print(sys.version)",
+            "scripts/plan_coordinated_development.py",
+            "tests/test_plan_coordinated_development.py"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.022722244262695312,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/04-result.json",
+          "runtime_root": null
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "tests/test_plan_coordinated_development.py",
+            "--basetemp=/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/test-artifacts-312"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.36953306198120117,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/05-result.json",
+          "runtime_root": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/test-artifacts-312"
+        }
+      ],
+      "path": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01",
+      "runtime_roots": [
+        "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/test-artifacts-311",
+        "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/test-artifacts-312"
+      ],
+      "source_snapshot": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/source_snapshot"
+    }
+  ],
+  "binding_result": {
+    "binding_matches": true,
+    "classification": "development_coordinated_runtime_binding_unsealed",
+    "descriptor_sha256": "457ad9de62bcf77214bdb042b438c4969fe4f4834f5c1b92546d4075cbf398b7",
+    "execution_authorized": false,
+    "run_id": "dev-coord-3d1b2dc4200bf86309fbfcab",
+    "run_sha256": "3d1b2dc4200bf86309fbfcab48012b9431a1f74221534cfa22d8d593e5e1eb56",
+    "runtime_authenticated": false,
+    "schedule_sha256": "6f9e8a589de78bcf10d5276268bd299c5bd6af29be75691edbc584321a68467f",
+    "schema": 1
+  },
+  "classification": "development_coordinated_scheduler_worker_handoff_unsealed",
+  "commit_created": false,
+  "constants": {
+    "CLASSIFICATION": "development_coordinated_round_preparation_unsealed",
+    "MANIFEST_SCHEMA": "specorganon.coordinated_development_manifest.v1",
+    "RUNTIME_PROFILE": "coordinated_development_parent_v1",
+    "SCHEDULE_SCHEMA": "specorganon.coordinated_development_schedule.v1"
+  },
+  "coordination": {
+    "bootstrap": {
+      "init": "leader",
+      "work": "empty"
+    },
+    "budget": "single_parent",
+    "max_concurrent_worker_requests": 2,
+    "profile": "leader_two_workers_reviewer_v1",
+    "reviewer": {
+      "serial": true,
+      "tools": false
+    },
+    "roles": [
+      "leader",
+      "worker-1",
+      "worker-2",
+      "reviewer"
+    ],
+    "sharing": "public_artifacts_only",
+    "workers": 2
+  },
+  "errors": [
+    "DevelopmentPlanError",
+    "CoordinatedDevelopmentError (alias)"
+  ],
+  "examples": {
+    "classification": "synthetic metadata, no assets/runtime/provider exists",
+    "path": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/worker_checks/scheduler_attempt01/examples"
+  },
+  "files": {
+    "scripts/plan_coordinated_development.py": "7f37134191dbb220c86bf65e4c2141020f711ff74d34a25bafe7cf5c3296deb2",
+    "tests/test_plan_coordinated_development.py": "202e1839d50d089b1d2d89c48aad3871b8b7f9d763c90d2380fc59c1c93b4a85"
+  },
+  "implementation_ready": true,
+  "limits": [
+    "Pure metadata: no filesystem/provider/claim effects in scheduler APIs",
+    "No existing solo schedule relabelled; base DEV2 only normalizes common declarations",
+    "Local matching descriptor does not authenticate runtime, availability, provider, effort, activity, telemetry, custody, quality or execution authorization",
+    "A/B coordinated runtimes and D117 C binding still pending; R2 remains rejected",
+    "Root/preparer own real bytes/capsules/delivery/rubric validation and final independent review"
+  ],
+  "manifest_keys": [
+    "base",
+    "coordination",
+    "provider_route",
+    "runtime_policy",
+    "schema",
+    "shared_contract",
+    "source_freeze_sha256"
+  ],
+  "prospective_plan_commit": "4abc46f27977f3e245eef0cbd20ce91da2dee916",
+  "route": "provider=openai|google|minimax|fixture; api/version/service_tier are 1\u2013128 ASCII identifier characters (letters/digits/dot/underscore/hyphen), begin alphanumeric; no URL/header/auth fields",
+  "runtime_coordinates_keys": [
+    "agent_count",
+    "agents",
+    "arm",
+    "block_id",
+    "case_id",
+    "case_package_sha256",
+    "case_reference_sha256",
+    "coordination_sha256",
+    "effort",
+    "effort_provider_value",
+    "family",
+    "input_sha256",
+    "mode",
+    "model_id",
+    "model_version",
+    "order_position",
+    "release_block_order",
+    "replica",
+    "round",
+    "stratum_id",
+    "tier"
+  ],
+  "runtime_descriptor_keys": [
+    "coordinates",
+    "coordination",
+    "cost_limit_micro_usd",
+    "execution_profile",
+    "inputs",
+    "max_model_requests",
+    "model",
+    "per_run_limits",
+    "provider_route",
+    "run_id",
+    "run_sha256",
+    "runtime_policy",
+    "schedule_sha256",
+    "schema",
+    "shared_contract",
+    "source_freeze_sha256"
+  ],
+  "schedule_keys": [
+    "block_count",
+    "cases",
+    "classification",
+    "coordination",
+    "coordination_sha256",
+    "cost_limit_micro_usd",
+    "input_sha256",
+    "inputs",
+    "manifest",
+    "max_model_requests",
+    "models",
+    "per_run_limits",
+    "protocol_sha256",
+    "provider_route",
+    "run_count",
+    "runs",
+    "runtime_policy",
+    "schedule_sha256",
+    "schema",
+    "seed",
+    "shared_contract",
+    "source_freeze_sha256"
+  ],
+  "verification": {
+    "compile311": "passed",
+    "compile312": "passed",
+    "original_validator_unchanged": {
+      "command": [
+        "git",
+        "show",
+        "e2f76688ecd64d286f266d305d28fb256d377111:scripts/plan_development_round.py"
+      ],
+      "equal_live_bytes": true,
+      "sha256": "dbaa8cfd034190fa56e0719e9e71e3b6a342d02cdee50f27e8dce422f03f8fd2"
+    },
+    "pytest311": "87 passed in 0.11s",
+    "pytest312": "87 passed in 0.14s",
+    "ruff": "passed"
+  }
+}
