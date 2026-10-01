@@ -1,5 +1,23 @@
 # Despacho medido de una solicitud de desarrollo
 
+## Preparación de rondas A/B/C (D-112)
+
+`scripts/prepare_development_round.py` conecta los casos públicos originales
+D-F/D-E al contexto común: esquema DEV separado,12 preparaciones R1 y cero
+celdas formales ejecutadas. La configuración fija modelo/esfuerzo, perfil de
+precios declarado, topes y fuentes; team/bridge verifican precio y topes de
+solicitudes/costo también al invocarlos directamente. Un plan sólo reduce
+topes y DEV declara solo/leader, sin roles adicionales ni paralelismo.
+
+El driver sellado ejecuta el core original A/B/C y entrega archivos por
+bloques contados. `approve` y `analyze` están bloqueados; análisis aislado,
+lectura común completa y C paralelo siguen pendientes. Ronda2 necesita su
+adaptación prospectiva a R1. Preparar no autoriza gasto ni ejecuta proveedor.
+El [dossier D112](../experiments/development/development_round_adapter_2026-10-01/README.md)
+preserva233passed3.11/142passed3.12 y seis trazas con proveedor falso;
+tokens/costo sintéticos no son medición de un modelo ni factura. Los contratos
+y gates de los cortes anteriores se conservan como evidencia histórica.
+
 ## Contexto común de una corrida (D-111)
 
 `scripts/run_managed_team.py` añade un plan optativo `schema:2` con segmentos

@@ -1,5 +1,24 @@
 # Estado de reanudación
 
+**D-112 conecta preparaciones A/B/C con el ejecutor común:**
+[dossier](../experiments/development/development_round_adapter_2026-10-01/README.md).
+Esquema DEV explícito para12 preparaciones R1; D-F/D-E originales fijados a
+Git98a1403, core embebido y modos reales, precio/topes comunes comprobados en
+los runners. Freeze1c3cbf4:233passed3.11/142passed3.12, Ruff/compile/diff y
+CLI build/prepare aprobados. Seis trazas mecánicas con sandbox, ocho tools,
+ledger único y relevo sin reposición;150tokens/costo sintéticos por traza,
+norma pending. Negativos y fuente previa conservados; fchmod incompatible
+con sandbox corregido sin flexibilizarlo; revisión independiente cerrada
+sin P1/P2 abierto en el alcance preparatorio.
+
+**1/5 C1 técnico; C2–C5 No demostrado; cero nuevas celdas formales.**
+Antes de R1 real faltan análisis aislado, lectura común de PDF/CSV bajo topes,
+paralelismo real C y ruta/telemetría/autorización. Luego R1→mejoras/freezeR2,
+24 ensayos y selección; siguen custodia/jueces/autoridades/campo/transferencia.
+Ronda2 rechazada por el preparador hasta su adaptación prospectiva. Aceptación
+mecánica de fases no significa revisión humana. GOAL/protocolo/producción/
+wheel y fuentes originales intactos. Los cortes siguientes son históricos.
+
 **D-111 integra un contexto de presupuesto y relevos por corrida:**
 [dossier](../experiments/development/shared_run_context_2026-10-01/README.md)
 y [contrato](presupuesto_solicitudes_modelo.md). Runner schema2: modelo/esfuerzo
