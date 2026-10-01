@@ -232,4 +232,3 @@ def test_real_cli_build_and_fresh_process_verify(tmp_path, contracts):
         capture_output=True, text=True, timeout=60)
     assert failed.returncode == 2
     assert before == {name: (target / name).read_bytes() for name in before}
-
