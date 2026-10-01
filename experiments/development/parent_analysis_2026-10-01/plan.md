@@ -96,6 +96,9 @@ integración, replay y veredicto requieren comprobación independiente.
 
 Sin claves, proveedores auténticos, gasto de API, publicación externa o campo.
 Tokens de fixture y precios declarados no acreditan telemetría/factura. La
+continuidad del reloj activo local no acredita actividad real ni suma de
+tiempos de agentes dentro del proveedor; esa contabilidad debe cerrarse antes
+de la comparación formal, con esperas API/humanas declaradas y sin imputación.
 frontera local no protege contra un actor hostil del mismo UID. Ningún cálculo
 documental prueba verdad empírica, autoridad normativa, Q o causalidad.
 
