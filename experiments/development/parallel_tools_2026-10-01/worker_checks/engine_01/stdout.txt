@@ -1,0 +1,26 @@
+...................F................................                     [100%]
+=================================== FAILURES ===================================
+________________ test_deadline_late_callback_no_journal_effects ________________
+
+tmp_path = PosixPath('/tmp/specorganon-D115-engine01-1jc9c7x4/cases/test_deadline_late_callback_no0')
+
+    def test_deadline_late_callback_no_journal_effects(tmp_path):
+        directory, status, adapters = prepare(tmp_path, lambda p: p.update(active_limit_seconds=2))
+        entered, release = threading.Event(), threading.Event()
+        for adapter in adapters.values():
+            adapter.barrier = None
+        def block(payload):
+            entered.set()
+            release.wait(8)
+        adapters["task-2"].hook = block
+        start = time.monotonic()
+        result = step(directory, status, adapters)
+>       assert entered.is_set() and result["state"] == "indeterminate"
+E       assert (False)
+E        +  where False = is_set()
+E        +    where is_set = <threading.Event at 0x7fa4f0c56d50: unset>.is_set
+
+tests/test_managed_parallel_tools.py:294: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_managed_parallel_tools.py::test_deadline_late_callback_no_journal_effects
+1 failed, 51 passed in 157.77s (0:02:37)

@@ -1,5 +1,29 @@
 # Estado de reanudación
 
+**D-115 ejecuta herramientas en ramas privadas e integra sus efectos:**
+[dossier](../experiments/development/parallel_tools_2026-10-01/README.md).
+Perfil nuevo con conversaciones privadas y pausas CAS, un claim padre,
+ledger/reloj/topes comunes, sandbox sellado y ownership disjunto. Reviewer
+serial sólo recibe artefactos públicos; replay de RAW/recibos/ledger/historia
+antes de tools. Merge obligatorio reproduce operaciones con el core original,
+reúne dos cambios y reportes y conserva invalidaciones/normas pending. Publicación
+sólo tras finish y marcador válido; v1 textual conserva su contrato.
+Freeze `9a6c4d8`: **272 passed en3.11 y272 en3.12**, Ruff/compile/diff0,
+34 fuentes/38 base y41 copias por gate intactas. Seis corridas HTTP/CLI
+sintéticas distintas:7requests/4tools/91tokens ficticios cada una. Archivo12.671
+regulares cotejado por root y revisor; tres P2 cerrados y negativos conservados.
+
+**C1 técnico D107 vigente; C2–C5 No demostrado; celdas formales0/24.**
+Siguiente: integrar análisis/métricas D113 en este perfil C y preparaciones
+comparables, fijar contrato/rúbrica común sin respuestas y ruta/modelo/effort/
+versión/telemetría/autorización. Luego12R1 reales→adaptación/freeze→12R2,
+selección; siguen panel, custodia, jueces, autoridades, reserva, campo y
+transferencia. El wrapper C de este corte sólo expone el driver de método;
+analysis_readonly del broker es un control aislado, sin validador genérico/Q.
+GOAL/protocolo/producción/core/wheel/casos originales intactos. No hay proveedor
+auténtico ni gasto/campo/autoridad humana acreditados. Los cortes siguientes
+son históricos y conservan sus pendientes de esa fecha.
+
 **D-114 ejecuta propuestas C en paralelo con presupuesto común:**
 [dossier](../experiments/development/parallel_wave_2026-10-01/README.md).
 WaveLedger schema 3 reserva el lote entero antes de cualquier envío; contexto

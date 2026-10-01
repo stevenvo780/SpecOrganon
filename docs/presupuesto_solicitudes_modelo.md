@@ -1,5 +1,30 @@
 # Despacho medido de una solicitud de desarrollo
 
+## Conversaciones con herramientas privadas (D-115)
+
+`managed_parallel_tools.py` añade el perfil optativo parallel_tool_wave_v2:
+turnos reales por worker, incluido cada follow-up de herramientas, se reservan
+por lotes en el mismo WaveLedger3/contexto2/claim padre. Pausas CAS conservan
+todos los contadores y tiempo. Un broker fija delegaciones y reserva ordinal
+global fsync antes del sandbox sellado; no abre claims o saldo por branch.
+Replay liga RAW/recibo/ledger/historia antes de efectos; pending no se reenvía.
+
+Driver C limita IDs propios y prohíbe init/approve/advance. Reviewer no tiene
+tools ni razonamiento privado. Merge obligatorio reproduce operaciones con
+el core, coteja work y crea estado reunido nuevo; marcador de publicación sólo
+después de finish, sin mutar journals congelados. Deadline/claim/tamper/cierre
+incierto impiden publicar/reanudar. Herramientas host seriales; requests de
+workers paralelos. No se garantiza cancelación remota ni aislamiento completo
+frente a procesos del mismo UID.
+
+[Dossier](../experiments/development/parallel_tools_2026-10-01/README.md):272
+pruebas por Python3.11/3.12 y seis corridas HTTP/CLI sintéticas verificadas,
+7requests/4tools/91tokens de fixture por corrida. Identidad nueva tool-wave-…,
+no reinterpretación de DEV solo/tríos ni celda formal. La rama C expone sólo
+el driver de método; incorporar análisis/métricas D113 y contrato/rúbrica
+comunes sigue pendiente. Sin provider/usage/factura/Q autenticados ni permiso
+de gasto/campo; criterio4 continúa No demostrado.
+
 ## Propuestas paralelas optativas (D-114)
 
 `managed_wave_ledger.py` schema 3 admite 1–4 requests de una wave atómicamente:

@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "sources": {
+    "scripts/c_parallel_tools.py": "21d6da8c827ab4d53d3f2ea8c06ec9e2569f7734bf3aebaae9f70663ec3a8087",
+    "scripts/development_branch_tool.py": "8100e64f4ea562d14dd00130bce061ffae3d07debc260933bcec37f5d6c49485",
+    "scripts/managed_parallel_tools.py": "eea0466e585e0f118b3a51ba7720f9c5b734d94f4964041e8930f71faa4af40a",
+    "scripts/managed_parallel_wave.py": "82e517b374f4309008ed9b51d55cff4717123fcdc1491b87291a26b2bbe7fa32",
+    "scripts/parallel_tool_broker.py": "5cf6b3c1b9836b0091f5b7c18ae4481b333000aca9e19503d207118a0ab52b70",
+    "tests/test_c_parallel_tools.py": "3dfa54d88a8c07f5b7549695bff9eff2652d64414ddd3fad57c50988cffa3ad5"
+  },
+  "checks": [
+    {
+      "cmd": [
+        "ruff",
+        "check",
+        "scripts/c_parallel_tools.py",
+        "scripts/development_branch_tool.py",
+        "scripts/managed_parallel_tools.py",
+        "scripts/managed_parallel_wave.py",
+        "scripts/parallel_tool_broker.py",
+        "tests/test_c_parallel_tools.py"
+      ],
+      "returncode": 0,
+      "seconds": 0.014955397986341268
+    },
+    {
+      "cmd": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_c_parallel_tools.py",
+        "--basetemp",
+        "/tmp/specorganon-D115-integration_02-g4dv4p_f/cases"
+      ],
+      "returncode": 0,
+      "seconds": 13.3144709529588
+    }
+  ],
+  "runtime": "/tmp/specorganon-D115-integration_02-g4dv4p_f"
+}

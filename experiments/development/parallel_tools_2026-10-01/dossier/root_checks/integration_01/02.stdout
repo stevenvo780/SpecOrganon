@@ -1,0 +1,93 @@
+FF..F                                                                    [100%]
+=================================== FAILURES ===================================
+___ test_real_http_private_tools_checkpoints_and_actual_merge[D-F-synthetic] ___
+
+tmp_path = PosixPath('/tmp/specorganon-D115-integration_01-l2d5kdq0/cases/test_real_http_private_tools_c0')
+domain = 'D-F-synthetic'
+
+    @pytest.mark.parametrize("domain", ["D-F-synthetic", "D-E-synthetic"])
+    def test_real_http_private_tools_checkpoints_and_actual_merge(tmp_path, domain):
+        state, case, inputs, config = fixture(tmp_path / "inputs", domain)
+        original = state.read_bytes()
+        run = tmp_path / "run"
+        result = c.prepare_c_tool_wave(run, state, case, inputs, config, admission_root=tmp_path / "admissions")
+        checkpoints = [result]
+        with server(run) as (address, trace):
+            transports = {task: LocalHTTP(address) for task in ("c-task-1", "c-task-2", "reviewer")}
+            for step in range(3):
+                before = result
+                result = c.execute_c_tool_wave_step(run, transports, expected_checkpoint=result["checkpoint_sha256"])
+                checkpoints.append(result)
+                if step < 2:
+                    assert result["state"] == "paused", result
+                    assert result["budget"]["request_count"] == (step + 1) * 2
+>                   assert result["active_seconds"] >= before["active_seconds"]
+                           ^^^^^^^^^^^^^^^^^^^^^^^^
+E                   KeyError: 'active_seconds'
+
+tests/test_c_parallel_tools.py:187: KeyError
+----------------------------- Captured stdout call -----------------------------
+{"action": "init", "case_id": "D-F-synthetic", "ok": true}
+___ test_real_http_private_tools_checkpoints_and_actual_merge[D-E-synthetic] ___
+
+tmp_path = PosixPath('/tmp/specorganon-D115-integration_01-l2d5kdq0/cases/test_real_http_private_tools_c1')
+domain = 'D-E-synthetic'
+
+    @pytest.mark.parametrize("domain", ["D-F-synthetic", "D-E-synthetic"])
+    def test_real_http_private_tools_checkpoints_and_actual_merge(tmp_path, domain):
+        state, case, inputs, config = fixture(tmp_path / "inputs", domain)
+        original = state.read_bytes()
+        run = tmp_path / "run"
+        result = c.prepare_c_tool_wave(run, state, case, inputs, config, admission_root=tmp_path / "admissions")
+        checkpoints = [result]
+        with server(run) as (address, trace):
+            transports = {task: LocalHTTP(address) for task in ("c-task-1", "c-task-2", "reviewer")}
+            for step in range(3):
+                before = result
+                result = c.execute_c_tool_wave_step(run, transports, expected_checkpoint=result["checkpoint_sha256"])
+                checkpoints.append(result)
+                if step < 2:
+                    assert result["state"] == "paused", result
+                    assert result["budget"]["request_count"] == (step + 1) * 2
+>                   assert result["active_seconds"] >= before["active_seconds"]
+                           ^^^^^^^^^^^^^^^^^^^^^^^^
+E                   KeyError: 'active_seconds'
+
+tests/test_c_parallel_tools.py:187: KeyError
+----------------------------- Captured stdout call -----------------------------
+{"action": "init", "case_id": "D-E-synthetic", "ok": true}
+______ test_final_checkpoint_failure_keeps_merge_prepared_and_unpublished ______
+
+tmp_path = PosixPath('/tmp/specorganon-D115-integration_01-l2d5kdq0/cases/test_final_checkpoint_failure_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7faf5954d050>
+
+    def test_final_checkpoint_failure_keeps_merge_prepared_and_unpublished(tmp_path, monkeypatch):
+        state, case, inputs, config = fixture(tmp_path / "inputs")
+        run = tmp_path / "run"
+        result = c.prepare_c_tool_wave(run, state, case, inputs, config, admission_root=tmp_path / "admissions")
+        with server(run) as (address, _):
+            transports = {task: LocalHTTP(address) for task in ("c-task-1", "c-task-2", "reviewer")}
+            for _ in range(2):
+                result = c.execute_c_tool_wave_step(run, transports, expected_checkpoint=result["checkpoint_sha256"])
+    
+            def fail_finish(self, cursor):
+                raise OSError("synthetic checkpoint failure after actual merge")
+    
+            monkeypatch.setattr(RunContext, "finish", fail_finish)
+            result = c.execute_c_tool_wave_step(run, transports, expected_checkpoint=result["checkpoint_sha256"])
+        assert result["state"] == "indeterminate"
+        assert result["artifacts"] == []
+        assert result.get("merge_result") is None
+>       assert (run / "merge" / ".pending.json").is_file()
+E       AssertionError: assert False
+E        +  where False = is_file()
+E        +    where is_file = ((PosixPath('/tmp/specorganon-D115-integration_01-l2d5kdq0/cases/test_final_checkpoint_failure_0/run') / 'merge') / '.pending.json').is_file
+
+tests/test_c_parallel_tools.py:265: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "init", "case_id": "D-F-synthetic", "ok": true}
+=========================== short test summary info ============================
+FAILED tests/test_c_parallel_tools.py::test_real_http_private_tools_checkpoints_and_actual_merge[D-F-synthetic]
+FAILED tests/test_c_parallel_tools.py::test_real_http_private_tools_checkpoints_and_actual_merge[D-E-synthetic]
+FAILED tests/test_c_parallel_tools.py::test_final_checkpoint_failure_keeps_merge_prepared_and_unpublished
+3 failed, 2 passed in 88.42s (0:01:28)

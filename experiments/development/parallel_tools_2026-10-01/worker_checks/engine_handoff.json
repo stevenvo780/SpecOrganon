@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "classification": "development_parallel_tools_worker_handoff_unsealed",
+  "sources": {
+    "scripts/managed_parallel_tools.py": {
+      "sha256": "421033d6e07212954c0de2e67f0f222e689d82e255682392bd00d9f6c1138ecf",
+      "bytes": 30822
+    },
+    "scripts/managed_parallel_wave.py": {
+      "sha256": "82e517b374f4309008ed9b51d55cff4717123fcdc1491b87291a26b2bbe7fa32",
+      "bytes": 26591
+    },
+    "tests/test_managed_parallel_tools.py": {
+      "sha256": "84123b0bf022e41cd15f29ff107df2129171f749298687f5d9f2e82bda40eabf",
+      "bytes": 19302
+    }
+  },
+  "api": {
+    "prepare_tool_wave": "(run_dir, plan, *, admission_root=None)",
+    "execute_tool_wave_step": "(run_dir, transports_by_task, *, expected_checkpoint, broker=None, guard=None, merge=None); merge callable REQUIRED before any active lease/claim/model operation",
+    "read_tool_wave_status": "(run_dir)",
+    "batch_seam": "keyword-only request_ids=None, decoder=None; existing task_id transport keys and zero-tools v1 defaults preserved"
+  },
+  "checks": [
+    {
+      "receipt": "experiments/development/parallel_tools_2026-10-01/worker_checks/engine_01/receipt.json",
+      "receipt_sha256": "007eb168e0b1c4f9ace1011f338a624c64be8c636cc026bc6b9f7e47deb3d195",
+      "exit_code": 1,
+      "duration_seconds": 158.02434612601064,
+      "source_stable": true,
+      "workspace": "/tmp/specorganon-D115-engine01-1jc9c7x4",
+      "stdout_sha256": "16ac0d4039661276bc2d54a135da8076932368e9ae4f538c96f14763dd3e86d5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "receipt": "experiments/development/parallel_tools_2026-10-01/worker_checks/engine_02/receipt.json",
+      "receipt_sha256": "dc8879d0ff77e534a8531e5c5313146921f1d5b63f0695438966b0128f4a0810",
+      "exit_code": 0,
+      "duration_seconds": 46.08054785296554,
+      "source_stable": true,
+      "workspace": "/tmp/specorganon-D115-engine02-i6001iol",
+      "stdout_sha256": "153c7813bb1ac5e15d46e6b963c994f561be09ae8ad3ee56e002095a3f59aa2a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "receipt": "experiments/development/parallel_tools_2026-10-01/worker_checks/engine_03/receipt.json",
+      "receipt_sha256": "b10364e14bd5261bda5ce315835da2a364e72cfda6ce38969b09945be5d9c657",
+      "exit_code": 0,
+      "duration_seconds": 10.652870288991835,
+      "source_stable": true,
+      "workspace": "/tmp/specorganon-D115-engine_03-47bt131_",
+      "stdout_sha256": "162f473306c785e871ea3ad928395e600dd1965a184f2f830e12ef7e20fa7e57",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "receipt": "experiments/development/parallel_tools_2026-10-01/worker_checks/engine_04/receipt.json",
+      "receipt_sha256": "cf0df49b3308338d51f4a4ea35e0b25da0571cc8d42d7a1bd799106bf57ad04e",
+      "exit_code": 0,
+      "duration_seconds": 13.096175345010124,
+      "source_stable": true,
+      "workspace": "/tmp/specorganon-D115-engine_04-hnpls3fi",
+      "stdout_sha256": "09f0d38d8534984b2c01ab2a162b319733cb1967c798b79a38efb469f8501d50",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "receipt": "experiments/development/parallel_tools_2026-10-01/worker_checks/engine_05/receipt.json",
+      "receipt_sha256": "e73de8db6223f54c68815d095329d7b1b2e9cf6b00d7c60665c2b0a844f1dae9",
+      "exit_code": 0,
+      "duration_seconds": 9.463645496987738,
+      "source_stable": true,
+      "workspace": "/tmp/specorganon-D115-engine_05-68qbwkay",
+      "stdout_sha256": "b07d12842476a423fea22001fecfd9bc44d378f996e16b8c9f4e23c12c1ac2cc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "receipt": "experiments/development/parallel_tools_2026-10-01/worker_checks/engine_06/receipt.json",
+      "receipt_sha256": "428edf25baa9f6172654dedaa1ac83369c74deed92b1261664d55ed4987c4173",
+      "exit_code": 0,
+      "duration_seconds": 11.8658013259992,
+      "source_stable": true,
+      "workspace": "/tmp/specorganon-D115-engine_06-mz3m1fk9",
+      "stdout_sha256": "f3390319dcaaeccef07fbd593e1c30db2f0e547a6c63c8d28f2a968eef3b2a55",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "receipt": "experiments/development/parallel_tools_2026-10-01/worker_checks/engine_07/311/receipt.json",
+      "receipt_sha256": "7861ad29bba90752a0aabe9ed67cc082d7b0874db729f5fcf170103179e7e504",
+      "exit_code": 0,
+      "duration_seconds": 0.6364345340407453,
+      "source_stable": true
+    },
+    {
+      "receipt": "experiments/development/parallel_tools_2026-10-01/worker_checks/engine_07/312/receipt.json",
+      "receipt_sha256": "2364e6ffc57198e347cc8c82653ff2642ce7f2af312deaa0e1574cb21574f6e6",
+      "exit_code": 0,
+      "duration_seconds": 0.6559796319925226,
+      "source_stable": true
+    },
+    {
+      "receipt": "experiments/development/parallel_tools_2026-10-01/worker_checks/engine_07/ruff/receipt.json",
+      "receipt_sha256": "f6352010e81d79a1358712856da2171992e9e64e0ee082ad1207f765cd1c0479",
+      "exit_code": 0,
+      "duration_seconds": 0.01200581603916362,
+      "source_stable": true
+    },
+    {
+      "receipt": "experiments/development/parallel_tools_2026-10-01/worker_checks/engine_07/compile311/receipt.json",
+      "receipt_sha256": "9e404de68643d1562668dc60d8764a7164e09ec29f6e109f159c59054c51f16b",
+      "exit_code": 0,
+      "duration_seconds": 0.03567970503354445,
+      "source_stable": true
+    },
+    {
+      "receipt": "experiments/development/parallel_tools_2026-10-01/worker_checks/engine_07/compile312/receipt.json",
+      "receipt_sha256": "4a10da2b3066783f3fe389ae086850bd0ea345a88fb73fbeeea2f2bb10437eca",
+      "exit_code": 0,
+      "duration_seconds": 0.03719641995849088,
+      "source_stable": true
+    }
+  ],
+  "results": {
+    "engine_01": "51 passed, 1 failed: callback not entered before 2s deadline; originals retained",
+    "engine_02": "54 passed (23 v2 + 31 v1) after source-closure cache",
+    "engine_03_04": "25 passed each Python 3.11/3.12 after pretool RAW/history checks",
+    "engine_05_06": "26 passed each Python 3.11/3.12 after mandatory merge callback; test SHA 59387ed7b316cd4d28c9b836fbb9a0864295cb5b48d514337e2ee8eefb25cce4",
+    "engine_07": "final test SHA changed only registry glob claims/* -> *.json; that exact negative passed both Pythons; Ruff/compile3.11/3.12 passed"
+  },
+  "limits": [
+    "same-runtime daemon model callbacks may outlive deadline but cannot write host journals or publish late results",
+    "same-UID sandbox is not complete filesystem isolation",
+    "RunContext inventory bytes/entries remain bounded and may reject cumulative histories before declared request/token/tool caps are reached",
+    "fixture merge verifies public branch effects mechanically; root wrapper owns actual core replay/merged-state validation",
+    "provider identity and billing are not authenticated; no paid API, formal DEV cell, Q, field, or normative approval demonstrated"
+  ],
+  "stable": true,
+  "committed": false
+}
