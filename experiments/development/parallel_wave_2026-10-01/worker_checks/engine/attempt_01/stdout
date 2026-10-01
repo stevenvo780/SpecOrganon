@@ -1,0 +1,446 @@
+F..........FFFFF.F.F...FFF.                                              [100%]
+=================================== FAILURES ===================================
+___________ test_parallel_barrier_shared_budget_and_private_reviewer ___________
+
+tmp_path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_parallel_barrier_shared_b0')
+
+    def test_parallel_barrier_shared_budget_and_private_reviewer(tmp_path):
+        directory, prepared = prepare(tmp_path)
+        adapters = transports(directory)
+        result = execute(directory, prepared, adapters)
+>       assert result["state"] == "completed", result
+E       AssertionError: {'classification': 'development_parallel_wave_proposals_unsealed', 'execution_profile': 'parallel_wave_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E       assert 'indeterminate' == 'completed'
+E         
+E         - completed
+E         + indeterminate
+
+tests/test_managed_parallel_wave.py:96: AssertionError
+__ test_invalid_response_raw_preserved_and_no_artifact_publication[function] ___
+
+tmp_path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres0')
+bad = 'function'
+
+    @pytest.mark.parametrize("bad", ["function", "reviewer_function", "model", "incomplete", "usage"])
+    def test_invalid_response_raw_preserved_and_no_artifact_publication(tmp_path, bad):
+        directory, prepared = prepare(tmp_path)
+        adapters = transports(directory)
+        chosen = "reviewer" if bad == "reviewer_function" else "task-1"
+        if "function" in bad:
+            adapters[chosen].result["output"] = [{"type": "function_call", "name": "anything", "call_id": "public-fixture", "arguments": "{}"}]
+        elif bad == "model":
+            adapters[chosen].result["model"] = "other-model"
+        elif bad == "incomplete":
+            adapters[chosen].result["status"] = "incomplete"
+        else:
+            adapters[chosen].result["usage"]["total_tokens"] = 999
+        result = execute(directory, prepared, adapters)
+        assert result["state"] == "indeterminate"
+>       assert json.loads((directory / "responses" / f"{chosen}.json").read_bytes()) == adapters[chosen].result
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_parallel_wave.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1050: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres0/wave/responses/task-1.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres0/wave/responses/task-1.json'
+
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1044: FileNotFoundError
+_ test_invalid_response_raw_preserved_and_no_artifact_publication[reviewer_function] _
+
+tmp_path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres1')
+bad = 'reviewer_function'
+
+    @pytest.mark.parametrize("bad", ["function", "reviewer_function", "model", "incomplete", "usage"])
+    def test_invalid_response_raw_preserved_and_no_artifact_publication(tmp_path, bad):
+        directory, prepared = prepare(tmp_path)
+        adapters = transports(directory)
+        chosen = "reviewer" if bad == "reviewer_function" else "task-1"
+        if "function" in bad:
+            adapters[chosen].result["output"] = [{"type": "function_call", "name": "anything", "call_id": "public-fixture", "arguments": "{}"}]
+        elif bad == "model":
+            adapters[chosen].result["model"] = "other-model"
+        elif bad == "incomplete":
+            adapters[chosen].result["status"] = "incomplete"
+        else:
+            adapters[chosen].result["usage"]["total_tokens"] = 999
+        result = execute(directory, prepared, adapters)
+        assert result["state"] == "indeterminate"
+>       assert json.loads((directory / "responses" / f"{chosen}.json").read_bytes()) == adapters[chosen].result
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_parallel_wave.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1050: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres1/wave/responses/reviewer.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres1/wave/responses/reviewer.json'
+
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1044: FileNotFoundError
+____ test_invalid_response_raw_preserved_and_no_artifact_publication[model] ____
+
+tmp_path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres2')
+bad = 'model'
+
+    @pytest.mark.parametrize("bad", ["function", "reviewer_function", "model", "incomplete", "usage"])
+    def test_invalid_response_raw_preserved_and_no_artifact_publication(tmp_path, bad):
+        directory, prepared = prepare(tmp_path)
+        adapters = transports(directory)
+        chosen = "reviewer" if bad == "reviewer_function" else "task-1"
+        if "function" in bad:
+            adapters[chosen].result["output"] = [{"type": "function_call", "name": "anything", "call_id": "public-fixture", "arguments": "{}"}]
+        elif bad == "model":
+            adapters[chosen].result["model"] = "other-model"
+        elif bad == "incomplete":
+            adapters[chosen].result["status"] = "incomplete"
+        else:
+            adapters[chosen].result["usage"]["total_tokens"] = 999
+        result = execute(directory, prepared, adapters)
+        assert result["state"] == "indeterminate"
+>       assert json.loads((directory / "responses" / f"{chosen}.json").read_bytes()) == adapters[chosen].result
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_parallel_wave.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1050: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres2/wave/responses/task-1.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres2/wave/responses/task-1.json'
+
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1044: FileNotFoundError
+_ test_invalid_response_raw_preserved_and_no_artifact_publication[incomplete] __
+
+tmp_path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres3')
+bad = 'incomplete'
+
+    @pytest.mark.parametrize("bad", ["function", "reviewer_function", "model", "incomplete", "usage"])
+    def test_invalid_response_raw_preserved_and_no_artifact_publication(tmp_path, bad):
+        directory, prepared = prepare(tmp_path)
+        adapters = transports(directory)
+        chosen = "reviewer" if bad == "reviewer_function" else "task-1"
+        if "function" in bad:
+            adapters[chosen].result["output"] = [{"type": "function_call", "name": "anything", "call_id": "public-fixture", "arguments": "{}"}]
+        elif bad == "model":
+            adapters[chosen].result["model"] = "other-model"
+        elif bad == "incomplete":
+            adapters[chosen].result["status"] = "incomplete"
+        else:
+            adapters[chosen].result["usage"]["total_tokens"] = 999
+        result = execute(directory, prepared, adapters)
+        assert result["state"] == "indeterminate"
+>       assert json.loads((directory / "responses" / f"{chosen}.json").read_bytes()) == adapters[chosen].result
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_parallel_wave.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1050: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres3/wave/responses/task-1.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres3/wave/responses/task-1.json'
+
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1044: FileNotFoundError
+____ test_invalid_response_raw_preserved_and_no_artifact_publication[usage] ____
+
+tmp_path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres4')
+bad = 'usage'
+
+    @pytest.mark.parametrize("bad", ["function", "reviewer_function", "model", "incomplete", "usage"])
+    def test_invalid_response_raw_preserved_and_no_artifact_publication(tmp_path, bad):
+        directory, prepared = prepare(tmp_path)
+        adapters = transports(directory)
+        chosen = "reviewer" if bad == "reviewer_function" else "task-1"
+        if "function" in bad:
+            adapters[chosen].result["output"] = [{"type": "function_call", "name": "anything", "call_id": "public-fixture", "arguments": "{}"}]
+        elif bad == "model":
+            adapters[chosen].result["model"] = "other-model"
+        elif bad == "incomplete":
+            adapters[chosen].result["status"] = "incomplete"
+        else:
+            adapters[chosen].result["usage"]["total_tokens"] = 999
+        result = execute(directory, prepared, adapters)
+        assert result["state"] == "indeterminate"
+>       assert json.loads((directory / "responses" / f"{chosen}.json").read_bytes()) == adapters[chosen].result
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_parallel_wave.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1050: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres4/wave/responses/task-1.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_invalid_response_raw_pres4/wave/responses/task-1.json'
+
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1044: FileNotFoundError
+____ test_deadline_returns_without_join_and_late_result_never_writes[send] _____
+
+tmp_path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_deadline_returns_without_1')
+phase = 'send'
+
+    @pytest.mark.parametrize("phase", ["count", "send"])
+    def test_deadline_returns_without_join_and_late_result_never_writes(tmp_path, phase):
+        source = plan()
+        source["active_limit_seconds"] = 2
+        directory, prepared = prepare(tmp_path, source)
+        adapters = transports(directory, barrier=False)
+        release = threading.Event()
+        if phase == "count":
+            adapters["task-2"].count_hook = lambda _: release.wait(10)
+        else:
+            adapters["task-2"].send_hook = lambda _: release.wait(10)
+        start = time.monotonic()
+        result = execute(directory, prepared, adapters)
+        assert result["state"] == "indeterminate"
+        assert time.monotonic() - start < 3.5
+        before = {str(p.relative_to(directory)): p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+        assert not list((directory / "artifacts").iterdir())
+        if phase == "send":
+>           assert (directory / "responses/task-1.json").exists()
+E           AssertionError: assert False
+E            +  where False = exists()
+E            +    where exists = (PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_deadline_returns_without_1/wave') / 'responses/task-1.json').exists
+
+tests/test_managed_parallel_wave.py:190: AssertionError
+__________________ test_binding_mutation_blocks_effects[plan] __________________
+
+tmp_path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_binding_mutation_blocks_e1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcb4b1fd250>
+tamper = 'plan'
+
+    @pytest.mark.parametrize("tamper", ["source", "plan", "base", "payload", "claim"])
+    def test_binding_mutation_blocks_effects(tmp_path, monkeypatch, tamper):
+        directory, prepared = prepare(tmp_path)
+        adapters = transports(directory, barrier=False)
+        kwargs = {}
+        if tamper == "source":
+            original = wave._sources()
+            monkeypatch.setattr(wave, "_sources", lambda: {**original, "new-source": "0" * 64})
+        elif tamper == "plan":
+            p = directory / "plan.json"
+            p.write_bytes(p.read_bytes() + b"\n")
+        elif tamper == "base":
+            def guard():
+                raise ValueError("public source base changed")
+            kwargs["guard"] = guard
+        elif tamper == "payload":
+            adapters["task-1"].count_hook = lambda payload: payload.update(model="changed")
+        else:
+            def mutate(_):
+                claim = next((tmp_path / "admission").glob("*.json"))
+                claim.write_bytes(claim.read_bytes() + b"\n")
+            adapters["task-1"].count_hook = mutate
+        if tamper in {"source", "plan"}:
+            with pytest.raises(wave.ParallelWaveError):
+>               execute(directory, prepared, adapters, **kwargs)
+
+tests/test_managed_parallel_wave.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_managed_parallel_wave.py:89: in execute
+    return wave.execute_wave(directory, adapters, expected_checkpoint=status["checkpoint_sha256"], **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/managed_parallel_wave.py:429: in execute_wave
+    plan, state, ledger, context = _load(run_dir)
+                                   ^^^^^^^^^^^^^^
+scripts/managed_parallel_wave.py:197: in _load
+    plan = _validate_plan(_read_json(run_dir / "plan.json"))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_binding_mutation_blocks_e1/wave/plan.json')
+
+    def _read_json(path: Path) -> dict[str, Any]:
+        _private_file(path)
+        raw = path.read_bytes()
+        if len(raw) > MAX_JSON_BYTES:
+            raise ConversationError("run JSON exceeds the byte limit")
+        try:
+            value = json.loads(raw, object_pairs_hook=_unique_pairs,
+                               parse_constant=_reject_constant)
+        except (UnicodeError, ValueError, RecursionError) as exc:
+            raise ConversationError("run JSON is invalid") from exc
+        if type(value) is not dict or raw != _canonical(value):
+>           raise ConversationError("run JSON is not canonical")
+E           run_managed_conversation.ConversationError: run JSON is not canonical
+
+scripts/run_managed_conversation.py:145: ConversationError
+___________ test_another_owner_cannot_count_or_change_winner_ledger ____________
+
+tmp_path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_another_owner_cannot_coun0')
+
+    def test_another_owner_cannot_count_or_change_winner_ledger(tmp_path):
+        directory, first = prepare(tmp_path)
+        second_dir = tmp_path / "second"
+        second = wave.prepare_wave(second_dir, plan(), admission_root=tmp_path / "admission")
+>       assert execute(directory, first, transports(directory))["state"] == "completed"
+E       AssertionError: assert 'indeterminate' == 'completed'
+E         
+E         - completed
+E         + indeterminate
+
+tests/test_managed_parallel_wave.py:237: AssertionError
+__ test_actual_local_http_sends_overlap_and_legacy_adapter_timeout_unchanged ___
+
+tmp_path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_actual_local_http_sends_o0')
+
+    def test_actual_local_http_sends_overlap_and_legacy_adapter_timeout_unchanged(tmp_path):
+        sync = threading.Barrier(2)
+        intervals = []
+    
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *_):
+                pass
+    
+            def do_POST(self):
+                body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+                if self.path.endswith("input_tokens"):
+                    result = {"object": "response.input_tokens", "input_tokens": 5}
+                else:
+                    content = json.loads(body["input"][0]["content"])
+                    task_id = content.get("task_id", "reviewer")
+                    started = time.monotonic_ns()
+                    if task_id != "reviewer":
+                        sync.wait(timeout=5)
+                    result = response(task_id)
+                    ended = time.monotonic_ns()
+                    if task_id != "reviewer":
+                        intervals.append((started, ended))
+                raw = json.dumps(result).encode()
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(raw)))
+                self.end_headers()
+                self.wfile.write(raw)
+    
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            directory, prepared = prepare(tmp_path)
+            base = f"http://127.0.0.1:{server.server_port}/v1"
+            adapters = {name: OpenAIResponsesHTTP("public-local-fixture-only", timeout_seconds=90, base_url=base)
+                        for name in ("task-1", "task-2", "reviewer")}
+>           assert execute(directory, prepared, adapters)["state"] == "completed"
+E           AssertionError: assert 'indeterminate' == 'completed'
+E             
+E             - completed
+E             + indeterminate
+
+tests/test_managed_parallel_wave.py:281: AssertionError
+__________ test_real_process_crash_retains_inflight_and_cannot_resume __________
+
+tmp_path = PosixPath('/tmp/specorganon-D114-engine-311-z0vcipj6/cases/test_real_process_crash_retain0')
+
+    def test_real_process_crash_retains_inflight_and_cannot_resume(tmp_path):
+        directory, prepared = prepare(tmp_path)
+        script = """
+    import sys, threading
+    from pathlib import Path
+    sys.path.insert(0, sys.argv[1])
+    from managed_parallel_wave import execute_wave
+    barrier=threading.Barrier(2)
+    class T:
+     def count_input(self,payload,*,timeout_seconds): return 5
+     def send(self,payload,*,timeout_seconds):
+      number=barrier.wait(timeout=5)
+      if number==0: print('INFLIGHT',flush=True)
+      threading.Event().wait(60)
+    execute_wave(Path(sys.argv[2]),{k:T() for k in ('task-1','task-2','reviewer')},expected_checkpoint=sys.argv[3])
+    """
+        with (tmp_path / "crash.stderr").open("wb") as stderr:
+            process = subprocess.Popen([sys.executable, "-B", "-c", script,
+                                        str(Path(wave.__file__).parent), str(directory), prepared["checkpoint_sha256"]],
+                                       stdout=subprocess.PIPE, stderr=stderr)
+            try:
+                assert select.select([process.stdout], [], [], 10)[0]
+>               assert process.stdout.readline() == b"INFLIGHT\n"
+E               AssertionError: assert b'' == b'INFLIGHT\n'
+E                 
+E                 Use -v to get more diff
+
+tests/test_managed_parallel_wave.py:311: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_managed_parallel_wave.py::test_parallel_barrier_shared_budget_and_private_reviewer
+FAILED tests/test_managed_parallel_wave.py::test_invalid_response_raw_preserved_and_no_artifact_publication[function]
+FAILED tests/test_managed_parallel_wave.py::test_invalid_response_raw_preserved_and_no_artifact_publication[reviewer_function]
+FAILED tests/test_managed_parallel_wave.py::test_invalid_response_raw_preserved_and_no_artifact_publication[model]
+FAILED tests/test_managed_parallel_wave.py::test_invalid_response_raw_preserved_and_no_artifact_publication[incomplete]
+FAILED tests/test_managed_parallel_wave.py::test_invalid_response_raw_preserved_and_no_artifact_publication[usage]
+FAILED tests/test_managed_parallel_wave.py::test_deadline_returns_without_join_and_late_result_never_writes[send]
+FAILED tests/test_managed_parallel_wave.py::test_binding_mutation_blocks_effects[plan]
+FAILED tests/test_managed_parallel_wave.py::test_another_owner_cannot_count_or_change_winner_ledger
+FAILED tests/test_managed_parallel_wave.py::test_actual_local_http_sends_overlap_and_legacy_adapter_timeout_unchanged
+FAILED tests/test_managed_parallel_wave.py::test_real_process_crash_retains_inflight_and_cannot_resume
+11 failed, 16 passed in 3.74s

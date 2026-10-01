@@ -1,0 +1,32 @@
+.......F.................                                                [100%]
+=================================== FAILURES ===================================
+_______ test_c_cli_prepare_and_status_use_new_identity_without_model_io ________
+
+tmp_path = PosixPath('/tmp/specorganon-D114-integration_01-ksi5ze4c/cases/test_c_cli_prepare_and_status_0')
+
+    def test_c_cli_prepare_and_status_use_new_identity_without_model_io(tmp_path):
+        state, facts, config = case(tmp_path / "inputs")
+        config_path = tmp_path / "config.json"
+        config_path.write_text(json.dumps(config))
+        run = tmp_path / "run"
+        command = [sys.executable, "-I", "-B", str(SCRIPTS / "c_parallel_work.py")]
+        commands = [command + ["prepare", "--state", str(state), "--facts", str(facts),
+                              "--config", str(config_path), "--run-dir", str(run),
+                              "--admission-root", str(tmp_path / "admissions")],
+                    command + ["status", "--run-dir", str(run)]]
+        for index, args in enumerate(commands, 1):
+            completed = subprocess.run(args, capture_output=True, timeout=30, check=False)
+            (tmp_path / f"cli-{index}.stdout").write_bytes(completed.stdout)
+            (tmp_path / f"cli-{index}.stderr").write_bytes(completed.stderr)
+>           assert completed.returncode == 0, completed.stdout
+E           AssertionError: b'{"classification": "development_c_parallel_unsealed", "error": "ConversationError", "state": "rejected"}
+E             '
+E           assert 2 == 0
+E            +  where 2 = CompletedProcess(args=['/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python', '-I', '-B', '/workspace/SpecOrganon/..."classification": "development_c_parallel_unsealed", "error": "ConversationError", "state": "rejected"}\n', stderr=b'').returncode
+
+tests/test_c_parallel_work.py:208: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "init", "case_id": "D-F-synthetic", "ok": true}
+=========================== short test summary info ============================
+FAILED tests/test_c_parallel_work.py::test_c_cli_prepare_and_status_use_new_identity_without_model_io
+1 failed, 24 passed in 5.83s

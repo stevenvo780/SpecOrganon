@@ -1,5 +1,32 @@
 # Despacho medido de una solicitud de desarrollo
 
+## Propuestas paralelas optativas (D-114)
+
+`managed_wave_ledger.py` schema 3 admite 1–4 requests de una wave atómicamente:
+tokens, solicitudes y coste declarado se reservan en conjunto antes de sends.
+Permiso sólo en el proceso original; marca inflight durable. Reabrir no ofrece
+reenvío. Una respuesta inválida conserva su allowance; otras pueden conciliarse
+fuera de orden. Snapshot captura estado y SHA de bytes exactos bajo un lock.
+
+`managed_run_context.py` schema 2 optativo exige ledger_kind wave_v1/schema 3
+ligados a bindings/checkpoint; schema 1 mantiene TokenLedger sin autodetección.
+`managed_parallel_wave.py` cuenta todos los inputs y luego lanza 2–4 propuestas;
+reviewer serial consume el mismo techo/modelo/effort/plazo, sin reasoning privado.
+Un count puede ocurrir aunque el lote no quepa; en ese caso cero sends.
+
+Host administra journals/settles; daemon callbacks pueden superar el plazo,
+pero el host retorna indeterminate sin join y no publica/concilia resultados
+tardíos. Se guardan JSON oportunos observados antes de guards/validación; el
+fallo drena sólo respuestas ya disponibles. Artefactos se exponen únicamente
+cuando estado y contexto son completed. No se autentica gasto/cancelación.
+
+Wrapper C selecciona trabajo risk elegible, fija base y hechos y rechaza normas
+approved no verificadas. Es un perfil de propuestas con cero tools y grafo
+intacto, de identidad nueva. No sustituye calendarios DEV solo o tríos ni libera
+R1 real. [Dossier](../experiments/development/parallel_wave_2026-10-01/README.md):
+231 pruebas por Python 3.11/3.12, HTTP local/CLI reales con respuestas sintéticas,
+sin proveedor ni gasto. Pendientes tools por branches y comparación formal.
+
 ## Análisis protegido optativo (D-113)
 
 Configuración `schema:2,analysis_profile:"read_only_v1"` selecciona calendario

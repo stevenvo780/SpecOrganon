@@ -1,0 +1,39 @@
+{
+  "api": [
+    "prepare_wave(run_dir,plan,*,admission_root=None)",
+    "execute_wave(run_dir,transports_by_task,*,expected_checkpoint,guard=None)",
+    "read_wave_status(run_dir)"
+  ],
+  "classification": "offline_engine_handoff_not_model_execution",
+  "files": {
+    "scripts/managed_parallel_wave.py": {
+      "bytes": 25792,
+      "sha256": "9c270fd65c8021fcb4771b16eaa25f777004ac73b1f27a6ac75d3b290a925884"
+    },
+    "tests/test_managed_parallel_wave.py": {
+      "bytes": 18548,
+      "sha256": "f6073b7fc1892b76c5d70901c0608fe7d2c241001b82ebb89a6edf3cc90ba88b"
+    }
+  },
+  "gates": {
+    "311": "attempt_03/receipt.json",
+    "312": "attempt_04/receipt.json",
+    "static": "static_final/receipt.json"
+  },
+  "initial_failed_attempt_preserved": "attempt_01 (16 passed, 11 failed)",
+  "intermediate_passed_attempt_preserved": "attempt_02 (30 passed)",
+  "limits": [
+    "Textual proposals only; no tools/core mutations/normative approvals.",
+    "Host alone writes ledger/journals; daemon callbacks can outlive deadline.",
+    "Only host-observed parsed responses ended by deadline are retained; queued timely replies drained on failure, later remote replies not guaranteed.",
+    "Artifacts exposed only when context and stored state both completed; forensic entries separately counted without content reads.",
+    "Declared price/usage/model/effort and native actor labels not authenticated; no provider calls, no paid spend, no formal cells."
+  ],
+  "passed_tests_per_python": 31,
+  "public_fixture_workspaces": [
+    "/tmp/specorganon-D114-engine-311-z0vcipj6/cases",
+    "/tmp/specorganon-D114-engine-311-final-dzk7um42/cases",
+    "/tmp/specorganon-D114-engine-311-final-hdberfr2/cases",
+    "/tmp/specorganon-D114-engine-312-final-o01ykw3v/cases"
+  ]
+}

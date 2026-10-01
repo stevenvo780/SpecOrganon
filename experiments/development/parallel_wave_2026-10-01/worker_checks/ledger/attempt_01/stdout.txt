@@ -1,0 +1,34 @@
+...........F
+=================================== FAILURES ===================================
+___ test_out_of_order_concurrent_settlement_keeps_exact_cost_and_global_cap ____
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1466/test_out_of_order_concurrent_s0')
+
+    def test_out_of_order_concurrent_settlement_keeps_exact_cost_and_global_cap(
+        tmp_path: Path,
+    ) -> None:
+        ledger = _ledger(tmp_path, token_limit=20, cost_limit=50)
+        permit = ledger.reserve_wave("wave-1", [_item("a", SHA_A), _item("b", SHA_B)])
+        permit.begin_send("a", SHA_A)
+        permit.begin_send("b", SHA_B)
+        barrier = Barrier(2)
+    
+        def settle_one(request_id: str, response_sha: str, output_tokens: int) -> dict:
+            barrier.wait(timeout=5)
+            return ledger.settle(request_id, response_sha, _usage(output_tokens=output_tokens))
+    
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            first = pool.submit(settle_one, "b", RESPONSE_B, 0)
+            second = pool.submit(settle_one, "a", RESPONSE_A, 1)
+            results = [first.result(timeout=5), second.result(timeout=5)]
+        assert {result["state"] for result in results} == {"settled"}
+        snap = ledger.snapshot()
+        assert snap["blocked"] is False and snap["committed_tokens"] == 5
+>       assert snap["committed_cost_micro_usd"] == 7
+E       assert 11 == 7
+
+tests/test_managed_wave_ledger.py:200: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_managed_wave_ledger.py::test_out_of_order_concurrent_settlement_keeps_exact_cost_and_global_cap
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 11 passed in 0.50s

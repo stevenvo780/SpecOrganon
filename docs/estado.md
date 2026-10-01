@@ -1,5 +1,26 @@
 # Estado de reanudación
 
+**D-114 ejecuta propuestas C en paralelo con presupuesto común:**
+[dossier](../experiments/development/parallel_wave_2026-10-01/README.md).
+WaveLedger schema 3 reserva el lote entero antes de cualquier envío; contexto
+schema 2 optativo fija ese ledger, claim y plazo. Dos a cuatro workers con
+contextos privados, reviewer serial, mismo modelo/esfuerzo solicitado. Host
+conserva respuestas oportunas y sólo expone artefactos con cierre completed.
+Normas de entrada sin autoridad no se aceptan; grafo intacto y cero tools.
+Freeze `4e9de575`: **231 passed en 3.11 y 231 en 3.12**, Ruff/compile/diff,
+24 fuentes y 38 base intactas. Seis trazas distintas HTTP/CLI sintéticas;
+7.875 regulares archivados y cotejados por root/revisor. Tres P2 corregidos,
+negativos y error de enumeración de alias conservados/documentados.
+
+**1/5 C1 técnico D107; C2–C5 No demostrado; celdas formales 0.**
+Siguiente: herramientas en branches privadas e integración C bajo presupuesto,
+registro comparable y contrato/rúbrica común sin respuestas; ruta/modelo/
+telemetría/autorización, 12 R1 reales, adaptación/freeze R2 y 12 R2, selección.
+Siguen custodia, panel, jueces, autoridades, banco sellado, campo y transferencia.
+El perfil nuevo no reinterpreta DEV solo/tríos; no demuestra calidad, identidad,
+effort efectivo, factura ni cancelación remota. GOAL/protocolo/producción/core/
+wheel/casos originales intactos. Los cortes siguientes son históricos.
+
 **D-113 ejecuta análisis con estado protegido y fuentes comunes:**
 [dossier](../experiments/development/isolated_analysis_2026-10-01/README.md).
 Config/calendario/política2 optativos: dos tools sellados workspace/analysis_readonly,
