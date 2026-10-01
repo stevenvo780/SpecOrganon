@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
 import sys
 import time
 
@@ -45,6 +46,15 @@ def put(path, raw):
     path.chmod(0o600)
 
 
+def policy_fixture():
+    return {"schema": 2, "generic_tools": [
+        {"id": "method", "version": "development-original-core-v1", "profile": "workspace",
+         "executable_sha256": module._sha(module._method_bytes())},
+        {"id": "analysis", "version": "development-readonly-analysis-v1", "profile": "analysis_readonly",
+         "executable_sha256": module._sha(module.analysis._launcher_bytes())},
+    ]}
+
+
 def source_fixture(tmp_path, mode="graph"):
     tmp_path.chmod(0o700)
     case, inputs, run = (private(tmp_path / name) for name in ("case", "inputs", "run"))
@@ -56,7 +66,7 @@ def source_fixture(tmp_path, mode="graph"):
     arm = {"sequential": "A", "graph": "B", "risk": "C"}[mode]
     put(inputs / "arm_prompt", module._canonical({"alternative": arm, "mode": mode,
         "instructions": "Use original method; norms remain pending."}))
-    put(inputs / "tool_policy", module._canonical({"schema": 2}))
+    put(inputs / "tool_policy", module._canonical(policy_fixture()))
     return run, case, inputs
 
 
@@ -329,3 +339,93 @@ def test_original_advance_then_upstream_revision_keeps_native_audit(mode, tmp_pa
     assert public["state"]["nodes"]["n"]["status"] == "pending"
     assert bool(public["audit"]["unsafe_accepted_phases"]) is (mode == "sequential")
     assert module.CoordinatedPrototypeBroker(host.run_dir, host.binding).public_state() == public
+
+
+@pytest.mark.parametrize("change", [
+    "missing_inventory", "missing_tool", "duplicate", "schema_bool", "wrong_profile",
+    "wrong_version", "wrong_hash", "hash_bool", "unknown_field", "missing_file", "bad_json",
+])
+def test_declared_tool_policy_rejects_before_any_creation(tmp_path, monkeypatch, change):
+    run, case, inputs = source_fixture(tmp_path)
+    policy = policy_fixture()
+    if change == "missing_inventory":
+        del policy["generic_tools"]
+    elif change == "missing_tool":
+        policy["generic_tools"].pop()
+    elif change == "duplicate":
+        policy["generic_tools"][1] = policy["generic_tools"][0].copy()
+    elif change == "schema_bool":
+        policy["schema"] = True
+    elif change == "wrong_profile":
+        policy["generic_tools"][0]["profile"] = "analysis_readonly"
+    elif change == "wrong_version":
+        policy["generic_tools"][0]["version"] = "different-version"
+    elif change in {"wrong_hash", "hash_bool"}:
+        policy["generic_tools"][0]["executable_sha256"] = "0" * 64 if change == "wrong_hash" else True
+    elif change == "unknown_field":
+        policy["generic_tools"][0]["unknown"] = True
+    put(inputs / "tool_policy", module._canonical(policy))
+    if change == "missing_file":
+        (inputs / "tool_policy").unlink()
+    elif change == "bad_json":
+        put(inputs / "tool_policy", b'{"schema":2,"schema":2}\n')
+    before = {str(path): path.read_bytes() for folder in (case, inputs) for path in folder.iterdir()}
+    def no_build(*args, **kwargs):
+        pytest.fail("tool builder called before rejecting declared policy")
+    monkeypatch.setattr(module.method, "build_tool", no_build)
+    monkeypatch.setattr(module.analyzer, "build_analysis_tool", no_build)
+    with pytest.raises(ValueError):
+        module.prepare_broker(run, case, inputs, mode="graph")
+    assert list(run.iterdir()) == []
+    assert before == {str(path): path.read_bytes() for folder in (case, inputs) for path in folder.iterdir()}
+    assert not (tmp_path / "admission").exists()
+
+
+def test_actual_other_interpreter_policy_rejects_before_io(tmp_path):
+    other_version = "312" if sys.version_info[:2] == (3, 11) else "311"
+    other = Path(f"/tmp/specorganon-D107-deps-re8v1j45/venv-{other_version}/bin/python")
+    if not other.is_file():
+        pytest.skip("second offline interpreter not installed")
+    run, case, inputs = source_fixture(tmp_path)
+    script = ("import sys,json;sys.path.insert(0,sys.argv[1]);"
+              "import coordinated_prototype_broker as m;"
+              "print(json.dumps({'method':m._sha(m._method_bytes()),"
+              "'analysis':m._sha(m.analysis._launcher_bytes())}))")
+    command = [str(other), "-I", "-B", "-c", script, str(Path(module.__file__).parent)]
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            timeout=30, check=False, env={"PYTHONDONTWRITEBYTECODE": "1"})
+    put(tmp_path / "other_interpreter_stdout", result.stdout)
+    put(tmp_path / "other_interpreter_stderr", result.stderr)
+    put(tmp_path / "other_interpreter_command.json", module._canonical(command))
+    assert result.returncode == 0
+    foreign = json.loads(result.stdout)
+    policy = policy_fixture()
+    assert all(row["executable_sha256"] != foreign[row["id"]] for row in policy["generic_tools"])
+    for row in policy["generic_tools"]:
+        row["executable_sha256"] = foreign[row["id"]]
+    put(inputs / "tool_policy", module._canonical(policy))
+    before = {str(path): path.read_bytes() for folder in (case, inputs) for path in folder.iterdir()}
+    with pytest.raises(module.BrokerError, match="current interpreter"):
+        module.prepare_broker(run, case, inputs, mode="graph")
+    assert list(run.iterdir()) == []
+    assert before == {str(path): path.read_bytes() for folder in (case, inputs) for path in folder.iterdir()}
+    assert not (tmp_path / "admission").exists()
+
+
+def test_reopen_checks_policy_even_with_rebound_stage_snapshot(tmp_path):
+    run, case, inputs = source_fixture(tmp_path)
+    binding = module.prepare_broker(run, case, inputs, mode="graph")
+    path = Path(binding["path"])
+    manifest = json.loads(path.read_bytes())
+    for stage in manifest["stages"].values():
+        directory = Path(stage["stage_dir"])
+        policy = json.loads((directory / "inputs/tool_policy").read_bytes())
+        policy["generic_tools"][1]["executable_sha256"] = "0" * 64
+        put(directory / "inputs/tool_policy", module._canonical(policy))
+        stage["snapshot"] = json.loads(module._canonical(module._immutable_snapshot(directory)))
+    put(path, module._canonical(manifest))
+    rebound = {"path": str(path), "sha256": module._sha(path.read_bytes())}
+    with pytest.raises(module.BrokerError, match="current interpreter"):
+        module.CoordinatedPrototypeBroker(run, rebound)
+    assert not (run / "broker").exists()
+    assert not (run / "tool_reservations").exists()

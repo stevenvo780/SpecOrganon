@@ -109,6 +109,34 @@ def _method_bytes() -> bytes:
         "__EMBEDDED_CORE_SHA256__", _sha(core))).encode()
 
 
+def _policy_functions(policy: dict, expected: dict[str, bytes]) -> dict[str, str]:
+    """Bind declared tools to exact original launchers of this interpreter."""
+    inventory = {
+        "method": ("development_method", "development-original-core-v1", "workspace"),
+        "analysis": ("development_analysis", "development-readonly-analysis-v1", "analysis_readonly"),
+    }
+    if (type(policy) is not dict or type(policy.get("schema")) is not int
+            or policy["schema"] != 2 or type(policy.get("generic_tools")) is not list
+            or len(policy["generic_tools"]) != len(inventory)):
+        raise BrokerError("tool policy needs the exact generic tool inventory")
+    declared = {}
+    for row in policy["generic_tools"]:
+        if (type(row) is not dict
+                or set(row) != {"id", "version", "executable_sha256", "profile"}
+                or type(row["id"]) is not str or row["id"] not in inventory):
+            raise BrokerError("generic tool policy record is malformed")
+        name, version, profile = inventory[row["id"]]
+        if name in declared or row["version"] != version or row["profile"] != profile:
+            raise BrokerError("generic tool policy identity, version, or profile differs")
+        digest = primitive._digest(row["executable_sha256"], "declared executable digest")
+        if digest != _sha(expected[name]):
+            raise BrokerError("declared executable differs from the current interpreter launcher")
+        declared[name] = digest
+    if set(declared) != set(expected):
+        raise BrokerError("generic tool policy inventory differs")
+    return declared
+
+
 def prepare_broker(run_dir: Path, case_dir: Path, inputs_dir: Path, *, mode: str) -> dict:
     run_dir = primitive._absolute(run_dir, "run")
     primitive._private_dir(run_dir)
@@ -128,6 +156,9 @@ def prepare_broker(run_dir: Path, case_dir: Path, inputs_dir: Path, *, mode: str
             or type(prompt["instructions"]) is not str or not prompt["instructions"].strip()
             or type(policy) is not dict or type(policy.get("schema")) is not int or policy["schema"] != 2):
         raise BrokerError("case, selected mode, or CAS tool policy is invalid")
+    expected_tools = {"development_method": _method_bytes(),
+                      "development_analysis": analysis._launcher_bytes()}
+    declared_tools = _policy_functions(policy, expected_tools)
     # Validate/read every public byte before creating stages.
     before = {}
     for folder in (case_dir, inputs_dir):
@@ -162,8 +193,7 @@ def prepare_broker(run_dir: Path, case_dir: Path, inputs_dir: Path, *, mode: str
     functions = []
     for name, path in (("development_method", tools / "method"), ("development_analysis", tools / "analyzer")):
         raw, frozen = primitive._executable(path)
-        expected = _method_bytes() if name == "development_method" else analysis._launcher_bytes()
-        if raw != expected:
+        if raw != expected_tools[name] or frozen["sha256"] != declared_tools[name]:
             raise BrokerError("generated tool differs from the exact original launcher")
         functions.append({"name": name, "profile": FUNCTIONS[name], **frozen})
     stages = {}
@@ -261,6 +291,9 @@ class CoordinatedPrototypeBroker:
         if (root != self.run_dir / "broker_stages" or self.path != root / "metadata/manifest.json"
                 or primitive._identity(root, directory=True) != value["root_identity"]):
             raise BrokerError("broker root identity changed")
+        expected_tools = {"development_method": _method_bytes(),
+                          "development_analysis": analysis._launcher_bytes()}
+        declared_tools = None
         for role, item in value["stages"].items():
             stage = primitive._absolute(item["stage_dir"], "stage")
             if stage != root / role or primitive._identity(stage, directory=True) != item["identity"]:
@@ -268,13 +301,20 @@ class CoordinatedPrototypeBroker:
             if _parse(_canonical(_immutable_snapshot(stage)), "stage snapshot",
                       primitive.MAX_MANIFEST_BYTES) != item["snapshot"]:
                 raise BrokerError("public case/inputs or stage binding changed")
+            policy = _parse(_raw(stage / "inputs/tool_policy"), "tool policy", 128 * 1024)
+            current_policy = _policy_functions(policy, expected_tools)
+            if declared_tools is not None and current_policy != declared_tools:
+                raise BrokerError("role tool policies differ")
+            declared_tools = current_policy
         for function in value["functions"]:
             raw, current = primitive._executable(Path(function["path"]))
             if (current != {key: function[key] for key in ("path", "sha256", "bytes", "identity")}
                     or FUNCTIONS.get(function["name"]) != function["profile"]
-                    or raw != (_method_bytes() if function["profile"] == "workspace" else analysis._launcher_bytes())):
+                    or current["sha256"] != declared_tools.get(function["name"])
+                    or raw != expected_tools.get(function["name"])):
                 raise BrokerError("original sealed executable changed")
-        if {row["name"] for row in value["functions"]} != set(FUNCTIONS):
+        if (len(value["functions"]) != len(FUNCTIONS)
+                or {row["name"] for row in value["functions"]} != set(FUNCTIONS)):
             raise BrokerError("delegated function inventory changed")
         return value
 

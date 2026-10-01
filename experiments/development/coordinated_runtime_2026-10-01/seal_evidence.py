@@ -39,7 +39,7 @@ def build():
     for row in freeze["records"] + baseline["records"]:
         assert by_path[row["path"]]["bytes"] == row["bytes"] and by_path[row["path"]]["sha256"] == row["sha256"]
     gates = {}
-    for name in ("final311", "final312", "integration311", "integration312"):
+    for name in ("final311_02", "final312_02", "integration311_02", "integration312_02"):
         report = load("checks/" + name + "/report.json")
         assert report["source_unchanged"] and report["all_exit_zero"]
         assert report["head"] == lib.git("rev-parse", "HEAD").decode().strip()

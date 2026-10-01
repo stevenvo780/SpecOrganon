@@ -188,3 +188,24 @@ def test_changed_input_after_prepare_never_counts_sends_or_claims(bundle, tmp_pa
         runtime.execute_coordinated_runtime_step(run, fixture.transports(), expected_checkpoint=status["checkpoint_sha256"])
     assert fixture.trace == [] and (run / "ledger/ledger.json").read_bytes() == before
     assert not list((tmp_path / "admission").glob("*.json"))
+
+
+def test_different_tool_interpreter_rejected_before_preparation_io(bundle, tmp_path, monkeypatch):
+    monkeypatch.setattr(sys, "executable", "/different/registered/python")
+    with pytest.raises(ValueError, match="exact tool interpreter"):
+        runtime.prepare_coordinated_runtime(tmp_path / "run", bundle, run_id(bundle), configuration(),
+                                             admission_root=tmp_path / "admission")
+    assert not any((tmp_path / name).exists() for name in ("run", "run-inputs", "admission"))
+
+
+def test_different_tool_interpreter_rejected_on_reopen_without_transport_or_claim(bundle, tmp_path, monkeypatch):
+    run = tmp_path / "run"
+    status = runtime.prepare_coordinated_runtime(run, bundle, run_id(bundle), configuration(),
+                                                 admission_root=tmp_path / "admission")
+    before = (run / "ledger/ledger.json").read_bytes()
+    fixture = SyntheticRoles(run)
+    monkeypatch.setattr(sys, "executable", "/different/registered/python")
+    with pytest.raises(ValueError):
+        runtime.execute_coordinated_runtime_step(run, fixture.transports(), expected_checkpoint=status["checkpoint_sha256"])
+    assert fixture.trace == [] and (run / "ledger/ledger.json").read_bytes() == before
+    assert not list((tmp_path / "admission").glob("*.json"))

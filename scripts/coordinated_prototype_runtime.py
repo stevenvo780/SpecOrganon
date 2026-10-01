@@ -155,6 +155,8 @@ def guard_coordinated_runtime(plan: dict, state: dict, broker) -> None:
     _publication()
     bundle = Path(binding["bundle"])
     receipt = _json(bundle / "bundle.json")
+    if receipt["tool_interpreter"] != sys.executable:
+        raise CoordinatedRuntimeError("runtime must use the bundle's exact tool interpreter")
     if (_sha(preparation._read(bundle / "bundle.json")) != binding["bundle_receipt_sha256"]
             or receipt["inventory"] != preparation._inventory(bundle)
             or receipt["source_records"] != preparation._source_records(SPEC / "public_contract")
@@ -182,6 +184,8 @@ def prepare_coordinated_runtime(run_dir: Path, bundle: Path, run_id: str, config
     _publication()
     preparation.verify_coordinated_bundle(bundle)
     receipt = _json(bundle / "bundle.json")
+    if receipt["tool_interpreter"] != sys.executable:
+        raise CoordinatedRuntimeError("runtime must use the bundle's exact tool interpreter")
     schedule = planner.validate_schedule(_json(bundle / "schedule.json"))
     if (receipt["contract_dir"] != str(SPEC / "public_contract")
             or schedule["source_freeze_sha256"] != SPEC_SHA256):
