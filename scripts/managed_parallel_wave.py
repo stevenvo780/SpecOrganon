@@ -311,7 +311,8 @@ def _response_text(response: Any, model: str) -> str:
 def _batch(
     run_dir: Path, plan: dict, tasks: list[dict], requests: list[dict], transports: dict,
     wave_id: str, ledger: WaveLedger, context: RunContext, guard: Callable[[], None],
-    state: dict,
+    state: dict, *, request_ids: dict[str, str] | None = None,
+    decoder: Callable[[dict, str], dict] | None = None,
 ) -> list[dict]:
     assert context.deadline is not None
     deadline = context.deadline
@@ -320,6 +321,11 @@ def _batch(
     gate = threading.Event()
     digests = {task["task_id"]: _sha(_json_bytes(request)) for task, request in zip(tasks, requests, strict=True)}
     by_id = {task["task_id"]: task for task in tasks}
+    request_ids = ({key: key for key in by_id} if request_ids is None else request_ids.copy())
+    if (set(request_ids) != set(by_id) or len(set(request_ids.values())) != len(by_id)
+            or any(type(value) is not str or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}", value) is None
+                   for value in request_ids.values())):
+        raise ParallelWaveError("invalid batch request identities")
     sending = False
 
     def worker(task: dict, request: dict, operation: str) -> None:
@@ -359,7 +365,7 @@ def _batch(
         raw = _json_bytes(response) + b"\n"
         if len(raw) > MAX_JSON_BYTES:
             raise ParallelWaveError("response exceeds byte bound")
-        path = run_dir / "responses" / f"{task_id}.json"
+        path = run_dir / "responses" / f"{request_ids[task_id]}.json"
         if not path.exists():
             _new_private_file(path, raw)
         return _sha(raw)
@@ -367,22 +373,26 @@ def _batch(
     def accept_response(task_id: str, response: dict, started: int, ended: int, response_sha: str) -> dict:
         guard()
         task = by_id[task_id]
-        text = _response_text(response, plan["model"])
+        decoded = ({"text": _response_text(response, plan["model"])} if decoder is None
+                   else decoder(response, plan["model"]))
+        request_id = request_ids[task_id]
         usage = response.get("usage")
         measured = ({key: usage.get(key) for key in ("input_tokens", "output_tokens", "total_tokens")}
                     if type(usage) is dict else usage)
         details = ({key: usage[key] for key in ("input_tokens_details", "output_tokens_details") if key in usage}
                    if type(usage) is dict else None)
         guard()
-        settled = ledger.settle(task_id, response_sha, measured, usage_details=details)
-        _new_private_file(run_dir / "receipts" / f"{task_id}.json", _canonical({
-            "request_id": task_id, "role": task["role"], "payload_sha256": digests[task_id],
+        settled = ledger.settle(request_id, response_sha, measured, usage_details=details)
+        _new_private_file(run_dir / "receipts" / f"{request_id}.json", _canonical({
+            "request_id": request_id, "role": task["role"], "payload_sha256": digests[task_id],
             "response_sha256": response_sha, "send_started_ns": started, "send_ended_ns": ended,
-            "classification": CLASSIFICATION, "settled": settled}))
+            "classification": state["classification"], "settled": settled}))
         state["completed_requests"] += 1
         _write_state(run_dir, state)
         guard()
-        artifact = {"task_id": task_id, "role": task["role"], "text": text}
+        artifact = {"task_id": task_id, "role": task["role"], **decoded}
+        if decoder is not None:
+            artifact["request_id"] = request_id
         if "owned_node_ids" in task:
             artifact["owned_node_ids"] = task["owned_node_ids"]
         artifact["artifact_sha256"] = _sha(_canonical(artifact))
@@ -420,7 +430,7 @@ def _batch(
         for task in tasks:
             count = counted[task["task_id"]][0]
             _integer(count, 1, 10**9, "input count")
-            items.append({"request_id": task["task_id"], "role": task["role"],
+            items.append({"request_id": request_ids[task["task_id"]], "role": task["role"],
                           "payload_sha256": digests[task["task_id"]], "input_tokens": count,
                           "max_output_tokens": task["max_output_tokens"], "model": plan["model"], "effort": plan["effort"]})
         guard()
@@ -428,8 +438,8 @@ def _batch(
         for task, request in zip(tasks, requests, strict=True):
             guard()
             task_id = task["task_id"]
-            _new_private_file(run_dir / "requests" / f"{task_id}.json", _canonical(request))
-            permit.begin_send(task_id, digests[task_id])
+            _new_private_file(run_dir / "requests" / f"{request_ids[task_id]}.json", _canonical(request))
+            permit.begin_send(request_ids[task_id], digests[task_id])
             threading.Thread(target=worker, args=(task, request, "send"), daemon=True).start()
         guard()
         gate.set()
