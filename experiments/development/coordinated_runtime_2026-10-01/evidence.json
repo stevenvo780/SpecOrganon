@@ -1,0 +1,353 @@
+{
+  "schema": 1,
+  "classification": "persistent_original_mode_synthetic_runtime_evidence_not_experimental_acceptance",
+  "prospective_plan_commit": "5f5f44d95c2042526b195d7aa2a00f0361030f20",
+  "initial_freeze_commit": "a343154ae0afd24b8e80b0abb733201d14fe076a",
+  "corrected_freeze_commit": "7de98c9e8dcfc35fbd809b5ec6646cc7a3895b86",
+  "source_freeze_sha256": "014de01372ff1cf0b9547982aed83f996b6739cf242d19b7dc75d7cd7ef31eab",
+  "source_freeze_records": 82,
+  "gate_source_records": 83,
+  "baseline_records": 125,
+  "tests_per_interpreter": 317,
+  "tests_breakdown": {
+    "kernel": 77,
+    "broker": 33,
+    "engine": 24,
+    "wrapper": 26,
+    "planner": 87,
+    "builder": 39,
+    "delivery": 31
+  },
+  "gates": {
+    "final311_02": {
+      "path": "experiments/development/coordinated_runtime_2026-10-01/checks/final311_02/report.json",
+      "sha256": "9e35442ee2d9bc33f2de01f43a03179ab950a5b07923978a31f296097d912f4f",
+      "runtime_root": "/tmp/specorganon-D119-final311_02-01jopwd9",
+      "command_exit_codes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sources_equal": true,
+      "source_count": 83,
+      "interpreter": {
+        "version": "3.11.15 (main, Jul 18 2026, 17:02:49) [Clang 22.1.3 ]",
+        "executable": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python"
+      }
+    },
+    "final312_02": {
+      "path": "experiments/development/coordinated_runtime_2026-10-01/checks/final312_02/report.json",
+      "sha256": "dbdc9d1881f6f53494aa20b6256f5f435c52a1ea44fd0cfc544a335ccf1414fa",
+      "runtime_root": "/tmp/specorganon-D119-final312_02-lr0asj2v",
+      "command_exit_codes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sources_equal": true,
+      "source_count": 83,
+      "interpreter": {
+        "version": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+        "executable": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python"
+      }
+    },
+    "integration311_02": {
+      "path": "experiments/development/coordinated_runtime_2026-10-01/checks/integration311_02/report.json",
+      "sha256": "a3f9a304cf104c1d05d2d755f9f57dc5deec17a498a80179d6aa5ba73da656d7",
+      "runtime_root": "/tmp/specorganon-D119-integration311_02-ddvo36cs",
+      "command_exit_codes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sources_equal": true,
+      "source_count": 83,
+      "interpreter": {
+        "version": "3.11.15 (main, Jul 18 2026, 17:02:49) [Clang 22.1.3 ]",
+        "executable": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python"
+      }
+    },
+    "integration312_02": {
+      "path": "experiments/development/coordinated_runtime_2026-10-01/checks/integration312_02/report.json",
+      "sha256": "228a2493ae6eefa6892b6c0940fc473e44c8796d962740af6925dc957472a924",
+      "runtime_root": "/tmp/specorganon-D119-integration312_02-k5980jdd",
+      "command_exit_codes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sources_equal": true,
+      "source_count": 83,
+      "interpreter": {
+        "version": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+        "executable": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python"
+      }
+    }
+  },
+  "integrations": {
+    "integration311_02": {
+      "actual_cli_calls": 112,
+      "synthetic_response_count": 113,
+      "synthetic_declared_tokens": 791,
+      "actual_tool_calls": 69,
+      "rows": [
+        {
+          "arm": "A",
+          "case_id": "D-F",
+          "run_id": "dev-coord-36bd3a2c24082e3bf8a3e1a8",
+          "mode": "sequential",
+          "delegations": 3,
+          "model_requests": 20,
+          "fixture_reported_tokens": 140,
+          "tool_calls": 12,
+          "local_worker_http_overlap": false,
+          "same_claim_count": 1,
+          "trace_sha256": "f1c9538ffabac924e971c6a2dda99572505652c44c1326c9e11322c6fbaa8f06",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        },
+        {
+          "arm": "A",
+          "case_id": "D-E",
+          "run_id": "dev-coord-8826ef95e37a12160e28e436",
+          "mode": "sequential",
+          "delegations": 3,
+          "model_requests": 19,
+          "fixture_reported_tokens": 133,
+          "tool_calls": 11,
+          "local_worker_http_overlap": false,
+          "same_claim_count": 1,
+          "trace_sha256": "33593bf296afcae4abc4af81133f747b3996b1d4fa881b3ff2fab1feceae2fa6",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        },
+        {
+          "arm": "B",
+          "case_id": "D-F",
+          "run_id": "dev-coord-45a4301ba5b38b0aa8433a4f",
+          "mode": "graph",
+          "delegations": 2,
+          "model_requests": 19,
+          "fixture_reported_tokens": 133,
+          "tool_calls": 12,
+          "local_worker_http_overlap": true,
+          "same_claim_count": 1,
+          "trace_sha256": "c0059113a9e13597179e3e5ec4026b0028612d0c94a5ad2d8b44919c6da16a9f",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        },
+        {
+          "arm": "B",
+          "case_id": "D-E",
+          "run_id": "dev-coord-fa19b45dc81c4938f3523112",
+          "mode": "graph",
+          "delegations": 2,
+          "model_requests": 18,
+          "fixture_reported_tokens": 126,
+          "tool_calls": 11,
+          "local_worker_http_overlap": true,
+          "same_claim_count": 1,
+          "trace_sha256": "ce68da9b2e7b759460a2d581abc2a14371a4a34098128d979fef60143abe4266",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        },
+        {
+          "arm": "C",
+          "case_id": "D-F",
+          "run_id": "dev-coord-d41e273ba685b44fed255925",
+          "mode": "risk",
+          "delegations": 2,
+          "model_requests": 19,
+          "fixture_reported_tokens": 133,
+          "tool_calls": 12,
+          "local_worker_http_overlap": true,
+          "same_claim_count": 1,
+          "trace_sha256": "02fabac0ea42708b565bd9f78c6006e0097e522f2ac60fb3aecc1857d5b896b0",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        },
+        {
+          "arm": "C",
+          "case_id": "D-E",
+          "run_id": "dev-coord-8f139b8604c17f8f56138742",
+          "mode": "risk",
+          "delegations": 2,
+          "model_requests": 18,
+          "fixture_reported_tokens": 126,
+          "tool_calls": 11,
+          "local_worker_http_overlap": true,
+          "same_claim_count": 1,
+          "trace_sha256": "73f0543c5198d29d3f80200b53e044103752f85e34a58a56e7498e50bf3c94b8",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        }
+      ],
+      "replica": 1,
+      "formal_cells_executed": 0
+    },
+    "integration312_02": {
+      "actual_cli_calls": 112,
+      "synthetic_response_count": 113,
+      "synthetic_declared_tokens": 791,
+      "actual_tool_calls": 69,
+      "rows": [
+        {
+          "arm": "A",
+          "case_id": "D-F",
+          "run_id": "dev-coord-015d527dc3651cb41096925a",
+          "mode": "sequential",
+          "delegations": 3,
+          "model_requests": 20,
+          "fixture_reported_tokens": 140,
+          "tool_calls": 12,
+          "local_worker_http_overlap": false,
+          "same_claim_count": 1,
+          "trace_sha256": "e488daecb2c3ff1c2dbd598034eca745274819bf947c52b9524f2341eb6f274b",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        },
+        {
+          "arm": "A",
+          "case_id": "D-E",
+          "run_id": "dev-coord-5f62ff7513c95691bc58807f",
+          "mode": "sequential",
+          "delegations": 3,
+          "model_requests": 19,
+          "fixture_reported_tokens": 133,
+          "tool_calls": 11,
+          "local_worker_http_overlap": false,
+          "same_claim_count": 1,
+          "trace_sha256": "0baa1287628b40aa385cdd8697065d6786ae424f0d57bc99813411dbfceb460a",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        },
+        {
+          "arm": "B",
+          "case_id": "D-F",
+          "run_id": "dev-coord-5cd245bcf8832c698ea39f3c",
+          "mode": "graph",
+          "delegations": 2,
+          "model_requests": 19,
+          "fixture_reported_tokens": 133,
+          "tool_calls": 12,
+          "local_worker_http_overlap": true,
+          "same_claim_count": 1,
+          "trace_sha256": "dd02501ae05f50aa0a087382b2ebdf920772bfcad1c8976ee109292fb855acc9",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        },
+        {
+          "arm": "B",
+          "case_id": "D-E",
+          "run_id": "dev-coord-635cd83a72430a53d0b63c9b",
+          "mode": "graph",
+          "delegations": 2,
+          "model_requests": 18,
+          "fixture_reported_tokens": 126,
+          "tool_calls": 11,
+          "local_worker_http_overlap": true,
+          "same_claim_count": 1,
+          "trace_sha256": "b90eeab38bbde6509f2d1ccec0dfc3b07957fa4ae6d90d3f8776aca251025e6a",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        },
+        {
+          "arm": "C",
+          "case_id": "D-F",
+          "run_id": "dev-coord-07c6a7c06b685172e7d3aa4f",
+          "mode": "risk",
+          "delegations": 2,
+          "model_requests": 19,
+          "fixture_reported_tokens": 133,
+          "tool_calls": 12,
+          "local_worker_http_overlap": true,
+          "same_claim_count": 1,
+          "trace_sha256": "32c9f221907a6521b9b2d6e7ad867af4d6f910c562c895a98f0e1597eb1968fd",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        },
+        {
+          "arm": "C",
+          "case_id": "D-E",
+          "run_id": "dev-coord-b0b33478d627731354e5728b",
+          "mode": "risk",
+          "delegations": 2,
+          "model_requests": 18,
+          "fixture_reported_tokens": 126,
+          "tool_calls": 11,
+          "local_worker_http_overlap": true,
+          "same_claim_count": 1,
+          "trace_sha256": "8d1e7969f0c83281fc058c314711e0d87fca1063f5faf34c688b94942940c9ee",
+          "formal_cell_executed": false,
+          "quality_assessed": false
+        }
+      ],
+      "replica": 1,
+      "formal_cells_executed": 0
+    }
+  },
+  "archive": {
+    "archive": "runtimes.tar.gz",
+    "archive_bytes": 47929387,
+    "archive_sha256": "f7c7c884c51aefe222e7cc978377a93598d2a456dedb815bffa52f9a8ac6aff7",
+    "regular_files": 53857,
+    "unique_blobs": 12643,
+    "restorable_authority": false
+  },
+  "archive_root_count": 37,
+  "archive_verification": "experiments/development/coordinated_runtime_2026-10-01/checks/archive_verification.json",
+  "negative_evidence": [
+    "checks/runtime_intake01/report.json",
+    "worker_checks/kernel_attempt03/capture.json",
+    "review/cross_interpreter_prepare_probe.json",
+    "review/cross_interpreter_rejection_probe.json",
+    "checks/initial_timeouts.json",
+    "checks/capture_timeout_probe/report.json",
+    "checks/archive_invocation01.json"
+  ],
+  "independent_review_reports": [
+    "review/binding_closure.json",
+    "review/final_gate_review.json",
+    "review/final_runtime_review.json",
+    "review/archive_review.json"
+  ],
+  "luna": {
+    "requested_model": "gpt-6-luna",
+    "scope": [
+      "historical125path_inventory",
+      "bounded_readonly_next_measurement_intake"
+    ],
+    "root_reviewed": true,
+    "quality_benchmark": false,
+    "provider_identity_claim": false
+  },
+  "next_measurement_intake": "planning/next_measurement_intake.md",
+  "formal_cells_executed": 0,
+  "quality_assessed": false,
+  "provider_activity_authenticated": false,
+  "invoice_authenticated": false,
+  "normative_approval": false,
+  "acceptance": {
+    "C1": "technical_D107_preserved",
+    "C2": "not_demonstrated",
+    "C3": "not_demonstrated",
+    "C4": "not_demonstrated",
+    "C5": "not_demonstrated"
+  },
+  "remaining": [
+    "actual_route_usage_cost_activity_and_authorization",
+    "12_real_R1_then_prospective_adaptation_freeze_then12_R2_and_independent_selection",
+    "reserved_confirmation_custody_panel_judges_competent_human_authorities",
+    "causal_food_field_evaluation_and_real_other_domain_transfer"
+  ],
+  "archive_negative_limitations": {
+    "missing_referenced_root": "/tmp/specorganon-D119-engine-intake01",
+    "cause": "manual interpreter could not import pytest; tests_executed false; missing root disclosed",
+    "raw_broad_whitespace_diagnostic": "CRLF source copies preserved, scoped code/docs exit0",
+    "archive_invocation_error_before_mkdir": "relative report paths corrected in argv; source unchanged"
+  }
+}

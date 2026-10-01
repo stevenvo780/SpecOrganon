@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "classification": "preserved_engine_intake_failures_not_successful_gates",
+  "manual_environment_failure": {
+    "argv": ["python3.11", "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/test_managed_coordinated_prototype.py", "-k", "two_delegations or terminal_leader", "--basetemp", "/tmp/specorganon-D119-engine-intake01"],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "/home/dev/.local/bin/python3.11: No module named pytest\n",
+    "tests_executed": false,
+    "before_after_snapshot_available": false
+  },
+  "manual_intake02": {
+    "argv": [".venv/bin/python", "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/test_managed_coordinated_prototype.py", "-k", "two_delegations or terminal_leader", "--basetemp", "/tmp/specorganon-D119-engine-intake02"],
+    "exit_code": 2,
+    "runtime_root": "/tmp/specorganon-D119-engine-intake02",
+    "result": "1 failed, 1 passed, 15 deselected; interrupted after source change",
+    "failed_run_reason": "CoordinatedRuntimeError: runtime source closure changed during capture",
+    "before_after_snapshot_available": false
+  },
+  "captured_attempts": {
+    "engine_attempt01": "Interrupted after AST cache source edit; exact source/streams preserved; source_unchanged false.",
+    "engine_attempt02": "Interrupted before wrapper AST cache and engine test additions stabilized; source_unchanged false.",
+    "engine_attempt03": "Python 3.12 counterpart; interrupted before source barrier; source_unchanged false.",
+    "engine_attempt04": "Python 3.11 actual parallel broker verification reproduced original core global stdout race; 3 failed and 19 passed before interrupt; source_unchanged true.",
+    "engine_attempt05": "Python 3.12 same core global stdout race; 3 failed and 17 passed before interrupt; source_unchanged true."
+  },
+  "repair": "Kernel owner serialized original core redirect/run/capture/parse under RLock; original prototype core bytes unchanged.",
+  "formal_cells_executed": 0,
+  "quality_assessed": false
+}

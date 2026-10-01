@@ -1,0 +1,48 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "ruff",
+        "check",
+        "scripts/coordinated_prototype_kernel.py",
+        "tests/test_coordinated_prototype_kernel.py"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.04918718338012695,
+      "stdout": "gate0.stdout",
+      "stderr": "gate0.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/specorganon-D119-native-kernel-311-attempt01-xjfcj40h",
+        "tests/test_coordinated_prototype_kernel.py"
+      ],
+      "returncode": 1,
+      "elapsed_seconds": 0.5900230407714844,
+      "stdout": "gate1.stdout",
+      "stderr": "gate1.stderr"
+    }
+  ],
+  "source_before": {
+    "scripts/coordinated_prototype_kernel.py": "56cef74c1fc9663c7197171423b28c80bfb89b8dd05c1b7b3df5342d65a15c67",
+    "tests/test_coordinated_prototype_kernel.py": "ca9de3b8cf16c474513fff880fddb160f94d3b69fc1716bbb7b4a9c7598e1808",
+    "prototypes/core.py": "6bf67d5542ac4fb9b9b1f9bd1e122ddb4c3b0a29e2fe26d040f1c401a2828986"
+  },
+  "source_after": {
+    "scripts/coordinated_prototype_kernel.py": "56cef74c1fc9663c7197171423b28c80bfb89b8dd05c1b7b3df5342d65a15c67",
+    "tests/test_coordinated_prototype_kernel.py": "ca9de3b8cf16c474513fff880fddb160f94d3b69fc1716bbb7b4a9c7598e1808",
+    "prototypes/core.py": "6bf67d5542ac4fb9b9b1f9bd1e122ddb4c3b0a29e2fe26d040f1c401a2828986"
+  },
+  "runtime_roots": [
+    "/tmp/specorganon-D119-native-kernel-311-attempt01-xjfcj40h"
+  ]
+}

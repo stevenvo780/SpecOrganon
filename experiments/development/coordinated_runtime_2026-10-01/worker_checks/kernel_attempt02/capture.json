@@ -1,0 +1,92 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "ruff",
+        "check",
+        "scripts/coordinated_prototype_kernel.py",
+        "tests/test_coordinated_prototype_kernel.py"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.024743080139160156,
+      "stdout": "gate0.stdout",
+      "stderr": "gate0.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/specorganon-D119-native-kernel-311-attempt02-5j5tajq7",
+        "tests/test_coordinated_prototype_kernel.py"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.5735433101654053,
+      "stdout": "gate1.stdout",
+      "stderr": "gate1.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-c",
+        "from pathlib import Path; [compile(Path(p).read_bytes(),p,'exec') for p in ['scripts/coordinated_prototype_kernel.py','tests/test_coordinated_prototype_kernel.py']]; print('syntax passed')"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.027257680892944336,
+      "stdout": "gate2.stdout",
+      "stderr": "gate2.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/specorganon-D119-native-kernel-312-attempt02-avi2o529",
+        "tests/test_coordinated_prototype_kernel.py"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.6695764064788818,
+      "stdout": "gate3.stdout",
+      "stderr": "gate3.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-c",
+        "from pathlib import Path; [compile(Path(p).read_bytes(),p,'exec') for p in ['scripts/coordinated_prototype_kernel.py','tests/test_coordinated_prototype_kernel.py']]; print('syntax passed')"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.023558855056762695,
+      "stdout": "gate4.stdout",
+      "stderr": "gate4.stderr"
+    }
+  ],
+  "source_hashes": {
+    "before": {
+      "scripts/coordinated_prototype_kernel.py": "42dff1e8e2027992d08f2fe924a19f0863f2aaf55fc66f2026c0c55f0ce8b93b",
+      "tests/test_coordinated_prototype_kernel.py": "cc623432f85b0459b992c301e7f78527877f8cee2ebef272a28b65ad546fa84c",
+      "prototypes/core.py": "6bf67d5542ac4fb9b9b1f9bd1e122ddb4c3b0a29e2fe26d040f1c401a2828986"
+    },
+    "after": {
+      "scripts/coordinated_prototype_kernel.py": "42dff1e8e2027992d08f2fe924a19f0863f2aaf55fc66f2026c0c55f0ce8b93b",
+      "tests/test_coordinated_prototype_kernel.py": "cc623432f85b0459b992c301e7f78527877f8cee2ebef272a28b65ad546fa84c",
+      "prototypes/core.py": "6bf67d5542ac4fb9b9b1f9bd1e122ddb4c3b0a29e2fe26d040f1c401a2828986"
+    }
+  },
+  "runtime_roots": [
+    "/tmp/specorganon-D119-native-kernel-311-attempt02-5j5tajq7",
+    "/tmp/specorganon-D119-native-kernel-312-attempt02-avi2o529"
+  ]
+}

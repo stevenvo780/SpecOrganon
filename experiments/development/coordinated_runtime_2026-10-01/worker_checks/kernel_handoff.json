@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "owner": "/root/d116_analysis_intake",
+  "scope": [
+    "scripts/coordinated_prototype_kernel.py",
+    "tests/test_coordinated_prototype_kernel.py"
+  ],
+  "stable": true,
+  "source_sha256": {
+    "scripts/coordinated_prototype_kernel.py": "42dff1e8e2027992d08f2fe924a19f0863f2aaf55fc66f2026c0c55f0ce8b93b",
+    "tests/test_coordinated_prototype_kernel.py": "cc623432f85b0459b992c301e7f78527877f8cee2ebef272a28b65ad546fa84c",
+    "prototypes/core.py": "6bf67d5542ac4fb9b9b1f9bd1e122ddb4c3b0a29e2fe26d040f1c401a2828986"
+  },
+  "apis": [
+    "parse_state(raw, *, mode, case_id=None)",
+    "validate_initialization(proposal,state_raw, *, mode,case_id,proposal_path)",
+    "select_work(state,limit=2)",
+    "apply_operations(base_raw,operations, *, mode)",
+    "merge_operations(base_raw,branches, *, mode)"
+  ],
+  "operation_row_fields": [
+    "global_ordinal",
+    "role",
+    "arguments",
+    "success"
+  ],
+  "arguments": "parsed inner request dict; only status/plan/revise/review/advance; no init/approve",
+  "branch_fields": [
+    "task_id",
+    "owned_node_ids",
+    "state_raw",
+    "operations"
+  ],
+  "capabilities": [
+    "strict bounded finite JSON with duplicate key rejection",
+    "original core schema/graph and history/version/staleness/phase checks",
+    "original local sequential invalidation and observable unsafe audit",
+    "original graph/risk descendant invalidation and dependency review",
+    "native revision without prior-phase gates",
+    "A singleton local-readiness phase/ID selection; B closure phase/ID; C original risk queue; pending norms excluded",
+    "original core.run replay with global ordinals and strict role/ownership",
+    "exact byte and semantic branch comparison, then global-order replay; multiple cycles and legitimate phase needs_review"
+  ],
+  "limits": [
+    "kernel does not authenticate provider/model/effort/cost or runtime authority",
+    "caller must bind/revalidate kernel/core source closure and journals",
+    "failed rows have no replay effects; receipt success authenticated by broker",
+    "initialization and read/write/replace/analysis journals are broker responsibilities",
+    "normative approval rejected; no formal runs or Q"
+  ],
+  "attempts": [
+    {
+      "path": "kernel_attempt01/capture.json",
+      "result": "Ruff passed; Python311 69 passed / 2 failed; fixture omitted native review after revise of own stale node; preserved without rewriting"
+    },
+    {
+      "path": "kernel_attempt02/capture.json",
+      "result": "Ruff passed, 75 passed Python311 and Python312, syntax both passed"
+    }
+  ],
+  "final_checks": [
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "ruff",
+        "check",
+        "scripts/coordinated_prototype_kernel.py",
+        "tests/test_coordinated_prototype_kernel.py"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.024743080139160156,
+      "stdout": "gate0.stdout",
+      "stderr": "gate0.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/specorganon-D119-native-kernel-311-attempt02-5j5tajq7",
+        "tests/test_coordinated_prototype_kernel.py"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.5735433101654053,
+      "stdout": "gate1.stdout",
+      "stderr": "gate1.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-c",
+        "from pathlib import Path; [compile(Path(p).read_bytes(),p,'exec') for p in ['scripts/coordinated_prototype_kernel.py','tests/test_coordinated_prototype_kernel.py']]; print('syntax passed')"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.027257680892944336,
+      "stdout": "gate2.stdout",
+      "stderr": "gate2.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/specorganon-D119-native-kernel-312-attempt02-avi2o529",
+        "tests/test_coordinated_prototype_kernel.py"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.6695764064788818,
+      "stdout": "gate3.stdout",
+      "stderr": "gate3.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-c",
+        "from pathlib import Path; [compile(Path(p).read_bytes(),p,'exec') for p in ['scripts/coordinated_prototype_kernel.py','tests/test_coordinated_prototype_kernel.py']]; print('syntax passed')"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.023558855056762695,
+      "stdout": "gate4.stdout",
+      "stderr": "gate4.stderr"
+    }
+  ],
+  "runtime_roots": [
+    "/tmp/specorganon-D119-native-kernel-311-attempt02-5j5tajq7",
+    "/tmp/specorganon-D119-native-kernel-312-attempt02-avi2o529"
+  ],
+  "negative_gates": [
+    "norm approved/init/approve",
+    "strict schema/graph cycles/duplicates/nonfinite/oversize",
+    "phase/history/snapshot/version/stale/mode tamper",
+    "A review denied has no effects",
+    "B/C premature stale review",
+    "success claim disagrees with native result",
+    "worker phase advance and phantom roles",
+    "ownership overlap/dependent branches/duplicate ordinal/order",
+    "observed branch byte/semantic tamper",
+    "malformed CLI-like value fails closed"
+  ],
+  "preservation": {
+    "core_before_after_equal": true,
+    "all_final_sources_before_after_equal": true
+  },
+  "no_commit": true
+}

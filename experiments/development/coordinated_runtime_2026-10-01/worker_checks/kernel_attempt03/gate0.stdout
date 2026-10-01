@@ -1,0 +1,180 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___________ test_concurrent_replays_capture_each_core_result[graph] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fd77a951d90>
+tmp_path = PosixPath('/tmp/specorganon-D119-native-kernel-311-attempt03-tmp-yf31t69l/test_concurrent_replays_captur0')
+mode = 'graph'
+
+    @pytest.mark.parametrize("mode", ["graph", "risk"])
+    def test_concurrent_replays_capture_each_core_result(monkeypatch, tmp_path, mode):
+        case = proposal(normative=False)
+        case["nodes"].append(node("q", "philosophy"))
+        raw, _ = initialize(tmp_path, mode, case)
+        operations = [[row(1, revision("p"), role="worker-1")],
+                      [row(2, revision("q"), role="worker-2")]]
+        expected = [kernel.apply_operations(raw, ops, mode=mode) for ops in operations]
+        native_run = kernel.core.run
+        start = threading.Barrier(2)
+        second_entered, first_finished = threading.Event(), threading.Event()
+        counter_lock = threading.Lock()
+        calls = active = maximum_active = 0
+    
+        def delayed_run(selected_mode, args):
+            nonlocal calls, active, maximum_active
+            with counter_lock:
+                calls += 1
+                index = calls
+                active += 1
+                maximum_active = max(maximum_active, active)
+            try:
+                if index == 1:
+                    # Without the kernel lock, the second redirect is now active
+                    # when this invocation emits its JSON into the wrong stream.
+                    second_entered.wait(0.15)
+                else:
+                    second_entered.set()
+                    assert first_finished.wait(2)
+                return native_run(selected_mode, args)
+            finally:
+                with counter_lock:
+                    active -= 1
+                if index == 1:
+                    first_finished.set()
+    
+        def replay(ops):
+            start.wait(timeout=2)
+            return kernel.apply_operations(raw, ops, mode=mode)
+    
+        monkeypatch.setattr(kernel.core, "run", delayed_run)
+        stdout, stderr = sys.stdout, sys.stderr
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                futures = [executor.submit(replay, ops) for ops in operations]
+                # Join before reading exceptions so the pre-fix failure also leaves
+                # the test runner's global streams restored and evidence readable.
+>           observed = [future.result() for future in futures]
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_coordinated_prototype_kernel.py:421: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_coordinated_prototype_kernel.py:421: in <listcomp>
+    observed = [future.result() for future in futures]
+                ^^^^^^^^^^^^^^^
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/concurrent/futures/_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_coordinated_prototype_kernel.py:412: in replay
+    return kernel.apply_operations(raw, ops, mode=mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/coordinated_prototype_kernel.py:328: in apply_operations
+    outcome = _json(stdout.getvalue().encode("utf-8"))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b''
+
+    def _json(raw):
+        if type(raw) is not bytes or not raw or len(raw) > MAX_STATE_BYTES:
+>           raise KernelError("state bytes are absent or exceed the bound")
+E           coordinated_prototype_kernel.KernelError: state bytes are absent or exceed the bound
+
+scripts/coordinated_prototype_kernel.py:70: KernelError
+----------------------------- Captured stdout call -----------------------------
+{"action": "revise", "affected": ["q"], "id": "q", "ok": true}
+____________ test_concurrent_replays_capture_each_core_result[risk] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fd77aa6c410>
+tmp_path = PosixPath('/tmp/specorganon-D119-native-kernel-311-attempt03-tmp-yf31t69l/test_concurrent_replays_captur1')
+mode = 'risk'
+
+    @pytest.mark.parametrize("mode", ["graph", "risk"])
+    def test_concurrent_replays_capture_each_core_result(monkeypatch, tmp_path, mode):
+        case = proposal(normative=False)
+        case["nodes"].append(node("q", "philosophy"))
+        raw, _ = initialize(tmp_path, mode, case)
+        operations = [[row(1, revision("p"), role="worker-1")],
+                      [row(2, revision("q"), role="worker-2")]]
+        expected = [kernel.apply_operations(raw, ops, mode=mode) for ops in operations]
+        native_run = kernel.core.run
+        start = threading.Barrier(2)
+        second_entered, first_finished = threading.Event(), threading.Event()
+        counter_lock = threading.Lock()
+        calls = active = maximum_active = 0
+    
+        def delayed_run(selected_mode, args):
+            nonlocal calls, active, maximum_active
+            with counter_lock:
+                calls += 1
+                index = calls
+                active += 1
+                maximum_active = max(maximum_active, active)
+            try:
+                if index == 1:
+                    # Without the kernel lock, the second redirect is now active
+                    # when this invocation emits its JSON into the wrong stream.
+                    second_entered.wait(0.15)
+                else:
+                    second_entered.set()
+                    assert first_finished.wait(2)
+                return native_run(selected_mode, args)
+            finally:
+                with counter_lock:
+                    active -= 1
+                if index == 1:
+                    first_finished.set()
+    
+        def replay(ops):
+            start.wait(timeout=2)
+            return kernel.apply_operations(raw, ops, mode=mode)
+    
+        monkeypatch.setattr(kernel.core, "run", delayed_run)
+        stdout, stderr = sys.stdout, sys.stderr
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                futures = [executor.submit(replay, ops) for ops in operations]
+                # Join before reading exceptions so the pre-fix failure also leaves
+                # the test runner's global streams restored and evidence readable.
+>           observed = [future.result() for future in futures]
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_coordinated_prototype_kernel.py:421: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_coordinated_prototype_kernel.py:421: in <listcomp>
+    observed = [future.result() for future in futures]
+                ^^^^^^^^^^^^^^^
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/concurrent/futures/_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_coordinated_prototype_kernel.py:412: in replay
+    return kernel.apply_operations(raw, ops, mode=mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/coordinated_prototype_kernel.py:328: in apply_operations
+    outcome = _json(stdout.getvalue().encode("utf-8"))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b''
+
+    def _json(raw):
+        if type(raw) is not bytes or not raw or len(raw) > MAX_STATE_BYTES:
+>           raise KernelError("state bytes are absent or exceed the bound")
+E           coordinated_prototype_kernel.KernelError: state bytes are absent or exceed the bound
+
+scripts/coordinated_prototype_kernel.py:70: KernelError
+----------------------------- Captured stdout call -----------------------------
+{"action": "revise", "affected": ["q"], "id": "q", "ok": true}
+=========================== short test summary info ============================
+FAILED tests/test_coordinated_prototype_kernel.py::test_concurrent_replays_capture_each_core_result[graph]
+FAILED tests/test_coordinated_prototype_kernel.py::test_concurrent_replays_capture_each_core_result[risk]
+2 failed, 75 deselected in 0.11s

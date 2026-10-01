@@ -1,5 +1,35 @@
 # Auditoría de aceptación actual
 
+## D-119 · Runtime persistente de desarrollo coordinado
+
+[Dossier](../experiments/development/coordinated_runtime_2026-10-01/README.md).
+El runtime implementa A/B/C desde init original del líder hasta varias
+delegaciones, merge, análisis final vigente y reviewer público, con el mismo
+ledger/contexto/claim y contadores globales. El host impone ownership y CAS;
+el análisis readonly usa herramientas originales y las métricas se retiran
+cuando cambia work. La entrega requiere estructura D118 y finish exitoso.
+El cierre del runtime conserva normas pendientes y no acepta automáticamente
+las cuatro fases del prototipo.
+
+Freeze corregido `7de98c9`: 82 fuentes y extractor, 125 rutas históricas
+verificadas por root/revisor. Se conserva el primer freeze y sus resultados
+negativos. La revisión reprodujo y cerró la diferencia entre tool_policy y
+ejecutables al mezclar intérpretes: rechazo antes de IO y cotejo en reapertura.
+Pasaron317pruebas por Python3.11/3.12, Ruff/sintaxis/diff0 y83fuentes
+before/after idénticas. La revisión reabrió los doce runs CLI/HTTP finales:
+112CLI/113sends/69tools de fixture por intérprete, claim/saldo único,
+análisis final vigente e inventario original completo, reviewer sin RAW
+ajeno. A3epochs serial; B/C2epochs con solapamiento HTTP local.
+Archivo37raíces/53.857regulares/12.643blobs/47.929.387B SHA f7c7c884…,
+18.735entradas de metadata; root cotejó bytes/modos/targets y membresía Tar
+contra todos los originales, sin seguir symlinks ni abrir FIFO.
+
+**C1 técnico D107 preservado; C2–C5 No demostrado; 0/24 formales.**
+No modelo/effort, usage, actividad remota o factura autenticados; estructura,
+inventario de fuentes y HTTP local no demuestran Q ni interpretación científica,
+campo, reserva o transferencia. El wheel y el producto permanecen intactos.
+Los cortes siguientes son históricos.
+
 ## D-118 · Preparación coordinada común, sin nuevas celdas evaluadas
 
 [Dossier](../experiments/development/coordinated_contract_2026-10-01/README.md).

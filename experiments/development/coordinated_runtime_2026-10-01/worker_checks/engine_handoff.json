@@ -1,0 +1,239 @@
+{
+  "schema": 1,
+  "status": "done",
+  "retryable": false,
+  "classification": "real_local_coordinated_engine_with_synthetic_model_responses_not_Q",
+  "ownership": [
+    "scripts/managed_coordinated_prototype.py",
+    "tests/test_managed_coordinated_prototype.py",
+    "worker_checks/engine_*"
+  ],
+  "source_sha256": {
+    "scripts/managed_coordinated_prototype.py": "450949301f084a6512855bf38df092be2bfca61bf59e5e49469254031191ec28",
+    "tests/test_managed_coordinated_prototype.py": "f08b7ad4972f85f3ae51eda1ea56f32cfd2b867c5458a08ab7e18b8847ca9049",
+    "scripts/coordinated_prototype_kernel.py": "2d63d884843e771ef726279d9b71f2d69ae1dc1afeeffba294dd0b5fb0ebf242",
+    "scripts/coordinated_prototype_broker.py": "9efe025cd63a5771482a1aca1d20ec57c2a97d27e8853ba47efc4e4e5f06fa0c"
+  },
+  "api": [
+    "prepare_coordinated_prototype(run_dir,plan,admission_root=None)",
+    "validate_plan(raw,check_inputs=False)",
+    "read_coordinated_prototype_status(run_dir,guard=None)",
+    "execute_coordinated_prototype_step(run_dir,transports,expected_checkpoint,guard=None)",
+    "read_status",
+    "execute_step"
+  ],
+  "plan_keys": [
+    "case_dir",
+    "context",
+    "descriptor",
+    "effort",
+    "execution_profile",
+    "functions",
+    "inputs_dir",
+    "journal_roots",
+    "limits",
+    "max_epochs",
+    "model",
+    "price_profile",
+    "role_config",
+    "run_id",
+    "runtime_source_digests",
+    "schedule",
+    "schema"
+  ],
+  "leader_terminal_envelope": {
+    "action": "delegate|deliver",
+    "public_text": "nonempty public text"
+  },
+  "status_runtime_stages": [
+    "leader",
+    "workers",
+    "reviewer",
+    "finished",
+    "stopped"
+  ],
+  "fixed_roles": [
+    "leader",
+    "worker-1",
+    "worker-2",
+    "reviewer"
+  ],
+  "broker_binding": "run.json broker_binding; never caller plan broker_manifest",
+  "claim": "actual compiled schedule SHA + run_id, attempt1, oneshot run_dir owner; separate immutable .coordinated-binding first-plan/caps/descriptor/code pin",
+  "continuity": "one WaveLedger schema3 + one RunContext schema2; global request IDs and role turns; flat model/tool journals and append-only delegations/merges",
+  "reviewer_context": "Public terminal artifacts, original method state/audit, actual current host metrics/checker, actual bounded analysis.py/report.md/D-F sources.json with content/bytes/SHA; no tools/private histories/RAW",
+  "delivery": "Current integrated readonly host analysis required, actual source/metric hashes and broker receipt checked; public D118 structural checker; context finish then publication marker",
+  "tests": {
+    "python311": 24,
+    "python312": 24,
+    "types": "actual local ledger/context/original sandboxed broker/kernel with synthetic responses; explicit transport uncertainty and context finish fault injection",
+    "coverage": [
+      "A serial versus B/C at most2 workers",
+      "two actual delegations per A/B/C",
+      "upstream readiness enables next epoch; B/C singleton",
+      "empty eligible set stops without fictitious workers",
+      "same ledger/context/balance/model/caps/claim",
+      "CAS restart and global counter/RAW/history/claim/context tamper",
+      "source/common input guards and closed no-permission schema",
+      "actual sealed initialization before delegation/delivery",
+      "unknown inflight does not resend",
+      "premature final analysis blocks reviewer",
+      "reviewer actual public files and no private reasoning",
+      "finish failure blocks publication"
+    ]
+  },
+  "gates": {
+    "engine_attempt06": {
+      "report": "experiments/development/coordinated_runtime_2026-10-01/worker_checks/engine_attempt06/report.json",
+      "report_sha256": "552e65095ceaa7a53e2c6547a8a23feafc2bbfa5b8b88582150892d243c4bf71",
+      "runtime_root": "/tmp/specorganon-D119-engine-attempt06-53bkf_ok",
+      "source_unchanged": true,
+      "all_exit_zero": true,
+      "commands": [
+        {
+          "argv": [
+            "/workspace/SpecOrganon/.venv/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "tests/test_managed_coordinated_prototype.py",
+            "--basetemp",
+            "/tmp/specorganon-D119-engine-attempt06-53bkf_ok/cases"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 368.00024418899557,
+          "stdout": "1.stdout",
+          "stderr": "1.stderr"
+        },
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "scripts/managed_coordinated_prototype.py",
+            "tests/test_managed_coordinated_prototype.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 0.015789501019753516,
+          "stdout": "2.stdout",
+          "stderr": "2.stderr"
+        },
+        {
+          "argv": [
+            "/workspace/SpecOrganon/.venv/bin/python",
+            "-I",
+            "-B",
+            "-c",
+            "import pathlib,sys;[compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]];print('syntax OK')",
+            "scripts/managed_coordinated_prototype.py",
+            "tests/test_managed_coordinated_prototype.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 0.03186916501726955,
+          "stdout": "3.stdout",
+          "stderr": "3.stderr"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check",
+            "--",
+            "scripts/managed_coordinated_prototype.py",
+            "tests/test_managed_coordinated_prototype.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 0.0079087860067375,
+          "stdout": "4.stdout",
+          "stderr": "4.stderr"
+        }
+      ]
+    },
+    "engine_attempt07": {
+      "report": "experiments/development/coordinated_runtime_2026-10-01/worker_checks/engine_attempt07/report.json",
+      "report_sha256": "507d2045f2a43cc541f7754c159cfa51f3cdf053dee0bdd07ea013e24d0eaa23",
+      "runtime_root": "/tmp/specorganon-D119-engine-attempt07-d_0uno2q",
+      "source_unchanged": true,
+      "all_exit_zero": true,
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/python3.12",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "tests/test_managed_coordinated_prototype.py",
+            "--basetemp",
+            "/tmp/specorganon-D119-engine-attempt07-d_0uno2q/cases"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 363.928108978027,
+          "stdout": "1.stdout",
+          "stderr": "1.stderr"
+        },
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "scripts/managed_coordinated_prototype.py",
+            "tests/test_managed_coordinated_prototype.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 0.015714891022071242,
+          "stdout": "2.stdout",
+          "stderr": "2.stderr"
+        },
+        {
+          "argv": [
+            "/usr/bin/python3.12",
+            "-I",
+            "-B",
+            "-c",
+            "import pathlib,sys;[compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]];print('syntax OK')",
+            "scripts/managed_coordinated_prototype.py",
+            "tests/test_managed_coordinated_prototype.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 0.03170980396680534,
+          "stdout": "3.stdout",
+          "stderr": "3.stderr"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check",
+            "--",
+            "scripts/managed_coordinated_prototype.py",
+            "tests/test_managed_coordinated_prototype.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 0.007685163989663124,
+          "stdout": "4.stdout",
+          "stderr": "4.stderr"
+        }
+      ]
+    }
+  },
+  "preserved_failures": "engine_intake_failures.json; captured engine_attempt01..05 remain false. Attempts04/05 demonstrate original global stdout concurrency race repaired by kernel owner; original core bytes preserved.",
+  "scope": {
+    "paid_provider_authorization": false,
+    "provider_identity_authenticated": false,
+    "provider_activity_authenticated": false,
+    "Q_assessed": false,
+    "formal_cells_executed": 0,
+    "method_phases_accepted": false,
+    "GOAL_verdict_changed": false,
+    "direct_engine_D118_bundle_custody_authenticated": false,
+    "external_wrapper_guard_required_for_D118_bundle": true,
+    "full_root_integration_gate": "owned by root"
+  },
+  "timing_scope": "Observed subprocess and host clock only; SUM local send intervals is not effective provider or agent activity.",
+  "commits_created": false,
+  "sources_stable": true
+}

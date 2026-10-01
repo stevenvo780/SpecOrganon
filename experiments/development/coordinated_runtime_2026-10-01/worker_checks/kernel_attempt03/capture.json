@@ -1,0 +1,39 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/specorganon-D119-native-kernel-311-attempt03-tmp-yf31t69l",
+        "tests/test_coordinated_prototype_kernel.py",
+        "-k",
+        "concurrent_replays_capture_each_core_result"
+      ],
+      "returncode": 1,
+      "elapsed_seconds": 0.2545185089111328,
+      "stdout": "gate0.stdout",
+      "stderr": "gate0.stderr"
+    }
+  ],
+  "source_hashes": {
+    "before": {
+      "scripts/coordinated_prototype_kernel.py": "42dff1e8e2027992d08f2fe924a19f0863f2aaf55fc66f2026c0c55f0ce8b93b",
+      "tests/test_coordinated_prototype_kernel.py": "6b3145622f325e313dec05c05ba81cac788f9a64091ceab116d15889ef007e43",
+      "prototypes/core.py": "6bf67d5542ac4fb9b9b1f9bd1e122ddb4c3b0a29e2fe26d040f1c401a2828986"
+    },
+    "after": {
+      "scripts/coordinated_prototype_kernel.py": "42dff1e8e2027992d08f2fe924a19f0863f2aaf55fc66f2026c0c55f0ce8b93b",
+      "tests/test_coordinated_prototype_kernel.py": "6b3145622f325e313dec05c05ba81cac788f9a64091ceab116d15889ef007e43",
+      "prototypes/core.py": "6bf67d5542ac4fb9b9b1f9bd1e122ddb4c3b0a29e2fe26d040f1c401a2828986"
+    }
+  },
+  "runtime_roots": [
+    "/tmp/specorganon-D119-native-kernel-311-attempt03-tmp-yf31t69l"
+  ],
+  "purpose": "expected pre-fix reproduction of global stream collision"
+}

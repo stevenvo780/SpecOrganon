@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "classification": "independent_adversarial_D119_local_development_review_not_GOAL_acceptance",
+  "status": "done",
+  "retryable": false,
+  "source_commit": "7de98c9e8dcfc35fbd809b5ec6646cc7a3895b86",
+  "source_freeze_sha256": "014de01372ff1cf0b9547982aed83f996b6739cf242d19b7dc75d7cd7ef31eab",
+  "verdict": "PASS_for_D119_local_synthetic_persistent_runtime_and_preserved_evidence",
+  "open_material_findings": [],
+  "closed_findings": [
+    {
+      "severity": "P1",
+      "topic": "Concurrent core stdout/stderr capture crossed between replays",
+      "evidence": "worker_checks/kernel_attempt03/gate0.stdout contains graph/risk failures and escaped JSON; kernel RLock encloses core.run, redirects, capture and parse. Independent targeted regression: 2 passed; final kernel suite:77 passed in each environment.",
+      "correction": "scripts/coordinated_prototype_kernel.py:324"
+    },
+    {
+      "severity": "P2",
+      "topic": "Cross-interpreter prepare accepted executable hashes different from sealed tool_policy",
+      "evidence": "Independent accepted and rejected prepare-only probes preserved; wrapper rejects exact-interpreter mismatch before IO, broker validates exact policy inventory and effective launcher hashes before stages and on reopen;33 broker tests per environment.",
+      "correction": "scripts/coordinated_prototype_runtime.py:187; scripts/coordinated_prototype_broker.py:112"
+    },
+    {
+      "severity": "P2",
+      "topic": "Reviewer lacked actual deliverable file contents",
+      "evidence": "Current payloads in all12final runs contain exact bounded analysis/report/sources bytes with sizes and SHA, without foreign RAW.",
+      "correction": "scripts/managed_coordinated_prototype.py:496"
+    },
+    {
+      "severity": "P3",
+      "topic": "Documentation incorrectly asserted same run IDs across environments",
+      "evidence": "Actual six coordinate pairs match but all run IDs differ between311/312 calendars because declared tool bytes include registered interpreter shebang. README corrected; evidence and runtime IDs unchanged.",
+      "correction": "README.md:125"
+    }
+  ],
+  "verified_evidence": {
+    "goal_and_prospective_plan_read_in_full": true,
+    "freeze_repo_records_live_and_git_verified": 82,
+    "external_extractor_verified": true,
+    "baseline_records_live_and_D118_git_verified": 125,
+    "completed_tests_per_interpreter": 317,
+    "gate_sources_before_after_live_capture_and_git": 83,
+    "closed_CLI_HTTP_runs_independently_reopened": 12,
+    "CLI_calls_per_environment": 112,
+    "synthetic_sends_per_environment": 113,
+    "tools_per_environment": 69,
+    "same_coordinate_pairs_per_environment": 6,
+    "same_run_ids_across_environments": false,
+    "archive_roots": 37,
+    "archive_regular_files": 53857,
+    "archive_unique_blobs": 12643,
+    "archive_metadata_entries": 18735,
+    "archive_regular_origin_bytes_verified": 1724526270,
+    "archive_bytes": 47929387,
+    "archive_sha256": "f7c7c884c51aefe222e7cc978377a93598d2a456dedb815bffa52f9a8ac6aff7",
+    "pinned_archive_reports": 44,
+    "staged_D119_paths_checked_before_verdict": 2140,
+    "staged_live_byte_mismatches": 0,
+    "unindexed_D119_files_before_verdict": 0,
+    "staged_changes_outside_D119_and_four_docs": []
+  },
+  "documentation_pins": [
+    {
+      "path": "experiments/development/coordinated_runtime_2026-10-01/README.md",
+      "sha256": "b0e5c5a1caf1b98733e36fef4e3229126567a8c6a7725537e5eb34bdb3ceaaf4"
+    },
+    {
+      "path": "experiments/development/coordinated_runtime_2026-10-01/evidence.json",
+      "sha256": "8df04be6e84c0009582fe55738de3d0e7ebec23b0d54a3228d1a51046a4fe3f6"
+    },
+    {
+      "path": "experiments/development/coordinated_runtime_2026-10-01/planning/next_measurement_intake.md",
+      "sha256": "85bc9818b4cd451b2d99e01a7d2309dc67a8f54709c32c9645805a8f4016b700"
+    },
+    {
+      "path": "docs/activacion_validacion.md",
+      "sha256": "7fe5847b9e74db86cd5646fd3da96c77342be05deb0c216270e5da872c59a665"
+    },
+    {
+      "path": "docs/decisiones.md",
+      "sha256": "294e90edfd75bb6c18341f4268add60bc21ed42da6bccb993f3760791667874c"
+    },
+    {
+      "path": "docs/estado.md",
+      "sha256": "07025324a1e24750f7f603624e1363751a158cab56e7dad3f222f92b7607b242"
+    },
+    {
+      "path": "docs/validacion_actual.md",
+      "sha256": "6c37b0403a960eeca01b3a460e1efd185466321ab943df25f373f3127e505088"
+    }
+  ],
+  "independent_review_reports": [
+    {
+      "path": "review/binding_closure.json",
+      "sha256": "1be0a08ca37b8659b0464e3c91619e755b76a32587e2909bdf71edfd9dab914d"
+    },
+    {
+      "path": "review/final_gate_review.json",
+      "sha256": "022e72e959e9ed7a095dbb03a7ae31535442fec38480bb9c83668ba622e2b09a"
+    },
+    {
+      "path": "review/final_runtime_review.json",
+      "sha256": "9cfce4911869591ac5e97cb30afa602fcf3037cfe783931563cedc4ce90f8fd3"
+    },
+    {
+      "path": "review/archive_review.json",
+      "sha256": "d9e85e005739dfceec2aadf6f6cb8b95172a7d003382f303cd8dbcdd0c68cd65"
+    }
+  ],
+  "acceptance": {
+    "C1": "technical_D107_preserved; no expanded claim from D119",
+    "C2": "not_demonstrated",
+    "C3": "not_demonstrated",
+    "C4": "not_demonstrated",
+    "C5": "not_demonstrated",
+    "formal_development_cells_executed": 0,
+    "formal_development_cells_total": 24,
+    "normative_approval": false,
+    "quality_assessed": false,
+    "real_problem_resolution_demonstrated": false
+  },
+  "limits": [
+    "All response content, reported usage and local tariffs are synthetic controls; not formal R1, authenticated model/effort/provider/cost or Q.",
+    "The twelve executions repeat six arm/case/replica1 coordinates across two interpreter environments under different declared calendars; not twelve independent experimental repetitions.",
+    "Local worker HTTP interval overlap proves local request overlap only; it does not authenticate provider-effective activity or sum of agent activity.",
+    "Direct engine API controls local declarations and journals; original D118 bundle guarantee requires mandatory public wrapper guard.",
+    "Standalone kernel parser verifies structure and declared history; broker native core replay enforces observed state transitions and readiness.",
+    "Normative nodes remain pending. Runtime completion does not accept all four prototype phases or all toolkit phases.",
+    "Same-UID cooperating development harness and archive provide local evidence binding, not hostile tenant isolation, person/provider authentication, spending authorization or restorable claims/leases.",
+    "The missing manual engine-intake01 root is disclosed: pytest import failed before tests. Initial timeout attempts retain partial evidence and receive no invented PASS or source-after capture.",
+    "Luna contribution was bounded inventory/read-map work, checked independently; no benchmark or provider identity proof.",
+    "Real authorized routes, authenticated usage/cost/activity,12R1 then prospective adaptation/freeze and12R2, independent selection, reserved confirmation, competent human authorities, causal field evidence and transfer remain pending."
+  ],
+  "repository_edits": "Only new review reports; no implementation edits or commits",
+  "post_commit_receipt_self_coverage_audit": "pending_next_finite_delivery"
+}

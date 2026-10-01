@@ -1,0 +1,373 @@
+{
+  "schema": 1,
+  "scope": "independent read-only completed scoped gates and timeout evidence review",
+  "source_commit": "7de98c9e8dcfc35fbd809b5ec6646cc7a3895b86",
+  "gates": [
+    {
+      "name": "final311_02",
+      "report_sha256": "9e35442ee2d9bc33f2de01f43a03179ab950a5b07923978a31f296097d912f4f",
+      "head": "7de98c9e8dcfc35fbd809b5ec6646cc7a3895b86",
+      "interpreter": {
+        "version": "3.11.15 (main, Jul 18 2026, 17:02:49) [Clang 22.1.3 ]",
+        "executable": "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python"
+      },
+      "83_sources_match_freeze82_plus_self_live_Git_and_capture": true,
+      "commands": [
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "tests/test_coordinated_prototype_kernel.py",
+            "tests/test_coordinated_prototype_broker.py",
+            "tests/test_managed_coordinated_prototype.py",
+            "tests/test_coordinated_prototype_runtime.py",
+            "tests/test_plan_coordinated_development.py",
+            "tests/test_prepare_coordinated_development.py",
+            "tests/test_development_delivery_contract.py",
+            "--basetemp",
+            "/tmp/specorganon-D119-final311_02-01jopwd9/cases"
+          ],
+          "exit_code": 0,
+          "stdout_sha256": "10d9a7550fd6e674abbbf4910465e61ca2f3b5d9fb02a4760fe35901d961a2b5",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_tail": "............................. [ 90%]\n.............................                                            [100%]\n317 passed in 1338.38s (0:22:18)\n"
+        },
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "scripts/coordinated_prototype_kernel.py",
+            "scripts/coordinated_prototype_broker.py",
+            "scripts/managed_coordinated_prototype.py",
+            "scripts/coordinated_prototype_runtime.py",
+            "tests/test_coordinated_prototype_kernel.py",
+            "tests/test_coordinated_prototype_broker.py",
+            "tests/test_managed_coordinated_prototype.py",
+            "tests/test_coordinated_prototype_runtime.py",
+            "tests/coordinated_runtime_fixture.py",
+            "experiments/development/coordinated_runtime_2026-10-01/archive_runtimes.py",
+            "experiments/development/coordinated_runtime_2026-10-01/capture_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/integration_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/seal_evidence.py"
+          ],
+          "exit_code": 0,
+          "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_tail": "All checks passed!\n"
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-I",
+            "-B",
+            "-c",
+            "import pathlib,sys;[compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]];print('syntax OK')",
+            "scripts/coordinated_prototype_kernel.py",
+            "scripts/coordinated_prototype_broker.py",
+            "scripts/managed_coordinated_prototype.py",
+            "scripts/coordinated_prototype_runtime.py",
+            "tests/test_coordinated_prototype_kernel.py",
+            "tests/test_coordinated_prototype_broker.py",
+            "tests/test_managed_coordinated_prototype.py",
+            "tests/test_coordinated_prototype_runtime.py",
+            "tests/coordinated_runtime_fixture.py",
+            "experiments/development/coordinated_runtime_2026-10-01/archive_runtimes.py",
+            "experiments/development/coordinated_runtime_2026-10-01/capture_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/integration_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/seal_evidence.py"
+          ],
+          "exit_code": 0,
+          "stdout_sha256": "9c6d16305373aef2bef9308e9c2af9c565f9b206faf088179c672852d41a9fb4",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_tail": "syntax OK\n"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check",
+            "--",
+            "scripts/coordinated_prototype_kernel.py",
+            "scripts/coordinated_prototype_broker.py",
+            "scripts/managed_coordinated_prototype.py",
+            "scripts/coordinated_prototype_runtime.py",
+            "tests/test_coordinated_prototype_kernel.py",
+            "tests/test_coordinated_prototype_broker.py",
+            "tests/test_managed_coordinated_prototype.py",
+            "tests/test_coordinated_prototype_runtime.py",
+            "tests/coordinated_runtime_fixture.py",
+            "experiments/development/coordinated_runtime_2026-10-01/archive_runtimes.py",
+            "experiments/development/coordinated_runtime_2026-10-01/capture_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/integration_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/seal_evidence.py"
+          ],
+          "exit_code": 0,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_tail": ""
+        }
+      ],
+      "samples": [
+        {
+          "case_path": "/tmp/specorganon-D119-final311_02-01jopwd9/cases/test_original_modes_multiple_d0",
+          "scope": "synthetic mechanism fixture, not formal cell or Q",
+          "runtime_stage": "finished",
+          "stored_state": "completed",
+          "publication_exists": true,
+          "ledger_schema": 3,
+          "request_count": 20
+        },
+        {
+          "case_path": "/tmp/specorganon-D119-final311_02-01jopwd9/cases/test_inflight_failure_keeps_sp0",
+          "scope": "synthetic mechanism fixture, not formal cell or Q",
+          "runtime_stage": "leader",
+          "stored_state": "indeterminate",
+          "publication_exists": false,
+          "ledger_schema": 3,
+          "request_count": 1
+        },
+        {
+          "case_path": "/tmp/specorganon-D119-final311_02-01jopwd9/cases/test_finish_failure_keeps_deli0",
+          "scope": "synthetic mechanism fixture, not formal cell or Q",
+          "runtime_stage": "finished",
+          "stored_state": "indeterminate",
+          "publication_exists": false,
+          "ledger_schema": 3,
+          "request_count": 18
+        }
+      ]
+    },
+    {
+      "name": "final312_02",
+      "report_sha256": "dbdc9d1881f6f53494aa20b6256f5f435c52a1ea44fd0cfc544a335ccf1414fa",
+      "head": "7de98c9e8dcfc35fbd809b5ec6646cc7a3895b86",
+      "interpreter": {
+        "version": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+        "executable": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python"
+      },
+      "83_sources_match_freeze82_plus_self_live_Git_and_capture": true,
+      "commands": [
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "tests/test_coordinated_prototype_kernel.py",
+            "tests/test_coordinated_prototype_broker.py",
+            "tests/test_managed_coordinated_prototype.py",
+            "tests/test_coordinated_prototype_runtime.py",
+            "tests/test_plan_coordinated_development.py",
+            "tests/test_prepare_coordinated_development.py",
+            "tests/test_development_delivery_contract.py",
+            "--basetemp",
+            "/tmp/specorganon-D119-final312_02-lr0asj2v/cases"
+          ],
+          "exit_code": 0,
+          "stdout_sha256": "16cefaa50aa434ac6f6b56845a94db123ca187ac2c4f7165edbb91e60c3ea45d",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_tail": "............................. [ 90%]\n.............................                                            [100%]\n317 passed in 1298.73s (0:21:38)\n"
+        },
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "scripts/coordinated_prototype_kernel.py",
+            "scripts/coordinated_prototype_broker.py",
+            "scripts/managed_coordinated_prototype.py",
+            "scripts/coordinated_prototype_runtime.py",
+            "tests/test_coordinated_prototype_kernel.py",
+            "tests/test_coordinated_prototype_broker.py",
+            "tests/test_managed_coordinated_prototype.py",
+            "tests/test_coordinated_prototype_runtime.py",
+            "tests/coordinated_runtime_fixture.py",
+            "experiments/development/coordinated_runtime_2026-10-01/archive_runtimes.py",
+            "experiments/development/coordinated_runtime_2026-10-01/capture_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/integration_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/seal_evidence.py"
+          ],
+          "exit_code": 0,
+          "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_tail": "All checks passed!\n"
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-I",
+            "-B",
+            "-c",
+            "import pathlib,sys;[compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]];print('syntax OK')",
+            "scripts/coordinated_prototype_kernel.py",
+            "scripts/coordinated_prototype_broker.py",
+            "scripts/managed_coordinated_prototype.py",
+            "scripts/coordinated_prototype_runtime.py",
+            "tests/test_coordinated_prototype_kernel.py",
+            "tests/test_coordinated_prototype_broker.py",
+            "tests/test_managed_coordinated_prototype.py",
+            "tests/test_coordinated_prototype_runtime.py",
+            "tests/coordinated_runtime_fixture.py",
+            "experiments/development/coordinated_runtime_2026-10-01/archive_runtimes.py",
+            "experiments/development/coordinated_runtime_2026-10-01/capture_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/integration_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/seal_evidence.py"
+          ],
+          "exit_code": 0,
+          "stdout_sha256": "9c6d16305373aef2bef9308e9c2af9c565f9b206faf088179c672852d41a9fb4",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_tail": "syntax OK\n"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check",
+            "--",
+            "scripts/coordinated_prototype_kernel.py",
+            "scripts/coordinated_prototype_broker.py",
+            "scripts/managed_coordinated_prototype.py",
+            "scripts/coordinated_prototype_runtime.py",
+            "tests/test_coordinated_prototype_kernel.py",
+            "tests/test_coordinated_prototype_broker.py",
+            "tests/test_managed_coordinated_prototype.py",
+            "tests/test_coordinated_prototype_runtime.py",
+            "tests/coordinated_runtime_fixture.py",
+            "experiments/development/coordinated_runtime_2026-10-01/archive_runtimes.py",
+            "experiments/development/coordinated_runtime_2026-10-01/capture_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/integration_checks.py",
+            "experiments/development/coordinated_runtime_2026-10-01/seal_evidence.py"
+          ],
+          "exit_code": 0,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_tail": ""
+        }
+      ],
+      "samples": [
+        {
+          "case_path": "/tmp/specorganon-D119-final312_02-lr0asj2v/cases/test_original_modes_multiple_d0",
+          "scope": "synthetic mechanism fixture, not formal cell or Q",
+          "runtime_stage": "finished",
+          "stored_state": "completed",
+          "publication_exists": true,
+          "ledger_schema": 3,
+          "request_count": 20
+        },
+        {
+          "case_path": "/tmp/specorganon-D119-final312_02-lr0asj2v/cases/test_inflight_failure_keeps_sp0",
+          "scope": "synthetic mechanism fixture, not formal cell or Q",
+          "runtime_stage": "leader",
+          "stored_state": "indeterminate",
+          "publication_exists": false,
+          "ledger_schema": 3,
+          "request_count": 1
+        },
+        {
+          "case_path": "/tmp/specorganon-D119-final312_02-lr0asj2v/cases/test_finish_failure_keeps_deli0",
+          "scope": "synthetic mechanism fixture, not formal cell or Q",
+          "runtime_stage": "finished",
+          "stored_state": "indeterminate",
+          "publication_exists": false,
+          "ledger_schema": 3,
+          "request_count": 18
+        }
+      ]
+    }
+  ],
+  "historical_attempts": [
+    {
+      "name": "final311",
+      "report_exists": false,
+      "observed_files": [
+        {
+          "path": "experiments/development/coordinated_runtime_2026-10-01/checks/final311/1.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "text_tail": ""
+        },
+        {
+          "path": "experiments/development/coordinated_runtime_2026-10-01/checks/final311/1.stdout",
+          "bytes": 147,
+          "sha256": "f4ce0be82b3277f92521583ed482b4e4e9618bb0f6e675a21655dc06b1066c86",
+          "text_tail": "........................................................................ [ 23%]\n..................................................................."
+        },
+        {
+          "path": "experiments/development/coordinated_runtime_2026-10-01/checks/final311/python_metadata.json",
+          "bytes": 142,
+          "sha256": "9c31cc55f29517841850e052ec20f6429f042aa177c08ff228165d423477fe95",
+          "text_tail": "{\"version\": \"3.11.15 (main, Jul 18 2026, 17:02:49) [Clang 22.1.3 ]\", \"executable\": \"/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python\"}\n"
+        }
+      ],
+      "classification": "incomplete_capture_no_final_exit_or_summary_observed",
+      "claims_excluded": [
+        "passed suite",
+        "exact timeout exit",
+        "complete test count"
+      ]
+    },
+    {
+      "name": "final312",
+      "report_exists": false,
+      "observed_files": [
+        {
+          "path": "experiments/development/coordinated_runtime_2026-10-01/checks/final312/1.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "text_tail": ""
+        },
+        {
+          "path": "experiments/development/coordinated_runtime_2026-10-01/checks/final312/1.stdout",
+          "bytes": 147,
+          "sha256": "f4ce0be82b3277f92521583ed482b4e4e9618bb0f6e675a21655dc06b1066c86",
+          "text_tail": "........................................................................ [ 23%]\n..................................................................."
+        },
+        {
+          "path": "experiments/development/coordinated_runtime_2026-10-01/checks/final312/python_metadata.json",
+          "bytes": 138,
+          "sha256": "6f7eb6022f14053454d9b0fe5dcd867b0375e1db973544f22336a67b50d1b6b1",
+          "text_tail": "{\"version\": \"3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]\", \"executable\": \"/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python\"}\n"
+        }
+      ],
+      "classification": "incomplete_capture_no_final_exit_or_summary_observed",
+      "claims_excluded": [
+        "passed suite",
+        "exact timeout exit",
+        "complete test count"
+      ]
+    },
+    {
+      "name": "capture_timeout_probe",
+      "report_sha256": "355d1ecc8ea61e41ff7ddb9f0f0db035a880da59c2b514d11c30dae1277b5b07",
+      "exit_code": 124,
+      "timeout_seconds": 1,
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_coordinated_prototype_runtime.py::test_different_tool_interpreter_rejected_before_preparation_io",
+        "--basetemp",
+        "/tmp/specorganon-D119-capture_timeout_probe-0tc29_ta/cases"
+      ],
+      "timeout_error": "Command '['/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python', '-B', '-m', 'pytest', '-q', '-p', 'no:cacheprovider', 'tests/test_coordinated_prototype_runtime.py::test_different_tool_interpreter_rejected_before_preparation_io', '--basetemp', '/tmp/specorganon-D119-capture_timeout_probe-0tc29_ta/cases']' timed out after 0.9999772600131109 seconds",
+      "sources_before_after_equal": true,
+      "formal_cells_executed": 0,
+      "classification": "observed capture timeout, not successful test"
+    }
+  ],
+  "findings_open": [],
+  "formal_cells_executed": 0,
+  "quality_assessed": false,
+  "global_verdict": "pending_final_CLI_HTTP_integrations_and_archive"
+}

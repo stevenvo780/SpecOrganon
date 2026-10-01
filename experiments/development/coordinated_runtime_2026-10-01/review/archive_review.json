@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "scope": "Independent exhaustive tar and explicit origin verification",
+  "manifest_sha256": "149b31c739c310dfed26e001e353585e0c1d747cc29dda106435af69ad6740cb",
+  "archive_sha256": "f7c7c884c51aefe222e7cc978377a93598d2a456dedb815bffa52f9a8ac6aff7",
+  "archive_bytes": 47929387,
+  "roots_verified": 37,
+  "records_verified": 72592,
+  "origin_kind_counts": {
+    "file": 53857,
+    "directory": 18234,
+    "symlink": 499,
+    "fifo": 2
+  },
+  "origin_regular_bytes_verified": 1724526270,
+  "unique_tar_members_verified": 12643,
+  "all_tar_headers_content_membership_valid": true,
+  "all_origin_bytes_modes_directories_symlink_targets_fifo_metadata_equal": true,
+  "symlinks_followed": false,
+  "fifos_opened": false,
+  "report_pins_verified": 44,
+  "archive_inputs_coverage_equal": true,
+  "required_negative_roots_included": [
+    "/tmp/specorganon-D119-final311-xuo5w9fn",
+    "/tmp/specorganon-D119-final312-eycn4mk9",
+    "/tmp/specorganon-D119-review-crossinterp-9ekybxwr",
+    "/tmp/specorganon-D119-review-crossinterp-rejected-74i5xon0",
+    "/tmp/specorganon-D119-capture_timeout_probe-0tc29_ta"
+  ],
+  "missing_referenced_roots_disclosed": [
+    {
+      "path": "/tmp/specorganon-D119-engine-intake01",
+      "references": [
+        {
+          "evidence_path": "experiments/development/coordinated_runtime_2026-10-01/worker_checks/engine_intake_failures.json",
+          "json_pointer": "/manual_environment_failure/argv/11"
+        }
+      ]
+    }
+  ],
+  "wrong_relative_invocation_preserved": {
+    "path": "checks/archive_invocation01.json",
+    "sha256": "cc49d7d439d23a5d324e094a166d9ff7aac84fc3b8a030317504c9477ac53375",
+    "exit_code": 1,
+    "error": "ValueError: 'experiments/development/coordinated_runtime_2026-10-01/checks/capture_timeout_probe/report.json' is not in the subpath of '/workspace/SpecOrganon/experiments/development/coordinated_runtime_2026-10-01' OR one path is relative and the other is absolute.",
+    "archive_directory_created": false,
+    "error_provenance": "actual exec_command tool output; not present in a retained separate stderr file"
+  },
+  "review_verifier_initial_attempt": {
+    "result": "AssertionError after data checks",
+    "reason": "Over-specific error-text assertion required the literal relative_to; actual preserved ValueError uses subpath wording. Corrected verifier assertion; evidence untouched."
+  },
+  "elapsed_seconds": 5.1983950400026515,
+  "findings_open": [],
+  "restorable_authority": false,
+  "formal_cells_executed": 0,
+  "global_verdict": "pending_documentation_and_evidence_index"
+}

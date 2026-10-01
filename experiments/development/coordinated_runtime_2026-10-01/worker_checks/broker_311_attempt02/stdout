@@ -1,0 +1,27 @@
+F
+=================================== FAILURES ===================================
+_____ test_two_real_epochs_same_flat_stream_and_final_metrics[sequential] ______
+
+mode = 'sequential'
+tmp_path = PosixPath('/tmp/specorganon-D119-broker-l22gf9f7/pytest/test_two_real_epochs_same_flat0')
+
+    @pytest.mark.parametrize("mode", ["sequential", "graph", "risk"])
+    def test_two_real_epochs_same_flat_stream_and_final_metrics(mode, tmp_path):
+        host, context = fixture(tmp_path, mode)
+>       initialize(host, context)
+
+tests/test_coordinated_prototype_broker.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+host = <coordinated_prototype_broker.CoordinatedPrototypeBroker object at 0x7f89158a15d0>
+context = <test_coordinated_prototype_broker.Context object at 0x7f8915112510>
+
+    def initialize(host, context):
+>       assert invoke(host, context, "leader", {"op": "init", "nodes": nodes()})["ok"]
+E       assert False
+
+tests/test_coordinated_prototype_broker.py:107: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_coordinated_prototype_broker.py::test_two_real_epochs_same_flat_stream_and_final_metrics[sequential]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.39s

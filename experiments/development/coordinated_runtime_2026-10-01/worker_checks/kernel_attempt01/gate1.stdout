@@ -1,0 +1,42 @@
+..................FF...................................................  [100%]
+=================================== FAILURES ===================================
+_____ test_selection_singleton_empty_and_pending_norm_has_no_actor[graph] ______
+
+tmp_path = PosixPath('/tmp/specorganon-D119-native-kernel-311-attempt01-xjfcj40h/test_selection_singleton_empty1')
+mode = 'graph'
+
+    @pytest.mark.parametrize("mode", kernel.MODES)
+    def test_selection_singleton_empty_and_pending_norm_has_no_actor(tmp_path, mode):
+        raw, _ = initialize(tmp_path, mode)
+        state = kernel.parse_state(raw, mode=mode)
+        assert kernel.select_work(state) == [{"id": "p", "phase": "philosophy", "action": "revise"}]
+        state = kernel.parse_state(kernel.apply_operations(raw, [row(1, revision("p")), row(2, revision("s"))], mode=mode), mode=mode)
+>       assert kernel.select_work(state) == []
+E       AssertionError: assert [{'id': 's', ...n': 'review'}] == []
+E         
+E         Left contains one more item: {'id': 's', 'phase': 'science', 'action': 'review'}
+E         Use -v to get more diff
+
+tests/test_coordinated_prototype_kernel.py:153: AssertionError
+______ test_selection_singleton_empty_and_pending_norm_has_no_actor[risk] ______
+
+tmp_path = PosixPath('/tmp/specorganon-D119-native-kernel-311-attempt01-xjfcj40h/test_selection_singleton_empty2')
+mode = 'risk'
+
+    @pytest.mark.parametrize("mode", kernel.MODES)
+    def test_selection_singleton_empty_and_pending_norm_has_no_actor(tmp_path, mode):
+        raw, _ = initialize(tmp_path, mode)
+        state = kernel.parse_state(raw, mode=mode)
+        assert kernel.select_work(state) == [{"id": "p", "phase": "philosophy", "action": "revise"}]
+        state = kernel.parse_state(kernel.apply_operations(raw, [row(1, revision("p")), row(2, revision("s"))], mode=mode), mode=mode)
+>       assert kernel.select_work(state) == []
+E       AssertionError: assert [{'id': 's', ...n': 'review'}] == []
+E         
+E         Left contains one more item: {'id': 's', 'phase': 'science', 'action': 'review'}
+E         Use -v to get more diff
+
+tests/test_coordinated_prototype_kernel.py:153: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_coordinated_prototype_kernel.py::test_selection_singleton_empty_and_pending_norm_has_no_actor[graph]
+FAILED tests/test_coordinated_prototype_kernel.py::test_selection_singleton_empty_and_pending_norm_has_no_actor[risk]
+2 failed, 69 passed in 0.40s

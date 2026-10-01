@@ -1,0 +1,50 @@
+{
+  "api_changed": false,
+  "artifact_pins": {
+    "experiments/development/coordinated_runtime_2026-10-01/worker_checks/broker_binding_311_attempt01/receipt.json": "c5f4b13c8d97d6c0cecf54db3b5f4354889e65b000a981c69742a65de3d6a0cc",
+    "experiments/development/coordinated_runtime_2026-10-01/worker_checks/broker_binding_312_attempt01/receipt.json": "b8d6b541544b90555809c74b1466b1a5980a5ad8b23b57d0b6ac6b750087b9e0",
+    "experiments/development/coordinated_runtime_2026-10-01/worker_checks/broker_binding_prepatch01/pins.json": "43c3e0e736e8e93ba4cc8d233f464998f1b6c480f21d065bcaba7295537eb601",
+    "experiments/development/coordinated_runtime_2026-10-01/worker_checks/broker_binding_static01/receipt.json": "c6b89ccbf97942b478f3008a59fc783ea8fbfaf07e4e161bf47bf114fc57f98c"
+  },
+  "classification": "local_offline_broker_policy_interpreter_binding_fix",
+  "controls": [
+    "Exact generic_tools method and analysis inventory, fixed versions/profiles, strict lowercase executable digests",
+    "Expected bytes from current interpreter original launchers checked before stages/tools mkdir or launcher build",
+    "Generated executable bytes and SHA equal declared policy, each role policy rechecked against effective manifest/tools on reopen",
+    "Actual other interpreter hashes rejected before IO, source bytes preserved and no claim creation",
+    "Missing/malformed policy and rebound incompatible stage policy reject before effects"
+  ],
+  "limits": [
+    "Interpreter-specific launcher shebangs mean a bundle must be prepared with its declared interpreter; this correction intentionally rejects cross-interpreter bundles",
+    "Local cooperating same-UID development boundary; not provider/identity authority or authenticated cost",
+    "Original D119 receipts/handoffs remain historical and unchanged; this report records new gates only"
+  ],
+  "passed": true,
+  "runtime_roots": [
+    "/tmp/specorganon-D119-broker-41knw75r",
+    "/tmp/specorganon-D119-broker-29k730nu"
+  ],
+  "schema": 1,
+  "source_pins": {
+    "scripts/coordinated_prototype_broker.py": {
+      "bytes": 56672,
+      "sha256": "1921ad220a9b9041ce103bd75b0f7f18c3fa1b39c311e8616dee0c3848e69ac4"
+    },
+    "tests/test_coordinated_prototype_broker.py": {
+      "bytes": 21870,
+      "sha256": "dc5f81a86c356350709b088dfd6387941dfc8b8b03c49010d27a613e39ccc9f1"
+    }
+  },
+  "tests": {
+    "311": {
+      "passed": 33,
+      "receipt": "experiments/development/coordinated_runtime_2026-10-01/worker_checks/broker_binding_311_attempt01/receipt.json",
+      "skipped": 0
+    },
+    "312": {
+      "passed": 33,
+      "receipt": "experiments/development/coordinated_runtime_2026-10-01/worker_checks/broker_binding_312_attempt01/receipt.json",
+      "skipped": 0
+    }
+  }
+}

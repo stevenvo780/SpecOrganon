@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "classification": "coordinated_prototype_broker_offline_handoff",
+  "state": "stable_for_parent_freeze_and_independent_review",
+  "sources": [
+    {
+      "path": "scripts/coordinated_prototype_broker.py",
+      "sha256": "9efe025cd63a5771482a1aca1d20ec57c2a97d27e8853ba47efc4e4e5f06fa0c"
+    },
+    {
+      "path": "tests/test_coordinated_prototype_broker.py",
+      "sha256": "b6617557a01c913e98e91596da372023242bf97c8c9a33f8b27e898d1c6c92a9"
+    },
+    {
+      "path": "scripts/coordinated_prototype_kernel.py",
+      "sha256": "42dff1e8e2027992d08f2fe924a19f0863f2aaf55fc66f2026c0c55f0ce8b93b"
+    }
+  ],
+  "api": {
+    "prepare_broker": "prepare_broker(run_dir:Path,case_dir:Path,inputs_dir:Path,*,mode:str)->{path,sha256}",
+    "constructor": "CoordinatedPrototypeBroker(run_dir:Path,binding:{path,sha256})",
+    "invoke": "invoke(task_id,request_id,call:{name,call_id,arguments:str},context,guard)->function_call_output",
+    "verify": "verify()->{manifest_sha256,reservations,receipts,pending,blocked,pending_host,active_epoch}",
+    "operations": "operations()-> ordered global records including epoch/task/request/call/local ordinal, parsed method request, terminal and result",
+    "leader_stage": "leader_stage()->Path(run_dir/broker_stages/leader)",
+    "journal_roots": "journal_roots()->[Path(run_dir/broker_stages)]",
+    "branch": "branch(task_id)->{task_id,stage_dir,owned_node_ids,owned_files,functions}; workers only during assigned epoch",
+    "activate_epoch": "activate_epoch(epoch:int,assignments:list[{task_id,owned_node_ids,owned_files}],*,guard)->host_receipt_binding",
+    "merge_epoch": "merge_epoch(epoch:int,*,guard)->host_receipt_binding",
+    "host_receipt_binding": "{path,sha256,epoch,assignments,method_state_sha256,work_before_sha256,work_after_sha256}",
+    "public_state": "public_state()->{state,audit,method_state_sha256,case_id,mode}; state/audit null before init",
+    "current_metrics": "current_metrics(task_id)->null|{task_id,function_name,global_ordinal,local_ordinal,analysis_script_sha256,analysis_metrics_sha256,metrics_bytes,metrics_path,metrics,receipt_sha256}"
+  },
+  "engine_binding": {
+    "state_keys": [
+      "plan_sha256",
+      "broker_binding",
+      "admission_descriptor",
+      "claim_sha256",
+      "run_id"
+    ],
+    "plan_keys_consumed": [
+      "run_id",
+      "schedule.schedule_sha256",
+      "descriptor.schedule_sha256",
+      "max_epochs",
+      "limits.tool_wall_seconds"
+    ],
+    "claim_key": "schedule_sha256 + run_id, attempt1, owner('oneshot',run_dir,run_dir)",
+    "host_guard": "activate/merge guard must close over the engine's current RunContext lease/time/bindings. Broker also checks current schedule/run claim before and after guarded effects.",
+    "functions": {
+      "development_method": "workspace",
+      "development_analysis": "analysis_readonly"
+    },
+    "tool_caps": "Context.status tools_reserved/max_tool_calls; one persistent global stream, never reset."
+  },
+  "layout": {
+    "broker_stages": "Fixed leader/worker-1/worker-2 each case/inputs/work plus stage.json; metadata and epochs subdirectories.",
+    "broker_tools": "Original exact method/core launcher and D113 analyzer. Engine must bind this immutable tools directory as well as broker_stages.",
+    "case_copy_count": 3,
+    "case_copy_reason": "Original method requires case.parent == inputs.parent == work.parent; copies occur once per role, never per epoch. No symlink/hardlink redirection.",
+    "epoch_artifacts": "Immutable base_state.json and merged_state.json, append-only activation/merge metadata. Fixed worker workspaces are reset only by declared host activation transitions.",
+    "stream": "run_dir/tool_reservations/*.json, tool_receipts/*.json and broker/NNNN/{stdout,stderr}; same ordinals across roles and epochs."
+  },
+  "controls": [
+    "Common original tool bytes across A/B/C; mode fixed by the immutable arm_prompt and manifest.",
+    "Host enforces canonical original operation and node/file scope before reservation/launch; scope rechecked inside broker lock.",
+    "Leader init once; workers no init/advance/approve, only owned revise/review and disjoint deliverables; reviewer receives no tools.",
+    "Pending norm enforcement and method replay use the unchanged mode-aware kernel/core; A unsafe accepted downstream remains observable, not relabeled corrupt.",
+    "One/two workers selected by deterministic original-mode readiness policy; empty selection is not fabricated.",
+    "Actual local sandbox, current claim and immutable sources/staged public inputs checked before/after effects.",
+    "Host transition intent is durable; an orphan intent/partial tool or staging artifact blocks effects and is never silently repaired.",
+    "Replay binds raw streams, exact record schema, counters/call IDs, per-role inventories, initialization, mode/core headers and method states; host merged state must equal original kernel replay.",
+    "Readonly analyzer writes metrics through host only; ordinary errors retire prior metrics. All nonmetrics work inventory must match the producer for current_metrics.",
+    "Merge always retires leader metrics and never transfers branch metrics as final leader metrics.",
+    "Conflicting ownership has no silent file winner; globals of previous brokers/core are never patched."
+  ],
+  "gates": [
+    {
+      "python": "3.11",
+      "attempt": "worker_checks/broker_311_attempt06",
+      "runtime_root": "/tmp/specorganon-D119-broker-hq9nfsvq",
+      "passed": 20,
+      "pytest_seconds": 14.4,
+      "exit_code": 0,
+      "sources_unchanged": true
+    },
+    {
+      "python": "3.12",
+      "attempt": "worker_checks/broker_312_attempt01",
+      "runtime_root": "/tmp/specorganon-D119-broker-wqqsgthq",
+      "passed": 20,
+      "pytest_seconds": 15.76,
+      "exit_code": 0,
+      "sources_unchanged": true
+    },
+    {
+      "scope": "Ruff and memory-only compile both interpreters",
+      "attempt": "worker_checks/broker_static_01",
+      "all_exit_codes": 0,
+      "sources_unchanged": true
+    }
+  ],
+  "historical_attempts": [
+    {
+      "attempt": "worker_checks/broker_311_attempt01",
+      "exit_code": 2,
+      "issue": "pytest reserved parameter name request; collection failed. Exact sources/streams retained."
+    },
+    {
+      "attempt": "worker_checks/broker_311_attempt02",
+      "exit_code": 1,
+      "issue": "Synthetic fixture risk was integer instead of original impact/uncertainty/effort object. Raw original tool rejection retained."
+    },
+    {
+      "attempt": "worker_checks/broker_311_attempt03",
+      "exit_code": 1,
+      "issue": "Synthetic fixture attempted native review before supporting a pending stale node. Core blocked it; fixture corrected, raw streams retained."
+    },
+    {
+      "attempt": "worker_checks/broker_311_attempt04",
+      "exit_code": 0,
+      "scope": "17 tests before explicit native phase differential extension."
+    },
+    {
+      "attempt": "worker_checks/broker_311_attempt05",
+      "exit_code": 0,
+      "scope": "20 tests against old unit-only top-level broker_manifest layout before closed engine integration correction."
+    }
+  ],
+  "limits": [
+    "Same-UID cooperating harness, not a hostile-code/host administrator boundary or authenticated execution receipt.",
+    "Unit transports/context lease are explicitly synthetic; tools/analyzer/sandbox effects are real, no provider/model/paid calls occurred.",
+    "Broker units use a minimal public fixture. Full original D-F/D-E capsules and closed engine/global-context integration remain root's integrated gate.",
+    "RunContext's unchanged 64MiB/10000-entry journal limits may reject legitimately large cumulative streams before declared request/tool caps; they are not bypassed, reset or presented as provider caps.",
+    "Three fixed source copies are necessary for the original launcher's same-parent requirement; no source copies accumulate per epoch.",
+    "Metrics prove current host-produced finite JSON provenance only, not scientific truth, delivery semantics, Q, field efficacy or normative approval.",
+    "Formal DEV remains 0/24; root owns prospective runtime/HTTP/CLI evidence and final freeze/review."
+  ],
+  "next_action": "Parent freeze plus independent review and six original-domain/arm integrated runtime gates."
+}

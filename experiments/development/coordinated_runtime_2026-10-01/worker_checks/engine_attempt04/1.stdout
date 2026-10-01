@@ -1,0 +1,104 @@
+.FF................F..
+=================================== FAILURES ===================================
+__________ test_two_delegations_keep_global_ids_context_and_claim[B] ___________
+
+bundle = PosixPath('/tmp/specorganon-D119-engine-attempt04-drsriwvb/cases/D119-engine-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-engine-attempt04-drsriwvb/cases/test_two_delegations_keep_glob1')
+arm = 'B'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    def test_two_delegations_keep_global_ids_context_and_claim(bundle, tmp_path, arm):
+        run, status, fixture = prepare(bundle, tmp_path, arm)
+        context_before = json.loads((run / "context/run.json").read_bytes())
+>       status = reach_delegations(run, status, fixture)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_coordinated_prototype.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+run = PosixPath('/tmp/specorganon-D119-engine-attempt04-drsriwvb/cases/test_two_delegations_keep_glob1/run')
+status = {'classification': 'development_coordinated_prototype_runtime_unsealed', 'execution_profile': 'coordinated_development_parent_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+fixture = <coordinated_runtime_fixture.SyntheticRoles object at 0x7f74590084d0>
+count = 2
+
+    def reach_delegations(run, status, fixture, count=2):
+        for _ in range(40):
+            if len(status["delegations"]) >= count:
+                return status
+            status = step(run, status, fixture)
+>           assert status["state"] == "paused", status
+E           AssertionError: {'classification': 'development_coordinated_prototype_runtime_unsealed', 'execution_profile': 'coordinated_development_parent_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E           assert 'indeterminate' == 'paused'
+E             
+E             - paused
+E             + indeterminate
+
+tests/test_managed_coordinated_prototype.py:47: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "revise", "affected": ["P2"], "id": "P2", "ok": true}
+__________ test_two_delegations_keep_global_ids_context_and_claim[C] ___________
+
+bundle = PosixPath('/tmp/specorganon-D119-engine-attempt04-drsriwvb/cases/D119-engine-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-engine-attempt04-drsriwvb/cases/test_two_delegations_keep_glob2')
+arm = 'C'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    def test_two_delegations_keep_global_ids_context_and_claim(bundle, tmp_path, arm):
+        run, status, fixture = prepare(bundle, tmp_path, arm)
+        context_before = json.loads((run / "context/run.json").read_bytes())
+>       status = reach_delegations(run, status, fixture)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_coordinated_prototype.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+run = PosixPath('/tmp/specorganon-D119-engine-attempt04-drsriwvb/cases/test_two_delegations_keep_glob2/run')
+status = {'classification': 'development_coordinated_prototype_runtime_unsealed', 'execution_profile': 'coordinated_development_parent_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+fixture = <coordinated_runtime_fixture.SyntheticRoles object at 0x7f74599ed210>
+count = 2
+
+    def reach_delegations(run, status, fixture, count=2):
+        for _ in range(40):
+            if len(status["delegations"]) >= count:
+                return status
+            status = step(run, status, fixture)
+>           assert status["state"] == "paused", status
+E           AssertionError: {'classification': 'development_coordinated_prototype_runtime_unsealed', 'execution_profile': 'coordinated_development_parent_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E           assert 'indeterminate' == 'paused'
+E             
+E             - paused
+E             + indeterminate
+
+tests/test_managed_coordinated_prototype.py:47: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "revise", "affected": ["E", "N", "P1", "R", "V"], "id": "P1", "ok": true}
+______ test_finish_failure_keeps_delivery_forensic_and_blocks_publication ______
+
+bundle = PosixPath('/tmp/specorganon-D119-engine-attempt04-drsriwvb/cases/D119-engine-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-engine-attempt04-drsriwvb/cases/test_finish_failure_keeps_deli0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f74591a8c10>
+
+    def test_finish_failure_keeps_delivery_forensic_and_blocks_publication(bundle, tmp_path, monkeypatch):
+        run, status, fixture = prepare(bundle, tmp_path)
+        for _ in range(45):
+            if status["runtime_stage"] == "reviewer":
+                break
+            status = step(run, status, fixture)
+>           assert status["state"] == "paused", status
+E           AssertionError: {'classification': 'development_coordinated_prototype_runtime_unsealed', 'execution_profile': 'coordinated_development_parent_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E           assert 'indeterminate' == 'paused'
+E             
+E             - paused
+E             + indeterminate
+
+tests/test_managed_coordinated_prototype.py:205: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "revise", "affected": ["E", "N", "P1", "R", "V"], "id": "P1", "ok": true}
+=========================== short test summary info ============================
+FAILED tests/test_managed_coordinated_prototype.py::test_two_delegations_keep_global_ids_context_and_claim[B]
+FAILED tests/test_managed_coordinated_prototype.py::test_two_delegations_keep_global_ids_context_and_claim[C]
+FAILED tests/test_managed_coordinated_prototype.py::test_finish_failure_keeps_delivery_forensic_and_blocks_publication
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/home/dev/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/subprocess.py:2047: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+3 failed, 19 passed in 196.27s (0:03:16)

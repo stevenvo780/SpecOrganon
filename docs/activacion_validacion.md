@@ -1,6 +1,6 @@
 # Distancia hasta la validación de GOAL
 
-**Corte:** 2026-10-01 UTC, revisión D-118. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). El [inventario D-109 de24 celdas](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json), las [preparaciones D-113](../experiments/development/isolated_analysis_2026-10-01/README.md), el [runtime padre D-117](../experiments/development/parent_analysis_2026-10-01/README.md) y el [contrato común D-118](../experiments/development/coordinated_contract_2026-10-01/README.md) son desarrollo mecánico: cero celdas formales. Este documento no cambia umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
+**Corte:** 2026-10-01 UTC, revisión D-119. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). El [inventario D-109 de 24 celdas](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json), el [contrato común D-118](../experiments/development/coordinated_contract_2026-10-01/README.md) y el [runtime persistente D-119](../experiments/development/coordinated_runtime_2026-10-01/README.md) son desarrollo mecánico: cero celdas formales. Este documento no cambia umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
 
 | Criterio de GOAL | Evidencia actual | Puerta pendiente |
 | --- | --- | --- |
@@ -14,15 +14,21 @@
 
 ## Puerta 0: cerrar el desarrollo antes de abrir la reserva
 
-D-118 implementa contrato/rúbrica públicos, paquete de información común y un
-calendario nuevo de 12 IDs R1 con cuatro roles iguales A/B/C. Freeze `6a36197`:
-265 pruebas por Python3.11/3.12 y dos integraciones de preparación CLI,
-106 archivos y seis fixtures de estructura por intérprete; no participant/Q.
-El binding coteja metadata declarada; no acredita runtime, proveedor o permiso.
-Faltan adapters coordinados A/B y continuidad/binding C, control de uso/suma
-de actividad efectiva y rutas autorizadas antes de iniciar R1. El digest del
-freeze y el prompt deben cotejarse con la publicación específica en la futura
-admisión. R2 continúa pendiente de R1 y adaptación congelada prospectivamente.
+D-118 fija contrato/rúbrica públicos, información común y 12 IDs R1 con cuatro
+roles iguales A/B/C. D-119 implementa los adapters persistentes originales:
+init del líder, delegaciones repetidas, replay/merge, análisis final vigente
+y reviewer comparten un único ledger/contexto/claim. La admisión del wrapper
+coteja la publicación específica D118 y el intérprete registrado; el broker
+liga los dos SHA de tool_policy a launchers/ejecutables efectivos y reapertura.
+Freeze corregido `7de98c9`, 82 fuentes y 125 rutas históricas preservadas;
+317pruebas por Python3.11/3.12,83registros before/after iguales y12recorridos
+CLI/HTTP reabiertos por revisión independiente:112CLI/113sends/69tools de
+fixture por intérprete, múltiples delegaciones y análisis final vigente.
+Archivo37raíces conserva originales y negativos. Respuestas, usage y tarifas locales son
+sintéticos: no proveedor autenticado, Q ni permiso de gasto.
+Faltan rutas/modelos/esfuerzos autorizados, uso/coste y suma de actividad
+efectiva medidos antes de iniciar R1. R2 continúa pendiente de R1 y adaptación
+congelada prospectivamente. Los resultados D117/D118 siguientes son históricos.
 
 D-117 cierra el bootstrap C desde work vacío: el líder crea el grafo por init
 sellado y comparte ledger/contexto/claim con las ramas D116, reviewer y merge.

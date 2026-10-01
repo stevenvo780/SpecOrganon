@@ -1,5 +1,33 @@
 # Estado de reanudación
 
+**D-119 implementa el runtime persistente coordinado A/B/C:**
+[dossier](../experiments/development/coordinated_runtime_2026-10-01/README.md).
+Work vacío/init original del líder, delegaciones repetidas, replay/merge,
+reviewer público y análisis final vigente comparten un único saldo,
+contexto y claim. A selecciona un worker; B/C permiten dos independientes.
+Se conservan sus modos, cuatro fases, invalidaciones y normas pendientes.
+El wrapper exige la publicación D118 y el intérprete exacto del bundle;
+el broker coteja política, launchers y ejecutables antes de efectos y al reabrir.
+
+Freeze corregido `7de98c9`: 82 fuentes + extractor, 125 rutas históricas
+intactas. Se conservan la carrera de captura reproducida/corregida, el
+prepare cross-interpreter aceptado y luego rechazado antes de IO, y los dos
+timeouts de las primeras suites. La revisión independiente cerró el binding
+y auditó los doce recorridos finales. **317 pruebas por intérprete**,
+Ruff/sintaxis/diff0 y 83 fuentes before/after idénticas. Seis runs originales
+D-F/D-E por Python:112 CLI,113 sends/69 tools de fixture, claim único y
+métricas finales vigentes; A serial, B/C con solapamiento HTTP local.
+Archivo37raíces:53.857regulares/12.643blobs/47.929.387B, SHA f7c7c884…,
+18.234directorios/499symlinks/2FIFO sólo metadata, sin restaurar autoridad.
+
+**C1 técnico D107 preservado; C2–C5 No demostrado; 0/24 formales.**
+Respuestas/usage/precios son de fixture; no Q, aprobación normativa, uso o
+actividad remota autenticados. El [intake de medición](../experiments/development/coordinated_runtime_2026-10-01/planning/next_measurement_intake.md)
+separa deadline local, pared W y actividad acumulada. Siguen rutas y medición/autorización antes de
+12 R1 reales, adaptación/freeze y 12 R2, selección independiente, reserva,
+custodia/panel/jueces, campo causal y transferencia. Los cortes siguientes
+conservan su alcance histórico.
+
 **D-118 fija contrato y preparación comunes para desarrollo coordinado A/B/C:**
 [dossier](../experiments/development/coordinated_contract_2026-10-01/README.md).
 Calendario NUEVO de 12 IDs R1/cuatro bloques: líder, dos workers y reviewer,

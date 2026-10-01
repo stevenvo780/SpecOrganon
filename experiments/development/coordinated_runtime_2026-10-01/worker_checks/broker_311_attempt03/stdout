@@ -1,0 +1,51 @@
+.F
+=================================== FAILURES ===================================
+________ test_two_real_epochs_same_flat_stream_and_final_metrics[graph] ________
+
+mode = 'graph'
+tmp_path = PosixPath('/tmp/specorganon-D119-broker-0jgv21go/pytest/test_two_real_epochs_same_flat1')
+
+    @pytest.mark.parametrize("mode", ["sequential", "graph", "risk"])
+    def test_two_real_epochs_same_flat_stream_and_final_metrics(mode, tmp_path):
+        host, context = fixture(tmp_path, mode)
+        initialize(host, context)
+        immutable = {path: path.read_bytes() for role in module.ROLES
+                     for folder in ("case", "inputs")
+                     for path in (Path(host.manifest["stages"][role]["stage_dir"]) / folder).iterdir()}
+        selected = assignments(host)
+        assert len(selected) == (1 if mode == "sequential" else 2)
+        first = host.activate_epoch(1, selected, guard=lambda: None)
+        assert first["epoch"] == 1
+        for assignment in selected:
+            role = assignment["task_id"]
+            assert invoke(host, context, role, {"op": "revise", "id": assignment["owned_node_ids"][0],
+                "status": "supported", "reason": "Synthetic positive fixture."})["ok"]
+            if role == "worker-1":
+                assert invoke(host, context, role, {"op": "write", "path": "analysis.py", "offset": 0,
+                                                   "content": GOOD})["ok"]
+                assert invoke(host, context, role, {"script_sha256": module._sha(GOOD.encode())}, analyze=True)["public_fixture"] == 7
+            else:
+                assert invoke(host, context, role, {"op": "write", "path": "report.md", "offset": 0,
+                                                   "content": "Public report only.\n"})["ok"]
+        merged = host.merge_epoch(1, guard=lambda: None)
+        assert merged["method_state_sha256"] == host.public_state()["method_state_sha256"]
+        assert host.current_metrics("leader") is None
+        leader = host.leader_stage() / "work"
+        assert (leader / "analysis.py").read_text() == GOOD
+        selected = assignments(host)
+        assert selected
+        before = len(host.operations())
+        host.activate_epoch(2, selected, guard=lambda: None)
+        for assignment in selected:
+            role, key = assignment["task_id"], assignment["owned_node_ids"][0]
+            state = kernel.parse_state((Path(host.branch(role)["stage_dir"]) / "work/method_state.json").read_bytes(), mode=mode)
+            if state["nodes"][key]["stale"]:
+                outcome = invoke(host, context, role, {"op": "review", "id": key})
+>               assert outcome["ok"] is (mode != "sequential")
+E               AssertionError: assert False is ('graph' != 'sequential')
+
+tests/test_coordinated_prototype_broker.py:161: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_coordinated_prototype_broker.py::test_two_real_epochs_same_flat_stream_and_final_metrics[graph]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 1 passed in 2.64s

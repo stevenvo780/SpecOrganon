@@ -1,0 +1,252 @@
+{
+  "schema": "specorganon.development_delivery_contract.v1",
+  "classification": "public_development_structure_without_reference_answers",
+  "cases": [
+    {
+      "case_id": "D-F",
+      "task_sha256": "ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51",
+      "artifacts": [
+        {
+          "kind": "python_source",
+          "max_bytes": 131072,
+          "path": "analysis.py",
+          "producer": "participant"
+        },
+        {
+          "kind": "finite_json_object",
+          "max_bytes": 131072,
+          "path": "metrics.json",
+          "producer": "readonly_analysis_host"
+        },
+        {
+          "kind": "utf8_report",
+          "max_bytes": 65536,
+          "max_words": 1200,
+          "path": "report.md",
+          "producer": "participant"
+        },
+        {
+          "path": "sources.json",
+          "kind": "source_claim_map",
+          "max_bytes": 131072,
+          "producer": "participant"
+        }
+      ],
+      "metrics_sections": [
+        "milling",
+        "baking_energy",
+        "survey",
+        "source_audit"
+      ]
+    },
+    {
+      "case_id": "D-E",
+      "task_sha256": "f6fed29bc6ce18631cff30710b25f30b9662e04f889f336cccda2869f0789b64",
+      "artifacts": [
+        {
+          "kind": "python_source",
+          "max_bytes": 131072,
+          "path": "analysis.py",
+          "producer": "participant"
+        },
+        {
+          "kind": "finite_json_object",
+          "max_bytes": 131072,
+          "path": "metrics.json",
+          "producer": "readonly_analysis_host"
+        },
+        {
+          "kind": "utf8_report",
+          "max_bytes": 65536,
+          "max_words": 1200,
+          "path": "report.md",
+          "producer": "participant"
+        }
+      ],
+      "metrics_sections": [
+        "intervals",
+        "appliances_weekly",
+        "appliances_daily",
+        "additional_observation",
+        "source_audit"
+      ]
+    }
+  ],
+  "quantity_fields": {
+    "baking_energy": [
+      "piece_mass",
+      "electricity_per_piece",
+      "gas_per_piece",
+      "electricity_per_kg",
+      "gas_per_kg",
+      "total_per_kg"
+    ],
+    "milling": [
+      "wheat_input",
+      "refined_flour",
+      "wholemeal_flour",
+      "bran",
+      "total_outputs",
+      "balance_residual"
+    ],
+    "survey": [
+      "total_respondents",
+      "known_respondents",
+      "unknown_respondents",
+      "open_category_respondents",
+      "closed_category_respondents",
+      "lower_total_slices",
+      "lower_mean_all",
+      "lower_mean_known"
+    ]
+  },
+  "section_fields": {
+    "baking_energy": [
+      "piece_mass",
+      "electricity_per_piece",
+      "gas_per_piece",
+      "electricity_per_kg",
+      "gas_per_kg",
+      "total_per_kg",
+      "conversion"
+    ],
+    "milling": [
+      "wheat_input",
+      "refined_flour",
+      "wholemeal_flour",
+      "bran",
+      "total_outputs",
+      "balance_residual",
+      "mass_fractions",
+      "economic_allocation",
+      "original_electricity_base"
+    ],
+    "survey": [
+      "total_respondents",
+      "known_respondents",
+      "unknown_respondents",
+      "open_category_respondents",
+      "closed_category_respondents",
+      "lower_total_slices",
+      "lower_mean_all",
+      "lower_mean_known",
+      "closed_mean_interval",
+      "finite_upper_all",
+      "finite_upper_known",
+      "category_and_missing_rules"
+    ]
+  },
+  "original_sources": {
+    "D-F": [
+      {
+        "file": "task.md",
+        "sha256": "ab73075db2b4ee8c5e58dfc873ef14b75276dbcc0ba7afc9685c5b72b72add51"
+      },
+      {
+        "file": "source_claims.json",
+        "sha256": "63ce5419981c0a3f7d7ba83218cac2dbb528f061b313cfdf4655400ac2e86abc"
+      },
+      {
+        "file": "source_manifest.json",
+        "sha256": "83bdf5e7bc584971ca2446cf0fe6bd83dd4b9ea624a433fc54c5e5b3f89c4f3a"
+      },
+      {
+        "file": "source_lca.pdf",
+        "sha256": "9d64c0538b76ebaa19af86fb7ec231243cb5e1272316105ad979cfb9b6de3a32"
+      },
+      {
+        "file": "source_survey.pdf",
+        "sha256": "61b3b63cc7b5748138335fa2eaebde2f4ab0e454750e4592582fb80a5043dcee"
+      },
+      {
+        "file": "survey_table1.json",
+        "sha256": "50361b4803226a6a387fb39f0289c0e708679f348b5081ccb0034242155a064f"
+      }
+    ],
+    "D-E": [
+      {
+        "file": "task.md",
+        "sha256": "f6fed29bc6ce18631cff30710b25f30b9662e04f889f336cccda2869f0789b64"
+      },
+      {
+        "file": "source_manifest.json",
+        "sha256": "0e18340d130c495201e68c1c869bc2c6f49b35663176040aebb0d0d7d7bd1ee1"
+      },
+      {
+        "file": "sample_first_complete_week.csv",
+        "sha256": "c7f66ffaadc4e38375a7edf03091bae4fc861880510867903487eec83f05e6ba"
+      }
+    ]
+  },
+  "quantity": {
+    "required": [
+      "value",
+      "unit",
+      "base"
+    ],
+    "null_requires": "reason",
+    "finite_numbers_only": true
+  },
+  "metric_forms": {
+    "source_audit": "nonempty list of explicit UTF-8 statements; passage verification remains independent",
+    "closed_mean_interval": {
+      "lower": "quantity",
+      "upper": "quantity",
+      "denominator": "quantity"
+    },
+    "finite_upper_all_and_known": {
+      "finite": "boolean",
+      "reason": "nonempty text"
+    },
+    "original_electricity_base_conversion_category_rules": "nonempty explanatory text",
+    "mass_fractions_and_economic_allocation": "separate explicit objects, independently reviewed",
+    "intervals": {
+      "count": "nonnegative integer",
+      "continuity_checked": "boolean",
+      "issues": "list of nonempty text"
+    },
+    "appliances_weekly": "quantity",
+    "appliances_daily": "nonempty YYYY-MM-DD to quantity object",
+    "additional_observation": "nonempty justified observation text"
+  },
+  "source_claim": {
+    "schema": 1,
+    "fields": [
+      "id",
+      "claim",
+      "classification",
+      "sources",
+      "unit",
+      "base",
+      "formula",
+      "inputs",
+      "author",
+      "reason"
+    ],
+    "classifications": [
+      "reported",
+      "derived",
+      "assumption",
+      "pending"
+    ],
+    "source_fields": [
+      "file",
+      "sha256",
+      "locator"
+    ],
+    "derived_inputs": "existing_claim_ids"
+  },
+  "adaptations": [
+    "D113_common_positional_case_dir_and_JSON_stdout_for_DE",
+    "D118_common_explicit_metric_field_names_and_source_map_schema"
+  ],
+  "analysis_argv": [
+    "analysis.py",
+    "case_dir"
+  ],
+  "report_word_count": "all_unicode_whitespace_separated_tokens",
+  "normative_approval": "competent_external_human_only_pending",
+  "checker_executes_participant": false,
+  "checker_assigns_Q": false,
+  "semantic_verification": "independent_review_pending"
+}

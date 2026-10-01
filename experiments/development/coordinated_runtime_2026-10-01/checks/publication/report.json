@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "scoped_code_docs_whitespace_exit_code": 0,
+  "commands": {
+    "scoped": {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        "docs/estado.md",
+        "docs/decisiones.md",
+        "docs/activacion_validacion.md",
+        "docs/validacion_actual.md",
+        "experiments/development/coordinated_runtime_2026-10-01/README.md",
+        "experiments/development/coordinated_runtime_2026-10-01/planning/next_measurement_intake.md",
+        "experiments/development/coordinated_runtime_2026-10-01/plan.md",
+        "experiments/development/coordinated_runtime_2026-10-01/seal_evidence.py",
+        "experiments/development/coordinated_runtime_2026-10-01/archive_runtimes.py",
+        "experiments/development/coordinated_runtime_2026-10-01/integration_checks.py",
+        "experiments/development/coordinated_runtime_2026-10-01/capture_checks.py",
+        "scripts/coordinated_prototype_kernel.py",
+        "scripts/coordinated_prototype_broker.py",
+        "scripts/managed_coordinated_prototype.py",
+        "scripts/coordinated_prototype_runtime.py",
+        "tests/test_coordinated_prototype_kernel.py",
+        "tests/test_coordinated_prototype_broker.py",
+        "tests/test_managed_coordinated_prototype.py",
+        "tests/test_coordinated_prototype_runtime.py",
+        "tests/coordinated_runtime_fixture.py"
+      ],
+      "exit_code": 0,
+      "stdout": "scoped.stdout",
+      "stderr": "scoped.stderr"
+    },
+    "all_evidence_diagnostic": {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        "experiments/development/coordinated_runtime_2026-10-01"
+      ],
+      "exit_code": 2,
+      "stdout": "all_evidence_diagnostic.stdout",
+      "stderr": "all_evidence_diagnostic.stderr"
+    }
+  },
+  "raw_negative_evidence_preserved_unchanged": true,
+  "all_evidence_check_is_diagnostic_not_a_gate": true,
+  "formal_cells_executed": 0
+}

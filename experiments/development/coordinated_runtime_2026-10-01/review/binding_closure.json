@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "scope": "P2 interpreter and declared executable binding closure only",
+  "freeze_commit": "7de98c9e8dcfc35fbd809b5ec6646cc7a3895b86",
+  "source_pins": {
+    "scripts/coordinated_prototype_runtime.py": {
+      "bytes": 17662,
+      "sha256": "feb3429547dbdb05eef63fdb4efd6750121364b5dd74097655bd801483f2ec3a"
+    },
+    "scripts/coordinated_prototype_broker.py": {
+      "bytes": 56672,
+      "sha256": "1921ad220a9b9041ce103bd75b0f7f18c3fa1b39c311e8616dee0c3848e69ac4"
+    },
+    "tests/test_coordinated_prototype_runtime.py": {
+      "bytes": 11374,
+      "sha256": "758229102c89118eb205cb4507524c4f5e6d83732833954982a996b5f802444d"
+    },
+    "tests/test_coordinated_prototype_broker.py": {
+      "bytes": 21870,
+      "sha256": "dc5f81a86c356350709b088dfd6387941dfc8b8b03c49010d27a613e39ccc9f1"
+    }
+  },
+  "checks": [
+    {
+      "name": "source_freeze02.json",
+      "actual_file": "experiments/development/coordinated_runtime_2026-10-01/source_freeze.json",
+      "sha256": "014de01372ff1cf0b9547982aed83f996b6739cf242d19b7dc75d7cd7ef31eab",
+      "records_live_and_git_verified": 82,
+      "mismatches": [],
+      "external_tools_verified": [
+        "/usr/bin/pdftotext"
+      ]
+    },
+    {
+      "name": "baseline_pins.json",
+      "actual_file": "experiments/development/coordinated_runtime_2026-10-01/baseline_pins.json",
+      "sha256": "7d5f20687a280ca686c89f65373e499d655d911edde4b13a3646db57aa1ad093",
+      "records_live_and_git_verified": 125,
+      "mismatches": [],
+      "external_tools_verified": []
+    },
+    {
+      "name": "broker_binding_311_attempt01",
+      "receipt_sha256": "c5f4b13c8d97d6c0cecf54db3b5f4354889e65b000a981c69742a65de3d6a0cc",
+      "command": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_coordinated_prototype_broker.py",
+        "--basetemp",
+        "/tmp/specorganon-D119-broker-41knw75r/pytest",
+        "-x"
+      ],
+      "exit_code": 0,
+      "raw_stdout_tail": ".................................                                        [100%]\n33 passed in 16.06s\n",
+      "raw_stderr_bytes": 0,
+      "sources_unchanged": true
+    },
+    {
+      "name": "broker_binding_312_attempt01",
+      "receipt_sha256": "b8d6b541544b90555809c74b1466b1a5980a5ad8b23b57d0b6ac6b750087b9e0",
+      "command": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_coordinated_prototype_broker.py",
+        "--basetemp",
+        "/tmp/specorganon-D119-broker-29k730nu/pytest",
+        "-x"
+      ],
+      "exit_code": 0,
+      "raw_stdout_tail": ".................................                                        [100%]\n33 passed in 17.37s\n",
+      "raw_stderr_bytes": 0,
+      "sources_unchanged": true
+    },
+    {
+      "name": "cross_interpreter_prepare_probe.json",
+      "sha256": "6a8e075bc20e27e4080255a6313a40d1ad17e6569545308a047911b180a2da74",
+      "prepare_accepted": true,
+      "model_count_calls": 0,
+      "model_send_calls": 0,
+      "claims": [],
+      "error": null,
+      "outputs_exist": null
+    },
+    {
+      "name": "cross_interpreter_rejection_probe.json",
+      "sha256": "f7e75131ae9d531041e99e63fcf391466762379054bd7b25be48b8f30e6445c7",
+      "prepare_accepted": false,
+      "model_count_calls": 0,
+      "model_send_calls": 0,
+      "claims": [],
+      "error": "CoordinatedRuntimeError: runtime must use the bundle's exact tool interpreter",
+      "outputs_exist": {
+        "run": false,
+        "run-inputs": false,
+        "admission": false
+      }
+    }
+  ],
+  "findings_open": [],
+  "whole_D119_verdict": "pending_final_gates_integrations_and_archive",
+  "source_review": [
+    {
+      "file": "scripts/coordinated_prototype_runtime.py",
+      "lines": [
+        159,
+        187
+      ],
+      "evidence": "Exact interpreter equality checked in prepare before inputs creation and in resume guard."
+    },
+    {
+      "file": "scripts/coordinated_prototype_broker.py",
+      "lines": [
+        112,
+        159,
+        196,
+        304,
+        313
+      ],
+      "evidence": "Exact two-tool policy inventory validated before stages/build; generated launcher bytes and SHA checked; each role policy and effective manifest/tool rechecked on reopen."
+    },
+    {
+      "file": "tests/test_coordinated_prototype_broker.py",
+      "lines": [
+        347,
+        387,
+        418
+      ],
+      "evidence": "Negative malformed inventory, actual foreign-interpreter policy, and rebound metadata reopen tests inspected."
+    }
+  ]
+}

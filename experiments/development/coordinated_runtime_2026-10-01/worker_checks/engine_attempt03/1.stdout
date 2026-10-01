@@ -1,0 +1,117 @@
+F{"action": "revise", "affected": ["E", "N", "P1", "R", "V"], "id": "P1", "ok": true}
+FF.......
+=================================== FAILURES ===================================
+__________ test_two_delegations_keep_global_ids_context_and_claim[A] ___________
+
+bundle = PosixPath('/tmp/specorganon-D119-engine-attempt03-sbslcg6w/cases/D119-engine-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-engine-attempt03-sbslcg6w/cases/test_two_delegations_keep_glob0')
+arm = 'A'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    def test_two_delegations_keep_global_ids_context_and_claim(bundle, tmp_path, arm):
+        run, status, fixture = prepare(bundle, tmp_path, arm)
+        context_before = json.loads((run / "context/run.json").read_bytes())
+>       status = reach_delegations(run, status, fixture)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_coordinated_prototype.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+run = PosixPath('/tmp/specorganon-D119-engine-attempt03-sbslcg6w/cases/test_two_delegations_keep_glob0/run')
+status = {'active_time_scope': 'shared_local_clock_not_authenticated_provider_activity', 'artifacts': [], 'assignments': [{'own...t': {'blocked': False, 'committed_cost_micro_usd': 35, 'committed_tokens': 35, 'cost_limit_micro_usd': 1000, ...}, ...}
+fixture = <coordinated_runtime_fixture.SyntheticRoles object at 0x7ff37b9c3380>
+count = 2
+
+    def reach_delegations(run, status, fixture, count=2):
+        for _ in range(40):
+            if len(status["delegations"]) >= count:
+                return status
+            status = step(run, status, fixture)
+>           assert status["state"] == "paused", status
+E           AssertionError: {'active_time_scope': 'shared_local_clock_not_authenticated_provider_activity', 'artifacts': [], 'assignments': [{'own...t': {'blocked': False, 'committed_cost_micro_usd': 35, 'committed_tokens': 35, 'cost_limit_micro_usd': 1000, ...}, ...}
+E           assert 'indeterminate' == 'paused'
+E             
+E             - paused
+E             + indeterminate
+
+tests/test_managed_coordinated_prototype.py:47: AssertionError
+__________ test_two_delegations_keep_global_ids_context_and_claim[B] ___________
+
+bundle = PosixPath('/tmp/specorganon-D119-engine-attempt03-sbslcg6w/cases/D119-engine-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-engine-attempt03-sbslcg6w/cases/test_two_delegations_keep_glob1')
+arm = 'B'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    def test_two_delegations_keep_global_ids_context_and_claim(bundle, tmp_path, arm):
+        run, status, fixture = prepare(bundle, tmp_path, arm)
+        context_before = json.loads((run / "context/run.json").read_bytes())
+>       status = reach_delegations(run, status, fixture)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_coordinated_prototype.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+run = PosixPath('/tmp/specorganon-D119-engine-attempt03-sbslcg6w/cases/test_two_delegations_keep_glob1/run')
+status = {'active_time_scope': 'shared_local_clock_not_authenticated_provider_activity', 'artifacts': [], 'assignments': [{'own...t': {'blocked': False, 'committed_cost_micro_usd': 35, 'committed_tokens': 35, 'cost_limit_micro_usd': 1000, ...}, ...}
+fixture = <coordinated_runtime_fixture.SyntheticRoles object at 0x7ff37ad2c860>
+count = 2
+
+    def reach_delegations(run, status, fixture, count=2):
+        for _ in range(40):
+            if len(status["delegations"]) >= count:
+                return status
+            status = step(run, status, fixture)
+>           assert status["state"] == "paused", status
+E           AssertionError: {'active_time_scope': 'shared_local_clock_not_authenticated_provider_activity', 'artifacts': [], 'assignments': [{'own...t': {'blocked': False, 'committed_cost_micro_usd': 35, 'committed_tokens': 35, 'cost_limit_micro_usd': 1000, ...}, ...}
+E           assert 'indeterminate' == 'paused'
+E             
+E             - paused
+E             + indeterminate
+
+tests/test_managed_coordinated_prototype.py:47: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "revise", "affected": ["E", "N", "P1", "R", "V"], "id": "P1", "ok": true}
+__________ test_two_delegations_keep_global_ids_context_and_claim[C] ___________
+
+bundle = PosixPath('/tmp/specorganon-D119-engine-attempt03-sbslcg6w/cases/D119-engine-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-engine-attempt03-sbslcg6w/cases/test_two_delegations_keep_glob2')
+arm = 'C'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    def test_two_delegations_keep_global_ids_context_and_claim(bundle, tmp_path, arm):
+        run, status, fixture = prepare(bundle, tmp_path, arm)
+        context_before = json.loads((run / "context/run.json").read_bytes())
+>       status = reach_delegations(run, status, fixture)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_managed_coordinated_prototype.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+run = PosixPath('/tmp/specorganon-D119-engine-attempt03-sbslcg6w/cases/test_two_delegations_keep_glob2/run')
+status = {'active_time_scope': 'shared_local_clock_not_authenticated_provider_activity', 'artifacts': [], 'assignments': [{'own...t': {'blocked': False, 'committed_cost_micro_usd': 35, 'committed_tokens': 35, 'cost_limit_micro_usd': 1000, ...}, ...}
+fixture = <coordinated_runtime_fixture.SyntheticRoles object at 0x7ff37a086a50>
+count = 2
+
+    def reach_delegations(run, status, fixture, count=2):
+        for _ in range(40):
+            if len(status["delegations"]) >= count:
+                return status
+            status = step(run, status, fixture)
+>           assert status["state"] == "paused", status
+E           AssertionError: {'active_time_scope': 'shared_local_clock_not_authenticated_provider_activity', 'artifacts': [], 'assignments': [{'own...t': {'blocked': False, 'committed_cost_micro_usd': 35, 'committed_tokens': 35, 'cost_limit_micro_usd': 1000, ...}, ...}
+E           assert 'indeterminate' == 'paused'
+E             
+E             - paused
+E             + indeterminate
+
+tests/test_managed_coordinated_prototype.py:47: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "revise", "affected": ["E", "N", "P1", "R", "V"], "id": "P1", "ok": true}
+=========================== short test summary info ============================
+FAILED tests/test_managed_coordinated_prototype.py::test_two_delegations_keep_global_ids_context_and_claim[A]
+FAILED tests/test_managed_coordinated_prototype.py::test_two_delegations_keep_global_ids_context_and_claim[B]
+FAILED tests/test_managed_coordinated_prototype.py::test_two_delegations_keep_global_ids_context_and_claim[C]
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/usr/lib/python3.12/ast.py:369: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+3 failed, 7 passed in 200.42s (0:03:20)

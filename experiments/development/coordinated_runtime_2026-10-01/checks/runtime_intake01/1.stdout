@@ -1,0 +1,256 @@
+.............FFFFFF.                                                     [100%]
+=================================== FAILURES ===================================
+_ test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-A] _
+
+bundle = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/D119-original-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/test_original_modes_multiple_d0')
+arm = 'A', case_id = 'D-F'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    def test_original_modes_multiple_delegations_same_budget_and_final_host_analysis(bundle, tmp_path, arm, case_id):
+        from coordinated_prototype_broker import CoordinatedPrototypeBroker
+        from local_replay_sandbox import probe_sandbox
+        capability = probe_sandbox()
+        assert capability.available, capability.reason
+        run = tmp_path / "run"
+        status = runtime.prepare_coordinated_runtime(run, bundle, run_id(bundle, arm, case_id), configuration(),
+                                                     admission_root=tmp_path / "admission")
+        fixture = SyntheticRoles(run)
+        transports = fixture.transports()
+        assert status["budget"]["request_count"] == 0
+        assert not list((tmp_path / "admission").glob("*.json"))
+        saved_claim, requests = None, []
+        for _ in range(50):
+            status = runtime.execute_coordinated_runtime_step(run, transports, expected_checkpoint=status["checkpoint_sha256"])
+            requests.append(status["budget"]["request_count"])
+            claims = sorted(path for path in (tmp_path / "admission").glob("*.json")
+                            if not path.name.endswith(".coordinated-binding.json"))
+            assert len(claims) == 1
+            if saved_claim is None:
+                saved_claim = claims[0].read_bytes()
+            assert claims[0].read_bytes() == saved_claim
+            if status["state"] != "paused":
+                break
+>       assert status["state"] == "completed", status
+E       AssertionError: {'classification': 'development_coordinated_prototype_runtime_unsealed', 'execution_profile': 'coordinated_development_parent_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E       assert 'indeterminate' == 'completed'
+E         
+E         - completed
+E         + indeterminate
+
+tests/test_coordinated_prototype_runtime.py:100: AssertionError
+_ test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-B] _
+
+bundle = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/D119-original-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/test_original_modes_multiple_d1')
+arm = 'B', case_id = 'D-F'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    def test_original_modes_multiple_delegations_same_budget_and_final_host_analysis(bundle, tmp_path, arm, case_id):
+        from coordinated_prototype_broker import CoordinatedPrototypeBroker
+        from local_replay_sandbox import probe_sandbox
+        capability = probe_sandbox()
+        assert capability.available, capability.reason
+        run = tmp_path / "run"
+        status = runtime.prepare_coordinated_runtime(run, bundle, run_id(bundle, arm, case_id), configuration(),
+                                                     admission_root=tmp_path / "admission")
+        fixture = SyntheticRoles(run)
+        transports = fixture.transports()
+        assert status["budget"]["request_count"] == 0
+        assert not list((tmp_path / "admission").glob("*.json"))
+        saved_claim, requests = None, []
+        for _ in range(50):
+            status = runtime.execute_coordinated_runtime_step(run, transports, expected_checkpoint=status["checkpoint_sha256"])
+            requests.append(status["budget"]["request_count"])
+            claims = sorted(path for path in (tmp_path / "admission").glob("*.json")
+                            if not path.name.endswith(".coordinated-binding.json"))
+            assert len(claims) == 1
+            if saved_claim is None:
+                saved_claim = claims[0].read_bytes()
+            assert claims[0].read_bytes() == saved_claim
+            if status["state"] != "paused":
+                break
+>       assert status["state"] == "completed", status
+E       AssertionError: {'classification': 'development_coordinated_prototype_runtime_unsealed', 'execution_profile': 'coordinated_development_parent_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E       assert 'indeterminate' == 'completed'
+E         
+E         - completed
+E         + indeterminate
+
+tests/test_coordinated_prototype_runtime.py:100: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "revise", "affected": ["E", "N", "P1", "R", "V"], "id": "P1", "ok": true}
+_ test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-C] _
+
+bundle = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/D119-original-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/test_original_modes_multiple_d2')
+arm = 'C', case_id = 'D-F'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    def test_original_modes_multiple_delegations_same_budget_and_final_host_analysis(bundle, tmp_path, arm, case_id):
+        from coordinated_prototype_broker import CoordinatedPrototypeBroker
+        from local_replay_sandbox import probe_sandbox
+        capability = probe_sandbox()
+        assert capability.available, capability.reason
+        run = tmp_path / "run"
+        status = runtime.prepare_coordinated_runtime(run, bundle, run_id(bundle, arm, case_id), configuration(),
+                                                     admission_root=tmp_path / "admission")
+        fixture = SyntheticRoles(run)
+        transports = fixture.transports()
+        assert status["budget"]["request_count"] == 0
+        assert not list((tmp_path / "admission").glob("*.json"))
+        saved_claim, requests = None, []
+        for _ in range(50):
+            status = runtime.execute_coordinated_runtime_step(run, transports, expected_checkpoint=status["checkpoint_sha256"])
+            requests.append(status["budget"]["request_count"])
+            claims = sorted(path for path in (tmp_path / "admission").glob("*.json")
+                            if not path.name.endswith(".coordinated-binding.json"))
+            assert len(claims) == 1
+            if saved_claim is None:
+                saved_claim = claims[0].read_bytes()
+            assert claims[0].read_bytes() == saved_claim
+            if status["state"] != "paused":
+                break
+>       assert status["state"] == "completed", status
+E       AssertionError: {'classification': 'development_coordinated_prototype_runtime_unsealed', 'execution_profile': 'coordinated_development_parent_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E       assert 'indeterminate' == 'completed'
+E         
+E         - completed
+E         + indeterminate
+
+tests/test_coordinated_prototype_runtime.py:100: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "revise", "affected": ["E", "N", "P1", "R", "V"], "id": "P1", "ok": true}
+_ test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-E-A] _
+
+bundle = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/D119-original-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/test_original_modes_multiple_d3')
+arm = 'A', case_id = 'D-E'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    def test_original_modes_multiple_delegations_same_budget_and_final_host_analysis(bundle, tmp_path, arm, case_id):
+        from coordinated_prototype_broker import CoordinatedPrototypeBroker
+        from local_replay_sandbox import probe_sandbox
+        capability = probe_sandbox()
+        assert capability.available, capability.reason
+        run = tmp_path / "run"
+        status = runtime.prepare_coordinated_runtime(run, bundle, run_id(bundle, arm, case_id), configuration(),
+                                                     admission_root=tmp_path / "admission")
+        fixture = SyntheticRoles(run)
+        transports = fixture.transports()
+        assert status["budget"]["request_count"] == 0
+        assert not list((tmp_path / "admission").glob("*.json"))
+        saved_claim, requests = None, []
+        for _ in range(50):
+            status = runtime.execute_coordinated_runtime_step(run, transports, expected_checkpoint=status["checkpoint_sha256"])
+            requests.append(status["budget"]["request_count"])
+            claims = sorted(path for path in (tmp_path / "admission").glob("*.json")
+                            if not path.name.endswith(".coordinated-binding.json"))
+            assert len(claims) == 1
+            if saved_claim is None:
+                saved_claim = claims[0].read_bytes()
+            assert claims[0].read_bytes() == saved_claim
+            if status["state"] != "paused":
+                break
+>       assert status["state"] == "completed", status
+E       AssertionError: {'classification': 'development_coordinated_prototype_runtime_unsealed', 'execution_profile': 'coordinated_development_parent_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E       assert 'indeterminate' == 'completed'
+E         
+E         - completed
+E         + indeterminate
+
+tests/test_coordinated_prototype_runtime.py:100: AssertionError
+_ test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-E-B] _
+
+bundle = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/D119-original-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/test_original_modes_multiple_d4')
+arm = 'B', case_id = 'D-E'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    def test_original_modes_multiple_delegations_same_budget_and_final_host_analysis(bundle, tmp_path, arm, case_id):
+        from coordinated_prototype_broker import CoordinatedPrototypeBroker
+        from local_replay_sandbox import probe_sandbox
+        capability = probe_sandbox()
+        assert capability.available, capability.reason
+        run = tmp_path / "run"
+        status = runtime.prepare_coordinated_runtime(run, bundle, run_id(bundle, arm, case_id), configuration(),
+                                                     admission_root=tmp_path / "admission")
+        fixture = SyntheticRoles(run)
+        transports = fixture.transports()
+        assert status["budget"]["request_count"] == 0
+        assert not list((tmp_path / "admission").glob("*.json"))
+        saved_claim, requests = None, []
+        for _ in range(50):
+            status = runtime.execute_coordinated_runtime_step(run, transports, expected_checkpoint=status["checkpoint_sha256"])
+            requests.append(status["budget"]["request_count"])
+            claims = sorted(path for path in (tmp_path / "admission").glob("*.json")
+                            if not path.name.endswith(".coordinated-binding.json"))
+            assert len(claims) == 1
+            if saved_claim is None:
+                saved_claim = claims[0].read_bytes()
+            assert claims[0].read_bytes() == saved_claim
+            if status["state"] != "paused":
+                break
+>       assert status["state"] == "completed", status
+E       AssertionError: {'classification': 'development_coordinated_prototype_runtime_unsealed', 'execution_profile': 'coordinated_development_parent_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E       assert 'indeterminate' == 'completed'
+E         
+E         - completed
+E         + indeterminate
+
+tests/test_coordinated_prototype_runtime.py:100: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action": "revise", "affected": ["E", "N", "P1", "R", "V"], "id": "P1", "ok": true}
+_ test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-E-C] _
+
+bundle = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/D119-original-bundle0/bundle')
+tmp_path = PosixPath('/tmp/specorganon-D119-runtime_intake01-tjwyxymk/cases/test_original_modes_multiple_d5')
+arm = 'C', case_id = 'D-E'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    def test_original_modes_multiple_delegations_same_budget_and_final_host_analysis(bundle, tmp_path, arm, case_id):
+        from coordinated_prototype_broker import CoordinatedPrototypeBroker
+        from local_replay_sandbox import probe_sandbox
+        capability = probe_sandbox()
+        assert capability.available, capability.reason
+        run = tmp_path / "run"
+        status = runtime.prepare_coordinated_runtime(run, bundle, run_id(bundle, arm, case_id), configuration(),
+                                                     admission_root=tmp_path / "admission")
+        fixture = SyntheticRoles(run)
+        transports = fixture.transports()
+        assert status["budget"]["request_count"] == 0
+        assert not list((tmp_path / "admission").glob("*.json"))
+        saved_claim, requests = None, []
+        for _ in range(50):
+            status = runtime.execute_coordinated_runtime_step(run, transports, expected_checkpoint=status["checkpoint_sha256"])
+            requests.append(status["budget"]["request_count"])
+            claims = sorted(path for path in (tmp_path / "admission").glob("*.json")
+                            if not path.name.endswith(".coordinated-binding.json"))
+            assert len(claims) == 1
+            if saved_claim is None:
+                saved_claim = claims[0].read_bytes()
+            assert claims[0].read_bytes() == saved_claim
+            if status["state"] != "paused":
+                break
+>       assert status["state"] == "completed", status
+E       AssertionError: {'classification': 'development_coordinated_prototype_runtime_unsealed', 'execution_profile': 'coordinated_development_parent_v1', 'state': 'indeterminate', 'stored_state': 'indeterminate', ...}
+E       assert 'indeterminate' == 'completed'
+E         
+E         - completed
+E         + indeterminate
+
+tests/test_coordinated_prototype_runtime.py:100: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-A]
+FAILED tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-B]
+FAILED tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-C]
+FAILED tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-E-A]
+FAILED tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-E-B]
+FAILED tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-E-C]
+6 failed, 14 passed in 442.11s (0:07:22)
