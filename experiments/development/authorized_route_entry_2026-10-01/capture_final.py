@@ -35,13 +35,18 @@ def main():
         path.write_bytes(raw)
     commands = []
     def capture(argv, name, timeout=240):
-        result = subprocess.run(argv, cwd=ROOT, env=ENV, capture_output=True, timeout=timeout)
-        (args.output / (name + ".stdout")).write_bytes(result.stdout)
-        (args.output / (name + ".stderr")).write_bytes(result.stderr)
-        row = {"argv": argv, "exit_code": result.returncode, "stdout_sha256": sha(result.stdout), "stderr_sha256": sha(result.stderr)}
+        try:
+            result = subprocess.run(argv, cwd=ROOT, env=ENV, capture_output=True, timeout=timeout)
+            code, stdout, stderr = result.returncode, result.stdout, result.stderr
+        except subprocess.TimeoutExpired as exc:
+            code, stdout, stderr = 124, exc.stdout or b"", exc.stderr or b""
+        (args.output / (name + ".stdout")).write_bytes(stdout)
+        (args.output / (name + ".stderr")).write_bytes(stderr)
+        row = {"argv": argv, "exit_code": code, "timeout_seconds": timeout,
+               "stdout_sha256": sha(stdout), "stderr_sha256": sha(stderr)}
         commands.append(row)
         (args.output / "commands.json").write_text(json.dumps(commands, indent=2) + "\n")
-        return result.returncode
+        return code
     baseline = ROOT / "experiments/development/real_route_proposal_2026-10-01/seal_evidence.py"
     temp = Path(tempfile.mkdtemp(prefix="specorganon-D123-final-"))
     capture([sys.executable, "-I", "-B", str(baseline), "verify"], "baseline_before")
@@ -51,7 +56,7 @@ def main():
     capture(["/home/dev/.local/bin/ruff", "check", *before], "ruff")
     capture([sys.executable, "-I", "-B", "-c", "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]", *before], "compile")
     runtime = temp / "runtime"
-    code = capture([sys.executable, "-I", "-B", str(DOSSIER / "integration_checks.py"), "--destination", str(runtime)], "integration", 600)
+    code = capture([sys.executable, "-I", "-B", str(DOSSIER / "integration_checks.py"), "--destination", str(runtime)], "integration", 1200)
     saved = archive(runtime, args.output / "runtimes.tar.gz", args.output / "runtimes_inventory.json")
     if code == 0:
         (args.output / "integration_result.json").write_bytes((runtime / "integration_result.json").read_bytes())

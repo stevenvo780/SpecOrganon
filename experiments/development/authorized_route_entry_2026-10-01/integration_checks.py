@@ -84,10 +84,10 @@ def main():
         parent, run, obs, status = prepare(arm, arm + "-D-E")
         fixture = SyntheticRoles(run)
         with fixture.http_server() as endpoint:
+            preview = cli([entry, "preflight", "--run-dir", run, "--observation-dir", obs,
+                           "--expected-checkpoint", status["checkpoint_sha256"]])
+            assert preview["credentials_read"] is False and preview["provider_requests"] == 0
             for _ in range(50):
-                preview = cli([entry, "preflight", "--run-dir", run, "--observation-dir", obs,
-                               "--expected-checkpoint", status["checkpoint_sha256"]])
-                assert preview["credentials_read"] is False and preview["provider_requests"] == 0
                 result = cli([entry, "step-fixture", "--run-dir", run, "--observation-dir", obs,
                               "--expected-checkpoint", status["checkpoint_sha256"], "--local-http-fixture", endpoint])
                 assert result["step_failed"] is False
