@@ -1,0 +1,1 @@
+# transitive local shadow fixture

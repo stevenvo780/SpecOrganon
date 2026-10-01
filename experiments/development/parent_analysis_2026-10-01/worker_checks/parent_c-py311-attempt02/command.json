@@ -1,0 +1,33 @@
+{
+  "cwd": "/workspace/SpecOrganon",
+  "commands": [
+    [
+      "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_c_parent_analysis.py",
+      "--basetemp",
+      "/tmp/specorganon-D117-parent_c-py311-attempt02-happc65y/cases",
+      "-k",
+      "physical_source_overlap or prepare_empty_work"
+    ],
+    [
+      "ruff",
+      "check",
+      "scripts/c_parent_analysis.py",
+      "tests/test_c_parent_analysis.py",
+      "experiments/development/parent_analysis_2026-10-01/worker_checks/capture_parent_c.py"
+    ],
+    [
+      "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print('syntax OK')",
+      "scripts/c_parent_analysis.py",
+      "tests/test_c_parent_analysis.py"
+    ]
+  ]
+}

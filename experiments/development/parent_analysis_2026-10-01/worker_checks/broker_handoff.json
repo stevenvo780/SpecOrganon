@@ -1,0 +1,317 @@
+{
+  "api": {
+    "ParentAnalysisBroker": "(run_dir, bootstrap_manifest)",
+    "activate": "(branch_manifest,context,handoff_guard) -> {path,sha256} activation binding",
+    "invoke": "(task_id,request_id,call={name,call_id,arguments},context,guard)",
+    "other": [
+      "verify",
+      "operations",
+      "branch",
+      "current_metrics",
+      "journal_roots",
+      "bootstrap_snapshot",
+      "wave_view"
+    ],
+    "prepare_parent_broker_manifest": "(root, leader_spec={task_id,stage_dir,functions}, slots=[{task_id,stage_dir}]) -> {path,sha256}",
+    "prepare_parent_manifest": "alias"
+  },
+  "attempts": [
+    {
+      "commands": [
+        {
+          "command": [
+            "/usr/bin/python3",
+            "-m",
+            "ruff",
+            "check",
+            "scripts/parent_analysis_broker.py",
+            "tests/test_parent_analysis_broker.py"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.02532339096069336,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt01/01-result.json",
+          "runtime_root": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt01/test-artifacts"
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "tests/test_parent_analysis_broker.py",
+            "--basetemp=/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt01/test-artifacts"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 84.75682377815247,
+          "exit_code": 1,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt01/02-result.json",
+          "runtime_root": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt01/test-artifacts"
+        }
+      ],
+      "path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt01",
+      "runtime_roots": [
+        "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt01/test-artifacts",
+        "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt01/test-artifacts"
+      ],
+      "source_snapshot": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt01/source_snapshot"
+    },
+    {
+      "commands": [
+        {
+          "command": [
+            "/usr/bin/python3",
+            "-m",
+            "ruff",
+            "check",
+            "scripts/parent_analysis_broker.py",
+            "tests/test_parent_analysis_broker.py"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.022837162017822266,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/01-result.json",
+          "runtime_root": null
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-c",
+            "from pathlib import Path; import sys; [compile(Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print(sys.version)",
+            "scripts/parent_analysis_broker.py",
+            "tests/test_parent_analysis_broker.py"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.02617359161376953,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/02-result.json",
+          "runtime_root": null
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "tests/test_parent_analysis_broker.py",
+            "--basetemp=/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/test-artifacts-311"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 97.79740929603577,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/03-result.json",
+          "runtime_root": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/test-artifacts-311"
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-B",
+            "-c",
+            "from pathlib import Path; import sys; [compile(Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print(sys.version)",
+            "scripts/parent_analysis_broker.py",
+            "tests/test_parent_analysis_broker.py"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.02430105209350586,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/04-result.json",
+          "runtime_root": null
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "tests/test_parent_analysis_broker.py",
+            "--basetemp=/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/test-artifacts-312"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 115.17151117324829,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/05-result.json",
+          "runtime_root": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/test-artifacts-312"
+        }
+      ],
+      "path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02",
+      "runtime_roots": [
+        "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/test-artifacts-311",
+        "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/test-artifacts-312"
+      ],
+      "source_snapshot": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/source_snapshot"
+    },
+    {
+      "commands": [
+        {
+          "command": [
+            "/usr/bin/python3",
+            "-m",
+            "ruff",
+            "check",
+            "scripts/parent_analysis_broker.py",
+            "tests/test_parent_analysis_broker.py"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.041434526443481445,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/01-result.json",
+          "runtime_root": null
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-c",
+            "from pathlib import Path; import sys; [compile(Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print(sys.version)",
+            "scripts/parent_analysis_broker.py",
+            "tests/test_parent_analysis_broker.py"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.0361480712890625,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/02-result.json",
+          "runtime_root": null
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "tests/test_parent_analysis_broker.py",
+            "-k",
+            "source_cache or real_init_shared_ordinals",
+            "--basetemp=/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/test-artifacts-311"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 8.67556643486023,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/03-result.json",
+          "runtime_root": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/test-artifacts-311"
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-B",
+            "-c",
+            "from pathlib import Path; import sys; [compile(Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print(sys.version)",
+            "scripts/parent_analysis_broker.py",
+            "tests/test_parent_analysis_broker.py"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 0.05005526542663574,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/04-result.json",
+          "runtime_root": null
+        },
+        {
+          "command": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "tests/test_parent_analysis_broker.py",
+            "-k",
+            "source_cache or real_init_shared_ordinals",
+            "--basetemp=/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/test-artifacts-312"
+          ],
+          "cwd": "/workspace/SpecOrganon",
+          "duration_seconds": 8.25932502746582,
+          "exit_code": 0,
+          "result_path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/05-result.json",
+          "runtime_root": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/test-artifacts-312"
+        }
+      ],
+      "path": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache",
+      "runtime_roots": [
+        "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/test-artifacts-311",
+        "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/test-artifacts-312"
+      ],
+      "source_snapshot": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt03-cache/source_snapshot"
+    }
+  ],
+  "baseline": "ee26beb4cc7cb8788e130f0b0225f32b57a8cd3e",
+  "cache_refinement": {
+    "compile_311": "passed",
+    "compile_312": "passed",
+    "description": "Cache AST discovery only; every call rehashes all bounded sources/core and checks local candidates twice. Root/core identity keys isolate caches. Returned dict cannot poison pinned cache.",
+    "full_suite": "Historical 20-test gate under previous source retained; new full24 gate belongs to root final unified freeze",
+    "negative_gates": [
+      "changed cached script bytes",
+      "changed prototype core bytes",
+      "new local import candidate and nested dependency",
+      "returned mapping mutation"
+    ],
+    "pytest_311": "5 passed, 19 deselected in 8.29s",
+    "pytest_312": "5 passed, 19 deselected in 7.89s",
+    "ruff": "passed"
+  },
+  "classification": "development_parent_analysis_broker_worker_handoff_unsealed",
+  "commit_created": false,
+  "contract": {
+    "activation_path": "root/metadata/activation.json",
+    "bootstrap_path": "root/metadata/bootstrap_manifest.json",
+    "intent_path": "root/metadata/activation_intent.json",
+    "journal_roots": "one fixed entire predeclared stage root",
+    "leader_owned_ids": "none; internal compatibility list empty, no dummy node/task",
+    "metrics": "D116 actual before/after_child/after_host inventories, entire work-input freshness, ordinary repair and old metric retirement",
+    "ordinals": "flat continuous global stream; schema1 workspace / schema2 analysis",
+    "profile": "parent_analysis_two_phase_v1",
+    "recovery": "partial descriptor or intent blocks new effects; fresh broker cannot complete pending activation",
+    "reservation_binding": "constant bootstrap manifest digest in both phases",
+    "transition_path": "root/metadata/transition.json",
+    "worker_seed": "only method_state.json bytes from real bootstrap; original risk selection and exact owned-node driver"
+  },
+  "files": {
+    "scripts/parent_analysis_broker.py": "09f02622c7cdefa4cf8fbdb862e8fe333f3442043d550258e1dc87a441db215c",
+    "tests/test_parent_analysis_broker.py": "c274dcb90a7536d7a7a79ea88c4c650b214843b5d09e84812c4b8e7a0afa506d"
+  },
+  "followup_required": "Root integration and independent final review after source freeze",
+  "historical_full_gate_handoff": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/broker_handoff_before_cache.json",
+  "implementation_ready": true,
+  "limitations": [
+    "Focused broker tests use a minimal context interface; root integration owns real WaveLedger/RunContext/claim continuity and authenticated request/response histories",
+    "Same-UID reviewed local primitive; no hostile-code isolation claim",
+    "No paid API, provider telemetry, normative approval or formal24 execution"
+  ],
+  "prospective_plan_commit": "4783701",
+  "verification": {
+    "compile_311": "passed",
+    "compile_312": "passed",
+    "first_attempt": "18 passed / 1 failed; os.kill SIGTERM was blocked by sandbox seccomp and became an ordinary PermissionError, fixture corrected to os.abort; original stderr and attempts preserved",
+    "negative_gates": [
+      "Bootstrap revise/review/advance/approve/analyze rejected before reservation or work effect",
+      "Wrong phase task and duplicate init rejected before new reservation",
+      "Global call ID uniqueness and tool cap include bootstrap",
+      "Missing/invalid real init cannot make a transition",
+      "Ordinary invalid JSON and nonzero exit return repair feedback; CAS repair produces fresh host metrics",
+      "Later report write invalidates metrics input snapshot; reanalysis required",
+      "Invalid later analysis retires old metrics",
+      "Transition/activation/leader seed/stream tamper prevents replay",
+      "Prepared transition on a fresh broker and durable intent without activation block recovery",
+      "Readonly timeout and actual abort signal leave ordinal3 pending and block metrics publication",
+      "Worker initial seed mismatch rejected before activation intent"
+    ],
+    "old_source_count": 28,
+    "old_sources_unchanged_report": "/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt02/original_sources_unchanged.json",
+    "pytest_311": "historical pre-cache: 20 passed in 97.61s",
+    "pytest_312": "historical pre-cache: 20 passed in 114.95s",
+    "ruff": "passed"
+  }
+}

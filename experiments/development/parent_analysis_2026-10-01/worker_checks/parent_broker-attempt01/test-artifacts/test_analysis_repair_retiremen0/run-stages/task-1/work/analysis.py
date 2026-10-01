@@ -1,0 +1,1 @@
+print('ordinary malformed JSON')

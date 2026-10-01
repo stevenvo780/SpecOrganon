@@ -1,5 +1,30 @@
 # Despacho medido de una solicitud de desarrollo
 
+## Presupuesto desde el bootstrap del líder (D-117)
+
+`managed_parent_analysis.py`, `parent_analysis_broker.py` y
+`c_parent_analysis.py` añaden un runtime optativo desde work vacío. El líder
+ejecuta init real y su texto público habilita la transición a ramas privadas.
+Un único WaveLedger/RunContext/claim cubre ambas fases, reviewer y merge;
+sin preparaciones hijas, conversión de ledger ni reposición de contadores.
+Los ordinals de herramientas son globales. Replay reconstruye los historiales
+privados y sus recibos; checkpoint CAS conserva saldo, plazo y pausas.
+
+[Dossier](../experiments/development/parent_analysis_2026-10-01/README.md):
+98 pruebas por Python 3.11/3.12 y seis trazas originales HTTP/CLI sintéticas.
+Cada una consume 14 requests, 10 tools reales y 182 tokens de fixture;
+3 requests/2 tools del líder cuentan dentro del saldo. Los negativos comprueban
+que sus consumos pueden impedir el primer lote de workers. El merge exige
+estado y recibos ligados antes de finish y publicación; `{}` no puede cerrarlo.
+
+Se conserva un reloj activo local común. Eso no mide ni autentica la suma
+de actividad dentro del proveedor; tokens de fixture y precios declarados
+tampoco son telemetría o factura. Este corte no completa nueve fases ni un
+contrato comparable A/B/C: 0/24 formales, sin autorización de gasto/campo.
+Siguen continuidad, coordinación/contrato/rúbrica prospectivos y medición
+auténtica de modelo/esfuerzo/uso/actividad/coste antes del ensayo. Las
+secciones siguientes conservan contratos y límites de cortes históricos.
+
 ## Análisis protegido en ramas privadas (D-116)
 
 `managed_parallel_analysis.py` y `c_parallel_analysis.py` inyectan un broker

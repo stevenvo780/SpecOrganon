@@ -1,0 +1,20 @@
+................F..                                                      [100%]
+=================================== FAILURES ===================================
+_ test_timeout_and_signal_leave_global_reservation_blocked[import os,signal\nos.kill(os.getpid(),signal.SIGTERM)\n] _
+
+tmp_path = PosixPath('/workspace/SpecOrganon/experiments/development/parent_analysis_2026-10-01/worker_checks/parent_broker-attempt01/test-artifacts/test_timeout_and_signal_leave_1')
+source = 'import os,signal\nos.kill(os.getpid(),signal.SIGTERM)\n'
+
+    @pytest.mark.parametrize("source", ["import time\ntime.sleep(5)\n", "import os,signal\nos.kill(os.getpid(),signal.SIGTERM)\n"])
+    def test_timeout_and_signal_leave_global_reservation_blocked(tmp_path, source):
+        host, context = fixture(tmp_path, wall=0.25)
+        init(host, context)
+        activate(host, context)
+        write(host, context, source)
+>       with pytest.raises(parent.BrokerError, match="uncertain"):
+E       Failed: DID NOT RAISE BrokerError
+
+tests/test_parent_analysis_broker.py:323: Failed
+=========================== short test summary info ============================
+FAILED tests/test_parent_analysis_broker.py::test_timeout_and_signal_leave_global_reservation_blocked[import os,signal\nos.kill(os.getpid(),signal.SIGTERM)\n]
+1 failed, 18 passed in 84.46s (0:01:24)

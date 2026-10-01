@@ -1,5 +1,33 @@
 # Estado de reanudación
 
+**D-117 arranca C desde work vacío dentro de un único runtime padre:**
+[dossier](../experiments/development/parent_analysis_2026-10-01/README.md).
+El líder lee un bloque del caso, crea el grafo con init sellado real y publica
+su texto. La transición deriva ramas privadas bajo el mismo ledger/contexto/
+claim y saldo; reviewer y merge continúan esa contabilidad. Se validan cuatro
+journals de merge antes de finish y al consultar completed. Rechazo de solapes
+físicos de fuentes, run, stages y admisión antes de mkdir; replay y cache
+conservan hashes, imports e historias. D113/D115/D116 permanecen intactos.
+Freeze `25f8730`: **98 passed por Python 3.11/3.12**, Ruff/compile/diff 0,
+55 pines fuente/90 base y 52 copias before/after por gate. Seis trazas físicas
+originales D-F/D-E HTTP/CLI: 14 requests/10 tools/182 tokens de fixture cada
+una; líder 3 requests/2 tools dentro del saldo, init real, dos métricas
+vigentes, reparación CAS y normas pending. Archivo de 13 raíces: 23.985
+regulares/3.568 blobs/10.026.409 B, SHA cf0a15f8…; cotejado entero por root y
+revisor, sin P1/P2 abierto en alcance. Intentos fallidos conservados, incluida
+colección sin runtime y validación incorrecta del JSON original del core.
+
+**C1 técnico D107 vigente; C2–C5 No demostrado; formales 0/24.** D117 termina
+una wave del prototipo: no equivale a las nueve fases del motor metodológico
+ni fija aún coordinación/contrato/rúbrica comunes A/B/C. Siguiente:
+continuidad y contrato prospectivo, medición auténtica de uso y suma de
+actividad de agentes, ruta/modelo/esfuerzo/versiones/telemetría/autorización;
+12 R1 reales, adaptación/freeze R2, 12 R2 y selección. Siguen custodia,
+panel, jueces, autoridades, reserva, campo y transferencia. Luna hizo el
+inventario de 90 rutas, cotejado por root y revisor; no fue ensayo de calidad.
+GOAL/protocolo/producción/core/wheel/casos intactos. Los cortes siguientes
+son históricos y conservan los pendientes que tenían entonces.
+
 **D-116 integra análisis protegido y métricas frescas en las ramas de C:**
 [dossier](../experiments/development/parallel_analysis_2026-10-01/README.md).
 Manifest v2 y adapter nuevos sobre D115 intacto; mismo ledger/contexto/claim,

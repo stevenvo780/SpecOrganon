@@ -1,0 +1,24 @@
+F........                                                                [100%]
+=================================== FAILURES ===================================
+______________ test_prepare_empty_work_no_graph_manifest_or_claim ______________
+
+tmp_path = PosixPath('/tmp/specorganon-D117-parent_c-py311-attempt01-i3bs1e9p/cases/test_prepare_empty_work_no_gra0')
+
+    def test_prepare_empty_work_no_graph_manifest_or_claim(tmp_path):
+        run, status, _, _ = prepare(tmp_path)
+        assert status["state"] == "prepared" and status["phase"] == "bootstrap"
+        assert status["budget"]["request_count"] == 0
+        stages = tmp_path / "run-stages"
+        assert list((stages / "leader/work").iterdir()) == []
+        assert all(list(work.iterdir()) == [] for work in (stages / "slots").glob("*/work"))
+        assert not (stages / "branch_manifest.json").exists()
+        assert not (stages / "metadata/transition.json").exists()
+>       assert not (tmp_path / "admission").exists()
+E       AssertionError: assert not True
+E        +  where True = exists()
+E        +    where exists = (PosixPath('/tmp/specorganon-D117-parent_c-py311-attempt01-i3bs1e9p/cases/test_prepare_empty_work_no_gra0') / 'admission').exists
+
+tests/test_c_parent_analysis.py:128: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_c_parent_analysis.py::test_prepare_empty_work_no_graph_manifest_or_claim
+1 failed, 8 passed in 417.95s (0:06:57)

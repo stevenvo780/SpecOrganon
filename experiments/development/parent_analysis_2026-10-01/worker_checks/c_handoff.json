@@ -1,0 +1,558 @@
+{
+  "apis": {
+    "bootstrap_to_wave": "(plan,state,broker,context,guard)",
+    "execute_c_parent_analysis_step": "(run_dir,transports_by_task,*,expected_checkpoint)",
+    "merge_c_parent": "(wave_plan,state,broker,context,guard)",
+    "prepare_c_parent_analysis": "(run_dir,case_dir,inputs_dir,config,*,admission_root=None)",
+    "read_c_parent_analysis_status": "(run_dir)"
+  },
+  "checks": [
+    {
+      "all_exit_zero": false,
+      "artifacts": [
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt01/1.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 1487,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt01/1.stdout",
+          "sha256": "cefdab9a21dea89ec59bf4ec3db92d4600b61638ba2463a08a762e56143f860b"
+        },
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt01/2.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 19,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt01/2.stdout",
+          "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+        },
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt01/3.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 10,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt01/3.stdout",
+          "sha256": "9c6d16305373aef2bef9308e9c2af9c565f9b206faf088179c672852d41a9fb4"
+        },
+        {
+          "bytes": 845,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt01/command.json",
+          "sha256": "62e066fc22d582d5861751232b38b4a2451e3459fe88143a38c2626dc9d4eebb"
+        },
+        {
+          "bytes": 16019,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt01/report.json",
+          "sha256": "0c72ec962206e486568a515c080c25611fe145a6bb93af91d0ae3cfa5318b5ba"
+        }
+      ],
+      "attempt": "parent_c-py311-attempt01",
+      "commands": [
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_c_parent_analysis.py",
+            "--basetemp",
+            "/tmp/specorganon-D117-parent_c-py311-attempt01-i3bs1e9p/cases"
+          ],
+          "exit_code": 1,
+          "stderr": "1.stderr",
+          "stdout": "1.stdout",
+          "wall_seconds": 418.27990919799777
+        },
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py",
+            "experiments/development/parent_analysis_2026-10-01/worker_checks/capture_parent_c.py"
+          ],
+          "exit_code": 0,
+          "stderr": "2.stderr",
+          "stdout": "2.stdout",
+          "wall_seconds": 0.0162086840136908
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-I",
+            "-B",
+            "-c",
+            "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print('syntax OK')",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py"
+          ],
+          "exit_code": 0,
+          "stderr": "3.stderr",
+          "stdout": "3.stdout",
+          "wall_seconds": 0.03196893498534337
+        }
+      ],
+      "pytest_stdout": "F........                                                                [100%]\n=================================== FAILURES ===================================\n______________ test_prepare_empty_work_no_graph_manifest_or_claim ______________\n\ntmp_path = PosixPath('/tmp/specorganon-D117-parent_c-py311-attempt01-i3bs1e9p/cases/test_prepare_empty_work_no_gra0')\n\n    def test_prepare_empty_work_no_graph_manifest_or_claim(tmp_path):\n        run, status, _, _ = prepare(tmp_path)\n        assert status[\"state\"] == \"prepared\" and status[\"phase\"] == \"bootstrap\"\n        assert status[\"budget\"][\"request_count\"] == 0\n        stages = tmp_path / \"run-stages\"\n        assert list((stages / \"leader/work\").iterdir()) == []\n        assert all(list(work.iterdir()) == [] for work in (stages / \"slots\").glob(\"*/work\"))\n        assert not (stages / \"branch_manifest.json\").exists()\n        assert not (stages / \"metadata/transition.json\").exists()\n>       assert not (tmp_path / \"admission\").exists()\nE       AssertionError: assert not True\nE        +  where True = exists()\nE        +    where exists = (PosixPath('/tmp/specorganon-D117-parent_c-py311-attempt01-i3bs1e9p/cases/test_prepare_empty_work_no_gra0') / 'admission').exists\n\ntests/test_c_parent_analysis.py:128: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_c_parent_analysis.py::test_prepare_empty_work_no_graph_manifest_or_claim\n1 failed, 8 passed in 417.95s (0:06:57)\n",
+      "report": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt01/report.json",
+      "runtime_root": "/tmp/specorganon-D117-parent_c-py311-attempt01-i3bs1e9p/cases",
+      "source_unchanged": true
+    },
+    {
+      "all_exit_zero": true,
+      "artifacts": [
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt02/1.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 112,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt02/1.stdout",
+          "sha256": "ad6d778198dbc64b223771245ec36a847178a15b8b93825277c09705aafecaa4"
+        },
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt02/2.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 19,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt02/2.stdout",
+          "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+        },
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt02/3.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 10,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt02/3.stdout",
+          "sha256": "9c6d16305373aef2bef9308e9c2af9c565f9b206faf088179c672852d41a9fb4"
+        },
+        {
+          "bytes": 912,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt02/command.json",
+          "sha256": "5cc223cd5d45e0c383a91825522d1822fbc8e7346516cf123d4af4d6f6be564a"
+        },
+        {
+          "bytes": 16089,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt02/report.json",
+          "sha256": "ace6665bb2d489bbbae622635413f33ff16678e0480499f0472579618f9a2f84"
+        }
+      ],
+      "attempt": "parent_c-py311-attempt02",
+      "commands": [
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_c_parent_analysis.py",
+            "--basetemp",
+            "/tmp/specorganon-D117-parent_c-py311-attempt02-happc65y/cases",
+            "-k",
+            "physical_source_overlap or prepare_empty_work"
+          ],
+          "exit_code": 0,
+          "stderr": "1.stderr",
+          "stdout": "1.stdout",
+          "wall_seconds": 4.875189426005818
+        },
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py",
+            "experiments/development/parent_analysis_2026-10-01/worker_checks/capture_parent_c.py"
+          ],
+          "exit_code": 0,
+          "stderr": "2.stderr",
+          "stdout": "2.stdout",
+          "wall_seconds": 0.01620223803911358
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-I",
+            "-B",
+            "-c",
+            "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print('syntax OK')",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py"
+          ],
+          "exit_code": 0,
+          "stderr": "3.stderr",
+          "stdout": "3.stdout",
+          "wall_seconds": 0.03206026501720771
+        }
+      ],
+      "pytest_stdout": ".....                                                                    [100%]\n5 passed, 8 deselected in 4.61s\n",
+      "report": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt02/report.json",
+      "runtime_root": "/tmp/specorganon-D117-parent_c-py311-attempt02-happc65y/cases",
+      "source_unchanged": true
+    },
+    {
+      "all_exit_zero": true,
+      "artifacts": [
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt01/1.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 112,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt01/1.stdout",
+          "sha256": "f92853c49703bec3ac01ce0e7c92383017b937ad77e41acc3c848e41900d90dd"
+        },
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt01/2.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 19,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt01/2.stdout",
+          "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+        },
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt01/3.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 10,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt01/3.stdout",
+          "sha256": "9c6d16305373aef2bef9308e9c2af9c565f9b206faf088179c672852d41a9fb4"
+        },
+        {
+          "bytes": 912,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt01/command.json",
+          "sha256": "ad216b945162035373c54385c31c9197c68d949b99430fc4fb1646295e914476"
+        },
+        {
+          "bytes": 16088,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt01/report.json",
+          "sha256": "c4b9ca0cca828e5f5d0956e258d1e2824d985ccab9481a88e8023052b55996b3"
+        }
+      ],
+      "attempt": "parent_c-py312-attempt01",
+      "commands": [
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_c_parent_analysis.py",
+            "--basetemp",
+            "/tmp/specorganon-D117-parent_c-py312-attempt01-z2b5duja/cases",
+            "-k",
+            "physical_source_overlap or prepare_empty_work"
+          ],
+          "exit_code": 0,
+          "stderr": "1.stderr",
+          "stdout": "1.stdout",
+          "wall_seconds": 4.974907129013445
+        },
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py",
+            "experiments/development/parent_analysis_2026-10-01/worker_checks/capture_parent_c.py"
+          ],
+          "exit_code": 0,
+          "stderr": "2.stderr",
+          "stdout": "2.stdout",
+          "wall_seconds": 0.0643396299565211
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-I",
+            "-B",
+            "-c",
+            "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print('syntax OK')",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py"
+          ],
+          "exit_code": 0,
+          "stderr": "3.stderr",
+          "stdout": "3.stdout",
+          "wall_seconds": 0.03190675302175805
+        }
+      ],
+      "pytest_stdout": ".....                                                                    [100%]\n5 passed, 8 deselected in 4.56s\n",
+      "report": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt01/report.json",
+      "runtime_root": "/tmp/specorganon-D117-parent_c-py312-attempt01-z2b5duja/cases",
+      "source_unchanged": true
+    },
+    {
+      "all_exit_zero": true,
+      "artifacts": [
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt03/1.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 112,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt03/1.stdout",
+          "sha256": "8ab7cdaaba778438f5d44318aa84b1dcac05c7ec791cdecf5726952e2ace6e54"
+        },
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt03/2.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 19,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt03/2.stdout",
+          "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+        },
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt03/3.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 10,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt03/3.stdout",
+          "sha256": "9c6d16305373aef2bef9308e9c2af9c565f9b206faf088179c672852d41a9fb4"
+        },
+        {
+          "bytes": 937,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt03/command.json",
+          "sha256": "3f4e46706c18ab1e25285dbe3808a7523663600e34eb7ee4774588b902e4bd35"
+        },
+        {
+          "bytes": 16115,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt03/report.json",
+          "sha256": "e0f99c2c5a9ff19839c41bbe82789c8ff0ba99ea2986d70781c030a5ba25cf66"
+        }
+      ],
+      "attempt": "parent_c-py311-attempt03",
+      "commands": [
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_c_parent_analysis.py",
+            "--basetemp",
+            "/tmp/specorganon-D117-parent_c-py311-attempt03-tkwav91a/cases",
+            "-k",
+            "physical_source_overlap or prepare_empty_work or cached_source_closure"
+          ],
+          "exit_code": 0,
+          "stderr": "1.stderr",
+          "stdout": "1.stdout",
+          "wall_seconds": 2.920314836956095
+        },
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py",
+            "experiments/development/parent_analysis_2026-10-01/worker_checks/capture_parent_c.py"
+          ],
+          "exit_code": 0,
+          "stderr": "2.stderr",
+          "stdout": "2.stdout",
+          "wall_seconds": 0.016306997975334525
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-I",
+            "-B",
+            "-c",
+            "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print('syntax OK')",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py"
+          ],
+          "exit_code": 0,
+          "stderr": "3.stderr",
+          "stdout": "3.stdout",
+          "wall_seconds": 0.06414681801106781
+        }
+      ],
+      "pytest_stdout": ".......                                                                  [100%]\n7 passed, 8 deselected in 2.62s\n",
+      "report": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt03/report.json",
+      "runtime_root": "/tmp/specorganon-D117-parent_c-py311-attempt03-tkwav91a/cases",
+      "source_unchanged": true
+    },
+    {
+      "all_exit_zero": true,
+      "artifacts": [
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt02/1.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 112,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt02/1.stdout",
+          "sha256": "62639acdfacee1e9eb45e87b42f145aeb1eea053db2418932dfcb37d81770e0e"
+        },
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt02/2.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 19,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt02/2.stdout",
+          "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+        },
+        {
+          "bytes": 0,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt02/3.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 10,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt02/3.stdout",
+          "sha256": "9c6d16305373aef2bef9308e9c2af9c565f9b206faf088179c672852d41a9fb4"
+        },
+        {
+          "bytes": 937,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt02/command.json",
+          "sha256": "8025c59e687f4f6604e292442d1532a999b8fc1ec619bd8c07560f09c0feba27"
+        },
+        {
+          "bytes": 16115,
+          "path": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt02/report.json",
+          "sha256": "6475a34bbe0e178d1db882dcd3553aac773157173b3cee11ea004e48a32daff2"
+        }
+      ],
+      "attempt": "parent_c-py312-attempt02",
+      "commands": [
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_c_parent_analysis.py",
+            "--basetemp",
+            "/tmp/specorganon-D117-parent_c-py312-attempt02-vjs8rx10/cases",
+            "-k",
+            "physical_source_overlap or prepare_empty_work or cached_source_closure"
+          ],
+          "exit_code": 0,
+          "stderr": "1.stderr",
+          "stdout": "1.stdout",
+          "wall_seconds": 2.9711359160137363
+        },
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py",
+            "experiments/development/parent_analysis_2026-10-01/worker_checks/capture_parent_c.py"
+          ],
+          "exit_code": 0,
+          "stderr": "2.stderr",
+          "stdout": "2.stdout",
+          "wall_seconds": 0.01646836899453774
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-I",
+            "-B",
+            "-c",
+            "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print('syntax OK')",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py"
+          ],
+          "exit_code": 0,
+          "stderr": "3.stderr",
+          "stdout": "3.stdout",
+          "wall_seconds": 0.06417087896261364
+        }
+      ],
+      "pytest_stdout": ".......                                                                  [100%]\n7 passed, 8 deselected in 2.59s\n",
+      "report": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt02/report.json",
+      "runtime_root": "/tmp/specorganon-D117-parent_c-py312-attempt02-vjs8rx10/cases",
+      "source_unchanged": true
+    }
+  ],
+  "classification": "development_c_parent_analysis_mechanical_unsealed",
+  "cli": [
+    "prepare --run-dir --case-dir --inputs-dir --config [--admission-root]",
+    "status --run-dir",
+    "step --run-dir --expected-checkpoint --local-http-fixture (alias --transports)"
+  ],
+  "commit_created": false,
+  "config": "D116 config exact keys plus leader_max_model_turns and leader_max_output_tokens; run_id parent-wave- prefix",
+  "controls": [
+    "physical run/stages overlap with case/inputs rejected before mkdir, including aliases",
+    "one parent ledger/context/admission claim; derived wave descriptor opens no second runtime",
+    "common source and policy2 bytes pinned before preparation and every guard",
+    "source closure hashes all bytes/core on every call and checks newly local import candidates",
+    "real init payload and terminal bind exactly pending graph with normative engineering dependency",
+    "original risk selection determines private disjoint ownership",
+    "reviewer sees only public artifacts and common sources",
+    "merge and metrics provenance reused from original D116",
+    "publication controlled by root parent engine after finish and valid marker"
+  ],
+  "final_directed_result": "7 passed and 8 deselected each Python 3.11 and 3.12; Ruff and compile exit0; source closure unchanged",
+  "formal_cells_executed": 0,
+  "initial_failure": "Original initial attempt preserved byteexact. 8 passed and 1 failed: own fixture expected absent admission directory; actual descriptor creates empty directory without claim. Corrected expectation checks zero claim JSON files.",
+  "original_modules_edited": false,
+  "schema": 1,
+  "source_pins": [
+    {
+      "bytes": 25516,
+      "path": "scripts/c_parent_analysis.py",
+      "sha256": "84e38c76b31de3ada4ce305e379b59434eef123d8d0dd31580bad5728aa54d43"
+    },
+    {
+      "bytes": 12499,
+      "path": "tests/test_c_parent_analysis.py",
+      "sha256": "61b1164f653c5731be2a146d254fa856c4454474905cf28cb8a8d1140d1455ff"
+    }
+  ],
+  "source_ready_for_root_freeze": true,
+  "transition": {
+    "branch_seed": "only actual method_state.json in initially empty branch work",
+    "path": "sibling run-stages/metadata/transition.json",
+    "return_keys": [
+      "wave_plan",
+      "branch_manifest",
+      "transition_path",
+      "transition_sha256",
+      "seed"
+    ],
+    "seed_sources": "actual leader proposal, method_state, final public artifact, init model receipt and tool terminal, retained leader work files",
+    "trigger": "leader final public text plus successful real sealed init"
+  },
+  "verification_limits": [
+    "initial 8 positives used historical captured source version, not final cache/overlap version",
+    "root owns final full frozen test and HTTP/CLI integration gates",
+    "own analysis fixture verifies actual original case/task access, not independent domain correctness",
+    "local active wall budget does not authenticate provider active time or aggregate provider execution",
+    "mechanical empty-work bootstrap and one wave; no complete nine-phase workflow or comparative formal cell",
+    "fixtures have synthetic model labels, tariffs, responses and token usage; no real provider or authenticated identity",
+    "normative approval and empirical support remain unverified"
+  ]
+}

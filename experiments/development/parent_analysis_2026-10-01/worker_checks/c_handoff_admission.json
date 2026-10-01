@@ -1,0 +1,155 @@
+{
+  "checks": [
+    {
+      "all_exit_zero": true,
+      "attempt": "parent_c-py311-attempt04",
+      "commands": [
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_c_parent_analysis.py",
+            "--basetemp",
+            "/tmp/specorganon-D117-parent_c-py311-attempt04-fe83v8xd/cases",
+            "-k",
+            "admission_overlap"
+          ],
+          "exit_code": 0,
+          "stderr": "1.stderr",
+          "stdout": "1.stdout",
+          "wall_seconds": 3.12082614202518
+        },
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py",
+            "experiments/development/parent_analysis_2026-10-01/worker_checks/capture_parent_c.py"
+          ],
+          "exit_code": 0,
+          "stderr": "2.stderr",
+          "stdout": "2.stdout",
+          "wall_seconds": 0.016276861948426813
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+            "-I",
+            "-B",
+            "-c",
+            "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print('syntax OK')",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py"
+          ],
+          "exit_code": 0,
+          "stderr": "3.stderr",
+          "stdout": "3.stdout",
+          "wall_seconds": 0.032043168030213565
+        }
+      ],
+      "pytest_stdout": ".........                                                                [100%]\n9 passed, 15 deselected in 2.83s\n",
+      "report": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py311-attempt04/report.json",
+      "report_sha256": "fd92bdef3bc873eec1e587c52e0fd49d9834cf8d866124970fbadc1fe2b35d14",
+      "runtime_root": "/tmp/specorganon-D117-parent_c-py311-attempt04-fe83v8xd/cases",
+      "source_unchanged": true
+    },
+    {
+      "all_exit_zero": true,
+      "attempt": "parent_c-py312-attempt03",
+      "commands": [
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_c_parent_analysis.py",
+            "--basetemp",
+            "/tmp/specorganon-D117-parent_c-py312-attempt03-k85j_tmk/cases",
+            "-k",
+            "admission_overlap"
+          ],
+          "exit_code": 0,
+          "stderr": "1.stderr",
+          "stdout": "1.stdout",
+          "wall_seconds": 3.020527807995677
+        },
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py",
+            "experiments/development/parent_analysis_2026-10-01/worker_checks/capture_parent_c.py"
+          ],
+          "exit_code": 0,
+          "stderr": "2.stderr",
+          "stdout": "2.stdout",
+          "wall_seconds": 0.0159871990326792
+        },
+        {
+          "argv": [
+            "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+            "-I",
+            "-B",
+            "-c",
+            "import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]; print('syntax OK')",
+            "scripts/c_parent_analysis.py",
+            "tests/test_c_parent_analysis.py"
+          ],
+          "exit_code": 0,
+          "stderr": "3.stderr",
+          "stdout": "3.stdout",
+          "wall_seconds": 0.03176411602180451
+        }
+      ],
+      "pytest_stdout": ".........                                                                [100%]\n9 passed, 15 deselected in 2.73s\n",
+      "report": "experiments/development/parent_analysis_2026-10-01/worker_checks/parent_c-py312-attempt03/report.json",
+      "report_sha256": "1cae8b22eee9030092f3dbac5dc3576fb7c65625403be921c9cadb6c110357b7",
+      "runtime_root": "/tmp/specorganon-D117-parent_c-py312-attempt03-k85j_tmk/cases",
+      "source_unchanged": true
+    }
+  ],
+  "classification": "development_c_parent_admission_overlap_amendment_unsealed",
+  "commit_created": false,
+  "final_full_test_count": 24,
+  "fix": "Select configured admission root without creating it; physically resolve and reject overlap with case, inputs, run and stages before any output or descriptor. Pass the selected path to engine.",
+  "formal_cells_executed": 0,
+  "limits": "Mechanical parent and one private wave only; no complete nine-phase workflow, empirical approval, authenticated provider identity or comparative formal cell.",
+  "negative_cases": [
+    "case",
+    "inputs",
+    "case_alias",
+    "inputs_alias",
+    "run",
+    "stages",
+    "default_env",
+    "default_passwd",
+    "ancestor"
+  ],
+  "observed_effects": "Source inventories unchanged; no run/stages directory, new registry or claim JSON created in rejected preparations.",
+  "original_runtime_modules_edited": false,
+  "previous_handoff_sha256": "4748843b157f0dd05c6c7b65769d2d5fa5968734404541c030fec660474d61a4",
+  "previous_snapshots_and_reports_unchanged": true,
+  "remaining_verification": "Root owns final unified frozen gates, including positive HTTP and CLI sequences on final source.",
+  "schema": 1,
+  "source_pins": [
+    {
+      "bytes": 25961,
+      "path": "scripts/c_parent_analysis.py",
+      "sha256": "d1b77a8627ead67fba3dde61e59afe6a87951a531e41a0a895e915ea5e85a0eb"
+    },
+    {
+      "bytes": 14529,
+      "path": "tests/test_c_parent_analysis.py",
+      "sha256": "d3a887837eaf2e11911c4ea35b88176ad7344e062e85bfca3430abaaa832d0f0"
+    }
+  ],
+  "source_ready_for_root_freeze": true,
+  "supersedes_source_pins_from": "experiments/development/parent_analysis_2026-10-01/worker_checks/c_handoff.json"
+}
