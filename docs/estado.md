@@ -1,5 +1,30 @@
 # Estado de reanudación
 
+**D-121 observa prospectivamente una ejecución coordinada local:**
+[dossier](../experiments/development/coordinated_observation_2026-10-01/README.md).
+Journal separado de eventos/clocks/boot, locks distintos, tokens revocables;
+proxy count/send y hook del broker real por instancia, delegación única y
+timeout que incluye I/O. Snapshot/guard/replay/publicación D119 y conciliación
+D120 verifican sets/digests/uso y containment de send; host/sandbox son
+subconjuntos separados. W local mide liberación→marca de entrega verificada,
+con pausas/guard/I/O; no recepción externa, H o CPU/remoto.
+
+Plan `d8bbae8`, freeze `892d6a8`: 104 registros + extractor, 105 con self.
+**88 pruebas por Python 3.11/3.12**, Ruff/sintaxis/diff 0. Seis runs NUEVOS
+A/B/C × D-E, 118 CLI, 110 count/110 send y 66 tools originales;
+770 tokens de fixture. Dos releases históricos rechazados sin observador.
+Baseline D119/D120 2283/2439 pins con docs históricos en Git y los doce
+inventarios originales iguales antes/después. Archives dos × 1369 entradas
+por bytes/modos/membresía/raíces. Intentos negativos con fuentes/streams intactos.
+
+**C1 técnico D107 preservado; C2–C5 No demostrado; 0/24 formales.**
+Sin modelo pagado/Q/autoridad/campo/reserva. Luna ayudó en inventario; no se
+midió su calidad relativa. Siguen ruta/modelo/esfuerzo/telemetría/precios y
+autorización concreta, H/remoto/costes de estudio; después 12 R1→adaptación/
+freeze→12 R2/selección, confirmación independiente, campo causal y transferencia.
+[Siguiente puerta](../experiments/development/coordinated_observation_2026-10-01/next_activation.md).
+Los cortes siguientes conservan su alcance histórico y no se reinterpretan.
+
 **D-120 concilia mediciones locales del runtime coordinado:**
 [dossier](../experiments/development/coordinated_measurement_2026-10-01/README.md).
 Lector separado con un lock original, guard/replay/publicación nativos,

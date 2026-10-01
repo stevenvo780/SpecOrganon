@@ -1,0 +1,359 @@
+"""Prospective local observation of the original coordinated runtime.
+
+Intervals describe calls observed on this Linux host. They do not authenticate
+remote compute, model identity, usage, invoices, human time or quality.
+The CLI accepts only a public loopback fixture and never reads credentials.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import math
+from pathlib import Path
+import sys
+import threading
+import time
+
+SCRIPTS = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPTS))
+import coordinated_prototype_runtime as runtime  # noqa: E402
+import managed_coordinated_prototype as engine  # noqa: E402
+import managed_parallel_tools as tools  # noqa: E402
+import managed_parallel_wave as wave  # noqa: E402
+import measure_coordinated_runtime as measurement  # noqa: E402
+from coordinated_observation_journal import ObservationError, ObservationJournal  # noqa: E402
+from run_managed_conversation import _canonical, _private_dir, _private_file, _run_lock  # noqa: E402
+from run_managed_response import OpenAIResponsesHTTP, _json_bytes  # noqa: E402
+
+
+def _require(condition, reason):
+    if not condition:
+        raise ObservationError(reason)
+
+
+def _source_digests():
+    # The original guard independently binds prototypes/core.py. These pins
+    # add the observer, journal and D120 reader to the native script closure.
+    rows = {key: value for key, value in runtime._runtime_sources().items() if key.startswith("scripts/")}
+    for name in ("observed_coordinated_runtime.py", "coordinated_observation_journal.py", "measure_coordinated_runtime.py"):
+        rows["scripts/" + name] = runtime._sha(runtime.preparation._read(SCRIPTS / name))
+    return dict(sorted(rows.items()))
+
+
+def _payloads(request):
+    count = {key: value for key, value in request.items() if key not in {"max_output_tokens", "service_tier"}}
+    send = {**request, "store": False, "stream": False}
+    return count, send
+
+
+def _payload_key(kind):
+    return "count_payload_sha256" if kind == "count_input" else "send_payload_sha256"
+
+
+def _expected(plan, state, run_dir):
+    roles = ([row["task_id"] for row in state["assignments"] if not state["roles"][row["task_id"]]["finished"]]
+             if state["runtime_stage"] == "workers" else [state["runtime_stage"]])
+    rows = []
+    for role in roles:
+        history = engine._read_json(run_dir / "histories" / role / "run.json")["history"]
+        request = engine._request(plan, role, history)
+        count, send = _payloads(request)
+        rows.append({"role": role, "request_id": tools._id(role, state["roles"][role]["turns"] + 1),
+                     "request_sha256": runtime._sha(_json_bytes(request)),
+                     "count_payload_sha256": runtime._sha(_json_bytes(count)),
+                     "send_payload_sha256": runtime._sha(_json_bytes(send))})
+    return rows
+
+
+def _native_snapshot(run_dir, *, expected_checkpoint=None, visitor=None):
+    """One original lock; precheck lazy-created broker paths before loading."""
+    with _run_lock(run_dir):
+        for name in (*measurement.JOURNALS, "broker", "ledger", "context"):
+            _private_dir(run_dir / name)
+        for name in ("broker/.lock", "ledger/.lock", "context/.lock"):
+            _private_file(run_dir / name)
+        plan, state, ledger, context, broker = engine._load(run_dir)
+        runtime.guard_coordinated_runtime(plan, state, broker)
+        _require(state["state"] in {"prepared", "paused", "completed"}, "native runtime is uncertain")
+        engine._audit(run_dir, plan, state, ledger, broker)
+        status = engine._view(run_dir, plan, state, ledger, context)
+        _require(status["state"] == state["state"], "native publication or context disagrees")
+        if expected_checkpoint is not None:
+            _require(type(expected_checkpoint) is str and status["checkpoint_sha256"] == expected_checkpoint,
+                     "native checkpoint differs")
+        calls = _expected(plan, state, run_dir) if state["state"] in {"prepared", "paused"} else []
+        if visitor is not None:
+            return visitor(plan, state, status, calls)
+        return plan, state, status, calls
+
+
+def _binding(plan, status, run_dir, initial):
+    return {"run_dir": str(run_dir), "run_id": plan["run_id"], "plan_sha256": runtime._sha(_canonical(plan)),
+            "schedule_sha256": status["schedule_sha256"], "initial_checkpoint_sha256": initial,
+            "observer_source_digests": _source_digests()}
+
+
+def _check_binding(report, plan, status, run_dir):
+    binding = report["binding"]
+    _require(binding == _binding(plan, status, run_dir, binding["initial_checkpoint_sha256"]),
+             "observation binding or sources differ")
+    _require(report["checkpoint_sha256"] == status["checkpoint_sha256"], "observed and native checkpoints differ")
+
+
+def _separate(directory, run_dir, plan):
+    roots = [run_dir, Path(plan["case_dir"]), Path(plan["inputs_dir"]), Path(runtime._binding(plan)["bundle"])]
+    for root in roots:
+        root = root.resolve()
+        _require(directory != root and root not in directory.parents and directory not in root.parents,
+                 "observation directory overlaps native inputs or runtime")
+
+
+def release_observation(run_dir, directory, *, expected_checkpoint):
+    run_dir, directory = Path(run_dir).resolve(), Path(directory).resolve()
+    def create(plan, state, status, _calls):
+        _require(state["state"] == "prepared" and type(state["cursor"]) is int and state["cursor"] == 0
+                 and status["budget"]["request_count"] == 0 and status["tool_calls_completed"] == 0,
+                 "release requires an untouched prepared native run")
+        _separate(directory, run_dir, plan)
+        journal = ObservationJournal.create(directory, _binding(plan, status, run_dir, expected_checkpoint))
+        return journal.report()
+    return _native_snapshot(run_dir, expected_checkpoint=expected_checkpoint, visitor=create)
+
+
+class ObservedTransport:
+    """Protocol proxy, deliberately not an OpenAIResponsesHTTP subclass."""
+    def __init__(self, original, journal, token, call):
+        self.original, self.journal, self.token, self.call = original, journal, token, call
+
+    def _operation(self, kind, payload, timeout_seconds):
+        _require(type(timeout_seconds) in (int, float) and math.isfinite(timeout_seconds) and timeout_seconds > 0,
+                 "invalid observed timeout")
+        # Fix the deadline BEFORE journal I/O; persistence consumes this budget.
+        deadline = time.monotonic() + timeout_seconds
+        digest = runtime._sha(_json_bytes(payload))
+        _require(digest == self.call[_payload_key(kind)], "observed payload differs")
+        op = self.journal.begin_operation(self.token, kind, self.call["role"], self.call["request_id"], digest)
+        try:
+            result = wave._RemainingTransport(self.original, deadline).operation(kind, payload)
+            if kind == "count_input":
+                _require(type(result) is int and result > 0, "observed count is invalid")
+            else:
+                _require(type(result) is dict, "observed response is invalid")
+            closed = self.journal.end_operation(self.token, op, result_sha256=runtime._sha(_canonical(result)),
+                                                 input_tokens=result if kind == "count_input" else None)
+            _require(closed, "observed operation lease closed")
+            return result
+        except BaseException as exc:
+            self.journal.end_operation(self.token, op, result_sha256=None, error="transport_error")
+            if isinstance(exc, (KeyboardInterrupt, SystemExit)):
+                raise
+            raise ObservationError("observed transport failed") from None
+
+    def count_input(self, payload, *, timeout_seconds):
+        return self._operation("count_input", payload, timeout_seconds)
+
+    def send(self, payload, *, timeout_seconds):
+        return self._operation("send", payload, timeout_seconds)
+
+
+def _instrument_guard(journal, token, binding):
+    lock, installed = threading.RLock(), []
+    def guard(plan, state, broker):
+        runtime.guard_coordinated_runtime(plan, state, broker)
+        _require(_source_digests() == binding["observer_source_digests"], "observer sources changed")
+        _require(runtime._sha(_canonical(plan)) == binding["plan_sha256"] and plan["run_id"] == binding["run_id"],
+                 "active observation plan differs")
+        with lock:
+            if any(item is broker for item in installed):
+                return
+            original = broker.invoke
+            def invoke(role, request_id, call, context, active_guard):
+                op = journal.begin_operation(token, "tool", role, request_id, runtime._sha(_json_bytes(call)))
+                try:
+                    result = original(role, request_id, call, context, active_guard)
+                    closed = journal.end_operation(token, op, result_sha256=runtime._sha(_canonical(result)))
+                    _require(closed, "observed tool lease closed")
+                    return result
+                except BaseException as exc:
+                    journal.end_operation(token, op, result_sha256=None, error="tool_error")
+                    if isinstance(exc, (KeyboardInterrupt, SystemExit)):
+                        raise
+                    raise ObservationError("observed tool failed") from None
+            broker.invoke = invoke
+            installed.append(broker)
+    return guard
+
+
+def _coverage(snapshot, observation):
+    """Pure exact reconciliation; caller separately performs the native guard."""
+    base = measurement.reconcile_snapshot(snapshot)
+    binding = observation["binding"]
+    _require(binding["run_id"] == base["run_id"] and binding["plan_sha256"] == base["snapshot_sha256"]["plan"]
+             and binding["schedule_sha256"] == base["schedule_sha256"], "final observation binding differs")
+    _require(observation["state"] in {"ready", "delivered"}
+             and observation["checkpoint_sha256"] == base["checkpoint_sha256"], "observation is not terminal")
+    events = observation["events"]
+    starts, ends, expected = {}, {}, {}
+    for event in events:
+        data = event["data"]
+        if event["type"] == "step_begin":
+            for call in data["expected_calls"]:
+                _require(call["request_id"] not in expected, "duplicate observed request")
+                expected[call["request_id"]] = call
+        elif event["type"] == "operation_begin":
+            key = (data["kind"], data["request_id"])
+            _require(key not in starts, "duplicate observed operation")
+            starts[key] = event
+        elif event["type"] == "operation_end":
+            _require(data["op_id"] not in ends and data["error"] is None, "uncertain observed operation")
+            ends[data["op_id"]] = event
+    _require(set(expected) == {row["request_id"] for row in base["requests"]}, "observed request set differs")
+    needed = {(kind, row["request_id"]) for row in base["requests"] for kind in ("count_input", "send")}
+    needed |= {("tool", row["request_id"]) for row in base["tools"]}
+    _require(set(starts) == needed and len(ends) == len(starts), "operation coverage differs")
+    for row in base["requests"]:
+        request_id, role = row["request_id"], row["role"]
+        raw = snapshot["journals"]["requests"][request_id + ".json"]
+        request = measurement._parsed(raw)
+        count, send = _payloads(request)
+        call = {"role": role, "request_id": request_id, "request_sha256": runtime._sha(_json_bytes(request)),
+                "count_payload_sha256": runtime._sha(_json_bytes(count)), "send_payload_sha256": runtime._sha(_json_bytes(send))}
+        _require(expected[request_id] == call, "observed expected payload differs from native request")
+        for kind in ("count_input", "send"):
+            start = starts[kind, request_id]
+            end = ends.get(start["data"]["op_id"])
+            _require(end is not None and start["data"]["role"] == role
+                     and start["data"]["payload_sha256"] == call[_payload_key(kind)], "observed operation binding differs")
+            result = end["data"]
+            if kind == "count_input":
+                _require(type(result["input_tokens"]) is int and result["input_tokens"] == row["input_tokens"]
+                         and result["result_sha256"] == runtime._sha(_canonical(row["input_tokens"])), "observed count differs from usage")
+            else:
+                receipt = measurement._parsed(snapshot["journals"]["receipts"][request_id + ".json"])
+                _require(result["input_tokens"] is None and result["result_sha256"] == row["response_sha256"],
+                         "observed response differs")
+                _require(receipt["send_started_ns"] <= start["monotonic_ns"] <= end["monotonic_ns"] <= receipt["send_ended_ns"],
+                         "observed send interval is outside native receipt")
+    for row in base["tools"]:
+        start = starts["tool", row["request_id"]]
+        end = ends.get(start["data"]["op_id"])
+        response = measurement._parsed(snapshot["journals"]["responses"][row["request_id"] + ".json"])
+        call = next(item for item in response["output"] if item.get("type") == "function_call")
+        call = {key: call[key] for key in ("name", "call_id", "arguments")}
+        receipt = measurement._parsed(snapshot["journals"]["tool_receipts"][f"{row['global_ordinal']:04d}.json"])
+        result = {"type": "function_call_output", "call_id": receipt["call_id"], "output": receipt["output"]}
+        _require(start["data"]["role"] == row["role"] and start["data"]["payload_sha256"] == runtime._sha(_json_bytes(call))
+                 and end is not None and end["data"]["result_sha256"] == runtime._sha(_canonical(result))
+                 and end["data"]["input_tokens"] is None, "observed tool differs from native receipt")
+        elapsed = (end["monotonic_ns"] - start["monotonic_ns"]) / 1e9
+        _require(elapsed >= row["host_elapsed_seconds"] >= row["sandbox_duration_seconds"],
+                 "observed tool interval does not contain native host and sandbox duration")
+    # Hash only the stable D120 pure measurement; delivery does not hash itself.
+    digest = runtime._sha(_canonical(base))
+    if observation["state"] == "delivered":
+        _require(events[-1]["type"] == "delivery" and events[-1]["data"]["measurement_sha256"] == digest,
+                 "delivered measurement changed")
+    return base, digest
+
+
+def _final_report(snapshot, observation):
+    base, digest = _coverage(snapshot, observation)
+    delivered = observation["state"] == "delivered"
+    return {"schema": 1, "classification": "prospective_local_coordinated_observation",
+            "run_id": base["run_id"], "native_measurement": base, "native_measurement_sha256": digest,
+            "observation": observation, "native_D119_guard_replay_publication_verified": False,
+            "coverage": {"local_release_to_delivery": delivered, "count_send_tool_exact": True,
+                         "native_send_interval_containment": True, "remote_activity_complete": False},
+            "scopes": {"W": "same_boot_monotonic_release_to_verified_delivery_includes_pauses_IO_and_observer",
+                       "operations": "host_observed_calls_not_remote_CPU_or_authenticated_activity",
+                       "tool": "observed_broker_host_elapsed_includes_native_host_and_sandbox_subsets",
+                       "clock": "local_boot_hash_and_clock_info_not_authenticated_global_clock",
+                       "outside_callbacks": "elapsed_outside_observed_operation_union_not_human_time_or_CPU"},
+            "missing": [key for key in base["missing"] if key not in {
+                "W_release_to_delivery_with_identified_clock", "input_count_timing", "global_clock_or_boot_identity"}]
+                + ["authenticated_global_clock", "remote_custody"],
+            "formal_cell_executed": False, "quality_assessed": False, "Q_demonstrated": False,
+            "paid_route_authorized": False, "identity_authenticated": False, "cost_authenticated": False,
+            "remote_cancellation_guaranteed": False}
+
+
+def execute_observed_step(run_dir, directory, transports, *, expected_checkpoint):
+    run_dir = Path(run_dir).resolve()
+    journal = ObservationJournal(Path(directory).resolve())
+    with journal.driver_lock():
+        observation = journal.report()
+        plan, _, status, calls = _native_snapshot(run_dir, expected_checkpoint=expected_checkpoint)
+        _check_binding(observation, plan, status, run_dir)
+        _require(status["state"] in {"prepared", "paused"}, "native step is terminal")
+        roles = {row["role"] for row in calls}
+        _require(type(transports) is dict and set(transports) in (roles, set(runtime.ROLES)), "observed transports differ")
+        token = journal.begin_step(expected_checkpoint, calls)
+        proxies = {row["role"]: ObservedTransport(transports[row["role"]], journal, token, row) for row in calls}
+        try:
+            status = engine.execute_coordinated_prototype_step(run_dir, proxies, expected_checkpoint=expected_checkpoint,
+                          guard=_instrument_guard(journal, token, observation["binding"]))
+            _require(status["state"] in {"paused", "completed"}, "native step became uncertain")
+            journal.end_step(token, status["checkpoint_sha256"], status["state"])
+            if status["state"] == "completed":
+                snapshot = measurement.snapshot_runtime(run_dir)
+                _, digest = _coverage(snapshot, journal.report())
+                report = _final_report(snapshot, journal.finish(digest))
+                report["native_D119_guard_replay_publication_verified"] = True
+                return report
+            return {"state": "paused", "checkpoint_sha256": status["checkpoint_sha256"], "observation": journal.report(),
+                    "formal_cell_executed": False, "quality_assessed": False}
+        except BaseException as exc:
+            journal.fail_step(token)
+            if isinstance(exc, (KeyboardInterrupt, SystemExit)):
+                raise
+            raise ObservationError("observed step rejected or became uncertain") from None
+
+
+def read_observed_report(run_dir, directory):
+    run_dir = Path(run_dir).resolve()
+    journal = ObservationJournal(Path(directory).resolve())
+    with journal.driver_lock():
+        observation = journal.report()
+        plan, _, status, _ = _native_snapshot(run_dir)
+        _check_binding(observation, plan, status, run_dir)
+        if observation["state"] == "delivered":
+            snapshot = measurement.snapshot_runtime(run_dir)
+            report = _final_report(snapshot, observation)
+            report["native_D119_guard_replay_publication_verified"] = True
+            return report
+        return {"state": observation["state"], "checkpoint_sha256": status["checkpoint_sha256"],
+                "observation": observation, "formal_cell_executed": False, "quality_assessed": False}
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest="command", required=True)
+    for name in ("release", "step", "report"):
+        command = commands.add_parser(name)
+        command.add_argument("--run-dir", type=Path, required=True)
+        command.add_argument("--observation-dir", type=Path, required=True)
+        if name != "report":
+            command.add_argument("--expected-checkpoint", required=True)
+        if name == "step":
+            command.add_argument("--local-http-fixture", required=True)
+    args = parser.parse_args(argv)
+    try:
+        if args.command == "release":
+            report = release_observation(args.run_dir, args.observation_dir, expected_checkpoint=args.expected_checkpoint)
+        elif args.command == "report":
+            report = read_observed_report(args.run_dir, args.observation_dir)
+        else:
+            endpoint = runtime._fixture_endpoint(args.local_http_fixture)
+            plan = runtime._json(args.run_dir / "plan.json")
+            _require(plan["descriptor"]["provider_route"]["provider"] == "fixture", "fixture CLI requires fixture route")
+            transports = {role: OpenAIResponsesHTTP("public-synthetic-no-credential", base_url=endpoint) for role in runtime.ROLES}
+            report = execute_observed_step(args.run_dir, args.observation_dir, transports, expected_checkpoint=args.expected_checkpoint)
+        print(json.dumps(report, sort_keys=True, allow_nan=False))
+        return 0
+    except (ValueError, OSError, KeyError, TypeError, RuntimeError, AttributeError):
+        print(json.dumps({"error": "observation_rejected", "formal_cell_executed": False, "quality_assessed": False}))
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

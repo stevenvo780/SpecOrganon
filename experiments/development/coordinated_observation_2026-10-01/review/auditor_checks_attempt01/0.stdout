@@ -1,0 +1,65 @@
+E402 Module level import not at top of file
+  --> experiments/development/coordinated_observation_2026-10-01/review/audit_frozen_evidence.py:28:1
+   |
+26 | DOCS = {"docs/estado.md", "docs/decisiones.md", "docs/activacion_validacion.md", "docs/validacion_actual.md"}
+27 | sys.path.insert(0, str(ROOT / "scripts"))
+28 | import coordinated_observation_journal as journal
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+29 | import measure_coordinated_runtime as measurement
+30 | import observed_coordinated_runtime as observer
+   |
+
+E402 Module level import not at top of file
+  --> experiments/development/coordinated_observation_2026-10-01/review/audit_frozen_evidence.py:29:1
+   |
+27 | sys.path.insert(0, str(ROOT / "scripts"))
+28 | import coordinated_observation_journal as journal
+29 | import measure_coordinated_runtime as measurement
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+30 | import observed_coordinated_runtime as observer
+31 | from managed_wave_ledger import WaveLedger
+   |
+
+E402 Module level import not at top of file
+  --> experiments/development/coordinated_observation_2026-10-01/review/audit_frozen_evidence.py:30:1
+   |
+28 | import coordinated_observation_journal as journal
+29 | import measure_coordinated_runtime as measurement
+30 | import observed_coordinated_runtime as observer
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+31 | from managed_wave_ledger import WaveLedger
+   |
+
+E402 Module level import not at top of file
+  --> experiments/development/coordinated_observation_2026-10-01/review/audit_frozen_evidence.py:31:1
+   |
+29 | import measure_coordinated_runtime as measurement
+30 | import observed_coordinated_runtime as observer
+31 | from managed_wave_ledger import WaveLedger
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+
+E731 Do not assign a `lambda` expression, use a `def`
+   --> experiments/development/coordinated_observation_2026-10-01/review/audit_frozen_evidence.py:460:13
+    |
+458 |   …     # The frozen fixture's count trace has no turn or timestamps.
+459 |   …     # Bind it by exact payload digest; timing comes from the journal.
+460 | / …     ids = lambda values: {(item["role"], item["turn"] if "turn" in item else
+461 | | …                            count_identity[item["role"], item["request_sha256"]]) for item in values}
+    | |______________________________________________________________________________________________________^
+462 |   …     require(len(sends) == len(counts) == len(ids(sends)) == len(ids(counts)) == row["native_requests"] == len(base["requests"]),
+463 |   …             "HTTP exact request/count/send coverage differs")
+    |
+help: Rewrite `ids` as a `def`
+
+E402 Module level import not at top of file
+  --> experiments/development/coordinated_observation_2026-10-01/review/early_snapshot_probe.py:14:1
+   |
+12 | ROOT = Path(__file__).resolve().parents[4]
+13 | sys.path.insert(0, str(ROOT / "scripts"))
+14 | import observed_coordinated_runtime as observer
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+
+Found 6 errors.
+No fixes available (1 hidden fix can be enabled with the `--unsafe-fixes` option).

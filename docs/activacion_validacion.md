@@ -1,6 +1,6 @@
 # Distancia hasta la validación de GOAL
 
-**Corte:** 2026-10-01 UTC, revisión D-120. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). El [inventario D-109 de 24 celdas](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json), el [contrato común D-118](../experiments/development/coordinated_contract_2026-10-01/README.md), el [runtime persistente D-119](../experiments/development/coordinated_runtime_2026-10-01/README.md) y el [lector D-120 de mediciones](../experiments/development/coordinated_measurement_2026-10-01/README.md) son desarrollo mecánico: cero celdas formales. Este documento no cambia umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
+**Corte:** 2026-10-01 UTC, revisión D-121. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). El [inventario D-109 de 24 celdas](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json), el [contrato común D-118](../experiments/development/coordinated_contract_2026-10-01/README.md), el [runtime persistente D-119](../experiments/development/coordinated_runtime_2026-10-01/README.md), el [lector D-120](../experiments/development/coordinated_measurement_2026-10-01/README.md) y el [observador D-121](../experiments/development/coordinated_observation_2026-10-01/README.md) son desarrollo mecánico: cero celdas formales. Este documento no cambia umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
 
 | Criterio de GOAL | Evidencia actual | Puerta pendiente |
 | --- | --- | --- |
@@ -13,6 +13,21 @@
 **Veredicto actual: 1/5, C1 cumplido en alcance técnico; C2–C5 no demostrados.** La suite local y las variantes documentales no son puntuaciones `Q`, aprobaciones competentes, reserva independiente ni impacto de campo. No hay una fecha de cierre defendible a partir del número de pruebas.
 
 ## Puerta 0: cerrar el desarrollo antes de abrir la reserva
+
+D-121 añade observación nueva de W local, conteos/envíos/tools con reloj
+monotónico y boot hash. Freeze `892d6a8`, 88 pruebas por Python 3.11/3.12
+y seis controles NUEVOS A/B/C × D-E con 118 CLI/110 count/110 send/66 tools
+originales, 770 tokens sintéticos. Cobertura exacta y send dentro de receipts
+D119, publicación/guard/replay nativos y conciliación D120. Dos releases
+históricos rechazados; fuentes/HEAD/baseline y doce originales intactos.
+W incluye pausas/guard/I/O hasta su marca de entrega; no recepción externa,
+H o remoto. D118/D119 ya fijaron contrato común y saldo/contexto/claim
+preventivos; los nulos D109 son históricos. El freeze R1 real requiere
+ruta/modelo/esfuerzo/telemetría/tarifas y autorización concreta, personas
+competentes y recursos de revisión. No se pide aprobar placeholders ni
+sobres completos del estudio. Ver [siguiente puerta](../experiments/development/coordinated_observation_2026-10-01/next_activation.md).
+Los cortes siguientes son históricos; el faltante W D120 queda resuelto
+sólo en estos controles locales D121, sin inferir métricas de los runs anteriores.
 
 D-120 agrega conciliación local de request/response/receipt/ledger por
 corrida/rol/brazo y herramientas, con snapshot único, guard/replay/publicación

@@ -1,0 +1,40 @@
+{
+  "sources": [
+    {
+      "path": "scripts/observed_coordinated_runtime.py",
+      "sha256": "3a453927ec2b1ce1c2c72f351bad5248ef1e2e118e01496644e245085426e0c5"
+    },
+    {
+      "path": "tests/test_observed_coordinated_runtime.py",
+      "sha256": "b267171d278ea98699014506c0ce1d7228e35c385e9623bd43ed63d96277228c"
+    },
+    {
+      "path": "scripts/coordinated_observation_journal.py",
+      "sha256": "c67fc67c17af03cf2a2d310110486798ea83e956bd69c107ba9c217f252449c7"
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_observed_coordinated_runtime.py"
+      ],
+      "exit_code": 1
+    },
+    {
+      "argv": [
+        "/home/dev/.local/bin/ruff",
+        "check",
+        "scripts/observed_coordinated_runtime.py",
+        "tests/test_observed_coordinated_runtime.py"
+      ],
+      "exit_code": 1
+    }
+  ]
+}

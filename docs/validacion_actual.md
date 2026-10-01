@@ -1,5 +1,31 @@
 # Auditoría de aceptación actual
 
+## D-121 · Observación prospectiva local
+
+[Dossier](../experiments/development/coordinated_observation_2026-10-01/README.md).
+Journal/clocks/boot y callbacks observados sin modificar fuentes D119/D120.
+Release sólo preparado/cursor0 sin requests/tools, protegido por lock original;
+el precheck valida delegación/merge/delivery y métricas antes de efectos.
+Deadline previo a I/O, proxy de protocolo y broker real por instancia. Fallo
+activo no se reanuda; callback tardía no escribe. D120 y guard/replay/publicación
+nativos cotejan cobertura exacta y containment de send. API pura no autentica guard.
+
+Freeze `892d6a8`, 104 registros + extractor; **88 pruebas por Python 3.11/3.12**,
+Ruff/sintaxis/diff 0, freeze/HEAD before/after iguales. Seis runtimes nuevos
+A/B/C × D-E: 118 CLI/110 count/110 send/66 tools originales, 770 tokens
+sintéticos; dos releases retrospectivos rechazados sin crear observador.
+Baseline D119/D120 2283/2439 pins incluyendo versiones Git de docs y doce
+inventarios originales intactos. Dos archives ×1369 entradas cotejadas por
+bytes/modos/membresía/raíces. Historial de fallos y fuentes preservado.
+
+W es elapsed local identificado de liberación a marca de entrega verificada,
+con guard/I/O/pausas; no recepción externa ni CPU/remoto. Sumas/uniones
+separadas por kind/rol; tool host/sandbox son subconjuntos, no adiciones.
+**C1 técnico preservado; C2–C5 No demostrado; 0/24 formales.** Sin Q, factura/
+effort/proveedor autenticados, autoridad, campo o reserva. H/remoto/costes
+completos/ruta y autorización real siguen pendientes. No ventaja comparativa
+inferida. Los cortes siguientes mantienen sus límites históricos.
+
 ## D-120 · Conciliación de mediciones locales
 
 [Dossier](../experiments/development/coordinated_measurement_2026-10-01/README.md).

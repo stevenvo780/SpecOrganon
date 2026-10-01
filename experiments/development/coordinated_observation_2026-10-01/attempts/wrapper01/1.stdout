@@ -1,0 +1,69 @@
+F841 Local variable `plan` is assigned to but never used
+   --> scripts/observed_coordinated_runtime.py:186:5
+    |
+184 |     """Pure exact reconciliation; caller separately performs the native guard."""
+185 |     base = measurement.reconcile_snapshot(snapshot)
+186 |     plan = measurement._parsed(snapshot["documents"]["plan"])
+    |     ^^^^
+187 |     binding = observation["binding"]
+188 |     _require(binding["run_id"] == base["run_id"] and binding["plan_sha256"] == base["snapshot_sha256"]["plan"]
+    |
+help: Remove assignment to unused variable `plan`
+
+F811 Redefinition of unused `snapshot` from line 16
+   --> tests/test_observed_coordinated_runtime.py:168:46
+    |
+167 | @pytest.fixture
+168 | def observed_snapshot(tmp_path, monkeypatch, snapshot):
+    |                                              ^^^^^^^^ `snapshot` redefined here
+169 |     """Construct a replayed synthetic journal around the D120 pure fixture."""
+170 |     value = copy.deepcopy(snapshot)
+    |
+   ::: tests/test_observed_coordinated_runtime.py:16:46
+    |
+ 14 | import observed_coordinated_runtime as observer
+ 15 | import coordinated_observation_journal as journal_module
+ 16 | from test_measure_coordinated_runtime import snapshot  # noqa: F401
+    |                                              -------- previous definition of `snapshot` here
+    |
+help: Remove definition: `snapshot`
+
+F811 Redefinition of unused `snapshot` from line 16
+   --> tests/test_observed_coordinated_runtime.py:211:5
+    |
+210 | def test_final_pure_reconciliation_has_exact_sets_but_no_native_attestation(observed_snapshot):
+211 |     snapshot, observation = observed_snapshot
+    |     ^^^^^^^^ `snapshot` redefined here
+212 |     report = observer._final_report(snapshot, observation)
+213 |     assert report["coverage"]["count_send_tool_exact"] is True
+    |
+   ::: tests/test_observed_coordinated_runtime.py:16:46
+    |
+ 14 | import observed_coordinated_runtime as observer
+ 15 | import coordinated_observation_journal as journal_module
+ 16 | from test_measure_coordinated_runtime import snapshot  # noqa: F401
+    |                                              -------- previous definition of `snapshot` here
+    |
+help: Remove definition: `snapshot`
+
+F811 Redefinition of unused `snapshot` from line 16
+   --> tests/test_observed_coordinated_runtime.py:222:5
+    |
+220 | @pytest.mark.parametrize("kind", ["missing", "duplicate", "count", "response", "tool", "role", "containment", "delivery"])
+221 | def test_final_reconciliation_rejects_native_observation_disagreement(observed_snapshot, kind):
+222 |     snapshot, observation = copy.deepcopy(observed_snapshot)
+    |     ^^^^^^^^ `snapshot` redefined here
+223 |     start = next(event for event in observation["events"] if event["type"] == "operation_begin" and event["data"]["kind"] == "send")
+224 |     end = next(event for event in observation["events"] if event["type"] == "operation_end" and event["data"]["op_id"] == start["data…
+    |
+   ::: tests/test_observed_coordinated_runtime.py:16:46
+    |
+ 14 | import observed_coordinated_runtime as observer
+ 15 | import coordinated_observation_journal as journal_module
+ 16 | from test_measure_coordinated_runtime import snapshot  # noqa: F401
+    |                                              -------- previous definition of `snapshot` here
+    |
+help: Remove definition: `snapshot`
+
+Found 4 errors.
+No fixes available (1 hidden fix can be enabled with the `--unsafe-fixes` option).

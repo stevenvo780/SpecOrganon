@@ -1,0 +1,610 @@
+FFFFFF.....EEEEEEEEE                                                     [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_final_pure_reconciliation_has_exact_sets_but_no_native_attestation _
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_final_pure_reconciliation0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae36ab90>
+snapshot = {'documents': {'plan': b'{"descriptor":{"coordinates":{"agent_count":4,"agents":"fixture","arm":"C","block_id":"fixtur...illion': 3, 'cached_input_rate_micro_usd_per_million': 1, 'cache_write_rate_micro_usd_per_million': 5, ...}, ...}, ...}
+
+    @pytest.fixture
+    def observed_snapshot(tmp_path, monkeypatch, snapshot):
+        """Construct a replayed synthetic journal around the D120 pure fixture."""
+        value = copy.deepcopy(snapshot)
+        for name, raw in value["journals"]["receipts"].items():
+            receipt = json.loads(raw)
+            receipt.update(send_started_ns=0, send_ended_ns=10**15)
+            value["journals"]["receipts"][name] = observer._canonical(receipt)
+        for name, raw in value["journals"]["tool_receipts"].items():
+            receipt = json.loads(raw)
+            receipt["output"] = "PRIVATE-TOOL-SENTINEL"
+            value["journals"]["tool_receipts"][name] = observer._canonical(receipt)
+        clock = [0]
+        def sample():
+            clock[0] += 10**9
+            return {"monotonic_ns": clock[0], "wall_ns": clock[0], "boot_sha256": "e" * 64}
+        monkeypatch.setattr(journal_module, "_sample", sample)
+        plan = json.loads(value["documents"]["plan"])
+        binding = {"run_dir": str(tmp_path / "run"), "run_id": plan["run_id"],
+            "plan_sha256": observer.runtime._sha(value["documents"]["plan"]), "schedule_sha256": "a" * 64,
+            "initial_checkpoint_sha256": "c" * 64, "observer_source_digests": {"scripts/observed_coordinated_runtime.py": "d" * 64}}
+        journal = observer.ObservationJournal.create(tmp_path / "observation", binding)
+        for role in observer.runtime.ROLES:
+            request_id = role + "-turn-0001"
+            request = json.loads(value["journals"]["requests"][request_id + ".json"])
+            response = json.loads(value["journals"]["responses"][request_id + ".json"])
+            call, _, _ = call_for(role, request)
+            token = journal.begin_step(journal.report()["checkpoint_sha256"], [call])
+            for kind, result in (("count_input", 10), ("send", response)):
+>               op = journal.begin_operation(token, kind, role, request_id, call[kind + "_payload_sha256"])
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'count_input_payload_sha256'
+
+tests/test_observed_coordinated_runtime.py:196: KeyError
+_ ERROR at setup of test_final_reconciliation_rejects_native_observation_disagreement[missing] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_final_reconciliation_reje0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae3dd290>
+snapshot = {'documents': {'plan': b'{"descriptor":{"coordinates":{"agent_count":4,"agents":"fixture","arm":"C","block_id":"fixtur...illion': 3, 'cached_input_rate_micro_usd_per_million': 1, 'cache_write_rate_micro_usd_per_million': 5, ...}, ...}, ...}
+
+    @pytest.fixture
+    def observed_snapshot(tmp_path, monkeypatch, snapshot):
+        """Construct a replayed synthetic journal around the D120 pure fixture."""
+        value = copy.deepcopy(snapshot)
+        for name, raw in value["journals"]["receipts"].items():
+            receipt = json.loads(raw)
+            receipt.update(send_started_ns=0, send_ended_ns=10**15)
+            value["journals"]["receipts"][name] = observer._canonical(receipt)
+        for name, raw in value["journals"]["tool_receipts"].items():
+            receipt = json.loads(raw)
+            receipt["output"] = "PRIVATE-TOOL-SENTINEL"
+            value["journals"]["tool_receipts"][name] = observer._canonical(receipt)
+        clock = [0]
+        def sample():
+            clock[0] += 10**9
+            return {"monotonic_ns": clock[0], "wall_ns": clock[0], "boot_sha256": "e" * 64}
+        monkeypatch.setattr(journal_module, "_sample", sample)
+        plan = json.loads(value["documents"]["plan"])
+        binding = {"run_dir": str(tmp_path / "run"), "run_id": plan["run_id"],
+            "plan_sha256": observer.runtime._sha(value["documents"]["plan"]), "schedule_sha256": "a" * 64,
+            "initial_checkpoint_sha256": "c" * 64, "observer_source_digests": {"scripts/observed_coordinated_runtime.py": "d" * 64}}
+        journal = observer.ObservationJournal.create(tmp_path / "observation", binding)
+        for role in observer.runtime.ROLES:
+            request_id = role + "-turn-0001"
+            request = json.loads(value["journals"]["requests"][request_id + ".json"])
+            response = json.loads(value["journals"]["responses"][request_id + ".json"])
+            call, _, _ = call_for(role, request)
+            token = journal.begin_step(journal.report()["checkpoint_sha256"], [call])
+            for kind, result in (("count_input", 10), ("send", response)):
+>               op = journal.begin_operation(token, kind, role, request_id, call[kind + "_payload_sha256"])
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'count_input_payload_sha256'
+
+tests/test_observed_coordinated_runtime.py:196: KeyError
+_ ERROR at setup of test_final_reconciliation_rejects_native_observation_disagreement[duplicate] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_final_reconciliation_reje1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae310c10>
+snapshot = {'documents': {'plan': b'{"descriptor":{"coordinates":{"agent_count":4,"agents":"fixture","arm":"C","block_id":"fixtur...illion': 3, 'cached_input_rate_micro_usd_per_million': 1, 'cache_write_rate_micro_usd_per_million': 5, ...}, ...}, ...}
+
+    @pytest.fixture
+    def observed_snapshot(tmp_path, monkeypatch, snapshot):
+        """Construct a replayed synthetic journal around the D120 pure fixture."""
+        value = copy.deepcopy(snapshot)
+        for name, raw in value["journals"]["receipts"].items():
+            receipt = json.loads(raw)
+            receipt.update(send_started_ns=0, send_ended_ns=10**15)
+            value["journals"]["receipts"][name] = observer._canonical(receipt)
+        for name, raw in value["journals"]["tool_receipts"].items():
+            receipt = json.loads(raw)
+            receipt["output"] = "PRIVATE-TOOL-SENTINEL"
+            value["journals"]["tool_receipts"][name] = observer._canonical(receipt)
+        clock = [0]
+        def sample():
+            clock[0] += 10**9
+            return {"monotonic_ns": clock[0], "wall_ns": clock[0], "boot_sha256": "e" * 64}
+        monkeypatch.setattr(journal_module, "_sample", sample)
+        plan = json.loads(value["documents"]["plan"])
+        binding = {"run_dir": str(tmp_path / "run"), "run_id": plan["run_id"],
+            "plan_sha256": observer.runtime._sha(value["documents"]["plan"]), "schedule_sha256": "a" * 64,
+            "initial_checkpoint_sha256": "c" * 64, "observer_source_digests": {"scripts/observed_coordinated_runtime.py": "d" * 64}}
+        journal = observer.ObservationJournal.create(tmp_path / "observation", binding)
+        for role in observer.runtime.ROLES:
+            request_id = role + "-turn-0001"
+            request = json.loads(value["journals"]["requests"][request_id + ".json"])
+            response = json.loads(value["journals"]["responses"][request_id + ".json"])
+            call, _, _ = call_for(role, request)
+            token = journal.begin_step(journal.report()["checkpoint_sha256"], [call])
+            for kind, result in (("count_input", 10), ("send", response)):
+>               op = journal.begin_operation(token, kind, role, request_id, call[kind + "_payload_sha256"])
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'count_input_payload_sha256'
+
+tests/test_observed_coordinated_runtime.py:196: KeyError
+_ ERROR at setup of test_final_reconciliation_rejects_native_observation_disagreement[count] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_final_reconciliation_reje2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae180d50>
+snapshot = {'documents': {'plan': b'{"descriptor":{"coordinates":{"agent_count":4,"agents":"fixture","arm":"C","block_id":"fixtur...illion': 3, 'cached_input_rate_micro_usd_per_million': 1, 'cache_write_rate_micro_usd_per_million': 5, ...}, ...}, ...}
+
+    @pytest.fixture
+    def observed_snapshot(tmp_path, monkeypatch, snapshot):
+        """Construct a replayed synthetic journal around the D120 pure fixture."""
+        value = copy.deepcopy(snapshot)
+        for name, raw in value["journals"]["receipts"].items():
+            receipt = json.loads(raw)
+            receipt.update(send_started_ns=0, send_ended_ns=10**15)
+            value["journals"]["receipts"][name] = observer._canonical(receipt)
+        for name, raw in value["journals"]["tool_receipts"].items():
+            receipt = json.loads(raw)
+            receipt["output"] = "PRIVATE-TOOL-SENTINEL"
+            value["journals"]["tool_receipts"][name] = observer._canonical(receipt)
+        clock = [0]
+        def sample():
+            clock[0] += 10**9
+            return {"monotonic_ns": clock[0], "wall_ns": clock[0], "boot_sha256": "e" * 64}
+        monkeypatch.setattr(journal_module, "_sample", sample)
+        plan = json.loads(value["documents"]["plan"])
+        binding = {"run_dir": str(tmp_path / "run"), "run_id": plan["run_id"],
+            "plan_sha256": observer.runtime._sha(value["documents"]["plan"]), "schedule_sha256": "a" * 64,
+            "initial_checkpoint_sha256": "c" * 64, "observer_source_digests": {"scripts/observed_coordinated_runtime.py": "d" * 64}}
+        journal = observer.ObservationJournal.create(tmp_path / "observation", binding)
+        for role in observer.runtime.ROLES:
+            request_id = role + "-turn-0001"
+            request = json.loads(value["journals"]["requests"][request_id + ".json"])
+            response = json.loads(value["journals"]["responses"][request_id + ".json"])
+            call, _, _ = call_for(role, request)
+            token = journal.begin_step(journal.report()["checkpoint_sha256"], [call])
+            for kind, result in (("count_input", 10), ("send", response)):
+>               op = journal.begin_operation(token, kind, role, request_id, call[kind + "_payload_sha256"])
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'count_input_payload_sha256'
+
+tests/test_observed_coordinated_runtime.py:196: KeyError
+_ ERROR at setup of test_final_reconciliation_rejects_native_observation_disagreement[response] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_final_reconciliation_reje3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae16edd0>
+snapshot = {'documents': {'plan': b'{"descriptor":{"coordinates":{"agent_count":4,"agents":"fixture","arm":"C","block_id":"fixtur...illion': 3, 'cached_input_rate_micro_usd_per_million': 1, 'cache_write_rate_micro_usd_per_million': 5, ...}, ...}, ...}
+
+    @pytest.fixture
+    def observed_snapshot(tmp_path, monkeypatch, snapshot):
+        """Construct a replayed synthetic journal around the D120 pure fixture."""
+        value = copy.deepcopy(snapshot)
+        for name, raw in value["journals"]["receipts"].items():
+            receipt = json.loads(raw)
+            receipt.update(send_started_ns=0, send_ended_ns=10**15)
+            value["journals"]["receipts"][name] = observer._canonical(receipt)
+        for name, raw in value["journals"]["tool_receipts"].items():
+            receipt = json.loads(raw)
+            receipt["output"] = "PRIVATE-TOOL-SENTINEL"
+            value["journals"]["tool_receipts"][name] = observer._canonical(receipt)
+        clock = [0]
+        def sample():
+            clock[0] += 10**9
+            return {"monotonic_ns": clock[0], "wall_ns": clock[0], "boot_sha256": "e" * 64}
+        monkeypatch.setattr(journal_module, "_sample", sample)
+        plan = json.loads(value["documents"]["plan"])
+        binding = {"run_dir": str(tmp_path / "run"), "run_id": plan["run_id"],
+            "plan_sha256": observer.runtime._sha(value["documents"]["plan"]), "schedule_sha256": "a" * 64,
+            "initial_checkpoint_sha256": "c" * 64, "observer_source_digests": {"scripts/observed_coordinated_runtime.py": "d" * 64}}
+        journal = observer.ObservationJournal.create(tmp_path / "observation", binding)
+        for role in observer.runtime.ROLES:
+            request_id = role + "-turn-0001"
+            request = json.loads(value["journals"]["requests"][request_id + ".json"])
+            response = json.loads(value["journals"]["responses"][request_id + ".json"])
+            call, _, _ = call_for(role, request)
+            token = journal.begin_step(journal.report()["checkpoint_sha256"], [call])
+            for kind, result in (("count_input", 10), ("send", response)):
+>               op = journal.begin_operation(token, kind, role, request_id, call[kind + "_payload_sha256"])
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'count_input_payload_sha256'
+
+tests/test_observed_coordinated_runtime.py:196: KeyError
+_ ERROR at setup of test_final_reconciliation_rejects_native_observation_disagreement[tool] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_final_reconciliation_reje4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae33b4d0>
+snapshot = {'documents': {'plan': b'{"descriptor":{"coordinates":{"agent_count":4,"agents":"fixture","arm":"C","block_id":"fixtur...illion': 3, 'cached_input_rate_micro_usd_per_million': 1, 'cache_write_rate_micro_usd_per_million': 5, ...}, ...}, ...}
+
+    @pytest.fixture
+    def observed_snapshot(tmp_path, monkeypatch, snapshot):
+        """Construct a replayed synthetic journal around the D120 pure fixture."""
+        value = copy.deepcopy(snapshot)
+        for name, raw in value["journals"]["receipts"].items():
+            receipt = json.loads(raw)
+            receipt.update(send_started_ns=0, send_ended_ns=10**15)
+            value["journals"]["receipts"][name] = observer._canonical(receipt)
+        for name, raw in value["journals"]["tool_receipts"].items():
+            receipt = json.loads(raw)
+            receipt["output"] = "PRIVATE-TOOL-SENTINEL"
+            value["journals"]["tool_receipts"][name] = observer._canonical(receipt)
+        clock = [0]
+        def sample():
+            clock[0] += 10**9
+            return {"monotonic_ns": clock[0], "wall_ns": clock[0], "boot_sha256": "e" * 64}
+        monkeypatch.setattr(journal_module, "_sample", sample)
+        plan = json.loads(value["documents"]["plan"])
+        binding = {"run_dir": str(tmp_path / "run"), "run_id": plan["run_id"],
+            "plan_sha256": observer.runtime._sha(value["documents"]["plan"]), "schedule_sha256": "a" * 64,
+            "initial_checkpoint_sha256": "c" * 64, "observer_source_digests": {"scripts/observed_coordinated_runtime.py": "d" * 64}}
+        journal = observer.ObservationJournal.create(tmp_path / "observation", binding)
+        for role in observer.runtime.ROLES:
+            request_id = role + "-turn-0001"
+            request = json.loads(value["journals"]["requests"][request_id + ".json"])
+            response = json.loads(value["journals"]["responses"][request_id + ".json"])
+            call, _, _ = call_for(role, request)
+            token = journal.begin_step(journal.report()["checkpoint_sha256"], [call])
+            for kind, result in (("count_input", 10), ("send", response)):
+>               op = journal.begin_operation(token, kind, role, request_id, call[kind + "_payload_sha256"])
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'count_input_payload_sha256'
+
+tests/test_observed_coordinated_runtime.py:196: KeyError
+_ ERROR at setup of test_final_reconciliation_rejects_native_observation_disagreement[role] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_final_reconciliation_reje5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae3c29d0>
+snapshot = {'documents': {'plan': b'{"descriptor":{"coordinates":{"agent_count":4,"agents":"fixture","arm":"C","block_id":"fixtur...illion': 3, 'cached_input_rate_micro_usd_per_million': 1, 'cache_write_rate_micro_usd_per_million': 5, ...}, ...}, ...}
+
+    @pytest.fixture
+    def observed_snapshot(tmp_path, monkeypatch, snapshot):
+        """Construct a replayed synthetic journal around the D120 pure fixture."""
+        value = copy.deepcopy(snapshot)
+        for name, raw in value["journals"]["receipts"].items():
+            receipt = json.loads(raw)
+            receipt.update(send_started_ns=0, send_ended_ns=10**15)
+            value["journals"]["receipts"][name] = observer._canonical(receipt)
+        for name, raw in value["journals"]["tool_receipts"].items():
+            receipt = json.loads(raw)
+            receipt["output"] = "PRIVATE-TOOL-SENTINEL"
+            value["journals"]["tool_receipts"][name] = observer._canonical(receipt)
+        clock = [0]
+        def sample():
+            clock[0] += 10**9
+            return {"monotonic_ns": clock[0], "wall_ns": clock[0], "boot_sha256": "e" * 64}
+        monkeypatch.setattr(journal_module, "_sample", sample)
+        plan = json.loads(value["documents"]["plan"])
+        binding = {"run_dir": str(tmp_path / "run"), "run_id": plan["run_id"],
+            "plan_sha256": observer.runtime._sha(value["documents"]["plan"]), "schedule_sha256": "a" * 64,
+            "initial_checkpoint_sha256": "c" * 64, "observer_source_digests": {"scripts/observed_coordinated_runtime.py": "d" * 64}}
+        journal = observer.ObservationJournal.create(tmp_path / "observation", binding)
+        for role in observer.runtime.ROLES:
+            request_id = role + "-turn-0001"
+            request = json.loads(value["journals"]["requests"][request_id + ".json"])
+            response = json.loads(value["journals"]["responses"][request_id + ".json"])
+            call, _, _ = call_for(role, request)
+            token = journal.begin_step(journal.report()["checkpoint_sha256"], [call])
+            for kind, result in (("count_input", 10), ("send", response)):
+>               op = journal.begin_operation(token, kind, role, request_id, call[kind + "_payload_sha256"])
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'count_input_payload_sha256'
+
+tests/test_observed_coordinated_runtime.py:196: KeyError
+_ ERROR at setup of test_final_reconciliation_rejects_native_observation_disagreement[containment] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_final_reconciliation_reje6')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae787a50>
+snapshot = {'documents': {'plan': b'{"descriptor":{"coordinates":{"agent_count":4,"agents":"fixture","arm":"C","block_id":"fixtur...illion': 3, 'cached_input_rate_micro_usd_per_million': 1, 'cache_write_rate_micro_usd_per_million': 5, ...}, ...}, ...}
+
+    @pytest.fixture
+    def observed_snapshot(tmp_path, monkeypatch, snapshot):
+        """Construct a replayed synthetic journal around the D120 pure fixture."""
+        value = copy.deepcopy(snapshot)
+        for name, raw in value["journals"]["receipts"].items():
+            receipt = json.loads(raw)
+            receipt.update(send_started_ns=0, send_ended_ns=10**15)
+            value["journals"]["receipts"][name] = observer._canonical(receipt)
+        for name, raw in value["journals"]["tool_receipts"].items():
+            receipt = json.loads(raw)
+            receipt["output"] = "PRIVATE-TOOL-SENTINEL"
+            value["journals"]["tool_receipts"][name] = observer._canonical(receipt)
+        clock = [0]
+        def sample():
+            clock[0] += 10**9
+            return {"monotonic_ns": clock[0], "wall_ns": clock[0], "boot_sha256": "e" * 64}
+        monkeypatch.setattr(journal_module, "_sample", sample)
+        plan = json.loads(value["documents"]["plan"])
+        binding = {"run_dir": str(tmp_path / "run"), "run_id": plan["run_id"],
+            "plan_sha256": observer.runtime._sha(value["documents"]["plan"]), "schedule_sha256": "a" * 64,
+            "initial_checkpoint_sha256": "c" * 64, "observer_source_digests": {"scripts/observed_coordinated_runtime.py": "d" * 64}}
+        journal = observer.ObservationJournal.create(tmp_path / "observation", binding)
+        for role in observer.runtime.ROLES:
+            request_id = role + "-turn-0001"
+            request = json.loads(value["journals"]["requests"][request_id + ".json"])
+            response = json.loads(value["journals"]["responses"][request_id + ".json"])
+            call, _, _ = call_for(role, request)
+            token = journal.begin_step(journal.report()["checkpoint_sha256"], [call])
+            for kind, result in (("count_input", 10), ("send", response)):
+>               op = journal.begin_operation(token, kind, role, request_id, call[kind + "_payload_sha256"])
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'count_input_payload_sha256'
+
+tests/test_observed_coordinated_runtime.py:196: KeyError
+_ ERROR at setup of test_final_reconciliation_rejects_native_observation_disagreement[delivery] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_final_reconciliation_reje7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae16f850>
+snapshot = {'documents': {'plan': b'{"descriptor":{"coordinates":{"agent_count":4,"agents":"fixture","arm":"C","block_id":"fixtur...illion': 3, 'cached_input_rate_micro_usd_per_million': 1, 'cache_write_rate_micro_usd_per_million': 5, ...}, ...}, ...}
+
+    @pytest.fixture
+    def observed_snapshot(tmp_path, monkeypatch, snapshot):
+        """Construct a replayed synthetic journal around the D120 pure fixture."""
+        value = copy.deepcopy(snapshot)
+        for name, raw in value["journals"]["receipts"].items():
+            receipt = json.loads(raw)
+            receipt.update(send_started_ns=0, send_ended_ns=10**15)
+            value["journals"]["receipts"][name] = observer._canonical(receipt)
+        for name, raw in value["journals"]["tool_receipts"].items():
+            receipt = json.loads(raw)
+            receipt["output"] = "PRIVATE-TOOL-SENTINEL"
+            value["journals"]["tool_receipts"][name] = observer._canonical(receipt)
+        clock = [0]
+        def sample():
+            clock[0] += 10**9
+            return {"monotonic_ns": clock[0], "wall_ns": clock[0], "boot_sha256": "e" * 64}
+        monkeypatch.setattr(journal_module, "_sample", sample)
+        plan = json.loads(value["documents"]["plan"])
+        binding = {"run_dir": str(tmp_path / "run"), "run_id": plan["run_id"],
+            "plan_sha256": observer.runtime._sha(value["documents"]["plan"]), "schedule_sha256": "a" * 64,
+            "initial_checkpoint_sha256": "c" * 64, "observer_source_digests": {"scripts/observed_coordinated_runtime.py": "d" * 64}}
+        journal = observer.ObservationJournal.create(tmp_path / "observation", binding)
+        for role in observer.runtime.ROLES:
+            request_id = role + "-turn-0001"
+            request = json.loads(value["journals"]["requests"][request_id + ".json"])
+            response = json.loads(value["journals"]["responses"][request_id + ".json"])
+            call, _, _ = call_for(role, request)
+            token = journal.begin_step(journal.report()["checkpoint_sha256"], [call])
+            for kind, result in (("count_input", 10), ("send", response)):
+>               op = journal.begin_operation(token, kind, role, request_id, call[kind + "_payload_sha256"])
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'count_input_payload_sha256'
+
+tests/test_observed_coordinated_runtime.py:196: KeyError
+=================================== FAILURES ===================================
+________ test_original_http_adapter_is_observed_once_via_protocol_proxy ________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_original_http_adapter_is_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae32ec90>
+
+    def test_original_http_adapter_is_observed_once_via_protocol_proxy(tmp_path, monkeypatch):
+        journal = new_journal(tmp_path)
+        call, count, send = call_for()
+        token = journal.begin_step("c" * 64, [call])
+        seen = []
+        def post(self, endpoint, payload):
+            seen.append((endpoint, payload, self._timeout))
+            return {"object": "response.input_tokens", "input_tokens": 5} if endpoint.endswith("input_tokens") else {"id": "fixture"}
+        monkeypatch.setattr(observer.OpenAIResponsesHTTP, "_post", post)
+        original = observer.OpenAIResponsesHTTP("public-synthetic-no-credential", base_url="http://127.0.0.1:1/v1")
+        proxy = observer.ObservedTransport(original, journal, token, call)
+        assert not isinstance(proxy, observer.OpenAIResponsesHTTP)
+        deadline = time.monotonic() + 5
+>       assert observer.wave._RemainingTransport(proxy, deadline).operation("count_input", count) == 5
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_observed_coordinated_runtime.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/managed_parallel_wave.py:272: in operation
+    return getattr(self.original, kind)(payload, timeout_seconds=self._timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/observed_coordinated_runtime.py:149: in count_input
+    return self._operation("count_input", payload, timeout_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <observed_coordinated_runtime.ObservedTransport object at 0x7f3fae33bd50>
+kind = 'count_input', payload = {'model': 'fixture', 'input': []}
+timeout_seconds = 4.999990449985489
+
+    def _operation(self, kind, payload, timeout_seconds):
+        _require(type(timeout_seconds) in (int, float) and math.isfinite(timeout_seconds) and timeout_seconds > 0,
+                 "invalid observed timeout")
+        # Fix the deadline BEFORE journal I/O; persistence consumes this budget.
+        deadline = time.monotonic() + timeout_seconds
+        digest = runtime._sha(_json_bytes(payload))
+>       _require(digest == self.call[kind + "_payload_sha256"], "observed payload differs")
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'count_input_payload_sha256'
+
+scripts/observed_coordinated_runtime.py:130: KeyError
+__________________ test_journal_io_consumes_transport_timeout __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_journal_io_consumes_trans0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae263d10>
+
+    def test_journal_io_consumes_transport_timeout(tmp_path, monkeypatch):
+        journal = new_journal(tmp_path)
+        call, count, _ = call_for()
+        token = journal.begin_step("c" * 64, [call])
+        begin = journal.begin_operation
+        def delayed(*args):
+            time.sleep(0.025)
+            return begin(*args)
+        monkeypatch.setattr(journal, "begin_operation", delayed)
+        remaining = []
+        original = SimpleNamespace(count_input=lambda _payload, *, timeout_seconds: remaining.append(timeout_seconds) or 5)
+>       assert observer.ObservedTransport(original, journal, token, call).count_input(count, timeout_seconds=1) == 5
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_observed_coordinated_runtime.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/observed_coordinated_runtime.py:149: in count_input
+    return self._operation("count_input", payload, timeout_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <observed_coordinated_runtime.ObservedTransport object at 0x7f3fae261750>
+kind = 'count_input', payload = {'model': 'fixture', 'input': []}
+timeout_seconds = 1
+
+    def _operation(self, kind, payload, timeout_seconds):
+        _require(type(timeout_seconds) in (int, float) and math.isfinite(timeout_seconds) and timeout_seconds > 0,
+                 "invalid observed timeout")
+        # Fix the deadline BEFORE journal I/O; persistence consumes this budget.
+        deadline = time.monotonic() + timeout_seconds
+        digest = runtime._sha(_json_bytes(payload))
+>       _require(digest == self.call[kind + "_payload_sha256"], "observed payload differs")
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'count_input_payload_sha256'
+
+scripts/observed_coordinated_runtime.py:130: KeyError
+_______________ test_expiry_during_observation_does_not_delegate _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_expiry_during_observation0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae300d50>
+
+    def test_expiry_during_observation_does_not_delegate(tmp_path, monkeypatch):
+        journal = new_journal(tmp_path)
+        call, count, _ = call_for()
+        token = journal.begin_step("c" * 64, [call])
+        begin = journal.begin_operation
+        def delayed(*args):
+            time.sleep(0.015)
+            return begin(*args)
+        monkeypatch.setattr(journal, "begin_operation", delayed)
+        original = SimpleNamespace(count_input=lambda *_args, **_kwargs: pytest.fail("expired request delegated"))
+        with pytest.raises(observer.ObservationError, match="observed transport failed"):
+>           observer.ObservedTransport(original, journal, token, call).count_input(count, timeout_seconds=0.001)
+
+tests/test_observed_coordinated_runtime.py:85: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/observed_coordinated_runtime.py:149: in count_input
+    return self._operation("count_input", payload, timeout_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <observed_coordinated_runtime.ObservedTransport object at 0x7f3fae3e7c90>
+kind = 'count_input', payload = {'model': 'fixture', 'input': []}
+timeout_seconds = 0.001
+
+    def _operation(self, kind, payload, timeout_seconds):
+        _require(type(timeout_seconds) in (int, float) and math.isfinite(timeout_seconds) and timeout_seconds > 0,
+                 "invalid observed timeout")
+        # Fix the deadline BEFORE journal I/O; persistence consumes this budget.
+        deadline = time.monotonic() + timeout_seconds
+        digest = runtime._sha(_json_bytes(payload))
+>       _require(digest == self.call[kind + "_payload_sha256"], "observed payload differs")
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'count_input_payload_sha256'
+
+scripts/observed_coordinated_runtime.py:130: KeyError
+___________ test_transport_error_does_not_export_exception_material ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_transport_error_does_not_0')
+
+    def test_transport_error_does_not_export_exception_material(tmp_path):
+        journal = new_journal(tmp_path)
+        call, count, _ = call_for()
+        token = journal.begin_step("c" * 64, [call])
+        def fail(*_args, **_kwargs):
+            raise ValueError("PRIVATE-ERROR-MATERIAL")
+        with pytest.raises(observer.ObservationError) as error:
+>           observer.ObservedTransport(SimpleNamespace(count_input=fail), journal, token, call).count_input(count, timeout_seconds=5)
+
+tests/test_observed_coordinated_runtime.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/observed_coordinated_runtime.py:149: in count_input
+    return self._operation("count_input", payload, timeout_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <observed_coordinated_runtime.ObservedTransport object at 0x7f3fae3c52d0>
+kind = 'count_input', payload = {'model': 'fixture', 'input': []}
+timeout_seconds = 5
+
+    def _operation(self, kind, payload, timeout_seconds):
+        _require(type(timeout_seconds) in (int, float) and math.isfinite(timeout_seconds) and timeout_seconds > 0,
+                 "invalid observed timeout")
+        # Fix the deadline BEFORE journal I/O; persistence consumes this budget.
+        deadline = time.monotonic() + timeout_seconds
+        digest = runtime._sha(_json_bytes(payload))
+>       _require(digest == self.call[kind + "_payload_sha256"], "observed payload differs")
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'count_input_payload_sha256'
+
+scripts/observed_coordinated_runtime.py:130: KeyError
+________________ test_payload_mismatch_rejects_before_delegate _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_payload_mismatch_rejects_0')
+
+    def test_payload_mismatch_rejects_before_delegate(tmp_path):
+        journal = new_journal(tmp_path)
+        call, _, _ = call_for()
+        token = journal.begin_step("c" * 64, [call])
+        original = SimpleNamespace(count_input=lambda *_args, **_kwargs: pytest.fail("mismatched payload delegated"))
+        with pytest.raises(observer.ObservationError, match="payload differs"):
+>           observer.ObservedTransport(original, journal, token, call).count_input({}, timeout_seconds=5)
+
+tests/test_observed_coordinated_runtime.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/observed_coordinated_runtime.py:149: in count_input
+    return self._operation("count_input", payload, timeout_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <observed_coordinated_runtime.ObservedTransport object at 0x7f3fae149ed0>
+kind = 'count_input', payload = {}, timeout_seconds = 5
+
+    def _operation(self, kind, payload, timeout_seconds):
+        _require(type(timeout_seconds) in (int, float) and math.isfinite(timeout_seconds) and timeout_seconds > 0,
+                 "invalid observed timeout")
+        # Fix the deadline BEFORE journal I/O; persistence consumes this budget.
+        deadline = time.monotonic() + timeout_seconds
+        digest = runtime._sha(_json_bytes(payload))
+>       _require(digest == self.call[kind + "_payload_sha256"], "observed payload differs")
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'count_input_payload_sha256'
+
+scripts/observed_coordinated_runtime.py:130: KeyError
+________ test_guard_instruments_actual_broker_once_without_global_patch ________
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1484/test_guard_instruments_actual_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fae1f7b90>
+
+    def test_guard_instruments_actual_broker_once_without_global_patch(tmp_path, monkeypatch):
+        journal = new_journal(tmp_path)
+        call, count, send = call_for()
+        token = journal.begin_step("c" * 64, [call])
+        original = SimpleNamespace(count_input=lambda *_args, **_kw: 5, send=lambda *_args, **_kw: {})
+        proxy = observer.ObservedTransport(original, journal, token, call)
+>       proxy.count_input(count, timeout_seconds=5)
+
+tests/test_observed_coordinated_runtime.py:119: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/observed_coordinated_runtime.py:149: in count_input
+    return self._operation("count_input", payload, timeout_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <observed_coordinated_runtime.ObservedTransport object at 0x7f3fae1f5e90>
+kind = 'count_input', payload = {'model': 'fixture', 'input': []}
+timeout_seconds = 5
+
+    def _operation(self, kind, payload, timeout_seconds):
+        _require(type(timeout_seconds) in (int, float) and math.isfinite(timeout_seconds) and timeout_seconds > 0,
+                 "invalid observed timeout")
+        # Fix the deadline BEFORE journal I/O; persistence consumes this budget.
+        deadline = time.monotonic() + timeout_seconds
+        digest = runtime._sha(_json_bytes(payload))
+>       _require(digest == self.call[kind + "_payload_sha256"], "observed payload differs")
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'count_input_payload_sha256'
+
+scripts/observed_coordinated_runtime.py:130: KeyError
+=========================== short test summary info ============================
+FAILED tests/test_observed_coordinated_runtime.py::test_original_http_adapter_is_observed_once_via_protocol_proxy
+FAILED tests/test_observed_coordinated_runtime.py::test_journal_io_consumes_transport_timeout
+FAILED tests/test_observed_coordinated_runtime.py::test_expiry_during_observation_does_not_delegate
+FAILED tests/test_observed_coordinated_runtime.py::test_transport_error_does_not_export_exception_material
+FAILED tests/test_observed_coordinated_runtime.py::test_payload_mismatch_rejects_before_delegate
+FAILED tests/test_observed_coordinated_runtime.py::test_guard_instruments_actual_broker_once_without_global_patch
+ERROR tests/test_observed_coordinated_runtime.py::test_final_pure_reconciliation_has_exact_sets_but_no_native_attestation
+ERROR tests/test_observed_coordinated_runtime.py::test_final_reconciliation_rejects_native_observation_disagreement[missing]
+ERROR tests/test_observed_coordinated_runtime.py::test_final_reconciliation_rejects_native_observation_disagreement[duplicate]
+ERROR tests/test_observed_coordinated_runtime.py::test_final_reconciliation_rejects_native_observation_disagreement[count]
+ERROR tests/test_observed_coordinated_runtime.py::test_final_reconciliation_rejects_native_observation_disagreement[response]
+ERROR tests/test_observed_coordinated_runtime.py::test_final_reconciliation_rejects_native_observation_disagreement[tool]
+ERROR tests/test_observed_coordinated_runtime.py::test_final_reconciliation_rejects_native_observation_disagreement[role]
+ERROR tests/test_observed_coordinated_runtime.py::test_final_reconciliation_rejects_native_observation_disagreement[containment]
+ERROR tests/test_observed_coordinated_runtime.py::test_final_reconciliation_rejects_native_observation_disagreement[delivery]
+6 failed, 5 passed, 9 errors in 0.43s

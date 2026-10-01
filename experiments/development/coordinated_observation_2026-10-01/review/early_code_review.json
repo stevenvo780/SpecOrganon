@@ -1,0 +1,154 @@
+{
+  "closed_findings": [
+    {
+      "closure": "confirmed_with_pure_mock_probe",
+      "fact": "Original candidate _native_snapshot omitted native bound activation/merge/delivery receipt checks and completed metric freshness; _audit does not inspect those state references. D120 final snapshot still rejected disagreement, so no final native bypass was established.",
+      "fixed_evidence": [
+        "scripts/observed_coordinated_runtime.py:79",
+        "scripts/observed_coordinated_runtime.py:83",
+        "scripts/observed_coordinated_runtime.py:85",
+        "tests/test_observed_coordinated_runtime.py:169"
+      ],
+      "id": "D121-P2-native-snapshot-bound-receipts",
+      "native_comparison": [
+        "scripts/managed_coordinated_prototype.py:625",
+        "scripts/measure_coordinated_runtime.py:125"
+      ],
+      "original_source_bytes_archived_by_this_reviewer": false,
+      "original_wrapper_sha256": "c55ca750c924ceb6f0020cce19a0a51f875c45be4de03b810d08eca04d1f115c",
+      "reproduction": "Run review/early_snapshot_probe.py; every native dependency and run lock is replaced by a pure mock. Receipt mismatch raises before visitor; native metric disagreement also rejects.",
+      "severity": "P2",
+      "suggested_correction": "The candidate already copies those checks into the existing run lock; no nested public reader."
+    }
+  ],
+  "helpers_scope": "Inspected capture_checks source/baseline preservation and integration_checks projected HTTP trace/exact coverage/overlap; archive_runtimes finite public synthetic scope. Frozen gate/artifact verification remains pending.",
+  "inspected_contracts": [
+    "closed typed event chain and canonical durable publication",
+    "same boot monotonic clock and separately adjustable wall delta",
+    "interval sum versus union, role/kind decomposition and local release-to-delivery scope",
+    "exclusive nonblocking driver lock distinct from callback event lock; no event-to-run lock nesting",
+    "checkpoint CAS, global IDs and payload transforms",
+    "transport protocol proxy and once-only delegate, deadline fixed before journal I/O",
+    "per-instance broker hook with idempotent guard, no global patches",
+    "late callback revoked capability, failed/active state cannot resume or deliver",
+    "exact final request/count/send/tool sets, payload/result digests and native send containment",
+    "native D120 final guard and replay/publication; sanitized fixed errors and participant-free projections"
+  ],
+  "limits": [
+    "sources were mutable and not frozen during early review",
+    "No PASS global, final gate, CLI integration, archive or sealed evidence verdict issued",
+    "Pure reconciliation helper assumes a journal.report already validated by the typed journal; direct arbitrary mappings are not authenticated or a native attestation",
+    "Driver locks are cooperative; same UID hostile modifications are not prevented",
+    "Observed intervals and boot hashes do not authenticate remote activity, model identity, usage, invoices or custody",
+    "C1 technical only; C2-C5 not demonstrated; zero formal cells and no Q evidence"
+  ],
+  "open_material_findings": [],
+  "phase": "early_candidate_code_barrier_not_final_acceptance",
+  "probe": {
+    "argv": [
+      "python3",
+      "-B",
+      "experiments/development/coordinated_observation_2026-10-01/review/early_snapshot_probe.py"
+    ],
+    "cases": [
+      {
+        "accepted": false,
+        "case": "activation",
+        "error": "synthetic receipt mismatch",
+        "touched": [
+          "epoch activation"
+        ]
+      },
+      {
+        "accepted": false,
+        "case": "merge",
+        "error": "synthetic receipt mismatch",
+        "touched": [
+          "epoch merge"
+        ]
+      },
+      {
+        "accepted": false,
+        "case": "delivery",
+        "error": "synthetic receipt mismatch",
+        "touched": [
+          "delivery"
+        ]
+      },
+      {
+        "accepted": false,
+        "case": "metrics",
+        "error": "published host metrics are stale",
+        "touched": [
+          "delivery"
+        ]
+      },
+      {
+        "accepted": true,
+        "case": "valid",
+        "touched": [
+          "delivery",
+          "visitor"
+        ]
+      }
+    ],
+    "exit_code": 0,
+    "prior_launcher_failure": {
+      "argv": [
+        "python",
+        "-B",
+        "experiments/development/coordinated_observation_2026-10-01/review/early_snapshot_probe.py"
+      ],
+      "exit_code": 127,
+      "followup": "python3 succeeded",
+      "stderr": "/bin/bash: line 1: python: command not found\n"
+    },
+    "scope": "PURE mocked snapshot; zero native runtime execution, transports, model requests or tools; no CLI bypass claim",
+    "sources_unchanged_during_probe": true
+  },
+  "schema": 1,
+  "source_pins": [
+    {
+      "bytes": 21363,
+      "path": "scripts/observed_coordinated_runtime.py",
+      "sha256": "1ade46abe57d98bd955a5f336715fb5baff36427e2b67bd52b7673e5b3fffe87"
+    },
+    {
+      "bytes": 27526,
+      "path": "scripts/coordinated_observation_journal.py",
+      "sha256": "075feb36dfdf124d76af7bf63b604d3ba69f8859a9e009779ec2a95beabb7d50"
+    },
+    {
+      "bytes": 14757,
+      "path": "tests/test_observed_coordinated_runtime.py",
+      "sha256": "c746d170b5f2f795d8c137d5cb3e2457aad7f1dc7f2386bba51bce40a66493f4"
+    },
+    {
+      "bytes": 25116,
+      "path": "tests/test_coordinated_observation_journal.py",
+      "sha256": "ebcadbe11dd371b517b1ab767b591da8be6847cfd9000fe4947b4d0187d64958"
+    },
+    {
+      "bytes": 6284,
+      "path": "experiments/development/coordinated_observation_2026-10-01/capture_checks.py",
+      "sha256": "057b5f344af766382adea9c2fff3748f9a2e278cdd6b6687186422a16dae0720"
+    },
+    {
+      "bytes": 6990,
+      "path": "experiments/development/coordinated_observation_2026-10-01/integration_checks.py",
+      "sha256": "60ba4702968d06363074fc0dc43ad3b9f1290100712dd0f986409c6b12b53fc4"
+    },
+    {
+      "bytes": 1967,
+      "path": "experiments/development/coordinated_observation_2026-10-01/archive_runtimes.py",
+      "sha256": "6590e3fde5b1a72e51bb102a4f4440c971c9e1a2a5f243f9da791a0679d0f81a"
+    },
+    {
+      "bytes": 3392,
+      "path": "experiments/development/coordinated_observation_2026-10-01/review/early_snapshot_probe.py",
+      "sha256": "367f37bd0ede730a60e9dd20e386240834aac324edc7423a5e09c5b6422168af"
+    }
+  ],
+  "tests_scope": "Read current journal and wrapper tests. Did not rerun suites, original runtimes or native effects. Pure mock probe has four negatives and one positive.",
+  "verdict": "NO_OPEN_MATERIAL_FINDINGS_IN_REVIEWED_CANDIDATE"
+}
