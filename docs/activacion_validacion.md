@@ -1,6 +1,6 @@
 # Distancia hasta la validación de GOAL
 
-**Corte:** 2026-10-01 UTC, revisión D-109 después de D-108. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). El [dossier de activación D-109](../experiments/development/activation_readiness_2026-09-30/README.md) y su [inventario de 24 celdas](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json) registran preparación, no ejecuciones. Este documento no cambia umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
+**Corte:** 2026-10-01 UTC, revisión D-113 después de D-112. Este documento resume las puertas para pasar del desarrollo a pruebas externas. Los requisitos y el veredicto completo están en [GOAL.md](../GOAL.md), [la auditoría actual](validacion_actual.md) y [el protocolo prospectivo](protocolo_experimental.md). El [inventario D-109 de 24 celdas](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json) y las [preparaciones D-113](../experiments/development/isolated_analysis_2026-10-01/README.md) son desarrollo mecánico: cero celdas formales. Este documento no cambia umbrales ni autoriza llamadas a proveedores, gasto o intervención de campo.
 
 | Criterio de GOAL | Evidencia actual | Puerta pendiente |
 | --- | --- | --- |
@@ -13,6 +13,15 @@
 **Veredicto actual: 1/5, C1 cumplido en alcance técnico; C2–C5 no demostrados.** La suite local y las variantes documentales no son puntuaciones `Q`, aprobaciones competentes, reserva independiente ni impacto de campo. No hay una fecha de cierre defendible a partir del número de pruebas.
 
 ## Puerta 0: cerrar el desarrollo antes de abrir la reserva
+
+D-110–D-113 añaden admisión antes de efectos, contexto compartido, preparaciones
+originales y análisis con estado protegido. D-113 conservó fuentes e inventarios,
+verificó seis trazas de fixtures por intérprete y cuatro CLI de preparación:
+470passed3.11/178passed3.12, proveedor falso. Se resolvieron análisis aislado y
+lectura común de PDF; faltan C paralelo efectivo y contrato/rúbrica comunes sin
+respuestas, entregados antes de R1, más ruta/modelo/telemetría/autorización. El
+oráculo D-113 valida su contrato de fixtures, no Q ni cualquier output de tarea.
+Los topes locales compartidos no autentican consumo/precio/cancelación remotos.
 
 El [protocolo §2](protocolo_experimental.md#2-registro-casos-y-separaci%C3%B3n-entre-desarrollo-y-reserva) exige **24 ejecuciones futuras en total**: tres prototipos A/B/C × dos casos públicos D-F/D-E × dos rondas × dos repeticiones. El [inventario D-109](../experiments/development/activation_readiness_2026-09-30/planned_development_cells.json) enumera las 24 tuplas y deja **cero filas ejecutadas bajo ese diseño**. A/B/C son arquitecturas de desarrollo; **N/SDD/T son brazos de la comparación confirmatoria posterior**. Ni las 33 ejecuciones mecánicas de fixtures, ni los intentos A/B/C parciales de D-094, ni las seis llamadas Luna de D-099 se reclasifican como esas 24 corridas o como evaluación `Q`.
 

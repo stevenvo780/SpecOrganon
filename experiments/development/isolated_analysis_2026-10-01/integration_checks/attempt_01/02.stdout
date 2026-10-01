@@ -1,0 +1,280 @@
+...........F......F                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_later_invalid_analysis_retires_host_metrics _______________
+
+run_dir = PosixPath('/tmp/specorganon-D113-integration01/test_later_invalid_analysis_re0/attempt/managed')
+transport = <test_run_managed_team.FakeTransport object at 0x7eff77e4a2d0>
+expected_checkpoint = '00f193d11fb2a8af7cf8f46852c37c39c7ce78c6720230dc89de434249e793a3'
+
+    def execute_team_segment(
+        run_dir: Path, transport: ResponseTransport, expected_checkpoint: str,
+    ) -> dict[str, Any]:
+        """Execute exactly one planned segment, then pause or finish durably."""
+        run_dir = Path(run_dir)
+        with _run_lock(run_dir):
+            plan, state, schedule, session_status, ledger, context, context_status = _load(run_dir)
+            if context_status["state"] not in {"prepared", "paused"}:
+                raise TeamError("team run is active or terminal; no segment may start")
+            role_histories, artifacts = _audit_completed(
+                run_dir, plan, state, session_status, ledger, context_status)
+            segment_index = context_status["cursor"] + 1
+            if segment_index > len(plan["segments"]):
+                raise TeamError("team has no remaining segment")
+            segment = plan["segments"][segment_index - 1]
+            context.begin(expected_checkpoint, segment["role"])
+            def guard() -> None:
+                _guard_operation(context, run_dir, plan, state, schedule,
+                                 session_status, ledger)
+            bounded = _TeamTransport(transport, guard)
+            history = list(role_histories.get(segment["role"], []))
+            history.append({"role": "user", "content": _prompt(segment, artifacts)})
+            request_plan = _request_plan(plan, segment)
+            deadline_scope = None
+            deadline_entered = False
+            checkpoint_closed = False
+            try:
+                if admission.acquire_staged_claim(**_claim_args(schedule, state, session_status)) != state["claim_sha256"]:
+                    raise TeamError("first segment did not acquire its expected durable claim")
+                remaining = context.deadline - time.monotonic()
+                if remaining <= 0:
+                    raise TeamError("shared active deadline expired before provider operation")
+                deadline_scope = _deadline(max(1, math.ceil(remaining)))
+                deadline_scope.__enter__()
+                deadline_entered = True
+                while True:
+>                   guard()
+
+scripts/run_managed_team.py:637: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/run_managed_team.py:618: in guard
+    _guard_operation(context, run_dir, plan, state, schedule,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+context = <managed_run_context.RunContext object at 0x7eff77dbf0d0>
+run_dir = PosixPath('/tmp/specorganon-D113-integration01/test_later_invalid_analysis_re0/attempt/managed')
+plan = {'functions': [{'description': 'Use only the public task and listed sources. Original D-F/D-E data are shared by all a...serve its actual invalidation behavior.","mode":"sequential"}\n', 'max_model_requests': 128, 'max_tool_calls': 64, ...}
+state = {'active_limit_seconds': 120, 'claim_sha256': '689650a5151ca5429359f6cf759682e1e87913bb8ef3a76cbfc7304510f61a66', 'classification': 'development_managed_team_unsealed', 'cost_limit_micro_usd': 10000, ...}
+schedule = {'block_count': 4, 'cases': [{'case_id': 'D-F', 'package_sha256': '78b1d41e1286bf93a0cb2e8784c4740cad72e33dd58cdee1f44...7ecad4330b1b81459aa'}], 'classification': 'development_round_preparation_unsealed', 'cost_limit_micro_usd': 10000, ...}
+session_status = {'schema': 1, 'classification': 'development_staged_local_tool_session_unsealed', 'notice': "Offline local generic too...UID mutation and clock changes remain outside this journal's guarantees.", 'budget_scope': 'stage_instance_local', ...}
+ledger = <managed_token_ledger.TokenLedger object at 0x7eff77dbed50>
+
+    def _guard_operation(
+        context: RunContext, run_dir: Path, plan: dict[str, Any], state: dict[str, Any],
+        schedule: dict[str, Any], session_status: dict[str, Any], ledger: TokenLedger,
+    ) -> None:
+        """Check the active lease and frozen bindings around every provider effect."""
+        context.require_active()
+        if _source_closure() != state["source_sha256"]:
+>           raise TeamError("frozen runner or helper source changed during segment")
+E           run_managed_team.TeamError: frozen runner or helper source changed during segment
+
+scripts/run_managed_team.py:516: TeamError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/specorganon-D113-integration01/test_later_invalid_analysis_re0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eff77dbe250>
+
+    def test_later_invalid_analysis_retires_host_metrics(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        _, attempt, run, ready = prepare(tmp_path, monkeypatch)
+        good, bad = b"print('{}')\n", b"print('invalid')\n"
+        calls = [call({"op": "init", "nodes": nodes()}, 1)] + writes(good, 2)
+        calls += [analysis_call(good, 3),
+                  call({"op": "replace", "path": "analysis.py", "expected_sha256": sha(good),
+                        "content": bad.decode()}, 4), analysis_call(bad, 5)]
+>       final, _ = execute(attempt, run, ready, calls)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_isolated_development_analysis.py:159: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_isolated_development_analysis.py:74: in execute
+    paused = team.execute_team_segment(attempt / "managed", transport, ready["checkpoint_sha256"])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+run_dir = PosixPath('/tmp/specorganon-D113-integration01/test_later_invalid_analysis_re0/attempt/managed')
+transport = <test_run_managed_team.FakeTransport object at 0x7eff77e4a2d0>
+expected_checkpoint = '00f193d11fb2a8af7cf8f46852c37c39c7ce78c6720230dc89de434249e793a3'
+
+    def execute_team_segment(
+        run_dir: Path, transport: ResponseTransport, expected_checkpoint: str,
+    ) -> dict[str, Any]:
+        """Execute exactly one planned segment, then pause or finish durably."""
+        run_dir = Path(run_dir)
+        with _run_lock(run_dir):
+            plan, state, schedule, session_status, ledger, context, context_status = _load(run_dir)
+            if context_status["state"] not in {"prepared", "paused"}:
+                raise TeamError("team run is active or terminal; no segment may start")
+            role_histories, artifacts = _audit_completed(
+                run_dir, plan, state, session_status, ledger, context_status)
+            segment_index = context_status["cursor"] + 1
+            if segment_index > len(plan["segments"]):
+                raise TeamError("team has no remaining segment")
+            segment = plan["segments"][segment_index - 1]
+            context.begin(expected_checkpoint, segment["role"])
+            def guard() -> None:
+                _guard_operation(context, run_dir, plan, state, schedule,
+                                 session_status, ledger)
+            bounded = _TeamTransport(transport, guard)
+            history = list(role_histories.get(segment["role"], []))
+            history.append({"role": "user", "content": _prompt(segment, artifacts)})
+            request_plan = _request_plan(plan, segment)
+            deadline_scope = None
+            deadline_entered = False
+            checkpoint_closed = False
+            try:
+                if admission.acquire_staged_claim(**_claim_args(schedule, state, session_status)) != state["claim_sha256"]:
+                    raise TeamError("first segment did not acquire its expected durable claim")
+                remaining = context.deadline - time.monotonic()
+                if remaining <= 0:
+                    raise TeamError("shared active deadline expired before provider operation")
+                deadline_scope = _deadline(max(1, math.ceil(remaining)))
+                deadline_scope.__enter__()
+                deadline_entered = True
+                while True:
+                    guard()
+                    budget = ledger.status()
+                    next_index = state["model_requests_completed"] + 1
+                    if budget["blocked"]:
+                        raise TeamError("unresolved provider request blocks the team")
+                    if (budget["request_count"] >= plan["max_model_requests"]
+                            or next_index > plan["max_model_requests"]):
+                        raise TokenBudgetExhausted("model_request_cap")
+                    request = _request(request_plan, history, 1)
+                    name = f"{next_index:04d}.json"
+                    request_sha = _sha(_json_bytes(request))
+                    _new_private_file(run_dir / "requests" / name, _canonical({
+                        "schema": 2, "run_id": plan["run_id"],
+                        "segment_index": segment_index, "role": segment["role"],
+                        "request_index": next_index, "request_sha256": request_sha,
+                        "request": request,
+                    }))
+                    # count_input and send each check the live context and exact
+                    # claim both before and after transport I/O. The ledger reserves
+                    # before send and retains an uncertain reservation.
+                    result = dispatch_response(
+                        ledger, request_id=f"model-{next_index:04d}", role=segment["role"],
+                        request=request, response_path=run_dir / "responses" / name,
+                        transport=bounded,
+                    )
+                    guard()
+                    response_raw = _file_bytes(run_dir / "responses" / name,
+                                               MAX_JSON_BYTES, "provider response")
+                    response_sha = _sha(response_raw)
+                    if response_sha != result["response_sha256"]:
+                        raise TeamError("provider response digest differs from dispatch")
+                    response = _read_json(run_dir / "responses" / name)
+                    _new_private_file(run_dir / "receipts" / name, _canonical({
+                        "schema": 2, "run_id": plan["run_id"],
+                        "segment_index": segment_index, "role": segment["role"],
+                        "request_index": next_index, "request_sha256": request_sha,
+                        **result,
+                    }))
+                    state["model_requests_completed"] = next_index
+                    _write_state(run_dir, state)
+                    if result["provider_status"] != "completed":
+                        raise TeamError("provider returned an incomplete response")
+                    kind, call = _response_kind(response, plan["functions"])
+                    if kind == "unsupported":
+                        raise TeamError("provider returned unsupported team output")
+                    history.extend(response["output"])
+                    if kind == "text":
+                        artifact = _text_artifact(segment_index, segment["role"], next_index,
+                                                  response, response_sha)
+                        _new_private_file(run_dir / "artifacts" / f"{segment_index:04d}.json",
+                                          _canonical(artifact))
+                        _new_private_file(run_dir / "histories" / f"{segment_index:04d}.json",
+                                          _canonical({
+                                              "schema": 2, "segment_index": segment_index,
+                                              "role": segment["role"], "items": history,
+                                              "items_sha256": _sha(_canonical(history)),
+                                          }))
+                        state["segments_completed"] = segment_index
+                        _write_state(run_dir, state)
+                        guard()
+                        if segment_index == len(plan["segments"]):
+                            context.finish(segment_index)
+                        else:
+                            context.pause(segment_index)
+                        checkpoint_closed = True
+                        assert deadline_scope is not None
+                        deadline_scope.__exit__(None, None, None)
+                        deadline_entered = False
+                        return read_team_status_unlocked(run_dir, plan, state, schedule,
+                                                         ledger, context)
+                    assert call is not None
+                    # Check the entire follow-up request before any local tool effect.
+                    _request(request_plan, [*history, {
+                        "type": "function_call_output", "call_id": call["call_id"],
+                        "output": "preflight",
+                    }], 1)
+                    if state["tool_calls_completed"] >= plan["max_tool_calls"]:
+                        raise TokenBudgetExhausted("tool_call_cap")
+                    guard()
+                    receipt = _invoke_tool(run_dir, plan, state, schedule, next_index,
+                                           segment_index, call, response_sha, request_sha,
+                                           context.deadline, guard=guard)
+                    guard()
+                    if receipt["terminal_status"] != "success" or receipt["output"] is None:
+                        raise TeamError(receipt.get("output_error") or "sealed_tool_failure")
+                    history.append({"type": "function_call_output", "call_id": call["call_id"],
+                                    "output": receipt["output"]})
+            except Exception as exc:
+                if checkpoint_closed:
+                    raise TeamError("completed checkpoint failed post-write verification") from exc
+                reason = (f"truncated:{type(exc).__name__}" if isinstance(
+                    exc, (TokenBudgetExhausted, CostBudgetExhausted))
+                    else f"indeterminate:{type(exc).__name__}")
+                state["terminal_reason"] = reason
+                try:
+                    _write_state(run_dir, state)
+                    context.abort(reason)
+                except Exception:
+                    pass  # A stale instance must not change a newer lease.
+>               raise TeamError("team segment outcome indeterminate; no automatic retry") from exc
+E               run_managed_team.TeamError: team segment outcome indeterminate; no automatic retry
+
+scripts/run_managed_team.py:736: TeamError
+_________________ test_direct_bridge_dispatches_both_profiles __________________
+
+tmp_path = PosixPath('/tmp/specorganon-D113-integration01/test_direct_bridge_dispatches_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eff77e265d0>
+
+    def test_direct_bridge_dispatches_both_profiles(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        bundle, attempt, run, _ = prepare(tmp_path, monkeypatch)
+        plan = copy.deepcopy(json.loads((attempt / "managed/plan.json").read_text()))
+        plan["schema"] = 1
+        plan["turns"] = [{"user": segment["user"], "max_output_tokens": segment["max_output_tokens"]}
+                         for segment in plan.pop("segments")]
+        managed = tmp_path / "direct_bridge"
+>       bridge.prepare_tool_conversation(managed, bundle / "schedule.json", attempt / "stage", plan,
+                                         limit_tokens=4000, active_limit_seconds=120, cost_limit_micro_usd=10000,
+                                         price_profile=config()["price_profile"])
+
+tests/test_isolated_development_analysis.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/run_managed_tool_conversation.py:372: in prepare_tool_conversation
+    run_dir / "ledger", limit_tokens, validated["max_model_requests"],
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/staged_tool_session.py:1072: in create_session
+    _anchor_preflight(stage, run_id)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stage = PosixPath('/tmp/specorganon-D113-integration01/test_direct_bridge_dispatches_0/attempt/stage')
+run_id = 'dev-2dd0d6ee71c6fcd9c335fa1d'
+
+    def _anchor_preflight(stage: Path, run_id: str) -> None:
+        anchor = _anchor_path(stage, run_id)
+        with _controlled_stage_parent(stage) as parent_fd:
+            try:
+                os.stat(anchor.name, dir_fd=parent_fd, follow_symlinks=False)
+            except FileNotFoundError:
+                return
+>       raise SessionError("stage/run already has a durable local session anchor")
+E       staged_tool_session.SessionError: stage/run already has a durable local session anchor
+
+scripts/staged_tool_session.py:400: SessionError
+=========================== short test summary info ============================
+FAILED tests/test_isolated_development_analysis.py::test_later_invalid_analysis_retires_host_metrics
+FAILED tests/test_isolated_development_analysis.py::test_direct_bridge_dispatches_both_profiles
+2 failed, 17 passed in 164.98s (0:02:44)

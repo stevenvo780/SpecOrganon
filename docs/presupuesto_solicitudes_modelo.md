@@ -1,5 +1,28 @@
 # Despacho medido de una solicitud de desarrollo
 
+## Análisis protegido optativo (D-113)
+
+Configuración `schema:2,analysis_profile:"read_only_v1"` selecciona calendario
+DEV2/política2: hasta64tools/128requests prospectivos iguales para A/B/C, sin
+reponer intentos abiertos;80k tokens/5400s máximos intactos. V1 conserva16/32,
+una función/política1 en bridge/team. Sesión de bajo nivel añade perfiles por
+tool; runner valida nombre/id/ejecutable/perfil durante reserva, despacho y
+replay con un solo presupuesto.
+
+Método escribe entregables; analizador lee case/inputs/work con cero raíces
+de escritura. Host valida JSON finito≤128KiB, comprueba protección y publica
+metrics.json/procedencia SHA. Raw stdout/stderr conservados; errores normales/
+JSON inválido consumen llamada y feedback. replace CAS corrige código propio
+sin tocar estados/métricas. Señal/timeout/launch incierto/tamper bloquean.
+No approve/analyze en driver. C sigue serial; ledger exige una reserva de modelo
+pendiente a la vez. Preparación no autoriza llamadas pagadas ni campo.
+
+[Dossier D113](../experiments/development/isolated_analysis_2026-10-01/README.md):
+470passed3.11/178passed3.12 y cuatro CLI preparatorios, sin proveedor real.
+PDF completos comunes disponibles. Antes de R1 faltan C paralelo, contrato/
+rúbrica sin respuestas, modelo/ruta/telemetría/autorización. Los cortes siguientes
+son históricos.
+
 ## Preparación de rondas A/B/C (D-112)
 
 `scripts/prepare_development_round.py` conecta los casos públicos originales

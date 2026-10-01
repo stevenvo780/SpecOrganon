@@ -1,0 +1,84 @@
+..................F
+=================================== FAILURES ===================================
+___ test_malformed_or_factual_policy_content_rejected[schema_number-schema] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-dev/pytest-1454/test_malformed_or_factual_poli1')
+change = 'schema_number', pattern = 'schema'
+
+    @pytest.mark.parametrize(
+        "change,pattern",
+        [
+            ("schema_bool", "schema"),
+            ("schema_number", "schema"),
+            ("classification", "classification"),
+            ("runtime_uppercase", "runtime_image_sha256"),
+            ("runtime_short", "runtime_image_sha256"),
+            ("network", "network"),
+            ("read_roots", "read_roots"),
+            ("write_roots", "write_roots"),
+            ("top_extra", "exactly"),
+            ("tool_extra", "exactly"),
+            ("tool_id_path", "simple lowercase ID"),
+            ("tool_id_upper", "simple lowercase ID"),
+            ("tool_id_duplicate", "duplicate generic tool id"),
+            ("tool_version_empty", "version"),
+            ("tool_hash_upper", "executable_sha256"),
+            ("limit_bool", "positive integer"),
+            ("limit_zero", "positive integer"),
+            ("limit_extra", "exactly"),
+        ],
+    )
+    def test_malformed_or_factual_policy_content_rejected(
+        tmp_path: Path, change: str, pattern: str
+    ) -> None:
+        valid = _policy()
+        policy = copy.deepcopy(valid)
+        if change == "schema_bool":
+            policy["schema"] = True
+        elif change == "schema_number":
+            policy["schema"] = 2
+        elif change == "classification":
+            policy["classification"] = "enforced"
+        elif change == "runtime_uppercase":
+            policy["runtime_image_sha256"] = "A" * 64
+        elif change == "runtime_short":
+            policy["runtime_image_sha256"] = "a" * 63
+        elif change == "network":
+            policy["network"] = "enabled"
+        elif change == "read_roots":
+            policy["read_roots"].append("/secret")
+        elif change == "write_roots":
+            policy["write_roots"] = ["/tmp"]
+        elif change == "top_extra":
+            policy["observed_result"] = "success"
+        elif change == "tool_extra":
+            policy["generic_tools"][0]["purpose"] = "proved intervention"
+        elif change == "tool_id_path":
+            policy["generic_tools"][0]["id"] = "../shell"
+        elif change == "tool_id_upper":
+            policy["generic_tools"][0]["id"] = "Shell"
+        elif change == "tool_id_duplicate":
+            policy["generic_tools"][1]["id"] = "read_file"
+        elif change == "tool_version_empty":
+            policy["generic_tools"][0]["version"] = "  "
+        elif change == "tool_hash_upper":
+            policy["generic_tools"][0]["executable_sha256"] = "B" * 64
+        elif change == "limit_bool":
+            policy["limits"]["measured_tokens"] = True
+        elif change == "limit_zero":
+            policy["limits"]["active_seconds"] = 0
+        else:
+            policy["limits"]["outcome"] = 1
+        path = tmp_path / "tool_policy"
+        _write_policy(path, policy)
+    
+>       with pytest.raises(inspector.ToolPolicyError, match=pattern):
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'schema'
+E         Actual message: "generic_tools[0] must contain exactly ['executable_sha256', 'id', 'profile', 'version']"
+
+tests/test_tool_policy.py:284: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_tool_policy.py::test_malformed_or_factual_policy_content_rejected[schema_number-schema]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 18 passed in 0.27s

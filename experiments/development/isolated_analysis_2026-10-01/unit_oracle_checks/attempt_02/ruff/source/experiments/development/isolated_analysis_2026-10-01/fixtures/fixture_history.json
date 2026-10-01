@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "classification": "public_prospective_runtime_fixtures_not_formal_development_runs",
+  "fixtures": [
+    {
+      "case_id": "D-E",
+      "fixture": "building_energy_analysis.py",
+      "sha256": "2a621b4aab86a246dbb4b9e4ac8b4a67a32e68ceb5922c383c6e3e4520d1fd45",
+      "bytes": 2635,
+      "source": "experiments/development/subscription_method_trial_2026-09-30/attempts/T/first.analysis.py",
+      "source_sha256": "2a621b4aab86a246dbb4b9e4ac8b4a67a32e68ceb5922c383c6e3e4520d1fd45",
+      "adaptations": [],
+      "byte_exact_original": true
+    },
+    {
+      "case_id": "D-F",
+      "fixture": "bread_analysis.py",
+      "sha256": "c086e70103f392272fd14c7d517d399db11d87b2d450935940097cceead8d0dc",
+      "bytes": 20178,
+      "source": "experiments/development/bread_prototype_feasibility_2026-09-30/runs/B-01/analysis.py",
+      "source_sha256": "4d937e90d1bb7ef48afa63c95e71a0208574dd907583b61124538226167d9c27",
+      "byte_exact_original": false,
+      "adaptations": [
+        {
+          "operation": "replace",
+          "old": "            result = subprocess.run(\n                [\"pdftotext\", \"-layout\", \"-f\", str(number), \"-l\", str(number),\n                 str(root / file_name), \"-\"], capture_output=True, text=True,\n                timeout=20, check=False)\n            require(result.returncode == 0,\n                    \"PDF extraction failed: \" + file_name + \": \" + result.stderr.strip())\n            page_cache[cache_key] = re.sub(r\"\\s+\", \" \", result.stdout).strip()",
+          "new": "            text_manifest = load(root / \"text_extract_manifest.json\")\n            documents = [item for item in text_manifest[\"documents\"]\n                         if item[\"original_pdf\"] == file_name]\n            require(len(documents) == 1, \"missing or ambiguous common text document\")\n            document = documents[0]\n            require(document[\"original_pdf_sha256\"] == files[file_name][\"sha256\"],\n                    \"common text has a different original PDF\")\n            pages = [item for item in document[\"pages\"] if item[\"page\"] == number]\n            require(len(pages) == 1, \"missing or ambiguous common text page\")\n            record = pages[0]\n            require(Path(record[\"path\"]).name == record[\"path\"], \"invalid common page filename\")\n            raw_page = (root / record[\"path\"]).read_bytes()\n            require(len(raw_page) == record[\"bytes\"] and\n                    hashlib.sha256(raw_page).hexdigest() == record[\"sha256\"],\n                    \"common text page differs from manifest\")\n            page_cache[cache_key] = re.sub(r\"\\s+\", \" \", raw_page.decode(\"utf-8\")).strip()",
+          "scope": "Replace only external PDF extraction with common pinned page reads; preserve all calculations and passage checks."
+        },
+        {
+          "operation": "remove_import",
+          "old": "import subprocess",
+          "reason": "No external extractor runs inside the participant fixture."
+        },
+        {
+          "operation": "remove_exception_type",
+          "old": "subprocess.SubprocessError",
+          "reason": "The replaced page reader no longer executes subprocesses."
+        }
+      ]
+    }
+  ],
+  "original_sources_unchanged": true,
+  "participant_outputs_repaired": false,
+  "fixture_code_in_visible_case": false,
+  "notes": [
+    "The D-F adaptation is new prospective test code; it is not a repaired historical participant result.",
+    "No provider calls or formal development cells are represented by these fixtures."
+  ]
+}

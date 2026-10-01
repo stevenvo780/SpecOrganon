@@ -1,0 +1,24 @@
+E731 Do not assign a `lambda` expression, use a `def`
+   --> experiments/development/isolated_analysis_2026-10-01/fixtures/bread_analysis.py:207:5
+    |
+205 |             "methodology interval discrepancy could not be verified")
+206 |
+207 |     value = lambda key: claims[key]["value"]
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+208 |     wheat_kg = 1000
+209 |     products = ("refined_flour", "whole_flour", "bran")
+    |
+help: Rewrite `value` as a `def`
+
+E401 [*] Multiple imports on one line
+ --> experiments/development/isolated_analysis_2026-10-01/fixtures/building_energy_analysis.py:1:1
+  |
+1 | import csv, datetime as dt, hashlib, json, math, pathlib, sys
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2 |
+3 | root = pathlib.Path(sys.argv[1])
+  |
+help: Split imports
+
+Found 2 errors.
+[*] 1 fixable with the `--fix` option (1 hidden fix can be enabled with the `--unsafe-fixes` option).

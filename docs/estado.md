@@ -1,5 +1,25 @@
 # Estado de reanudación
 
+**D-113 ejecuta análisis con estado protegido y fuentes comunes:**
+[dossier](../experiments/development/isolated_analysis_2026-10-01/README.md).
+Config/calendario/política2 optativos: dos tools sellados workspace/analysis_readonly,
+mismo ledger/claim/contexto. Host valida JSON, liga script/métricas SHA y comprueba
+inventario; errores normales se corrigen con replace CAS contado, sin reponer
+límites ni aprobar normas. Se conservan6+3 originales y se añaden38 derivados
+PDF comunes, todas35páginas. Freezec7979a8: **470passed3.11/178passed3.12**,
+Ruff/compile y cuatro CLI build/prepare aprobados,49pins fuentes/38base intactos.
+Seis trazas de fixture por intérprete D-F/D-E×A/B/C, cálculo/oráculo independiente
+y norma pending; proveedor falso, **celdas formales0**. Revisión cerró tres P2,
+negativos conservados; archivo27610regulares/4482blobs cotejado independientemente.
+
+**1/5 C1 técnico D107; C2–C5 No demostrado.** Siguiente: C paralelo efectivo,
+contrato/rúbrica comunes sin respuestas antes de R1, modelo/ruta/telemetría/
+autorización;12reales R1→adaptación/freezeR2→12reales R2 y selección. Siguen
+custodia/panel/jueces/autoridades/banco sellado/campo/transferencia. Oráculo del
+corte sólo contrato de fixtures, no Q ni validador genérico. Señales/timeout/
+tamper bloquean, frontera local sin atestación externa. GOAL/protocolo/producción/
+wheel intactos. Los cortes siguientes son históricos y sus pendientes de su fecha.
+
 **D-112 conecta preparaciones A/B/C con el ejecutor común:**
 [dossier](../experiments/development/development_round_adapter_2026-10-01/README.md).
 Esquema DEV explícito para12 preparaciones R1; D-F/D-E originales fijados a
