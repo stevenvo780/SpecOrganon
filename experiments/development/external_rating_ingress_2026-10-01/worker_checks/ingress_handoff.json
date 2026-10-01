@@ -1,0 +1,57 @@
+{
+  "Q_demonstrated": false,
+  "acceptance_assessed": false,
+  "api": "validate_development_rating(rating_raw:bytes, *, rating_sha256:str, blinded_delivery_raw:bytes, blinded_delivery_sha256:str, rubric_raw:bytes, rubric_sha256:str, delivery_contract_raw:bytes, delivery_contract_sha256:str)->dict",
+  "classification": "D124_ingress_integration_worker_handoff",
+  "commits": false,
+  "contract": [
+    "exact raw bytes SHA binding without reencoding",
+    "fixed D118 rubric and delivery contract byte pins",
+    "five closed strict integer0..20 components; no bool/coercion",
+    "closed bounded duplicate-free incident records with six public types",
+    "incidents remain separate from declared_component_total",
+    "output allowlist hashes, scores, declared incident types and bool/null declarations",
+    "no description or raw reviewer/incident identity output",
+    "every human, independence, blinding, chronology, custody and incident verification false",
+    "no acceptance decision or confirmatory judge/arbitration requirement",
+    "pure API, no files/models/keys/case execution"
+  ],
+  "draft_preserved": {
+    "code_sha256": "6631512ce54ccf617a2b03b0bdff718cbaa7d5be9cc2be4bfd43075db7138301",
+    "handoff_sha256": "4045ade91ff7833983765956813a596c5d1f4dfd09c06f19c0d20ebfb1143834",
+    "plan_sha256": "d33b76613e928aca78dce0f3adbb5f76b52e5fb0e703b7eb7c4e511e98bbe41e",
+    "root": "/tmp/specorganon-D124-staging-ffv4ct0l",
+    "test_sha256": "bafd3a0a53e819651c2529c8c2df6d5209ba787570267d16533bc7aa466a8205"
+  },
+  "error": "RatingIngressError fixed messages",
+  "module_byte_identical_to_draft": true,
+  "plan_commit": "776710a35c15160e975593d452590f3531ba93cd",
+  "schema": 1,
+  "scope_limits": [
+    "synthetic unit ratings only; no external human ratings supplied",
+    "root CLI/native file privacy integration and independent review are separate gates",
+    "digest equality does not authenticate custody, chronology or human authority",
+    "opaque supplied delivery content and actual blinding are not verified"
+  ],
+  "sources": {
+    "scripts/development_rating_ingress.py": "6631512ce54ccf617a2b03b0bdff718cbaa7d5be9cc2be4bfd43075db7138301",
+    "tests/test_development_rating_ingress.py": "947f931ac2f13b90a27a4a400a924d2060dc346c04da191b86b3bd4feef52968"
+  },
+  "stable_source_barrier": true,
+  "test_changes": [
+    "import sys",
+    "sys.path from repository root scripts",
+    "PUBLIC from repository root public_contract path"
+  ],
+  "verification": {
+    "compile311_exit_code": 0,
+    "compile312_exit_code": 0,
+    "passed311": 69,
+    "passed312": 69,
+    "report_path": "experiments/development/external_rating_ingress_2026-10-01/worker_checks/ingress_attempt01/report.json",
+    "report_sha256": "2691f264adc7f81905dd024a66d4b3e91e8b8a51dfd3b00b766e5599b719c434",
+    "ruff_exit_code": 0,
+    "runtime_root": "/tmp/specorganon-D124-worker-attempt01-o4hsmir_",
+    "sources_before_after_unchanged": true
+  }
+}

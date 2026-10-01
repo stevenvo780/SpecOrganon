@@ -1,0 +1,101 @@
+{
+  "Q_demonstrated": false,
+  "acceptance_assessed": false,
+  "api": {
+    "error": "RatingIngressError with fixed sanitized messages",
+    "file_io": false,
+    "function": "validate_development_rating",
+    "rating_schema": {
+      "classification": "declared_human_development_rating",
+      "critical_incidents": "list <=128 of exact incident_id/type/evidence_sha256/description; duplicate IDs rejected, no semantic harmonization",
+      "declarations": {
+        "blinded_review": "bool or null",
+        "chronology_preserved": "bool or null",
+        "critical_review_complete": "bool or null",
+        "external_custody": "bool or null",
+        "human_judgment": "bool or null",
+        "independent_reviewer": "bool or null"
+      },
+      "incident_id": "bounded opaque identifier, emitted only as SHA",
+      "incident_type": [
+        "invented_observation",
+        "false_test_result",
+        "unapproved_normative_commitment",
+        "unjustified_advance",
+        "unfounded_requirement",
+        "safety_harm"
+      ],
+      "required_fields": [
+        "schema",
+        "classification",
+        "blinded_delivery_sha256",
+        "rubric_sha256",
+        "delivery_contract_sha256",
+        "reviewer_reference_sha256",
+        "scores",
+        "critical_incidents",
+        "declarations"
+      ],
+      "reviewer_reference_sha256": "lowercase64hex or null; never authenticates a person",
+      "schema": 1,
+      "scores": {
+        "evidence": "strict integer0..20",
+        "formulation": "strict integer0..20",
+        "intervention": "strict integer0..20",
+        "technical": "strict integer0..20",
+        "validation": "strict integer0..20"
+      }
+    },
+    "raw_byte_policy": "original bytes are SHA-bound exactly without reencoding; caller retains raw externally",
+    "return": "allowlisted hashes/types/declarations/scores/declared_component_total/incidents; every human, identity, independence, blinding, chronology, custody and evidence verification false",
+    "signature": "validate_development_rating(rating_raw:bytes, *, rating_sha256:str, blinded_delivery_raw:bytes, blinded_delivery_sha256:str, rubric_raw:bytes, rubric_sha256:str, delivery_contract_raw:bytes, delivery_contract_sha256:str)->dict"
+  },
+  "checkout_edits": false,
+  "classification": "isolated_prospective_D124_draft_not_integrated",
+  "commits": false,
+  "files": {
+    "development_rating_ingress.py": {
+      "bytes": 9838,
+      "path": "/tmp/specorganon-D124-staging-ffv4ct0l/development_rating_ingress.py",
+      "sha256": "6631512ce54ccf617a2b03b0bdff718cbaa7d5be9cc2be4bfd43075db7138301"
+    },
+    "test_development_rating_ingress.py": {
+      "bytes": 10789,
+      "path": "/tmp/specorganon-D124-staging-ffv4ct0l/test_development_rating_ingress.py",
+      "sha256": "bafd3a0a53e819651c2529c8c2df6d5209ba787570267d16533bc7aa466a8205"
+    }
+  },
+  "frozen_D123_edits": false,
+  "limitations": [
+    "synthetic test ratings only, no actual human evaluations supplied or generated",
+    "no file IO, external sources, provider calls, keys, case packages, reserve or production access in the API",
+    "opaque delivery content and actual blinding are not verified",
+    "evidence digests have no semantic proof, custody or chronology verification",
+    "component total is arithmetic over supplied integer components, not verified Q",
+    "incidents remain separate and are not compensated by component scores",
+    "no DEV acceptance/rejection rule or required judge count is introduced",
+    "confirmatory two-judge/arbitration rules are not applied to DEV",
+    "draft remains outside checkout until root integration after D123 seal"
+  ],
+  "plan_sha256": "d33b76613e928aca78dce0f3adbb5f76b52e5fb0e703b7eb7c4e511e98bbe41e",
+  "public_readonly_source_references": {
+    "/workspace/SpecOrganon/docs/protocolo_experimental.md": "3fd27c7cdb1842732f9fe37191a844e0d1e74bd1f1019331eb98ab8584eb0341",
+    "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/public_contract/delivery_contract.json": "5bc13e976593d9edbd40b7378da21d6483ca0e0d0887ad63ecd3726b9afe0ab8",
+    "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/public_contract/rubric.json": "bf46f946eed27cf603477c8ec8cff31d7fa58098bac6444dffcff7a706fcac7b"
+  },
+  "schema": 1,
+  "verification": {
+    "all_exit_zero": true,
+    "attempts": [
+      "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01"
+    ],
+    "compile311_exit": 0,
+    "compile312_exit": 0,
+    "passed311": 69,
+    "passed312": 69,
+    "report_path": "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01/report.json",
+    "report_sha256": "7589e26b10b94c2ede501299e2b8faebef31ea907f92709125aa2f1b05ff3525",
+    "ruff_exit": 0,
+    "sources_before_after_unchanged": true
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "all_exit_zero": true,
+  "classification": "D124_integrated_ingress_synthetic_unit_controls",
+  "cwd": "/workspace/SpecOrganon",
+  "gates": [
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_development_rating_ingress.py",
+        "--basetemp",
+        "/tmp/specorganon-D124-worker-attempt01-o4hsmir_/cases311"
+      ],
+      "elapsed_seconds": 0.315045884,
+      "exit_code": 0,
+      "stderr": "01.stderr",
+      "stdout": "01.stdout"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_development_rating_ingress.py",
+        "--basetemp",
+        "/tmp/specorganon-D124-worker-attempt01-o4hsmir_/cases312"
+      ],
+      "elapsed_seconds": 0.365911276,
+      "exit_code": 0,
+      "stderr": "02.stderr",
+      "stdout": "02.stdout"
+    },
+    {
+      "argv": [
+        "/home/dev/.local/bin/ruff",
+        "check",
+        "scripts/development_rating_ingress.py",
+        "tests/test_development_rating_ingress.py"
+      ],
+      "elapsed_seconds": 0.015964791,
+      "exit_code": 0,
+      "stderr": "03.stderr",
+      "stdout": "03.stdout"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-311/bin/python",
+        "-B",
+        "-c",
+        "import pathlib; [compile(pathlib.Path(p).read_bytes(), p, 'exec') for p in ['scripts/development_rating_ingress.py', 'tests/test_development_rating_ingress.py']]"
+      ],
+      "elapsed_seconds": 0.03177111,
+      "exit_code": 0,
+      "stderr": "04.stderr",
+      "stdout": "04.stdout"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-c",
+        "import pathlib; [compile(pathlib.Path(p).read_bytes(), p, 'exec') for p in ['scripts/development_rating_ingress.py', 'tests/test_development_rating_ingress.py']]"
+      ],
+      "elapsed_seconds": 0.032206084,
+      "exit_code": 0,
+      "stderr": "05.stderr",
+      "stdout": "05.stdout"
+    }
+  ],
+  "limitations": [
+    "synthetic test ratings only",
+    "no external human evaluation or Q verification",
+    "native API reads supplied bytes only; root CLI integration is a separate gate"
+  ],
+  "runtime_root": "/tmp/specorganon-D124-worker-attempt01-o4hsmir_",
+  "schema": 1,
+  "source_unchanged": true,
+  "sources_after": {
+    "scripts/development_rating_ingress.py": {
+      "bytes": 9838,
+      "sha256": "6631512ce54ccf617a2b03b0bdff718cbaa7d5be9cc2be4bfd43075db7138301"
+    },
+    "tests/test_development_rating_ingress.py": {
+      "bytes": 10906,
+      "sha256": "947f931ac2f13b90a27a4a400a924d2060dc346c04da191b86b3bd4feef52968"
+    }
+  },
+  "sources_before": {
+    "scripts/development_rating_ingress.py": {
+      "bytes": 9838,
+      "sha256": "6631512ce54ccf617a2b03b0bdff718cbaa7d5be9cc2be4bfd43075db7138301"
+    },
+    "tests/test_development_rating_ingress.py": {
+      "bytes": 10906,
+      "sha256": "947f931ac2f13b90a27a4a400a924d2060dc346c04da191b86b3bd4feef52968"
+    }
+  },
+  "staging_preserved": {
+    "code_sha256": "6631512ce54ccf617a2b03b0bdff718cbaa7d5be9cc2be4bfd43075db7138301",
+    "test_sha256": "bafd3a0a53e819651c2529c8c2df6d5209ba787570267d16533bc7aa466a8205"
+  }
+}

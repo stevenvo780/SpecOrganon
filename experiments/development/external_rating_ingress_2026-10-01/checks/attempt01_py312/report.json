@@ -1,0 +1,73 @@
+{
+  "python": "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+  "commands": [
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_development_rating_ingress.py",
+        "tests/test_read_development_rating.py",
+        "--basetemp",
+        "/tmp/specorganon-D124-local-tests-08s43p20/cases"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "e783f7f0a360b99a84cda1becd00d1892cb56e4e9bffaeec38436922caa5fd79",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/dev/.local/bin/ruff",
+        "check",
+        "scripts/development_rating_ingress.py",
+        "scripts/read_development_rating.py",
+        "tests/test_development_rating_ingress.py",
+        "tests/test_read_development_rating.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/tmp/specorganon-D107-deps-re8v1j45/venv-312/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import pathlib,sys;[compile(pathlib.Path(p).read_bytes(),p,'exec') for p in sys.argv[1:]]",
+        "scripts/development_rating_ingress.py",
+        "scripts/read_development_rating.py",
+        "tests/test_development_rating_ingress.py",
+        "tests/test_read_development_rating.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "source_sha256": {
+    "scripts/development_rating_ingress.py": "6631512ce54ccf617a2b03b0bdff718cbaa7d5be9cc2be4bfd43075db7138301",
+    "scripts/read_development_rating.py": "3e7b2288dfa91ade1d74af9aac55f772c565a962cd80b79da94963ca4e248c0a",
+    "tests/test_development_rating_ingress.py": "947f931ac2f13b90a27a4a400a924d2060dc346c04da191b86b3bd4feef52968",
+    "tests/test_read_development_rating.py": "8c4e68556cbf2d5e24cf9a680fa4cad7c63eecd669d651350112e2990769ae26"
+  },
+  "source_unchanged": true,
+  "all_exit_zero": true,
+  "actual_human_evaluations": 0,
+  "formal_cells_executed": 0,
+  "paid_api_requests": 0
+}

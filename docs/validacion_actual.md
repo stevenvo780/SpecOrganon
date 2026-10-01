@@ -1,5 +1,32 @@
 # Auditoría de aceptación actual
 
+## D-124 · Ingreso de declaraciones de evaluación DEV
+
+[Dossier](../experiments/development/external_rating_ingress_2026-10-01/README.md):
+API pura y CLI real de lectura privada; forma cerrada, SHA de originales y
+referencias públicas fijas, sin escribir notas normalizadas. Cinco componentes
+enteros0..20; suma e incidentes separados. Declaraciones bool/null no autentican
+humanos ni custodia. Q/calidad/aceptación/celda formal false, sin imponer reglas
+nuevas del panel confirmatorio a DEV.
+
+Plan776710a/freeze4459ae2,87pruebas por Python3.11/3.12 y estáticos0.
+Catorce lecturas definitivas: seis aceptadas/ocho rechazadas; todos controles
+sintéticos. Suma100 conserva incidente visible; bytes distintos de valores
+iguales ligan SHA distintos; unknown y cuatro errores CLI tratados. Fuentes,
+HEAD y snapshots before/after iguales; archivos21miembros por intérprete
+cotejados contra originales.19archivos draft/22miembros preservados.
+Revisión detectó P2 de destinos `..`; fix temprano y siete variantes sin efectos
+verificados por worker/revisor, fuente/probe/freeze/capturas anteriores intactos.
+D123725 registros live+4docs históricos Git7d5a, recibo y herencia preservados.
+
+**C1 técnico D107; C2–C5 No demostrado; 0/24 formales.** No nuevas notas humanas,
+API experimental ni credenciales. Lectura cooperativa mismoUID no aporta
+custodia autenticada o snapshot global atómico. Siguen personas, elección/
+autorización/acceso, modelos/uso/H/costos reales; después confirmación/campo/
+transferencia. Los cortes siguientes conservan su alcance histórico.
+El dueño indica un revisor y custodio disponibles; la separación de personas
+y sus condiciones no están verificadas. El panel confirmatorio sigue pendiente.
+
 ## D-123 · Entrada controlada y desenlaces indeterminados
 
 [Dossier](../experiments/development/authorized_route_entry_2026-10-01/README.md):

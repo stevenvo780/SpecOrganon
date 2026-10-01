@@ -1,0 +1,68 @@
+{
+  "Q_demonstrated": false,
+  "api": {
+    "archive": "archive_originals(root:Path,output:Path,manifest:Path)->dict; alias archive",
+    "create_cli": "python -B archive_originals.py --root ROOT --archive NEW_TAR --inventory NEW_MANIFEST",
+    "invalid_inputs": "fixed ArchiveOriginalsError, CLIexit2; outputs existing/inside source and symlinks/hardlinks/special files rejected",
+    "verify": "verify_originals(archive_path:Path,manifest:Path)->dict; alias verify",
+    "verify_cli": "python -B archive_originals.py --verify --archive TAR --inventory MANIFEST"
+  },
+  "archive_extracted": false,
+  "archived_code_executed": false,
+  "classification": "D124_originals_archive_worker_handoff",
+  "commits": false,
+  "custody_authenticated": false,
+  "frozen_helper": {
+    "import": "importlib spec/module using pinned bytes, no bytecode cache written",
+    "modified": false,
+    "path": "experiments/development/authorized_route_entry_2026-10-01/archive_runtimes.py",
+    "sha256": "ac11678d2312bd3c0bc77aac72a56ca9659e7ffb478c29a0e09f9676ff38d456"
+  },
+  "gates": {
+    "archive_cli311_exit": 0,
+    "compile311_exit": 0,
+    "compile312_exit": 0,
+    "five_control_assertions311_exit": 0,
+    "five_control_assertions312_exit": 0,
+    "frozen_helper_before_after_unchanged": true,
+    "report_path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks01/report.json",
+    "report_sha256": "071b24e6d5c84c28192b65dbd13f3085ea49932ef1f35d7a7c4cdd3838adac9e",
+    "ruff_exit": 0,
+    "verify_cli311_exit": 0,
+    "verify_cli312_exit": 0,
+    "wrapper_sources_before_after_unchanged": true
+  },
+  "limitations": [
+    "finite synthetic originals only",
+    "originals remain caller scoped; no external custody authentication",
+    "no extraction, restore or execution of archived sources",
+    "old D123 helper is reused intact",
+    "no API/tests/capture_checks/integration/docs changed by this task"
+  ],
+  "root_integration_originals": "Root supplies integration_result and finite original root; wrapper ready for independent root archive/verify gates",
+  "schema": 1,
+  "scope_manifest": {
+    "excluded": [
+      "caches",
+      "pytest fixture trees",
+      "symlinks/hardlinks/special files"
+    ],
+    "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/staging_scope.json",
+    "selected_regular_files": 19,
+    "sha256": "fe3c12a51bf1d2b0b15963fca76e9aac1225ea5ab04e495c966e7aef2f1bfcc6",
+    "source_and_copies_bytes_modes_sha_equal_after_gates": true
+  },
+  "stable_source_barrier": true,
+  "staging_archive": {
+    "bytes": 11255,
+    "inventory_path": "experiments/development/external_rating_ingress_2026-10-01/provenance/staging_originals.inventory.json",
+    "inventory_sha256": "9bcd442e2ec8bf9bfb7a68e3f89091e6850b98092845ff0e0a144af13d791d35",
+    "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/staging_originals.tar.gz",
+    "sha256": "3b80473181fdd5aadde8aaf9d1ba876ecb336dd58b1b0064c2de1d132b565b23",
+    "verified_entries": 22
+  },
+  "wrapper": {
+    "path": "experiments/development/external_rating_ingress_2026-10-01/archive_originals.py",
+    "sha256": "71a3a50b96fa4c61427504bfad896d233f6e6fc534428651d08326cc8682d584"
+  }
+}

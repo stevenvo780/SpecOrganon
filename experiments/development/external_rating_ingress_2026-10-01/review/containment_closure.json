@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "verdict": "P2_CLOSED_PENDING_FINAL_FROZEN_GATES",
+  "open_material_findings": [],
+  "finding_closed": "D124-archive-containment",
+  "fixed_source_pin": {
+    "path": "experiments/development/external_rating_ingress_2026-10-01/archive_originals.py",
+    "bytes": 4185,
+    "sha256": "f02f5329b16e9341d766d0328f06b015af5223952e7ae9aa7051aacf7c69aa9b"
+  },
+  "previous_source_pin": {
+    "path": "experiments/development/external_rating_ingress_2026-10-01/review/archive_originals_pre_fix_probed.py",
+    "bytes": 4066,
+    "sha256": "71a3a50b96fa4c61427504bfad896d233f6e6fc534428651d08326cc8682d584"
+  },
+  "fix": "archive_originals.py26-29 rejects.. before absolute conversion;67-70 applies all three paths before tree;82-85 applies both verify paths before directory/file/helper callbacks",
+  "independent_PURE_probe": {
+    "command_pin": {
+      "path": "experiments/development/external_rating_ingress_2026-10-01/review/archive_rejection_postfix.command.json",
+      "bytes": 514,
+      "sha256": "23754f05b62e99149950a26f1c9fdaaeaaa821dc95ee208fc3f400bd4e59d561"
+    },
+    "stdout_pin": {
+      "path": "experiments/development/external_rating_ingress_2026-10-01/review/archive_rejection_postfix.stdout",
+      "bytes": 1872,
+      "sha256": "5ae30e3b6da971d0e5a7580ea786e56ff00c567eb6bf1399cf53e29a6722cb2a"
+    },
+    "all_seven_variants_rejected_before_any_callback": true,
+    "original_IO": false
+  },
+  "worker_focused_checks": {
+    "report_pin": {
+      "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/report.json",
+      "bytes": 4675,
+      "sha256": "4ba89922bef17630179bde82262d4ba9b3f242191ca4b19f5107ccc2ccdde3e4"
+    },
+    "seven_gate_exit_codes_verified": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "actual_stdout_seven_parent_rejections_plus_six_prior_controls_per_Py_verified": true,
+    "fixed_before_after_live_source_equal": true,
+    "pre_fix_source_retained_and_equals_reviewer_probed": true,
+    "frozen_D123_helper_sha_verified": true,
+    "streams": [
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/01.stdout",
+        "bytes": 320,
+        "sha256": "052fba360a3a189c30d19dbf61281d96d59b57cebeb7fa887b20d53d0b63d2aa"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/01.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/02.stdout",
+        "bytes": 320,
+        "sha256": "7bd097008aeeb573d55aed1aebdf8c2ec715f46624cb6526cf798667f403026f"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/02.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/03.stdout",
+        "bytes": 343,
+        "sha256": "bd3955d46fc3f24ac3569b08028ec89e22cba0272a5b0060c7ff59f0ec5992cf"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/03.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/04.stdout",
+        "bytes": 343,
+        "sha256": "bd3955d46fc3f24ac3569b08028ec89e22cba0272a5b0060c7ff59f0ec5992cf"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/04.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/05.stdout",
+        "bytes": 19,
+        "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/05.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/06.stdout",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/06.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/07.stdout",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "experiments/development/external_rating_ingress_2026-10-01/provenance/checks02/07.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "integration_snapshot_correction": {
+    "source_pin": {
+      "path": "experiments/development/external_rating_ingress_2026-10-01/integration_cli.py",
+      "bytes": 7115,
+      "sha256": "699636ed1ad869aec459039f3f4dbe46dbefcd784f19049b42c0c89872fe36d8"
+    },
+    "exact_only_changes_from_freeze01": "persist after snapshot and both complete before/after arrays per control; no other source delta",
+    "pending_actual_capture": "source fix only, final CLI arrays not audited until root supplies closed frozen captures"
+  },
+  "reviewer_probe_Ruff_compile_exit_codes": [
+    0,
+    0
+  ],
+  "final_PASS_issued": false,
+  "formal_progress": "0/24",
+  "actual_human_ratings": 0,
+  "provider_requests": 0
+}

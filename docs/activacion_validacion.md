@@ -1,5 +1,25 @@
 # Distancia hasta la validación de GOAL
 
+## Actualización D-124 · 2026-10-01 UTC
+
+El [ingreso de evaluaciones](../experiments/development/external_rating_ingress_2026-10-01/README.md)
+ya lee originales privados sin modificarlos y verifica formato/hashes.
+87pruebas por Python3.11/3.12 y siete CLI sintéticos por intérprete; incidentes
+visibles incluso con suma100 y declaraciones de identidad/independencia/
+custodia sin verificar. P2 de archivado `..` corregido y cerrado por revisión;
+fuentes, originales, archivos y evidencia anterior preservados.
+
+La [activación siguiente](../experiments/development/external_rating_ingress_2026-10-01/next_activation.md)
+requiere personas competentes y custodia, elección del dueño y autorización
+de gasto/acceso, telemetría y medidas reales. El dueño indica un revisor y
+custodio disponibles; se pidió aclarar si son personas distintas. Competencia,
+independencia, custodia y cegamiento efectivos aún no verificados; el panel
+confirmatorio sigue pendiente. La respuesta no autoriza gasto.
+Luego doceR1→adaptación/freeze→doceR2/selección→confirmación→campo/transferencia.
+**C1 técnico; C2–C5 No demostrado; 0/24.** Ninguna nota sintética equivale a Q
+humana, ni repetir estos controles demuestra aporte o impacto real.
+Los cortes siguientes permanecen históricos.
+
 ## Actualización D-123 · 2026-10-01 UTC
 
 La [entrada controlada](../experiments/development/authorized_route_entry_2026-10-01/README.md)

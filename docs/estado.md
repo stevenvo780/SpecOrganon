@@ -1,5 +1,27 @@
 # Estado de reanudación
 
+**D-124 permite leer evaluaciones externas DEV:**
+[dossier](../experiments/development/external_rating_ingress_2026-10-01/README.md).
+API pura y CLI de lectura privada con hashes, cinco notas enteras0..20,
+incidentes separados y originales sin cambios. Suma100 con incidente sigue
+siendo una declaración; Q, independencia, custodia y aceptación no verificadas.
+
+Plan776710a/freeze4459ae2: **87 pruebas por Python3.11/3.12**, estáticos0 y
+siete CLI nuevos por intérprete (tres aceptados/cuatro rechazados). Dos archivos
+de21 miembros cotejados contra originales; snapshots before/after persistidos,
+ocho fuentes/HEAD intactos.19 archivos originales del borrador conservados.
+P2 del archivado con rutas `..` detectado por revisión, corregido y reproducido
+sin efectos; freeze/capturas anteriores permanecen. D123725 registros live y
+cuatro docs históricos Git, recibo y cierre heredado preservados.
+
+**C1 técnico D107; C2–C5 No demostrado; 0/24 formales.** Sin API experimental,
+credenciales o notas humanas. La [puerta siguiente](../experiments/development/external_rating_ingress_2026-10-01/next_activation.md)
+requiere elección/autorización/acceso, revisores/custodio y mediciones reales,
+luego12R1→adaptación/freeze→12R2/selección→confirmación→campo/transferencia.
+El dueño indica un revisor y custodio disponibles; falta aclarar si coinciden
+en una persona y verificar los roles. El panel confirmatorio sigue pendiente.
+Los controles sintéticos no sustituyen esa evidencia. Cortes siguientes históricos.
+
 **D-123 agrega entrada Responses futura y lectura de respuestas rechazadas:**
 [dossier](../experiments/development/authorized_route_entry_2026-10-01/README.md).
 Flag de gasto y declaración privada ligada a run/modelo/recursos/fuentes,

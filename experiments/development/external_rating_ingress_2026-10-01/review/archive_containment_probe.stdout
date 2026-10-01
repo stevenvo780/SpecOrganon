@@ -1,0 +1,32 @@
+{
+  "classification": "PURE_mock_containment_precheck_probe_no_real_filesystem_or_archive_IO",
+  "source_path": "experiments/development/external_rating_ingress_2026-10-01/archive_originals.py",
+  "source_bytes": 4066,
+  "source_sha256": "71a3a50b96fa4c61427504bfad896d233f6e6fc534428651d08326cc8682d584",
+  "inputs": [
+    "/tmp/D124-DECLARED-ORIGINAL",
+    "/tmp/D124-DECLARED-ALIAS/../D124-DECLARED-ORIGINAL/archive.tar.gz",
+    "/tmp/D124-DECLARED-ALIAS/../D124-DECLARED-ORIGINAL/inventory.json"
+  ],
+  "normalized_destinations": [
+    "/tmp/D124-DECLARED-ORIGINAL/archive.tar.gz",
+    "/tmp/D124-DECLARED-ORIGINAL/inventory.json"
+  ],
+  "delegated_archive_call": [
+    [
+      "/tmp/D124-DECLARED-ORIGINAL",
+      "/tmp/D124-DECLARED-ALIAS/../D124-DECLARED-ORIGINAL/archive.tar.gz",
+      "/tmp/D124-DECLARED-ALIAS/../D124-DECLARED-ORIGINAL/inventory.json"
+    ]
+  ],
+  "delegate_entered_with_destinations_inside_original": true,
+  "mocks": [
+    "_tree",
+    "_directory",
+    "_helper.archive",
+    "os.path.lexists=False"
+  ],
+  "assumption": "declared existing nonsymlink directories and absent output files; demonstrated path arithmetic only",
+  "no_real_originals_created_or_changed": true,
+  "no_provider_or_credentials": true
+}

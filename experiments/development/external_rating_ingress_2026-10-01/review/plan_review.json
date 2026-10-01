@@ -1,0 +1,183 @@
+{
+  "schema": 1,
+  "classification": "independent_prospective_plan_and_isolated_draft_review",
+  "verdict": "REVIEW_COMPLETE_PENDING_CLI_FREEZE_AND_FINAL_GATES",
+  "open_material_findings": [],
+  "review_scope": {
+    "plan_commit": "776710a35c15160e975593d452590f3531ba93cd",
+    "plan_pin": {
+      "path": "/workspace/SpecOrganon/experiments/development/external_rating_ingress_2026-10-01/plan.md",
+      "bytes": 4044,
+      "sha256": "209c76e85dc7311d15575de96f409457bef2931e48c19a89e475f1285f0ac9d5"
+    },
+    "GOAL_read_in_full": true,
+    "API_draft_and_all_tests_read": true,
+    "source_pins": [
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/development_rating_ingress.py",
+        "bytes": 9838,
+        "sha256": "6631512ce54ccf617a2b03b0bdff718cbaa7d5be9cc2be4bfd43075db7138301"
+      },
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/test_development_rating_ingress.py",
+        "bytes": 10789,
+        "sha256": "bafd3a0a53e819651c2529c8c2df6d5209ba787570267d16533bc7aa466a8205"
+      }
+    ],
+    "public_contract_pins": [
+      {
+        "path": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/public_contract/rubric.json",
+        "bytes": 3281,
+        "sha256": "bf46f946eed27cf603477c8ec8cff31d7fa58098bac6444dffcff7a706fcac7b"
+      },
+      {
+        "path": "/workspace/SpecOrganon/experiments/development/coordinated_contract_2026-10-01/public_contract/delivery_contract.json",
+        "bytes": 6630,
+        "sha256": "5bc13e976593d9edbd40b7378da21d6483ca0e0d0887ad63ecd3726b9afe0ab8"
+      }
+    ],
+    "CLI_reviewed": false,
+    "CLI_limit": "not present in initial scoped file listing; prospective gates below require code/captured evidence before final acceptance",
+    "no_tests_or_native_API_executed_by_reviewer": true
+  },
+  "checked_facts": [
+    {
+      "file": "/tmp/specorganon-D124-staging-ffv4ct0l/development_rating_ingress.py",
+      "lines": [
+        61,
+        89,
+        116,
+        127
+      ],
+      "fact": "All supplied bytes require exact lowercase SHA, bounded immutable bytes; closed JSON rejects duplicate keys, floating/nonfinite values, invalid UTF8 and malformed structure with fixed messages; rubric/contract fixed SHA match original D118."
+    },
+    {
+      "file": "/tmp/specorganon-D124-staging-ffv4ct0l/development_rating_ingress.py",
+      "lines": [
+        123,
+        134,
+        138,
+        166
+      ],
+      "fact": "Schema bool/int distinction and five integer components0..20; six rubric critical types independently inventoried with bounded count, unique IDs and description/evidence hashes. A total100 never compensates for a critical incident or decides acceptance."
+    },
+    {
+      "file": "/tmp/specorganon-D124-staging-ffv4ct0l/development_rating_ingress.py",
+      "lines": [
+        135,
+        137,
+        154,
+        177
+      ],
+      "fact": "Declarations require explicit bool/null with no truthy coercion; all human/independence/blinding/custody/chronology/Q/acceptance/formal verification flags remain false. Output allowlist returns scores, hashes and typed counts; no original descriptions or IDs."
+    },
+    {
+      "file": "/tmp/specorganon-D124-staging-ffv4ct0l/development_rating_ingress.py",
+      "lines": [
+        98,
+        103,
+        171,
+        174
+      ],
+      "fact": "Opaque delivery content/redaction/semantic correctness and incident evidence are explicitly unverified. Incident deduplication/harmonization and confirmatory two-judge/arbitration rules are not invented for DEV."
+    }
+  ],
+  "prospective_CLI_gates": [
+    {
+      "severity_if_missing": "P2",
+      "risk": "Path alias or file replacement during private read can invalidate the claimed private single-link original snapshot. This is a design gate, not a reproduced finding in nonexistent CLI.",
+      "requested_check": "Reject symlink parents/terminal; validate fd and named regular-file identity dev/inode/uid/mode/nlink/size/mtime/ctime before and after bounded read, closing descriptor on every path. Include deterministic replacement/hardlink-added/read-race negatives.",
+      "scope": "cooperative same-UID custody; do not claim external authentication"
+    },
+    {
+      "severity_if_missing": "P2",
+      "risk": "Opening FIFO/device before validation may block or read inappropriate unbounded input despite a private-file precheck.",
+      "requested_check": "Use nofollow+nonblock open and fstat regular check before read; consume at mostcap+1; reject overrun/truncation/changes. Finite FIFO/directory/symlink/oversize and parent-policy tests."
+    },
+    {
+      "severity_if_missing": "P2",
+      "risk": "Parser, OSError or traceback text can expose a private filename or supplied raw text on rejection.",
+      "requested_check": "CLI parser/error handlers must emit fixed allowlisted messages, not argv/path/raw exception text. Negative tests include private basename/content sentinels, malformed Unicode/JSON/digests and duplicate fields; bind fixed public-contract originals independently."
+    }
+  ],
+  "draft_capture_review": {
+    "classification": "isolated_D124_draft_synthetic_controls",
+    "owner_capture_all_five_commands_exit_zero": true,
+    "owner_recorded_tests_per_interpreter": 69,
+    "actual_stdout_counts_verified": true,
+    "before_after_live_staging_source_bytes_verified": true,
+    "streams_pinned": [
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01/01.stdout",
+        "bytes": 99,
+        "sha256": "3dde8d2f185555d83fc5f27d80e6a18386062e315533362fd8723b8c421724c8"
+      },
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01/01.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01/02.stdout",
+        "bytes": 99,
+        "sha256": "3dde8d2f185555d83fc5f27d80e6a18386062e315533362fd8723b8c421724c8"
+      },
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01/02.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01/03.stdout",
+        "bytes": 19,
+        "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+      },
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01/03.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01/04.stdout",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01/04.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01/05.stdout",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/specorganon-D124-staging-ffv4ct0l/attempt01/05.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "reviewer_did_not_rerun": true,
+    "not_a_final_D124_gate": true
+  },
+  "remaining_final_gates": [
+    "inspect actual root CLI and its tests",
+    "frozen source bytes before/after both exact Python environments",
+    "actual private-original CLI valid100+critical, formatting-different SHA, unknown declarations and privacy/binding negatives; bytes/modes unchanged",
+    "original archives and D123 baseline preservation",
+    "docs claim limits and sealer live/index/HEAD closure after final review"
+  ],
+  "limits": {
+    "human_ratings_supplied": 0,
+    "formal_progress": "0/24",
+    "C1": "technical_D107_preserved",
+    "C2_C5": "not_demonstrated",
+    "Q_demonstrated": false,
+    "human_authority_verified": false,
+    "provider_requests": 0,
+    "credentials_read": false,
+    "originals_changed": false,
+    "final_PASS_issued": false
+  }
+}
