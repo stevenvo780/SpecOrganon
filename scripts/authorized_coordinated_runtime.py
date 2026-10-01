@@ -84,7 +84,7 @@ def preflight(run_dir, directory, *, expected_checkpoint):
         report = journal.report()
         plan, _state, status, calls = observed._native_snapshot(run_dir, expected_checkpoint=expected_checkpoint)
         observed._check_binding(report, plan, status, run_dir)
-        _require(status["state"] in {"prepared", "paused"} and report["state"] == "ready", "not_startable")
+        _require(status["state"] in {"prepared", "paused"} and report["state"] in {"released", "paused"}, "not_startable")
         binding = _binding(plan, status, report, run_dir, directory)
         return {"schema": 1, "classification": "offline_coordinated_route_preflight",
                 "binding": binding, "checkpoint_sha256": status["checkpoint_sha256"],
