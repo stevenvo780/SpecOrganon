@@ -2,12 +2,18 @@
 
 Metodología operativa y toolkit para formular un problema con sus actores y valores, investigarlo, comparar intervenciones, construir una solución mediante SDD y validar sus efectos. El caso alimentario sirve para probar el método; los artefactos y comandos son reutilizables en otros dominios. [GOAL.md](GOAL.md) fija el objetivo y [metodologia.md](docs/metodologia.md) describe los contratos de las nueve fases.
 
-**Estado:** versión de trabajo. El funcionamiento técnico de las rutas probadas tiene evidencia en tests y en una instalación limpia; el aporte frente a otros métodos y el impacto real de una intervención permanecen sin demostrar. [Estado y veredictos](docs/estado.md).
+**Estado:** MVP local operativo. El funcionamiento técnico de las rutas probadas tiene evidencia en tests y en una instalación limpia; el aporte frente a otros métodos y el impacto real de una intervención permanecen sin demostrar. [Estado y veredictos](docs/estado.md).
 
-**Prioridad actual:** cerrar un [MVP usable](docs/mvp.md) de filosofía,
-ciencia, ingeniería y validación con proyectos locales, agentes nativos y
-los recursos presentes. El hito exige un resultado útil comprobado; la
-evaluación final de aporte e impacto sigue pendiente.
+**Prioridad actual:** aplicar el [MVP usable](docs/mvp.md) de filosofía,
+ciencia, ingeniería y validación a proyectos manejables con agentes nativos y
+los recursos presentes. La evaluación final de integridad, aporte,
+impacto y transferencia sigue pendiente.
+
+**Descarga:** [paquete instalable del MVP local](releases/mvp-local-20261002/specorganon-mvp-local-20261002.zip),
+[wheel](releases/mvp-local-20261002/specorganon-0.1.0-py3-none-any.whl) e
+[instrucciones y hashes](releases/mvp-local-20261002/README.md).
+Los [paquetes anteriores](releases/historical/dist-20261002/README.md) se
+conservan como archivos históricos de desarrollo.
 
 ## Empezar un proyecto local con un agente
 
