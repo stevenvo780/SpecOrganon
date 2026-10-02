@@ -1,0 +1,100 @@
+{
+  "regression": {
+    "argv": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_case_report.py",
+      "tests/test_local_workflow.py",
+      "tests/test_local_interfaces.py",
+      "tests/test_method.py",
+      "tests/test_approval_security.py",
+      "tests/test_signed_phase_review.py",
+      "tests/test_local_evidence_archive_gate.py",
+      "tests/test_signed_test_execution.py",
+      "tests/test_signed_test_execution_transport.py",
+      "tests/test_signed_phase_review_interfaces.py",
+      "tests/test_ledger.py",
+      "tests/test_runner.py",
+      "--tb=short"
+    ],
+    "exit_code": 0,
+    "passed": 263,
+    "seconds": 52.22,
+    "source": "actual terminal execution"
+  },
+  "new_suites_python311": {
+    "passed": 52,
+    "streams_and_receipt": "../run01/entry/execution_round02",
+    "seconds": 15.67
+  },
+  "new_suites_python312": {
+    "passed": 52,
+    "seconds": 15.79,
+    "interpreter": "/tmp/specorganon-mvp-py312-niuWLb/bin/python",
+    "installed_wheel": true,
+    "exit_code": 0
+  },
+  "installed_smoke": {
+    "interpreter": "/tmp/specorganon-mvp-installed-UF9XNk/bin/python",
+    "argv": [
+      "scripts/clean_smoke.py",
+      "/workspace/SpecOrganon"
+    ],
+    "exit_code": 0,
+    "package_from_site_packages": true,
+    "discovered_mcp_tools": 24,
+    "cli_commands_exercised": 15,
+    "mcp_tools_exercised": 15,
+    "fixture_phases_accepted": 9,
+    "invalid_inputs_preserved_ledger": true,
+    "synthetic_signatures_rejected_when_invalid": true,
+    "sigkill_mcp_resume": true,
+    "trust_removal_reopened": true,
+    "scope": "synthetic integration control, not human approval or field impact"
+  },
+  "installed_local_projects": "../run01/installed_local_parity.json",
+  "statics": {
+    "ruff": "passed",
+    "compileall": "passed",
+    "skill_validator": "passed with system python",
+    "git_diff_check": "passed"
+  },
+  "release_wheel": {
+    "filename": "specorganon-0.1.0-py3-none-any.whl",
+    "sha256": "0e8f11c48cf4e097d9e02c12b8f7b8165db69160e46f49e5df389505f32e4a9a",
+    "tested_wheel_sha256": "72c8f2145312570e3587775414c65bd9e9d3ca9a5a29ea4fd311eb35413374fc",
+    "python_modules_equal_to_tested_wheel": true,
+    "python_module_hashes": {
+      "specorganon/__init__.py": "cbfd011a2da30410ed99125aaf779fb4ad070c49834a5bbdd932a0125f269f56",
+      "specorganon/anchor.py": "6e12048244f3d603b1d4f7c16d9284c78676dba207c195a69d1a8ba2a9947d1c",
+      "specorganon/approval.py": "e93c47868aa3cc96cb2f57336985377d2159a8aaf4b338a524226c66564c64a0",
+      "specorganon/cli.py": "5a66c5290d77dfd4980e0ed4824d85d008a5cda67602f67a12f1b1c52c390bbc",
+      "specorganon/engine.py": "9c12dd21b4b7da4811bc32afce73b9be46cb31226ace179a147e309c578723f4",
+      "specorganon/field_adjusted_candidate.py": "88a70560fbe0907ad1e3cb3a2e25dabb7fc0c02eaa42db6f6cda3cad2178971c",
+      "specorganon/field_attestation.py": "62e2f75ee95bb1535c27be35cfb0cb175def146b380407de350ee5e2e20b10ba",
+      "specorganon/field_effect_analysis.py": "cf3ab0190e87702464e1482c95847a55af5f1ba46d9936bb74553fa66984ef9a",
+      "specorganon/field_flows.py": "112c3c3295224697c5b8d7c93841f411e8a6dc72c0dca1961bad6dcedd495dd7",
+      "specorganon/field_guardrails.py": "97f93030259db9d66ab88c858868bf481758c52a3e7dca410be044b196eab777",
+      "specorganon/field_power_sensitivity.py": "aa973e17ee4df24c8ba4b9a181967a92216cf9be24d7d36e08c8363beaee7e4e",
+      "specorganon/field_source_content_audit.py": "1fb828ef82fbbe9c63efca3a2c8d32c9a716eb2aa2fca7f1421bfea4daead37f",
+      "specorganon/field_source_digest_audit.py": "820b3d1b310e80d002c74c9dcb54984449bc0fff3ba5079cdc1221818e6a3fbe",
+      "specorganon/field_trial_design.py": "f0e937ba77d894e9f56088d7f80b6e3fef182a4b1c153e45a1f185b1a6407cb0",
+      "specorganon/ledger.py": "da40076304d044151dacd93ae4c675139fa88b1b0deb8f929017829bc9c3871d",
+      "specorganon/lot_journal.py": "ce994e599fa36684038d81b8ea2133ba39de6039f3ecc6b9f20dc1338a06c7b6",
+      "specorganon/ratio_audit.py": "55bf8b9174d49985ce69b503b113541bc313f992ca4fced9532fb0f0201121d1",
+      "specorganon/report.py": "5820adf9ac1dbe143e63c9bfbefb73bf3d112c029f92d8fb85b2d5c1861a570e",
+      "specorganon/review_provenance.py": "3b2a59bd195a9b77819f716d35ba8527180235cd978030dc4b7351dc8dc033a3",
+      "specorganon/runner.py": "2a165ff745b083e2f10cdb9f29f22f6fc8d31250cb2933c7ddd1e048edbd75e3",
+      "specorganon/server.py": "bd2a5597119f577ecf8f4d02bb05b6b6a0c49b5f7212cb1fc5cddcaed8061ba3",
+      "specorganon/source_passages.py": "5d1e6ced5e82e4f0285b138acadc82817e097f5b0dfdd0a71d0d7729eb557459",
+      "specorganon/test_execution.py": "2952534b0b709513224e3bb25f155e282ed5dd63a41bf99e2fa0a1d2bf400d24",
+      "specorganon/test_observation.py": "02e5a316e44f90e67f75797624fd6f243b6516df4be3c9aa3b11974f6b2af5a0",
+      "specorganon/workflow.py": "3f3980119743962a210beffdc2b0f8d845d53bb25a0cc3eace3eacaa347ad5f2"
+    }
+  },
+  "negative_setup_preserved": {
+    "old_python312_environment": "An initial test invocation used the preserved D107 installed wheel, so new modules were unavailable. No original environment was modified. The correct new wheel was installed in a new isolated Python3.12 environment and all52 new checks passed."
+  }
+}

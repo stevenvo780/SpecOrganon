@@ -1,0 +1,423 @@
+{
+  "schema": 1,
+  "steps": [
+    {
+      "op": "put",
+      "id": "p1",
+      "kind": "problem",
+      "text": "Necesitamos comprobar que un agente puede reproducir el análisis del XLSX escolar disponible sin cambiar la fuente, el plan o los resultados históricos.",
+      "refs": [],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "a1",
+      "kind": "actor",
+      "text": "El dueño fija el propósito; un agente implementa y otro revisa los resultados locales.",
+      "refs": [
+        "p1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "b1",
+      "kind": "boundary",
+      "text": "Workspace de desarrollo y archivos disponibles. Sin API adicional ni acciones de campo.",
+      "refs": [
+        "p1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "advance",
+      "phase": "frame"
+    },
+    {
+      "op": "put",
+      "id": "c1",
+      "kind": "concept",
+      "text": "Autonomía es ejecutar dentro del encargo; reproducibilidad es poder repetir y cotejar resultados.",
+      "refs": [
+        "p1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "s1",
+      "kind": "assumption",
+      "text": "Las herramientas y archivos locales permiten comprobar este proyecto en el entorno actual.",
+      "refs": [
+        "p1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "f1",
+      "kind": "frame_option",
+      "text": "Encuadrar el problema como falta de garantías externas en cada transición.",
+      "refs": [
+        "p1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "f2",
+      "kind": "frame_option",
+      "text": "Encuadrar el problema como una experiencia local usable con confianza declarada y evidencia verificable.",
+      "refs": [
+        "p1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "n1",
+      "kind": "norm",
+      "text": "Aplicar el mandato del dueño al MVP: usar recursos presentes, preservar historia, delegar decisiones técnicas reversibles y mantener explícitos los límites de las conclusiones.",
+      "refs": [
+        "p1",
+        "a1"
+      ],
+      "data": {
+        "authorization_scope": "MVP local de filosofia, ciencia e ingenieria; recursos presentes; decisiones tecnicas reversibles delegadas; preservar originales y declarar limites.",
+        "origin": "existing_owner_mandate",
+        "identity_authenticated": false
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "critique"
+    },
+    {
+      "op": "put",
+      "id": "q1",
+      "kind": "question",
+      "text": "¿Podemos producir y revisar una entrega local reproducible con los recursos presentes?",
+      "refs": [
+        "p1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "h1",
+      "kind": "hypothesis",
+      "text": "Un recorrido local explícito permite ejecutar y revisar el proyecto sin un registro de firmas externo.",
+      "refs": [
+        "q1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "pr1",
+      "kind": "protocol",
+      "text": "Registrar criterios, ejecutar comandos reales, conservar streams y cotejar resultados antes de evaluar.",
+      "refs": [
+        "q1",
+        "h1"
+      ],
+      "data": {
+        "population": "Este proyecto de desarrollo expuesto, en el entorno actual",
+        "method": "Ejecución local, hashes de originales, cotejo objetivo y revisión nativa separada",
+        "comparison": "JSON histórico del análisis escolar",
+        "uncertainty": "Un entorno y un proyecto; sin causalidad de campo ni comparación confirmatoria"
+      }
+    },
+    {
+      "op": "put",
+      "id": "e0",
+      "kind": "evidence",
+      "text": "Material local disponible y situación anterior al recorrido de este proyecto.",
+      "refs": [
+        "pr1"
+      ],
+      "data": {
+        "source": "cases/school_waste/source.xlsx and scripts/analyze_school_waste.py",
+        "locator": "pinned source and plan hashes",
+        "value": 0,
+        "scope": "before reproduction",
+        "origin": "observed",
+        "date": "2026-10-01",
+        "method": "Read actual local files and case state",
+        "metric_key": "exact_reproduction",
+        "unit": "match"
+      }
+    },
+    {
+      "op": "put",
+      "id": "i1",
+      "kind": "indicator",
+      "text": "Coincidencia exacta de la reproducción con el resultado histórico.",
+      "refs": [
+        "p1",
+        "n1",
+        "e0"
+      ],
+      "data": {
+        "metric": "exact_reproduction",
+        "unit": "match"
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "study"
+    },
+    {
+      "op": "put",
+      "id": "inf1",
+      "kind": "inference",
+      "text": "La entrada firmada conserva su bloqueo si no hay registro; el modo local declara otra confianza.",
+      "refs": [
+        "e0",
+        "h1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "advance",
+      "phase": "observe"
+    },
+    {
+      "op": "put",
+      "id": "syn1",
+      "kind": "synthesis",
+      "text": "Este proyecto necesita mediciones locales y revisión separada; no necesita un ensayo pagado para empezar.",
+      "refs": [
+        "inf1",
+        "e0"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "u1",
+      "kind": "uncertainty",
+      "text": "La ejecución local no autentica custodios, personas ni mejoras causales fuera del software observado.",
+      "refs": [
+        "syn1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "advance",
+      "phase": "explain"
+    },
+    {
+      "op": "put",
+      "id": "o1",
+      "kind": "option",
+      "text": "Configurar firmas externas para todas las revisiones y reportes.",
+      "refs": [
+        "syn1",
+        "n1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "o2",
+      "kind": "option",
+      "text": "Usar un modo local explícito, agentes separados y comprobaciones reales, preservando el modo firmado.",
+      "refs": [
+        "syn1",
+        "n1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "cmp1",
+      "kind": "comparison",
+      "text": "La primera opción aporta control de claves externo; la segunda permite operar en el workspace de confianza con menor configuración inicial y sin afirmar autenticación.",
+      "refs": [
+        "o1",
+        "o2"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "risk1",
+      "kind": "risk",
+      "text": "Una etiqueta o un recibo declarados pueden ser falsos; conservar streams y revisar las fuentes; no extrapolar el resultado local a campo o superioridad metodológica.",
+      "refs": [
+        "o2"
+      ],
+      "data": {}
+    },
+    {
+      "op": "advance",
+      "phase": "compare"
+    },
+    {
+      "op": "put",
+      "id": "d1",
+      "kind": "decision",
+      "text": "Elegir la ruta local para este proyecto, dentro de la delegación técnica del dueño. El dueño no seleccionó personalmente esta arquitectura.",
+      "refs": [
+        "cmp1",
+        "n1",
+        "e0"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "req1",
+      "kind": "requirement",
+      "text": "Conservar compuertas y trazabilidad, ejecutar una prueba real y producir un informe reproducible.",
+      "refs": [
+        "d1"
+      ],
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "crit1",
+      "kind": "criterion",
+      "text": "Reproducir exactamente el JSON existente sin modificar originales.",
+      "refs": [
+        "req1",
+        "i1"
+      ],
+      "data": {
+        "metric": "exact_reproduction",
+        "unit": "match",
+        "threshold": {
+          "operator": ">=",
+          "statistic": "estimate",
+          "value": 1
+        },
+        "reject": "No cerrar si el resultado es menor que 1 o hay prueba fallida",
+        "reject_test": {
+          "operator": "<",
+          "statistic": "estimate",
+          "value": 1
+        }
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "specify"
+    },
+    {
+      "op": "put",
+      "id": "impl1",
+      "kind": "implementation",
+      "text": "Analizador escolar existente, con fuente y plan fijados por hashes.",
+      "refs": [
+        "req1"
+      ],
+      "data": {
+        "paths": [
+          "scripts/analyze_school_waste.py"
+        ]
+      }
+    },
+    {
+      "op": "put",
+      "id": "t1",
+      "kind": "test",
+      "text": "Ejecución real conservada en execution/; recibo local no autenticado externamente.",
+      "refs": [
+        "impl1",
+        "crit1"
+      ],
+      "data": {
+        "passed": true,
+        "argv": [
+          "/workspace/SpecOrganon/.venv/bin/python3",
+          "scripts/analyze_school_waste.py",
+          "--output",
+          "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json"
+        ],
+        "command": "/workspace/SpecOrganon/.venv/bin/python3 scripts/analyze_school_waste.py --output /workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json",
+        "receipt": {
+          "argv": [
+            "/workspace/SpecOrganon/.venv/bin/python3",
+            "scripts/analyze_school_waste.py",
+            "--output",
+            "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "stdout_sha256": "76345610f1d615f929b6ef3552e3e16e7da267c33978e4d5774bef354172673c",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "result_sha256": "8a352fbf0915d5761a11103c7dcb8de86843002b1bf2ffbdb28e9fd1e4b12161"
+        }
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "build"
+    },
+    {
+      "op": "put",
+      "id": "base1",
+      "kind": "baseline",
+      "text": "Estado local previo o comparador histórico disponible.",
+      "refs": [
+        "crit1"
+      ],
+      "data": {
+        "origin": "technical",
+        "source": "cases/school_waste/source.xlsx and scripts/analyze_school_waste.py",
+        "date": "2026-10-01",
+        "metric": "exact_reproduction",
+        "unit": "match",
+        "value": 0
+      }
+    },
+    {
+      "op": "put",
+      "id": "res1",
+      "kind": "result",
+      "text": "La reproducción actual coincide byte por byte con el JSON histórico.",
+      "refs": [
+        "base1",
+        "crit1",
+        "t1"
+      ],
+      "data": {
+        "origin": "technical",
+        "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/execution",
+        "date": "2026-10-01",
+        "effect": {
+          "metric": "exact_reproduction",
+          "unit": "match",
+          "estimate": 1,
+          "interval": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "op": "put",
+      "id": "ass1",
+      "kind": "assessment",
+      "text": "Reproducción técnica exacta; las diferencias escolares siguen siendo descriptivas, sin atribución causal.",
+      "refs": [
+        "res1",
+        "risk1"
+      ],
+      "data": {
+        "verdict": "cumplido",
+        "claim_scope": "technical",
+        "uncertainty": "Conteo o coincidencia exactos en esta ejecución; sin intervalo estadístico poblacional",
+        "adverse_effects": "Originales preservados; ninguna intervención externa",
+        "cost": "Agentes y herramientas presentes; sin API adicional. Consumo total no medido."
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "validate"
+    }
+  ]
+}

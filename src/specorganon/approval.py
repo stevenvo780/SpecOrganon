@@ -11,6 +11,7 @@ import binascii
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -100,6 +101,41 @@ def trust_contexts_with_observers(
                 if path_registration is not None:
                     raise ValueError("duplicate trusted case path")
                 path_registration = registered_id
+    if project.get("approval_policy") == "local":
+        if path_registration is not None or (cases is not None and project.get("case_id") in cases):
+            raise ValueError("registered signed case cannot become a local case")
+        # A configured registry is always a trust boundary. An unrelated valid
+        # signed case may coexist with local development; malformed entries
+        # must never silently disable the operator's registration controls.
+        for entry in (cases or {}).values():
+            fingerprint = entry.get("project_sha256")
+            if (type(fingerprint) is not str or re.fullmatch(r"[0-9a-f]{64}", fingerprint) is None
+                    or type(entry.get("approvers")) is not dict):
+                raise ValueError("malformed trusted case registry entry")
+            key_owners: dict[bytes, str] = {}
+            for role, prefix in (("approvers", "human:"), ("phase_reviewers", ""),
+                                 ("test_executors", "executor:"), ("test_observers", "observer:")):
+                actors = entry.get(role, {})
+                if type(actors) is not dict:
+                    raise ValueError(f"malformed trusted {role}")
+                for actor, encoded in actors.items():
+                    key = _decode(encoded, 32)
+                    if (type(actor) is not str or not actor.strip() or actor != actor.strip()
+                            or not actor.startswith(prefix) or not actor.removeprefix(prefix).strip()
+                            or key is None):
+                        raise ValueError(f"malformed trusted {role} entry")
+                    if key in key_owners and (key_owners[key] != actor or prefix in {"executor:", "observer:"}):
+                        raise ValueError("trusted public key is registered under multiple actors or roles")
+                    key_owners[key] = actor
+        owner = project.get("created_by")
+        if (not isinstance(owner, str) or not owner.startswith("human:")
+                or not owner.removeprefix("human:").strip()
+                or owner != "human:" + owner.removeprefix("human:").strip()
+                or owner == "human:fixture"):
+            raise ValueError("local case requires a declared human:<owner>")
+        if project.get("test_gate_policy") != "local_report":
+            raise ValueError("local case requires local_report test gate policy")
+        return {}, {}, {}, {}, "local_declared"
     if project.get("approval_policy") == "fixture":
         if path_registration is not None:
             raise ValueError("registered signed case cannot become a fixture")

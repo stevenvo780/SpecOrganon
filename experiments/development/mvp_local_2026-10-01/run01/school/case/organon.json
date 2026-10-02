@@ -1,0 +1,1366 @@
+{
+  "events": [
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:05+00:00",
+      "hash": "04a2fc981a4eea5f53d646e1493d70765aa33910467afabf778e25c8966b9290",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "p1",
+        "kind": "problem",
+        "text": "Necesitamos comprobar que un agente puede reproducir el análisis del XLSX escolar disponible sin cambiar la fuente, el plan o los resultados históricos.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:05+00:00",
+      "hash": "db4f0e57a7c41a1f34446cad3ee7975897388e5aa5b402beb79c0fb9f603232d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "a1",
+        "kind": "actor",
+        "text": "El dueño fija el propósito; un agente implementa y otro revisa los resultados locales.",
+        "version": 1
+      },
+      "prev_hash": "04a2fc981a4eea5f53d646e1493d70765aa33910467afabf778e25c8966b9290",
+      "seq": 2
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "2209b5fc122458a1d6de6b28f6a8d39018963a900118d8ceea6864c1bd648b15",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "b1",
+        "kind": "boundary",
+        "text": "Workspace de desarrollo y archivos disponibles. Sin API adicional ni acciones de campo.",
+        "version": 1
+      },
+      "prev_hash": "db4f0e57a7c41a1f34446cad3ee7975897388e5aa5b402beb79c0fb9f603232d",
+      "seq": 3
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "28a1cd57db992605c317c8787f6ff478612078f68b86368d3d5e3446f05f4720",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "c1",
+        "kind": "concept",
+        "text": "Autonomía es ejecutar dentro del encargo; reproducibilidad es poder repetir y cotejar resultados.",
+        "version": 1
+      },
+      "prev_hash": "2209b5fc122458a1d6de6b28f6a8d39018963a900118d8ceea6864c1bd648b15",
+      "seq": 4
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "9bf5308abee9dc21398e0af9d594092ad69e217714f91b02d003ed72cbd6b6ca",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "s1",
+        "kind": "assumption",
+        "text": "Las herramientas y archivos locales permiten comprobar este proyecto en el entorno actual.",
+        "version": 1
+      },
+      "prev_hash": "28a1cd57db992605c317c8787f6ff478612078f68b86368d3d5e3446f05f4720",
+      "seq": 5
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "24d8784c4133ca11296ad463db6fce5b76f914bd05fe8b9c3c08183d08b03e7b",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "f1",
+        "kind": "frame_option",
+        "text": "Encuadrar el problema como falta de garantías externas en cada transición.",
+        "version": 1
+      },
+      "prev_hash": "9bf5308abee9dc21398e0af9d594092ad69e217714f91b02d003ed72cbd6b6ca",
+      "seq": 6
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "21a6ec2c6d12db2080befbcb1a83ffa7d33249608a9f1b0705cada4729abe212",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "f2",
+        "kind": "frame_option",
+        "text": "Encuadrar el problema como una experiencia local usable con confianza declarada y evidencia verificable.",
+        "version": 1
+      },
+      "prev_hash": "24d8784c4133ca11296ad463db6fce5b76f914bd05fe8b9c3c08183d08b03e7b",
+      "seq": 7
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "61527d47ad829e3e723cd06b974ac83855e2e5deb983ea37a906ea7641f3e340",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "authorization_scope": "MVP local de filosofia, ciencia e ingenieria; recursos presentes; decisiones tecnicas reversibles delegadas; preservar originales y declarar limites.",
+          "identity_authenticated": false,
+          "origin": "existing_owner_mandate"
+        },
+        "deps": {
+          "a1": 1,
+          "p1": 1
+        },
+        "id": "n1",
+        "kind": "norm",
+        "text": "Aplicar el mandato del dueño al MVP: usar recursos presentes, preservar historia, delegar decisiones técnicas reversibles y mantener explícitos los límites de las conclusiones.",
+        "version": 1
+      },
+      "prev_hash": "21a6ec2c6d12db2080befbcb1a83ffa7d33249608a9f1b0705cada4729abe212",
+      "seq": 8
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "fbbf484e3a79c7adb3d6f34024d8cbfd9802dff2a02543a98b5d2af51ceea5b0",
+      "kind": "approval",
+      "payload": {
+        "id": "n1",
+        "provenance": "local_declared",
+        "reason": "Registro del mandato existente del dueño para el MVP local; identidad declarada.",
+        "version": 1
+      },
+      "prev_hash": "61527d47ad829e3e723cd06b974ac83855e2e5deb983ea37a906ea7641f3e340",
+      "seq": 9
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "a4bbe5321a6afc0beabb7a7334ef87dab40a341d2c1ce594c306156ad185a79b",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "q1",
+        "kind": "question",
+        "text": "¿Podemos producir y revisar una entrega local reproducible con los recursos presentes?",
+        "version": 1
+      },
+      "prev_hash": "fbbf484e3a79c7adb3d6f34024d8cbfd9802dff2a02543a98b5d2af51ceea5b0",
+      "seq": 10
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "690ac61e93d1c7f2c19c8f77b39a818cd60d95c8dc1a7ea285cfb20dfe0fe8cb",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "q1": 1
+        },
+        "id": "h1",
+        "kind": "hypothesis",
+        "text": "Un recorrido local explícito permite ejecutar y revisar el proyecto sin un registro de firmas externo.",
+        "version": 1
+      },
+      "prev_hash": "a4bbe5321a6afc0beabb7a7334ef87dab40a341d2c1ce594c306156ad185a79b",
+      "seq": 11
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "17f5cf38d7fdd9deb68a59a1fc5e6b79ac9ce08296ca8194472e4019958962c9",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "JSON histórico del análisis escolar",
+          "method": "Ejecución local, hashes de originales, cotejo objetivo y revisión nativa separada",
+          "population": "Este proyecto de desarrollo expuesto, en el entorno actual",
+          "uncertainty": "Un entorno y un proyecto; sin causalidad de campo ni comparación confirmatoria"
+        },
+        "deps": {
+          "h1": 1,
+          "q1": 1
+        },
+        "id": "pr1",
+        "kind": "protocol",
+        "text": "Registrar criterios, ejecutar comandos reales, conservar streams y cotejar resultados antes de evaluar.",
+        "version": 1
+      },
+      "prev_hash": "690ac61e93d1c7f2c19c8f77b39a818cd60d95c8dc1a7ea285cfb20dfe0fe8cb",
+      "seq": 12
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "5e5e690a5fa39459ce61a3bfc02e8e4a3ef76f37f2dc05a8b6f38c874b21024e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-01",
+          "locator": "pinned source and plan hashes",
+          "method": "Read actual local files and case state",
+          "metric_key": "exact_reproduction",
+          "origin": "observed",
+          "scope": "before reproduction",
+          "source": "cases/school_waste/source.xlsx and scripts/analyze_school_waste.py",
+          "unit": "match",
+          "value": 0
+        },
+        "deps": {
+          "pr1": 1
+        },
+        "id": "e0",
+        "kind": "evidence",
+        "text": "Material local disponible y situación anterior al recorrido de este proyecto.",
+        "version": 1
+      },
+      "prev_hash": "17f5cf38d7fdd9deb68a59a1fc5e6b79ac9ce08296ca8194472e4019958962c9",
+      "seq": 13
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "4ae7f790d8249f733702fc7880c5cb08c3bc54881b5a2aa46ee25ac3d8da0b95",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "exact_reproduction",
+          "unit": "match"
+        },
+        "deps": {
+          "e0": 1,
+          "n1": 1,
+          "p1": 1
+        },
+        "id": "i1",
+        "kind": "indicator",
+        "text": "Coincidencia exacta de la reproducción con el resultado histórico.",
+        "version": 1
+      },
+      "prev_hash": "5e5e690a5fa39459ce61a3bfc02e8e4a3ef76f37f2dc05a8b6f38c874b21024e",
+      "seq": 14
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "b40b027fa34fc00f9bc3a0dc7be79e5368276c31a3acbeb0463d25e29a2fab10",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e0": 1,
+          "h1": 1
+        },
+        "id": "inf1",
+        "kind": "inference",
+        "text": "La entrada firmada conserva su bloqueo si no hay registro; el modo local declara otra confianza.",
+        "version": 1
+      },
+      "prev_hash": "4ae7f790d8249f733702fc7880c5cb08c3bc54881b5a2aa46ee25ac3d8da0b95",
+      "seq": 15
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "148dd207abfef3a1486abd0dc6df589e0c4e576834fb70ba886f827eefa142a8",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e0": 1,
+          "inf1": 1
+        },
+        "id": "syn1",
+        "kind": "synthesis",
+        "text": "Este proyecto necesita mediciones locales y revisión separada; no necesita un ensayo pagado para empezar.",
+        "version": 1
+      },
+      "prev_hash": "b40b027fa34fc00f9bc3a0dc7be79e5368276c31a3acbeb0463d25e29a2fab10",
+      "seq": 16
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "bc9cc948f6bebb56f6f7509922fd59011eadeb9b01af057c502eb0bad17730a9",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "syn1": 1
+        },
+        "id": "u1",
+        "kind": "uncertainty",
+        "text": "La ejecución local no autentica custodios, personas ni mejoras causales fuera del software observado.",
+        "version": 1
+      },
+      "prev_hash": "148dd207abfef3a1486abd0dc6df589e0c4e576834fb70ba886f827eefa142a8",
+      "seq": 17
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "49b0e4da7ab35763e6674ac6a237eae9be228e155b4922a479f158ddbfbdbef2",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n1": 1,
+          "syn1": 1
+        },
+        "id": "o1",
+        "kind": "option",
+        "text": "Configurar firmas externas para todas las revisiones y reportes.",
+        "version": 1
+      },
+      "prev_hash": "bc9cc948f6bebb56f6f7509922fd59011eadeb9b01af057c502eb0bad17730a9",
+      "seq": 18
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "a43e9253f1ac587f99f8b0a5579f21e8347fd63d33b4d4023b766ff357747e86",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n1": 1,
+          "syn1": 1
+        },
+        "id": "o2",
+        "kind": "option",
+        "text": "Usar un modo local explícito, agentes separados y comprobaciones reales, preservando el modo firmado.",
+        "version": 1
+      },
+      "prev_hash": "49b0e4da7ab35763e6674ac6a237eae9be228e155b4922a479f158ddbfbdbef2",
+      "seq": 19
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "df7c6685dfc50cfb923f059dfb20de371487bc9e2caf40aadde58ca4fa683e53",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "o1": 1,
+          "o2": 1
+        },
+        "id": "cmp1",
+        "kind": "comparison",
+        "text": "La primera opción aporta control de claves externo; la segunda permite operar en el workspace de confianza con menor configuración inicial y sin afirmar autenticación.",
+        "version": 1
+      },
+      "prev_hash": "a43e9253f1ac587f99f8b0a5579f21e8347fd63d33b4d4023b766ff357747e86",
+      "seq": 20
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "5f2615e3dbd463f97372710a175a6969ac3f5b1d58160a78fefb4c7d5292f816",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "o2": 1
+        },
+        "id": "risk1",
+        "kind": "risk",
+        "text": "Una etiqueta o un recibo declarados pueden ser falsos; conservar streams y revisar las fuentes; no extrapolar el resultado local a campo o superioridad metodológica.",
+        "version": 1
+      },
+      "prev_hash": "df7c6685dfc50cfb923f059dfb20de371487bc9e2caf40aadde58ca4fa683e53",
+      "seq": 21
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "0a3f3a343fa3b829a65051d1b3034388fad3385e92c783761593b818b71a840d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "cmp1": 1,
+          "e0": 1,
+          "n1": 1
+        },
+        "id": "d1",
+        "kind": "decision",
+        "text": "Elegir la ruta local para este proyecto, dentro de la delegación técnica del dueño. El dueño no seleccionó personalmente esta arquitectura.",
+        "version": 1
+      },
+      "prev_hash": "5f2615e3dbd463f97372710a175a6969ac3f5b1d58160a78fefb4c7d5292f816",
+      "seq": 22
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "89f37ffbe2bb57d7ddfb2a451769e9d821d41bb82d2758c7c39ff3c994bdd43c",
+      "kind": "approval",
+      "payload": {
+        "id": "d1",
+        "provenance": "local_declared",
+        "reason": "El mandato existente delega la elección técnica reversible dentro del MVP local.",
+        "version": 1
+      },
+      "prev_hash": "0a3f3a343fa3b829a65051d1b3034388fad3385e92c783761593b818b71a840d",
+      "seq": 23
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "0ba3846315fca4d50b8b290e8b08d1b38950e908304ba20641d0c1c79025ec82",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "d1": 1
+        },
+        "id": "req1",
+        "kind": "requirement",
+        "text": "Conservar compuertas y trazabilidad, ejecutar una prueba real y producir un informe reproducible.",
+        "version": 1
+      },
+      "prev_hash": "89f37ffbe2bb57d7ddfb2a451769e9d821d41bb82d2758c7c39ff3c994bdd43c",
+      "seq": 24
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "36b2ea38f03c1d1ea9033214c1a0fa439c3b8b01bc507519bc48d13cf0cdaddd",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "exact_reproduction",
+          "reject": "No cerrar si el resultado es menor que 1 o hay prueba fallida",
+          "reject_test": {
+            "operator": "<",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "threshold": {
+            "operator": ">=",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "unit": "match"
+        },
+        "deps": {
+          "i1": 1,
+          "req1": 1
+        },
+        "id": "crit1",
+        "kind": "criterion",
+        "text": "Reproducir exactamente el JSON existente sin modificar originales.",
+        "version": 1
+      },
+      "prev_hash": "0ba3846315fca4d50b8b290e8b08d1b38950e908304ba20641d0c1c79025ec82",
+      "seq": 25
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "8a50f20d3b306cb119d6f7236f766edc19b212da1e72adfced4ee33391773523",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "paths": [
+            "scripts/analyze_school_waste.py"
+          ]
+        },
+        "deps": {
+          "req1": 1
+        },
+        "id": "impl1",
+        "kind": "implementation",
+        "text": "Analizador escolar existente, con fuente y plan fijados por hashes.",
+        "version": 1
+      },
+      "prev_hash": "36b2ea38f03c1d1ea9033214c1a0fa439c3b8b01bc507519bc48d13cf0cdaddd",
+      "seq": 26
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "5e57151c0fa9a3b57858c64ba1e9fc0e4acaa3e4342a108696e99fa1becfaf2f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/workspace/SpecOrganon/.venv/bin/python3",
+            "scripts/analyze_school_waste.py",
+            "--output",
+            "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json"
+          ],
+          "command": "/workspace/SpecOrganon/.venv/bin/python3 scripts/analyze_school_waste.py --output /workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json",
+          "passed": true,
+          "receipt": {
+            "argv": [
+              "/workspace/SpecOrganon/.venv/bin/python3",
+              "scripts/analyze_school_waste.py",
+              "--output",
+              "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json"
+            ],
+            "exit_code": 0,
+            "result_sha256": "8a352fbf0915d5761a11103c7dcb8de86843002b1bf2ffbdb28e9fd1e4b12161",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_sha256": "76345610f1d615f929b6ef3552e3e16e7da267c33978e4d5774bef354172673c",
+            "timed_out": false
+          }
+        },
+        "deps": {
+          "crit1": 1,
+          "impl1": 1
+        },
+        "id": "t1",
+        "kind": "test",
+        "text": "Ejecución real conservada en execution/; recibo local no autenticado externamente.",
+        "version": 1
+      },
+      "prev_hash": "8a50f20d3b306cb119d6f7236f766edc19b212da1e72adfced4ee33391773523",
+      "seq": 27
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "87ba56ad6bdc0f4d42fbac438ea4d4c76d02a0cf935a4c9eda651c7c423ef0d1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-01",
+          "metric": "exact_reproduction",
+          "origin": "technical",
+          "source": "cases/school_waste/source.xlsx and scripts/analyze_school_waste.py",
+          "unit": "match",
+          "value": 0
+        },
+        "deps": {
+          "crit1": 1
+        },
+        "id": "base1",
+        "kind": "baseline",
+        "text": "Estado local previo o comparador histórico disponible.",
+        "version": 1
+      },
+      "prev_hash": "5e57151c0fa9a3b57858c64ba1e9fc0e4acaa3e4342a108696e99fa1becfaf2f",
+      "seq": 28
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "5314afe7be60f04758fdd43650043cccf9d97c8bd333aeab5f0dbe5b64cdf553",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-01",
+          "effect": {
+            "estimate": 1,
+            "interval": [
+              1,
+              1
+            ],
+            "metric": "exact_reproduction",
+            "unit": "match"
+          },
+          "origin": "technical",
+          "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/execution"
+        },
+        "deps": {
+          "base1": 1,
+          "crit1": 1,
+          "t1": 1
+        },
+        "id": "res1",
+        "kind": "result",
+        "text": "La reproducción actual coincide byte por byte con el JSON histórico.",
+        "version": 1
+      },
+      "prev_hash": "87ba56ad6bdc0f4d42fbac438ea4d4c76d02a0cf935a4c9eda651c7c423ef0d1",
+      "seq": 29
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:06+00:00",
+      "hash": "685021d769b834d794311d0cc4942eaf4f46f4e53581ec5456bab22b7ffdcb75",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": "Originales preservados; ninguna intervención externa",
+          "claim_scope": "technical",
+          "cost": "Agentes y herramientas presentes; sin API adicional. Consumo total no medido.",
+          "uncertainty": "Conteo o coincidencia exactos en esta ejecución; sin intervalo estadístico poblacional",
+          "verdict": "cumplido"
+        },
+        "deps": {
+          "res1": 1,
+          "risk1": 1
+        },
+        "id": "ass1",
+        "kind": "assessment",
+        "text": "Reproducción técnica exacta; las diferencias escolares siguen siendo descriptivas, sin atribución causal.",
+        "version": 1
+      },
+      "prev_hash": "5314afe7be60f04758fdd43650043cccf9d97c8bd333aeab5f0dbe5b64cdf553",
+      "seq": 30
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:31+00:00",
+      "hash": "9a77fd3c256dcb5c373ffb002ee98f8023a91582499971d7c49a65c8462d4b9f",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "q1": 1
+        },
+        "id": "h1",
+        "kind": "hypothesis",
+        "text": "El analizador existente reproduce exactamente el JSON de referencia al conservar fuente y plan fijados.",
+        "version": 2
+      },
+      "prev_hash": "685021d769b834d794311d0cc4942eaf4f46f4e53581ec5456bab22b7ffdcb75",
+      "seq": 31
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:31+00:00",
+      "hash": "3034d4a20af6ec8cd0276c0045864ebd3b93a3e2430fbd8563493ebde94d867e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "JSON histórico del análisis escolar",
+          "method": "Ejecución local, hashes de originales, cotejo objetivo y revisión nativa separada",
+          "population": "Este proyecto de desarrollo expuesto, en el entorno actual",
+          "uncertainty": "Un entorno y un proyecto; sin causalidad de campo ni comparación confirmatoria"
+        },
+        "deps": {
+          "h1": 2,
+          "q1": 1
+        },
+        "id": "pr1",
+        "kind": "protocol",
+        "text": "Registrar criterios, ejecutar comandos reales, conservar streams y cotejar resultados antes de evaluar.",
+        "version": 2
+      },
+      "prev_hash": "9a77fd3c256dcb5c373ffb002ee98f8023a91582499971d7c49a65c8462d4b9f",
+      "seq": 32
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "2e2e456b65025d1ffadcbe7d83326e4e81e4fb0caf2514eec95aa01dea4b911f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-01",
+          "locator": "byte_equal and historical_sha256/reproduced_sha256",
+          "method": "Compare retained actual output bytes with historical JSON; verify both SHA256 digests",
+          "metric_key": "exact_reproduction",
+          "origin": "observed",
+          "scope": "current exact reproduction",
+          "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/source_checks.json",
+          "unit": "match",
+          "value": 1
+        },
+        "deps": {
+          "pr1": 2
+        },
+        "id": "e0",
+        "kind": "evidence",
+        "text": "La salida reproducida coincide exactamente con el JSON histórico; sus hashes y el cotejo de bytes están conservados.",
+        "version": 2
+      },
+      "prev_hash": "3034d4a20af6ec8cd0276c0045864ebd3b93a3e2430fbd8563493ebde94d867e",
+      "seq": 33
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "bda922fa304244b8b5e495a0eb35e4a844d8ac5f1bff0f97c86f2ef1bb0f38c1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "exact_reproduction",
+          "unit": "match"
+        },
+        "deps": {
+          "e0": 2,
+          "n1": 1,
+          "p1": 1
+        },
+        "id": "i1",
+        "kind": "indicator",
+        "text": "Coincidencia exacta de la reproducción con el resultado histórico.",
+        "version": 2
+      },
+      "prev_hash": "2e2e456b65025d1ffadcbe7d83326e4e81e4fb0caf2514eec95aa01dea4b911f",
+      "seq": 34
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "e8a6206ab6fcf3dd43d0225a37fcdaf918799c5d63059dc5b24f0e7bd95f170f",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e0": 2,
+          "h1": 2
+        },
+        "id": "inf1",
+        "kind": "inference",
+        "text": "El cotejo actual muestra reproducibilidad técnica exacta; no identifica un efecto causal sobre los residuos escolares.",
+        "version": 2
+      },
+      "prev_hash": "bda922fa304244b8b5e495a0eb35e4a844d8ac5f1bff0f97c86f2ef1bb0f38c1",
+      "seq": 35
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "5f25f2c0af67f4b9a80e9c492aa3be939df40aba46ef733d35e888251326551e",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e0": 2,
+          "inf1": 2
+        },
+        "id": "syn1",
+        "kind": "synthesis",
+        "text": "El analizador reproduce el resultado descriptivo histórico y conserva exclusiones y límites causales; la comparación técnica fue exacta.",
+        "version": 2
+      },
+      "prev_hash": "e8a6206ab6fcf3dd43d0225a37fcdaf918799c5d63059dc5b24f0e7bd95f170f",
+      "seq": 36
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "07d099c62ce48d3d049f0621dfdcdb924696a087bb2e916fb5abe2c782b93f04",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "syn1": 2
+        },
+        "id": "u1",
+        "kind": "uncertainty",
+        "text": "La ejecución local no autentica custodios, personas ni mejoras causales fuera del software observado.",
+        "version": 2
+      },
+      "prev_hash": "5f25f2c0af67f4b9a80e9c492aa3be939df40aba46ef733d35e888251326551e",
+      "seq": 37
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "f620c4c34eab5e8e82784fcea8ea410a2529b0797ee0a408338863c26413b344",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n1": 1,
+          "syn1": 2
+        },
+        "id": "o1",
+        "kind": "option",
+        "text": "Recalcular manualmente en una hoja nueva conservando las reglas del plan y comprobar transcripción y redondeo.",
+        "version": 2
+      },
+      "prev_hash": "07d099c62ce48d3d049f0621dfdcdb924696a087bb2e916fb5abe2c782b93f04",
+      "seq": 38
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "e271bde5fc25240ca887fc2e76b726a3432500a750f7559541c7ffc5503c4f3e",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n1": 1,
+          "syn1": 2
+        },
+        "id": "o2",
+        "kind": "option",
+        "text": "Reutilizar el analizador con hashes fijados y cotejar los bytes de salida contra la referencia.",
+        "version": 2
+      },
+      "prev_hash": "f620c4c34eab5e8e82784fcea8ea410a2529b0797ee0a408338863c26413b344",
+      "seq": 39
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "68ae2d36e6bfd6b45d975ec750c12323c69e90f7c3edfa0c4b8bfd44f299a01a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "o1": 2,
+          "o2": 2
+        },
+        "id": "cmp1",
+        "kind": "comparison",
+        "text": "La vía manual necesita verificar transcripción y redondeo. El analizador versionado permite cotejo exacto con los recursos actuales. No se midió ahorro de tiempo.",
+        "version": 2
+      },
+      "prev_hash": "e271bde5fc25240ca887fc2e76b726a3432500a750f7559541c7ffc5503c4f3e",
+      "seq": 40
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "e430f72236643ffe298a309b9941b665cf5401f35325a10297904434ab390172",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "o2": 2
+        },
+        "id": "risk1",
+        "kind": "risk",
+        "text": "Una etiqueta o un recibo declarados pueden ser falsos; conservar streams y revisar las fuentes; no extrapolar el resultado local a campo o superioridad metodológica.",
+        "version": 2
+      },
+      "prev_hash": "68ae2d36e6bfd6b45d975ec750c12323c69e90f7c3edfa0c4b8bfd44f299a01a",
+      "seq": 41
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "56e6a9827bc619e0a33fca12408939a5ddc13afbfe0556042a645da68286e847",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "cmp1": 2,
+          "e0": 2,
+          "n1": 1
+        },
+        "id": "d1",
+        "kind": "decision",
+        "text": "Reutilizar el analizador con pines y cotejo exacto dentro de la delegación técnica del dueño.",
+        "version": 2
+      },
+      "prev_hash": "e430f72236643ffe298a309b9941b665cf5401f35325a10297904434ab390172",
+      "seq": 42
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "f7fa89ea01750cced1c382fc905dcb9944a18643382ac95a9e15cce97f2b3f5b",
+      "kind": "approval",
+      "payload": {
+        "id": "d1",
+        "provenance": "local_declared",
+        "reason": "Mandato existente del dueño mantiene la delegación técnica local; se registra la versión revisada.",
+        "version": 2
+      },
+      "prev_hash": "56e6a9827bc619e0a33fca12408939a5ddc13afbfe0556042a645da68286e847",
+      "seq": 43
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "5cb80f69313a078fbfda8571e4667501b414dc7a21ea6b856d450039b0c23dc3",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "d1": 2
+        },
+        "id": "req1",
+        "kind": "requirement",
+        "text": "Conservar compuertas y trazabilidad, ejecutar una prueba real y producir un informe reproducible.",
+        "version": 2
+      },
+      "prev_hash": "f7fa89ea01750cced1c382fc905dcb9944a18643382ac95a9e15cce97f2b3f5b",
+      "seq": 44
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "2f4b732b5b9fccefca1b8196b71662c3e01483d318383c636ce6e613bbd43bed",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "exact_reproduction",
+          "reject": "No cerrar si el resultado es menor que 1 o hay prueba fallida",
+          "reject_test": {
+            "operator": "<",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "threshold": {
+            "operator": ">=",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "unit": "match"
+        },
+        "deps": {
+          "i1": 2,
+          "req1": 2
+        },
+        "id": "crit1",
+        "kind": "criterion",
+        "text": "Reproducir exactamente el JSON existente sin modificar originales.",
+        "version": 2
+      },
+      "prev_hash": "5cb80f69313a078fbfda8571e4667501b414dc7a21ea6b856d450039b0c23dc3",
+      "seq": 45
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "8c752c1de92b6ae5191ee7ee5b4aa93a5852c48b41f8879775d01471a3830db7",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "paths": [
+            "scripts/analyze_school_waste.py"
+          ]
+        },
+        "deps": {
+          "req1": 2
+        },
+        "id": "impl1",
+        "kind": "implementation",
+        "text": "Analizador escolar existente, con fuente y plan fijados por hashes.",
+        "version": 2
+      },
+      "prev_hash": "2f4b732b5b9fccefca1b8196b71662c3e01483d318383c636ce6e613bbd43bed",
+      "seq": 46
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "2c5f3de89843811303e9f81ef9e822e47bd719baa7578325cd564e533a65734d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/workspace/SpecOrganon/.venv/bin/python3",
+            "scripts/analyze_school_waste.py",
+            "--output",
+            "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json"
+          ],
+          "command": "/workspace/SpecOrganon/.venv/bin/python3 scripts/analyze_school_waste.py --output /workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json",
+          "passed": true,
+          "receipt": {
+            "argv": [
+              "/workspace/SpecOrganon/.venv/bin/python3",
+              "scripts/analyze_school_waste.py",
+              "--output",
+              "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json"
+            ],
+            "exit_code": 0,
+            "result_sha256": "8a352fbf0915d5761a11103c7dcb8de86843002b1bf2ffbdb28e9fd1e4b12161",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_sha256": "76345610f1d615f929b6ef3552e3e16e7da267c33978e4d5774bef354172673c",
+            "timed_out": false
+          }
+        },
+        "deps": {
+          "crit1": 2,
+          "impl1": 2
+        },
+        "id": "t1",
+        "kind": "test",
+        "text": "Ejecución real conservada en execution/; recibo local no autenticado externamente.",
+        "version": 2
+      },
+      "prev_hash": "8c752c1de92b6ae5191ee7ee5b4aa93a5852c48b41f8879775d01471a3830db7",
+      "seq": 47
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "aa79a08a7dab8dc3de9b1ee1abd988f195240717782ab8e54a290d154eca8392",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-01",
+          "meaning": "Referencia fijada del cotejo exacto: objetivo coincidencia=1, sin afirmar una reproducción fallida anterior",
+          "metric": "exact_reproduction",
+          "origin": "technical",
+          "reference_sha256": "dd2f41c01a7c082871144ee36398a8372914436be9c808ad8954ab3f8a86a878",
+          "source": "/workspace/SpecOrganon/experiments/development/school_waste_2026-09-26.json",
+          "unit": "match",
+          "value": 1
+        },
+        "deps": {
+          "crit1": 2
+        },
+        "id": "base1",
+        "kind": "baseline",
+        "text": "Comparador histórico real conservado; la salida debe coincidir exactamente con sus bytes.",
+        "version": 2
+      },
+      "prev_hash": "2c5f3de89843811303e9f81ef9e822e47bd719baa7578325cd564e533a65734d",
+      "seq": 48
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "5cbe916119766d4b929374f3b2bab588b4fcb24ee2ed0097612a4abd13783f8b",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-01",
+          "effect": {
+            "estimate": 1,
+            "interval": [
+              1,
+              1
+            ],
+            "metric": "exact_reproduction",
+            "unit": "match"
+          },
+          "origin": "technical",
+          "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/execution"
+        },
+        "deps": {
+          "base1": 2,
+          "crit1": 2,
+          "t1": 2
+        },
+        "id": "res1",
+        "kind": "result",
+        "text": "La reproducción actual coincide byte por byte con el JSON histórico.",
+        "version": 2
+      },
+      "prev_hash": "aa79a08a7dab8dc3de9b1ee1abd988f195240717782ab8e54a290d154eca8392",
+      "seq": 49
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:32+00:00",
+      "hash": "786a9aa98797a52c1641bc71222783643dcf1263d31bb27312e8d93066b5428a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": "Originales preservados; ninguna intervención externa",
+          "claim_scope": "technical",
+          "cost": "Agentes y herramientas presentes; sin API adicional. Consumo total no medido.",
+          "uncertainty": "Conteo o coincidencia exactos en esta ejecución; sin intervalo estadístico poblacional",
+          "verdict": "cumplido"
+        },
+        "deps": {
+          "res1": 2,
+          "risk1": 2
+        },
+        "id": "ass1",
+        "kind": "assessment",
+        "text": "Reproducción técnica exacta; las diferencias escolares siguen siendo descriptivas, sin atribución causal.",
+        "version": 2
+      },
+      "prev_hash": "5cbe916119766d4b929374f3b2bab588b4fcb24ee2ed0097612a4abd13783f8b",
+      "seq": 50
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:09+00:00",
+      "hash": "4030f795d502993badc3fe5b76003356a8a030df572702c3edd751231e94e069",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Reproducción delimitada; originales preservados.",
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b",
+        "verdict": "accept"
+      },
+      "prev_hash": "786a9aa98797a52c1641bc71222783643dcf1263d31bb27312e8d93066b5428a",
+      "seq": 51
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:09+00:00",
+      "hash": "269e1bab26eaefcd246b7cc5baec54ef8cbd695647c7fca251bd5030efd45e61",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 51,
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b"
+      },
+      "prev_hash": "4030f795d502993badc3fe5b76003356a8a030df572702c3edd751231e94e069",
+      "seq": 52
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:09+00:00",
+      "hash": "ed04d91e785d157141e6714ed8387dc824b741a2e04570bf19660868e6a18eaf",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Conceptos y compromisos coherentes con el mandato.",
+        "snapshot": "1799ff4aeb0a2c9782c66ec23bc48d6b93059019633d9468c46cbb7026b0eaaa",
+        "verdict": "accept"
+      },
+      "prev_hash": "269e1bab26eaefcd246b7cc5baec54ef8cbd695647c7fca251bd5030efd45e61",
+      "seq": 53
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:09+00:00",
+      "hash": "154415f46d90c5cdf915e2607018970e44de5da814a75a1cd579169425a5de7d",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "critique",
+        "review_seq": 53,
+        "snapshot": "1799ff4aeb0a2c9782c66ec23bc48d6b93059019633d9468c46cbb7026b0eaaa"
+      },
+      "prev_hash": "ed04d91e785d157141e6714ed8387dc824b741a2e04570bf19660868e6a18eaf",
+      "seq": 54
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:09+00:00",
+      "hash": "69b842a21d5cd0ceace6a79ebda1d0cba81e6e2cc4a8d39efc2eb08909db7c64",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Hipótesis específica y observación real de coincidencia, sin pseudoresultado anterior.",
+        "snapshot": "e9df0bee203ab6ea7371bfc514505f63643818598223ac5135e343e44eff4560",
+        "verdict": "accept"
+      },
+      "prev_hash": "154415f46d90c5cdf915e2607018970e44de5da814a75a1cd579169425a5de7d",
+      "seq": 55
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:09+00:00",
+      "hash": "d23140cb14aa0487e9689c8b86df6074ec8bdb9c4e9f030cee4b67d88a60f9d1",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "study",
+        "review_seq": 55,
+        "snapshot": "e9df0bee203ab6ea7371bfc514505f63643818598223ac5135e343e44eff4560"
+      },
+      "prev_hash": "69b842a21d5cd0ceace6a79ebda1d0cba81e6e2cc4a8d39efc2eb08909db7c64",
+      "seq": 56
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:09+00:00",
+      "hash": "09a57cddb2e2d024ba80b384f4f987371ba25062f8a86e02b2e3b04b419dfe18",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "observe",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Inferencia de reproducción exacta respaldada por bytes y hashes.",
+        "snapshot": "6c818c9c5ce82e7bc1c57285bcddb9cbe93d33dd84e4ba06172492c83ff48dec",
+        "verdict": "accept"
+      },
+      "prev_hash": "d23140cb14aa0487e9689c8b86df6074ec8bdb9c4e9f030cee4b67d88a60f9d1",
+      "seq": 57
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:09+00:00",
+      "hash": "7b0bd5cfba0a8eba05603599c6aac9215d92d71a970cd6ce02f4a4fec770108d",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "observe",
+        "review_seq": 57,
+        "snapshot": "6c818c9c5ce82e7bc1c57285bcddb9cbe93d33dd84e4ba06172492c83ff48dec"
+      },
+      "prev_hash": "09a57cddb2e2d024ba80b384f4f987371ba25062f8a86e02b2e3b04b419dfe18",
+      "seq": 58
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:10+00:00",
+      "hash": "d9aafdb34369ddde46ea9baa19f768cbdd671c2c0f89d1995cee4155895090c5",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "explain",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Síntesis descriptiva sin conclusión causal.",
+        "snapshot": "5f39f1dda15121526598bf7898ff3d2ef18932155b8797bdb2cd41303aa9d984",
+        "verdict": "accept"
+      },
+      "prev_hash": "7b0bd5cfba0a8eba05603599c6aac9215d92d71a970cd6ce02f4a4fec770108d",
+      "seq": 59
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:10+00:00",
+      "hash": "bf11dcb6c6864cb504f2ffe9d88a4afbb0ac3838945d21f5002f3d2bdd9adcfb",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "explain",
+        "review_seq": 59,
+        "snapshot": "5f39f1dda15121526598bf7898ff3d2ef18932155b8797bdb2cd41303aa9d984"
+      },
+      "prev_hash": "d9aafdb34369ddde46ea9baa19f768cbdd671c2c0f89d1995cee4155895090c5",
+      "seq": 60
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:10+00:00",
+      "hash": "6bb2551e0e7ea297b1c80921b90e218e99ffc5509e7b9b9384d0fb4d8881659c",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "compare",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Alternativas manual/analizador pertinentes; no inventa ahorro medido.",
+        "snapshot": "f839ebae6711751d71147c81e155999e8868f720d1d808cea14fc49e5cda57ae",
+        "verdict": "accept"
+      },
+      "prev_hash": "bf11dcb6c6864cb504f2ffe9d88a4afbb0ac3838945d21f5002f3d2bdd9adcfb",
+      "seq": 61
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:10+00:00",
+      "hash": "311d6cfcd80fa7a6fe382d3f35eff3d3fa970c6afa0d11074a93e61d1771f1d1",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "compare",
+        "review_seq": 61,
+        "snapshot": "f839ebae6711751d71147c81e155999e8868f720d1d808cea14fc49e5cda57ae"
+      },
+      "prev_hash": "6bb2551e0e7ea297b1c80921b90e218e99ffc5509e7b9b9384d0fb4d8881659c",
+      "seq": 62
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:10+00:00",
+      "hash": "6668b0c5c0ef591536ee2b0d4d8612c0857b35b910d1c054b0dbe0c1670b28df",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "specify",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Decisión específica aprobada en v2 y criterio de igualdad conservado.",
+        "snapshot": "82742f3d6cd82b881f2fefe4dfad2ac508be17902ac047d4a4eeb84f1b2fc5c5",
+        "verdict": "accept"
+      },
+      "prev_hash": "311d6cfcd80fa7a6fe382d3f35eff3d3fa970c6afa0d11074a93e61d1771f1d1",
+      "seq": 63
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:10+00:00",
+      "hash": "787246a1b8f72b90d1600a2e5afac3ebab018ae2e94fe273f321a6d2ec396f65",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "specify",
+        "review_seq": 63,
+        "snapshot": "82742f3d6cd82b881f2fefe4dfad2ac508be17902ac047d4a4eeb84f1b2fc5c5"
+      },
+      "prev_hash": "6668b0c5c0ef591536ee2b0d4d8612c0857b35b910d1c054b0dbe0c1670b28df",
+      "seq": 64
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:11+00:00",
+      "hash": "e49d0a0da0925553aec9537b70a88734878fb5c8dec73c2f5381615846ed17f9",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "build",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Ejecución y reproducción corroboradas independientemente.",
+        "snapshot": "d8e8e227b474a3b4ad07049c89423a93f4c907d4cd3d127e3fa72da3429149b3",
+        "verdict": "accept"
+      },
+      "prev_hash": "787246a1b8f72b90d1600a2e5afac3ebab018ae2e94fe273f321a6d2ec396f65",
+      "seq": 65
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:11+00:00",
+      "hash": "3d8cebbe8ff7fe28105e8f70ddea8af2405b386ef5ec121320a6cb380c073965",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "build",
+        "review_seq": 65,
+        "snapshot": "d8e8e227b474a3b4ad07049c89423a93f4c907d4cd3d127e3fa72da3429149b3"
+      },
+      "prev_hash": "e49d0a0da0925553aec9537b70a88734878fb5c8dec73c2f5381615846ed17f9",
+      "seq": 66
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:11+00:00",
+      "hash": "18c58890af4bcf7b814c6ca97a97840b6e635bef2f4f2c78239963c40477b267",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "validate",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Referencia esperada explícita y coincidencia observada de uno.",
+        "snapshot": "c56e3bb8ef76f9e0706668b217eefaf23fe4dfe0437f13a5373a982414625e6e",
+        "verdict": "accept"
+      },
+      "prev_hash": "3d8cebbe8ff7fe28105e8f70ddea8af2405b386ef5ec121320a6cb380c073965",
+      "seq": 67
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:11+00:00",
+      "hash": "79b2536ecb39cce697d2a0c56b64e6e8b8478a9ef39a8ef4b94f5fd471e6fa93",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "validate",
+        "review_seq": 67,
+        "snapshot": "c56e3bb8ef76f9e0706668b217eefaf23fe4dfe0437f13a5373a982414625e6e"
+      },
+      "prev_hash": "18c58890af4bcf7b814c6ca97a97840b6e635bef2f4f2c78239963c40477b267",
+      "seq": 68
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "3dd87c0a-efac-41d3-925a-0ed2b9d47ebe",
+    "created_at": "2026-10-01T23:34:04+00:00",
+    "created_by": "human:owner",
+    "domain": "análisis reproducible",
+    "test_gate_policy": "local_report",
+    "title": "Reproducción local del análisis escolar"
+  },
+  "schema": 1
+}

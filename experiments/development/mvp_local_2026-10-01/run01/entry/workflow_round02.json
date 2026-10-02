@@ -1,0 +1,556 @@
+{
+  "schema": 1,
+  "steps": [
+    {
+      "op": "put",
+      "id": "p1",
+      "kind": "problem",
+      "text": "La entrada del toolkit requiere configurar revisiones externas antes de aceptar fases; necesitamos un recorrido local con agentes y una entrega legible.",
+      "refs": [],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {}
+    },
+    {
+      "op": "put",
+      "id": "a1",
+      "kind": "actor",
+      "text": "El dueño fija el propósito; un agente implementa y otro revisa los resultados locales.",
+      "refs": [
+        "p1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "p1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "b1",
+      "kind": "boundary",
+      "text": "Workspace de desarrollo y archivos disponibles. Sin API adicional ni acciones de campo.",
+      "refs": [
+        "p1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "p1": 1
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "frame"
+    },
+    {
+      "op": "put",
+      "id": "c1",
+      "kind": "concept",
+      "text": "Autonomía es ejecutar dentro del encargo; reproducibilidad es poder repetir y cotejar resultados.",
+      "refs": [
+        "p1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "p1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "s1",
+      "kind": "assumption",
+      "text": "Las herramientas y archivos locales permiten comprobar este proyecto en el entorno actual.",
+      "refs": [
+        "p1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "p1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "f1",
+      "kind": "frame_option",
+      "text": "Encuadrar el problema como falta de garantías externas en cada transición.",
+      "refs": [
+        "p1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "p1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "f2",
+      "kind": "frame_option",
+      "text": "Encuadrar el problema como una experiencia local usable con confianza declarada y evidencia verificable.",
+      "refs": [
+        "p1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "p1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "n1",
+      "kind": "norm",
+      "text": "Aplicar el mandato del dueño al MVP: usar recursos presentes, preservar historia, delegar decisiones técnicas reversibles y mantener explícitos los límites de las conclusiones.",
+      "refs": [
+        "a1",
+        "p1"
+      ],
+      "data": {
+        "authorization_scope": "MVP local de filosofia, ciencia e ingenieria; recursos presentes; decisiones tecnicas reversibles delegadas; preservar originales y declarar limites.",
+        "identity_authenticated": false,
+        "origin": "existing_owner_mandate"
+      },
+      "expected_version": 0,
+      "expected_deps": {
+        "a1": 1,
+        "p1": 1
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "critique"
+    },
+    {
+      "op": "put",
+      "id": "q1",
+      "kind": "question",
+      "text": "¿Podemos producir y revisar una entrega local reproducible con los recursos presentes?",
+      "refs": [
+        "p1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "p1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "h1",
+      "kind": "hypothesis",
+      "text": "Un recorrido local explícito permite ejecutar y revisar el proyecto sin un registro de firmas externo.",
+      "refs": [
+        "q1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "q1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "pr1",
+      "kind": "protocol",
+      "text": "Registrar criterios, ejecutar comandos reales, conservar streams y cotejar resultados antes de evaluar.",
+      "refs": [
+        "h1",
+        "q1"
+      ],
+      "data": {
+        "comparison": "Entrada firmada sin registro",
+        "method": "Ejecución local, hashes de originales, cotejo objetivo y revisión nativa separada",
+        "population": "Este proyecto de desarrollo expuesto, en el entorno actual",
+        "uncertainty": "Un entorno y un proyecto; sin causalidad de campo ni comparación confirmatoria"
+      },
+      "expected_version": 0,
+      "expected_deps": {
+        "h1": 1,
+        "q1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "i1",
+      "kind": "indicator",
+      "text": "Contar fases aceptadas del recorrido local.",
+      "refs": [
+        "e0",
+        "n1",
+        "p1"
+      ],
+      "data": {
+        "metric": "accepted_phases",
+        "unit": "phase"
+      },
+      "expected_version": 0,
+      "expected_deps": {
+        "e0": 1,
+        "n1": 1,
+        "p1": 1
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "study"
+    },
+    {
+      "op": "put",
+      "id": "e0",
+      "kind": "evidence",
+      "text": "Material local disponible y situación anterior al recorrido de este proyecto.",
+      "refs": [
+        "pr1"
+      ],
+      "data": {
+        "date": "2026-10-01",
+        "locator": "accepted_phases",
+        "method": "Read actual local files and case state",
+        "metric_key": "accepted_phases",
+        "origin": "observed",
+        "scope": "signed entry without external registry",
+        "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/signed_baseline.json",
+        "unit": "phase",
+        "value": 0
+      },
+      "expected_version": 0,
+      "expected_deps": {
+        "pr1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "inf1",
+      "kind": "inference",
+      "text": "La entrada firmada conserva su bloqueo si no hay registro; el modo local declara otra confianza.",
+      "refs": [
+        "e0",
+        "h1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "e0": 1,
+        "h1": 1
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "observe"
+    },
+    {
+      "op": "put",
+      "id": "syn1",
+      "kind": "synthesis",
+      "text": "Este proyecto necesita mediciones locales y revisión separada; no necesita un ensayo pagado para empezar.",
+      "refs": [
+        "e0",
+        "inf1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "e0": 1,
+        "inf1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "u1",
+      "kind": "uncertainty",
+      "text": "La ejecución local no autentica custodios, personas ni mejoras causales fuera del software observado.",
+      "refs": [
+        "syn1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "syn1": 1
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "explain"
+    },
+    {
+      "op": "put",
+      "id": "o1",
+      "kind": "option",
+      "text": "Configurar firmas externas para todas las revisiones y reportes.",
+      "refs": [
+        "n1",
+        "syn1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "n1": 1,
+        "syn1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "o2",
+      "kind": "option",
+      "text": "Usar un modo local explícito, agentes separados y comprobaciones reales, preservando el modo firmado.",
+      "refs": [
+        "n1",
+        "syn1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "n1": 1,
+        "syn1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "cmp1",
+      "kind": "comparison",
+      "text": "La primera opción aporta control de claves externo; la segunda permite operar en el workspace de confianza con menor configuración inicial y sin afirmar autenticación.",
+      "refs": [
+        "o1",
+        "o2"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "o1": 1,
+        "o2": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "risk1",
+      "kind": "risk",
+      "text": "Una etiqueta o un recibo declarados pueden ser falsos; conservar streams y revisar las fuentes; no extrapolar el resultado local a campo o superioridad metodológica.",
+      "refs": [
+        "o2"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "o2": 1
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "compare"
+    },
+    {
+      "op": "put",
+      "id": "d1",
+      "kind": "decision",
+      "text": "Elegir la ruta local para este proyecto, dentro de la delegación técnica del dueño. El dueño no seleccionó personalmente esta arquitectura.",
+      "refs": [
+        "cmp1",
+        "e0",
+        "n1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "cmp1": 1,
+        "e0": 1,
+        "n1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "req1",
+      "kind": "requirement",
+      "text": "Conservar compuertas y trazabilidad, ejecutar una prueba real y producir un informe reproducible.",
+      "refs": [
+        "d1"
+      ],
+      "data": {},
+      "expected_version": 0,
+      "expected_deps": {
+        "d1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "crit1",
+      "kind": "criterion",
+      "text": "Completar las nueve fases con revisión real.",
+      "refs": [
+        "i1",
+        "req1"
+      ],
+      "data": {
+        "metric": "accepted_phases",
+        "reject": "No cerrar si el resultado es menor que 9 o hay prueba fallida",
+        "reject_test": {
+          "operator": "<",
+          "statistic": "estimate",
+          "value": 9
+        },
+        "threshold": {
+          "operator": ">=",
+          "statistic": "estimate",
+          "value": 9
+        },
+        "unit": "phase"
+      },
+      "expected_version": 0,
+      "expected_deps": {
+        "i1": 1,
+        "req1": 1
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "specify"
+    },
+    {
+      "op": "put",
+      "id": "impl1",
+      "kind": "implementation",
+      "text": "Política local, informe CLI/MCP y entrada de agente.",
+      "refs": [
+        "req1"
+      ],
+      "data": {
+        "paths": [
+          "src/specorganon/report.py",
+          ".agents/skills/specorganon/SKILL.md"
+        ]
+      },
+      "expected_version": 0,
+      "expected_deps": {
+        "req1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "t1",
+      "kind": "test",
+      "text": "Pruebas reales finales del modo local y del reporte consistente; ejecución conservada en execution_round02.",
+      "refs": [
+        "crit1",
+        "impl1"
+      ],
+      "data": {
+        "argv": [
+          "/workspace/SpecOrganon/.venv/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_local_workflow.py",
+          "tests/test_local_interfaces.py",
+          "tests/test_case_report.py"
+        ],
+        "command": "/workspace/SpecOrganon/.venv/bin/python -m pytest -q tests/test_local_workflow.py tests/test_local_interfaces.py tests/test_case_report.py",
+        "passed": true,
+        "receipt": {
+          "argv": [
+            "/workspace/SpecOrganon/.venv/bin/python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_local_workflow.py",
+            "tests/test_local_interfaces.py",
+            "tests/test_case_report.py"
+          ],
+          "exit_code": 0,
+          "result_sha256": "ae54de5b595b017ed50adf2722b5170fce8af5f6706dab0275e3ba8f56b1b7c2",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "8353b6bdf33228ff41d6eb7adcd5b9613050d33ac16ee62199489035faaddd20",
+          "timed_out": false
+        }
+      },
+      "expected_version": 1,
+      "expected_deps": {
+        "crit1": 1,
+        "impl1": 1
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "build"
+    },
+    {
+      "op": "put",
+      "id": "base1",
+      "kind": "baseline",
+      "text": "Estado local previo o comparador histórico disponible.",
+      "refs": [
+        "crit1"
+      ],
+      "data": {
+        "date": "2026-10-01",
+        "metric": "accepted_phases",
+        "origin": "technical",
+        "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/signed_baseline.json",
+        "unit": "phase",
+        "value": 0
+      },
+      "expected_version": 0,
+      "expected_deps": {
+        "crit1": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "res1",
+      "kind": "result",
+      "text": "Medición del proyecto en el momento de preparar el expediente; las revisiones siguen pendientes.",
+      "refs": [
+        "base1",
+        "crit1",
+        "t1"
+      ],
+      "data": {
+        "date": "2026-10-01",
+        "effect": {
+          "estimate": 0,
+          "interval": [
+            0,
+            0
+          ],
+          "metric": "accepted_phases",
+          "unit": "phase"
+        },
+        "origin": "technical",
+        "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/entry/execution"
+      },
+      "expected_version": 1,
+      "expected_deps": {
+        "base1": 1,
+        "crit1": 1,
+        "t1": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "ass1",
+      "kind": "assessment",
+      "text": "Completitud del recorrido pendiente de revisión real; actualizar tras observarla.",
+      "refs": [
+        "res1",
+        "risk1"
+      ],
+      "data": {
+        "adverse_effects": "Originales preservados; ninguna intervención externa",
+        "claim_scope": "technical",
+        "cost": "Agentes y herramientas presentes; sin API adicional. Consumo total no medido.",
+        "uncertainty": "Conteo o coincidencia exactos en esta ejecución; sin intervalo estadístico poblacional",
+        "verdict": "no_demostrado"
+      },
+      "expected_version": 1,
+      "expected_deps": {
+        "res1": 2,
+        "risk1": 1
+      }
+    },
+    {
+      "op": "advance",
+      "phase": "validate"
+    }
+  ]
+}

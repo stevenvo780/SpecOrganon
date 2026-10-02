@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "recorded_at": "2026-10-01T22:54:00.344250+00:00",
+  "scope": "MVP entry commands only; not a completed method run or acceptance verdict",
+  "goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "guide_sha256": "5c853df7498b7e83920eec4436df21398e63ac7ac520288a608d4ffbf557d86b",
+  "case_directory": "/tmp/organon-mvp-entry-k36qdo0g",
+  "case_retained": true,
+  "commands": [
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "organon",
+        "init",
+        "/tmp/organon-mvp-entry-k36qdo0g",
+        "--title",
+        "Entrada local de SpecOrganon",
+        "--domain",
+        "desarrollo",
+        "--actor",
+        "agent:analista"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "5826e192d336db6d4b9a7dd9274dbd6a080a2e17f00b04d588f4c38311caacff"
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "organon",
+        "put",
+        "/tmp/organon-mvp-entry-k36qdo0g",
+        "p1",
+        "--kind",
+        "problem",
+        "--text",
+        "Un agente necesita iniciar un caso local y entender el siguiente trabajo y sus bloqueos.",
+        "--actor",
+        "agent:analista"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "34a0879b733c9330a1a8f3abddf5a3f9f68fcf4408a431fde7e0e61bf4b94256"
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "organon",
+        "put",
+        "/tmp/organon-mvp-entry-k36qdo0g",
+        "a1",
+        "--kind",
+        "actor",
+        "--text",
+        "El dueño fija el encargo; el agente ejecuta; otro agente revisa los resultados técnicos.",
+        "--ref",
+        "p1",
+        "--actor",
+        "agent:analista"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "b1332a1f013c909067522fb789a9c7efd114d812387e8b84b19ac2f60d59015f"
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "organon",
+        "put",
+        "/tmp/organon-mvp-entry-k36qdo0g",
+        "b1",
+        "--kind",
+        "boundary",
+        "--text",
+        "CLI y archivos locales de desarrollo; herramientas y suscripciones presentes.",
+        "--ref",
+        "p1",
+        "--actor",
+        "agent:analista"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "89dee1a1de2d7c0c4052f1ed277231b0cbdeb3c599d7032340b013ad2bc08fa4"
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "organon",
+        "next-task",
+        "/tmp/organon-mvp-entry-k36qdo0g"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "72ba81ab20288ee1637178c469ddd5a967d276224718da27477b1cdb5c9c3e97"
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "organon",
+        "status",
+        "/tmp/organon-mvp-entry-k36qdo0g"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "0b4b800202027620ac67be9cb6a6d140c744535f0f93854e66cc1d35a0cab49b"
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "organon",
+        "trace",
+        "/tmp/organon-mvp-entry-k36qdo0g",
+        "p1"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "24bbb33f0b3da99c6d3dc7da32d3c4db02e3366abbb1ebf40a61e4a27f1c92a9"
+    }
+  ],
+  "observed": {
+    "artifact_ids": [
+      "a1",
+      "b1",
+      "p1"
+    ],
+    "approval_policy": "signed",
+    "next_phase": "frame",
+    "next_action": "review_phase",
+    "phase_review_trust": "unavailable",
+    "accepted_phases": []
+  },
+  "paid_api_calls": 0,
+  "synthetic_approvals_generated": 0,
+  "mvp_complete": false,
+  "final_goal_acceptance_changed": false
+}

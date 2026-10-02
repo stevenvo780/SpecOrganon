@@ -1,5 +1,20 @@
 # Auditoría de aceptación actual
 
+## Hito del MVP local
+
+El [dossier](../experiments/development/mvp_local_2026-10-01/results.md)
+registra dos proyectos expuestos con nueve fases aceptadas, revisión nativa
+real, reproducción escolar exacta, replay sin duplicados e invalidación de
+dependencias al cambiar una hipótesis. El nuevo modo `local` y `report`
+pasaron interfaces CLI/MCP reales y controles de regresión. La confianza se
+declara local; no se autentican personas ni campo.
+
+**El MVP está disponible para uso técnico local.** Esto no cierra C2–C5, ni
+convierte los proyectos en casos reservados. D107 mantiene su veredicto
+histórico C1; el wheel del MVP descubrió 24 herramientas y comprobó report y
+replay de los nuevos proyectos fuera del árbol. Los apartados siguientes
+conservan la evidencia y condiciones de sus cortes anteriores.
+
 ## D-124 · Ingreso de declaraciones de evaluación DEV
 
 [Dossier](../experiments/development/external_rating_ingress_2026-10-01/README.md):

@@ -154,10 +154,18 @@ def init_project(directory: str | Path, title: str, domain: str, actor: str,
     """Create a project, refusing to replace an existing ledger."""
     if not all(isinstance(v, str) and v.strip() for v in (title, domain, actor)):
         raise LedgerError("title, domain and actor must be nonempty strings")
-    if approval_policy not in {"signed", "fixture"}:
-        raise LedgerError("approval_policy must be signed or fixture")
-    if test_gate_policy not in {"signed_report", "signed_observed"}:
-        raise LedgerError("test_gate_policy must be signed_report or signed_observed")
+    if approval_policy not in {"signed", "fixture", "local"}:
+        raise LedgerError("approval_policy must be signed, fixture or local")
+    if approval_policy == "local":
+        if (not actor.startswith("human:") or not actor.removeprefix("human:").strip()
+                or actor != "human:" + actor.removeprefix("human:").strip() or actor == "human:fixture"):
+            raise LedgerError("local case requires a declared human:<owner>")
+        if test_gate_policy == "signed_report":
+            test_gate_policy = "local_report"
+    if test_gate_policy not in {"signed_report", "signed_observed", "local_report"}:
+        raise LedgerError("test_gate_policy must be signed_report, signed_observed or local_report")
+    if (test_gate_policy == "local_report") != (approval_policy == "local"):
+        raise LedgerError("local_report test gate requires local approval policy")
     if test_gate_policy == "signed_observed" and approval_policy != "signed":
         raise LedgerError("signed_observed test gate requires signed approval policy")
     directory = Path(directory)
@@ -171,7 +179,7 @@ def init_project(directory: str | Path, title: str, domain: str, actor: str,
                         "created_at": _now(), "created_by": actor.strip(), "approval_policy": approval_policy},
             "events": [],
         }
-        if test_gate_policy == "signed_observed":
+        if test_gate_policy in {"signed_observed", "local_report"}:
             data["project"]["test_gate_policy"] = test_gate_policy
         _atomic_write(target, data)
         return data
@@ -191,10 +199,11 @@ def read_project(directory: str | Path, *, verify_external_anchor: bool = True) 
     if not isinstance(data.get("project"), dict):
         raise LedgerError("malformed project metadata")
     policy = data["project"].get("approval_policy", "signed")
-    if not isinstance(policy, str) or policy not in {"signed", "fixture"}:
+    if not isinstance(policy, str) or policy not in {"signed", "fixture", "local"}:
         raise LedgerError("malformed project approval policy")
     test_policy = data["project"].get("test_gate_policy", "signed_report")
-    if (type(test_policy) is not str or test_policy not in {"signed_report", "signed_observed"}
+    if (type(test_policy) is not str or test_policy not in {"signed_report", "signed_observed", "local_report"}
+            or ((test_policy == "local_report") != (policy == "local"))
             or (test_policy == "signed_observed" and policy != "signed")):
         raise LedgerError("malformed project test gate policy")
     case_id = data["project"].get("case_id")

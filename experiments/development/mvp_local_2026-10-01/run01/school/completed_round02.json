@@ -1,0 +1,1797 @@
+{
+  "review_source": "/root/mvp_independent_review",
+  "reviews_recorded_from_actual_response": true,
+  "calls": [
+    {
+      "phase_review": "frame",
+      "review_event": {
+        "seq": 51,
+        "at": "2026-10-01T23:47:09+00:00",
+        "actor": "agent:mvp-independent-review",
+        "kind": "phase_review",
+        "payload": {
+          "phase": "frame",
+          "verdict": "accept",
+          "reason": "Revisión real de /root/mvp_independent_review: Reproducción delimitada; originales preservados.",
+          "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b",
+          "independent": true,
+          "provenance": "local_declared"
+        },
+        "prev_hash": "786a9aa98797a52c1641bc71222783643dcf1263d31bb27312e8d93066b5428a",
+        "hash": "4030f795d502993badc3fe5b76003356a8a030df572702c3edd751231e94e069"
+      },
+      "command": [
+        "/workspace/SpecOrganon/.venv/bin/organon",
+        "run",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/case",
+        "--manifest",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/workflow_round02.json",
+        "--actor",
+        "agent:mvp-builder"
+      ],
+      "exit_code": 0,
+      "result": {
+        "applied": 1,
+        "cursor": 9,
+        "next": {
+          "action": "review_phase",
+          "actor": null,
+          "approval_targets": [],
+          "artifacts": {
+            "items": [
+              {
+                "approved": true,
+                "contested": false,
+                "data": "{\"authorization_scope\": \"MVP local de filosofia, ciencia e ingenieria; recursos presentes; decisiones tecnicas reversibles delegadas; preservar originales y declarar limites.\", \"identity_authenticated\": false, \"origin\": \"existing_owner_mandate\"}",
+                "id": "n1",
+                "issues": [],
+                "kind": "norm",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "a1": 1,
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Aplicar el mandato del dueño al MVP: usar recursos presentes, preservar historia, delegar decisiones técnicas reversibles y mantener explícitos los límites de las conclusiones.",
+                "version": 1
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "f2",
+                "issues": [],
+                "kind": "frame_option",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Encuadrar el problema como una experiencia local usable con confianza declarada y evidencia verificable.",
+                "version": 1
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "f1",
+                "issues": [],
+                "kind": "frame_option",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Encuadrar el problema como falta de garantías externas en cada transición.",
+                "version": 1
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "s1",
+                "issues": [],
+                "kind": "assumption",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Las herramientas y archivos locales permiten comprobar este proyecto en el entorno actual.",
+                "version": 1
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "c1",
+                "issues": [],
+                "kind": "concept",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Autonomía es ejecutar dentro del encargo; reproducibilidad es poder repetir y cotejar resultados.",
+                "version": 1
+              }
+            ],
+            "omitted": 0
+          },
+          "blockers": [],
+          "criteria": {
+            "exit": "Los juicios sobre lo deseable están separados de las afirmaciones fácticas y la opción normativa está aprobada por una persona.",
+            "review": "Revisar conflictos de valor y fundamentos de cada alternativa.",
+            "stop": "Detener ante conflicto normativo sin decisión humana o definición circular."
+          },
+          "front": "philosophy",
+          "gate": {
+            "accepted": false,
+            "independent_review": false,
+            "ready": true,
+            "review_provenance": "none",
+            "review_signature_verified": false,
+            "reviewed": false,
+            "snapshot": "1799ff4aeb0a2c9782c66ec23bc48d6b93059019633d9468c46cbb7026b0eaaa"
+          },
+          "inputs": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "p1",
+                "issues": [],
+                "kind": "problem",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {},
+                "stale": false,
+                "text": "Necesitamos comprobar que un agente puede reproducir el análisis del XLSX escolar disponible sin cambiar la fuente, el plan o los resultados históricos.",
+                "version": 1
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "a1",
+                "issues": [],
+                "kind": "actor",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "El dueño fija el propósito; un agente implementa y otro revisa los resultados locales.",
+                "version": 1
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "b1",
+                "issues": [],
+                "kind": "boundary",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Workspace de desarrollo y archivos disponibles. Sin API adicional ni acciones de campo.",
+                "version": 1
+              }
+            ],
+            "omitted": 0
+          },
+          "inputs_description": "Formulación y testimonios de actores.",
+          "missing": [],
+          "omitted_approval_targets": 0,
+          "omitted_blockers": 0,
+          "omitted_challenges": 0,
+          "omitted_test_execution_targets": 0,
+          "omitted_test_observation_targets": 0,
+          "open_challenges": [],
+          "phase": "critique",
+          "phase_review_trust": "local_declared",
+          "purpose": "Examinar conceptos, supuestos, alternativas y fines.",
+          "revision": 52,
+          "role": "reviewer",
+          "role_label": "revisor",
+          "status": "pending",
+          "task": "Revisar independientemente el snapshot vigente y registrar veredicto motivado.",
+          "test_execution_targets": [],
+          "test_execution_trust": "local_declared",
+          "test_observation_targets": [],
+          "test_observation_trust": "not_applicable"
+        },
+        "reason": "independent_review_required",
+        "skipped": 8,
+        "status": "waiting",
+        "total_steps": 37
+      }
+    },
+    {
+      "phase_review": "critique",
+      "review_event": {
+        "seq": 53,
+        "at": "2026-10-01T23:47:09+00:00",
+        "actor": "agent:mvp-independent-review",
+        "kind": "phase_review",
+        "payload": {
+          "phase": "critique",
+          "verdict": "accept",
+          "reason": "Revisión real de /root/mvp_independent_review: Conceptos y compromisos coherentes con el mandato.",
+          "snapshot": "1799ff4aeb0a2c9782c66ec23bc48d6b93059019633d9468c46cbb7026b0eaaa",
+          "independent": true,
+          "provenance": "local_declared"
+        },
+        "prev_hash": "269e1bab26eaefcd246b7cc5baec54ef8cbd695647c7fca251bd5030efd45e61",
+        "hash": "ed04d91e785d157141e6714ed8387dc824b741a2e04570bf19660868e6a18eaf"
+      },
+      "command": [
+        "/workspace/SpecOrganon/.venv/bin/organon",
+        "run",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/case",
+        "--manifest",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/workflow_round02.json",
+        "--actor",
+        "agent:mvp-builder"
+      ],
+      "exit_code": 0,
+      "result": {
+        "applied": 1,
+        "cursor": 14,
+        "next": {
+          "action": "review_phase",
+          "actor": null,
+          "approval_targets": [],
+          "artifacts": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"metric\": \"exact_reproduction\", \"unit\": \"match\"}",
+                "id": "i1",
+                "issues": [],
+                "kind": "indicator",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "e0": 2,
+                  "n1": 1,
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Coincidencia exacta de la reproducción con el resultado histórico.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"comparison\": \"JSON histórico del análisis escolar\", \"method\": \"Ejecución local, hashes de originales, cotejo objetivo y revisión nativa separada\", \"population\": \"Este proyecto de desarrollo expuesto, en el entorno actual\", \"uncertainty\": \"Un entorno y un proyecto; sin causalidad de campo ni comparación confirmatoria\"}",
+                "id": "pr1",
+                "issues": [],
+                "kind": "protocol",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "h1": 2,
+                  "q1": 1
+                },
+                "stale": false,
+                "text": "Registrar criterios, ejecutar comandos reales, conservar streams y cotejar resultados antes de evaluar.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "h1",
+                "issues": [],
+                "kind": "hypothesis",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "q1": 1
+                },
+                "stale": false,
+                "text": "El analizador existente reproduce exactamente el JSON de referencia al conservar fuente y plan fijados.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "q1",
+                "issues": [],
+                "kind": "question",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "¿Podemos producir y revisar una entrega local reproducible con los recursos presentes?",
+                "version": 1
+              }
+            ],
+            "omitted": 0
+          },
+          "blockers": [],
+          "criteria": {
+            "exit": "Protocolo, hipótesis e indicador fijan unidad, fuente, comparación e incertidumbre antes del resultado.",
+            "review": "Revisar sesgos, factibilidad y ética de medición.",
+            "stop": "Detener si no se puede distinguir dato, inferencia y supuesto."
+          },
+          "front": "science",
+          "gate": {
+            "accepted": false,
+            "independent_review": false,
+            "ready": true,
+            "review_provenance": "none",
+            "review_signature_verified": false,
+            "reviewed": false,
+            "snapshot": "e9df0bee203ab6ea7371bfc514505f63643818598223ac5135e343e44eff4560"
+          },
+          "inputs": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "p1",
+                "issues": [],
+                "kind": "problem",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {},
+                "stale": false,
+                "text": "Necesitamos comprobar que un agente puede reproducir el análisis del XLSX escolar disponible sin cambiar la fuente, el plan o los resultados históricos.",
+                "version": 1
+              },
+              {
+                "approved": true,
+                "contested": false,
+                "data": "{\"authorization_scope\": \"MVP local de filosofia, ciencia e ingenieria; recursos presentes; decisiones tecnicas reversibles delegadas; preservar originales y declarar limites.\", \"identity_authenticated\": false, \"origin\": \"existing_owner_mandate\"}",
+                "id": "n1",
+                "issues": [],
+                "kind": "norm",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "a1": 1,
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Aplicar el mandato del dueño al MVP: usar recursos presentes, preservar historia, delegar decisiones técnicas reversibles y mantener explícitos los límites de las conclusiones.",
+                "version": 1
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "c1",
+                "issues": [],
+                "kind": "concept",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Autonomía es ejecutar dentro del encargo; reproducibilidad es poder repetir y cotejar resultados.",
+                "version": 1
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "s1",
+                "issues": [],
+                "kind": "assumption",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Las herramientas y archivos locales permiten comprobar este proyecto en el entorno actual.",
+                "version": 1
+              }
+            ],
+            "omitted": 0
+          },
+          "inputs_description": "Preguntas derivadas del encuadre.",
+          "missing": [],
+          "omitted_approval_targets": 0,
+          "omitted_blockers": 0,
+          "omitted_challenges": 0,
+          "omitted_test_execution_targets": 0,
+          "omitted_test_observation_targets": 0,
+          "open_challenges": [],
+          "phase": "study",
+          "phase_review_trust": "local_declared",
+          "purpose": "Diseñar investigación verificable.",
+          "revision": 54,
+          "role": "reviewer",
+          "role_label": "revisor",
+          "status": "pending",
+          "task": "Revisar independientemente el snapshot vigente y registrar veredicto motivado.",
+          "test_execution_targets": [],
+          "test_execution_trust": "local_declared",
+          "test_observation_targets": [],
+          "test_observation_trust": "not_applicable"
+        },
+        "reason": "independent_review_required",
+        "skipped": 13,
+        "status": "waiting",
+        "total_steps": 37
+      }
+    },
+    {
+      "phase_review": "study",
+      "review_event": {
+        "seq": 55,
+        "at": "2026-10-01T23:47:09+00:00",
+        "actor": "agent:mvp-independent-review",
+        "kind": "phase_review",
+        "payload": {
+          "phase": "study",
+          "verdict": "accept",
+          "reason": "Revisión real de /root/mvp_independent_review: Hipótesis específica y observación real de coincidencia, sin pseudoresultado anterior.",
+          "snapshot": "e9df0bee203ab6ea7371bfc514505f63643818598223ac5135e343e44eff4560",
+          "independent": true,
+          "provenance": "local_declared"
+        },
+        "prev_hash": "154415f46d90c5cdf915e2607018970e44de5da814a75a1cd579169425a5de7d",
+        "hash": "69b842a21d5cd0ceace6a79ebda1d0cba81e6e2cc4a8d39efc2eb08909db7c64"
+      },
+      "command": [
+        "/workspace/SpecOrganon/.venv/bin/organon",
+        "run",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/case",
+        "--manifest",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/workflow_round02.json",
+        "--actor",
+        "agent:mvp-builder"
+      ],
+      "exit_code": 0,
+      "result": {
+        "applied": 1,
+        "cursor": 17,
+        "next": {
+          "action": "review_phase",
+          "actor": null,
+          "approval_targets": [],
+          "artifacts": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "inf1",
+                "issues": [],
+                "kind": "inference",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "e0": 2,
+                  "h1": 2
+                },
+                "stale": false,
+                "text": "El cotejo actual muestra reproducibilidad técnica exacta; no identifica un efecto causal sobre los residuos escolares.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"date\": \"2026-10-01\", \"locator\": \"byte_equal and historical_sha256/reproduced_sha256\", \"method\": \"Compare retained actual output bytes with historical JSON; verify both SHA256 digests\", \"metric_key\": \"exact_reproduction\", \"origin\": \"observed\", \"scope\": \"current exact reproduction\", \"source\": \"/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/source_checks.json\", \"unit\": \"match\", \"value\": 1}",
+                "id": "e0",
+                "issues": [],
+                "kind": "evidence",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "pr1": 2
+                },
+                "stale": false,
+                "text": "La salida reproducida coincide exactamente con el JSON histórico; sus hashes y el cotejo de bytes están conservados.",
+                "version": 2
+              }
+            ],
+            "omitted": 0
+          },
+          "blockers": [],
+          "criteria": {
+            "exit": "Cada evidencia conserva fuente, fecha, alcance y origen; cada inferencia enlaza datos.",
+            "review": "Revisar calidad de fuente, cobertura y contradicciones.",
+            "stop": "Detener ante dato insuficiente o contradicción sin resolver."
+          },
+          "front": "science",
+          "gate": {
+            "accepted": false,
+            "independent_review": false,
+            "ready": true,
+            "review_provenance": "none",
+            "review_signature_verified": false,
+            "reviewed": false,
+            "snapshot": "6c818c9c5ce82e7bc1c57285bcddb9cbe93d33dd84e4ba06172492c83ff48dec"
+          },
+          "inputs": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"comparison\": \"JSON histórico del análisis escolar\", \"method\": \"Ejecución local, hashes de originales, cotejo objetivo y revisión nativa separada\", \"population\": \"Este proyecto de desarrollo expuesto, en el entorno actual\", \"uncertainty\": \"Un entorno y un proyecto; sin causalidad de campo ni comparación confirmatoria\"}",
+                "id": "pr1",
+                "issues": [],
+                "kind": "protocol",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "h1": 2,
+                  "q1": 1
+                },
+                "stale": false,
+                "text": "Registrar criterios, ejecutar comandos reales, conservar streams y cotejar resultados antes de evaluar.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "h1",
+                "issues": [],
+                "kind": "hypothesis",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "q1": 1
+                },
+                "stale": false,
+                "text": "El analizador existente reproduce exactamente el JSON de referencia al conservar fuente y plan fijados.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"metric\": \"exact_reproduction\", \"unit\": \"match\"}",
+                "id": "i1",
+                "issues": [],
+                "kind": "indicator",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "e0": 2,
+                  "n1": 1,
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Coincidencia exacta de la reproducción con el resultado histórico.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "q1",
+                "issues": [],
+                "kind": "question",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "¿Podemos producir y revisar una entrega local reproducible con los recursos presentes?",
+                "version": 1
+              }
+            ],
+            "omitted": 0
+          },
+          "inputs_description": "Protocolo registrado y fuentes accesibles.",
+          "missing": [],
+          "omitted_approval_targets": 0,
+          "omitted_blockers": 0,
+          "omitted_challenges": 0,
+          "omitted_test_execution_targets": 0,
+          "omitted_test_observation_targets": 0,
+          "open_challenges": [],
+          "phase": "observe",
+          "phase_review_trust": "local_declared",
+          "purpose": "Recaudar y clasificar evidencia.",
+          "revision": 56,
+          "role": "reviewer",
+          "role_label": "revisor",
+          "status": "pending",
+          "task": "Revisar independientemente el snapshot vigente y registrar veredicto motivado.",
+          "test_execution_targets": [],
+          "test_execution_trust": "local_declared",
+          "test_observation_targets": [],
+          "test_observation_trust": "not_applicable"
+        },
+        "reason": "independent_review_required",
+        "skipped": 16,
+        "status": "waiting",
+        "total_steps": 37
+      }
+    },
+    {
+      "phase_review": "observe",
+      "review_event": {
+        "seq": 57,
+        "at": "2026-10-01T23:47:09+00:00",
+        "actor": "agent:mvp-independent-review",
+        "kind": "phase_review",
+        "payload": {
+          "phase": "observe",
+          "verdict": "accept",
+          "reason": "Revisión real de /root/mvp_independent_review: Inferencia de reproducción exacta respaldada por bytes y hashes.",
+          "snapshot": "6c818c9c5ce82e7bc1c57285bcddb9cbe93d33dd84e4ba06172492c83ff48dec",
+          "independent": true,
+          "provenance": "local_declared"
+        },
+        "prev_hash": "d23140cb14aa0487e9689c8b86df6074ec8bdb9c4e9f030cee4b67d88a60f9d1",
+        "hash": "09a57cddb2e2d024ba80b384f4f987371ba25062f8a86e02b2e3b04b419dfe18"
+      },
+      "command": [
+        "/workspace/SpecOrganon/.venv/bin/organon",
+        "run",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/case",
+        "--manifest",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/workflow_round02.json",
+        "--actor",
+        "agent:mvp-builder"
+      ],
+      "exit_code": 0,
+      "result": {
+        "applied": 1,
+        "cursor": 20,
+        "next": {
+          "action": "review_phase",
+          "actor": null,
+          "approval_targets": [],
+          "artifacts": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "u1",
+                "issues": [],
+                "kind": "uncertainty",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "syn1": 2
+                },
+                "stale": false,
+                "text": "La ejecución local no autentica custodios, personas ni mejoras causales fuera del software observado.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "syn1",
+                "issues": [],
+                "kind": "synthesis",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "e0": 2,
+                  "inf1": 2
+                },
+                "stale": false,
+                "text": "El analizador reproduce el resultado descriptivo histórico y conserva exclusiones y límites causales; la comparación técnica fue exacta.",
+                "version": 2
+              }
+            ],
+            "omitted": 0
+          },
+          "blockers": [],
+          "criteria": {
+            "exit": "La síntesis distingue hallazgos, supuestos y límites; la incertidumbre queda explícita.",
+            "review": "Revisar alternativas explicativas y sesgos.",
+            "stop": "Detener si la conclusión excede sus datos."
+          },
+          "front": "science",
+          "gate": {
+            "accepted": false,
+            "independent_review": false,
+            "ready": true,
+            "review_provenance": "none",
+            "review_signature_verified": false,
+            "reviewed": false,
+            "snapshot": "5f39f1dda15121526598bf7898ff3d2ef18932155b8797bdb2cd41303aa9d984"
+          },
+          "inputs": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"date\": \"2026-10-01\", \"locator\": \"byte_equal and historical_sha256/reproduced_sha256\", \"method\": \"Compare retained actual output bytes with historical JSON; verify both SHA256 digests\", \"metric_key\": \"exact_reproduction\", \"origin\": \"observed\", \"scope\": \"current exact reproduction\", \"source\": \"/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/source_checks.json\", \"unit\": \"match\", \"value\": 1}",
+                "id": "e0",
+                "issues": [],
+                "kind": "evidence",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "pr1": 2
+                },
+                "stale": false,
+                "text": "La salida reproducida coincide exactamente con el JSON histórico; sus hashes y el cotejo de bytes están conservados.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "inf1",
+                "issues": [],
+                "kind": "inference",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "e0": 2,
+                  "h1": 2
+                },
+                "stale": false,
+                "text": "El cotejo actual muestra reproducibilidad técnica exacta; no identifica un efecto causal sobre los residuos escolares.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "h1",
+                "issues": [],
+                "kind": "hypothesis",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "q1": 1
+                },
+                "stale": false,
+                "text": "El analizador existente reproduce exactamente el JSON de referencia al conservar fuente y plan fijados.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"comparison\": \"JSON histórico del análisis escolar\", \"method\": \"Ejecución local, hashes de originales, cotejo objetivo y revisión nativa separada\", \"population\": \"Este proyecto de desarrollo expuesto, en el entorno actual\", \"uncertainty\": \"Un entorno y un proyecto; sin causalidad de campo ni comparación confirmatoria\"}",
+                "id": "pr1",
+                "issues": [],
+                "kind": "protocol",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "h1": 2,
+                  "q1": 1
+                },
+                "stale": false,
+                "text": "Registrar criterios, ejecutar comandos reales, conservar streams y cotejar resultados antes de evaluar.",
+                "version": 2
+              }
+            ],
+            "omitted": 0
+          },
+          "inputs_description": "Evidencias e inferencias vigentes.",
+          "missing": [],
+          "omitted_approval_targets": 0,
+          "omitted_blockers": 0,
+          "omitted_challenges": 0,
+          "omitted_test_execution_targets": 0,
+          "omitted_test_observation_targets": 0,
+          "open_challenges": [],
+          "phase": "explain",
+          "phase_review_trust": "local_declared",
+          "purpose": "Contrastar hipótesis y condiciones materiales.",
+          "revision": 58,
+          "role": "reviewer",
+          "role_label": "revisor",
+          "status": "pending",
+          "task": "Revisar independientemente el snapshot vigente y registrar veredicto motivado.",
+          "test_execution_targets": [],
+          "test_execution_trust": "local_declared",
+          "test_observation_targets": [],
+          "test_observation_trust": "not_applicable"
+        },
+        "reason": "independent_review_required",
+        "skipped": 19,
+        "status": "waiting",
+        "total_steps": 37
+      }
+    },
+    {
+      "phase_review": "explain",
+      "review_event": {
+        "seq": 59,
+        "at": "2026-10-01T23:47:10+00:00",
+        "actor": "agent:mvp-independent-review",
+        "kind": "phase_review",
+        "payload": {
+          "phase": "explain",
+          "verdict": "accept",
+          "reason": "Revisión real de /root/mvp_independent_review: Síntesis descriptiva sin conclusión causal.",
+          "snapshot": "5f39f1dda15121526598bf7898ff3d2ef18932155b8797bdb2cd41303aa9d984",
+          "independent": true,
+          "provenance": "local_declared"
+        },
+        "prev_hash": "7b0bd5cfba0a8eba05603599c6aac9215d92d71a970cd6ce02f4a4fec770108d",
+        "hash": "d9aafdb34369ddde46ea9baa19f768cbdd671c2c0f89d1995cee4155895090c5"
+      },
+      "command": [
+        "/workspace/SpecOrganon/.venv/bin/organon",
+        "run",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/case",
+        "--manifest",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/workflow_round02.json",
+        "--actor",
+        "agent:mvp-builder"
+      ],
+      "exit_code": 0,
+      "result": {
+        "applied": 1,
+        "cursor": 25,
+        "next": {
+          "action": "review_phase",
+          "actor": null,
+          "approval_targets": [],
+          "artifacts": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "risk1",
+                "issues": [],
+                "kind": "risk",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "o2": 2
+                },
+                "stale": false,
+                "text": "Una etiqueta o un recibo declarados pueden ser falsos; conservar streams y revisar las fuentes; no extrapolar el resultado local a campo o superioridad metodológica.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "cmp1",
+                "issues": [],
+                "kind": "comparison",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "o1": 2,
+                  "o2": 2
+                },
+                "stale": false,
+                "text": "La vía manual necesita verificar transcripción y redondeo. El analizador versionado permite cotejo exacto con los recursos actuales. No se midió ahorro de tiempo.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "o2",
+                "issues": [],
+                "kind": "option",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "n1": 1,
+                  "syn1": 2
+                },
+                "stale": false,
+                "text": "Reutilizar el analizador con hashes fijados y cotejar los bytes de salida contra la referencia.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "o1",
+                "issues": [],
+                "kind": "option",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "n1": 1,
+                  "syn1": 2
+                },
+                "stale": false,
+                "text": "Recalcular manualmente en una hoja nueva conservando las reglas del plan y comprobar transcripción y redondeo.",
+                "version": 2
+              }
+            ],
+            "omitted": 0
+          },
+          "blockers": [],
+          "criteria": {
+            "exit": "La comparación incluye efectos por actor, coste, riesgo y alternativa sin software cuando proceda.",
+            "review": "Revisar opciones dominadas y perjuicios desplazados.",
+            "stop": "Detener si solo se evaluó la primera idea o falta una restricción de seguridad."
+          },
+          "front": "engineering",
+          "gate": {
+            "accepted": false,
+            "independent_review": false,
+            "ready": true,
+            "review_provenance": "none",
+            "review_signature_verified": false,
+            "reviewed": false,
+            "snapshot": "f839ebae6711751d71147c81e155999e8868f720d1d808cea14fc49e5cda57ae"
+          },
+          "inputs": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "syn1",
+                "issues": [],
+                "kind": "synthesis",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "e0": 2,
+                  "inf1": 2
+                },
+                "stale": false,
+                "text": "El analizador reproduce el resultado descriptivo histórico y conserva exclusiones y límites causales; la comparación técnica fue exacta.",
+                "version": 2
+              },
+              {
+                "approved": true,
+                "contested": false,
+                "data": "{\"authorization_scope\": \"MVP local de filosofia, ciencia e ingenieria; recursos presentes; decisiones tecnicas reversibles delegadas; preservar originales y declarar limites.\", \"identity_authenticated\": false, \"origin\": \"existing_owner_mandate\"}",
+                "id": "n1",
+                "issues": [],
+                "kind": "norm",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "a1": 1,
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Aplicar el mandato del dueño al MVP: usar recursos presentes, preservar historia, delegar decisiones técnicas reversibles y mantener explícitos los límites de las conclusiones.",
+                "version": 1
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "u1",
+                "issues": [],
+                "kind": "uncertainty",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "syn1": 2
+                },
+                "stale": false,
+                "text": "La ejecución local no autentica custodios, personas ni mejoras causales fuera del software observado.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"date\": \"2026-10-01\", \"locator\": \"byte_equal and historical_sha256/reproduced_sha256\", \"method\": \"Compare retained actual output bytes with historical JSON; verify both SHA256 digests\", \"metric_key\": \"exact_reproduction\", \"origin\": \"observed\", \"scope\": \"current exact reproduction\", \"source\": \"/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/source_checks.json\", \"unit\": \"match\", \"value\": 1}",
+                "id": "e0",
+                "issues": [],
+                "kind": "evidence",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "pr1": 2
+                },
+                "stale": false,
+                "text": "La salida reproducida coincide exactamente con el JSON histórico; sus hashes y el cotejo de bytes están conservados.",
+                "version": 2
+              }
+            ],
+            "omitted": 0
+          },
+          "inputs_description": "Síntesis y compromisos normativos vigentes.",
+          "missing": [],
+          "omitted_approval_targets": 0,
+          "omitted_blockers": 0,
+          "omitted_challenges": 0,
+          "omitted_test_execution_targets": 0,
+          "omitted_test_observation_targets": 0,
+          "open_challenges": [],
+          "phase": "compare",
+          "phase_review_trust": "local_declared",
+          "purpose": "Comparar intervenciones materiales y organizativas.",
+          "revision": 60,
+          "role": "reviewer",
+          "role_label": "revisor",
+          "status": "pending",
+          "task": "Revisar independientemente el snapshot vigente y registrar veredicto motivado.",
+          "test_execution_targets": [],
+          "test_execution_trust": "local_declared",
+          "test_observation_targets": [],
+          "test_observation_trust": "not_applicable"
+        },
+        "reason": "independent_review_required",
+        "skipped": 24,
+        "status": "waiting",
+        "total_steps": 37
+      }
+    },
+    {
+      "phase_review": "compare",
+      "review_event": {
+        "seq": 61,
+        "at": "2026-10-01T23:47:10+00:00",
+        "actor": "agent:mvp-independent-review",
+        "kind": "phase_review",
+        "payload": {
+          "phase": "compare",
+          "verdict": "accept",
+          "reason": "Revisión real de /root/mvp_independent_review: Alternativas manual/analizador pertinentes; no inventa ahorro medido.",
+          "snapshot": "f839ebae6711751d71147c81e155999e8868f720d1d808cea14fc49e5cda57ae",
+          "independent": true,
+          "provenance": "local_declared"
+        },
+        "prev_hash": "bf11dcb6c6864cb504f2ffe9d88a4afbb0ac3838945d21f5002f3d2bdd9adcfb",
+        "hash": "6bb2551e0e7ea297b1c80921b90e218e99ffc5509e7b9b9384d0fb4d8881659c"
+      },
+      "command": [
+        "/workspace/SpecOrganon/.venv/bin/organon",
+        "run",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/case",
+        "--manifest",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/workflow_round02.json",
+        "--actor",
+        "agent:mvp-builder"
+      ],
+      "exit_code": 0,
+      "result": {
+        "applied": 1,
+        "cursor": 29,
+        "next": {
+          "action": "review_phase",
+          "actor": null,
+          "approval_targets": [],
+          "artifacts": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"metric\": \"exact_reproduction\", \"reject\": \"No cerrar si el resultado es menor que 1 o hay prueba fallida\", \"reject_test\": {\"operator\": \"<\", \"statistic\": \"estimate\", \"value\": 1}, \"threshold\": {\"operator\": \">=\", \"statistic\": \"estimate\", \"value\": 1}, \"unit\": \"match\"}",
+                "id": "crit1",
+                "issues": [],
+                "kind": "criterion",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "i1": 2,
+                  "req1": 2
+                },
+                "stale": false,
+                "text": "Reproducir exactamente el JSON existente sin modificar originales.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "req1",
+                "issues": [],
+                "kind": "requirement",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "d1": 2
+                },
+                "stale": false,
+                "text": "Conservar compuertas y trazabilidad, ejecutar una prueba real y producir un informe reproducible.",
+                "version": 2
+              },
+              {
+                "approved": true,
+                "contested": false,
+                "data": "{}",
+                "id": "d1",
+                "issues": [],
+                "kind": "decision",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "cmp1": 2,
+                  "e0": 2,
+                  "n1": 1
+                },
+                "stale": false,
+                "text": "Reutilizar el analizador con pines y cotejo exacto dentro de la delegación técnica del dueño.",
+                "version": 2
+              }
+            ],
+            "omitted": 0
+          },
+          "blockers": [],
+          "criteria": {
+            "exit": "Cada requisito y criterio traza a problema, norma aprobada y evidencia; el criterio precede al resultado.",
+            "review": "Revisar consistencia entre spec, decisión y prueba.",
+            "stop": "Detener ante requisito huérfano o criterio ajustado tras ver el resultado."
+          },
+          "front": "engineering",
+          "gate": {
+            "accepted": false,
+            "independent_review": false,
+            "ready": true,
+            "review_provenance": "none",
+            "review_signature_verified": false,
+            "reviewed": false,
+            "snapshot": "82742f3d6cd82b881f2fefe4dfad2ac508be17902ac047d4a4eeb84f1b2fc5c5"
+          },
+          "inputs": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "cmp1",
+                "issues": [],
+                "kind": "comparison",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "o1": 2,
+                  "o2": 2
+                },
+                "stale": false,
+                "text": "La vía manual necesita verificar transcripción y redondeo. El analizador versionado permite cotejo exacto con los recursos actuales. No se midió ahorro de tiempo.",
+                "version": 2
+              },
+              {
+                "approved": true,
+                "contested": false,
+                "data": "{\"authorization_scope\": \"MVP local de filosofia, ciencia e ingenieria; recursos presentes; decisiones tecnicas reversibles delegadas; preservar originales y declarar limites.\", \"identity_authenticated\": false, \"origin\": \"existing_owner_mandate\"}",
+                "id": "n1",
+                "issues": [],
+                "kind": "norm",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "a1": 1,
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Aplicar el mandato del dueño al MVP: usar recursos presentes, preservar historia, delegar decisiones técnicas reversibles y mantener explícitos los límites de las conclusiones.",
+                "version": 1
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"date\": \"2026-10-01\", \"locator\": \"byte_equal and historical_sha256/reproduced_sha256\", \"method\": \"Compare retained actual output bytes with historical JSON; verify both SHA256 digests\", \"metric_key\": \"exact_reproduction\", \"origin\": \"observed\", \"scope\": \"current exact reproduction\", \"source\": \"/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/source_checks.json\", \"unit\": \"match\", \"value\": 1}",
+                "id": "e0",
+                "issues": [],
+                "kind": "evidence",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "pr1": 2
+                },
+                "stale": false,
+                "text": "La salida reproducida coincide exactamente con el JSON histórico; sus hashes y el cotejo de bytes están conservados.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"metric\": \"exact_reproduction\", \"unit\": \"match\"}",
+                "id": "i1",
+                "issues": [],
+                "kind": "indicator",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "e0": 2,
+                  "n1": 1,
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Coincidencia exacta de la reproducción con el resultado histórico.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "o2",
+                "issues": [],
+                "kind": "option",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "n1": 1,
+                  "syn1": 2
+                },
+                "stale": false,
+                "text": "Reutilizar el analizador con hashes fijados y cotejar los bytes de salida contra la referencia.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "o1",
+                "issues": [],
+                "kind": "option",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "n1": 1,
+                  "syn1": 2
+                },
+                "stale": false,
+                "text": "Recalcular manualmente en una hoja nueva conservando las reglas del plan y comprobar transcripción y redondeo.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "risk1",
+                "issues": [],
+                "kind": "risk",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "o2": 2
+                },
+                "stale": false,
+                "text": "Una etiqueta o un recibo declarados pueden ser falsos; conservar streams y revisar las fuentes; no extrapolar el resultado local a campo o superioridad metodológica.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "p1",
+                "issues": [],
+                "kind": "problem",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {},
+                "stale": false,
+                "text": "Necesitamos comprobar que un agente puede reproducir el análisis del XLSX escolar disponible sin cambiar la fuente, el plan o los resultados históricos.",
+                "version": 1
+              }
+            ],
+            "omitted": 0
+          },
+          "inputs_description": "Comparación, evidencia y aprobación humana.",
+          "missing": [],
+          "omitted_approval_targets": 0,
+          "omitted_blockers": 0,
+          "omitted_challenges": 0,
+          "omitted_test_execution_targets": 0,
+          "omitted_test_observation_targets": 0,
+          "open_challenges": [],
+          "phase": "specify",
+          "phase_review_trust": "local_declared",
+          "purpose": "Justificar decisiones y escribir SDD verificable.",
+          "revision": 62,
+          "role": "reviewer",
+          "role_label": "revisor",
+          "status": "pending",
+          "task": "Revisar independientemente el snapshot vigente y registrar veredicto motivado.",
+          "test_execution_targets": [],
+          "test_execution_trust": "local_declared",
+          "test_observation_targets": [],
+          "test_observation_trust": "not_applicable"
+        },
+        "reason": "independent_review_required",
+        "skipped": 28,
+        "status": "waiting",
+        "total_steps": 37
+      }
+    },
+    {
+      "phase_review": "specify",
+      "review_event": {
+        "seq": 63,
+        "at": "2026-10-01T23:47:10+00:00",
+        "actor": "agent:mvp-independent-review",
+        "kind": "phase_review",
+        "payload": {
+          "phase": "specify",
+          "verdict": "accept",
+          "reason": "Revisión real de /root/mvp_independent_review: Decisión específica aprobada en v2 y criterio de igualdad conservado.",
+          "snapshot": "82742f3d6cd82b881f2fefe4dfad2ac508be17902ac047d4a4eeb84f1b2fc5c5",
+          "independent": true,
+          "provenance": "local_declared"
+        },
+        "prev_hash": "311d6cfcd80fa7a6fe382d3f35eff3d3fa970c6afa0d11074a93e61d1771f1d1",
+        "hash": "6668b0c5c0ef591536ee2b0d4d8612c0857b35b910d1c054b0dbe0c1670b28df"
+      },
+      "command": [
+        "/workspace/SpecOrganon/.venv/bin/organon",
+        "run",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/case",
+        "--manifest",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/workflow_round02.json",
+        "--actor",
+        "agent:mvp-builder"
+      ],
+      "exit_code": 0,
+      "result": {
+        "applied": 1,
+        "cursor": 32,
+        "next": {
+          "action": "review_phase",
+          "actor": null,
+          "approval_targets": [],
+          "artifacts": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"argv\": [\"/workspace/SpecOrganon/.venv/bin/python3\", \"scripts/analyze_school_waste.py\", \"--output\", \"/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json\"], \"command\": \"/workspace/SpecOrganon/.venv/bin/python3 scripts/analyze_school_waste.py --output /workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json\", \"passed\": true, \"receipt\": {\"argv\": [\"/workspace/SpecOrganon/.venv/bin/python3\", \"scripts/analyze_school_waste.py\", \"--output\", \"/workspac…",
+                "id": "t1",
+                "issues": [],
+                "kind": "test",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "crit1": 2,
+                  "impl1": 2
+                },
+                "stale": false,
+                "text": "Ejecución real conservada en execution/; recibo local no autenticado externamente.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"paths\": [\"scripts/analyze_school_waste.py\"]}",
+                "id": "impl1",
+                "issues": [],
+                "kind": "implementation",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "req1": 2
+                },
+                "stale": false,
+                "text": "Analizador escolar existente, con fuente y plan fijados por hashes.",
+                "version": 2
+              }
+            ],
+            "omitted": 0
+          },
+          "blockers": [],
+          "criteria": {
+            "exit": "La implementación enlaza requisitos y las pruebas ejecutadas enlazan criterio e implementación.",
+            "review": "Revisar riesgos técnicos y efectos materiales.",
+            "stop": "Detener ante prueba fallida o control de seguridad ausente."
+          },
+          "front": "engineering",
+          "gate": {
+            "accepted": false,
+            "independent_review": false,
+            "ready": true,
+            "review_provenance": "none",
+            "review_signature_verified": false,
+            "reviewed": false,
+            "snapshot": "d8e8e227b474a3b4ad07049c89423a93f4c907d4cd3d127e3fa72da3429149b3"
+          },
+          "inputs": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "req1",
+                "issues": [],
+                "kind": "requirement",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "d1": 2
+                },
+                "stale": false,
+                "text": "Conservar compuertas y trazabilidad, ejecutar una prueba real y producir un informe reproducible.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"metric\": \"exact_reproduction\", \"reject\": \"No cerrar si el resultado es menor que 1 o hay prueba fallida\", \"reject_test\": {\"operator\": \"<\", \"statistic\": \"estimate\", \"value\": 1}, \"threshold\": {\"operator\": \">=\", \"statistic\": \"estimate\", \"value\": 1}, \"unit\": \"match\"}",
+                "id": "crit1",
+                "issues": [],
+                "kind": "criterion",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "i1": 2,
+                  "req1": 2
+                },
+                "stale": false,
+                "text": "Reproducir exactamente el JSON existente sin modificar originales.",
+                "version": 2
+              },
+              {
+                "approved": true,
+                "contested": false,
+                "data": "{}",
+                "id": "d1",
+                "issues": [],
+                "kind": "decision",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "cmp1": 2,
+                  "e0": 2,
+                  "n1": 1
+                },
+                "stale": false,
+                "text": "Reutilizar el analizador con pines y cotejo exacto dentro de la delegación técnica del dueño.",
+                "version": 2
+              }
+            ],
+            "omitted": 0
+          },
+          "inputs_description": "Requisitos y criterios versionados.",
+          "missing": [],
+          "omitted_approval_targets": 0,
+          "omitted_blockers": 0,
+          "omitted_challenges": 0,
+          "omitted_test_execution_targets": 0,
+          "omitted_test_observation_targets": 0,
+          "open_challenges": [],
+          "phase": "build",
+          "phase_review_trust": "local_declared",
+          "purpose": "Implementar y probar la intervención.",
+          "revision": 64,
+          "role": "reviewer",
+          "role_label": "revisor",
+          "status": "pending",
+          "task": "Revisar independientemente el snapshot vigente y registrar veredicto motivado.",
+          "test_execution_targets": [],
+          "test_execution_trust": "local_declared",
+          "test_observation_targets": [],
+          "test_observation_trust": "not_applicable"
+        },
+        "reason": "independent_review_required",
+        "skipped": 31,
+        "status": "waiting",
+        "total_steps": 37
+      }
+    },
+    {
+      "phase_review": "build",
+      "review_event": {
+        "seq": 65,
+        "at": "2026-10-01T23:47:11+00:00",
+        "actor": "agent:mvp-independent-review",
+        "kind": "phase_review",
+        "payload": {
+          "phase": "build",
+          "verdict": "accept",
+          "reason": "Revisión real de /root/mvp_independent_review: Ejecución y reproducción corroboradas independientemente.",
+          "snapshot": "d8e8e227b474a3b4ad07049c89423a93f4c907d4cd3d127e3fa72da3429149b3",
+          "independent": true,
+          "provenance": "local_declared"
+        },
+        "prev_hash": "787246a1b8f72b90d1600a2e5afac3ebab018ae2e94fe273f321a6d2ec396f65",
+        "hash": "e49d0a0da0925553aec9537b70a88734878fb5c8dec73c2f5381615846ed17f9"
+      },
+      "command": [
+        "/workspace/SpecOrganon/.venv/bin/organon",
+        "run",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/case",
+        "--manifest",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/workflow_round02.json",
+        "--actor",
+        "agent:mvp-builder"
+      ],
+      "exit_code": 0,
+      "result": {
+        "applied": 1,
+        "cursor": 36,
+        "next": {
+          "action": "review_phase",
+          "actor": null,
+          "approval_targets": [],
+          "artifacts": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"adverse_effects\": \"Originales preservados; ninguna intervención externa\", \"claim_scope\": \"technical\", \"cost\": \"Agentes y herramientas presentes; sin API adicional. Consumo total no medido.\", \"uncertainty\": \"Conteo o coincidencia exactos en esta ejecución; sin intervalo estadístico poblacional\", \"verdict\": \"cumplido\"}",
+                "id": "ass1",
+                "issues": [],
+                "kind": "assessment",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "res1": 2,
+                  "risk1": 2
+                },
+                "stale": false,
+                "text": "Reproducción técnica exacta; las diferencias escolares siguen siendo descriptivas, sin atribución causal.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"date\": \"2026-10-01\", \"effect\": {\"estimate\": 1, \"interval\": [1, 1], \"metric\": \"exact_reproduction\", \"unit\": \"match\"}, \"origin\": \"technical\", \"source\": \"/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/execution\"}",
+                "id": "res1",
+                "issues": [],
+                "kind": "result",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "base1": 2,
+                  "crit1": 2,
+                  "t1": 2
+                },
+                "stale": false,
+                "text": "La reproducción actual coincide byte por byte con el JSON histórico.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"date\": \"2026-10-01\", \"meaning\": \"Referencia fijada del cotejo exacto: objetivo coincidencia=1, sin afirmar una reproducción fallida anterior\", \"metric\": \"exact_reproduction\", \"origin\": \"technical\", \"reference_sha256\": \"dd2f41c01a7c082871144ee36398a8372914436be9c808ad8954ab3f8a86a878\", \"source\": \"/workspace/SpecOrganon/experiments/development/school_waste_2026-09-26.json\", \"unit\": \"match\", \"value\": 1}",
+                "id": "base1",
+                "issues": [],
+                "kind": "baseline",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "crit1": 2
+                },
+                "stale": false,
+                "text": "Comparador histórico real conservado; la salida debe coincidir exactamente con sus bytes.",
+                "version": 2
+              }
+            ],
+            "omitted": 0
+          },
+          "blockers": [],
+          "criteria": {
+            "exit": "El veredicto distingue técnico, simulado y observado y evalúa costes, daños e incertidumbre.",
+            "review": "Revisión independiente del diseño causal y de los resultados.",
+            "stop": "Detener sin atribución razonable o ante daño crítico; declarar no demostrado cuando falte campo."
+          },
+          "front": "validation",
+          "gate": {
+            "accepted": false,
+            "independent_review": false,
+            "ready": true,
+            "review_provenance": "none",
+            "review_signature_verified": false,
+            "reviewed": false,
+            "snapshot": "c56e3bb8ef76f9e0706668b217eefaf23fe4dfe0437f13a5373a982414625e6e"
+          },
+          "inputs": {
+            "items": [
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"metric\": \"exact_reproduction\", \"reject\": \"No cerrar si el resultado es menor que 1 o hay prueba fallida\", \"reject_test\": {\"operator\": \"<\", \"statistic\": \"estimate\", \"value\": 1}, \"threshold\": {\"operator\": \">=\", \"statistic\": \"estimate\", \"value\": 1}, \"unit\": \"match\"}",
+                "id": "crit1",
+                "issues": [],
+                "kind": "criterion",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "i1": 2,
+                  "req1": 2
+                },
+                "stale": false,
+                "text": "Reproducir exactamente el JSON existente sin modificar originales.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{}",
+                "id": "risk1",
+                "issues": [],
+                "kind": "risk",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "o2": 2
+                },
+                "stale": false,
+                "text": "Una etiqueta o un recibo declarados pueden ser falsos; conservar streams y revisar las fuentes; no extrapolar el resultado local a campo o superioridad metodológica.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"argv\": [\"/workspace/SpecOrganon/.venv/bin/python3\", \"scripts/analyze_school_waste.py\", \"--output\", \"/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json\"], \"command\": \"/workspace/SpecOrganon/.venv/bin/python3 scripts/analyze_school_waste.py --output /workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/school_waste_reproduced.json\", \"passed\": true, \"receipt\": {\"argv\": [\"/workspace/SpecOrganon/.venv/bin/python3\", \"scripts/analyze_school_waste.py\", \"--output\", \"/workspac…",
+                "id": "t1",
+                "issues": [],
+                "kind": "test",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "crit1": 2,
+                  "impl1": 2
+                },
+                "stale": false,
+                "text": "Ejecución real conservada en execution/; recibo local no autenticado externamente.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"paths\": [\"scripts/analyze_school_waste.py\"]}",
+                "id": "impl1",
+                "issues": [],
+                "kind": "implementation",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "req1": 2
+                },
+                "stale": false,
+                "text": "Analizador escolar existente, con fuente y plan fijados por hashes.",
+                "version": 2
+              },
+              {
+                "approved": null,
+                "contested": false,
+                "data": "{\"metric\": \"exact_reproduction\", \"unit\": \"match\"}",
+                "id": "i1",
+                "issues": [],
+                "kind": "indicator",
+                "omitted_issues": 0,
+                "omitted_refs": 0,
+                "refs": {
+                  "e0": 2,
+                  "n1": 1,
+                  "p1": 1
+                },
+                "stale": false,
+                "text": "Coincidencia exacta de la reproducción con el resultado histórico.",
+                "version": 2
+              }
+            ],
+            "omitted": 0
+          },
+          "inputs_description": "Criterios prerregistrados e intervención ejecutada.",
+          "missing": [],
+          "omitted_approval_targets": 0,
+          "omitted_blockers": 0,
+          "omitted_challenges": 0,
+          "omitted_test_execution_targets": 0,
+          "omitted_test_observation_targets": 0,
+          "open_challenges": [],
+          "phase": "validate",
+          "phase_review_trust": "local_declared",
+          "purpose": "Medir eficacia y daños contra línea base.",
+          "revision": 66,
+          "role": "reviewer",
+          "role_label": "revisor",
+          "status": "pending",
+          "task": "Revisar independientemente el snapshot vigente y registrar veredicto motivado.",
+          "test_execution_targets": [],
+          "test_execution_trust": "local_declared",
+          "test_observation_targets": [],
+          "test_observation_trust": "not_applicable"
+        },
+        "reason": "independent_review_required",
+        "skipped": 35,
+        "status": "waiting",
+        "total_steps": 37
+      }
+    },
+    {
+      "phase_review": "validate",
+      "review_event": {
+        "seq": 67,
+        "at": "2026-10-01T23:47:11+00:00",
+        "actor": "agent:mvp-independent-review",
+        "kind": "phase_review",
+        "payload": {
+          "phase": "validate",
+          "verdict": "accept",
+          "reason": "Revisión real de /root/mvp_independent_review: Referencia esperada explícita y coincidencia observada de uno.",
+          "snapshot": "c56e3bb8ef76f9e0706668b217eefaf23fe4dfe0437f13a5373a982414625e6e",
+          "independent": true,
+          "provenance": "local_declared"
+        },
+        "prev_hash": "3d8cebbe8ff7fe28105e8f70ddea8af2405b386ef5ec121320a6cb380c073965",
+        "hash": "18c58890af4bcf7b814c6ca97a97840b6e635bef2f4f2c78239963c40477b267"
+      },
+      "command": [
+        "/workspace/SpecOrganon/.venv/bin/organon",
+        "run",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/case",
+        "--manifest",
+        "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/school/workflow_round02.json",
+        "--actor",
+        "agent:mvp-builder"
+      ],
+      "exit_code": 0,
+      "result": {
+        "applied": 1,
+        "cursor": 37,
+        "next": {
+          "action": "complete",
+          "actor": null,
+          "artifacts": {
+            "items": [],
+            "omitted": 0
+          },
+          "blockers": [],
+          "criteria": null,
+          "inputs": {
+            "items": [],
+            "omitted": 0
+          },
+          "missing": [],
+          "open_challenges": [],
+          "phase": null,
+          "revision": 68,
+          "role": null,
+          "status": "done",
+          "task": "Todas las fases tienen avance vigente."
+        },
+        "reason": null,
+        "skipped": 36,
+        "status": "complete",
+        "total_steps": 37
+      }
+    }
+  ],
+  "revision": 68,
+  "accepted_phases": 9,
+  "terminal": {
+    "status": "complete",
+    "cursor": 37,
+    "total_steps": 37,
+    "applied": 0,
+    "skipped": 37,
+    "reason": null,
+    "next": {
+      "status": "done",
+      "revision": 68,
+      "phase": null,
+      "role": null,
+      "actor": null,
+      "action": "complete",
+      "task": "Todas las fases tienen avance vigente.",
+      "inputs": {
+        "items": [],
+        "omitted": 0
+      },
+      "artifacts": {
+        "items": [],
+        "omitted": 0
+      },
+      "missing": [],
+      "criteria": null,
+      "blockers": [],
+      "open_challenges": []
+    }
+  },
+  "initial_assessment": {
+    "adverse_effects": "Originales preservados; ninguna intervención externa",
+    "claim_scope": "technical",
+    "cost": "Agentes y herramientas presentes; sin API adicional. Consumo total no medido.",
+    "uncertainty": "Conteo o coincidencia exactos en esta ejecución; sin intervalo estadístico poblacional",
+    "verdict": "cumplido"
+  }
+}

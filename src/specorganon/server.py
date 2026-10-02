@@ -9,7 +9,7 @@ import platform
 import sys
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, AsyncIterator, Iterator
+from typing import Any, AsyncIterator, Iterator, Literal
 
 import anyio
 from mcp.shared.message import SessionMessage
@@ -412,10 +412,21 @@ def _validate_init(kwargs: dict[str, Any]) -> None:
         for key in ("title", "domain", "actor")
     ):
         raise ValueError("title, domain and actor must be nonempty strings")
-    if kwargs.get("approval_policy", "signed") not in {"signed", "fixture"}:
-        raise ValueError("approval_policy must be signed or fixture")
-    if kwargs.get("test_gate_policy", "signed_report") not in {"signed_report", "signed_observed"}:
-        raise ValueError("test_gate_policy must be signed_report or signed_observed")
+    approval_policy = kwargs.get("approval_policy", "signed")
+    test_gate_policy = kwargs.get("test_gate_policy", "signed_report")
+    if approval_policy not in {"signed", "local", "fixture"}:
+        raise ValueError("approval_policy must be signed, local or fixture")
+    if approval_policy == "local":
+        actor = kwargs["actor"]
+        if (not actor.startswith("human:") or not actor.removeprefix("human:").strip()
+                or actor != "human:" + actor.removeprefix("human:").strip() or actor == "human:fixture"):
+            raise ValueError("local case requires a declared human:<owner>")
+    if test_gate_policy not in {"signed_report", "signed_observed", "local_report"}:
+        raise ValueError("test_gate_policy must be signed_report, signed_observed or local_report")
+    if test_gate_policy == "signed_observed" and approval_policy != "signed":
+        raise ValueError("signed_observed requires signed approval policy")
+    if test_gate_policy == "local_report" and approval_policy != "local":
+        raise ValueError("local_report requires local approval policy")
 
 
 def _invoke(operation: str, **kwargs: Any) -> dict[str, Any]:
@@ -435,15 +446,24 @@ server = _StrictStdioMCPServer(
     instructions=(
         "Start with init, add items with put, inspect status and gate before advance. "
         "Record reviews and human decisions explicitly. Signed cases require an offline Ed25519 "
-        "signature checked against the operator-controlled ORGANON_APPROVERS_FILE."
+        "signature checked against the operator-controlled ORGANON_APPROVERS_FILE. "
+        "Choose local explicitly for trusted development with declared human approvals and "
+        "separate reviewers; fixture is reserved for synthetic tests. Use report for a readable "
+        "summary, next task and evidence limits."
     ),
 )
 
 
-@server.tool(description="Create a case at path with a title, domain and actor label.")
+@server.tool(
+    description=("Create a case. signed (default) authenticates real-case approvals and reviews; "
+                 "local is trusted development with declared human approvals and reviews; "
+                 "local requires actor human:<owner> and uses local_report; fixture is synthetic. "
+                 "signed_observed requires signed."),
+)
 def init(
-    path: str, title: str, domain: str, actor: str, approval_policy: str = "signed",
-    test_gate_policy: str = "signed_report",
+    path: str, title: str, domain: str, actor: str,
+    approval_policy: Literal["signed", "local", "fixture"] = "signed",
+    test_gate_policy: Literal["signed_report", "signed_observed", "local_report"] = "signed_report",
 ) -> dict[str, Any]:
     return _invoke(
         "init",
@@ -489,6 +509,11 @@ def status(path: str) -> dict[str, Any]:
     return _invoke("status", path=path)
 
 
+@server.tool(description="Read a case summary, next task and evidence limits without changing the ledger.")
+def report(path: str) -> dict[str, Any]:
+    return _invoke("report", path=path)
+
+
 @server.tool(description="Record an item review with a verdict and reason.")
 def review(path: str, id: str, verdict: str, reason: str, actor: str) -> dict[str, Any]:
     return _invoke(
@@ -517,7 +542,8 @@ def approval_challenge(path: str, id: str, reason: str, actor: str) -> dict[str,
 
 
 @server.tool(
-    description="Record a normative approval; signed cases require a trusted Ed25519 signature."
+    description=("Record an explicit human normative approval; local records its owner's declaration, "
+                 "and signed cases require a trusted Ed25519 signature."),
 )
 def approve(
     path: str, id: str, reason: str, actor: str, signature: str | None = None
@@ -645,7 +671,8 @@ def phase_review_challenge(
     )
 
 
-@server.tool(description="Record a phase review; signed cases require a trusted Ed25519 reviewer signature.")
+@server.tool(description=("Record a phase review; local requires a separate declared reviewer, "
+                          "and signed cases require a trusted Ed25519 reviewer signature."))
 def review_phase(
     path: str, phase: str, verdict: str, reason: str, actor: str,
     signature: str | None = None,

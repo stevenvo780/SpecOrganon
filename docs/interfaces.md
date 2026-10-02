@@ -1,20 +1,21 @@
 # Interfaces CLI y MCP
 
-Ambas interfaces comparten el motor, runner y auditor de lotes. El directorio de un caso contiene `organon.json`, un registro de eventos versionado. Los resultados de la CLI se imprimen como JSON; los errores salen por stderr con código distinto de cero.
+Ambas interfaces comparten el motor, runner y auditor de lotes. El directorio de un caso contiene `organon.json`, un registro de eventos versionado. Los resultados de la CLI se imprimen como JSON; `report --format markdown` ofrece también texto legible. Los errores salen por stderr con código distinto de cero. El [modo local](uso_local.md) se elige explícitamente para desarrollo; el valor inicial sigue siendo `signed`.
 
 ## CLI
 
-Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 23 operaciones públicas:
+Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <comando> --help` para ver los argumentos. Hay 24 operaciones públicas:
 
 | CLI | MCP | Función |
 | --- | --- | --- |
 | `init` | `init` | Crear el caso con `approval_policy="signed"` y `test_gate_policy="signed_report"` por defecto y un `case_id` UUID. |
 | `put` | `put` | Añadir o revisar un ítem. |
 | `status` | `status` | Leer estado y confianza de aprobaciones. |
+| `report` | `report` | Informe del caso, dependencias y siguiente tarea desde una única snapshot. CLI admite `--format markdown`; JSON es el valor inicial. |
 | `review` | `review` | Revisar un ítem. |
 | `retire-indicator` | `retire_indicator` | Retirar un indicador rechazado sin consumidores, con reemplazos y revisión fijados por versión. |
 | `approval-challenge` | `approval_challenge` | Obtener el mensaje exacto para una firma offline. |
-| `approve` | `approve` | Registrar una aprobación normativa verificada. |
+| `approve` | `approve` | Registrar aprobación: firmada en `signed`, mandato declarado del dueño en `local`, sintética en `fixture`. |
 | `test-execution-challenge` | `test_execution_challenge` | Obtener los bytes exactos de un reporte de ejecución de prueba para firma offline. |
 | `record-test-execution` | `record_test_execution` | Registrar el reporte firmado por un ejecutor externo de un test `signed`. |
 | `test-observation-challenge` | `test_observation_challenge` | Obtener los bytes exactos de una repetición local para firma de observador. |
@@ -32,7 +33,7 @@ Tras `uv sync --extra dev`, usa `uv run organon --help` y `uv run organon <coman
 | `run` | `run` | Aplicar un manifiesto reanudable. |
 | `audit-lot-journal` | `audit_lot_journal` | Auditar balances incrementales declarados; lectura sin caso o ledger. |
 
-Ejemplo inicial para un caso real:
+Ejemplo inicial para un caso firmado:
 
 ```sh
 uv run organon init ./mi-caso --title "Cadena alimentaria" --domain alimentos --actor agent:analista

@@ -50,6 +50,66 @@ def _hash(value: Any) -> str:
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
+def local_test_result_sha256(data: dict[str, Any]) -> str:
+    """Digest the declared local result, never authenticate the execution history.
+
+    An operator measures the streams and process outcome outside the engine.
+    The digest binds that report to passed, argv and both stream hashes.
+    """
+    receipt = data["receipt"]
+    return _hash({"passed": data.get("passed"), **{
+        field: receipt[field] for field in (
+            "argv", "exit_code", "timed_out", "stdout_sha256", "stderr_sha256",
+        )
+    }})
+
+
+def _local_test_issues(item: dict[str, Any]) -> list[str]:
+    data = item["data"]
+    issues = [issue.replace("signed test", "local test")
+              for issue in test_execution.item_issues(item)]
+    if data.get("passed") is not True:
+        issues.append("local test needs passed=true")
+    receipt = data.get("receipt")
+    fields = {"argv", "exit_code", "timed_out", "stdout_sha256", "stderr_sha256", "result_sha256"}
+    if type(receipt) is not dict or set(receipt) != fields:
+        return issues + ["local test needs an exact structured execution receipt"]
+    # Reuse the strict process/stream validator without implying signed custody.
+    report = {"schema": 1, "artifacts": [], **{
+        key: value for key, value in receipt.items() if key != "result_sha256"
+    }}
+    try:
+        test_execution.validate_report(report)
+    except ValueError as exc:
+        return issues + [f"local receipt: {exc}"]
+    if receipt["argv"] != data.get("argv"):
+        issues.append("local receipt argv differs from declared argv")
+    if receipt["exit_code"] != 0 or receipt["timed_out"]:
+        issues.append("local test execution failed or timed out")
+    digest = receipt["result_sha256"]
+    if (type(digest) is not str or _SOURCE_SHA256.fullmatch(digest) is None
+            or digest != local_test_result_sha256(data)):
+        issues.append("local receipt result_sha256 differs from declared result")
+    if any(field in data for field in ("signature", "key_sha256")):
+        issues.append("local test must not claim a signature")
+    return issues
+
+
+def _local_field_issues(item: dict[str, Any]) -> list[str]:
+    data = item["data"]
+    if (item["kind"] in {"baseline", "result"}
+            and (data.get("origin") == "field" or data.get("scope") == "field"
+                 or data.get("claim_scope") == "field")):
+        return ["local policy cannot substantiate a field baseline or result"]
+    if item["kind"] in {"baseline", "result"} and data.get("origin") not in {"technical", "simulation"}:
+        return ["local baseline and result require technical or simulation origin labels"]
+    if (item["kind"] == "assessment"
+            and (data.get("claim_scope") == "field" or data.get("scope") == "field")
+            and data.get("verdict") in {"cumplido", "incumplido"}):
+        return ["local policy cannot substantiate a decisive field verdict"]
+    return []
+
+
 def _archive_stat_identity(info: os.stat_result) -> tuple[int, ...]:
     return (info.st_dev, info.st_ino, info.st_mode, info.st_uid,
             info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
@@ -183,11 +243,13 @@ def _project(path: str | Path) -> dict[str, Any]:
         "approval_trust": trust_status,
         "phase_review_trust": (
             "fixture" if trust_status == "fixture" else
+            "local_declared" if trust_status == "local_declared" else
             "configured" if trust_status == "configured" and phase_reviewers else "unavailable"
         ),
         "phase_reviewers": phase_reviewers,
         "test_execution_trust": (
             "fixture" if trust_status == "fixture" else
+            "local_declared" if trust_status == "local_declared" else
             "configured" if trust_status == "configured" and test_executors else "unavailable"
         ),
         "test_executors": test_executors,
@@ -241,6 +303,13 @@ def _project(path: str | Path) -> dict[str, Any]:
                 valid = (trust_status == "fixture" and event["actor"] == "human:fixture"
                          and isinstance(payload.get("reason"), str) and bool(payload["reason"].strip()))
                 status = "fixture" if valid else "unverified"
+            elif project["approval_policy"] == "local":
+                valid = (trust_status == "local_declared"
+                         and event["actor"] == project["created_by"]
+                         and isinstance(payload.get("reason"), str) and bool(payload["reason"].strip())
+                         and payload.get("provenance") == "local_declared"
+                         and "signature" not in payload and "key_sha256" not in payload)
+                status = "local_declared" if valid else "unverified"
             else:
                 valid = (trust_status == "configured" and isinstance(payload.get("reason"), str)
                          and isinstance(payload.get("signature"), str)
@@ -405,6 +474,18 @@ def _project(path: str | Path) -> dict[str, Any]:
                 provenance = "signed_verified" if verified else (
                     "legacy_unverified" if not has_proof else "signature_unverified"
                 )
+            elif project["approval_policy"] == "local":
+                verified = False
+                declared = (trust_status == "local_declared"
+                            and payload.get("provenance") == "local_declared"
+                            and payload.get("verdict") in VERDICTS
+                            and payload.get("snapshot") == _phase_statuses(state)[payload["phase"]]["snapshot"]
+                            and isinstance(payload.get("reason"), str) and bool(payload["reason"].strip())
+                            and "signature" not in payload and "key_sha256" not in payload
+                            and isinstance(event["actor"], str)
+                            and event["actor"] == event["actor"].strip()
+                            and bool(event["actor"].strip()))
+                provenance = "local_declared" if declared else "local_unavailable"
             else:
                 verified = False
                 provenance = "synthetic_fixture" if trust_status == "fixture" else "fixture_unavailable"
@@ -421,9 +502,9 @@ def _project(path: str | Path) -> dict[str, Any]:
 
 
 def _phase_authors(state: dict[str, Any], phase: str) -> set[str]:
-    """Keep earlier item-version authors in signed reviewer independence checks."""
+    """Keep all earlier item-version authors in real workflow review checks."""
     phase_items = (item for item in state["items"].values() if KIND_TO_PHASE[item["kind"]] == phase)
-    if state["project"]["approval_policy"] == "signed":
+    if state["project"]["approval_policy"] in {"signed", "local"}:
         authors = set().union(*(state["item_author_history"][item["id"]] for item in phase_items))
         if phase == "study":
             authors.update(entry["actor"] for entry in state["indicator_retirements"])
@@ -845,7 +926,7 @@ def _success_claim_issues(items: dict[str, dict], assessment: dict[str, Any],
         test = items[ref]
         if test["kind"] != "test":
             continue
-        if approval_policy == "signed":
+        if approval_policy in {"signed", "local"}:
             if any(flags[ref][field] for field in ("stale", "contested", "issues")):
                 continue
         elif _stale(items, ref) or _item_issues(test):
@@ -998,7 +1079,7 @@ def _flags(state: dict[str, Any], *, check_archives: bool = True,
                 review_issues.setdefault(dependent_id, []).append(issue)
     archive_issues: dict[str, list[str]] = {}
     archive_dependency_issues: dict[str, list[str]] = {}
-    if state["project"]["approval_policy"] == "signed":
+    if state["project"]["approval_policy"] in {"signed", "local"}:
         # One named archive cannot substantiate incompatible byte digests in
         # the same case. Reject the declarations before reading a mutable file:
         # separate reads could otherwise each see a different valid version.
@@ -1039,10 +1120,17 @@ def _flags(state: dict[str, Any], *, check_archives: bool = True,
                     )
     flags: dict[str, dict[str, Any]] = {}
     for item_id, item in items.items():
-        issues = (_item_issues(item) if state["project"]["approval_policy"] == "fixture" or item["kind"] != "test"
-                  else test_execution.item_issues(
-                      item, observed=state["project"].get("test_gate_policy") == "signed_observed",
-                  ))
+        policy = state["project"]["approval_policy"]
+        if item["kind"] == "test" and policy == "local":
+            issues = _local_test_issues(item)
+        elif item["kind"] == "test" and policy == "signed":
+            issues = test_execution.item_issues(
+                item, observed=state["project"].get("test_gate_policy") == "signed_observed",
+            )
+        else:
+            issues = _item_issues(item)
+        if policy == "local":
+            issues += _local_field_issues(item)
         flag = {
             "stale": _stale(items, item_id),
             "contested": item_id in contested,
@@ -1051,6 +1139,12 @@ def _flags(state: dict[str, Any], *, check_archives: bool = True,
             "approved": (item_id, item["version"]) in state["approvals"],
             "approval_status": state["approval_statuses"].get((item_id, item["version"]), "missing"),
         }
+        if policy == "local" and item["kind"] == "test":
+            flag["test_execution_status"] = "local_reported_passed" if not issues else "local_report_invalid"
+            flag["test_execution_provenance"] = (item["seq"], _hash(item))
+            flag["test_execution_actor"] = item["author"]
+            flag["test_execution_signature_verified"] = False
+            flag["test_execution_identity_authenticated"] = False
         if state["project"]["approval_policy"] == "signed" and item["kind"] == "test":
             receipt = state["test_executions"].get((item_id, item["version"]))
             seen_unverified = any(
@@ -1130,7 +1224,7 @@ def _indicator_retirement_issues(state: dict, record: dict, flags: dict) -> list
     issues = []
     review = state["item_reviews"].get((source["id"], source["version"]))
     source_authors = (state["item_author_history"][source["id"]]
-                      if state["project"]["approval_policy"] == "signed" else {source["author"]})
+                      if state["project"]["approval_policy"] in {"signed", "local"} else {source["author"]})
     if (review is None or review["verdict"] != "reject" or review["seq"] != record["review_seq"]
             or type(review["version"]) is not int or review["version"] != source["version"]
             or type(review["actor"]) is not str or not review["actor"].strip()
@@ -1315,7 +1409,8 @@ def _phase_blockers(state: dict[str, Any], phase_id: str, previous_accepted: boo
             blockers.append(f"{item_id} has an unresolved contradiction")
         blockers.extend(f"{item_id}: {issue}" for issue in flag["issues"])
         if item["kind"] in {"norm", "decision"} and not flag["approved"]:
-            blockers.append(f"{item_id} requires {'a fixture' if state['project']['approval_policy'] == 'fixture' else 'a verified human'} approval")
+            label = {"fixture": "a fixture", "local": "the declared human owner", "signed": "a verified human"}
+            blockers.append(f"{item_id} requires {label[state['project']['approval_policy']]} approval")
     for kind, minimum in phase.required:
         count = sum(item["kind"] == kind and not flags[item["id"]]["stale"] and not flags[item["id"]]["contested"] and not flags[item["id"]]["issues"] for item in in_phase)
         if count < minimum:
@@ -1469,7 +1564,7 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
                 (entry for flag in flags.values() for entry in flag["retirement_history"]),
                 key=lambda entry: entry["seq"],
             )
-        if state["project"]["approval_policy"] == "signed":
+        if state["project"]["approval_policy"] in {"signed", "local"}:
             normative_ids = sorted(item_id for item_id in relevant_ids
                                    if state["items"][item_id]["kind"] in {"norm", "decision"})
             if normative_ids:
@@ -1505,12 +1600,21 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if (state["project"]["approval_policy"] == "fixture"
                 and state["phase_review_trust"] != "fixture"):
             blockers.insert(0, "fixture policy is unavailable or conflicts with a registered signed case")
+        if (state["project"]["approval_policy"] == "local"
+                and state["phase_review_trust"] != "local_declared"):
+            blockers.insert(0, "local policy is unavailable or conflicts with a registered signed case")
         reviews = [review for review in state["phase_reviews"] if review["phase"] == phase.id and review["snapshot"] == snapshot]
         review = reviews[-1] if reviews else None
         if state["project"]["approval_policy"] == "signed":
             review_effective = bool(
                 review and review["verdict"] == "accept"
                 and review["signature_verified"] and review["independent"]
+            )
+        elif state["project"]["approval_policy"] == "local":
+            review_effective = bool(
+                state["phase_review_trust"] == "local_declared"
+                and review and review["verdict"] == "accept" and review["independent"]
+                and review["provenance"] == "local_declared"
             )
         else:
             review_effective = bool(
@@ -1532,9 +1636,13 @@ def _phase_statuses(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
             "independent_review": bool(review and review["independent"] and (
                 (state["project"]["approval_policy"] == "fixture"
                  and state["phase_review_trust"] == "fixture")
+                or (state["project"]["approval_policy"] == "local"
+                    and state["phase_review_trust"] == "local_declared"
+                    and review["provenance"] == "local_declared")
                 or review["signature_verified"]
             )),
             "review_signature_verified": bool(review and review["signature_verified"]),
+            "review_identity_authenticated": False,
             "review_provenance": review["provenance"] if review else "none",
             "blockers": blockers,
             "snapshot": snapshot,
@@ -1669,7 +1777,7 @@ def approval_challenge(path: str | Path, id: str, reason: str, actor: str) -> di
     state = _project(path)
     item = _approval_target(state, id, reason, actor)
     if state["project"]["approval_policy"] != "signed":
-        raise MethodError("fixture cases do not need signed approval challenges")
+        raise MethodError("local and fixture cases do not need signed approval challenges")
     return approval.challenge(state["project"], item, actor, reason.strip(), path, state["head_hash"])
 
 
@@ -1677,7 +1785,13 @@ def approve(path: str | Path, id: str, reason: str, actor: str, signature: str |
     state = _project(path)
     item = _approval_target(state, id, reason, actor)
     payload = {"id": id, "version": item["version"], "reason": reason.strip()}
-    if state["project"]["approval_policy"] == "fixture":
+    if state["project"]["approval_policy"] == "local":
+        if state["approval_trust"] != "local_declared":
+            raise MethodError("local approval is unavailable or conflicts with a registered signed case")
+        if actor != state["project"]["created_by"] or signature is not None:
+            raise MethodError("local approval requires the declared human owner and no signature")
+        payload["provenance"] = "local_declared"
+    elif state["project"]["approval_policy"] == "fixture":
         if state["approval_trust"] != "fixture":
             raise MethodError("fixture approval is disabled or conflicts with a registered signed case")
         if actor != "human:fixture" or signature is not None:
@@ -1924,6 +2038,7 @@ def get_state(path: str | Path) -> dict[str, Any]:
     open_challenges = [challenge for seq, challenge in state["challenges"].items() if seq not in active_resolutions]
     return {"project": state["project"], "project_sha256": approval.project_fingerprint(state["project"]),
             "revision": state["revision"], "approval_trust": state["approval_trust"],
+            "approval_identity_authenticated": False,
             "phase_review_trust": state["phase_review_trust"],
             "test_execution_trust": state["test_execution_trust"],
             "test_execution_history": state["test_execution_history"],
@@ -1968,7 +2083,9 @@ def _matching_phase_review(state: dict[str, Any], payload: dict[str, Any], actor
     for review in reversed(state["phase_reviews"]):
         if review["phase"] == payload["phase"] and review["snapshot"] == payload["snapshot"]:
             if (review["actor"] == actor
-                    and (state["project"]["approval_policy"] == "fixture" or review["signature_verified"])
+                    and (state["project"]["approval_policy"] == "fixture" or review["signature_verified"]
+                         or (state["project"]["approval_policy"] == "local"
+                             and review["provenance"] == "local_declared"))
                     and all(review.get(key) == value for key, value in payload.items())):
                 return review["_event"]
             break
@@ -1993,6 +2110,13 @@ def _phase_review_target(
     authors = _phase_authors(state, phase)
     if state["project"]["approval_policy"] == "fixture" and state["phase_review_trust"] != "fixture":
         raise MethodError("fixture phase reviews are disabled or conflict with a registered signed case")
+    if state["project"]["approval_policy"] == "local":
+        if state["phase_review_trust"] != "local_declared":
+            raise MethodError("local phase review is unavailable or conflicts with a registered signed case")
+        if normalized_actor != actor:
+            raise MethodError("local phase reviewer actor must not contain surrounding whitespace")
+        if verdict == "accept" and normalized_actor in authors:
+            raise MethodError("accepted phase review must be independent of all historical phase authors")
     if state["project"]["approval_policy"] == "signed":
         if normalized_actor != actor:
             raise MethodError("signed phase reviewer actor must not contain surrounding whitespace")
@@ -2010,7 +2134,7 @@ def phase_review_challenge(
 ) -> dict[str, Any]:
     state = _project(path)
     if state["project"]["approval_policy"] != "signed":
-        raise MethodError("fixture cases do not need signed phase review challenges")
+        raise MethodError("local and fixture cases do not need signed phase review challenges")
     status, normalized_actor = _phase_review_target(state, phase, verdict, reason, actor)
     return review_provenance.challenge(
         state["project"], path, state["head_hash"], phase, status["snapshot"],
@@ -2026,7 +2150,11 @@ def review_phase(
     status, normalized_actor = _phase_review_target(state, phase, verdict, reason, actor)
     authors = _phase_authors(state, phase)
     payload = {"phase": phase, "verdict": verdict, "reason": reason.strip(), "snapshot": status["snapshot"], "independent": normalized_actor not in authors}
-    if state["project"]["approval_policy"] == "fixture":
+    if state["project"]["approval_policy"] == "local":
+        if signature is not None:
+            raise MethodError("local phase review must not have a signature")
+        payload["provenance"] = "local_declared"
+    elif state["project"]["approval_policy"] == "fixture":
         if signature is not None:
             raise MethodError("fixture phase review must not have a signature")
     else:

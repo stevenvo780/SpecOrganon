@@ -50,6 +50,10 @@ def invoke(operation: str, **kwargs: Any) -> Any:
         from specorganon.lot_journal import audit_lot_journal
 
         return audit_lot_journal(kwargs["journal"])
+    if operation == "report":
+        from specorganon.report import case_report
+
+        return case_report(kwargs["path"])
     raise ValueError(f"unknown operation: {operation}")
 
 
@@ -95,7 +99,7 @@ def _json_receipt(raw: str) -> dict[str, Any]:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="organon",
-        description="Evidence-linked case workflow. All results are JSON.",
+        description="Evidence-linked case workflow. Results are JSON; report also supports Markdown.",
     )
     commands = parser.add_subparsers(dest="command", required=True)
 
@@ -103,11 +107,18 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("path", help="Case directory")
     init.add_argument("--title", required=True)
     init.add_argument("--domain", required=True)
-    init.add_argument("--actor", required=True)
-    init.add_argument("--approval-policy", choices=("signed", "fixture"), default="signed",
-                      help="signed for real cases; fixture for explicitly synthetic tests")
-    init.add_argument("--test-gate-policy", choices=("signed_report", "signed_observed"),
-                      default="signed_report", help="Require a signed report or a signed report plus observation")
+    init.add_argument("--actor", required=True, help="Declared human:<owner> for local; actor label otherwise")
+    init.add_argument(
+        "--approval-policy", choices=("signed", "local", "fixture"), default="signed",
+        help=("signed (default) for authenticated real cases; local for trusted development "
+              "with declared human approvals and reviews; fixture for explicitly synthetic tests"),
+    )
+    init.add_argument(
+        "--test-gate-policy", choices=("signed_report", "signed_observed", "local_report"),
+        default="signed_report",
+        help=("local uses declared reports (local_report); signed_report requires an executor "
+              "signature; signed_observed also requires an observer signature"),
+    )
 
     put = commands.add_parser("put", help="Add or revise a case item")
     put.add_argument("path")
@@ -123,6 +134,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     status = commands.add_parser("status", help="Read the current case state")
     status.add_argument("path")
+
+    report = commands.add_parser("report", help="Read a case summary, next task and evidence limits")
+    report.add_argument("path")
+    report.add_argument("--format", choices=("json", "markdown"), default="json",
+                        help="JSON by default, or readable Markdown")
 
     review = commands.add_parser("review", help="Review an item")
     review.add_argument("path")
@@ -147,7 +163,7 @@ def build_parser() -> argparse.ArgumentParser:
     approve.add_argument("id")
     approve.add_argument("--reason", required=True)
     approve.add_argument("--actor", required=True)
-    approve.add_argument("--signature", help="Base64 Ed25519 signature of approval-challenge message")
+    approve.add_argument("--signature", help="Base64 Ed25519 signature required for signed cases; local records a declared human approval")
 
     approval_challenge = commands.add_parser("approval-challenge", help="Prepare exact bytes for offline human signing")
     approval_challenge.add_argument("path")
@@ -231,7 +247,7 @@ def build_parser() -> argparse.ArgumentParser:
     review_phase.add_argument("--verdict", required=True)
     review_phase.add_argument("--reason", required=True)
     review_phase.add_argument("--actor", required=True)
-    review_phase.add_argument("--signature", help="Base64 Ed25519 signature of phase-review-challenge message")
+    review_phase.add_argument("--signature", help="Base64 Ed25519 signature required for signed cases; local records a separate reviewer's declaration")
 
     phase_review_challenge = commands.add_parser(
         "phase-review-challenge", help="Prepare exact phase snapshot bytes for offline reviewer signing"
@@ -270,6 +286,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = vars(parser.parse_args(argv))
     command = args.pop("command").replace("-", "_")
+    output_format = args.pop("format", "json")
     try:
         if command == "audit_lot_journal":
             from specorganon.lot_journal import read_journal
@@ -281,7 +298,10 @@ def main(argv: list[str] | None = None) -> int:
             with args.pop("manifest").open(encoding="utf-8") as source:
                 args["manifest"] = strict_json_loads(source.read())
         result = invoke(command, **args)
-        print(json.dumps(result, ensure_ascii=False, sort_keys=True, allow_nan=False))
+        if output_format == "markdown":
+            print(result["markdown"], end="")
+        else:
+            print(json.dumps(result, ensure_ascii=False, sort_keys=True, allow_nan=False))
     except (ValueError, OSError, TypeError, json.JSONDecodeError) as exc:
         print(f"organon: {exc}", file=sys.stderr)
         return 1

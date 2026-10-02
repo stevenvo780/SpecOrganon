@@ -1,0 +1,1179 @@
+{
+  "events": [
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "bb667bc1bdd0d09084ce212d4b96c8b30a931ebcb33e3c618ab3790fbac65d06",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "p1",
+        "kind": "problem",
+        "text": "La entrada del toolkit requiere configurar revisiones externas antes de aceptar fases; necesitamos un recorrido local con agentes y una entrega legible.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "a7a0e9de88445efe28a65ae95f78ee00c307eca10436072c09b0b2fa71cf7ce2",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "a1",
+        "kind": "actor",
+        "text": "El dueño fija el propósito; un agente implementa y otro revisa los resultados locales.",
+        "version": 1
+      },
+      "prev_hash": "bb667bc1bdd0d09084ce212d4b96c8b30a931ebcb33e3c618ab3790fbac65d06",
+      "seq": 2
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "702fc4030e30656e5bc0fea256fc9db6561bce7c6d3659138e8a56e43e5d00fe",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "b1",
+        "kind": "boundary",
+        "text": "Workspace de desarrollo y archivos disponibles. Sin API adicional ni acciones de campo.",
+        "version": 1
+      },
+      "prev_hash": "a7a0e9de88445efe28a65ae95f78ee00c307eca10436072c09b0b2fa71cf7ce2",
+      "seq": 3
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "2a5002ce57d6f966be1074fc8d0942718c4837e3b54e608f67580b20e458bfbe",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "c1",
+        "kind": "concept",
+        "text": "Autonomía es ejecutar dentro del encargo; reproducibilidad es poder repetir y cotejar resultados.",
+        "version": 1
+      },
+      "prev_hash": "702fc4030e30656e5bc0fea256fc9db6561bce7c6d3659138e8a56e43e5d00fe",
+      "seq": 4
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "43e6db66e5ccdd7afacdf53fe0ef9f0bd628fadc5384250666a1f7f34fe54e29",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "s1",
+        "kind": "assumption",
+        "text": "Las herramientas y archivos locales permiten comprobar este proyecto en el entorno actual.",
+        "version": 1
+      },
+      "prev_hash": "2a5002ce57d6f966be1074fc8d0942718c4837e3b54e608f67580b20e458bfbe",
+      "seq": 5
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "a4b934bfb864b3cc6927047bee26e671fbe8488250e37d6273914c1848fb9e45",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "f1",
+        "kind": "frame_option",
+        "text": "Encuadrar el problema como falta de garantías externas en cada transición.",
+        "version": 1
+      },
+      "prev_hash": "43e6db66e5ccdd7afacdf53fe0ef9f0bd628fadc5384250666a1f7f34fe54e29",
+      "seq": 6
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "ffd4480c754420869cfd4f3fe4fec08686c5c3f75418b867277396b9de94dde2",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "f2",
+        "kind": "frame_option",
+        "text": "Encuadrar el problema como una experiencia local usable con confianza declarada y evidencia verificable.",
+        "version": 1
+      },
+      "prev_hash": "a4b934bfb864b3cc6927047bee26e671fbe8488250e37d6273914c1848fb9e45",
+      "seq": 7
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "24451896aa0b0b6903ce7a6b1e3ffdd1c4e273d52ba976033bd28a83bac30db6",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "authorization_scope": "MVP local de filosofia, ciencia e ingenieria; recursos presentes; decisiones tecnicas reversibles delegadas; preservar originales y declarar limites.",
+          "identity_authenticated": false,
+          "origin": "existing_owner_mandate"
+        },
+        "deps": {
+          "a1": 1,
+          "p1": 1
+        },
+        "id": "n1",
+        "kind": "norm",
+        "text": "Aplicar el mandato del dueño al MVP: usar recursos presentes, preservar historia, delegar decisiones técnicas reversibles y mantener explícitos los límites de las conclusiones.",
+        "version": 1
+      },
+      "prev_hash": "ffd4480c754420869cfd4f3fe4fec08686c5c3f75418b867277396b9de94dde2",
+      "seq": 8
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "608ede566cced0b0794a242cd457467468371dec15ac9e0ccf6f94761d0e800c",
+      "kind": "approval",
+      "payload": {
+        "id": "n1",
+        "provenance": "local_declared",
+        "reason": "Registro del mandato existente del dueño para el MVP local; identidad declarada.",
+        "version": 1
+      },
+      "prev_hash": "24451896aa0b0b6903ce7a6b1e3ffdd1c4e273d52ba976033bd28a83bac30db6",
+      "seq": 9
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "48b29890b8ae2b18f64a61b0574ce33d25ca364c57fab5dca3ad53095a48ea8e",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "q1",
+        "kind": "question",
+        "text": "¿Podemos producir y revisar una entrega local reproducible con los recursos presentes?",
+        "version": 1
+      },
+      "prev_hash": "608ede566cced0b0794a242cd457467468371dec15ac9e0ccf6f94761d0e800c",
+      "seq": 10
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "6d224d7bd143a678e925ad4033550325f0cbee1a9e6f9a83f95b3f86d6fb7d54",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "q1": 1
+        },
+        "id": "h1",
+        "kind": "hypothesis",
+        "text": "Un recorrido local explícito permite ejecutar y revisar el proyecto sin un registro de firmas externo.",
+        "version": 1
+      },
+      "prev_hash": "48b29890b8ae2b18f64a61b0574ce33d25ca364c57fab5dca3ad53095a48ea8e",
+      "seq": 11
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "8cd6c217d71b93682157a0116bcdf0d16ae5ac9727ed02c500ee22e55495494e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Entrada firmada sin registro",
+          "method": "Ejecución local, hashes de originales, cotejo objetivo y revisión nativa separada",
+          "population": "Este proyecto de desarrollo expuesto, en el entorno actual",
+          "uncertainty": "Un entorno y un proyecto; sin causalidad de campo ni comparación confirmatoria"
+        },
+        "deps": {
+          "h1": 1,
+          "q1": 1
+        },
+        "id": "pr1",
+        "kind": "protocol",
+        "text": "Registrar criterios, ejecutar comandos reales, conservar streams y cotejar resultados antes de evaluar.",
+        "version": 1
+      },
+      "prev_hash": "6d224d7bd143a678e925ad4033550325f0cbee1a9e6f9a83f95b3f86d6fb7d54",
+      "seq": 12
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "2cbdb4937a25d161330746df3ceb398c8aa10a42db982ab800d36f7a1ae62908",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-01",
+          "locator": "accepted_phases",
+          "method": "Read actual local files and case state",
+          "metric_key": "accepted_phases",
+          "origin": "observed",
+          "scope": "signed entry without external registry",
+          "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/signed_baseline.json",
+          "unit": "phase",
+          "value": 0
+        },
+        "deps": {
+          "pr1": 1
+        },
+        "id": "e0",
+        "kind": "evidence",
+        "text": "Material local disponible y situación anterior al recorrido de este proyecto.",
+        "version": 1
+      },
+      "prev_hash": "8cd6c217d71b93682157a0116bcdf0d16ae5ac9727ed02c500ee22e55495494e",
+      "seq": 13
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "b61e336f59c52b63edff3e115145426d14ba3a8416ed6914809d61ed83160f14",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "accepted_phases",
+          "unit": "phase"
+        },
+        "deps": {
+          "e0": 1,
+          "n1": 1,
+          "p1": 1
+        },
+        "id": "i1",
+        "kind": "indicator",
+        "text": "Contar fases aceptadas del recorrido local.",
+        "version": 1
+      },
+      "prev_hash": "2cbdb4937a25d161330746df3ceb398c8aa10a42db982ab800d36f7a1ae62908",
+      "seq": 14
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "7e36fd554cd8c96c82d7fc21b8e65099eaad478f3185b5b0cd82fe27746fab44",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e0": 1,
+          "h1": 1
+        },
+        "id": "inf1",
+        "kind": "inference",
+        "text": "La entrada firmada conserva su bloqueo si no hay registro; el modo local declara otra confianza.",
+        "version": 1
+      },
+      "prev_hash": "b61e336f59c52b63edff3e115145426d14ba3a8416ed6914809d61ed83160f14",
+      "seq": 15
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "57d13e0ed3917b209aa5eab2ccdcf5cc11711a16ca928c4f261da56df6f44ef4",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "e0": 1,
+          "inf1": 1
+        },
+        "id": "syn1",
+        "kind": "synthesis",
+        "text": "Este proyecto necesita mediciones locales y revisión separada; no necesita un ensayo pagado para empezar.",
+        "version": 1
+      },
+      "prev_hash": "7e36fd554cd8c96c82d7fc21b8e65099eaad478f3185b5b0cd82fe27746fab44",
+      "seq": 16
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "a1407f67bc48fb4aa38ff44da09b64416e61d78523eeab7e2df55f7901eb82a0",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "syn1": 1
+        },
+        "id": "u1",
+        "kind": "uncertainty",
+        "text": "La ejecución local no autentica custodios, personas ni mejoras causales fuera del software observado.",
+        "version": 1
+      },
+      "prev_hash": "57d13e0ed3917b209aa5eab2ccdcf5cc11711a16ca928c4f261da56df6f44ef4",
+      "seq": 17
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "dcdb3efd163bb9bb3031b372bda5e1c174df3a6f12576bb8202ab51fa973265f",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n1": 1,
+          "syn1": 1
+        },
+        "id": "o1",
+        "kind": "option",
+        "text": "Configurar firmas externas para todas las revisiones y reportes.",
+        "version": 1
+      },
+      "prev_hash": "a1407f67bc48fb4aa38ff44da09b64416e61d78523eeab7e2df55f7901eb82a0",
+      "seq": 18
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "241f7f16e05ef0d5cabc61d47f7770dbdbd8eadea9b0150f3974606a12679b20",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "n1": 1,
+          "syn1": 1
+        },
+        "id": "o2",
+        "kind": "option",
+        "text": "Usar un modo local explícito, agentes separados y comprobaciones reales, preservando el modo firmado.",
+        "version": 1
+      },
+      "prev_hash": "dcdb3efd163bb9bb3031b372bda5e1c174df3a6f12576bb8202ab51fa973265f",
+      "seq": 19
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "d79a3684a2ae7d5b3a3436e365297aa2c2b5aad7ad4915403166ce93cc4bfe6a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "o1": 1,
+          "o2": 1
+        },
+        "id": "cmp1",
+        "kind": "comparison",
+        "text": "La primera opción aporta control de claves externo; la segunda permite operar en el workspace de confianza con menor configuración inicial y sin afirmar autenticación.",
+        "version": 1
+      },
+      "prev_hash": "241f7f16e05ef0d5cabc61d47f7770dbdbd8eadea9b0150f3974606a12679b20",
+      "seq": 20
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "459d5e41508879266272250cac80310f4a1096a5fd63258dd814f0effabfeb51",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "o2": 1
+        },
+        "id": "risk1",
+        "kind": "risk",
+        "text": "Una etiqueta o un recibo declarados pueden ser falsos; conservar streams y revisar las fuentes; no extrapolar el resultado local a campo o superioridad metodológica.",
+        "version": 1
+      },
+      "prev_hash": "d79a3684a2ae7d5b3a3436e365297aa2c2b5aad7ad4915403166ce93cc4bfe6a",
+      "seq": 21
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "730660bb96f1c24eb38be887a8eadb9a43b268eb07100879c96afeaf3fc37a8d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "cmp1": 1,
+          "e0": 1,
+          "n1": 1
+        },
+        "id": "d1",
+        "kind": "decision",
+        "text": "Elegir la ruta local para este proyecto, dentro de la delegación técnica del dueño. El dueño no seleccionó personalmente esta arquitectura.",
+        "version": 1
+      },
+      "prev_hash": "459d5e41508879266272250cac80310f4a1096a5fd63258dd814f0effabfeb51",
+      "seq": 22
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "0426b2e1e8ff4ff0de8d08dab099d54a9d79caeadf69f6dbf74c32c426fe7b31",
+      "kind": "approval",
+      "payload": {
+        "id": "d1",
+        "provenance": "local_declared",
+        "reason": "El mandato existente delega la elección técnica reversible dentro del MVP local.",
+        "version": 1
+      },
+      "prev_hash": "730660bb96f1c24eb38be887a8eadb9a43b268eb07100879c96afeaf3fc37a8d",
+      "seq": 23
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "4155fda72c69c4a0d7e5ef19a5fc7b8211c1c016c63679c41eced998835db4de",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "d1": 1
+        },
+        "id": "req1",
+        "kind": "requirement",
+        "text": "Conservar compuertas y trazabilidad, ejecutar una prueba real y producir un informe reproducible.",
+        "version": 1
+      },
+      "prev_hash": "0426b2e1e8ff4ff0de8d08dab099d54a9d79caeadf69f6dbf74c32c426fe7b31",
+      "seq": 24
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "9d66cbe0161301c2dc04f7f5b6ecc889bb741397f040deb5594e3b56e084871c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "accepted_phases",
+          "reject": "No cerrar si el resultado es menor que 9 o hay prueba fallida",
+          "reject_test": {
+            "operator": "<",
+            "statistic": "estimate",
+            "value": 9
+          },
+          "threshold": {
+            "operator": ">=",
+            "statistic": "estimate",
+            "value": 9
+          },
+          "unit": "phase"
+        },
+        "deps": {
+          "i1": 1,
+          "req1": 1
+        },
+        "id": "crit1",
+        "kind": "criterion",
+        "text": "Completar las nueve fases con revisión real.",
+        "version": 1
+      },
+      "prev_hash": "4155fda72c69c4a0d7e5ef19a5fc7b8211c1c016c63679c41eced998835db4de",
+      "seq": 25
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:33:48+00:00",
+      "hash": "94f6377c7a9022ca16128389149c984719cd63f47fb57fc16c34d4a941ad2859",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "paths": [
+            "src/specorganon/report.py",
+            ".agents/skills/specorganon/SKILL.md"
+          ]
+        },
+        "deps": {
+          "req1": 1
+        },
+        "id": "impl1",
+        "kind": "implementation",
+        "text": "Política local, informe CLI/MCP y entrada de agente.",
+        "version": 1
+      },
+      "prev_hash": "9d66cbe0161301c2dc04f7f5b6ecc889bb741397f040deb5594e3b56e084871c",
+      "seq": 26
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:04+00:00",
+      "hash": "78df5950418183883284a5184a00ff17988441f5ae84c694aa034b636324a468",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/workspace/SpecOrganon/.venv/bin/python3",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_local_workflow.py",
+            "tests/test_local_interfaces.py",
+            "tests/test_case_report.py"
+          ],
+          "command": "/workspace/SpecOrganon/.venv/bin/python3 -m pytest -q tests/test_local_workflow.py tests/test_local_interfaces.py tests/test_case_report.py",
+          "passed": true,
+          "receipt": {
+            "argv": [
+              "/workspace/SpecOrganon/.venv/bin/python3",
+              "-m",
+              "pytest",
+              "-q",
+              "tests/test_local_workflow.py",
+              "tests/test_local_interfaces.py",
+              "tests/test_case_report.py"
+            ],
+            "exit_code": 0,
+            "result_sha256": "885a3904555d154f2af84435215983bd22945909dac89ba10fdb0393bde5ec0f",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_sha256": "0b75eab107ce63e8253df268b24e9f7866e1ca44d44947bb1f92c3a92581c590",
+            "timed_out": false
+          }
+        },
+        "deps": {
+          "crit1": 1,
+          "impl1": 1
+        },
+        "id": "t1",
+        "kind": "test",
+        "text": "Ejecución real conservada en execution/; recibo local no autenticado externamente.",
+        "version": 1
+      },
+      "prev_hash": "94f6377c7a9022ca16128389149c984719cd63f47fb57fc16c34d4a941ad2859",
+      "seq": 27
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:04+00:00",
+      "hash": "20a75446b437327290ab989939b49c2c3bcdf26c0bee841cdd851f3a4f1e69ac",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-01",
+          "metric": "accepted_phases",
+          "origin": "technical",
+          "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/signed_baseline.json",
+          "unit": "phase",
+          "value": 0
+        },
+        "deps": {
+          "crit1": 1
+        },
+        "id": "base1",
+        "kind": "baseline",
+        "text": "Estado local previo o comparador histórico disponible.",
+        "version": 1
+      },
+      "prev_hash": "78df5950418183883284a5184a00ff17988441f5ae84c694aa034b636324a468",
+      "seq": 28
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:04+00:00",
+      "hash": "238071833c6850185b9091c8548456c82e08efbcd84fcfbc9f678962088e2e6f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-01",
+          "effect": {
+            "estimate": 0,
+            "interval": [
+              0,
+              0
+            ],
+            "metric": "accepted_phases",
+            "unit": "phase"
+          },
+          "origin": "technical",
+          "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/entry/execution"
+        },
+        "deps": {
+          "base1": 1,
+          "crit1": 1,
+          "t1": 1
+        },
+        "id": "res1",
+        "kind": "result",
+        "text": "Medición del proyecto en el momento de preparar el expediente; las revisiones siguen pendientes.",
+        "version": 1
+      },
+      "prev_hash": "20a75446b437327290ab989939b49c2c3bcdf26c0bee841cdd851f3a4f1e69ac",
+      "seq": 29
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:34:04+00:00",
+      "hash": "8d63c2aa472d74b6f5c32e185ebe612c08246040719bd2257e77b4a41490d98e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": "Originales preservados; ninguna intervención externa",
+          "claim_scope": "technical",
+          "cost": "Agentes y herramientas presentes; sin API adicional. Consumo total no medido.",
+          "uncertainty": "Conteo o coincidencia exactos en esta ejecución; sin intervalo estadístico poblacional",
+          "verdict": "no_demostrado"
+        },
+        "deps": {
+          "res1": 1,
+          "risk1": 1
+        },
+        "id": "ass1",
+        "kind": "assessment",
+        "text": "Completitud del recorrido pendiente de revisión real; actualizar tras observarla.",
+        "version": 1
+      },
+      "prev_hash": "238071833c6850185b9091c8548456c82e08efbcd84fcfbc9f678962088e2e6f",
+      "seq": 30
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:31+00:00",
+      "hash": "7b28048430afd8f09f76377268b2bb799d80fe9ec9a07f51a31b4ead71e27171",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/workspace/SpecOrganon/.venv/bin/python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_local_workflow.py",
+            "tests/test_local_interfaces.py",
+            "tests/test_case_report.py"
+          ],
+          "command": "/workspace/SpecOrganon/.venv/bin/python -m pytest -q tests/test_local_workflow.py tests/test_local_interfaces.py tests/test_case_report.py",
+          "passed": true,
+          "receipt": {
+            "argv": [
+              "/workspace/SpecOrganon/.venv/bin/python",
+              "-m",
+              "pytest",
+              "-q",
+              "tests/test_local_workflow.py",
+              "tests/test_local_interfaces.py",
+              "tests/test_case_report.py"
+            ],
+            "exit_code": 0,
+            "result_sha256": "ae54de5b595b017ed50adf2722b5170fce8af5f6706dab0275e3ba8f56b1b7c2",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_sha256": "8353b6bdf33228ff41d6eb7adcd5b9613050d33ac16ee62199489035faaddd20",
+            "timed_out": false
+          }
+        },
+        "deps": {
+          "crit1": 1,
+          "impl1": 1
+        },
+        "id": "t1",
+        "kind": "test",
+        "text": "Pruebas reales finales del modo local y del reporte consistente; ejecución conservada en execution_round02.",
+        "version": 2
+      },
+      "prev_hash": "8d63c2aa472d74b6f5c32e185ebe612c08246040719bd2257e77b4a41490d98e",
+      "seq": 31
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:31+00:00",
+      "hash": "b30bc7e106b47ebabcb386101055f7fd302b4193a3c25bf2354cf2ab91d413dd",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-01",
+          "effect": {
+            "estimate": 0,
+            "interval": [
+              0,
+              0
+            ],
+            "metric": "accepted_phases",
+            "unit": "phase"
+          },
+          "origin": "technical",
+          "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/entry/execution"
+        },
+        "deps": {
+          "base1": 1,
+          "crit1": 1,
+          "t1": 2
+        },
+        "id": "res1",
+        "kind": "result",
+        "text": "Medición del proyecto en el momento de preparar el expediente; las revisiones siguen pendientes.",
+        "version": 2
+      },
+      "prev_hash": "7b28048430afd8f09f76377268b2bb799d80fe9ec9a07f51a31b4ead71e27171",
+      "seq": 32
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:41:31+00:00",
+      "hash": "5e9d0f1243488e47d761ce6ecdd5c952ece0eaac7d48b59b28bf3abc3ef4bde0",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": "Originales preservados; ninguna intervención externa",
+          "claim_scope": "technical",
+          "cost": "Agentes y herramientas presentes; sin API adicional. Consumo total no medido.",
+          "uncertainty": "Conteo o coincidencia exactos en esta ejecución; sin intervalo estadístico poblacional",
+          "verdict": "no_demostrado"
+        },
+        "deps": {
+          "res1": 2,
+          "risk1": 1
+        },
+        "id": "ass1",
+        "kind": "assessment",
+        "text": "Completitud del recorrido pendiente de revisión real; actualizar tras observarla.",
+        "version": 2
+      },
+      "prev_hash": "b30bc7e106b47ebabcb386101055f7fd302b4193a3c25bf2354cf2ab91d413dd",
+      "seq": 33
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:06+00:00",
+      "hash": "afb06fb6c19edc3177249c09535a20736e6266e14140686cd8c465e51c2d3871",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Problema, actores y límites explícitos.",
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b",
+        "verdict": "accept"
+      },
+      "prev_hash": "5e9d0f1243488e47d761ce6ecdd5c952ece0eaac7d48b59b28bf3abc3ef4bde0",
+      "seq": 34
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:06+00:00",
+      "hash": "894f76d867cb086c87164bb5aad25a714f03c4f2efc5b73ba6928676316f4434",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 34,
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b"
+      },
+      "prev_hash": "afb06fb6c19edc3177249c09535a20736e6266e14140686cd8c465e51c2d3871",
+      "seq": 35
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:06+00:00",
+      "hash": "95774f5f14f3db55098fb0b8a938bfe52bd655407cc1b76565e99a11a2d945f2",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Autonomía y mandato declarados sin autenticar identidad.",
+        "snapshot": "fbe39daf5988abc719517e94e8a4f18963def39f0f2a3f059ae60bec11c5e6a7",
+        "verdict": "accept"
+      },
+      "prev_hash": "894f76d867cb086c87164bb5aad25a714f03c4f2efc5b73ba6928676316f4434",
+      "seq": 36
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:06+00:00",
+      "hash": "5696b332fa6df86324bbebae36b53c8abe2030912472c3c70a1e492a531ec488",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "critique",
+        "review_seq": 36,
+        "snapshot": "fbe39daf5988abc719517e94e8a4f18963def39f0f2a3f059ae60bec11c5e6a7"
+      },
+      "prev_hash": "95774f5f14f3db55098fb0b8a938bfe52bd655407cc1b76565e99a11a2d945f2",
+      "seq": 37
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:06+00:00",
+      "hash": "4b14bbfa8948975f72f31c7d80db633f0aa5f3b2f01d0da4bcca7764df4c87af",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Comparación técnica y umbral previo de nueve fases.",
+        "snapshot": "74815c20af71ccae4b3db87d7a06e2722e9d90989106c89dd8025562e9d8ea9f",
+        "verdict": "accept"
+      },
+      "prev_hash": "5696b332fa6df86324bbebae36b53c8abe2030912472c3c70a1e492a531ec488",
+      "seq": 38
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:06+00:00",
+      "hash": "3aacfaed5e64fb38b354de187f9d1a6cef7358c4e50ae88a8b160bbb2ec60aba",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "study",
+        "review_seq": 38,
+        "snapshot": "74815c20af71ccae4b3db87d7a06e2722e9d90989106c89dd8025562e9d8ea9f"
+      },
+      "prev_hash": "4b14bbfa8948975f72f31c7d80db633f0aa5f3b2f01d0da4bcca7764df4c87af",
+      "seq": 39
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:06+00:00",
+      "hash": "9a2354755147e826e2dd9ebf3e98c63b81a50646f4010a666546bb12e790478d",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "observe",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Bloqueo firmado respaldado por el control conservado.",
+        "snapshot": "4e078327c17a5321fd9d9c5ed5d43d87b3f52b25fbfd59eb9e2f83533ad8bc50",
+        "verdict": "accept"
+      },
+      "prev_hash": "3aacfaed5e64fb38b354de187f9d1a6cef7358c4e50ae88a8b160bbb2ec60aba",
+      "seq": 40
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:06+00:00",
+      "hash": "92f1e156fc90e68cf55f1610fd72e4e3c8f6d454aa3104c64512d6faf534ca80",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "observe",
+        "review_seq": 40,
+        "snapshot": "4e078327c17a5321fd9d9c5ed5d43d87b3f52b25fbfd59eb9e2f83533ad8bc50"
+      },
+      "prev_hash": "9a2354755147e826e2dd9ebf3e98c63b81a50646f4010a666546bb12e790478d",
+      "seq": 41
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:06+00:00",
+      "hash": "7658731f493fd62f510952c6d7e037b94d6dcb194487d831e3c646dffb166a0b",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "explain",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Síntesis local y límites expresos.",
+        "snapshot": "ed623a0e1f31f9dd0548d32301f30a2ec1f3ee1f3ef470666b3805bc430b7c3f",
+        "verdict": "accept"
+      },
+      "prev_hash": "92f1e156fc90e68cf55f1610fd72e4e3c8f6d454aa3104c64512d6faf534ca80",
+      "seq": 42
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:07+00:00",
+      "hash": "4f5c63a774dca035af20c2fa151b79c69ec0ddc080c55e948219c7dc3f340f5b",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "explain",
+        "review_seq": 42,
+        "snapshot": "ed623a0e1f31f9dd0548d32301f30a2ec1f3ee1f3ef470666b3805bc430b7c3f"
+      },
+      "prev_hash": "7658731f493fd62f510952c6d7e037b94d6dcb194487d831e3c646dffb166a0b",
+      "seq": 43
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:07+00:00",
+      "hash": "f4e10c37e4e91631d6c7511829c496466f1a8c0125b17a6a4a36051f49899686",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "compare",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Alternativas de confianza diferenciadas y riesgos declarados.",
+        "snapshot": "11960900fb933525be8cad9a7ab92e59c0ee3ed85a3cfd67455bc18140072973",
+        "verdict": "accept"
+      },
+      "prev_hash": "4f5c63a774dca035af20c2fa151b79c69ec0ddc080c55e948219c7dc3f340f5b",
+      "seq": 44
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:07+00:00",
+      "hash": "123f9aba808b89c4052f88e2042cb07e0e69b21e534afdad73f8dc74e089c59e",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "compare",
+        "review_seq": 44,
+        "snapshot": "11960900fb933525be8cad9a7ab92e59c0ee3ed85a3cfd67455bc18140072973"
+      },
+      "prev_hash": "f4e10c37e4e91631d6c7511829c496466f1a8c0125b17a6a4a36051f49899686",
+      "seq": 45
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:07+00:00",
+      "hash": "514ed3d33abb6f3827ed8dda19f8a111e5dc6d89db2cbc37651ecae7767e6fee",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "specify",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Requisitos trazables, elección delegada y criterio intacto.",
+        "snapshot": "bc3da33aae3bcf8c479b7f2fbcbeef7ab6fa23f11a66788b2dc437d2280a143c",
+        "verdict": "accept"
+      },
+      "prev_hash": "123f9aba808b89c4052f88e2042cb07e0e69b21e534afdad73f8dc74e089c59e",
+      "seq": 46
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:07+00:00",
+      "hash": "173669c7cb77a2277a2667baee39d0dc9625e91930f0a13fb01ee73c3a77526b",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "specify",
+        "review_seq": 46,
+        "snapshot": "bc3da33aae3bcf8c479b7f2fbcbeef7ab6fa23f11a66788b2dc437d2280a143c"
+      },
+      "prev_hash": "514ed3d33abb6f3827ed8dda19f8a111e5dc6d89db2cbc37651ecae7767e6fee",
+      "seq": 47
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:07+00:00",
+      "hash": "ad0f5e670eb0b91e97f1a1a9f490ef0a64e5a7adf73906fa0759efa7e8df430e",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "build",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Reporte corregido y recibo nuevo de 52 pruebas coincidente.",
+        "snapshot": "c30b1c22a7e8712210529b8ece4fd9110f614cf4c91cd8c607d254ac06e2456c",
+        "verdict": "accept"
+      },
+      "prev_hash": "173669c7cb77a2277a2667baee39d0dc9625e91930f0a13fb01ee73c3a77526b",
+      "seq": 48
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:08+00:00",
+      "hash": "85e760f718a911463ace8b6652916238445add05008326b39b9dd0232eaab224",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "build",
+        "review_seq": 48,
+        "snapshot": "c30b1c22a7e8712210529b8ece4fd9110f614cf4c91cd8c607d254ac06e2456c"
+      },
+      "prev_hash": "ad0f5e670eb0b91e97f1a1a9f490ef0a64e5a7adf73906fa0759efa7e8df430e",
+      "seq": 49
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:47:08+00:00",
+      "hash": "ef990dc2c8e7555ca0654f7610ca1b2f9cc693b5457c55df50172dab858757e9",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "validate",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Evaluación provisional no_demostrado y conteo cero fieles al estado anterior al avance.",
+        "snapshot": "7f748d2110e185bfe5c0d7d45a7eb50faf504f0d249d41a6ba75d7a622de3284",
+        "verdict": "accept"
+      },
+      "prev_hash": "85e760f718a911463ace8b6652916238445add05008326b39b9dd0232eaab224",
+      "seq": 50
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:47:08+00:00",
+      "hash": "47122c00acbfe9c2d3091b389e1523d8f200045384cfb3ada70429db36928741",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "validate",
+        "review_seq": 50,
+        "snapshot": "7f748d2110e185bfe5c0d7d45a7eb50faf504f0d249d41a6ba75d7a622de3284"
+      },
+      "prev_hash": "ef990dc2c8e7555ca0654f7610ca1b2f9cc693b5457c55df50172dab858757e9",
+      "seq": 51
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:48:31+00:00",
+      "hash": "911bbc31eac65daa4a960bf0cc38f6f63eab0f42d58152d395149556ee1b9d6d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/workspace/SpecOrganon/.venv/bin/python",
+            "-c",
+            "import json,sys; from specorganon.report import case_report; r=case_report(sys.argv[1]); assert r[\"accepted_phases\"]==9 and r[\"next\"][\"action\"]==\"complete\"; print(json.dumps({\"accepted_phases\":r[\"accepted_phases\"],\"revision\":r[\"revision\"],\"artifact_count\":r[\"artifact_count\"],\"next_action\":r[\"next\"][\"action\"]}))",
+            "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/entry/case"
+          ],
+          "command": "/workspace/SpecOrganon/.venv/bin/python -c 'import json,sys; from specorganon.report import case_report; r=case_report(sys.argv[1]); assert r[\"accepted_phases\"]==9 and r[\"next\"][\"action\"]==\"complete\"; print(json.dumps({\"accepted_phases\":r[\"accepted_phases\"],\"revision\":r[\"revision\"],\"artifact_count\":r[\"artifact_count\"],\"next_action\":r[\"next\"][\"action\"]}))' /workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/entry/case",
+          "passed": true,
+          "receipt": {
+            "argv": [
+              "/workspace/SpecOrganon/.venv/bin/python",
+              "-c",
+              "import json,sys; from specorganon.report import case_report; r=case_report(sys.argv[1]); assert r[\"accepted_phases\"]==9 and r[\"next\"][\"action\"]==\"complete\"; print(json.dumps({\"accepted_phases\":r[\"accepted_phases\"],\"revision\":r[\"revision\"],\"artifact_count\":r[\"artifact_count\"],\"next_action\":r[\"next\"][\"action\"]}))",
+              "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/entry/case"
+            ],
+            "exit_code": 0,
+            "result_sha256": "e12fb6185e0704c20088ce93ead01f92bccda7f4f1835233259d2d34bae8913a",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_sha256": "fc836a164031c1800f2e2429b2e147765c5577b8b35b7ea6e4f54decf5f918c2",
+            "timed_out": false
+          }
+        },
+        "deps": {
+          "crit1": 1,
+          "impl1": 1
+        },
+        "id": "t1",
+        "kind": "test",
+        "text": "Comprobación real del recorrido ya completado: nueve fases y siguiente acción complete, observado antes de esta nueva versión.",
+        "version": 3
+      },
+      "prev_hash": "47122c00acbfe9c2d3091b389e1523d8f200045384cfb3ada70429db36928741",
+      "seq": 52
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:48:31+00:00",
+      "hash": "f2c6c0df201bbf439e29115cb604bac5be6a647aa442a3afd2151bf22e385d14",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-01",
+          "effect": {
+            "estimate": 9,
+            "interval": [
+              9,
+              9
+            ],
+            "metric": "accepted_phases",
+            "unit": "phase"
+          },
+          "observed_revision": 51,
+          "origin": "technical",
+          "source": "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/entry/completion_check"
+        },
+        "deps": {
+          "base1": 1,
+          "crit1": 1,
+          "t1": 3
+        },
+        "id": "res1",
+        "kind": "result",
+        "text": "El recorrido local alcanzó nueve fases aceptadas en revisión 51, observado por comando real y conservado en completion_check.",
+        "version": 3
+      },
+      "prev_hash": "911bbc31eac65daa4a960bf0cc38f6f63eab0f42d58152d395149556ee1b9d6d",
+      "seq": 53
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:48:31+00:00",
+      "hash": "b4ab1f841decce4f9aa67a9f9be67f08a5cb0e805347ddb75a64050131c7d4b1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": "Originales preservados; ninguna intervención externa",
+          "claim_scope": "technical",
+          "cost": "Agentes y herramientas presentes; sin API adicional. Consumo total no medido.",
+          "uncertainty": "Conteo exacto de un recorrido técnico local observado; no mide superioridad metodológica ni efectos de campo.",
+          "verdict": "cumplido"
+        },
+        "deps": {
+          "res1": 3,
+          "risk1": 1
+        },
+        "id": "ass1",
+        "kind": "assessment",
+        "text": "El recorrido técnico local cumplió el umbral previo de nueve fases; conservación del control firmado y límites sin cambios.",
+        "version": 3
+      },
+      "prev_hash": "f2c6c0df201bbf439e29115cb604bac5be6a647aa442a3afd2151bf22e385d14",
+      "seq": 54
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:52:19+00:00",
+      "hash": "9f80d58d0d9c652e69be117a8ffcfaf0d4e20837040471c9ff68ec47cabc861a",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "build",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Recibo y streams de completion_check verificados; revisión51 confirmó nueve fases aceptadas sin bloqueos.",
+        "snapshot": "6a423350a26e817953f5dbdf4f03a35d49b6bdc6f4f204203e87489869f26809",
+        "verdict": "accept"
+      },
+      "prev_hash": "b4ab1f841decce4f9aa67a9f9be67f08a5cb0e805347ddb75a64050131c7d4b1",
+      "seq": 55
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:52:19+00:00",
+      "hash": "b6223b43a6881b63faba17c27a052379363fea4eca3e76345c6082e75cee2e6f",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "build",
+        "review_seq": 55,
+        "snapshot": "6a423350a26e817953f5dbdf4f03a35d49b6bdc6f4f204203e87489869f26809"
+      },
+      "prev_hash": "9f80d58d0d9c652e69be117a8ffcfaf0d4e20837040471c9ff68ec47cabc861a",
+      "seq": 56
+    },
+    {
+      "actor": "agent:mvp-independent-review",
+      "at": "2026-10-01T23:52:19+00:00",
+      "hash": "d0a78472699e421bf085799964408be2980b69d82142687ed96770e6d7d6241f",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "validate",
+        "provenance": "local_declared",
+        "reason": "Revisión real de /root/mvp_independent_review: Resultado técnico nueve respaldado por observación real de revisión51; criterio y umbral nueve intactos; control firmado cero sin registro externo.",
+        "snapshot": "2f2b22b51813a0139000fcb3602c49e99bb62274cf39c5f476c51c4a6a5abd0e",
+        "verdict": "accept"
+      },
+      "prev_hash": "b6223b43a6881b63faba17c27a052379363fea4eca3e76345c6082e75cee2e6f",
+      "seq": 57
+    },
+    {
+      "actor": "agent:mvp-builder",
+      "at": "2026-10-01T23:52:19+00:00",
+      "hash": "e389519070a25b68e14b205160f724456341634070a52f9bba5464bfdac96073",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "validate",
+        "review_seq": 57,
+        "snapshot": "2f2b22b51813a0139000fcb3602c49e99bb62274cf39c5f476c51c4a6a5abd0e"
+      },
+      "prev_hash": "d0a78472699e421bf085799964408be2980b69d82142687ed96770e6d7d6241f",
+      "seq": 58
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "9d6b88bc-cc0b-4b2b-9803-4e538c837e1c",
+    "created_at": "2026-10-01T23:33:48+00:00",
+    "created_by": "human:owner",
+    "domain": "desarrollo de software",
+    "test_gate_policy": "local_report",
+    "title": "Entrada y entrega local de SpecOrganon"
+  },
+  "schema": 1
+}

@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "argv": [
+    "/workspace/SpecOrganon/.venv/bin/python",
+    "-c",
+    "import json,sys; from specorganon.report import case_report; r=case_report(sys.argv[1]); assert r[\"accepted_phases\"]==9 and r[\"next\"][\"action\"]==\"complete\"; print(json.dumps({\"accepted_phases\":r[\"accepted_phases\"],\"revision\":r[\"revision\"],\"artifact_count\":r[\"artifact_count\"],\"next_action\":r[\"next\"][\"action\"]}))",
+    "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/entry/case"
+  ],
+  "command": "/workspace/SpecOrganon/.venv/bin/python -c 'import json,sys; from specorganon.report import case_report; r=case_report(sys.argv[1]); assert r[\"accepted_phases\"]==9 and r[\"next\"][\"action\"]==\"complete\"; print(json.dumps({\"accepted_phases\":r[\"accepted_phases\"],\"revision\":r[\"revision\"],\"artifact_count\":r[\"artifact_count\"],\"next_action\":r[\"next\"][\"action\"]}))' /workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/entry/case",
+  "receipt": {
+    "argv": [
+      "/workspace/SpecOrganon/.venv/bin/python",
+      "-c",
+      "import json,sys; from specorganon.report import case_report; r=case_report(sys.argv[1]); assert r[\"accepted_phases\"]==9 and r[\"next\"][\"action\"]==\"complete\"; print(json.dumps({\"accepted_phases\":r[\"accepted_phases\"],\"revision\":r[\"revision\"],\"artifact_count\":r[\"artifact_count\"],\"next_action\":r[\"next\"][\"action\"]}))",
+      "/workspace/SpecOrganon/experiments/development/mvp_local_2026-10-01/run01/entry/case"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout_sha256": "fc836a164031c1800f2e2429b2e147765c5577b8b35b7ea6e4f54decf5f918c2",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "result_sha256": "e12fb6185e0704c20088ce93ead01f92bccda7f4f1835233259d2d34bae8913a"
+  }
+}

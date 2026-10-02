@@ -97,14 +97,21 @@ def _validate_roles(roles: dict[str, str] | None) -> dict[str, str]:
 
 
 def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str, Any]:
+    """Read one public case snapshot and describe its first unaccepted phase."""
+    actors = _validate_roles(roles)
+    return describe_task(engine.get_state(path), actors)
+
+
+def describe_task(state: dict[str, Any], roles: dict[str, str] | None = None) -> dict[str, Any]:
     """Describe the first unaccepted phase without dumping the whole case.
 
+    Derive the task entirely from one public ``engine.get_state`` snapshot;
+    do not reread a ledger, registry, trust anchor or source archive.
     Every input and artifact includes its current version. Context is capped;
     callers can use ``engine.trace`` for full text and dependency details.
     Suggested actors are caller supplied, never inferred as authenticated people.
     """
     actors = _validate_roles(roles)
-    state = engine.get_state(path)
     phase = next((phase for phase in PHASES if not state["phases"][phase.id]["accepted"]), None)
     if phase is None:
         return {
@@ -150,6 +157,9 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
     execution_issues = {
         "signed test needs a current successful signed execution receipt",
         "latest signed test execution failed or timed out",
+        "local test needs an exact structured execution receipt",
+        "local test needs passed=true",
+        "local test execution failed or timed out",
     }
     observation_issues = {
         "signed test needs a current successful observed repeat receipt",
@@ -181,10 +191,13 @@ def next_task(path: str | Path, roles: dict[str, str] | None = None) -> dict[str
     if any(item["contested"] for item in troubled):
         action, role, task = "resolve_contradiction", "reviewer", "Investigar contradicciones; registrar síntesis y revisión independiente antes de continuar."
     elif only_execution_pending:
-        action, role, task = (
-            "execute_test", "executor",
-            "Ejecutar externamente el argv declarado; registrar el reporte y la firma Ed25519 del ejecutor."
-        )
+        action, role = "execute_test", "executor"
+        if state["project"]["approval_policy"] == "local":
+            task = ("Ejecutar externamente el argv declarado; registrar una nueva versión del test "
+                    "con passed, exit_code, timed_out y hashes de streams y resultado en receipt. "
+                    "La procedencia es local_declared y no autentica al ejecutor.")
+        else:
+            task = "Ejecutar externamente el argv declarado; registrar el reporte y la firma Ed25519 del ejecutor."
     elif only_observation_pending:
         action, role, task = (
             "observe_test", "observer",

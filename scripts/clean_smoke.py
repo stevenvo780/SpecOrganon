@@ -58,6 +58,7 @@ def main() -> None:
     }
     expected_mcp_tools = {name.replace("-", "_") for name in expected_cli_commands}
     published_mcp_tools = expected_mcp_tools | {
+        "report",
         "audit_lot_journal",
         "retire_indicator",
         "field_attestation_challenge", "attest_field",

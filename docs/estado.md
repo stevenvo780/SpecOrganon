@@ -1,5 +1,41 @@
 # Estado de reanudación
 
+## MVP local disponible
+
+El [MVP](mvp.md) tiene una [entrada de uso](uso_local.md), skill para agentes,
+política local explícita y reporte CLI/MCP. Dos proyectos recorrieron nueve
+fases con revisión nativa separada y comandos reales. Se verificaron replay
+sin duplicados, reanudación en procesos nuevos y reapertura al cambiar una
+hipótesis; el original quedó intacto. La reproducción escolar fue exacta.
+[Resultados y límites](../experiments/development/mvp_local_2026-10-01/results.md).
+
+Pasaron 263 pruebas de regresión incluidas las 52 nuevas, estáticos y
+validador de skill. Un wheel instalado fuera del árbol descubrió 24
+herramientas MCP; report y replay de ambos proyectos coincidieron por
+CLI/MCP sin modificar el ledger. `signed` conserva su valor inicial;
+`local_declared` no autentica personas ni impacto de campo.
+
+El siguiente trabajo es aplicar el MVP a nuevos encargos locales. Los
+veredictos finales C2–C5 siguen no demostrados y las 24 celdas del estudio
+original siguen pendientes; ese conteo no determina la disponibilidad del
+MVP. Los apartados siguientes conservan los cortes anteriores.
+
+## Prioridad del dueño · 2026-10-01: MVP usable
+
+El siguiente hito es el [MVP de SpecOrganon](mvp.md): una evolución de SDD
+con filosofía, ciencia e ingeniería, aplicada primero a proyectos locales
+manejables con las herramientas y suscripciones actuales. El dueño define
+propósito y límites; los agentes investigan, construyen, prueban y revisan.
+La financiación y los estudios finales se abordan después. Esto ordena el
+trabajo sin cambiar GOAL ni los criterios y resultados registrados.
+
+Ya existen fases, CLI, MCP, trazabilidad y reanudación. Falta cerrar y
+demostrar un recorrido sencillo que produzca una solución local útil,
+incluida la integración de revisión técnica con las compuertas actuales.
+Los registros D-124 y anteriores que siguen describen sus cortes
+históricos; sus dependencias experimentales no bloquean todo el trabajo del
+MVP. C1 técnico se conserva; C2–C5 siguen no demostrados.
+
 **D-124 permite leer evaluaciones externas DEV:**
 [dossier](../experiments/development/external_rating_ingress_2026-10-01/README.md).
 API pura y CLI de lectura privada con hashes, cinco notas enteras0..20,

@@ -1,5 +1,25 @@
 # Distancia hasta la validación de GOAL
 
+## MVP local activado
+
+El [recorrido local](uso_local.md) ya produjo dos entregas con nueve fases,
+revisión entre agentes, ejecución real, replay y control de invalidación.
+Está disponible para proyectos en un workspace de confianza, usando los
+recursos presentes. [Verificación](../experiments/development/mvp_local_2026-10-01/results.md).
+Los criterios finales de GOAL siguen separados; este hito no declara
+superioridad frente a SDD ni eficacia causal alimentaria. Los apartados
+siguientes describen las etapas y cortes anteriores.
+
+## Hito inmediato acordado · 2026-10-01
+
+Primero cerraremos el [MVP usable](mvp.md) con proyectos locales y recursos
+presentes. Su activación exige una entrada clara, un resultado útil
+comprobado, revisión técnica y reanudación. Las puertas del estudio
+confirmatorio descritas debajo siguen pendientes para sus propias
+afirmaciones; no son requisitos para empezar todos los proyectos del MVP.
+GOAL y los criterios finales conservan su alcance. El hito todavía no se
+declara cumplido.
+
 ## Actualización D-124 · 2026-10-01 UTC
 
 El [ingreso de evaluaciones](../experiments/development/external_rating_ingress_2026-10-01/README.md)
