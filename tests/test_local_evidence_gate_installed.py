@@ -69,7 +69,7 @@ def offline_wheel(tmp_path_factory) -> tuple[Path, Path, dict[str, str]]:
     return Path(uv), wheels[0], env
 
 
-@pytest.mark.parametrize("python_minor", ["3.11", "3.12"])
+@pytest.mark.parametrize("python_minor", ["3.11", "3.12", "3.13"])
 def test_installed_signed_local_pdf_gate_reopens_and_recovers_both_transports(
     tmp_path: Path, offline_wheel: tuple[Path, Path, dict[str, str]], python_minor: str,
 ) -> None:
