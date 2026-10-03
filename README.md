@@ -42,7 +42,7 @@ La instalación está probada en Linux con Python 3.11 y 3.12 y [`uv`](https://d
 
 ```sh
 uv sync --locked --extra dev
-uv run python -m pytest -q
+uv run python -m pytest -q tests
 uv build --wheel
 ```
 
