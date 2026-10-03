@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -13,7 +14,7 @@ from specorganon.cli import invoke
 from specorganon.lot_journal import LotJournalError, audit_lot_journal
 
 ROOT = Path(__file__).resolve().parents[1]
-CLI = ROOT / ".venv/bin/organon"
+CLI = Path(sys.executable).parent / "organon"
 
 
 @pytest.fixture
