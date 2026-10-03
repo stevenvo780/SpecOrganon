@@ -13,14 +13,85 @@ from .workflow import PHASES
 
 
 def _text(value: Any) -> str:
-    return re.sub(r"([\\`*_{}\[\]()<>#+.!|~-])", r"\\\1", str(value))
+    """Escape inline punctuation and keep entity spellings literal."""
+    return re.sub(r"([\\`*_{}\[\]()<>#+.!|~&-])", r"\\\1", str(value))
+
+
+def _inline_text(value: Any) -> str:
+    """Keep metadata in its heading, list item or labeled report line.
+
+    A multiline or tabbed label is represented as a quoted JSON string so its
+    whitespace remains visible without creating new Markdown blocks.
+    """
+    content = str(value)
+    if any(character in content for character in "\r\n\t"):
+        content = json.dumps(content, ensure_ascii=False)
+    return _text(content)
+
+
+def _fenced_block(content: str, language: str) -> str:
+    runs = re.findall(r"`+", content)
+    fence = "`" * max(3, 1 + max((len(run) for run in runs), default=0))
+    return f"{fence}{language}\n{content}\n{fence}"
+
+
+def _body_text(value: Any) -> str:
+    """Keep multiline narrative literal, including its paragraphs/indentation.
+
+    These fields have always been text rather than authored report Markdown.
+    Fences preserve their content without promoting citation headings, tables
+    or status-like lines into dossier structure; single-line prose stays inline.
+    """
+    content = str(value)
+    if "\n" in content or "\r" in content:
+        return _fenced_block(content, "text")
+    return _text(content)
+
+
+def _labeled_text(label: str, value: Any) -> str:
+    separator = "\n\n" if "\n" in str(value) or "\r" in str(value) else " "
+    return f"{label}:{separator}{_body_text(value)}"
 
 
 def _json_block(value: Any) -> str:
     content = json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True)
-    runs = re.findall(r"`+", content)
-    fence = "`" * max(3, 1 + max((len(run) for run in runs), default=0))
-    return f"{fence}json\n{content}\n{fence}"
+    return _fenced_block(content, "json")
+
+
+def _retirement_lines(item: dict[str, Any]) -> list[str]:
+    """Display the engine's evaluated lifecycle and exact historical guards."""
+    if not item["retirement_history"]:
+        return []
+    status = item["retirement_status"]
+    labels = {"effective": "efectiva", "invalidated": "invalidada", "superseded": "superada"}
+    lines = [
+        f"Retirada: {labels[status]} ({status}). Retirado actualmente: {'sí' if item['retired'] else 'no'}.",
+        "",
+        "La retirada conserva el historial; no acredita aprobación ni validez empírica.",
+        "",
+    ]
+    for record in item["retirement_history"]:
+        replacements = ", ".join(
+            f"{_inline_text(ref)} v{version}" for ref, version in sorted(record["replacements"].items())
+        )
+        lines.extend([
+            f"Declaración de retirada #{record['seq']}: {_inline_text(record['id'])} v{record['version']}; "
+            f"vigente: {'sí' if record['effective'] else 'no'}.",
+            "",
+            f"Autor de la retirada: {_inline_text(record['actor'])}.",
+            "",
+            f"Revisión negativa vinculada: #{record['review_seq']}.",
+            "",
+            f"Reemplazos declarados: {replacements}.",
+            "",
+            _labeled_text("Motivo", record["reason"]),
+            "",
+        ])
+        if record["issues"]:
+            lines.extend(["Problemas de esta retirada:", ""])
+            lines.extend(f"- {_inline_text(issue)}" for issue in record["issues"])
+            lines.append("")
+    return lines
 
 
 def case_report(path: str | Path) -> dict[str, Any]:
@@ -53,7 +124,7 @@ def case_report(path: str | Path) -> dict[str, Any]:
     phases = state["phases"]
     accepted = sum(bool(phases[phase.id]["accepted"]) for phase in PHASES)
     lines = [
-        f"# {_text(project['title'])}",
+        f"# {_inline_text(project['title'])}",
         "",
         scope,
         "",
@@ -61,14 +132,14 @@ def case_report(path: str | Path) -> dict[str, Any]:
         "",
         "## Siguiente trabajo",
         "",
-        _text(task["task"]),
+        _body_text(task["task"]),
         "",
     ]
     if task["phase"] is not None:
-        lines.extend([f"Fase: {_text(task['phase'])}. Acción: {_text(task['action'])}.", ""])
+        lines.extend([f"Fase: {_inline_text(task['phase'])}. Acción: {_inline_text(task['action'])}.", ""])
     if task["blockers"]:
         lines.extend(["Bloqueos:", ""])
-        lines.extend(f"- {_text(blocker)}" for blocker in task["blockers"])
+        lines.extend(f"- {_inline_text(blocker)}" for blocker in task["blockers"])
         lines.append("")
     lines.extend([
         "## Recorrido",
@@ -79,19 +150,19 @@ def case_report(path: str | Path) -> dict[str, Any]:
     for phase in PHASES:
         gate = phases[phase.id]
         status = "aceptada" if gate["accepted"] else "lista para revisión" if gate["ready"] else "pendiente"
-        lines.append(f"| {_text(phase.front)} | {_text(phase.id)} | {status} |")
+        lines.append(f"| {_inline_text(phase.front)} | {_inline_text(phase.id)} | {status} |")
     lines.extend(["", "## Artefactos y trazabilidad", ""])
     for item in sorted(state["items"].values(), key=lambda item: item["seq"]):
         lines.extend([
-            f"### {_text(item['id'])} · {_text(item['kind'])} · v{item['version']}",
+            f"### {_inline_text(item['id'])} · {_inline_text(item['kind'])} · v{item['version']}",
             "",
-            _text(item["text"]),
+            _body_text(item["text"]),
             "",
-            f"Autor: {_text(item['author'])}.",
+            f"Autor: {_inline_text(item['author'])}.",
             "",
         ])
         if item["deps"]:
-            refs = ", ".join(f"{_text(ref)} v{version}" for ref, version in sorted(item["deps"].items()))
+            refs = ", ".join(f"{_inline_text(ref)} v{version}" for ref, version in sorted(item["deps"].items()))
             lines.extend([f"Depende de: {refs}.", ""])
         if item["kind"] in {"norm", "decision"}:
             lines.extend([f"Aprobación vigente: {'sí' if item['approved'] else 'pendiente'}.", ""])
@@ -100,14 +171,16 @@ def case_report(path: str | Path) -> dict[str, Any]:
         if item["contested"]:
             lines.extend(["Tiene una contradicción pendiente.", ""])
         if item["issues"]:
-            lines.extend(f"- {_text(issue)}" for issue in item["issues"])
+            lines.extend(f"- {_inline_text(issue)}" for issue in item["issues"])
             lines.append("")
+        if item["kind"] == "indicator":
+            lines.extend(_retirement_lines(item))
         if item["data"]:
             lines.extend([_json_block(item["data"]), ""])
     if not state["items"]:
         lines.extend(["El caso todavía no contiene artefactos.", ""])
     lines.extend(["## Alcance del informe", ""])
-    lines.extend(f"- {_text(limit)}" for limit in limitations)
+    lines.extend(f"- {_inline_text(limit)}" for limit in limitations)
     return {
         "schema": 1,
         "title": project["title"],

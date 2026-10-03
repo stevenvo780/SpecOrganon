@@ -48,7 +48,11 @@ def test_report_keeps_user_data_inside_escaped_text_and_json(tmp_path):
     engine.put_item(tmp_path, "p1", "problem", "[link](bad)\n# injected", [], {"note": "```\n# close"}, "agent:author")
     report = case_report(tmp_path)
     assert "\\<script\\>" in report["markdown"]
-    assert "[link](bad)" not in report["markdown"]
+    literal_text = "```text\n[link](bad)\n# injected\n```"
+    assert literal_text in report["markdown"]
+    outside_literal = report["markdown"].replace(literal_text, "", 1)
+    assert "[link](bad)" not in outside_literal
+    assert "\n# injected" not in outside_literal
     assert "````json" in report["markdown"]
     assert "````\n" in report["markdown"]
 
