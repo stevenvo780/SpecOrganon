@@ -838,5 +838,5 @@ El protocolo propone hasta 540 ejecuciones, 48 millones de tokens y presupuestos
 ## Reanudar
 
 1. Leer [GOAL.md](../GOAL.md), [validacion_actual.md](validacion_actual.md), [plan.md](plan.md), [protocolo_experimental.md](protocolo_experimental.md), la [bitácora de enmiendas](enmiendas_protocolo.md) y la [preparación de matriz](preparacion_matriz.md).
-2. Verificar rama, `git status`, `uv run --locked --extra dev python -m pytest -q`, `uv build --wheel` y el smoke en un entorno nuevo antes de concluir sobre funcionamiento técnico. En casos reales, comprobar `ORGANON_APPROVERS_FILE` de esquema 2 contra UUID, ruta y `project_sha256`; en producción, omitir `ORGANON_ALLOW_FIXTURES`.
+2. Verificar rama, `git status`, `uv run --locked --extra dev python -m pytest -q tests`, `uv build --wheel` y el smoke en un entorno nuevo antes de concluir sobre funcionamiento técnico. En casos reales, comprobar `ORGANON_APPROVERS_FILE` de esquema 2 contra UUID, ruta y `project_sha256`; en producción, omitir `ORGANON_ALLOW_FIXTURES`.
 3. Mantener separados datos publicados, ficción de tests y observaciones de campo. No usar Citi Bike junio de 2026 como reserva ciega ni cambiar umbrales por resultados favorables.

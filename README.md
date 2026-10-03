@@ -42,9 +42,17 @@ La instalación está probada en Linux con Python 3.11 y 3.12 y [`uv`](https://d
 
 ```sh
 uv sync --locked --extra dev
-uv run pytest -q
+uv run python -m pytest -q tests
 uv build --wheel
 ```
+
+Para repetir una comprobación acotada en un Python ya disponible, usa
+`python3 scripts/check_python_compatibility.py --python python3.13 --output /tmp/organon-python313`.
+El directorio de salida debe ser nuevo y externo al repositorio. Construye e
+instala un wheel limpio con dependencias fijadas por `uv.lock`, ejecuta la CLI
+y MCP stdio reales y comprueba el flujo local, informes, ledger y replay.
+No descarga intérpretes. Consulta [alcance y reproducción por versión](docs/python_compatibility.md);
+esta comprobación no sustituye la suite completa ni una revisión nativa.
 
 Para probar el wheel fuera del árbol de desarrollo, crea un entorno temporal, instala `dist/specorganon-0.1.0-py3-none-any.whl` y ejecuta `scripts/clean_smoke.py` con el Python de ese entorno. El script crea fixtures sintéticas, descubre las 24 herramientas MCP actuales e invoca 15 operaciones por CLI y cliente MCP stdio real; las otras rutas se ejercitan en las [pruebas de atestación](tests/test_approval_security.py), [ejecución firmada](tests/test_signed_test_execution_transport.py), [observación firmada](tests/test_test_observation_transport.py) y [sonda del diario de lotes](scripts/probe_bread_prospectus.py). El [inventario D-079](experiments/development/installed_public_interface_inventory_2026-09-27.json) registra su corte histórico de 19/19, antes de añadir la observación. El [dossier D-107](experiments/development/indicator_retirement_2026-09-30/README.md) conserva el wheel instalado y el inventario técnico de ese corte de 23/23 operaciones en Python 3.11 y 3.12. El smoke recorre las nueve fases, comprueba `organon.json`, rechaza entradas JSON no finitas y números que se perderían por subdesbordamiento sin mutar el ledger, y verifica una repetición sin duplicados. Interrumpe con `SIGKILL` un runner CLI tras un checkpoint, reanuda el mismo manifiesto por MCP y coteja estado y replay. Libera dos procesos CLI escritores con precondiciones de versión y verifica ambos ítems; la barrera no demuestra una colisión de lecturas. Además ejercita una aprobación Ed25519 **sintética** con clave generada en memoria y comprueba rechazo de firma inválida y bloqueo al retirar el registro de confianza:
 
