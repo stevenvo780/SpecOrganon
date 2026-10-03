@@ -278,7 +278,11 @@ def describe_task(state: dict[str, Any], roles: dict[str, str] | None = None) ->
 
 
 def _manifest_steps(manifest: dict[str, Any]) -> list[dict[str, Any]]:
-    if not isinstance(manifest, dict) or manifest.get("schema") != 1 or not isinstance(manifest.get("steps"), list):
+    # JSON numeric 1 (including 1.0) is supported; Boolean true is not a version.
+    if (not isinstance(manifest, dict)
+            or type(manifest.get("schema")) not in (int, float)
+            or manifest["schema"] != 1
+            or not isinstance(manifest.get("steps"), list)):
         raise ManifestError("manifest needs schema 1 and a steps array")
     if set(manifest) - {"schema", "name", "description", "steps"}:
         raise ManifestError("unknown manifest fields")
@@ -363,7 +367,9 @@ def _response(path: str | Path, status: str, cursor: int, total: int, applied: i
     }
 
 
-def _pending_reason(task: dict[str, Any]) -> str:
+def _pending_reason(task: dict[str, Any], approval_policy: str) -> str:
+    if task["action"] == "execute_test" and approval_policy == "local":
+        return "local_test_execution_required"
     return {
         "resolve_contradiction": "contradiction",
         "repair_artifacts": "invalid_or_stale_artifact",
@@ -407,6 +413,7 @@ def run_manifest(path: str | Path, manifest: dict[str, Any], actor: str) -> dict
 
 def _apply_manifest(path: str | Path, steps: list[dict[str, Any]], actor: str) -> dict[str, Any]:
     state = engine.get_state(path)
+    approval_policy = state["project"]["approval_policy"]
     known_ids = set(state["items"])
     for index, step in enumerate(steps):
         if step["op"] == "put":
@@ -452,7 +459,8 @@ def _apply_manifest(path: str | Path, steps: list[dict[str, Any]], actor: str) -
                 continue
             status = state["phases"][phase_id]
             if not status["ready"]:
-                return _response(path, "waiting", index, len(steps), applied, skipped, _pending_reason(next_task(path)))
+                return _response(path, "waiting", index, len(steps), applied, skipped,
+                                 _pending_reason(next_task(path), approval_policy))
             if not status["reviewed"] or not status["independent_review"]:
                 return _response(path, "waiting", index, len(steps), applied, skipped, "independent_review_required")
             try:
@@ -462,5 +470,5 @@ def _apply_manifest(path: str | Path, steps: list[dict[str, Any]], actor: str) -
             applied += 1
     next_up = next_task(path)
     status = "complete" if next_up["status"] == "done" else "waiting"
-    reason = None if status == "complete" else _pending_reason(next_up)
+    reason = None if status == "complete" else _pending_reason(next_up, approval_policy)
     return _response(path, status, len(steps), len(steps), applied, skipped, reason)

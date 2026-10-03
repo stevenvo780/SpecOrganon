@@ -23,6 +23,42 @@ def _json_block(value: Any) -> str:
     return f"{fence}json\n{content}\n{fence}"
 
 
+def _retirement_lines(item: dict[str, Any]) -> list[str]:
+    """Display the engine's evaluated lifecycle and exact historical guards."""
+    if not item["retirement_history"]:
+        return []
+    status = item["retirement_status"]
+    labels = {"effective": "efectiva", "invalidated": "invalidada", "superseded": "superada"}
+    lines = [
+        f"Retirada: {labels[status]} ({status}). Retirado actualmente: {'sí' if item['retired'] else 'no'}.",
+        "",
+        "La retirada conserva el historial; no acredita aprobación ni validez empírica.",
+        "",
+    ]
+    for record in item["retirement_history"]:
+        replacements = ", ".join(
+            f"{_text(ref)} v{version}" for ref, version in sorted(record["replacements"].items())
+        )
+        lines.extend([
+            f"Declaración de retirada #{record['seq']}: {_text(record['id'])} v{record['version']}; "
+            f"vigente: {'sí' if record['effective'] else 'no'}.",
+            "",
+            f"Autor de la retirada: {_text(record['actor'])}.",
+            "",
+            f"Revisión negativa vinculada: #{record['review_seq']}.",
+            "",
+            f"Reemplazos declarados: {replacements}.",
+            "",
+            f"Motivo: {_text(record['reason'])}",
+            "",
+        ])
+        if record["issues"]:
+            lines.extend(["Problemas de esta retirada:", ""])
+            lines.extend(f"- {_text(issue)}" for issue in record["issues"])
+            lines.append("")
+    return lines
+
+
 def case_report(path: str | Path) -> dict[str, Any]:
     """Render current artifacts, gates and pending work without writing a case.
 
@@ -102,6 +138,8 @@ def case_report(path: str | Path) -> dict[str, Any]:
         if item["issues"]:
             lines.extend(f"- {_text(issue)}" for issue in item["issues"])
             lines.append("")
+        if item["kind"] == "indicator":
+            lines.extend(_retirement_lines(item))
         if item["data"]:
             lines.extend([_json_block(item["data"]), ""])
     if not state["items"]:

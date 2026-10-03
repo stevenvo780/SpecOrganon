@@ -56,6 +56,8 @@ El caso debe existir antes de ejecutar el manifiesto (`engine.create_case`). El 
 
 La CLI ejecuta `organon run ./mi-caso --manifest ./workflow.json --actor agent:ejecutor`; la herramienta MCP `run` recibe el objeto `manifest` directamente. Los dos caminos comparten los mismos checkpoints y se pueden alternar durante una reanudación.
 
+El campo `schema` admite únicamente la versión numérica JSON `1` (también escrita `1.0` o `1e0`); los booleanos como `true` no son versiones válidas.
+
 ```json
 {"op":"put","id":"p1","kind":"problem","text":"Problema delimitado por el caso","refs":[],"data":{}}
 {"op":"advance","phase":"frame"}
@@ -66,6 +68,15 @@ La CLI ejecuta `organon run ./mi-caso --manifest ./workflow.json --actor agent:e
 `advance` actúa solo cuando la compuerta está lista y existe una revisión aceptada e independiente del snapshot actual. El runner **no** admite operaciones `approve` ni `review_phase` dentro del manifiesto. Los pasos `put` pueden reparar artefactos obsoletos o preparar ramas independientes mientras otra fase tiene una objeción; se conservan como borradores y no se confunden con un avance justificado. Un `advance` se detiene con `status: "waiting"` ante aprobación humana, revisión, contradicción, artefacto inválido u obsoleto, o fase anterior sin aceptar. El resultado contiene `cursor` (índice del siguiente paso), `applied`, `skipped`, `reason` y `next`. Tras registrar la aprobación firmada y verificada o corregir el caso, ejecuta de nuevo el mismo manifiesto, incluso desde otro proceso. Los pasos ya materializados se omiten sin añadir eventos. `status: "complete"` requiere que todas las fases estén aceptadas; un manifiesto agotado antes de eso queda `waiting` con la razón pendiente, o `manifest_exhausted` si solo faltan pasos no declarados.
 
 La validación estructural del manifiesto y sus referencias adelantadas ocurre antes de cualquier escritura. Un fallo semántico en un paso posterior puede dejar pasos anteriores como checkpoint válido; nunca hay rollback implícito. El runner serializa **todas** las invocaciones de manifiestos del mismo caso mediante `.organon.runner.lock`, también si sus IDs son disjuntos; las ediciones directas con el motor no adquieren ese bloqueo y necesitan precondiciones y coordinación entre actores. Editar un manifiesto después de ejecutarlo exige una nueva revisión consciente del caso. El runner no autentica actores, no sustituye medición de campo y no convierte valores simulados en impacto observado.
+
+Cuando `next.action` es `execute_test`, `reason` distingue la política del caso:
+`local_test_execution_required` pide ejecutar y registrar un recibo local;
+`signed_test_execution_required` conserva el requisito de reporte firmado.
+La distinción se mantiene tanto al detener un `advance` como al agotar el
+manifiesto. En modo local, corrige el test mediante una nueva versión con su
+recibo medido; no solicita firma. Una ejecución exitosa sigue necesitando la
+revisión independiente de la fase antes de avanzar. El runner no ejecuta la
+prueba, crea el recibo ni concede la revisión.
 
 ## Fixture reproducible
 
