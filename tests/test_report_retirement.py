@@ -187,11 +187,13 @@ class ReportRetirementTests(unittest.TestCase):
         self._retire(case, reason, actor, {"i_3": 1, "i-4": 1})
         result, _ = self._read(case)
         section = _section(result["markdown"], "i1")
-        self.assertIn("Motivo: Synthetic \\[link\\]\\(https://example\\.invalid\\) \\<tag\\> \\`code\\` \\*only\\*\n\\# Heading", section)
+        literal_reason = f"```text\n{reason}\n```"
+        self.assertIn(f"Motivo:\n\n{literal_reason}", section)
         self.assertIn("Autor de la retirada: agent:\\[test\\]\\<actor\\>.", section)
         self.assertIn("Reemplazos declarados: i\\-4 v1, i\\_3 v1.", section)
-        self.assertNotIn("[link](https://example.invalid)", section)
-        self.assertNotIn("\n# Heading", section)
+        outside_reason = section.replace(literal_reason, "", 1)
+        self.assertNotIn("[link](https://example.invalid)", outside_reason)
+        self.assertNotIn("\n# Heading", outside_reason)
 
     def test_active_indicator_section_stays_unchanged(self):
         case = self._case()
