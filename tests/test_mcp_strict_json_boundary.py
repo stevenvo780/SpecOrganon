@@ -16,6 +16,7 @@ from mcp_types import INVALID_PARAMS, INVALID_REQUEST, PARSE_ERROR
 
 from specorganon import ledger
 from specorganon import server as mcp_server
+from stdio_process import managed_stdio_process
 
 
 MCP = Path(sys.executable).parent / "organon-mcp"
@@ -59,8 +60,8 @@ def test_raw_stdio_rejects_ambiguous_frames_without_mutating_case(
             stderr=asyncio.subprocess.PIPE,
             env=environment,
         )
-        assert process.stdin is not None
-        try:
+        async with managed_stdio_process(process):
+            assert process.stdin is not None
             initialize = {
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -401,9 +402,6 @@ def test_raw_stdio_rejects_ambiguous_frames_without_mutating_case(
                 "p1",
                 "valid",
             ]
-        finally:
-            process.terminate()
-            await asyncio.wait_for(process.wait(), timeout=5)
 
     asyncio.run(exercise())
 
