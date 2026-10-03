@@ -11,6 +11,8 @@ from pathlib import Path
 
 import pytest
 
+from subprocess_diagnostics import captured_subprocess_diagnostics
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import verify_citibike_march_workflow as probe  # noqa: E402
@@ -26,10 +28,11 @@ def _digest(path: Path) -> str:
 def test_installed_cli_mcp_resume_and_replay_leave_real_ledgers_intact(tmp_path: Path) -> None:
     before = {path: path.read_bytes() for path in probe.REAL_LEDGERS}
     receipt_path = tmp_path / "receipt.json"
-    process = subprocess.run(
-        [sys.executable, str(SCRIPT), "--output", str(receipt_path)],
-        cwd=ROOT, text=True, capture_output=True, check=True, timeout=90,
-    )
+    with captured_subprocess_diagnostics():
+        process = subprocess.run(
+            [sys.executable, str(SCRIPT), "--output", str(receipt_path)],
+            cwd=ROOT, text=True, capture_output=True, check=True, timeout=90,
+        )
     receipt = json.loads(process.stdout)
     assert receipt == json.loads(receipt_path.read_text(encoding="utf-8"))
     assert receipt["sha256"]["seed"] == _digest(probe.SEED)
