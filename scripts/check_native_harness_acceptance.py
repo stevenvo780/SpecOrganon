@@ -23,7 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-from specorganon.engine import local_test_result_sha256
+from specorganon.engine import local_test_result_sha256  # noqa: E402 -- source checkout selected above
 
 
 AUTHOR = "agent:reference-driver"
