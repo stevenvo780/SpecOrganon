@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 from specorganon import engine
 from specorganon.ledger import read_project
+from subprocess_diagnostics import captured_subprocess_diagnostics
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,21 +49,22 @@ def test_real_cli_mcp_invalidation_and_append_only_derived_case(tmp_path: Path) 
     original = json.loads(before[probe.SOURCE_LEDGER])
     derivative = tmp_path / "derivative"
     receipt_path = derivative / "receipt.json"
-    completed = subprocess.run(
-        [
-            sys.executable,
-            str(ROOT / "scripts/probe_citibike_march_indicator_lineage.py"),
-            "--output",
-            str(receipt_path),
-            "--derived-case",
-            str(derivative),
-        ],
-        cwd=ROOT,
-        text=True,
-        capture_output=True,
-        check=True,
-        timeout=90,
-    )
+    with captured_subprocess_diagnostics():
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts/probe_citibike_march_indicator_lineage.py"),
+                "--output",
+                str(receipt_path),
+                "--derived-case",
+                str(derivative),
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=True,
+            timeout=90,
+        )
     receipt = json.loads(completed.stdout)
     assert receipt == json.loads(receipt_path.read_text(encoding="utf-8"))
     assert _digest(receipt_path.read_bytes()) == _digest(
