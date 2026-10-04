@@ -11,6 +11,7 @@ import pytest
 from specorganon import source_passages
 from specorganon.source_passages import (
     DEFAULT_EXTRACTOR,
+    configured_extractor,
     ExtractorSpec,
     SourceAuditError,
     SourceSpec,
@@ -42,8 +43,8 @@ def test_read_real_pdf_retains_page_and_extractor_provenance(source_pdf):
     assert source_pdf.source_sha256 == SPEC.sha256
     assert len(source_pdf.text_sha256) == 64
     assert source_pdf.extractor_version
-    assert source_pdf.extractor_path == str(DEFAULT_EXTRACTOR.path)
-    assert source_pdf.extractor_sha256 == DEFAULT_EXTRACTOR.sha256
+    assert source_pdf.extractor_path == str(configured_extractor().path)
+    assert source_pdf.extractor_sha256 == configured_extractor().sha256
     assert "736" in source_pdf.pages[5]
 
 
@@ -147,7 +148,7 @@ def test_path_shim_is_not_invoked_for_pinned_extraction(tmp_path, monkeypatch, s
     actual = read_pdf_pages(PDF, SPEC)
     assert actual.pages == source_pdf.pages
     assert actual.text_sha256 == source_pdf.text_sha256
-    assert actual.extractor_sha256 == DEFAULT_EXTRACTOR.sha256
+    assert actual.extractor_sha256 == configured_extractor().sha256
 
 
 def test_wrong_extractor_digest_rejects_before_process_launch(monkeypatch):
@@ -183,7 +184,7 @@ def test_pdf_snapshot_survives_original_path_change_after_hash(tmp_path, monkeyp
 
 def test_sealed_binary_survives_extractor_path_change_after_capture(tmp_path, monkeypatch, source_pdf):
     local = tmp_path / "pdftotext"
-    shutil.copyfile(DEFAULT_EXTRACTOR.path, local)
+    shutil.copyfile(configured_extractor().path, local)
     local.chmod(0o700)
     run = source_passages.subprocess.run
     launches = []
@@ -195,10 +196,10 @@ def test_sealed_binary_survives_extractor_path_change_after_capture(tmp_path, mo
         return run(*args, **kwargs)
 
     monkeypatch.setattr(source_passages.subprocess, "run", replace_after_capture)
-    actual = read_pdf_pages(PDF, SPEC, extractor=ExtractorSpec(local, DEFAULT_EXTRACTOR.sha256))
+    actual = read_pdf_pages(PDF, SPEC, extractor=ExtractorSpec(local, configured_extractor().sha256))
     assert len(launches) == 2
     assert all(path.startswith("/proc/self/fd/") for path in launches)
     assert local.read_text() == "#!/bin/sh\nexit 99\n"
     assert actual.pages == source_pdf.pages
-    assert actual.extractor_sha256 == DEFAULT_EXTRACTOR.sha256
+    assert actual.extractor_sha256 == configured_extractor().sha256
     assert actual.extractor_version == source_pdf.extractor_version

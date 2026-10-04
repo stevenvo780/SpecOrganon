@@ -9,13 +9,15 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
 from decimal import Decimal
 from pathlib import Path
 
 from specorganon.source_passages import (
-    ExtractorSpec, SourceAuditError, SourceSpec, extract_passage, read_pdf_pages,
+    ExtractorSpec, SourceAuditError, SourceSpec, configured_extractor,
+    extract_passage, read_pdf_pages,
 )
 
 
@@ -71,9 +73,15 @@ def _numeric(value: object, label: str) -> Decimal:
 
 def audit_bread_sources(
     claims_path: Path = DEFAULT_CLAIMS, table_path: Path = DEFAULT_TABLE,
-    pdf_root: Path = DEFAULT_PDFS,
+    pdf_root: Path = DEFAULT_PDFS, *, extractor_profile: str | None = None,
 ) -> dict:
     contract, contract_pin = _load(CONTRACT)
+    contract_extractor = ExtractorSpec(Path(contract["extractor"]["path"]),
+                                       contract["extractor"]["sha256"])
+    profile_name = (extractor_profile if extractor_profile is not None
+                    else os.environ.get("SPECORGANON_EXTRACTOR_PROFILE"))
+    extractor = (contract_extractor if profile_name is None
+                 else configured_extractor(contract_extractor, profile=profile_name))
     claims, claims_pin = _load(claims_path)
     table, table_pin = _load(table_path)
     expected_claim_fields = set(contract["claim_document_metadata"]) | {"sources", "claims"}
@@ -124,8 +132,7 @@ def audit_bread_sources(
     pdfs = {
         name: read_pdf_pages(pdf_root / identity["visible_file"],
                              SourceSpec(identity["bytes"], identity["sha256"]),
-                             ExtractorSpec(Path(contract["extractor"]["path"]),
-                                           contract["extractor"]["sha256"]))
+                             extractor)
         for name, identity in contract["sources"].items()
     }
     passages = {}
@@ -197,6 +204,15 @@ def audit_bread_sources(
         "verified_claims": len(verified), "verified_survey_rows": len(verified_rows),
         "base_validation": "reviewed_contract_consistency",
         "input_pins": {"claims": claims_pin, "table": table_pin, "contract": contract_pin},
+        "extractor_selection": {
+            "profile": profile_name,
+            "profile_review_status": ("historical_contract_pin" if profile_name is None
+                                      else "candidate_pending_independent_review"),
+            "contract_path": str(contract_extractor.path),
+            "contract_sha256": contract_extractor.sha256,
+            "historical_binary_reproduced": extractor == contract_extractor,
+            "scope": "binary pin only; host libraries and full historical text not authenticated",
+        },
         "source_extraction": {
             name: {"bytes": pdf.source_bytes, "sha256": pdf.source_sha256,
                    "text_sha256": pdf.text_sha256, "pages": len(pdf.pages),
@@ -219,9 +235,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--table", type=Path, default=DEFAULT_TABLE)
     parser.add_argument("--pdf-root", type=Path, default=DEFAULT_PDFS)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--extractor-profile", help="Explicit registered installation profile")
     args = parser.parse_args(argv)
     try:
-        result = audit_bread_sources(args.claims, args.table, args.pdf_root)
+        result = audit_bread_sources(args.claims, args.table, args.pdf_root,
+                                    extractor_profile=args.extractor_profile)
         rendered = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
         if args.output:
             with args.output.open("x", encoding="utf-8") as stream:

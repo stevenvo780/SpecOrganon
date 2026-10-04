@@ -1,0 +1,125 @@
+{
+  "goal_status": "active",
+  "phase": "candidate_profile_tested_full_platform_diagnosis",
+  "completed": [
+    "native_goal_created",
+    "acceptance_plan_saved",
+    "source_audit_baseline_reproduced",
+    "candidate_profile_explicit_selection_implemented",
+    "historical_input_integrity_30_of_30_confirmed",
+    "clean_wheel_cli_mcp_smoke_passed"
+  ],
+  "source_audit_baseline": {
+    "argv": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_audit_bread_sources.py"
+    ],
+    "cwd": "/datos/workspaces/personal/SpecOrganon",
+    "environment": {
+      "PYTHONPATH": "src"
+    },
+    "exit_code": 1,
+    "failed": 3,
+    "passed": 49,
+    "cause": "extractor bytes differ from reviewed digest",
+    "stdout": "evidence/source-audit-baseline.stdout",
+    "stderr": "evidence/source-audit-baseline.stderr"
+  },
+  "original_goal_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36",
+  "next": "Review provisional extractor in physical read-only boundary; diagnose signed replay and historical checkout bindings without editing frozen evidence; build reproducible Docker and complete new method case before prospective campaign.",
+  "new_campaign_started": false,
+  "release_ready": false,
+  "original_field_goal_achieved": false,
+  "cloud_jobs": [
+    {
+      "machine": "Kratos",
+      "provider": "Gemini/Antigravity",
+      "model": "gemini/pro",
+      "account": "existing_primary_session",
+      "access": "read",
+      "job_id": "d57876f60f1d4d6c80804384feed103b",
+      "status_at_last_check": "SUCCEEDED",
+      "purpose": "independent extractor portability review",
+      "review_accepted": false,
+      "scope_violation": "read request did not prevent writes; two files restored to clean HEAD, patch retained"
+    }
+  ],
+  "diagnostic": {
+    "host_poppler": "26.08.0",
+    "historical_poppler": "24.02.0",
+    "historical_contract_unchanged": true,
+    "claims_equal": true,
+    "passage_groups_equal": true,
+    "lca_whole_text_equal": false,
+    "survey_whole_text_equal": true,
+    "new_extractor_reviewed": false,
+    "source_passage_baseline": "4 passed, 26 errors",
+    "system_python_full_suite": "14 collection errors; mcp absent from Python3.14; project venv Python3.12 used for authoritative full baseline",
+    "package_signature_verified": false,
+    "package_signature_reason": "cache files inaccessible to user and sudo requires password; no permissions changed"
+  },
+  "branch": "codex/autonomous-software-v1",
+  "case": "cases/autonomous_software_v1",
+  "case_state": "frame ready, unaccepted; no phase advanced",
+  "full_suite_baseline": {
+    "valid": false,
+    "reason": "interrupted after reviewer mutated source; retain as contaminated evidence only",
+    "second_attempt": {
+      "valid": false,
+      "reason": "entrypoints removed during dependency sync; interrupted, preserve output; fixed with no-deps project install before new bounded run"
+    },
+    "current_attempt": {
+      "stdout": "evidence/platform-external-temp.stdout",
+      "status": "failed_bounded_diagnostic",
+      "exit_code": 1,
+      "passed": 654,
+      "failed": 15,
+      "whole_suite_complete": false,
+      "timeout_seconds": 300,
+      "maxfail": 15,
+      "package_entrypoints_verified": true,
+      "temps_external_to_repository": true,
+      "failure_groups": {
+        "blind_ratings_parser_expectation": 1,
+        "signed_execution_observation": 4,
+        "historical_checkpoint_authority_binding": 10
+      }
+    },
+    "installed_attempt": {
+      "passed": 653,
+      "failed": 15,
+      "whole_suite_complete": false,
+      "notes": [
+        "temporary paths inside repository conflict with historical protected-tree guards",
+        "other failures require classification"
+      ]
+    }
+  },
+  "candidate_profile": {
+    "name": "cachyos-26.08.0-x86_64-v4",
+    "status": "provisional_pending_independent_review",
+    "targeted_tests_passed": 88,
+    "python": "system CPython3.14.7",
+    "dependency_lock": "uv.lock",
+    "historical_contract_modified": false,
+    "historical_full_text_reproduction": false,
+    "final_targeted_stdout": "evidence/profile-final.stdout"
+  },
+  "runtime_findings": {
+    "project_venv_python312_has_memfd_create": false,
+    "system_python314_has_memfd_create": true,
+    "tmp_inode_exhaustion": true,
+    "workaround": "isolated temporaries under /datos; no unrelated temp cleanup",
+    "landlock_abi_query": 10
+  },
+  "clean_install": {
+    "summary": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/clean-cpython314/summary.json",
+    "status": "passed",
+    "local_tests_passed": 81,
+    "cli_mcp_transport": "real stdio",
+    "phase_reviews": "synthetic, not independent agent review"
+  }
+}

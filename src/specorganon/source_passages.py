@@ -39,6 +39,33 @@ DEFAULT_EXTRACTOR = ExtractorSpec(
     Path("/usr/bin/pdftotext"),
     "0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7",
 )
+
+# Candidate installation profile: explicit opt-in, never derived from host bytes.
+# Its extraction comparison is retained under goals/autonomous-software-v1.
+_INSTALLATION_PROFILES = {
+    "cachyos-26.08.0-x86_64-v4": ExtractorSpec(
+        Path("/usr/bin/pdftotext"),
+        "47253257c7a7995ea6c8ad54b47b0edece8739dd4102c7bcd5a729472c386fb4",
+    ),
+}
+
+
+def configured_extractor(
+    fallback: ExtractorSpec = DEFAULT_EXTRACTOR, *, profile: str | None = None,
+) -> ExtractorSpec:
+    """Select an explicit fixed pin; absence preserves the caller's contract.
+
+    Profiles identify installation bytes, not method acceptance or authenticated
+    host libraries. Unknown/empty profile names reject rather than fall back.
+    """
+    name = os.environ.get("SPECORGANON_EXTRACTOR_PROFILE") if profile is None else profile
+    if name is None:
+        return fallback
+    try:
+        return _INSTALLATION_PROFILES[name]
+    except KeyError as exc:
+        raise SourceAuditError(f"unknown extractor profile: {name!r}") from exc
+
 # Linux constants are absent from some supported CPython 3.11 builds.
 _F_ADD_SEALS = getattr(fcntl, "F_ADD_SEALS", 1033)
 _F_SEALS = (getattr(fcntl, "F_SEAL_WRITE", 0x08)
@@ -66,6 +93,8 @@ def normalize_whitespace(text: str) -> str:
 @contextmanager
 def _sealed_extractor(spec: ExtractorSpec):
     """Execute the verified binary bytes, without a second path lookup."""
+    if not all(hasattr(os, name) for name in ("memfd_create", "MFD_CLOEXEC", "MFD_ALLOW_SEALING")):
+        raise SourceAuditError("runtime lacks sealed memfd extractor support")
     if (not spec.path.is_absolute()
             or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
         raise SourceAuditError("extractor needs an absolute path and reviewed digest")
@@ -93,9 +122,12 @@ def _sealed_extractor(spec: ExtractorSpec):
 
 
 def read_pdf_pages(
-    path: Path, spec: SourceSpec, extractor: ExtractorSpec = DEFAULT_EXTRACTOR,
+    path: Path, spec: SourceSpec, extractor: ExtractorSpec | None = None,
 ) -> PdfPages:
     """Hash once, then extract a private snapshot of those same source bytes."""
+    # An explicit caller pin always wins; environment cannot bypass its check.
+    if extractor is None:
+        extractor = configured_extractor()
     if (type(spec.bytes) is not int or not 0 < spec.bytes <= 20_000_000
             or not isinstance(spec.sha256, str)
             or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
