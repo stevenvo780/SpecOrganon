@@ -1,0 +1,23 @@
+{
+  "job_id": "beb35846b7294269af19396c2589ff52",
+  "status": "succeeded",
+  "submitted_at": 1791226913.9665277,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "gemini/3.8-flash",
+  "access": "read",
+  "codex_account": null,
+  "started_at": 1791226913.967092,
+  "finished_at": 1791227047.3814762,
+  "text": "```json\n{\n  \"schema\": 1,\n  \"verdict\": \"accept\",\n  \"scope\": \"full_v3_protocol_harness_provenance_rubric_evaluator_and_registration\",\n  \"source_manifest_sha256\": \"4334e828602dcb9eeaa403ffa3d47211cbccd533481eda6911c1e6867aa1cfae\",\n  \"tests_executed\": false,\n  \"findings\": [],\n  \"scope_limitations\": [\n    \"Static read-only engineering review of commit 275efb75; no tests, code executions, Docker containers, network calls, or model invocations were performed during this review.\",\n    \"Prior static review missed an actual startup failure where Registration.validate improperly applied delivery filename validation (safe_file) to repository sources, rejecting required hidden skill directories (.agents/skills/specorganon/SKILL.md) and lockfiles (uv.lock); the failed registration-03 attempt remains preserved as negative baseline evidence.\",\n    \"Correction is strictly bounded to experiments/software_comparison_v3/registration.py (introducing source_file for canonical repository path validation with component-wise O_NOFOLLOW reading) and tests/test_software_comparison_v3_registration.py (synthetic validator boundary and source path traversal tests); the 200-character delivery contract in software_controller.safe_file remains unchanged.\",\n    \"Private schedule validation relies on constant SHA-256 (33e47d210e98909c81fbe3df099cf4d7994faba7c205703dcb251f9d6d448245) and fixed sequence invariants (42 cells: 12 N, 12 S, 12 T, 6 A; primary T cell-01); identity and integrity depend on the operator filesystem boundary, not cryptographic remote reviewer identity.\",\n    \"Engineering review confirms static readiness of protocol, harness, provenance, evaluator, rubric, and registration plumbing only; actual execution of primary T (cell-01), full cohort delivery, downstream model behavior, and scientific efficacy remain unknown.\"\n  ]\n}\n```",
+  "meta": {
+    "agy_model": "Gemini 3.8 Flash (Medium)",
+    "provider": "gemini",
+    "model": "gemini/3.8-flash",
+    "access": "read",
+    "cwd": "/home/stev/.codex/worktrees/comparison-v3-budget/SpecOrganon",
+    "duration_s": 133.4,
+    "depth": 0
+  }
+}
