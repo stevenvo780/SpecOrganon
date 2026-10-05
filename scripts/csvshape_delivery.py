@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import re
+import sys
 
 from specorganon import engine
 from specorganon.docker_roles import DockerRoles, DockerRoleError
@@ -22,6 +23,35 @@ from scripts.study_campaign import current_quota, CampaignPause
 
 class RegistrationError(ValueError):
     pass
+
+
+def verify_runtime_sources(source, bindings):
+    """Source-only registered runner cannot import a different checkout/wheel."""
+    source = _safe(source)
+    if _safe(__file__) != source / 'scripts/csvshape_delivery.py':
+        raise RegistrationError('registered driver is not the executing source checkout')
+    for name, module in sorted(sys.modules.items()):
+        if (name not in ('specorganon', 'scripts', 'experiments') and not name.startswith(('specorganon.', 'scripts.', 'experiments.'))):
+            continue
+        file = getattr(module, '__file__', None)
+        if file is None:
+            # Source-only namespace packages have no file; bind every search path.
+            spec = getattr(module, '__spec__', None)
+            locations = getattr(spec, 'submodule_search_locations', None)
+            namespace = name.replace('.', '/')
+            if (not (name in ('scripts', 'experiments') or name.startswith(('scripts.', 'experiments.')))
+                    or spec is None or spec.origin is not None or locations is None
+                    or set(locations) != {str(source / namespace)}
+                    or not (source / namespace).is_dir()
+                    or not any(key.startswith(namespace + '/') for key in bindings)):
+                raise RegistrationError('runtime module lacks registered source file: ' + name)
+            continue
+        path = _safe(file)
+        try: relative = str(path.relative_to(source))
+        except ValueError as exc:
+            raise RegistrationError('runtime module loaded outside registered source: ' + name) from exc
+        if relative not in bindings or digest(_read(path, 2097152)) != bindings[relative]:
+            raise RegistrationError('runtime module is not source-bound: ' + name)
 
 
 def verify_registration(path, *, check_sources=True):
@@ -72,6 +102,7 @@ def verify_registration(path, *, check_sources=True):
             raise RegistrationError('unsafe source binding')
         if check_sources and digest(_read(source / name, 2097152)) != checksum:
             raise RegistrationError('registered source changed: ' + name)
+    verify_runtime_sources(source, sources)
     review_path = Path(value['review'])
     if review_path.is_absolute() or '..' in review_path.parts:
         raise RegistrationError('unsafe review path')
@@ -83,6 +114,7 @@ def verify_registration(path, *, check_sources=True):
         raise RegistrationError('actual independent accepted review binding required')
     from experiments.csvshape_delivery_v1.reserved import recipes
     if digest(canonical(recipes())) != value['matrix_sha256']: raise RegistrationError('reserved matrix changed')
+    verify_runtime_sources(source, sources)
     return value, digest(raw)
 
 

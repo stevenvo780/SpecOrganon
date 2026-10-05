@@ -21,42 +21,11 @@ from .ledger import _open_regular_file
 from .role_jobs import _safe, _read, _write, _json, canonical, digest
 from .runner import describe_task, run_manifest, _manifest_steps
 from .workflow import KIND_TO_PHASE, PHASE_BY_ID
+from .artifact_guidance import data_contract, reference_maintenance, phase_guidance
 
 
 class ControllerError(ValueError):
     pass
-
-
-# Public mechanical requirements from the current engine, not sample arguments,
-# invented evidence or prewritten approvals. Reviewers still judge substance.
-ARTIFACT_GUIDANCE = '''All puts use {op:"put",id,kind,text,refs:[existing IDs],data:{...}}.
-References include earlier puts in this packet and their resulting versions.
-critique: norm traces problem and actor; rival frame_option texts must differ.
-study: question traces problem; hypothesis traces question; protocol traces both,
-and data includes population, method, comparison, uncertainty. Indicator has metric
-and unit, traces problem, approved norm and protocol-grounded evidence before specify.
-Documentary evidence may accompany study to justify indicator selection; classify
-it published with supplied URL/date/locator and protocol linkage, not measured benefit.
-observe: evidence data origin published/observed/derived/simulated plus source,date,
-locator; observed includes collection method. Link protocol->hypothesis->question->problem.
-Inference traces evidence/protocol of the same problem. Never invent numeric measurements.
-explain: synthesis traces evidence and inference; uncertainty traces synthesis.
-compare: two substantive options trace synthesis/norm; comparison directly references
-both; risk references options. Include a feasible alternative without new software.
-specify: decision traces comparison/norm/evidence; requirements and criteria trace
-problem/norm/evidence/protocol/decision. Criterion has metric,threshold,reject and
-references requirement plus same-metric indicator. All criteria precede measurements.
-build: implementation traces requirements. Tests trace criterion AND implementation,
-declare data.argv as an explicit absolute executable vector; Python is available at
-/opt/specorganon/venv/bin/python and delivery files at /input/delivery in the clean
-executor. No profiles, network or mutable input. Never supply passed/receipt/test_job_ref.
-Only build returns complete files; include program, pertinent tests and README.
-validate: baseline/result data has origin technical/simulation/published, source,date,
-and honestly measured values/limits. Assessment traces result,baseline,criterion,risk, has
-verdict cumplido/incumplido/no_demostrado, claim_scope technical/simulation, uncertainty,
-adverse_effects,cost (unknown when unavailable). A technical contract result is not
-field efficacy or comparative superiority. Use supplied measured records and scope.
-'''
 
 
 def fingerprint(state):
@@ -96,12 +65,15 @@ class Controller:
         if state['project']['approval_policy'] != 'local':
             raise ControllerError('external software controller requires explicit local policy')
         self.contract = contract; self.mandate = mandate
-        policy = {'schema': 7, 'case': str(self.case), 'project_sha256': state['project_sha256'],
+        policy = {'schema': 8, 'case': str(self.case), 'project_sha256': state['project_sha256'],
                   'contract': contract, 'mandate': mandate, 'fixture_mode': fixture_mode,
                   'max_author_per_phase': 2, 'max_build_authors': 3,
                   'max_review_per_phase': 2, 'max_approval_per_phase': 2, 'max_role_calls': 40,
                   'max_phase_items': 6, 'max_phase_encoded_bytes': 6000,
-                  'max_files_encoded_bytes': 20000, 'max_test_stream_encoded_bytes': 4000}
+                  'max_files_encoded_bytes': 20000, 'max_test_stream_encoded_bytes': 4000,
+                  'artifact_data_contract_sha256': digest(canonical(data_contract())),
+                  'artifact_guidance_source_sha256': digest(_read(Path(__file__).with_name('artifact_guidance.py'), 128000)),
+                  'reference_hint_schema': 1, 'max_reference_hint_bytes': 4096}
         path = self.root / 'controller.json'
         # Reject legacy budgets before recreating even an empty delivery tree.
         # Recheck under the case lock below to cover concurrent initialization.
@@ -271,7 +243,7 @@ class Controller:
             'Judge semantic substance, source scope, alternatives, traceability, pertinent tests and useful docs; do not accept by field count. '
             'Phase acceptance applies only to this snapshot, never to comparative superiority or field impact.'
         )
-        instructions += (' Prospective schema7 admission: at most two authors per phase (three in build), '
+        instructions += (' Prospective schema8 admission: at most two authors per phase (three in build), '
                          'two mandate approvals and two phase reviews counted independently; '
                          'at most forty native roles across all phases, without resetting on edits or resume. '
                          'At most six current items per phase; '
@@ -285,12 +257,14 @@ class Controller:
                          'implementation and test IDs after actual failure/rejection, changing executable '
                          'bytes/argv. All tests must refer to criterion and current implementation.')
         documents = {'contract.md': self.contract, 'existing-mandate.md': self.mandate,
-                     'artifact-format-guidance.txt': ARTIFACT_GUIDANCE,
+                     'artifact-format-guidance.txt': phase_guidance(task['phase']),
                      'state.json': canonical(state).decode(), 'next-task.json': canonical(task_view).decode(),
                      'phase-contract.json': canonical(PHASE_BY_ID[task['phase']].__dict__).decode(),
                      'delivery-files.json': canonical(self._files()).decode(),
                      'previous-role-history.json': canonical(progress['history'][-3:]).decode(),
                      'approval-target-ids.json': canonical([item['id'] for item in task.get('approval_targets', [])]).decode(),
+                     'artifact-data-contract.json': canonical(data_contract()).decode(),
+                     'reference-maintenance.json': canonical(reference_maintenance(state)).decode(),
                      'action.txt': action}
         if task['phase'] == 'build':
             documents['build-stage.json'] = canonical({'stage': self._build_stage(),
