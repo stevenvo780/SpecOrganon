@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "classification": "native text source review, not tests run by reviewer or registration acceptance",
+  "job_id": "5dc753ad79fd49c7a0099bff6436949c",
+  "status": "succeeded",
+  "submitted_at": 1791217768.4857025,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "gemini/3.8-flash",
+  "access": "text",
+  "codex_account": null,
+  "started_at": 1791217768.4862144,
+  "finished_at": 1791217793.0435574,
+  "meta": {
+    "agy_model": "Gemini 3.8 Flash (Medium)",
+    "provider": "gemini",
+    "model": "gemini/3.8-flash",
+    "access": "text",
+    "cwd": "/home/stev/.codex/worktrees/comparison-v3-budget/SpecOrganon",
+    "duration_s": 24.6,
+    "depth": 0
+  },
+  "review": {
+    "verdict": "accept",
+    "evaluator_sources_ready": true,
+    "comparison_registration_ready": false,
+    "findings": [],
+    "oracle_audit": "Audit of all 250 generator-defined recipes across FractionMix (84), PolicyPick (82), and ListPatch (84) confirms exact conformance to their respective candidate contracts and evaluator specifications. The bad-UTF8 framing probe has been successfully hardened by prefixing the raw valid JSON payload with 0xFF (b'\\xff' + raw) across all three tasks; this strictly isolates decoders using lossy error handlers (such as utf-8 ignore or replace) that would otherwise recover valid JSON, while ensuring strict UTF-8 decoders reject the input with exact error status. Numeric and type bounds are strictly enforced: FractionMix correctly verifies exact rational arithmetic, canonical reduction by GCD, negative-zero normalization, large fractions up to 7,331 digits (well within the contractual 9,001/9,013 bounds and decoupled from the CPython 4,300-digit default limit via chunked decimal conversion and JsonInteger parsing), and non-skipping of invalid terms. PolicyPick enforces exact subset semantics for requires/tags, priority resolution with Unicode codepoint tie-breaking, case/whitespace sensitivity, string byte-length caps, and whole-document validation. ListPatch strictly respects zero-based indexing, sequential atomic evaluation with immediate error termination without state leakage, and transient capacity enforcement (max 1,000 items). Output stream framing ({...}\\n), exit code 0 for success, exit code 2 with b'{\"error\":\"invalid_input\"}\\n' on stderr, duplicate key rejection, and prohibition of non-finite constants (NaN/Infinity) are rigorously tested and upheld in judge(). In subjects.py and docker_roles.py/role_jobs.py, policy bindings securely digest subject and oracle sources, image tags, matrix definitions, read-only delivery mounts, and resource caps (3s runtime, 2 CPU, 1 GiB RAM, 128 PIDs, 2 MiB stream limit) with private non-overriding observer trace validation.",
+    "rationale": "The supplied 9 complete evaluator and oracle sources satisfy all technical, mathematical, and contractual requirements for isolated, hermetic evaluation. The recent strengthening of the invalid-UTF8 probe closes the previous lossy-decode loophole without changing case IDs, task counts, or author budgets. The protocol sequence correctly decouples preregistration from native phase delivery, mandates 42 generation completions prior to unholding reserved functional evaluation, and specifies prerequisite gating without post-hoc cherry-picking or automatic cohort spawning. As full campaign harnesses, rubrics, analysis pipelines, and frozen registration artifacts remain outside the scope of this review, comparison_registration_ready remains false. Readiness is strictly certified for the provided evaluator/oracle sources without executing native subject tests.",
+    "tests_executed": false
+  }
+}
