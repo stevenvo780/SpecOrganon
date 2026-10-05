@@ -45,9 +45,11 @@ frame, critique, study, observe, explain, compare, specify, build, validate. Las
 decisiones se registran en specify; la versión candidata anterior de rúbrica con
 choose era incorrecta y se conserva en el commit previo, sin autores afectados.
 
-Pasaron119controles en host y Docker source-mounted. Son fixtures mecánicas, no
-programas nativos correctos, independencia física demostrada o nueve fases reales.
-Faltan: verificador físico de receipts/autores/revisores y locators sustantivos,
+Pasaron142controles en host y Docker source-mounted. Son controles mecánicos, no
+programas nativos correctos ni nueve fases nuevas reales. provenance.py añade
+verificación física de receipts/autores/revisores y auditoría/locators actuales;
+su preflight cotejó dos roles históricos separados y dos tests físicos de fixtures.
+Véase PROVENANCE_STATUS.md. Falta conectar ese verificador al registro/runner,
 runner de campaña con fuentes/images/orden/mapping privado ligadas, export/evaluación
 opaca única, reconciliación/fallo nativo y revisión conjunta/registro inmutable.
 Las guías/mandato públicos son candidatos y no cambian el orden ya generado.
