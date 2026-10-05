@@ -18,6 +18,11 @@ def test_original_sixty_recipe_bytes_are_preserved_in_current_matrix():
     assert len(original) == 60 and raw == canonical(original)
     current = {row['id']:row for row in recipes()}
     assert canonical([current[row['id']] for row in original]) == raw
+    folder=Path(__file__).resolve().parents[1]/'experiments/lotledger_delivery_v1'
+    assert hashlib.sha256((folder/'original60_reserved.py').read_bytes()).hexdigest() == 'a5c8d9ea3d306f76890329caeabd9fafbd3dff249ed6c78f81d81458cb6403a7'
+    protocol=(folder/'protocol.md').read_text()
+    assert '895d9a2fc6d528b7be223969673e65bfb1bbdc31' in protocol
+    assert hashlib.sha256(raw).hexdigest() in protocol
 
 
 def execution(stdout=b'', stderr=b'', exit_code=0, **extra):

@@ -122,8 +122,8 @@ boundaries19;2ejemplos públicos incluidos. Las60recetas originales se conservan
 se añaden ausencia de LF final, CR/LF escapados y cinco bordes de strings id/site/
 from/to antes de registro/autores. También se añaden lot/site/from/to vacíos y byte NUL crudo.
 original60_reserved.py conserva íntegra la fuente generadora de las60 recetas
-del commit895d9a2fc6d528b7be223969675e65bfb1bbdc31. Sus datos canónicos tienen SHA256
-be25952e519f52a32947861757ae5fd7b8a53819ba34a0f4c5cf7bbff210fe61.
+del commit895d9a2fc6d528b7be223969673e65bfb1bbdc31. Sus datos canónicos tienen SHA256
+be25952e519f52a32947861737ae5fd7b8a53819ba34a0f4c5cf7bbff210fe61.
 La fuente se vincula y suministra completa al revisor; un control materializa sus
 recetas y compara hash y cada ID/input/argv/expected con la matriz actual. El
 snapshot JSON original de523407bytes también se conserva en custodia privada;
