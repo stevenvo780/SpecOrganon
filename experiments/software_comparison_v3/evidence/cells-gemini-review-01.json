@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "classification": "engineering scoped native source review only; not a trial phase or registration",
+  "native": {
+    "job_id": "fca14ca8908041018704a059854cb55e",
+    "status": "succeeded",
+    "submitted_at": 1791220302.2123232,
+    "owner_pid": 1347558,
+    "owner_start": "16526632",
+    "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+    "model": "gemini/3.8-flash",
+    "access": "text",
+    "codex_account": null,
+    "started_at": 1791220302.2131505,
+    "finished_at": 1791220445.0935593,
+    "text": "{\n  \"schema\": 1,\n  \"verdict\": \"accept\",\n  \"reason\": \"The candidate cells.py and rubric.py implementations correctly establish the prospective 42-cell execution routes (N12/S12/T12/A6) with immutable snapshot audit bindings and zero semantic leakage across treatments. Canonical 9-phase alignment (frame/critique/study/observe/explain/compare/specify/build/validate with decision in specify and no choose phase) is dynamically derived in rubric.py, preventing erroneous H labels while maintaining H-inapplicability for N. Mechanical guards (versioning, resource caps, and put contracts) are retained for A while intermediate acceptance/advance gates are strictly removed. T accurately delegates to Controller while deduplicating state and public attempt history via JSON pointers in audit-history.json. All synthetic tests and guards correctly execute without asserting physical model source correctness or full registration runner completion, which is properly scoped as absent.\",\n  \"findings\": [\n    {\n      \"severity\": \"minor\",\n      \"location\": \"experiments/software_comparison_v3/cells.py:270\",\n      \"problem\": \"BasicCell.step() catches StudyHarnessError, StudyBudgetError, BudgetError, ControllerError, NativeRoleError, and DockerRoleError, but omits UncertainJob (which is imported and caught in ToolkitCell.step()). If transport.call or transport.measure raises UncertainJob due to container timeouts or indeterminate exit status, it will escape unhandled rather than being recorded as a terminal failure.\",\n      \"correction\": \"Add UncertainJob to the exception tuple caught in BasicCell.step().\"\n    },\n    {\n      \"severity\": \"minor\",\n      \"location\": \"experiments/software_comparison_v3/cells.py:221-224\",\n      \"problem\": \"In BasicCell._apply() for N and S routes during the repair stage, candidate is set directly to files without verifying that test_*.py files are present in the delivery map, whereas stage=='tests' explicitly verifies test file presence. A repair response omitting test files would replace state['files'] without test files.\",\n      \"correction\": \"In BasicCell._apply() repair branch, assert any(Path(n).name.startswith('test_') and n.endswith('.py') for n in files) to enforce complete delivery retention.\"\n    },\n    {\n      \"severity\": \"minor\",\n      \"location\": \"experiments/software_comparison_v3/cells.py:328-333\",\n      \"problem\": \"ToolkitCell.step() failure payload returns {'action': 'failed', 'failure': {...}} but omits 'complete': False, whereas BasicCell.step() failure payload includes 'complete': False, creating a minor schema asymmetry across cell runners on failure.\",\n      \"correction\": \"Add 'complete': False to the failure return dictionary in ToolkitCell.step().\"\n    },\n    {\n      \"severity\": \"minor\",\n      \"location\": \"experiments/software_comparison_v3/cells.py:104-107,143\",\n      \"problem\": \"In BasicCell._request() for stage=='final-review', docs retains 'process-documents.json' and 'public-measurements.json' from initial setup while audit_documents adds 'audit-history.json' containing duplicate copies of process and measurements, increasing prompt size towards the 128,000-byte rendered limit.\",\n      \"correction\": \"Clear or omit redundant process-documents.json and public-measurements.json when preparing final-review in BasicCell, referencing audit-history.json as done in ToolkitCell.\"\n    }\n  ],\n  \"tests_executed\": false,\n  \"scope\": \"cell_routes_and_rubric_candidate_only\",\n  \"registration_ready\": false\n}",
+    "meta": {
+      "agy_model": "Gemini 3.8 Flash (Medium)",
+      "provider": "gemini",
+      "model": "gemini/3.8-flash",
+      "access": "text",
+      "cwd": "/home/stev/.codex/worktrees/comparison-v3-budget/SpecOrganon",
+      "duration_s": 142.9,
+      "depth": 0
+    }
+  }
+}

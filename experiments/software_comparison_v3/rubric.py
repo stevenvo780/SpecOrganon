@@ -9,7 +9,9 @@ from __future__ import annotations
 import copy
 import re
 
-PHASES = ('frame', 'critique', 'study', 'observe', 'compare', 'choose', 'specify', 'build', 'validate')
+from specorganon.workflow import PHASES as ENGINE_PHASES
+
+PHASES = tuple(phase.id for phase in ENGINE_PHASES)
 D = {
     'd1': 'README identifies Python3.12, stdlib-only installation and executable entry file.',
     'd2': 'README gives exact stdin/no-arguments invocation and input/output interface.',

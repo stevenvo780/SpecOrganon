@@ -45,3 +45,12 @@ def test_inconclusive_stays_a_range_and_zero_denominator_is_not_a_fake_perfect_s
     assert summary['G']['lower'] == 5 and summary['G']['upper'] == 6
     assert summary['D']['lower'] == summary['D']['upper'] == 7
     assert summary['H']['denominator'] == 0 and summary['H']['lower'] == summary['H']['upper'] == 0
+
+
+def test_nine_phase_rubric_matches_canonical_engine_including_explanation():
+    from specorganon.workflow import PHASES
+    from experiments.software_comparison_v3.rubric import rubric
+    phases=[phase.id for phase in PHASES]
+    assert phases==['frame','critique','study','observe','explain','compare','specify','build','validate']
+    assert [entry.split(':')[0] for entry in rubric('T')['H'].values()]==phases
+    assert [entry.split(':')[0] for entry in rubric('A')['H'].values()]==phases

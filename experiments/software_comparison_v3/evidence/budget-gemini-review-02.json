@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "classification": "engineering scoped native source review only; not a trial phase or registration",
+  "native": {
+    "job_id": "b21fc32b799c4be2820e8553d3163452",
+    "status": "succeeded",
+    "submitted_at": 1791220302.2066286,
+    "owner_pid": 1347558,
+    "owner_start": "16526632",
+    "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+    "model": "gemini/3.8-flash",
+    "access": "text",
+    "codex_account": null,
+    "started_at": 1791220302.2072325,
+    "finished_at": 1791220428.4344728,
+    "text": "```json\n{\n  \"schema\": 1,\n  \"verdict\": \"revise\",\n  \"reason\": \"The budget journal and role adapter architecture is sound, correctly respecting the canonical bytes API of render_prompt, tracking immutable registrations, preventing monotonic clock resets, and enforcing 42 sequential cells with a 2-test ceiling bound to failure/semantic rejection. However, two demonstrable control flaws and a schema inconsistency require revision before candidate acceptance: (1) admit() returns existing jobs before checking whether the cell or evaluation is sealed, allowing live transport re-dispatch and outcome overwrites on closed cells; (2) evaluation_gate() omits 'reserved_evaluation_allowed' from the sealed decision dictionary despite returning it on inconclusive results; and (3) close_cell() validates cell-level seconds but fails to enforce campaign-level deadline exhaustion on 'complete' seals.\",\n  \"findings\": [\n    {\n      \"severity\": \"high\",\n      \"location\": \"experiments/software_comparison_v3/budget.py:91-106\",\n      \"problem\": \"admit() checks existing = cell[kind].get(job_id) and returns early BEFORE verifying whether cell['terminal'] is not None or state['evaluation'] is not None. Because all cell jobs must be reconciled before closure, no further transport dispatch or reconciliation should ever be admitted on a sealed cell. Under the current code, calling RoleBudget.call() or measure() with a previously admitted job ID on a closed cell bypasses the sealed check and executes live transport calls on sealed cells.\",\n      \"correction\": \"Move `if cell['terminal'] is not None or state['evaluation'] is not None: raise BudgetError('sealed cell/evaluation cannot admit new work')` before the `existing = cell[kind].get(job_id)` lookup in RunJournal.admit().\"\n    },\n    {\n      \"severity\": \"medium\",\n      \"location\": \"experiments/software_comparison_v3/budget.py:180-186\",\n      \"problem\": \"Schema inconsistency in evaluation_gate() output. The inconclusive branch explicitly returns {'reserved_evaluation_allowed': False, ...}, but the terminal decision dict (persisted to progress.json and returned upon completion) omits 'reserved_evaluation_allowed' entirely. Consumers and verifiers querying decision.get('reserved_evaluation_allowed') receive None (falsy) even when status is 'released_once'.\",\n      \"correction\": \"Add `'reserved_evaluation_allowed': bool(eligible)` into the `decision` dictionary in RunJournal.evaluation_gate() alongside `'new_cohort_authorized': False`.\"\n    },\n    {\n      \"severity\": \"medium\",\n      \"location\": \"experiments/software_comparison_v3/budget.py:151-153\",\n      \"problem\": \"close_cell() validates `if status == 'complete' and seal['elapsed_seconds'] > CELL_LIMITS['seconds']`, but omits enforcing CAMPAIGN_LIMITS['seconds']. If the final admitted generation dispatches near the campaign limit and completes execution past 252,000s cumulative global clock time, close_cell() will seal the cell status as 'complete' despite campaign deadline violation.\",\n      \"correction\": \"In close_cell(), check both cell and campaign clocks: `if status == 'complete' and (seal['elapsed_seconds'] > CELL_LIMITS['seconds'] or self.elapsed(state['global_clock']) > CAMPAIGN_LIMITS['seconds']): raise BudgetError('generation completed beyond deadline')`.\"\n    },\n    {\n      \"severity\": \"low\",\n      \"location\": \"tests/test_software_comparison_v3_budget.py:49-56,140-149\",\n      \"problem\": \"Unit tests do not verify that re-invoking existing jobs on sealed cells raises BudgetError, and do not assert `reserved_evaluation_allowed is True` on released_once gate decisions.\",\n      \"correction\": \"Add assertions in test_fixed_order_and_terminal_seals_cannot_reopen checking `b.call('first', 'author', request())` raises BudgetError after closure, and assert `value['reserved_evaluation_allowed'] is True` in test_inconclusive_milestone_waits_without_sealing_or_synthetic_success.\"\n    }\n  ],\n  \"tests_executed\": false,\n  \"scope\": \"budget_gate_candidate_only\",\n  \"registration_ready\": false\n}\n```",
+    "meta": {
+      "agy_model": "Gemini 3.8 Flash (Medium)",
+      "provider": "gemini",
+      "model": "gemini/3.8-flash",
+      "access": "text",
+      "cwd": "/home/stev/.codex/worktrees/comparison-v3-budget/SpecOrganon",
+      "duration_s": 126.2,
+      "depth": 0
+    }
+  }
+}
