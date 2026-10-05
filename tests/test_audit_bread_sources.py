@@ -42,6 +42,17 @@ def _claim(claims, key):
     return next(claim for claim in claims["claims"] if claim["key"] == key)
 
 
+@pytest.mark.parametrize("token", ["736.00000000000000001", "7.3600000000000000001e2"])
+def test_decimal_claim_cannot_be_rounded_into_a_published_value(tmp_path, token):
+    # Parsing through float must not erase a numerically distinct transcription.
+    claims = tmp_path / "precision.json"
+    original = CLAIMS.read_text()
+    assert '"value": 736,' in original
+    claims.write_text(original.replace('"value": 736,', f'"value": {token},', 1))
+    with pytest.raises(SourceAuditError, match="precision|PDF value"):
+        auditor.audit_bread_sources(claims_path=claims)
+
+
 def test_real_archives_and_reserialized_transcriptions_are_verified(packet):
     claims, table, run = packet
     result = run()

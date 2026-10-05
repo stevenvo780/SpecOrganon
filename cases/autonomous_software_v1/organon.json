@@ -1,0 +1,743 @@
+{
+  "events": [
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-04T23:04:04+00:00",
+      "hash": "961579e76b583a79148ad6f5ae61600fbfa8e2dedd11ff747a5e50c0add173e3",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "p1",
+        "kind": "problem",
+        "text": "Necesitamos una release reproducible del toolkit que permita a agentes completar el método y entregar software pequeño con evidencia, documentación y comparación prospectiva. El piloto previo produjo buen código pero no aplicación completa.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-04T23:04:04+00:00",
+      "hash": "8e0ac995c2c73235ffdea34c5c7ae3abdd9dd2da23db891adefdd565e25d7339",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "a1",
+        "kind": "actor",
+        "text": "El dueño autoriza el hito local; Codex investiga e implementa; otros agentes revisan evidencia técnica sin editar la solución; evaluadores reservados observan la entrega. Los actores del campo alimentario quedan fuera de este hito.",
+        "version": 1
+      },
+      "prev_hash": "961579e76b583a79148ad6f5ae61600fbfa8e2dedd11ff747a5e50c0add173e3",
+      "seq": 2
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-04T23:04:04+00:00",
+      "hash": "e9038b78664616ca60b58d94630728f0b1b5ae38e2fdff58302bae0e77056e06",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "a1": 1,
+          "p1": 1
+        },
+        "id": "b1",
+        "kind": "boundary",
+        "text": "Software pequeño en este workspace, cuentas existentes y web Vercel actual. Preservar GOAL raíz, inputs congelados y entregas del piloto anterior. No contratar servicios ni fabricar aprobación/campo.",
+        "version": 1
+      },
+      "prev_hash": "8e0ac995c2c73235ffdea34c5c7ae3abdd9dd2da23db891adefdd565e25d7339",
+      "seq": 3
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-04T23:04:04+00:00",
+      "hash": "37dbdc818936920cb5f2ebef265719b5dd6331f15231c24b56d1ea51953e6bd8",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "c1",
+        "kind": "concept",
+        "text": "Reproducibilidad significa fijar entorno, fuentes y procedimientos con recibos comparables; integridad significa rechazar bytes no revisados. Autonomía es trabajar dentro del mandato, no inventar autorización.",
+        "version": 1
+      },
+      "prev_hash": "e9038b78664616ca60b58d94630728f0b1b5ae38e2fdff58302bae0e77056e06",
+      "seq": 4
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-04T23:04:04+00:00",
+      "hash": "9247e6287bd41aa1663531b5e16597a36e0f3b93f096dbeff449e7a60025b5c4",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "s1",
+        "kind": "assumption",
+        "text": "Los proveedores existentes pueden permitir una comparación acotada entre dos familias. Debe verificarse acceso efectivo y recursos antes del calendario; un catálogo y una cuota no prueban una corrida.",
+        "version": 1
+      },
+      "prev_hash": "37dbdc818936920cb5f2ebef265719b5dd6331f15231c24b56d1ea51953e6bd8",
+      "seq": 5
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-04T23:04:04+00:00",
+      "hash": "27ae448e72d95c2095083e96168b50221d11ed31a7ee8fc932aa7e7fd9d94c27",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "c1": 1,
+          "p1": 1
+        },
+        "id": "f1",
+        "kind": "frame_option",
+        "text": "Enmarcar el problema como reproducción estricta de la instalación histórica: recuperar el extractor original y su entorno completo, conservando las mismas dependencias. Ventaja: correspondencia histórica; riesgo: disponibilidad y coste de mantener ese entorno.",
+        "version": 1
+      },
+      "prev_hash": "9247e6287bd41aa1663531b5e16597a36e0f3b93f096dbeff449e7a60025b5c4",
+      "seq": 6
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-04T23:04:04+00:00",
+      "hash": "e1234d9e56ded57a0dfaaff26787b8e340c22f552d27aab845f2c1a9343b1f48",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "c1": 1,
+          "p1": 1
+        },
+        "id": "f2",
+        "kind": "frame_option",
+        "text": "Enmarcarlo como portabilidad revisada: separar reglas semánticas y perfiles de extracción explícitos, validar nuevas extracciones y calificar sus diferencias. Ventaja: instalaciones actuales; riesgo: afirmar equivalencia fuera de los pasajes cotejados.",
+        "version": 1
+      },
+      "prev_hash": "27ae448e72d95c2095083e96168b50221d11ed31a7ee8fc932aa7e7fd9d94c27",
+      "seq": 7
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-04T23:04:04+00:00",
+      "hash": "2e73bb40211b891bd2b29e88daf48a7a305074083655f4c94709ea73048572a1",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "c1": 1,
+          "p1": 1
+        },
+        "id": "f3",
+        "kind": "frame_option",
+        "text": "Enmarcarlo como entrega exclusivamente software sin PDF: aislar la funcionalidad de fuentes como opcional. Reduce dependencias pero no repara la plataforma ni cumple esta goal por sí solo.",
+        "version": 1
+      },
+      "prev_hash": "e1234d9e56ded57a0dfaaff26787b8e340c22f552d27aab845f2c1a9343b1f48",
+      "seq": 8
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-04T23:04:04+00:00",
+      "hash": "0ec3c5f12f488611200b2176bd2562ebde61f2b531f2057d326648d266a8f7af",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "scope": "local software release and prospective evaluation",
+          "source": "Conversación del dueño, 2026-10-04: crea una goal para lograrlo"
+        },
+        "deps": {
+          "a1": 1,
+          "b1": 1,
+          "p1": 1
+        },
+        "id": "n1",
+        "kind": "norm",
+        "text": "El dueño pidió crear la goal para cerrar la versión autónoma de software. Delega elecciones técnicas; exige evidencia y publicación honesta, conservación del piloto y separación del objetivo de campo. Esta norma registra ese mandato existente, no una autorización inventada.",
+        "version": 1
+      },
+      "prev_hash": "2e73bb40211b891bd2b29e88daf48a7a305074083655f4c94709ea73048572a1",
+      "seq": 9
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-04T23:04:04+00:00",
+      "hash": "e6c2177628778858f69ce8008e0fb0467ba59b82d0d0c51739fd627d65dfb5f6",
+      "kind": "approval",
+      "payload": {
+        "id": "n1",
+        "provenance": "local_declared",
+        "reason": "Registro declarativo del mandato existente del dueño en este chat; decisiones técnicas delegadas y límites conservados.",
+        "version": 1
+      },
+      "prev_hash": "0ec3c5f12f488611200b2176bd2562ebde61f2b531f2057d326648d266a8f7af",
+      "seq": 10
+    },
+    {
+      "actor": "reviewer:codex-docker-review-01",
+      "at": "2026-10-04T23:29:59+00:00",
+      "hash": "cbb3700504fa162062dda95ffe9f032bf34b0181577a7597648e54637287eb09",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Accepted by independent Codex gpt-6.1-sol in physically read-only Docker review-01; real ledger/input hashes verified unchanged. See goals/autonomous-software-v1/evidence/review-01-verdict.md and review-01-receipt.json. Scope: problem, actors and boundary. Local declared review; no externally authenticated identity or field consent.",
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b",
+        "verdict": "accept"
+      },
+      "prev_hash": "e6c2177628778858f69ce8008e0fb0467ba59b82d0d0c51739fd627d65dfb5f6",
+      "seq": 11
+    },
+    {
+      "actor": "agent:codex",
+      "at": "2026-10-04T23:29:59+00:00",
+      "hash": "16307e3442e85a07902fe22f2ed2f4376d654b61d1bca3d8c5b0e668e9fb9f3d",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 11,
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b"
+      },
+      "prev_hash": "cbb3700504fa162062dda95ffe9f032bf34b0181577a7597648e54637287eb09",
+      "seq": 12
+    },
+    {
+      "actor": "reviewer:codex-docker-review-01",
+      "at": "2026-10-04T23:29:59+00:00",
+      "hash": "6d260885d8a544c950bf30552325ffea38a755a7ccc8342b3e453bef2006c543",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "Accepted by independent Codex gpt-6.1-sol in physically read-only Docker review-01; real ledger/input hashes verified unchanged. See goals/autonomous-software-v1/evidence/review-01-verdict.md and review-01-receipt.json. Scope: concept, assumption, three framing alternatives and norm recording existing owner mandate. Local declared review; no externally authenticated identity or field consent.",
+        "snapshot": "b9cdfc03682b4273694ebb7985d621ac908bbd68004e20756fc4e23bda972944",
+        "verdict": "accept"
+      },
+      "prev_hash": "16307e3442e85a07902fe22f2ed2f4376d654b61d1bca3d8c5b0e668e9fb9f3d",
+      "seq": 13
+    },
+    {
+      "actor": "agent:codex",
+      "at": "2026-10-04T23:29:59+00:00",
+      "hash": "c2448ef28d50816596c0bf4316dc53978317c661a1a18eeb3da3f21fbacbee90",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "critique",
+        "review_seq": 13,
+        "snapshot": "b9cdfc03682b4273694ebb7985d621ac908bbd68004e20756fc4e23bda972944"
+      },
+      "prev_hash": "6d260885d8a544c950bf30552325ffea38a755a7ccc8342b3e453bef2006c543",
+      "seq": 14
+    },
+    {
+      "actor": "agent:codex",
+      "at": "2026-10-04T23:40:00+00:00",
+      "hash": "8957ffd0be5f2af53f97d6071a9be70102bd66d75eaeafd815b5741de902c761",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "b1": 1,
+          "c1": 1,
+          "p1": 1
+        },
+        "id": "q1",
+        "kind": "question",
+        "text": "¿Un controlador explícito con revisión separada, criterios previos y recibos medidos permite cerrar un caso NUEVO de software, detectar artefactos insuficientes y reanudar sin alterar historia?",
+        "version": 1
+      },
+      "prev_hash": "c2448ef28d50816596c0bf4316dc53978317c661a1a18eeb3da3f21fbacbee90",
+      "seq": 15
+    },
+    {
+      "actor": "agent:codex",
+      "at": "2026-10-04T23:40:00+00:00",
+      "hash": "b7406a40793758bb8cfd8642627c2d327420d5b593ef98348ff7ae31ac2f525b",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "q1": 1,
+          "s1": 1
+        },
+        "id": "h1",
+        "kind": "hypothesis",
+        "text": "Un controlador que materialice dependencias y someta cada fase a juicio real separado puede evitar los ledgers incompletos del piloto; puede fallar por falta de evidencia, criterios vacíos, revisiones superficiales o límites de proveedor. Es una hipótesis de factibilidad técnica local, no superioridad causal general.",
+        "version": 1
+      },
+      "prev_hash": "8957ffd0be5f2af53f97d6071a9be70102bd66d75eaeafd815b5741de902c761",
+      "seq": 16
+    },
+    {
+      "actor": "agent:codex",
+      "at": "2026-10-04T23:40:00+00:00",
+      "hash": "138eb77218f63d4ddf265a8b98804b3250055556e42f0fd1fec90627b83af284",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Toolkit sin controlador (estado actual/diagnóstico) frente a controlador nuevo sobre el mismo contrato local. Contrastar entrega normal, evidencia insuficiente, contradicción, cambio de premisa y recuperación de interrupción. La eficacia comparativa con modelos N/S/T se medirá después, por protocolo separado; no usar el antiguo piloto como nueva evaluación reservada.",
+          "measurement_start": "after accepted study review and predeclared specify criteria",
+          "method": "Antes de las mediciones nuevas, fijar requisitos, criterio y comandos. Registrar bytes, argv, salida, retorno, timeout, versiones y hashes. Revisor real en Docker con fuente RO y salida propia decide cada fase. Evaluador de controles no recibe permisos de escritura del autor. Exigir README reproducible y conservar fallos. Los 145 tests y pruebas exploratorias actuales son línea base diagnóstica, no cumplimiento retrospectivo de este protocolo.",
+          "population": "Un caso real nuevo de release y su controlador; controles adversariales sintéticos separados, etiquetados como tales. Ninguna intervención alimentaria ni ledger del piloto backup.",
+          "status": "draft_pending_independent_study_review",
+          "stop_rule": "Cada control tiene intento y timeout fijados; un rechazo conserva la traza. No repetir una campaña de modelos para buscar victoria. No cambiar cuenta, gastar por API ni usar resultados anteriores como nuevos.",
+          "uncertainty": "Un caso de ingeniería no estima efecto causal general. Actor local declarado no autentica identidad; revisiones pueden ser incompletas. Informar ausencia o fallos y no ajustar los criterios tras medir. Fuentes heredadas, códigos y presupuestos se fijarán en el protocolo comparativo antes de autorías nuevas."
+        },
+        "deps": {
+          "h1": 1,
+          "n1": 1,
+          "q1": 1
+        },
+        "id": "pr1",
+        "kind": "protocol",
+        "text": "Protocolo local prospectivo del controlador y la entrega: distinguir exploración técnica ya observada de las mediciones nuevas posteriores a la aceptación de este diseño. La comparación N/S/T requiere otro protocolo con tareas y presupuesto congelados antes de generar.",
+        "version": 1
+      },
+      "prev_hash": "b7406a40793758bb8cfd8642627c2d327420d5b593ef98348ff7ae31ac2f525b",
+      "seq": 17
+    },
+    {
+      "actor": "agent:codex",
+      "at": "2026-10-04T23:40:00+00:00",
+      "hash": "74b9217f56fc46969de0457c6450661595b70dc93e2c99a8f570a4d1f5e26af4",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "definition": "Contar criterios prerregistrados satisfechos: recorrido real revisado, trazabilidad, prueba medida, documentación, rechazo por evidencia insuficiente, contradicción, reapertura y recuperación. Exigir veredicto separado por control; denominador 8. Una fase aceptada por etiqueta o un template no satisface el recorrido real.",
+          "metric": "local_delivery_controls_satisfied",
+          "scope": "new_local_software_controller",
+          "unit": "count"
+        },
+        "deps": {
+          "n1": 1,
+          "p1": 1,
+          "pr1": 1
+        },
+        "id": "i1",
+        "kind": "indicator",
+        "text": "Controles técnicos locales satisfechos, con criterio y prueba individual, sin sumarlos a una tesis general.",
+        "version": 1
+      },
+      "prev_hash": "138eb77218f63d4ddf265a8b98804b3250055556e42f0fd1fec90627b83af284",
+      "seq": 18
+    },
+    {
+      "actor": "reviewer:gemini-docker-review-03",
+      "at": "2026-10-05T00:11:38+00:00",
+      "hash": "12f4ad811adc58dbcf45663db02366f65db622ab6ace1dabc7e179787d4afdba",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "Revisión independiente Gemini Pro text-only, documentos completos inmutables; acepta q1/h1/pr1/i1 como estudio local. Criterios de los ocho controles se fijarán en specify antes de nuevas mediciones; resultados previos son exploratorios. No ejecutó tests ni autenticó hashes. Informe evidence/review-03-verdict.md y alcance en review-03-receipt.json; sólo acepta study.",
+        "snapshot": "afd4fa7250218e6bf37541c1a66d1be4dfaa4f5d66f28612504445121e486f02",
+        "verdict": "accept"
+      },
+      "prev_hash": "74b9217f56fc46969de0457c6450661595b70dc93e2c99a8f570a4d1f5e26af4",
+      "seq": 19
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:11:38+00:00",
+      "hash": "ae417e2f0b8015ef0878e0f01a1abad947dad35cca2e867e2ba990375569c2cc",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "study",
+        "review_seq": 19,
+        "snapshot": "afd4fa7250218e6bf37541c1a66d1be4dfaa4f5d66f28612504445121e486f02"
+      },
+      "prev_hash": "12f4ad811adc58dbcf45663db02366f65db622ab6ace1dabc7e179787d4afdba",
+      "seq": 20
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:17:10+00:00",
+      "hash": "e0cf6f0f8407a45445685f69bbf1cf6dcbbff4b816356b3feeeee1fa547745cc",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-05",
+          "locator": "observations[*].observation.phases; secondary-outcomes.T.{1,2}.readmes; evidence/method-diagnostic-baseline.json",
+          "method": "Inspección determinista de los dos JSON persistidos y agregación con denominadores; hashes registrados, sin modificar entregas.",
+          "origin": "observed",
+          "purpose": "diagnostic_baseline_not_control_fulfillment",
+          "source": "experiments/backup_pilot/analysis/method/method-report.json; analysis/secondary-outcomes.json"
+        },
+        "deps": {
+          "pr1": 1
+        },
+        "id": "e1",
+        "kind": "evidence",
+        "text": "Los doce snapshots T del piloto anterior no completaron las nueve fases; README presente 0/12. Los bloqueos observados incluyen norma sin vínculo problem/actor, indicador sin métrica y evidencia sin origen válido. Son datos históricos para diagnosticar la entrega, no resultados del controlador nuevo.",
+        "version": 1
+      },
+      "prev_hash": "ae417e2f0b8015ef0878e0f01a1abad947dad35cca2e867e2ba990375569c2cc",
+      "seq": 21
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:17:10+00:00",
+      "hash": "41095a13ae994891679649697e89aca3996fd113f67246beb4b475cac66e9628",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "classification": "hypothesis_supported_as_design_motivation_not_causal_demonstration"
+        },
+        "deps": {
+          "e1": 1,
+          "h1": 1
+        },
+        "id": "inf1",
+        "kind": "inference",
+        "text": "La disponibilidad de herramientas y artefactos no garantizó recorridos aceptados ni documentación. Un controlador podría hacer visibles y resolver pendientes de formato, exigir resultados medidos y entregar README; la evidencia no distingue todavía entre falta de instrucciones, límites de tiempo, criterio semántico o dificultad del modelo.",
+        "version": 1
+      },
+      "prev_hash": "e0cf6f0f8407a45445685f69bbf1cf6dcbbff4b816356b3feeeee1fa547745cc",
+      "seq": 22
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:17:10+00:00",
+      "hash": "fdffe702fb36ec1b5114c20fa7b918ff3423347896b016e4941026c03020421a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "scope": "engineering_diagnosis"
+        },
+        "deps": {
+          "e1": 1,
+          "inf1": 1,
+          "pr1": 1
+        },
+        "id": "sy1",
+        "kind": "synthesis",
+        "text": "El piloto permite localizar fallos de adherencia concretos y conservables. La imagen nueva resuelve una precondición técnica pero no prueba la intervención metodológica. El diseño deberá comprobar si el circuito completo satisface criterios fijados antes de ejecutar, y preservar todo control que falle.",
+        "version": 1
+      },
+      "prev_hash": "41095a13ae994891679649697e89aca3996fd113f67246beb4b475cac66e9628",
+      "seq": 23
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:17:10+00:00",
+      "hash": "26b38da07ec7a9d0ccc63c4d4f24f6e31be32ad329bbcf3b6bf2cce8789d8d97",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "alternatives": [
+            "insufficient role instructions",
+            "time limits",
+            "invalid schema",
+            "semantic weakness",
+            "controller cannot correct reasoning"
+          ]
+        },
+        "deps": {
+          "e1": 1,
+          "sy1": 1
+        },
+        "id": "u1",
+        "kind": "uncertainty",
+        "text": "Un informe de doce snapshots de una sola familia no estima causalidad del nuevo diseño. Reglas mecánicas detectan referencias y recibos, no calidad de argumentos; identidad local no está autenticada; la revisión puede aceptar contenido insuficiente. Tiempo y tokens por solución son desconocidos hasta medición; dinero de suscripción no se atribuye por tokens.",
+        "version": 1
+      },
+      "prev_hash": "fdffe702fb36ec1b5114c20fa7b918ff3423347896b016e4941026c03020421a",
+      "seq": 24
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:17:10+00:00",
+      "hash": "8d8198b8ed191db4d12b8edecddddf39a0354c9ef18b43589fdba18ff9aa12b4",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "affected_actors": "author and reviewer carry sequencing/document checks",
+          "cost_measurement": "unknown",
+          "estimated_engineering_effort": "low",
+          "software_change": "none"
+        },
+        "deps": {
+          "n1": 1,
+          "sy1": 1
+        },
+        "id": "o1",
+        "kind": "option",
+        "text": "Conservar CLI/MCP y runner actuales, sin software adicional: dar instrucciones explícitas por fase y exigir lectura de next-task, README y recibos. Menor superficie nueva y revisión humana/agente más transparente; depende de que cada agente cumpla instrucciones, el fallo documentado del piloto.",
+        "version": 1
+      },
+      "prev_hash": "26b38da07ec7a9d0ccc63c4d4f24f6e31be32ad329bbcf3b6bf2cce8789d8d97",
+      "seq": 25
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:17:10+00:00",
+      "hash": "be26220e49274c361459da6ccfeae02622b1d342581703a4b9fd612a0ffe4f72",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "affected_actors": "author produces artifacts, separate reviewer judges, controller records evidence",
+          "cost_measurement": "unknown",
+          "estimated_engineering_effort": "medium",
+          "scope": "small trusted local software cases",
+          "software_change": "external orchestration around existing engine"
+        },
+        "deps": {
+          "n1": 1,
+          "sy1": 1
+        },
+        "id": "o2",
+        "kind": "option",
+        "text": "Controlador externo acotado: el motor conserva estado/compuertas; el controlador despacha tareas concretas, captura argv/streams/hash y entrega snapshots inmutables al revisor independiente. Publica una entrega sólo si las nueve fases aceptadas vigentes, trazas, recibos y documentación cumplen criterios previos. Reanudación consume checkpoints sin repetir trabajos cerrados. El controlador no inventa veredictos ni consentimiento.",
+        "version": 1
+      },
+      "prev_hash": "8d8198b8ed191db4d12b8edecddddf39a0354c9ef18b43589fdba18ff9aa12b4",
+      "seq": 26
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:17:10+00:00",
+      "hash": "47fd581d5081e6f92b2b2e4378250123ff2da5deca5ebb90ff53a584312944ad",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "affected_actors": "all toolkit domains and existing cases",
+          "cost_measurement": "unknown",
+          "estimated_engineering_effort": "high",
+          "software_change": "core engine schema and universal release gates"
+        },
+        "deps": {
+          "n1": 1,
+          "sy1": 1
+        },
+        "id": "o3",
+        "kind": "option",
+        "text": "Ampliar el motor para imponer campos y documentación de software obligatorios en toda fase: compuertas deterministas más fuertes pero mayor cambio del toolkit general, riesgo de rechazar casos no software y de confundir formatos con buen razonamiento. Aun requiere revisión externa y ejecución de pruebas.",
+        "version": 1
+      },
+      "prev_hash": "be26220e49274c361459da6ccfeae02622b1d342581703a4b9fd612a0ffe4f72",
+      "seq": 27
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:17:10+00:00",
+      "hash": "407051edb056e6adefca3c9c6dee1802fd10ae196d80b0577c2db6970adfcb1a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "dimensions": [
+            "fit_to_observed_failures",
+            "role_isolation",
+            "resume_integrity",
+            "implementation_scope",
+            "effects_on_other_domains"
+          ],
+          "measurement_status": "design_reasoning_only",
+          "money": null,
+          "preferred_candidate": "o2",
+          "tokens": null
+        },
+        "deps": {
+          "o1": 1,
+          "o2": 1,
+          "o3": 1,
+          "u1": 1
+        },
+        "id": "cmp1",
+        "kind": "comparison",
+        "text": "Comparación de diseño, sin puntuaciones medidas: o1 requiere menos ingeniería pero conserva dependencia de instrucciones; o2 reutiliza compuertas comprobadas y permite aislar roles/capturar ejecución, con coste de infraestructura; o3 endurece todo el motor y puede invalidar dominios existentes sin asegurar calidad semántica. Preferencia técnica provisional o2 para software local; o1 será línea base pertinente. Esfuerzo low/medium/high es estimación, no benchmark ni coste monetario.",
+        "version": 1
+      },
+      "prev_hash": "47fd581d5081e6f92b2b2e4378250123ff2da5deca5ebb90ff53a584312944ad",
+      "seq": 28
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:17:10+00:00",
+      "hash": "8810b490ef4f9965374aaeba04499e9ea386a07621e95fd2ba7168bbde8de866",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "residual_risk": "Semantic reviewer error and external custody remain open; no general causal thesis conclusion."
+        },
+        "deps": {
+          "cmp1": 1,
+          "o2": 1,
+          "u1": 1
+        },
+        "id": "risk1",
+        "kind": "risk",
+        "text": "El controlador puede congelar razonamiento superficial, confiar en etiquetas locales, repetir acciones tras una interrupción o divulgar evaluación reservada. Mitigar mediante revisor real con fuente RO, recibos de proceso, rechazo ante falta de evidencia, premisas versionadas, reanudación idempotente y montajes separados. Fallos del proveedor se registran inconclusos y no disparan cambio de cuenta. El caso nuevo y controles sintéticos conservan clasificaciones distintas.",
+        "version": 1
+      },
+      "prev_hash": "407051edb056e6adefca3c9c6dee1802fd10ae196d80b0577c2db6970adfcb1a",
+      "seq": 29
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:22:37+00:00",
+      "hash": "1a21290d95654fe04a7fbd3737b8f5741eef2f8b4ee964c7716584da60b61ab8",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "definition": "Contar criterios prerregistrados satisfechos: recorrido real revisado, trazabilidad, prueba medida, documentación, rechazo por evidencia insuficiente, contradicción, reapertura y recuperación. Exigir veredicto separado por control; denominador 8. Una fase aceptada por etiqueta o un template no satisface el recorrido real.",
+          "evidence_role": "e1 motivates the choice of delivery controls from historical failures; it is not a measured value for this new indicator",
+          "measurement_value": null,
+          "metric": "local_delivery_controls_satisfied",
+          "scope": "new_local_software_controller",
+          "unit": "count"
+        },
+        "deps": {
+          "e1": 1,
+          "n1": 1,
+          "p1": 1,
+          "pr1": 1
+        },
+        "id": "i1",
+        "kind": "indicator",
+        "text": "Controles técnicos locales satisfechos, con criterio y prueba individual, sin sumarlos a una tesis general. La evidencia histórica e1 motiva estos controles; no asigna valor al indicador nuevo ni satisface ninguno de sus ocho controles.",
+        "version": 2
+      },
+      "prev_hash": "8810b490ef4f9965374aaeba04499e9ea386a07621e95fd2ba7168bbde8de866",
+      "seq": 30
+    },
+    {
+      "actor": "reviewer:gemini-docker-review-06",
+      "at": "2026-10-05T00:27:24+00:00",
+      "hash": "7cb08f61d2ff0547565dfc61b5858194d67da013df3d9d1358c6bca029471833",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "Acepta i1v2: e1 motiva controles sin cumplirlos; resultado aún no medido; conserva criterio anterior a medidas nuevas. Informe independiente Gemini Pro text-only evidence/review-06-verdict.md, receipt review-06-receipt.json. No ejecutó pruebas; exige criterios y límites precisos antes de medir controlador; comparación N/S/T pendiente.",
+        "snapshot": "edc2ed5265fd8463e72c8d24a369a45952fbb19f78a2043a957c71b2b9b35c9c",
+        "verdict": "accept"
+      },
+      "prev_hash": "1a21290d95654fe04a7fbd3737b8f5741eef2f8b4ee964c7716584da60b61ab8",
+      "seq": 31
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:27:24+00:00",
+      "hash": "6ed9d96a2c481f3af4ab06d52c5167ea696d8f3387a1d14e88f3d525466ac0bf",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "study",
+        "review_seq": 31,
+        "snapshot": "edc2ed5265fd8463e72c8d24a369a45952fbb19f78a2043a957c71b2b9b35c9c"
+      },
+      "prev_hash": "7cb08f61d2ff0547565dfc61b5858194d67da013df3d9d1358c6bca029471833",
+      "seq": 32
+    },
+    {
+      "actor": "reviewer:gemini-docker-review-06",
+      "at": "2026-10-05T00:27:24+00:00",
+      "hash": "41d7fbe6ea8a637b9b8cd29c68af0ac9b8551534b6bf801dbaea6811e292e379",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "observe",
+        "provenance": "local_declared",
+        "reason": "Diagnóstico e1/inf1 del piloto anterior coherente con doce observaciones y ausencia de README; no es eficacia del controlador. Informe independiente Gemini Pro text-only evidence/review-06-verdict.md, receipt review-06-receipt.json. No ejecutó pruebas; exige criterios y límites precisos antes de medir controlador; comparación N/S/T pendiente.",
+        "snapshot": "632f9963403bfcccb8e34be73560849ccc8d54493f775a79db0603a3d0d3c844",
+        "verdict": "accept"
+      },
+      "prev_hash": "6ed9d96a2c481f3af4ab06d52c5167ea696d8f3387a1d14e88f3d525466ac0bf",
+      "seq": 33
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:27:24+00:00",
+      "hash": "9a0dfd4be0ac7411e024e3f332d3d83f8e99050b4e3c20c6a79d424f3c83b92c",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "observe",
+        "review_seq": 33,
+        "snapshot": "632f9963403bfcccb8e34be73560849ccc8d54493f775a79db0603a3d0d3c844"
+      },
+      "prev_hash": "41d7fbe6ea8a637b9b8cd29c68af0ac9b8551534b6bf801dbaea6811e292e379",
+      "seq": 34
+    },
+    {
+      "actor": "reviewer:gemini-docker-review-06",
+      "at": "2026-10-05T00:27:24+00:00",
+      "hash": "cb3226eeae61f4d9eac3ad1b27607fa3643fc5976494d4c245309dd103211172",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "explain",
+        "provenance": "local_declared",
+        "reason": "sy1/u1 delimitan diagnóstico, reglas mecánicas y costes/custodia/causalidad desconocidos. Informe independiente Gemini Pro text-only evidence/review-06-verdict.md, receipt review-06-receipt.json. No ejecutó pruebas; exige criterios y límites precisos antes de medir controlador; comparación N/S/T pendiente.",
+        "snapshot": "0218be71d37ce6dcd9b12f88d299e1cc8a73a21f46881c43828479a5000cd5e9",
+        "verdict": "accept"
+      },
+      "prev_hash": "9a0dfd4be0ac7411e024e3f332d3d83f8e99050b4e3c20c6a79d424f3c83b92c",
+      "seq": 35
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:27:24+00:00",
+      "hash": "48a49c2cd42fcadc4273d8d34b92ba26a78cf1b1de4277e4e90bf083d97333c5",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "explain",
+        "review_seq": 35,
+        "snapshot": "0218be71d37ce6dcd9b12f88d299e1cc8a73a21f46881c43828479a5000cd5e9"
+      },
+      "prev_hash": "cb3226eeae61f4d9eac3ad1b27607fa3643fc5976494d4c245309dd103211172",
+      "seq": 36
+    },
+    {
+      "actor": "reviewer:gemini-docker-review-06",
+      "at": "2026-10-05T00:27:24+00:00",
+      "hash": "9dbe7609e775f2d7974a41ee67b62736beec61041df80b1175608d1309cec9f6",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "compare",
+        "provenance": "local_declared",
+        "reason": "Acepta comparación sustantiva o1/o2/o3, impactos por actor y riesgos; esfuerzo es estimación, no benchmark. Informe independiente Gemini Pro text-only evidence/review-06-verdict.md, receipt review-06-receipt.json. No ejecutó pruebas; exige criterios y límites precisos antes de medir controlador; comparación N/S/T pendiente.",
+        "snapshot": "7dac2c0a913e9179189454158e43ed96181f3d2203284ee41e2296e039bd892c",
+        "verdict": "accept"
+      },
+      "prev_hash": "48a49c2cd42fcadc4273d8d34b92ba26a78cf1b1de4277e4e90bf083d97333c5",
+      "seq": 37
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:27:24+00:00",
+      "hash": "f62d62f4e64614b499253a239e5b8cc6ec8b8019ee29f04381e8059ce10965cd",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "compare",
+        "review_seq": 37,
+        "snapshot": "7dac2c0a913e9179189454158e43ed96181f3d2203284ee41e2296e039bd892c"
+      },
+      "prev_hash": "9dbe7609e775f2d7974a41ee67b62736beec61041df80b1175608d1309cec9f6",
+      "seq": 38
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "b9aa1128-a4ac-448b-a181-8ad316ff1d6a",
+    "created_at": "2026-10-04T23:01:05+00:00",
+    "created_by": "human:owner",
+    "domain": "desarrollo",
+    "test_gate_policy": "local_report",
+    "title": "SpecOrganon: release autónoma reproducible para software pequeño"
+  },
+  "schema": 1
+}

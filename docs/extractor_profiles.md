@@ -39,5 +39,8 @@ auditor. No sustituye el sellado por ejecución desde una ruta mutable.
 La instalación de Python por sí sola no garantiza estas capacidades.
 
 Este perfil depende de los bytes y la arquitectura x86_64_v4 indicados. No
-es una imagen Docker portable. El entorno Docker reproducible y la revisión
-independiente siguen pendientes dentro de la goal.
+es una imagen Docker portable. El [entorno Docker candidato](docker_release.md)
+recupera el binario histórico mediante Ubuntu 24.04 y comprueba su hash durante
+la construcción. Las revisiones independientes y los recibos de la goal
+conservan sus alcances: revisión de código y pruebas técnicas no equivalen a
+aceptación de la release ni a validación general del método.

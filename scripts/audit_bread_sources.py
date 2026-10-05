@@ -41,12 +41,22 @@ def _reject_constant(value: str) -> None:
     raise SourceAuditError(f"nonfinite JSON number: {value}")
 
 
+def _exact_float(token: str) -> float:
+    """Keep the existing numeric API only when its decimal roundtrip is exact."""
+    value = float(token)
+    original = Decimal(token)
+    if not original.is_finite() or Decimal(str(value)) != original:
+        raise SourceAuditError("JSON numeric precision would be lost")
+    return value
+
+
 def _load(path: Path) -> tuple[dict, dict]:
     try:
         raw = path.read_bytes()
         if len(raw) > 131_072:
             raise SourceAuditError("JSON input too large")
-        value = json.loads(raw, object_pairs_hook=_unique_pairs, parse_constant=_reject_constant)
+        value = json.loads(raw, object_pairs_hook=_unique_pairs,
+                           parse_constant=_reject_constant, parse_float=_exact_float)
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise SourceAuditError(f"cannot read valid JSON: {path.name}") from exc
     if type(value) is not dict:

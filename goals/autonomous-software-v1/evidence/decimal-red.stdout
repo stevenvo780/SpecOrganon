@@ -1,0 +1,40 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_decimal_claim_cannot_be_rounded_into_a_published_value[736.00000000000000001] _
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/decimal-red/test_decimal_claim_cannot_be_r0')
+token = '736.00000000000000001'
+
+    @pytest.mark.parametrize("token", ["736.00000000000000001", "7.3600000000000000001e2"])
+    def test_decimal_claim_cannot_be_rounded_into_a_published_value(tmp_path, token):
+        # Parsing through float must not erase a numerically distinct transcription.
+        claims = tmp_path / "precision.json"
+        original = CLAIMS.read_text()
+        assert '"value": 736,' in original
+        claims.write_text(original.replace('"value": 736,', f'"value": {token},', 1))
+>       with pytest.raises(SourceAuditError, match="precision|PDF value"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE SourceAuditError
+
+tests/test_audit_bread_sources.py:52: Failed
+_ test_decimal_claim_cannot_be_rounded_into_a_published_value[7.3600000000000000001e2] _
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/decimal-red/test_decimal_claim_cannot_be_r1')
+token = '7.3600000000000000001e2'
+
+    @pytest.mark.parametrize("token", ["736.00000000000000001", "7.3600000000000000001e2"])
+    def test_decimal_claim_cannot_be_rounded_into_a_published_value(tmp_path, token):
+        # Parsing through float must not erase a numerically distinct transcription.
+        claims = tmp_path / "precision.json"
+        original = CLAIMS.read_text()
+        assert '"value": 736,' in original
+        claims.write_text(original.replace('"value": 736,', f'"value": {token},', 1))
+>       with pytest.raises(SourceAuditError, match="precision|PDF value"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE SourceAuditError
+
+tests/test_audit_bread_sources.py:52: Failed
+=========================== short test summary info ============================
+FAILED tests/test_audit_bread_sources.py::test_decimal_claim_cannot_be_rounded_into_a_published_value[736.00000000000000001]
+FAILED tests/test_audit_bread_sources.py::test_decimal_claim_cannot_be_rounded_into_a_published_value[7.3600000000000000001e2]
+2 failed, 52 deselected in 0.22s

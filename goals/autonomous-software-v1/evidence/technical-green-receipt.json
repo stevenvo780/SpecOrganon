@@ -1,0 +1,41 @@
+{
+  "scope": "145 technical tests; not whole platform",
+  "argv": [
+    "/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_audit_bread_sources.py",
+    "tests/test_extractor_profiles.py",
+    "tests/test_source_passages.py",
+    "tests/test_local_replay_sandbox.py",
+    "tests/test_audit_signed_test_execution.py",
+    "tests/test_server_case_pin.py",
+    "--basetemp",
+    "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/technical-green"
+  ],
+  "cwd": "/datos/workspaces/personal/SpecOrganon",
+  "environment": {
+    "TMPDIR": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/temp",
+    "PYTHONPATH": "src",
+    "SPECORGANON_EXTRACTOR_PROFILE": "cachyos-26.08.0-x86_64-v4"
+  },
+  "exit_code": 0,
+  "passed": 145,
+  "source_sha256": {
+    "src/specorganon/source_passages.py": "42cd327ba51565c48dff4013d27de2e94eedb2a3763c6494a435b5e53f88ef83",
+    "src/specorganon/server.py": "f34fd5bc7dea710a23fa1543c264c78f8e2e2820203a79e0cf4ba626fae84621",
+    "scripts/local_replay_sandbox.py": "2d28f168d872f2cb1901592019e949e9b24f1fc3623aeec404ad55a7e9309ba5",
+    "scripts/audit_bread_sources.py": "fb271ad4287464b1bf5df0efed4475d683913d47ff1ca6837c2bfb0433ea5ba6",
+    "tests/test_extractor_profiles.py": "9db14895750893347c74676fd785b8b38ccf86f01568f1a183288af41af76965",
+    "tests/test_source_passages.py": "1632a6477e34b7771542d152a36bd50c0a07ba2966afd04fa6cbc505bae0f739",
+    "tests/test_audit_bread_sources.py": "811fdc21ab6d5e51514f005cbeba624ae887edda83ab27fc8909d39aeae5c573",
+    "tests/test_local_replay_sandbox.py": "5e8034a9cef02d8c06e5caab4d76b3db6c1b8e75a3d6fe20ee3fdc8502ec912e",
+    "tests/test_audit_signed_test_execution.py": "37401f3fa42f1ac1db04f1bd30ea6e906227ed2b80a24848595ebf79c0c21789",
+    "tests/test_server_case_pin.py": "01c18daa41cfd502d014ff0c77dfdf3e99b7ee54583accf786320f7f95fe053e",
+    "uv.lock": "4ce6a8280881287f43ddecd3a617b4387f4392432269c94c359c72d81c495c46"
+  },
+  "stdout_sha256": "553a003c517fe4fab47d0215001218b9d4354858d05db4f16e39ffec620de190",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "review_status": "decimal fix and full receipt pending second independent review"
+}

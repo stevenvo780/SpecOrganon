@@ -71,6 +71,8 @@ print('done')
     assert (paths["output"] / "result.txt").read_text() == "ok\n"
     assert (paths["temporary"] / "scratch.txt").read_text() == "tmp"
     assert (paths["work"].parent / "run.stdout").read_text() == "done\n"
+    # Launcher diagnostics must not contaminate the measured program stream.
+    assert (paths["work"].parent / "run.stderr").read_bytes() == b""
     assert ((paths["work"].parent / "run.stdout").stat().st_mode & 0o777) == 0o600
 
 

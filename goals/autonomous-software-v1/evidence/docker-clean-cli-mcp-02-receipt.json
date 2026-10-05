@@ -1,0 +1,417 @@
+{
+  "schema": 1,
+  "image_id": "sha256:696cff48caf2c54fe8243d85df096f441d5628165b8f0b9a4dc84bd3b06f8fd5",
+  "cli_init_argv": [
+    "docker",
+    "run",
+    "--rm",
+    "--network",
+    "none",
+    "--mount",
+    "type=bind,src=/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/docker-clean-cli-mcp-02,dst=/runs",
+    "sha256:696cff48caf2c54fe8243d85df096f441d5628165b8f0b9a4dc84bd3b06f8fd5",
+    "organon",
+    "init",
+    "/runs/mi-caso",
+    "--title",
+    "Prueba local",
+    "--domain",
+    "desarrollo",
+    "--approval-policy",
+    "local",
+    "--actor",
+    "human:owner"
+  ],
+  "cli_init_exit_code": 0,
+  "mcp_command": "docker",
+  "mcp_args": [
+    "run",
+    "--rm",
+    "-i",
+    "--name",
+    "specorganon-clean-mcp",
+    "--network",
+    "none",
+    "--read-only",
+    "--cap-drop=ALL",
+    "--security-opt",
+    "no-new-privileges",
+    "--mount",
+    "type=bind,src=/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/docker-clean-cli-mcp-02,dst=/runs",
+    "-e",
+    "ORGANON_ROOT=/runs",
+    "-e",
+    "TMPDIR=/runs",
+    "sha256:696cff48caf2c54fe8243d85df096f441d5628165b8f0b9a4dc84bd3b06f8fd5",
+    "organon-mcp"
+  ],
+  "mcp_initialize": {
+    "meta": null,
+    "protocol_version": "2025-11-25",
+    "capabilities": {
+      "experimental": {},
+      "logging": null,
+      "prompts": {
+        "list_changed": false
+      },
+      "resources": {
+        "subscribe": false,
+        "list_changed": false
+      },
+      "tools": {
+        "list_changed": false
+      },
+      "completions": null,
+      "extensions": null,
+      "tasks": null
+    },
+    "server_info": {
+      "name": "organon",
+      "title": null,
+      "version": "",
+      "description": "Evidence-linked case workflow with review, contradictions, phase gates and traceability.",
+      "website_url": null,
+      "icons": null
+    },
+    "instructions": "Start with init, add items with put, inspect status and gate before advance. Record reviews and human decisions explicitly. Signed cases require an offline Ed25519 signature checked against the operator-controlled ORGANON_APPROVERS_FILE. Choose local explicitly for trusted development with declared human approvals and separate reviewers; fixture is reserved for synthetic tests. Use report for a readable summary, next task and evidence limits."
+  },
+  "tool_names": [
+    "init",
+    "put",
+    "status",
+    "report",
+    "review",
+    "retire_indicator",
+    "approval_challenge",
+    "approve",
+    "test_execution_challenge",
+    "record_test_execution",
+    "test_observation_challenge",
+    "record_test_observation",
+    "field_attestation_challenge",
+    "attest_field",
+    "challenge",
+    "resolve_challenge",
+    "gate",
+    "phase_review_challenge",
+    "review_phase",
+    "advance",
+    "trace",
+    "next_task",
+    "run",
+    "audit_lot_journal"
+  ],
+  "status_response": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"project\": {\n    \"approval_policy\": \"local\",\n    \"case_id\": \"244bb7fa-ba1c-4d0a-bb25-509a860937cc\",\n    \"created_at\": \"2026-10-05T00:15:22+00:00\",\n    \"created_by\": \"human:owner\",\n    \"domain\": \"desarrollo\",\n    \"test_gate_policy\": \"local_report\",\n    \"title\": \"Prueba local\"\n  },\n  \"project_sha256\": \"990a60fefb84225b8f30d7377d39444558904fd21db5de64d26307a70b316ff3\",\n  \"revision\": 0,\n  \"approval_trust\": \"local_declared\",\n  \"approval_identity_authenticated\": false,\n  \"phase_review_trust\": \"local_declared\",\n  \"test_execution_trust\": \"local_declared\",\n  \"test_execution_history\": [],\n  \"test_observation_trust\": \"not_applicable\",\n  \"test_observation_history\": [],\n  \"phase_review_history\": [],\n  \"field_attestation_trust\": \"not_applicable\",\n  \"field_attestations\": [],\n  \"indicator_retirement_history\": [],\n  \"items\": {},\n  \"phases\": {\n    \"frame\": {\n      \"phase\": \"frame\",\n      \"front\": \"philosophy\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_identity_authenticated\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid actor; has 0\",\n        \"needs 1 valid boundary; has 0\",\n        \"needs 1 valid problem; has 0\"\n      ],\n      \"snapshot\": \"f9a34206d21cd981a14d17c1bd04526c39f80708bcb39286008c619c7e8a8431\",\n      \"advance_seq\": null\n    },\n    \"critique\": {\n      \"phase\": \"critique\",\n      \"front\": \"philosophy\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_identity_authenticated\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid assumption; has 0\",\n        \"needs 1 valid concept; has 0\",\n        \"needs 1 valid norm; has 0\",\n        \"needs 2 valid frame_option; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"bb7b59e1cd8a1f270b8466fed1eaf5c3f9af5bbd2c73688d694a17113efad1b1\",\n      \"advance_seq\": null\n    },\n    \"study\": {\n      \"phase\": \"study\",\n      \"front\": \"science\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_identity_authenticated\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid hypothesis; has 0\",\n        \"needs 1 valid indicator; has 0\",\n        \"needs 1 valid protocol; has 0\",\n        \"needs 1 valid question; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"a319b8ff70db5fc8e5e552c61c47d9b33bea62e36dee8104e881eda593d611c6\",\n      \"advance_seq\": null\n    },\n    \"observe\": {\n      \"phase\": \"observe\",\n      \"front\": \"science\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_identity_authenticated\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid evidence; has 0\",\n        \"needs 1 valid inference; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"68d843c513a81b2a4e5beeebc586b5b40f7bc58369d39f2e944a78bd60924067\",\n      \"advance_seq\": null\n    },\n    \"explain\": {\n      \"phase\": \"explain\",\n      \"front\": \"science\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_identity_authenticated\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid synthesis; has 0\",\n        \"needs 1 valid uncertainty; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"0a0c6bd681e7f67589eee109abc7929e127c7fe61563bce4768291922e54a203\",\n      \"advance_seq\": null\n    },\n    \"compare\": {\n      \"phase\": \"compare\",\n      \"front\": \"engineering\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_identity_authenticated\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid comparison; has 0\",\n        \"needs 1 valid risk; has 0\",\n        \"needs 2 valid option; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"16e4c5494ca4c37df236d13a8e30520ef0c4f5e3319a03ecff7818b9749af4d1\",\n      \"advance_seq\": null\n    },\n    \"specify\": {\n      \"phase\": \"specify\",\n      \"front\": \"engineering\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_identity_authenticated\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid criterion; has 0\",\n        \"needs 1 valid decision; has 0\",\n        \"needs 1 valid requirement; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"9151c1f24392cc0293c729a66b762feb5e9121b859e9a554310b9d79018a6e7d\",\n      \"advance_seq\": null\n    },\n    \"build\": {\n      \"phase\": \"build\",\n      \"front\": \"engineering\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_identity_authenticated\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid implementation; has 0\",\n        \"needs 1 valid test; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"86e7e4bf767365ad64e21192a23ea93c4e968cc2c997312ff133cfe1a00f44a2\",\n      \"advance_seq\": null\n    },\n    \"validate\": {\n      \"phase\": \"validate\",\n      \"front\": \"validation\",\n      \"ready\": false,\n      \"accepted\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_identity_authenticated\": false,\n      \"review_provenance\": \"none\",\n      \"blockers\": [\n        \"needs 1 valid assessment; has 0\",\n        \"needs 1 valid baseline; has 0\",\n        \"needs 1 valid result; has 0\",\n        \"previous phase is not currently accepted\"\n      ],\n      \"snapshot\": \"279619418846b9797270c2ef9eb1564053aaab7c194af15cfa7bc3a0a5db47d4\",\n      \"advance_seq\": null\n    }\n  },\n  \"open_challenges\": []\n}",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structured_content": {
+      "project": {
+        "approval_policy": "local",
+        "case_id": "244bb7fa-ba1c-4d0a-bb25-509a860937cc",
+        "created_at": "2026-10-05T00:15:22+00:00",
+        "created_by": "human:owner",
+        "domain": "desarrollo",
+        "test_gate_policy": "local_report",
+        "title": "Prueba local"
+      },
+      "project_sha256": "990a60fefb84225b8f30d7377d39444558904fd21db5de64d26307a70b316ff3",
+      "revision": 0,
+      "approval_trust": "local_declared",
+      "approval_identity_authenticated": false,
+      "phase_review_trust": "local_declared",
+      "test_execution_trust": "local_declared",
+      "test_execution_history": [],
+      "test_observation_trust": "not_applicable",
+      "test_observation_history": [],
+      "phase_review_history": [],
+      "field_attestation_trust": "not_applicable",
+      "field_attestations": [],
+      "indicator_retirement_history": [],
+      "items": {},
+      "phases": {
+        "frame": {
+          "phase": "frame",
+          "front": "philosophy",
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid actor; has 0",
+            "needs 1 valid boundary; has 0",
+            "needs 1 valid problem; has 0"
+          ],
+          "snapshot": "f9a34206d21cd981a14d17c1bd04526c39f80708bcb39286008c619c7e8a8431",
+          "advance_seq": null
+        },
+        "critique": {
+          "phase": "critique",
+          "front": "philosophy",
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid assumption; has 0",
+            "needs 1 valid concept; has 0",
+            "needs 1 valid norm; has 0",
+            "needs 2 valid frame_option; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "bb7b59e1cd8a1f270b8466fed1eaf5c3f9af5bbd2c73688d694a17113efad1b1",
+          "advance_seq": null
+        },
+        "study": {
+          "phase": "study",
+          "front": "science",
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid hypothesis; has 0",
+            "needs 1 valid indicator; has 0",
+            "needs 1 valid protocol; has 0",
+            "needs 1 valid question; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "a319b8ff70db5fc8e5e552c61c47d9b33bea62e36dee8104e881eda593d611c6",
+          "advance_seq": null
+        },
+        "observe": {
+          "phase": "observe",
+          "front": "science",
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid evidence; has 0",
+            "needs 1 valid inference; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "68d843c513a81b2a4e5beeebc586b5b40f7bc58369d39f2e944a78bd60924067",
+          "advance_seq": null
+        },
+        "explain": {
+          "phase": "explain",
+          "front": "science",
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid synthesis; has 0",
+            "needs 1 valid uncertainty; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "0a0c6bd681e7f67589eee109abc7929e127c7fe61563bce4768291922e54a203",
+          "advance_seq": null
+        },
+        "compare": {
+          "phase": "compare",
+          "front": "engineering",
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid comparison; has 0",
+            "needs 1 valid risk; has 0",
+            "needs 2 valid option; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "16e4c5494ca4c37df236d13a8e30520ef0c4f5e3319a03ecff7818b9749af4d1",
+          "advance_seq": null
+        },
+        "specify": {
+          "phase": "specify",
+          "front": "engineering",
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid criterion; has 0",
+            "needs 1 valid decision; has 0",
+            "needs 1 valid requirement; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "9151c1f24392cc0293c729a66b762feb5e9121b859e9a554310b9d79018a6e7d",
+          "advance_seq": null
+        },
+        "build": {
+          "phase": "build",
+          "front": "engineering",
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid implementation; has 0",
+            "needs 1 valid test; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "86e7e4bf767365ad64e21192a23ea93c4e968cc2c997312ff133cfe1a00f44a2",
+          "advance_seq": null
+        },
+        "validate": {
+          "phase": "validate",
+          "front": "validation",
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid assessment; has 0",
+            "needs 1 valid baseline; has 0",
+            "needs 1 valid result; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "279619418846b9797270c2ef9eb1564053aaab7c194af15cfa7bc3a0a5db47d4",
+          "advance_seq": null
+        }
+      },
+      "open_challenges": []
+    },
+    "is_error": false,
+    "result_type": "complete"
+  },
+  "report_response": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"schema\": 1,\n  \"title\": \"Prueba local\",\n  \"case_id\": \"244bb7fa-ba1c-4d0a-bb25-509a860937cc\",\n  \"approval_policy\": \"local\",\n  \"revision\": 0,\n  \"accepted_phases\": 0,\n  \"artifact_count\": 0,\n  \"next\": {\n    \"status\": \"pending\",\n    \"revision\": 0,\n    \"phase\": \"frame\",\n    \"front\": \"philosophy\",\n    \"purpose\": \"Delimitar el problema, actores y frontera.\",\n    \"role\": \"analyst\",\n    \"role_label\": \"analista\",\n    \"actor\": null,\n    \"action\": \"create_artifacts\",\n    \"task\": \"Producir los artefactos faltantes con contenido y fuentes verificables.\",\n    \"phase_review_trust\": \"local_declared\",\n    \"test_execution_trust\": \"local_declared\",\n    \"test_observation_trust\": \"not_applicable\",\n    \"inputs_description\": \"Encargo y contexto del caso.\",\n    \"inputs\": {\n      \"items\": [],\n      \"omitted\": 0\n    },\n    \"artifacts\": {\n      \"items\": [],\n      \"omitted\": 0\n    },\n    \"missing\": [\n      {\n        \"kind\": \"problem\",\n        \"required\": 1,\n        \"valid\": 0,\n        \"remaining\": 1\n      },\n      {\n        \"kind\": \"actor\",\n        \"required\": 1,\n        \"valid\": 0,\n        \"remaining\": 1\n      },\n      {\n        \"kind\": \"boundary\",\n        \"required\": 1,\n        \"valid\": 0,\n        \"remaining\": 1\n      }\n    ],\n    \"approval_targets\": [],\n    \"omitted_approval_targets\": 0,\n    \"test_execution_targets\": [],\n    \"omitted_test_execution_targets\": 0,\n    \"test_observation_targets\": [],\n    \"omitted_test_observation_targets\": 0,\n    \"criteria\": {\n      \"exit\": \"La formulaci\u00f3n nombra el da\u00f1o o necesidad, los afectados y el l\u00edmite de observaci\u00f3n.\",\n      \"review\": \"Revisar exclusiones y formulaciones rivales.\",\n      \"stop\": \"Detener si el problema no puede delimitarse o falta un actor afectado decisivo.\"\n    },\n    \"gate\": {\n      \"ready\": false,\n      \"reviewed\": false,\n      \"independent_review\": false,\n      \"review_signature_verified\": false,\n      \"review_provenance\": \"none\",\n      \"accepted\": false,\n      \"snapshot\": \"f9a34206d21cd981a14d17c1bd04526c39f80708bcb39286008c619c7e8a8431\"\n    },\n    \"blockers\": [\n      \"needs 1 valid actor; has 0\",\n      \"needs 1 valid boundary; has 0\",\n      \"needs 1 valid problem; has 0\"\n    ],\n    \"omitted_blockers\": 0,\n    \"open_challenges\": [],\n    \"omitted_challenges\": 0\n  },\n  \"limitations\": [\n    \"El informe resume el expediente; no verifica por s\u00ed solo la verdad de sus fuentes.\",\n    \"Aceptar fases no demuestra superioridad metodol\u00f3gica ni impacto de campo.\",\n    \"El modo local no autentica identidades ni custodia externa; sus revisiones y recibos son declaraciones del entorno de trabajo.\"\n  ],\n  \"markdown\": \"# Prueba local\\n\\nDesarrollo local con autores y mandato declarados.\\n\\nRevisi\u00f3n del expediente: 0. Fases aceptadas: 0/9.\\n\\n## Siguiente trabajo\\n\\nProducir los artefactos faltantes con contenido y fuentes verificables\\\\.\\n\\nFase: frame. Acci\u00f3n: create\\\\_artifacts.\\n\\nBloqueos:\\n\\n- needs 1 valid actor; has 0\\n- needs 1 valid boundary; has 0\\n- needs 1 valid problem; has 0\\n\\n## Recorrido\\n\\n| Frente | Fase | Estado |\\n| --- | --- | --- |\\n| philosophy | frame | pendiente |\\n| philosophy | critique | pendiente |\\n| science | study | pendiente |\\n| science | observe | pendiente |\\n| science | explain | pendiente |\\n| engineering | compare | pendiente |\\n| engineering | specify | pendiente |\\n| engineering | build | pendiente |\\n| validation | validate | pendiente |\\n\\n## Artefactos y trazabilidad\\n\\nEl caso todav\u00eda no contiene artefactos.\\n\\n## Alcance del informe\\n\\n- El informe resume el expediente; no verifica por s\u00ed solo la verdad de sus fuentes\\\\.\\n- Aceptar fases no demuestra superioridad metodol\u00f3gica ni impacto de campo\\\\.\\n- El modo local no autentica identidades ni custodia externa; sus revisiones y recibos son declaraciones del entorno de trabajo\\\\.\\n\"\n}",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structured_content": {
+      "schema": 1,
+      "title": "Prueba local",
+      "case_id": "244bb7fa-ba1c-4d0a-bb25-509a860937cc",
+      "approval_policy": "local",
+      "revision": 0,
+      "accepted_phases": 0,
+      "artifact_count": 0,
+      "next": {
+        "status": "pending",
+        "revision": 0,
+        "phase": "frame",
+        "front": "philosophy",
+        "purpose": "Delimitar el problema, actores y frontera.",
+        "role": "analyst",
+        "role_label": "analista",
+        "actor": null,
+        "action": "create_artifacts",
+        "task": "Producir los artefactos faltantes con contenido y fuentes verificables.",
+        "phase_review_trust": "local_declared",
+        "test_execution_trust": "local_declared",
+        "test_observation_trust": "not_applicable",
+        "inputs_description": "Encargo y contexto del caso.",
+        "inputs": {
+          "items": [],
+          "omitted": 0
+        },
+        "artifacts": {
+          "items": [],
+          "omitted": 0
+        },
+        "missing": [
+          {
+            "kind": "problem",
+            "required": 1,
+            "valid": 0,
+            "remaining": 1
+          },
+          {
+            "kind": "actor",
+            "required": 1,
+            "valid": 0,
+            "remaining": 1
+          },
+          {
+            "kind": "boundary",
+            "required": 1,
+            "valid": 0,
+            "remaining": 1
+          }
+        ],
+        "approval_targets": [],
+        "omitted_approval_targets": 0,
+        "test_execution_targets": [],
+        "omitted_test_execution_targets": 0,
+        "test_observation_targets": [],
+        "omitted_test_observation_targets": 0,
+        "criteria": {
+          "exit": "La formulaci\u00f3n nombra el da\u00f1o o necesidad, los afectados y el l\u00edmite de observaci\u00f3n.",
+          "review": "Revisar exclusiones y formulaciones rivales.",
+          "stop": "Detener si el problema no puede delimitarse o falta un actor afectado decisivo."
+        },
+        "gate": {
+          "ready": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_provenance": "none",
+          "accepted": false,
+          "snapshot": "f9a34206d21cd981a14d17c1bd04526c39f80708bcb39286008c619c7e8a8431"
+        },
+        "blockers": [
+          "needs 1 valid actor; has 0",
+          "needs 1 valid boundary; has 0",
+          "needs 1 valid problem; has 0"
+        ],
+        "omitted_blockers": 0,
+        "open_challenges": [],
+        "omitted_challenges": 0
+      },
+      "limitations": [
+        "El informe resume el expediente; no verifica por s\u00ed solo la verdad de sus fuentes.",
+        "Aceptar fases no demuestra superioridad metodol\u00f3gica ni impacto de campo.",
+        "El modo local no autentica identidades ni custodia externa; sus revisiones y recibos son declaraciones del entorno de trabajo."
+      ],
+      "markdown": "# Prueba local\n\nDesarrollo local con autores y mandato declarados.\n\nRevisi\u00f3n del expediente: 0. Fases aceptadas: 0/9.\n\n## Siguiente trabajo\n\nProducir los artefactos faltantes con contenido y fuentes verificables\\.\n\nFase: frame. Acci\u00f3n: create\\_artifacts.\n\nBloqueos:\n\n- needs 1 valid actor; has 0\n- needs 1 valid boundary; has 0\n- needs 1 valid problem; has 0\n\n## Recorrido\n\n| Frente | Fase | Estado |\n| --- | --- | --- |\n| philosophy | frame | pendiente |\n| philosophy | critique | pendiente |\n| science | study | pendiente |\n| science | observe | pendiente |\n| science | explain | pendiente |\n| engineering | compare | pendiente |\n| engineering | specify | pendiente |\n| engineering | build | pendiente |\n| validation | validate | pendiente |\n\n## Artefactos y trazabilidad\n\nEl caso todav\u00eda no contiene artefactos.\n\n## Alcance del informe\n\n- El informe resume el expediente; no verifica por s\u00ed solo la verdad de sus fuentes\\.\n- Aceptar fases no demuestra superioridad metodol\u00f3gica ni impacto de campo\\.\n- El modo local no autentica identidades ni custodia externa; sus revisiones y recibos son declaraciones del entorno de trabajo\\.\n"
+    },
+    "is_error": false,
+    "result_type": "complete"
+  },
+  "case_before_sha256": "c03032adf2336084cb8cc0e01cd2f4cee4af7ec083b3596a79d6188a80afb7de",
+  "case_after_sha256": "c03032adf2336084cb8cc0e01cd2f4cee4af7ec083b3596a79d6188a80afb7de",
+  "scope": "actual installed wheel CLI and stdio MCP; empty local case, not method completion"
+}

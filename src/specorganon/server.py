@@ -45,6 +45,7 @@ class _LandlockRulesetAttr(ctypes.Structure):
 
 
 class _LandlockPathBeneathAttr(ctypes.Structure):
+    _layout_ = "ms"
     _pack_ = 1
     _fields_ = [("allowed_access", ctypes.c_uint64), ("parent_fd", ctypes.c_int32)]
 

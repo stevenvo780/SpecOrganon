@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "scope": "synthetic current compiler runtime mechanics; no historical D118 acceptance",
+  "status": "all_27_collected_controls_covered_across_bounded_attempts_not_one_uninterrupted_suite_pass",
+  "source_sha256": {
+    "tests/test_coordinated_prototype_runtime.py": "1c88b62b088d8f7c2e81c124d4c182fdecbad62cac5005af169680cbb481ab35",
+    "tests/coordinated_runtime_fixture.py": "2bad27a82f7533d515445e732b0569149922973d3495ebf56826418adde8c9a4",
+    "scripts/coordinated_prototype_runtime.py": "feb3429547dbdb05eef63fdb4efd6750121364b5dd74097655bd801483f2ec3a",
+    "scripts/local_replay_sandbox.py": "2d28f168d872f2cb1901592019e949e9b24f1fc3623aeec404ad55a7e9309ba5"
+  },
+  "coverage_method": "Serial pytest collection order; first timeout output reports first 19 completed tests. Exact second selection covers collected remainder, including parameterized cache tests. Prior -k C substring also matched coordinated filename, so it did not filter the D-F A/B cases.",
+  "completed_ordered_prefix": [
+    "tests/test_coordinated_prototype_runtime.py::test_changed_compiler_still_rejects_under_synthetic_authority",
+    "tests/test_coordinated_prototype_runtime.py::test_invalid_configuration_creates_no_inputs_run_or_claim[extra]",
+    "tests/test_coordinated_prototype_runtime.py::test_invalid_configuration_creates_no_inputs_run_or_claim[bool_schema]",
+    "tests/test_coordinated_prototype_runtime.py::test_invalid_configuration_creates_no_inputs_run_or_claim[bool_output]",
+    "tests/test_coordinated_prototype_runtime.py::test_invalid_configuration_creates_no_inputs_run_or_claim[over_output]",
+    "tests/test_coordinated_prototype_runtime.py::test_invalid_configuration_creates_no_inputs_run_or_claim[role_extra]",
+    "tests/test_coordinated_prototype_runtime.py::test_invalid_configuration_creates_no_inputs_run_or_claim[reviewer_turns]",
+    "tests/test_coordinated_prototype_runtime.py::test_invalid_configuration_creates_no_inputs_run_or_claim[epochs]",
+    "tests/test_coordinated_prototype_runtime.py::test_invalid_configuration_creates_no_inputs_run_or_claim[wall]",
+    "tests/test_coordinated_prototype_runtime.py::test_unbound_or_overlapping_paths_rejected_before_io[bundle_child]",
+    "tests/test_coordinated_prototype_runtime.py::test_unbound_or_overlapping_paths_rejected_before_io[repo_child]",
+    "tests/test_coordinated_prototype_runtime.py::test_unbound_or_overlapping_paths_rejected_before_io[admission_overlap]",
+    "tests/test_coordinated_prototype_runtime.py::test_unbound_or_overlapping_paths_rejected_before_io[run_alias]",
+    "tests/test_coordinated_prototype_runtime.py::test_unbound_or_overlapping_paths_rejected_before_io[unknown_run]",
+    "tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-A]",
+    "tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-B]",
+    "tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-C]",
+    "tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-E-A]",
+    "tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-E-B]"
+  ],
+  "completed_exact_remainder": [
+    "tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-E-C]",
+    "tests/test_coordinated_prototype_runtime.py::test_stale_checkpoint_rejected_without_transport_or_budget_changes",
+    "tests/test_coordinated_prototype_runtime.py::test_cached_closure_rechecks_bytes_and_candidate_existence[bytes]",
+    "tests/test_coordinated_prototype_runtime.py::test_cached_closure_rechecks_bytes_and_candidate_existence[new_import]",
+    "tests/test_coordinated_prototype_runtime.py::test_declared_unpublished_freeze_is_not_admitted",
+    "tests/test_coordinated_prototype_runtime.py::test_changed_input_after_prepare_never_counts_sends_or_claims",
+    "tests/test_coordinated_prototype_runtime.py::test_different_tool_interpreter_rejected_before_preparation_io",
+    "tests/test_coordinated_prototype_runtime.py::test_different_tool_interpreter_rejected_on_reopen_without_transport_or_claim"
+  ],
+  "first_attempt": {
+    "receipt": "docker-runtime-controls-remaining-launch.json",
+    "stdout": "docker-runtime-controls-remaining.stdout",
+    "exit_code": 124,
+    "passed_before_timeout": 19
+  },
+  "remainder_attempt": {
+    "receipt": "docker-runtime-exact-remaining-receipt.json",
+    "exit_code": 0,
+    "passed": 8,
+    "duration_seconds": 125.98
+  },
+  "whole_suite_single_run_passed": false,
+  "original_D118_publication_changed": false
+}

@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import copy
 import json
+import hashlib
+import shutil
 import subprocess
 import sys
 
@@ -12,11 +14,64 @@ from coordinated_runtime_fixture import SyntheticRoles, bundle_configuration, co
 
 
 @pytest.fixture(scope="module")
-def bundle(tmp_path_factory):
+def current_runtime_test_authority(tmp_path_factory):
+    """Freeze current compiler bytes for synthetic mechanics, not the old trial.
+
+    The real D118 publication continues to reject changed source bytes. Positive
+    runtime controls need a distinct authority; rewriting its historical freeze
+    would falsely approve a different compiler under the published experiment.
+    """
+    published = runtime.SPEC
+    authority = tmp_path_factory.mktemp("synthetic-current-runtime-authority")
+    shutil.copytree(published / "public_contract", authority / "public_contract")
+    shutil.copyfile(published / "fixture_configuration.json", authority / "fixture_configuration.json")
+    freeze = json.loads((published / "source_freeze.json").read_bytes())
+    freeze["classification"] = "synthetic_current_runtime_test_authority_not_historical_acceptance"
+    for row in freeze["records"]:
+        raw = (runtime.ROOT / row["path"]).read_bytes()
+        row.update(bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest())
+    raw = (json.dumps(freeze, sort_keys=True, indent=2) + "\n").encode()
+    (authority / "source_freeze.json").write_bytes(raw)
+    (authority / "SCOPE.txt").write_text(
+        "Synthetic unit-test authority for current compiler. No historical trial acceptance.\n")
+    # The child must use the same explicit synthetic authority as this process.
+    # This test bootstrap invokes the unchanged production main; it adds no
+    # test-only override or alternate publication route to the shipped CLI.
+    (authority / "runtime_cli.py").write_text(
+        "import sys\nfrom pathlib import Path\n"
+        f"sys.path.insert(0, {str(runtime.SCRIPTS)!r})\n"
+        "import coordinated_prototype_runtime as runtime\n"
+        f"runtime.SPEC = Path({str(authority)!r})\n"
+        f"runtime.SPEC_SHA256 = {hashlib.sha256(raw).hexdigest()!r}\n"
+        "raise SystemExit(runtime.main())\n")
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(runtime, "SPEC", authority)
+        patch.setattr(runtime, "SPEC_SHA256", hashlib.sha256(raw).hexdigest())
+        yield authority
+
+
+@pytest.fixture(scope="module")
+def bundle(tmp_path_factory, current_runtime_test_authority):
     root = tmp_path_factory.mktemp("D119-original-bundle")
     target = root / "bundle"
     runtime.preparation.build_coordinated_round(target, bundle_configuration(), runtime.SPEC / "public_contract", runtime.SPEC_SHA256)
     return target
+
+
+def test_changed_compiler_still_rejects_under_synthetic_authority(
+    bundle, tmp_path, monkeypatch, current_runtime_test_authority,
+):
+    # A bypass of the source-byte gate must fail even in synthetic controls.
+    altered = tmp_path / "altered-authority"
+    altered.mkdir()
+    freeze = json.loads((current_runtime_test_authority / "source_freeze.json").read_bytes())
+    freeze["records"][0]["sha256"] = "0" * 64
+    raw = json.dumps(freeze).encode()
+    (altered / "source_freeze.json").write_bytes(raw)
+    monkeypatch.setattr(runtime, "SPEC", altered)
+    monkeypatch.setattr(runtime, "SPEC_SHA256", hashlib.sha256(raw).hexdigest())
+    with pytest.raises(ValueError, match="contract/compiler sources changed"):
+        runtime._publication()
 
 
 def run_id(bundle, arm="C", case_id="D-E"):
@@ -123,7 +178,7 @@ def test_original_modes_multiple_delegations_same_budget_and_final_host_analysis
     assert "SYNTHETIC-PRIVATE:leader:" not in json.dumps(fixture.payloads["worker-1"])
     if arm == "A":
         assert not fixture.payloads["worker-2"]
-    command = [sys.executable, "-I", "-B", str(runtime.SCRIPTS / "coordinated_prototype_runtime.py"),
+    command = [sys.executable, "-I", "-B", str(runtime.SPEC / "runtime_cli.py"),
                "status", "--run-dir", str(run)]
     reopened = subprocess.run(command, capture_output=True, text=True, timeout=60)
     assert reopened.returncode == 0, reopened.stdout + reopened.stderr

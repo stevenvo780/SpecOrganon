@@ -1,0 +1,135 @@
+F..F.....F..F......F..                                                   [100%]
+=================================== FAILURES ===================================
+_____________________ test_probe_and_allowed_packet_output _____________________
+
+replay_layout = {'work': PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/sandbox-red/test_probe_an...orkspaces/personal/specorganon-validation/autonomous-software-v1/sandbox-red/test_probe_and_allowed_packet_0/outside')}
+available_sandbox = None
+
+    def test_probe_and_allowed_packet_output(
+        replay_layout: dict[str, Path], available_sandbox: None,
+    ) -> None:
+        paths = replay_layout
+        result = _run(paths, """
+    from pathlib import Path
+    import os
+    assert Path('packet.txt').read_text() == 'packet\\n'
+    output = Path(os.environ['HOME']) / 'result.txt'
+    output.write_text('ok\\n')
+    assert output.read_text() == 'ok\\n'
+    Path(os.environ['TMPDIR'], 'scratch.txt').write_text('tmp')
+    print('done')
+    """)
+        assert result.launch_error is None
+        assert result.exit_code == 0
+        assert not result.timed_out
+        assert result.landlock_abi is not None and result.landlock_abi >= 5
+        assert (paths["output"] / "result.txt").read_text() == "ok\n"
+        assert (paths["temporary"] / "scratch.txt").read_text() == "tmp"
+        assert (paths["work"].parent / "run.stdout").read_text() == "done\n"
+        # Launcher diagnostics must not contaminate the measured program stream.
+>       assert (paths["work"].parent / "run.stderr").read_bytes() == b""
+E       assert b"/datos/work...Structure):\n" == b''
+E         
+E         Use -v to get more diff
+
+tests/test_local_replay_sandbox.py:75: AssertionError
+_______ test_matching_repeat_reads_input_and_hashes_artifact_and_streams _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/sandbox-red/test_matching_repeat_reads_inp0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f76ff3b5e00>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f76ff4023c0>
+available_sandbox = None
+
+    def test_matching_repeat_reads_input_and_hashes_artifact_and_streams(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        argv = _command()
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv))
+        run = _run_dir(tmp_path)
+        before = (case / "organon.json").read_bytes()
+        status, result = _cli(case, run, capsys)
+>       assert status == 0, result
+E       AssertionError: {'artifact_checks': [{'matches': True, 'observed_sha256': '995d363bf46636a72004e6de45f9079e585b242f890f6c4e0af697b7db9...nchanged': True, ...}, 'declared_argv_sha256': '8d4240fd1b71ce85b0220c04893643564ba5424179e43d617745cce8c5f54b14', ...}
+E       assert 1 == 0
+
+tests/test_audit_signed_test_execution.py:172: AssertionError
+_________________ test_signed_nonzero_matches_but_cannot_pass __________________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/sandbox-red/test_signed_nonzero_matches_bu0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f76fe50b7a0>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f76fe5747c0>
+available_sandbox = None
+
+    def test_signed_nonzero_matches_but_cannot_pass(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        argv = _command(exit_code=3)
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv, exit_code=3))
+        status, result = _cli(case, _run_dir(tmp_path), capsys)
+        assert status == 1
+        assert result["signature_verified"] is True
+>       assert result["observed_locally"] is True
+E       assert False is True
+
+tests/test_audit_signed_test_execution.py:274: AssertionError
+______ test_strict_repeat_emits_signable_measured_receipt_without_cli_pin ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/sandbox-red/test_strict_repeat_emits_signa0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f76ff3d9fd0>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f76fe536c50>
+available_sandbox = None
+
+    def test_strict_repeat_emits_signable_measured_receipt_without_cli_pin(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        run = _run_dir(tmp_path)
+        argv = _command()
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv),
+                            input_tree_sha256=test_observation.hash_input_tree(run / "input"))
+        before = (case / "organon.json").read_bytes()
+    
+        status, result = _cli(case, run, capsys, pin=None)
+    
+>       assert status == 0, result
+E       AssertionError: {'artifact_checks': [{'matches': True, 'observed_sha256': '995d363bf46636a72004e6de45f9079e585b242f890f6c4e0af697b7db9...tree_pin': True, ...}, 'declared_argv_sha256': '8d4240fd1b71ce85b0220c04893643564ba5424179e43d617745cce8c5f54b14', ...}
+E       assert 1 == 0
+
+tests/test_audit_signed_test_execution.py:324: AssertionError
+__________ test_strict_failed_execution_still_emits_measured_receipt ___________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/sandbox-red/test_strict_failed_execution_s0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f76ff302cb0>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f76ff407e90>
+available_sandbox = None
+
+    def test_strict_failed_execution_still_emits_measured_receipt(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        run = _run_dir(tmp_path)
+        argv = _command(exit_code=3)
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv, exit_code=3),
+                            input_tree_sha256=test_observation.hash_input_tree(run / "input"))
+        status, result = _cli(case, run, capsys, pin=None)
+    
+        assert status == 1
+>       assert result["observed_locally"] is True
+E       assert False is True
+
+tests/test_audit_signed_test_execution.py:440: AssertionError
+=============================== warnings summary ===============================
+scripts/local_replay_sandbox.py:152
+  /datos/workspaces/personal/SpecOrganon/scripts/local_replay_sandbox.py:152: DeprecationWarning: Due to '_pack_', the '_PathBeneathAttr' Structure will use memory layout compatible with MSVC (Windows). If this is intended, set _layout_ to 'ms'. The implicit default is deprecated and slated to become an error in Python 3.19.
+    class _PathBeneathAttr(ctypes.Structure):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_local_replay_sandbox.py::test_probe_and_allowed_packet_output
+FAILED tests/test_audit_signed_test_execution.py::test_matching_repeat_reads_input_and_hashes_artifact_and_streams
+FAILED tests/test_audit_signed_test_execution.py::test_signed_nonzero_matches_but_cannot_pass
+FAILED tests/test_audit_signed_test_execution.py::test_strict_repeat_emits_signable_measured_receipt_without_cli_pin
+FAILED tests/test_audit_signed_test_execution.py::test_strict_failed_execution_still_emits_measured_receipt
+5 failed, 17 passed, 1 warning in 1.84s

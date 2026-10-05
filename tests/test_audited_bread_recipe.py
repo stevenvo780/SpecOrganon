@@ -9,6 +9,7 @@ import fcntl
 import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 
 import pytest
@@ -20,7 +21,7 @@ from specorganon.ledger import read_project
 ROOT = Path(__file__).resolve().parents[1]
 CLAIMS = ROOT / "cases/bread_development/source_claims.json"
 TABLE = ROOT / "cases/bread_norway/survey_table1.json"
-CLI = ROOT / ".venv/bin/organon"
+CLI = Path(sys.executable).parent / "organon"
 
 
 def _load(path: Path) -> dict:
