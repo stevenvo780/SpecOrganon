@@ -81,3 +81,32 @@ El paquete legible de tres archivos es una copia exacta de la entrega sellada
 en el workspace privado, sin nueva generación ni reejecución. El registro,
 software y protocolo siguen congelados. La instalación final y publicación
 quedan pendientes del cierre de toda la campaña; la goal permanece activa.
+
+
+## Generación fija y candidato de instalación rc2, 2026-10-05
+
+Cinco celdas originales cerradas: T1 completa/eligible; A2 inválida por IDs con
+puntos; N3 excede el límite común de entrega al generar las pruebas; S4 y S5
+exceden el límite de contribución de spec. Se conservan salidas, recibos y
+entregas parciales, sin reintentos ni sustituciones. T6 continúa desde su reloj
+original y ya pasó su ejecución Docker propia; falta su cierre y prueba física.
+No se ejecutó la evaluación reservada ni se atribuye causalidad a esos fallos.
+
+El coordinador73031 terminó antes de una admisión por fallo de lectura de /usage.
+No dejó un native handle pendiente. El coordinador33178 conserva presupuesto y
+ledger; admite la observación CLI de la cuenta original del colector con su
+capturedAt real y antigüedad máxima600s, o una captura directa del mismo perfil.
+No usa cachedAt como fecha de observación, cambia cuenta ni activa polling Codex.
+El respaldo y los fallos de lectura se conservan en el área privada.
+
+En otro checkout, rc2 cambia únicamente la versión y documentación del candidato.
+Build offline sobre imagen fijada y nueva venv: dos wheels idénticos, origen de
+29 módulos verificado,69 controles instalados, CLI15/MCP15 por stdio real con
+fixtures, reanudación tras SIGKILL y PDF20páginas con rechazo de pins incorrectos.
+El kit fuente exportado pasó también69 controles sin montar src. Cinco controles
+de vinculación al checkout se excluyen de ese perfil; no se afirma toda la
+plataforma verde. El primer intento de curar el kit usó dos nombres inexistentes
+de bridge: falló antes de producir el ZIP y se corrigió usando fuentes registradas.
+El paquete final local tiene104entradas más manifest, no contiene perfiles ni el
+registro privado portátil de la campaña. Candidato no publicado ni release final.
+Los306bindings históricos, GOAL original y ledgers CSV/Lot permanecen intactos.
