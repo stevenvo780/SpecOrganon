@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "job_id": "role-03-critique-author",
+  "provider": "codex",
+  "model": "gpt-6.1-sol",
+  "result": {
+    "schema": 1,
+    "manifest": {
+      "schema": 1,
+      "steps": [
+        {
+          "op": "put",
+          "id": "c1",
+          "kind": "concept",
+          "text": "Integridad contractual significa conservar la semantica del flujo recibido: validar cada evento, aplicar una sola vez cada id con contenido identico, rechazar colisiones y saldo insuficiente, y no emitir estados parciales. Es verificable contra reglas de entrada y salida, no definida circularmente como 'lo que haga el programa'. No equivale a verdad del inventario fisico: dos ids distintos pueden describir una misma operacion real y el contrato no permite deducirlo. Idempotencia compara objetos ya validados, ignorando solo el orden de claves; no significa ignorar cualquier repeticion de id.",
+          "refs": [
+            "p1",
+            "a1",
+            "b1"
+          ],
+          "data": {
+            "sources": [
+              "contract.md: Procesamiento y duplicados",
+              "existing-mandate.md"
+            ],
+            "distinction": "Conformidad del flujo frente a exactitud del inventario real."
+          }
+        },
+        {
+          "op": "put",
+          "id": "s1",
+          "kind": "assumption",
+          "text": "El encuadre supone que la identidad declarada por id basta para decidir duplicados dentro del flujo contractual. Es discutible como modelo del dominio: una operacion real podria llegar con ids distintos o un id podria reutilizarse por error. El contrato resuelve solo igualdad de objetos validados y conflicto de contenido, sin autenticar procedencia ni reconstruir intenciones. Esta limitacion justifica evaluar conformidad tecnica, pero no inferir ausencia de doble registro real. Si se exigiera resolver identidad fisica, harian falta datos y otro mandato; no se reparara silenciosamente este flujo para simular esa capacidad.",
+          "refs": [
+            "p1",
+            "a1",
+            "b1",
+            "c1"
+          ],
+          "data": {
+            "assumption": "La identidad de evento es la declarada en el flujo, no una identidad fisica comprobada.",
+            "challenge": "Ids distintos pueden representar una misma operacion real.",
+            "status": "Supuesto de modelado contractual, sin validacion de campo.",
+            "sources": [
+              "contract.md: Procesamiento y duplicados",
+              "existing-mandate.md",
+              "state.json: items/b1 version 1"
+            ]
+          }
+        },
+        {
+          "op": "put",
+          "id": "f1",
+          "kind": "frame_option",
+          "text": "Encuadre de integridad previa a importacion: tratar todo stdin como una unidad y priorizar rechazo explicito sobre aprovechamiento parcial. Favorece trazabilidad, idempotencia y ausencia de resultados parciales ante errores; sacrifica la posibilidad de recuperar automaticamente eventos validos de un lote mixto. Su fundamento es el mandato y la politica contractual, no una medicion de preferencia humana. Es compatible con el alcance actual; la arquitectura que lo implemente queda abierta para compare.",
+          "refs": [
+            "p1",
+            "a1",
+            "b1",
+            "c1",
+            "s1"
+          ],
+          "data": {
+            "value_priority": "Integridad e identificacion explicita de errores.",
+            "tradeoff": "Una entrada con un error no entrega los saldos de sus eventos validos.",
+            "sources": [
+              "contract.md: Procesamiento y duplicados; Salida exacta y recursos",
+              "existing-mandate.md"
+            ]
+          }
+        },
+        {
+          "op": "put",
+          "id": "f2",
+          "kind": "frame_option",
+          "text": "Encuadre rival de recuperacion operativa: importar eventos aprovechables, omitir los defectuosos o reconciliar identidades ambiguas y reportar correcciones. Prioriza continuidad y recuperacion de datos frente a rechazo global; introduce decisiones sobre intencion, identidades y efectos parciales que pueden ocultar errores o cambiar el flujo original. Es distinto del primer encuadre por su unidad de aceptacion y autoridad para modificar datos, no por usar otra biblioteca. Podria plantearse bajo un contrato de reparacion con reglas y autorizacion explicitas, pero contradice el contrato vigente. No se propone adoptarlo ni se afirma que reduzca costes o mejore resultados humanos.",
+          "refs": [
+            "p1",
+            "a1",
+            "b1",
+            "c1",
+            "s1"
+          ],
+          "data": {
+            "value_priority": "Recuperacion de datos y continuidad operativa.",
+            "conflict": "Correccion u omision silenciosa frente a invalidacion total e identidad exacta.",
+            "mandate_fit": "Fuera del mandato vigente; requeriria decision humana y otro alcance.",
+            "sources": [
+              "contract.md: Procesamiento y duplicados",
+              "existing-mandate.md",
+              "state.json: items/b1 version 1"
+            ]
+          }
+        },
+        {
+          "op": "put",
+          "id": "n1",
+          "kind": "norm",
+          "text": "Se propone, para el operador human:owner y su autor tecnico delegado, priorizar integridad e idempotencia del flujo contractual: validar antes de consultar ids, no corregir ni normalizar datos, rechazar todo stdin ante conflicto o insuficiencia y comunicar solamente el error contractual. Se elige normativamente el encuadre f1 porque respeta el mandato documentado; no porque se haya demostrado superioridad frente a f2. La delegacion permite proponer esta norma, pero este artefacto no registra aprobacion humana ni autentica al actor. La conformidad separada permanece pendiente. Si aparece un conflicto normativo no resuelto o se requiere reparacion de datos, detener el avance para decision humana, sin ampliar el mandato. Describir cualquier resultado solo en su poblacion tecnica medida.",
+          "refs": [
+            "p1",
+            "a1",
+            "b1",
+            "c1",
+            "s1",
+            "f1",
+            "f2"
+          ],
+          "data": {
+            "actor": "human:owner",
+            "problem": "p1",
+            "proposed_frame": "f1",
+            "basis": "Mandato delegado de integridad/idempotencia y contrato prospectivo.",
+            "sources": [
+              "existing-mandate.md",
+              "contract.md: Proposito y alcance; Procesamiento y duplicados",
+              "protocol.md: Mandato, roles y separacion",
+              "phase-contract.json: stop_rule"
+            ]
+          }
+        }
+      ]
+    },
+    "files": {},
+    "reason": "Se proponen los cinco artefactos de critique, usando p1, a1 y b1 vigentes en version 1. Se distinguen concepto, supuesto discutible, alternativas con prioridades incompatibles y norma dentro del mandato. No se registra aprobacion, revision, avance ni ejecucion; no se entregan archivos de otras fases."
+  },
+  "native_exit_code": 0,
+  "scope": "captured native result; critique candidate rejected before real ledger writes"
+}

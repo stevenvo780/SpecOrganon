@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "job_id": "role-01-frame-author",
+  "provider": "codex",
+  "model": "gpt-6.1-sol",
+  "result": {
+    "schema": 1,
+    "manifest": {
+      "schema": 1,
+      "steps": [
+        {
+          "op": "put",
+          "id": "p1",
+          "kind": "problem",
+          "text": "La necesidad delegada es conciliar eventos de existencias por lote y ubicaci\u00f3n antes de importar datos, detectando doble aplicaci\u00f3n, conflicto de identidad y saldo insuficiente. Una repetici\u00f3n id\u00e9ntica debe ser idempotente; un evento inv\u00e1lido o un id con contenido distinto debe invalidar toda la entrada sin resultados parciales. Estos son riesgos t\u00e9cnicos definidos por el contrato, no incidentes de campo observados. La formulaci\u00f3n se limita a verificar una CLI local frente a entradas de prueba; no presupone demanda humana, p\u00e9rdidas evitadas ni superioridad sobre otra herramienta.",
+          "refs": [],
+          "data": {
+            "need": "Conciliaci\u00f3n determinista e \u00edntegra de eventos bajo el contrato LotLedger v1.",
+            "affected_actor": "Operador delegado que solicita la entrega t\u00e9cnica verificable.",
+            "sources": [
+              "existing-mandate.md",
+              "contract.md: Prop\u00f3sito y alcance; Procesamiento y duplicados",
+              "protocol.md: Sustancia de fases y evidencia anterior a medir"
+            ],
+            "observation_status": "Necesidad contractual; no da\u00f1o de campo medido."
+          }
+        },
+        {
+          "op": "put",
+          "id": "a1",
+          "kind": "actor",
+          "text": "El actor afectado y delegante es el operador identificado declarativamente como human:owner en el contexto local. Su inter\u00e9s documentado es recibir software aut\u00f3nomo reproducible y verificable dentro del mandato. Codex act\u00faa como autor t\u00e9cnico delegado: elegir contrato o arquitectura dentro del alcance no implica que el operador los haya elegido personalmente. El revisor separado y el controlador tienen funciones de revisi\u00f3n y registro; este artefacto no autentica identidades, registra aprobaci\u00f3n ni atribuye necesidades a usuarios o comunidades no documentados.",
+          "refs": [
+            "p1"
+          ],
+          "data": {
+            "actor": "human:owner",
+            "role": "Operador delegante y destinatario de la entrega t\u00e9cnica.",
+            "delegated_actor": "Codex, autor t\u00e9cnico dentro del mandato suministrado.",
+            "identity_trust": "local_declared",
+            "sources": [
+              "existing-mandate.md",
+              "protocol.md: Mandato, roles y separaci\u00f3n",
+              "state.json: project; approval_identity_authenticated"
+            ]
+          }
+        },
+        {
+          "op": "put",
+          "id": "b1",
+          "kind": "boundary",
+          "text": "El caso es exclusivamente lotledger-delivery-v1: una CLI Python 3.12 de biblioteca est\u00e1ndar que recibe JSONL por stdin y concilia existencias por pares exactos (lot, site), sin datos de personas, red ni efectos externos. La observaci\u00f3n pertinente ser\u00e1 el comportamiento t\u00e9cnico de la entrega ante entradas contractuales, sus errores y documentaci\u00f3n. Las seis assertions SQL p\u00fablicas s\u00f3lo describen primitivas SQLite sobre fixtures sint\u00e9ticos; no miden LotLedger ni constituyen su baseline. Se excluyen utilidad humana, eficacia alimentaria, reducci\u00f3n de p\u00e9rdidas, seguridad universal y superioridad metodol\u00f3gica. Como formulaciones rivales, la reparaci\u00f3n silenciosa privilegiar\u00eda importar datos incompletos y la gesti\u00f3n de inventario de campo exigir\u00eda evidencia de usuarios y operaciones reales; ambas exceden este contrato, que exige rechazo \u00edntegro e idempotencia. La elecci\u00f3n entre implementaciones, incluida SQLite con una capa contractual, queda para compare. No hay resultados de ejecuci\u00f3n de la entrega ni conformidad completa demostrada en este snapshot. Una sola identidad conserva su resultado aunque falle, sin ampliar l\u00edmites ni ajustar reservados tras observar respuestas.",
+          "refs": [
+            "p1",
+            "a1"
+          ],
+          "data": {
+            "scope": "Conciliaci\u00f3n t\u00e9cnica local conforme al contrato prospectivo LotLedger v1.",
+            "observation_limit": "Entradas sint\u00e9ticas y comportamiento contractual; sin extrapolaci\u00f3n a poblaci\u00f3n humana.",
+            "excluded_claims": [
+              "Beneficio de campo",
+              "Comparaci\u00f3n causal",
+              "Baseline de conformidad completa inventada",
+              "Elecci\u00f3n personal del operador",
+              "Aprobaci\u00f3n o aceptaci\u00f3n de fase"
+            ],
+            "sources": [
+              "contract.md: Interfaz y entrada; Procesamiento y duplicados; Salida exacta y recursos",
+              "existing-mandate.md",
+              "protocol.md: Sustancia de fases y evidencia anterior a medir; Congelaci\u00f3n y l\u00edmites",
+              "public-evidence.md",
+              "public-sqlite-observations.json: scope; observations.population",
+              "measured-test-records.json"
+            ]
+          }
+        }
+      ]
+    },
+    "files": {},
+    "reason": "Se proponen \u00fanicamente problema, actor y frontera de frame, trazados a los documentos suministrados. El estado actual no contiene antecedentes que referenciar. Se explicitan necesidad contractual, delegaci\u00f3n declarativa, formulaciones rivales y l\u00edmites de observaci\u00f3n, sin registrar ejecuci\u00f3n, aprobaci\u00f3n ni avance."
+  },
+  "native_exit_code": 0,
+  "scope": "captured native result; critique candidate rejected before real ledger writes"
+}
