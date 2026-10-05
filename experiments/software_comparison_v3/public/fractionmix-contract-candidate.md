@@ -2,7 +2,7 @@
 
 Tarea ya seleccionada en el protocolo v3. Este documento fija su interfaz candidata;
 no es un registro aceptado, un programa generado ni una evaluación realizada.
-Se revisará junto con sus sesenta recetas antes de admitir cualquier celda v3.
+Se revisará junto con sus 84 recetas antes de admitir cualquier celda v3.
 La tarea será idéntica para N, S, T y A y para las dos familias de modelos.
 
 ## Propósito y entrega
@@ -100,6 +100,8 @@ para ambos ejemplos con sus resultados; error exacto; límites de bytes/término
 enteros/recursos; suma exacta/reducción/cero/duplicados; tests reproducibles y alcance.
 Tests propios usan el intérprete absoluto fijado y casos de éxito, error y bordes.
 Sus recibos los crea el ejecutor externo; el autor no inventa ejecución ni resultados
-reservados. Las sesenta recetas reservadas se medirán después del cierre de entrega,
+reservados. Las 84 recetas reservadas se medirán después del cierre de entrega,
 sin feedback para corregir el programa. Este contrato no suministra implementación,
 argumentos de nueve fases ni evidencia inventada de eficacia.
+
+Matriz candidata: 84 recetas, incluidas dos re-mediciones de ejemplos públicos; 82 entradas reservadas. Conteo ampliado antes de0generaciones; sin garantía de cobertura universal.

@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "classification": "native text source review, not tests run by reviewer or registration acceptance",
+  "job_id": "4ada71e7e24b475eb0df2098d07adfb1",
+  "status": "succeeded",
+  "submitted_at": 1791216780.2621086,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "gemini/3.8-flash",
+  "access": "text",
+  "codex_account": null,
+  "started_at": 1791216780.2626474,
+  "finished_at": 1791216831.2144206,
+  "meta": {
+    "agy_model": "Gemini 3.8 Flash (Medium)",
+    "provider": "gemini",
+    "model": "gemini/3.8-flash",
+    "access": "text",
+    "cwd": "/home/stev/.codex/worktrees/comparison-v3-budget/SpecOrganon",
+    "duration_s": 51,
+    "depth": 0
+  },
+  "review": {
+    "verdict": "accept",
+    "evaluator_sources_ready": true,
+    "comparison_registration_ready": false,
+    "findings": [],
+    "oracle_audit": "Audit of all 250 generator-defined recipes (84 FractionMix, 82 PolicyPick, 84 ListPatch; 2 public per task, 82/80/82 hidden) completed against the exact task contracts. In FractionMix, all rational additions are exact, reductions by GCD are verified, zero returns exact 0/1, and the 7331-digit coprime power test agrees with the independent common denominator product without triggering CPython's 4300-digit limit. In PolicyPick, literal string handling, 64-byte UTF-8 boundaries, surrogate/control character rejections, literal Unicode code point tie-breaking, set subset semantics, tag deduplication, and late invalid rule atomicity are rigorously exercised. In ListPatch, 1-based/0-based bounds, atomic sequential updates, transient length-1001 overflow rejections, invalid op forms, delete property restrictions, and negative-zero integer handling match specifications. The output parser uses JsonInteger lexemes via custom parse_int, decoupled from global int conversion limits, rejects duplicate keys via unique_pairs, and rejects non-finite/floating constants. Subjects run hermetically with network=none, read-only delivery mounts, cap-drop=ALL, no-new-privileges, 3s execution limits, and persistent JobStore journals preventing replay or silent restart. Stdin ordering finite observer trace verification correctly tracks syscalls without asserting authority over captured streams.",
+    "rationale": "The supplied evaluator and oracle sources (reserved.py, subjects.py, tests, and task contracts) satisfy all scoping requirements: complete source coverage without omitted-code hashes, deterministic pre-selected recipe counts totaling exactly 250, strict type and boundary validations, complete decoupling from delivery authors, and robust isolation mechanisms. Readiness is strictly scoped to the evaluator/oracle subsystem; comparison registration readiness remains false pending full campaign harness freeze, sequence preregistration, and completion of the required 9-phase delivery milestone.",
+    "tests_executed": false
+  }
+}

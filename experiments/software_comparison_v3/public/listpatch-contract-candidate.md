@@ -1,7 +1,7 @@
 # ListPatch — contrato candidato, no registrado
 
 Tarea seleccionada antes del resultado de LotLedger. No hay programa generado ni
-celda comparativa admitida. Faltan revisión conjunta con60 recetas, rubricas,
+celda comparativa admitida. Faltan revisión conjunta con84 recetas, rubricas,
 transportes y análisis definitivos antes de congelar y generar.
 
 Entregar listpatch.py para Python3.12 sólo stdlib. Invocación sin argumentos:
@@ -45,6 +45,8 @@ README: instalación, interfaz, dos ejemplos con comandos completos, error exact
 todos los límites, semántica secuencial/atomicidad y tests ejecutables con alcance.
 
 Sujetos3s/2CPU/1GiB/128pids, red none, entrega readonly, sin perfiles/oráculos,
-2MiB/stream. F60 reservadas,D8,G6 y adherencia propia de cada método se registrarán
+2MiB/stream. F84 del evaluador,D8,G6 y adherencia propia de cada método se registrarán
 antes de autores. Es una transformación local de listas, sin evidencia de eficacia
 de un editor real ni superioridad universal. Tokens/dinero desconocidos explícitos.
+
+Matriz candidata: 84 recetas, incluidas dos re-mediciones de ejemplos públicos; 82 entradas reservadas. Conteo ampliado antes de0generaciones; sin garantía de cobertura universal.

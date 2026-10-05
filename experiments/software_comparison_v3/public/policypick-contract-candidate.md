@@ -1,7 +1,7 @@
 # PolicyPick — contrato candidato, no registrado
 
 Tarea seleccionada antes del resultado de LotLedger. No se ha generado un programa,
-ni admitido una celda comparativa. Este texto debe revisarse junto con las60 recetas,
+ni admitido una celda comparativa. Este texto debe revisarse junto con las82 recetas,
 rubricas, transportes y análisis definitivos antes del freeze.
 
 Entregar policypick.py para Python3.12, sólo stdlib. Invocación sin argumentos:
@@ -43,6 +43,8 @@ Ambos ejemplos exigen comandos completos en README, además de instalación,
 interfaz, error, límites, semántica literal/empates y tests ejecutables con alcance.
 
 Sujetos:3s/2CPU/1GiB/128pids, red none, entrega readonly, sin credenciales ni oráculos,
-2MiB por stream. F60 recetas reservadas, D8, G6 y adherencia por método se fijarán
+2MiB por stream. F82 recetas del evaluador, D8, G6 y adherencia por método se fijarán
 antes de autores. Este contrato define semántica local, no eficacia en control de
 acceso real ni cumplimiento legal. Valores/tokens/dinero desconocidos explícitos.
+
+Matriz candidata: 82 recetas, incluidas dos re-mediciones de ejemplos públicos; 80 entradas reservadas. Conteo ampliado antes de0generaciones; sin garantía de cobertura universal.

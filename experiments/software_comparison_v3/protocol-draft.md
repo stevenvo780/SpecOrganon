@@ -23,10 +23,10 @@ Tres familias propuestas, un contrato por familia para todos los métodos/modelo
 | ListPatch | edición de secuencias | Aplicar insert/replace/delete en índices del estado vigente; resultado atómico y errores por índice/tipo |
 
 La tabla selecciona ámbitos, no contratos completos ni oráculos. Contratos exactos,
-2ejemplos públicos y60recetas por tarea se fijarán y revisarán antes de la primera
+2ejemplos públicos y matrices de84/82/84recetas por tarea se fijarán y revisarán antes de la primera
 celda. Si un contrato no supera revisión de diseño, no generar ni cambiar su nombre
 para ocultar fracaso. No cambiar la selección a partir de resultados LotLedger.
-Sesenta recetas = cobertura determinista finita, sin garantía de equivalencia de
+Cada matriz es cobertura determinista finita, sin garantía de equivalencia de
 dificultad. Normalizar proporciones dentro de tarea y dar igual peso a cada tarea.
 Las recetas no son repeticiones independientes ni unidades de inferencia estadística.
 
@@ -97,7 +97,8 @@ sin método/ledger/modelo. El auditor de adherencia ve artefactos/historia y no 
 llama ciego. La matriz y mapping IDs se custodian fuera del snapshot de sujetos.
 
 Métricas separadas, sin un total que compense ausencia de método por código:
-F=recetas pasadas/60 y conformidad completa60/60; D=checklist8/8 específico del
+F=recetas pasadas/denominador propio (84FractionMix,82PolicyPick,84ListPatch),
+y conformidad completa exige todas las recetas; D=checklist8/8 específico del
 contrato; G=requisitos comunes de grounding/criterios previos/trazas/pruebas/alcance,
 checklist6; H=adherencia específica a guía (N no tiene guía impuesta, no tratarlo
 como fallo por omitir9fases). Para T, H exige9fases vigentes con revisión independiente;
@@ -106,7 +107,7 @@ retirados; para S exige sus5etapas/trazas. Las rúbricas completas se congelan.
 Veredicto full_package por celda exige F,D,G,H aplicables; publicar código que
 pase con método incompleto como tal. Revisión de forma no sustituye sustancia.
 
-Faltantes: programa ausente/contrato incorrecto =0/60; evidencia/doc/guía ausentes
+Faltantes: programa ausente/contrato incorrecto =0/denominador propio; evidencia/doc/guía ausentes
 =0en punto aplicable. Infraestructura desconocida se conserva inconclusa y se
 presenta rango descriptivo mínimo-máximo posible, sin imputarla como pass.
 No iniciada se distingue de fallida, manteniendo denominador de diseño42;
@@ -115,7 +116,7 @@ seleccionar mejor repetición ni reiniciar con nuevo seed/tarea para ganar.
 
 Mostrar cada celda y los12bloques pareados N/S/T; diferencias T-N y T-S dentro
 de bloque, media/mediana/rango sobre esos12 y estratos tarea/familia.6pares T-A.
-No contar60recetas como60réplicas. Con2repeticiones/estrato no se hacen afirmaciones
+No contar recetas como réplicas de autores. Con2repeticiones/estrato no se hacen afirmaciones
 confirmatorias de significancia ni eficacia general; registrar incertidumbre de
 variabilidad/selección/corpus/modelo y límites de extrapolación. Uso nativo exacto
 cuando esté declarado, otherwise null; nunca tokens inferidos de bytes ni coste
@@ -150,4 +151,48 @@ los controles de contexto máximo sin aumentar110000bytes de request/128000rende
 La revisión conjunta definitiva debe verificar también el orden de hitos de la
 goal: entrega nueva real de9fases antes de la evaluación comparativa. Este borrador
 no autoriza un caso de sustitución para perseguir victoria ni iniciar42generaciones
-antes de resolver ese orden. Los contratos/oráculos pueden prepararse sin autores.
+antes de resolver ese orden. Los contratos/oráculos pueden prepararse sin autores. La regla candidata de secuencia siguiente precisa ese orden sin agregar casos.
+
+## Matrices definitivas candidatas antes de outputs
+
+La propuesta60/tarea se amplía antes de cualquier generación a84FractionMix,
+82PolicyPick y84ListPatch,250recetas. Se conserva el inventario completo de bordes
+independientes en vez de agrupar errores o retirar entradas para ajustarlo a80.
+No cambia selección/orden de42celdas ni budgets de autores. Cada matriz incluye
+2ejemplos públicos y82/80/82entradas reservadas; denominadores84/82/84 incluyen
+también las dos re-mediciones públicas. Puntuar dentro de tarea, dar igual peso
+a cada tarea y publicar esa composición. Nunca afirmar84réplicas independientes.
+Las matrices aún requieren revisión conjunta y freeze antes de autores.
+
+## Hito9fases dentro del orden prefijado: candidato sujeto a freeze
+
+El primerT de block01(FractionMix/Codex/r1) está fijado antes de observar outputs
+por el scheduler731. Se declara candidato PRIMARIO del hito de ingeniería y
+también celda comparativa: no recibe llamada/presupuesto/feedback/oráculo extra.
+La regla de candidatura/hito se registrará con el mapping privado ya generado;
+no se designa otra celda primaria tras observar éxito/fracaso. Todas las42celdas
+se generan en el orden existente y se llevan a estado terminal, independientemente
+de éxito, sin cambios de fuente, reinicios, nuevas tareas o seeds en campaña.
+
+La goal exige completar9fases antes de EVALUAR; generar y evaluar son operaciones
+separadas. La evaluación funcional reservada queda globalmente retenida hasta
+que estén cerradas las42generaciones y exista al menos una celda T de esta MISMA
+cohorte con9aceptadas vigentes, revisiones técnicas nativas separadas, alternativas
+sustantivas, trazas, tests aislados/recibos y documentación/criterios comprobados
+antes de cualquier feedback reservado. Si primaria falla, su fila adversa queda
+siempre; el conjunto de todasT prefijadas define elegibilidad del hito secundario,
+sin elegir qué ejecutar según resultados ni detenerse al lograr victoria. Informe
+separará primaria/elegibles y todas42filas, sin seleccionar mejor repetición.
+
+Si ceroT satisface9al cerrar la generación de42, preservar todas las entregas y
+clasificar evaluación de42filas como not_evaluated_by_prerequisite. No imputar0F
+como si se hubieran ejecutado sujetos, ni comunicar campaña/goal completas ni
+superioridad. Publicar alcance incompleto y mantenergoal pendiente; sin reintentos
+o cohortes adicionales automáticas. Si hay hito verificable, habilitar UNA vez
+las evaluaciones finales de todas42, incluida primaria fallida, con snapshots
+terminales y mismos oráculos. Ningún resultado reservado reabre una entrega.
+
+Revisión de diseño Gemini3.8Flash-secuencia01 aceptó esta interpretación con
+condiciones: candidatura/dualrol/contingencia deben estar preregistrados, sin
+privilegios o filtrado, y nunca éxito por controles sintéticos. No es aceptación
+de recetas, harnesses, registro, entrega9/9 o evaluación ya realizada.

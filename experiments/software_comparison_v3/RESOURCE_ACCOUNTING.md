@@ -38,8 +38,10 @@ Los contratos candidatos FractionMix/PolicyPick/ListPatch se precisaron tras
 revisión de diseño Gemini3.8Flash. La prueba aritmética independiente en Docker
 confirma una entrada válida de38836bytes/1000 términos con denominador7331dígitos:
 la conversión predeterminada4300 falla y ambas formas de suma exacta concuerdan.
-Es un diagnóstico de dominio/entorno, no un programa entregado o una receta F60
-evaluada. Faltan180recetas, harnesses/rubricas/análisis y revisión/registro conjunto.
+Es un diagnóstico de dominio/entorno, no un programa entregado o una evaluación
+de la cohorte. El candidato posterior contiene250recetas y un evaluador revisado
+por Gemini. Faltan los harnesses N/S/T/A, la verificación de procedencia de las
+rúbricas y la revisión/registro conjunto; véase EVALUATOR_STATUS.md.
 
 La selección de tareas/orden anterior a outputs sigue fija; no se ha generado una
 celda. Antes de generar debe resolverse también la secuencia del objetivo: una
