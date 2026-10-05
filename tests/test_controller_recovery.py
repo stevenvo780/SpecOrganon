@@ -81,12 +81,13 @@ def test_sigkill_after_actual_role_receipt_before_puts_reuses_job_and_applies_on
         if child.poll() is None: os.killpg(child.pid, signal.SIGKILL); child.wait(timeout=5)
 
 
-@pytest.mark.parametrize('operation', ['run_manifest', 'review_phase', 'advance'])
+@pytest.mark.parametrize('operation', ['put_item', 'run_manifest', 'review_phase', 'advance'])
 def test_sigkill_after_engine_mutation_before_progress_commit_resumes_once(tmp_path, operation):
     case = tmp_path / 'case'; root = tmp_path / 'run'
     engine.create_case(case, 'Synthetic post-mutation recovery', 'development', 'human:owner', approval_policy='local')
     ctrl = construct(case, root)
-    if operation != 'run_manifest': ctrl.step()
+    author_operation = operation in {'put_item', 'run_manifest'}
+    if not author_operation: ctrl.step()
     target = 'controller' if operation == 'run_manifest' else 'controller.engine'
     code = (f'import sys, os, signal\nfrom pathlib import Path\nsys.path.insert(0, {str(Path(__file__).parent)!r})\n'
             'from test_controller_recovery import construct\nimport specorganon.software_controller as controller\n'
@@ -102,13 +103,40 @@ def test_sigkill_after_engine_mutation_before_progress_commit_resumes_once(tmp_p
         _, stderr = child.communicate(timeout=20)
         assert child.returncode == -signal.SIGKILL, stderr.decode(errors='replace')
         assert _json(root / 'controller/progress.json')['pending']['status'] == 'applying'
+        if operation == 'put_item': assert engine.get_state(case)['revision'] == 1
         invocations = (root / 'transport/invocations.txt').read_text()
         result = ctrl.step()
         state = engine.get_state(case)
         assert (root / 'transport/invocations.txt').read_text() == invocations
-        assert state['revision'] == (3 if operation == 'run_manifest' else 5)
-        assert result['action'] == ('author' if operation == 'run_manifest' else 'review')
-        assert len(_json(root / 'controller/progress.json')['history']) == (1 if operation == 'run_manifest' else 2)
-        assert state['phases']['frame']['accepted'] is (operation != 'run_manifest')
+        assert state['revision'] == (3 if author_operation else 5)
+        assert result['action'] == ('author' if author_operation else 'review')
+        assert len(_json(root / 'controller/progress.json')['history']) == (1 if author_operation else 2)
+        assert state['phases']['frame']['accepted'] is (not author_operation)
+    finally:
+        if child.poll() is None: os.killpg(child.pid, signal.SIGKILL); child.wait(timeout=5)
+
+
+def test_sigkill_during_file_rename_leaves_delivery_readable_and_write_resumable(tmp_path):
+    case = tmp_path / 'case'; root = tmp_path / 'run'
+    engine.create_case(case, 'Synthetic atomic file interruption', 'development', 'human:owner', approval_policy='local')
+    code = (f'import sys, os, signal\nfrom pathlib import Path\nsys.path.insert(0, {str(Path(__file__).parent)!r})\n'
+            'from test_controller_recovery import construct\n'
+            f'c=construct(Path({str(case)!r}),Path({str(root)!r}))\n'
+            'original=os.replace\n'
+            'def interrupted(source,target,*args,**kwargs):\n'
+            '    if Path(target).name == "probe.py": os.kill(os.getpid(),signal.SIGKILL)\n'
+            '    return original(source,target,*args,**kwargs)\n'
+            'os.replace=interrupted\n'
+            'c._write_files({"source_files":{}},{"probe.py":"print(123)\\n"})\n')
+    child = subprocess.Popen([sys.executable, '-c', code], stdin=subprocess.DEVNULL,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
+    try:
+        _, stderr = child.communicate(timeout=20)
+        assert child.returncode == -signal.SIGKILL, stderr.decode(errors='replace')
+        ctrl = construct(case, root)
+        assert ctrl._files() == {}
+        ctrl._write_files({'source_files': {}}, {'probe.py': 'print(123)\n'})
+        assert ctrl._files() == {'probe.py': 'print(123)\n'}
+        assert engine.get_state(case)['revision'] == 0
     finally:
         if child.poll() is None: os.killpg(child.pid, signal.SIGKILL); child.wait(timeout=5)

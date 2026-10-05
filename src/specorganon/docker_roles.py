@@ -261,13 +261,15 @@ class DockerRoles:
             _write(folder / 'measured-test.json', result)
             return result
 
-    def verify_test(self, data, files, *, require_passed=True):
+    def verify_test(self, data, files, *, require_passed=True, require_current=True):
         path = _safe(data['test_job_ref'])
         if path.parent.parent != self.store.root: raise DockerRoleError('test receipt lies outside this private journal')
         job_id = path.parent.name; receipt = _json(path); actual = _json(self.root / 'jobs' / job_id / 'measured-test.json')
         terminal = _json(self.root / 'jobs' / job_id / 'terminal-container.json')
         self.store._validate_receipt(path.parent, job_id, receipt)
-        if (actual['delivery_tree_sha256'] != digest(canonical(files)) or actual['subject_argv'] != data['argv']
+        if ((require_current and actual['delivery_tree_sha256'] != digest(canonical(files)))
+                or data.get('delivery_tree_sha256', actual['delivery_tree_sha256']) != actual['delivery_tree_sha256']
+                or actual['subject_argv'] != data['argv']
                 or (require_passed and actual['passed'] is not True) or actual['test_job_ref'] != str(path)
                 or actual['attachment_exit_code'] != receipt['exit_code'] or actual['exit_code'] != terminal['exit_code']
                 or any(actual[k] != receipt[k] for k in ('timed_out', 'stdout_sha256', 'stderr_sha256'))):

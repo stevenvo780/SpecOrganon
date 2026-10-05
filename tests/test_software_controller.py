@@ -31,6 +31,20 @@ def controller(tmp_path, transport):
                       mandate='Synthetic local owner mandate for guard tests', fixture_mode=True)
 
 
+def test_new_review_contract_does_not_silently_resume_old_run(tmp_path):
+    transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport)
+    ctrl.step()
+    policy_path = ctrl.root / 'controller.json'
+    from specorganon.role_jobs import _json
+    policy = _json(policy_path); policy['schema'] = 2; _write(policy_path, policy)
+    before = (ctrl.case / 'organon.json').read_bytes()
+    with pytest.raises(ControllerError, match='versioned run'):
+        Controller(ctrl.case, ctrl.root, transport, contract=ctrl.contract,
+                   mandate=ctrl.mandate, fixture_mode=True)
+    assert (ctrl.case / 'organon.json').read_bytes() == before
+    assert transport.calls == [('role-01-frame-author', 'author')]
+
+
 def test_author_puts_are_guarded_and_phase_requires_another_real_role(tmp_path):
     transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport)
     result = ctrl.step()
@@ -104,7 +118,8 @@ def test_no_replacement_review_when_author_changes_nothing_after_rejection(tmp_p
     assert not engine.get_state(ctrl.case)['phases']['frame']['accepted']
 
 
-def test_failed_test_needs_changed_author_work_before_bounded_second_measurement(tmp_path, monkeypatch):
+@pytest.mark.parametrize('repair', ['code', 'readme_only'])
+def test_failed_test_needs_changed_author_work_before_bounded_second_measurement(tmp_path, monkeypatch, repair):
     transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport)
     engine.put_item(ctrl.case, 't1', 'test', 'Synthetic process exit criterion', [],
                     {'argv': ['/usr/bin/python3', '-c', 'raise SystemExit(1)']}, 'agent:synthetic',
@@ -130,8 +145,15 @@ def test_failed_test_needs_changed_author_work_before_bounded_second_measurement
         {'op': 'put', 'id': 't1', 'kind': 'test', 'text': 'Repaired synthetic exit criterion', 'refs': [],
          'data': {'argv': ['/usr/bin/python3', '-c', 'raise SystemExit(0)']}}]},
         'files': {'probe.py': 'raise SystemExit(0)\n'}, 'reason': 'Synthetic engineering repair after measured exit1'}
+    if repair == 'readme_only':
+        transport.result['files'] = {'README.md': 'Documentation-only change after failure'}
+        transport.result['manifest']['steps'][0]['data']['argv'] = ['/usr/bin/python3', '-c', 'raise SystemExit(1)']
     assert ctrl.step()['action'] == 'author'
     assert len(ctrl.executor.calls) == 1
+    if repair == 'readme_only':
+        with pytest.raises(ControllerError, match='material|budget'): ctrl.step()
+        assert len(ctrl.executor.calls) == 1
+        return
     assert ctrl.step()['passed'] is True
     assert len(ctrl.executor.calls) == 2
     with pytest.raises(ControllerError, match='budget'): ctrl.step()

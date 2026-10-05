@@ -1,0 +1,151 @@
+{
+  "events": [
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-05T02:59:29+00:00",
+      "hash": "1b34cdad41e39cd6e57ef176e0197c0eb1f5f248b1082109084f09b497767cd9",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "affected": [
+            "Operadores que inspeccionan archivos JSONL de cierres",
+            "Revisores técnicos que interpretan los resúmenes"
+          ],
+          "limits": "Identificación funcional basada en el encargo; no se aportan entrevistas ni observaciones de uso.",
+          "mandating_actor": "Dueño del encargo existente",
+          "sources": [
+            {
+              "locator": "Comportamiento público",
+              "source": "contract.md"
+            },
+            {
+              "locator": "Mandato y elección técnica delegada",
+              "source": "existing-mandate.md"
+            }
+          ]
+        },
+        "deps": {},
+        "id": "loglens_actor",
+        "kind": "actor",
+        "text": "Los afectados son quienes inspeccionan cierres JSONL de trabajos y los revisores técnicos que necesitan distinguir los rótulos declarados de un juicio semántico. El dueño es el mandante del proyecto acotado; la elección técnica de LogLens está delegada, no consta como elección personal del dueño. Estos actores necesitan conteos reproducibles y errores explícitos para evitar interpretar duplicados, conflictos o entradas incompletas como un resumen válido.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-05T02:59:29+00:00",
+      "hash": "b64c1d2613dd07240f508826f8a38a8d190d28e84ed139fd080e858ef1980e7c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "need": "Resumen reproducible de registros válidos y únicos con errores explícitos y sin inferencias de calidad.",
+          "observational_status": "Necesidad y riesgos formulados a partir del encargo; no hay código, pruebas ejecutadas ni mediciones suministradas.",
+          "potential_harms": [
+            "Inflar conteos por cierres duplicados",
+            "Ocultar conflictos entre registros del mismo ID",
+            "Presentar información parcial como procesamiento completo",
+            "Confundir estados declarados con aceptación del trabajo"
+          ],
+          "rival_formulations": [
+            {
+              "formulation": "Contar líneas y agruparlas por estado.",
+              "limitation": "No representa trabajos únicos ni resuelve la necesidad de rechazar conflictos e entradas inválidas."
+            },
+            {
+              "formulation": "Determinar qué trabajos son semánticamente aceptables.",
+              "limitation": "Los tres campos declarados no aportan evidencia suficiente para ese juicio; corresponde a una revisión separada."
+            }
+          ],
+          "sources": [
+            {
+              "locator": "Comportamiento público y Criterios antes de implementar o medir",
+              "source": "contract.md"
+            },
+            {
+              "locator": "Conservar fallos y resultados inconclusos",
+              "source": "existing-mandate.md"
+            }
+          ]
+        },
+        "deps": {
+          "loglens_actor": 1
+        },
+        "id": "loglens_problem",
+        "kind": "problem",
+        "text": "Se necesita inspeccionar archivos JSONL de cierres mediante un resumen exacto de trabajos únicos, roles y estados declarados, sin convertir success o un exit=0 en aceptación semántica. Contar dos veces un cierre idéntico, resolver arbitrariamente un ID conflictivo o emitir un resumen parcial ante una entrada inválida podría inducir interpretaciones incorrectas. Estos son riesgos prospectivos que motivan el contrato, no fallos observados de una entrega. El problema se delimita a la fidelidad del resumen y al rechazo explícito conforme al contrato público de LogLens.",
+        "version": 1
+      },
+      "prev_hash": "1b34cdad41e39cd6e57ef176e0197c0eb1f5f248b1082109084f09b497767cd9",
+      "seq": 2
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-05T02:59:29+00:00",
+      "hash": "f98ccf9c8ca204c61d5b1a23602e5855fd7a2a9194c1d0f6c3183b38a06f66b4",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "excluded": [
+            "Autenticación de ejecuciones o identidad de autores y revisores",
+            "Lectura de credenciales, cambio de cuentas o servicios nuevos",
+            "Aceptación semántica deducida de role, status o exit=0",
+            "Comparación N/S/T, ablación, release y publicación como resultados de esta fase",
+            "Alteración del GOAL raíz, piloto backup o treinta inputs congelados",
+            "Conclusiones causales, superioridad comparativa o eficacia alimentaria de campo"
+          ],
+          "included": [
+            "Comando público python loglens.py INPUT.jsonl y opción --help",
+            "Objetos con exactamente job_id, role y status y los dominios fijados por el contrato",
+            "UTF-8, CRLF, última línea sin salto y archivo vacío",
+            "Deduplicación de cierres idénticos y rechazo de conflictos",
+            "Resumen completo con schema=1, unique_jobs, duplicate_records, by_status y by_role",
+            "Rechazo de claves repetidas, no finitos, tipos o campos inválidos, líneas vacías, BOM y problemas de lectura",
+            "Máximo de 1 MiB por archivo y 10000 registros, con lectura acotada",
+            "Entrada conservada y ausencia de resumen parcial ante errores"
+          ],
+          "observation_limit": "No existen mediciones aportadas. Las fuentes documentales describen formatos y API; no son resultados de LogLens.",
+          "sources": [
+            {
+              "locator": "Comportamiento público, Criterios antes de implementar o medir y Fuentes accesibles y límites de su uso",
+              "source": "contract.md"
+            },
+            {
+              "locator": "Alcance autorizado",
+              "source": "existing-mandate.md"
+            },
+            {
+              "locator": "exit_rule, review y stop_rule",
+              "source": "phase-contract.json"
+            }
+          ],
+          "stop_conditions": [
+            "Detener si no puede mantenerse esta delimitación técnica.",
+            "Detener si aparece un actor afectado decisivo cuya necesidad no está representada."
+          ]
+        },
+        "deps": {
+          "loglens_actor": 1,
+          "loglens_problem": 1
+        },
+        "id": "loglens_boundary",
+        "kind": "boundary",
+        "text": "La unidad de observación será una invocación local de la CLI sobre un archivo JSONL y sus salidas, código de terminación y conservación de la entrada. El alcance técnico es Python 3.12 con biblioteca estándar, en carpeta limpia y sin imports de SpecOrganon. El contrato delimita esquema, codificación, duplicados, conflictos, errores, ayuda y límites de lectura. Las futuras pruebas podrán demostrar comportamiento técnico en los casos examinados; no autenticarán trabajos, evaluarán su calidad semántica ni demostrarán superioridad metodológica o beneficio de campo. En esta fase sólo se formula el problema: no se implementa, mide, aprueba ni avanza.",
+        "version": 1
+      },
+      "prev_hash": "b64c1d2613dd07240f508826f8a38a8d190d28e84ed139fd080e858ef1980e7c",
+      "seq": 3
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "b363f529-c662-4c97-bfd7-af4ddf2bccef",
+    "created_at": "2026-10-05T02:58:39+00:00",
+    "created_by": "human:owner",
+    "domain": "development",
+    "test_gate_policy": "local_report",
+    "title": "LogLens: resumen JSONL sin confundir cierre y aceptación"
+  },
+  "schema": 1
+}

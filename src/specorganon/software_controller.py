@@ -61,6 +61,13 @@ def fingerprint(state):
     return digest(canonical(state))
 
 
+def executable_fingerprint(files, argv):
+    # This bounded Python delivery contract permits a second execution after
+    # changing executable bytes/argv, not after cosmetic documentation edits.
+    return digest(canonical({'argv': argv, 'python_files': {
+        name: text for name, text in files.items() if name.endswith('.py')}}))
+
+
 def safe_file(name):
     if (type(name) is not str or len(name) > 200 or not name
             or any(part.startswith('.') or re.fullmatch(r'[A-Za-z0-9_-][A-Za-z0-9_.-]*', part) is None
@@ -87,7 +94,7 @@ class Controller:
             raise ControllerError('private owned run root required')
         self.delivery = self.root / 'delivery'; self.delivery.mkdir(mode=0o700, exist_ok=True)
         self.contract = contract; self.mandate = mandate
-        policy = {'schema': 1, 'case': str(self.case), 'project_sha256': state['project_sha256'],
+        policy = {'schema': 3, 'case': str(self.case), 'project_sha256': state['project_sha256'],
                   'contract': contract, 'mandate': mandate, 'fixture_mode': fixture_mode,
                   'max_author_per_phase': 2, 'max_review_per_phase': 2, 'max_role_calls': 40}
         with self._lock():
@@ -122,8 +129,12 @@ class Controller:
             'Author may propose norm/decision within existing mandate; may not approve, review, advance or supply passed/receipt. '
             'A test draft contains explicit argv/command but no execution result. '
             'Only build/repair-build may supply program/test/README files. Study may include documentary evidence needed by indicator. '
-            'A reviewer returns schema=1, verdict accept/reject/inconclusive, reason, findings, tests_executed=false. '
-            'For approval judgment also return mandate_conformity=true/false and approval_targets listing exactly the supplied IDs. '
+            'A reviewer returns schema=1, verdict accept/reject/inconclusive, a nonempty reason string, '
+            'findings as an array of nonempty JSON objects (never strings), and tests_executed=false. '
+            'Use findings=[] when there are no actionable findings. Each finding should identify the artifact/file, '
+            'the problem and a concrete correction; descriptive praise belongs in reason. '
+            'Only when action.txt is approval, also return mandate_conformity=true/false and approval_targets '
+            'listing exactly the supplied IDs. Ordinary phase reviews do not approve owner mandate targets. '
             'Judge semantic substance, source scope, alternatives, traceability, pertinent tests and useful docs; do not accept by field count. '
             'Phase acceptance applies only to this snapshot, never to comparative superiority or field impact.'
         )
@@ -138,9 +149,11 @@ class Controller:
         for item in state['items'].values():
             if item['kind'] == 'test' and item['data'].get('test_job_ref'):
                 if self.executor is None: raise ControllerError('measured test records need their isolated executor')
-                self.executor.verify_test(item['data'], self._files(), require_passed=False)
+                self.executor.verify_test(item['data'], self._files(), require_passed=False, require_current=False)
                 receipt = Path(item['data']['test_job_ref'])
-                measurements[item['id']] = {'receipt': _json(receipt), 'streams': {
+                measurements[item['id']] = {'applies_to_current_delivery':
+                    item['data'].get('delivery_tree_sha256') == digest(canonical(self._files())),
+                    'receipt': _json(receipt), 'streams': {
                     name: {'text': _read(receipt.parent / (name + '.bin')).decode(errors='replace')[:8000],
                            'preview_limit_characters': 8000}
                     for name in ('stdout', 'stderr')}}
@@ -200,6 +213,7 @@ class Controller:
 
     def _write_files(self, pending, files):
         originals = pending['source_files']
+        staging = _safe(self.root / 'delivery-staging'); staging.mkdir(mode=0o700, exist_ok=True)
         for name, text in files.items():
             path = _safe(self.delivery / safe_file(name)); path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
             if path.exists():
@@ -207,14 +221,21 @@ class Controller:
                 if current == text: continue
                 if current != originals.get(name): raise ControllerError('delivery diverged during resumable write')
             elif name in originals: raise ControllerError('delivery source disappeared')
-            temporary = path.with_name('.controller-write-' + digest(text.encode())[:16])
-            fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
-            try:
+            temporary = staging / (digest(canonical({'name': name, 'text': text})) + '.tmp')
+            if temporary.exists():
+                if _read(temporary, 128_000) != text.encode():
+                    # A killed writer can leave a partial prefix. Restart only
+                    # this private staged file, never a native role or ledger.
+                    temporary.unlink()
+            if not temporary.exists():
+                fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
                 with os.fdopen(fd, 'wb') as file: file.write(text.encode()); file.flush(); os.fsync(file.fileno())
+            try:
                 os.replace(temporary, path)
-                parent = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
-                try: os.fsync(parent)
-                finally: os.close(parent)
+                for directory in (path.parent, staging):
+                    parent = os.open(directory, os.O_RDONLY | os.O_DIRECTORY)
+                    try: os.fsync(parent)
+                    finally: os.close(parent)
             finally:
                 if temporary.exists(): temporary.unlink()
 
@@ -303,7 +324,7 @@ class Controller:
         result = {'action': 'test', 'phase': 'build', 'test_id': item['id'], 'passed': passed,
                   'job_id': pending['job_id'], 'test_job_ref': measurement['test_job_ref'], 'cost': None,
                   'source_files_sha256': digest(canonical(pending['source_files'])),
-                  'subject_sha256': digest(canonical({'text': item['text'], 'argv': item['data']['argv']}))}
+                  'source_executable_sha256': executable_fingerprint(pending['source_files'], item['data']['argv'])}
         progress['history'].append(result); progress['pending'] = None; _write(self.root / 'progress.json', progress)
         return result
 
@@ -325,8 +346,7 @@ class Controller:
                     previous = next((entry for entry in reversed(progress['history']) if entry['action'] == 'test' and entry['test_id'] == item['id']), None)
                     files = self._files()
                     repair_after_failed_test = bool(previous and previous['passed'] is False
-                        and previous['source_files_sha256'] == digest(canonical(files))
-                        and previous['subject_sha256'] == digest(canonical({'text': item['text'], 'argv': item['data']['argv']})))
+                        and previous['source_executable_sha256'] == executable_fingerprint(files, item['data']['argv']))
                     if not repair_after_failed_test:
                         pending = {'job_id': 'test-' + digest(canonical({'item': item, 'files': files}))[:24],
                                'action': 'test', 'phase': 'build', 'test_id': item['id'], 'source_state': state,

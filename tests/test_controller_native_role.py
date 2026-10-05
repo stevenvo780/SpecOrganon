@@ -126,7 +126,9 @@ def test_requested_review_result_contract_is_checked():
     assert validate_result({"schema": 1, "verdict": "reject", "reason": "actual finding", "findings": []}, "review")["verdict"] == "reject"
     for value in [{}, {"schema": 1, "verdict": "accept", "reason": "", "findings": []},
                   {"schema": 1, "verdict": "magic", "reason": "finding", "findings": []},
-                  {"schema": 1, "verdict": "accept", "reason": "finding", "findings": "missing"}]:
+                  {"schema": 1, "verdict": "accept", "reason": "finding", "findings": "missing"},
+                  {"schema": 1, "verdict": "accept", "reason": "textual accept is not admission", "findings": ["praise"]},
+                  {"schema": 1, "verdict": "accept", "reason": "empty finding", "findings": [{}]}]:
         with pytest.raises(NativeRoleError): validate_result(value, "review")
 
 

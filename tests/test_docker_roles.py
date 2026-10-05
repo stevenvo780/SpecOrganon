@@ -51,6 +51,9 @@ def test_real_container_closed_receipt_reused_without_second_execution(tmp_path)
         assert (folder / 'output/count.txt').read_text() == '1'
         data = {'argv': argv, 'test_job_ref': measured['test_job_ref']}
         assert transport.verify_test(data, FILES)
+        changed = {**FILES, 'probe.py': 'print("changed executable")\n'}
+        assert transport.verify_test(data, changed, require_passed=False, require_current=False)
+        with pytest.raises(DockerRoleError): transport.verify_test(data, changed)
         with pytest.raises(DockerRoleError, match='changed'):
             transport.measure('closed-probe', [PYTHON, '-c', 'print("replacement")'], FILES)
         receipt = Path(measured['test_job_ref']); stdout = receipt.parent / 'stdout.bin'

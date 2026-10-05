@@ -1,0 +1,94 @@
+.....F...........F.                                                      [100%]
+=================================== FAILURES ===================================
+_ test_sigkill_during_file_rename_leaves_delivery_readable_and_write_resumable _
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/recovery-red-07/test_sigkill_during_file_renam0')
+
+    def test_sigkill_during_file_rename_leaves_delivery_readable_and_write_resumable(tmp_path):
+        case = tmp_path / 'case'; root = tmp_path / 'run'
+        engine.create_case(case, 'Synthetic atomic file interruption', 'development', 'human:owner', approval_policy='local')
+        code = (f'import sys, os, signal\nfrom pathlib import Path\nsys.path.insert(0, {str(Path(__file__).parent)!r})\n'
+                'from test_controller_recovery import construct\n'
+                f'c=construct(Path({str(case)!r}),Path({str(root)!r}))\n'
+                'original=os.replace\n'
+                'def interrupted(source,target,*args,**kwargs):\n'
+                '    if Path(target).name == "probe.py": os.kill(os.getpid(),signal.SIGKILL)\n'
+                '    return original(source,target,*args,**kwargs)\n'
+                'os.replace=interrupted\n'
+                'c._write_files({"source_files":{}},{"probe.py":"print(123)\\n"})\n')
+        child = subprocess.Popen([sys.executable, '-c', code], stdin=subprocess.DEVNULL,
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
+        try:
+            _, stderr = child.communicate(timeout=20)
+            assert child.returncode == -signal.SIGKILL, stderr.decode(errors='replace')
+            ctrl = construct(case, root)
+>           assert ctrl._files() == {}
+                   ^^^^^^^^^^^^^
+
+tests/test_controller_recovery.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/software_controller.py:112: in _files
+    if path.is_file(): result[safe_file(str(path.relative_to(self.delivery)))] = _read(path, 128_000).decode()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = '.controller-write-48bb5af48c47c613'
+
+    def safe_file(name):
+        if (type(name) is not str or len(name) > 200 or not name
+                or any(part.startswith('.') or re.fullmatch(r'[A-Za-z0-9_-][A-Za-z0-9_.-]*', part) is None
+                       for part in name.split('/'))
+                or PurePosixPath(name).is_absolute()
+                or PurePosixPath(name).suffix not in {'.py', '.md', '.json', '.jsonl', '.toml', '.txt'}):
+>           raise ControllerError('unsafe delivery file name')
+E           specorganon.software_controller.ControllerError: unsafe delivery file name
+
+src/specorganon/software_controller.py:70: ControllerError
+_ test_failed_test_needs_changed_author_work_before_bounded_second_measurement[readme_only] _
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/recovery-red-07/test_failed_test_needs_changed1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f16def8ef60>
+repair = 'readme_only'
+
+    @pytest.mark.parametrize('repair', ['code', 'readme_only'])
+    def test_failed_test_needs_changed_author_work_before_bounded_second_measurement(tmp_path, monkeypatch, repair):
+        transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport)
+        engine.put_item(ctrl.case, 't1', 'test', 'Synthetic process exit criterion', [],
+                        {'argv': ['/usr/bin/python3', '-c', 'raise SystemExit(1)']}, 'agent:synthetic',
+                        expected_version=0, expected_deps={})
+        def task(state):
+            return {'action': 'execute_test', 'phase': 'build', 'test_execution_targets': [{'id': 't1'}]}
+        monkeypatch.setattr('specorganon.software_controller.describe_task', task)
+        class Executor:
+            def __init__(self): self.calls = []
+            def measure(self, job_id, argv, files):
+                self.calls.append(job_id)
+                folder = tmp_path / ('measurement-' + str(len(self.calls))); folder.mkdir()
+                for name in ('stdout', 'stderr'): (folder / (name + '.bin')).write_bytes(b'')
+                _write(folder / 'receipt.json', {'synthetic': True})
+                return {'subject_argv': argv, 'delivery_tree_sha256': digest(canonical(files)),
+                        'exit_code': 1 if len(self.calls) == 1 else 0, 'timed_out': False,
+                        'truncated_streams': [], 'test_job_ref': str(folder / 'receipt.json'),
+                        'stdout_sha256': digest(b''), 'stderr_sha256': digest(b''), 'provenance': 'synthetic'}
+            def verify_test(self, *args, **kwargs): return True
+        ctrl.executor = Executor()
+        assert ctrl.step()['passed'] is False
+        transport.result = {'schema': 1, 'manifest': {'schema': 1, 'steps': [
+            {'op': 'put', 'id': 't1', 'kind': 'test', 'text': 'Repaired synthetic exit criterion', 'refs': [],
+             'data': {'argv': ['/usr/bin/python3', '-c', 'raise SystemExit(0)']}}]},
+            'files': {'probe.py': 'raise SystemExit(0)\n'}, 'reason': 'Synthetic engineering repair after measured exit1'}
+        if repair == 'readme_only':
+            transport.result['files'] = {'README.md': 'Documentation-only change after failure'}
+            transport.result['manifest']['steps'][0]['data']['argv'] = ['/usr/bin/python3', '-c', 'raise SystemExit(1)']
+        assert ctrl.step()['action'] == 'author'
+        assert len(ctrl.executor.calls) == 1
+        if repair == 'readme_only':
+>           with pytest.raises(ControllerError, match='material|budget'): ctrl.step()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ControllerError
+
+tests/test_software_controller.py:140: Failed
+=========================== short test summary info ============================
+FAILED tests/test_controller_recovery.py::test_sigkill_during_file_rename_leaves_delivery_readable_and_write_resumable
+FAILED tests/test_software_controller.py::test_failed_test_needs_changed_author_work_before_bounded_second_measurement[readme_only]
+2 failed, 17 passed in 1.37s
