@@ -45,6 +45,63 @@ def test_new_review_contract_does_not_silently_resume_old_run(tmp_path):
     assert transport.calls == [('role-01-frame-author', 'author')]
 
 
+def test_task_context_deduplicates_contents_but_keeps_complete_authoritative_state(tmp_path):
+    import json
+    from specorganon.runner import describe_task
+    ctrl = controller(tmp_path, SyntheticTransport(frame_response())); ctrl.step()
+    state = engine.get_state(ctrl.case); task = describe_task(state)
+    request = ctrl._request(state, 'review', {'history': []})
+    assert json.loads(request['documents']['state.json']) == state
+    view = json.loads(request['documents']['next-task.json'])
+    for original, compact in zip(task['artifacts']['items'], view['artifacts']['items']):
+        assert compact['id'] == original['id'] and compact['version'] == original['version']
+        assert compact['issues'] == original['issues']
+        assert 'refs' not in compact and 'omitted_refs' not in compact
+        assert compact['refs_locator'] == 'state.json/items/' + original['id'] + '/deps'
+        assert all(state['items'][original['id']]['deps'][key] == version
+                   for key, version in original['refs'].items())
+        assert 'text' not in compact and 'data' not in compact
+        assert compact['content_locator'] == 'state.json/items/' + original['id']
+        assert state['items'][compact['id']]['text'] == original['text']
+    assert describe_task(state) == task, 'public task API must remain unchanged'
+
+
+@pytest.mark.parametrize('target_shape', ['objects', 'strings'])
+def test_mandate_target_shape_never_coerces_an_invalid_native_judgment(tmp_path, target_shape):
+    import json
+    from specorganon.role_jobs import _json
+    from specorganon.runner import run_manifest
+    transport = SyntheticTransport({'schema': 1, 'verdict': 'accept',
+                                    'reason': 'Synthetic mechanics only', 'findings': []})
+    ctrl = controller(tmp_path, transport)
+    steps = json.loads((Path(__file__).parents[1] / 'workflows/synthetic_full.json').read_text())['steps']
+    for step in steps:
+        if step['op'] == 'advance':
+            if step['phase'] == 'critique': break
+            ctrl.step()
+        else:
+            current = engine.get_state(ctrl.case)
+            guarded = {**step, 'expected_version': 0,
+                       'expected_deps': {ref: current['items'][ref]['version'] for ref in step['refs']}}
+            run_manifest(ctrl.case, {'schema': 1, 'steps': [guarded]}, 'author:synthetic-fixture')
+    state = engine.get_state(ctrl.case)
+    request = ctrl._request(state, 'approval', {'history': []})
+    assert json.loads(request['documents']['approval-target-ids.json']) == ['n1']
+    transport.result = {'schema': 1, 'verdict': 'accept', 'reason': 'Synthetic mandate fixture only',
+                        'findings': [], 'mandate_conformity': True,
+                        'approval_targets': [{'id': 'n1', 'version': 1}] if target_shape == 'objects' else ['n1']}
+    before = (ctrl.case / 'organon.json').read_bytes()
+    if target_shape == 'objects':
+        with pytest.raises(ControllerError, match='mismatched'): ctrl.step()
+        assert (ctrl.case / 'organon.json').read_bytes() == before
+        assert _json(ctrl.root / 'progress.json')['pending']['status'] == 'closed'
+        assert engine.get_state(ctrl.case)['items']['n1']['approved'] is False
+    else:
+        assert ctrl.step()['action'] == 'approval'
+        assert engine.get_state(ctrl.case)['items']['n1']['approved'] is True
+        assert engine.get_state(ctrl.case)['phases']['critique']['accepted'] is False
+
+
 def test_author_puts_are_guarded_and_phase_requires_another_real_role(tmp_path):
     transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport)
     result = ctrl.step()

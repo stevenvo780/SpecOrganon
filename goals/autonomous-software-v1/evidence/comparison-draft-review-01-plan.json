@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "classification": "one independent draft-protocol text review; not preregistration or experiment generation",
+  "provider": "MiniMax",
+  "model": "minimax/MiniMax-M3",
+  "client": "OpenCode",
+  "machine": "Kratos",
+  "account": "existing default configured MiniMax subscription; no account switch",
+  "access": "text",
+  "max_calls": 1,
+  "timeout_seconds": 180,
+  "prompt": "Revisa este BORRADOR prospectivo, sin herramientas ni archivos y sin generar soluciones de las tareas. Tú eres un revisor independiente de diseño metodológico; Codex decide la arquitectura. Contexto: goal local autónoma SpecOrganon, piloto histórico18corridas no concluyente permanece congelado. Dos intentos nuevos de ingeniería preservados: LogLens0/9fase y IntervalDesk7/9fases actualmente construyendo; no son celdas del estudio. El presupuesto de campaña aún no está congelado. Cuota actual Gemini90%5h/49%sem, Codex4%sem restante, MiniMax88%5h/98%sem. No compramos servicios/reset, no cambiamos cuentas y costes desconocidos siguen desconocidos. Evalúa si este diseño evita selección por éxito, confusión de presupuesto, filtración de reservados y conclusiones injustificadas. Devuelve JSON con verdict (accept_draft/reject_draft), reason, findings=[{severity,section,problem,correction}], y preguntas de diseño que aún necesitan fijarse. No afirmes haber probado el harness. Objetivo de esta única llamada es detectar fallos antes del prerregistro, no aprobar resultados ni modificar archivos.\n\nBORRADOR:\n# Propuesta de comparación prospectiva: pendiente de revisar y congelar\n\nEste documento es un diseño de ingeniería, no un prerregistro ni una autorización\npara generar soluciones. Primero deben quedar fijados contratos, evaluador,\nguía SDD, harness, imágenes, orden y presupuesto con sus hashes. LogLens,\nIntervalDesk y los 30 inputs del piloto anterior quedan excluidos del estudio.\n\n## Pregunta y alcance\n\nComparar el paquete operativo de SpecOrganon con trabajo libre y una guía SDD\nconcreta para entregar dos herramientas pequeñas nuevas. Medir conformidad,\ndocumentación, adherencia y recursos observados. Los resultados no estimarán\nimpacto de campo, superioridad general ni un efecto puro de la filosofía:\nel paquete también cambia secuencia, compuertas y revisión intermedia.\n\nSe proponen dos tipos: un algoritmo sobre un grafo dirigido ponderado\n(`RoutePlan`, caminos mínimos con desempate contractual) y una CLI de inventario\nde un árbol de archivos (`TreeMap`, lectura acotada, sin seguir enlaces ni\nmodificar entradas). Son nombres y ámbitos propuestos: el contrato público y\nlos casos reservados se diseñarán y congelarán antes de cualquier autoría.\nNo se reinterpretará una tarea después de ver su dificultad o resultados.\n\n## Celdas, familias y repeticiones\n\nDos tareas × dos familias (Codex gpt-6.1-sol y Gemini 3.1 Pro High, perfiles\nprimarios originales) × dos repeticiones independientes × tres métodos:\n24 celdas principales. Dos repeticiones permiten mostrar variabilidad dentro\nde cada celda; no ofrecen potencia para generalizar sobre modelos o proyectos.\nSe mostrarán los ocho bloques tarea/familia/repetición y sus diferencias,\nmedias, rangos, fallos y denominadores, sin selección de mejores corridas.\n\nCuatro celdas adicionales, una por tarea/familia y en la primera repetición,\naplicarán la ablación propuesta: misma guía de nueve fases, sin revisión\nintermedia ni bloqueo por aceptación de cada fase, conservando revisión final\ny pruebas aisladas. No se inventarán revisiones aceptadas en su ledger. El\ncontraste identifica el conjunto revisión/compuerta, no cada componente.\nTotal propuesto: 28 celdas; el orden balanceado se fijará antes de generar.\n\n## Métodos concretos\n\n- N: contrato público y formato común de entrega; el autor decide el proceso.\n- S: contrato y guía fija de especificación → diseño → tareas → construcción\n  → verificación. Se exige especificación con requisitos y criterios antes\n  de construir, diseño con decisiones/alternativas y tareas trazables. La guía\n  se publicará íntegra; no se equiparará con todas las variantes de SDD.\n- T: contrato y toolkit/guía de nueve fases vigente, con autorías y revisiones\n  independientes, criterios anteriores a medir y recibos reales. Un paquete\n  incompleto sigue siendo incompleto aunque el programa pase pruebas.\n\nTodos tendrán revisión final por la otra familia y el mismo techo total de\nrecursos. Sólo T añade las revisiones intermedias prescritas por su método.\nEl presupuesto consumido por esas revisiones formará parte del tratamiento\ny del coste observado, nunca se excluirá para aparentar igualdad de gasto.\n\n## Separación y medición\n\nAutor, revisor y evaluador usarán snapshots/directorios separados. Ningún\nautor/revisor recibirá los tests, fixtures ni resultados reservados durante\ngeneración o reparación. Los tests del autor se ejecutarán en Docker sin\nred/perfiles; el evaluador reservado será otro proceso limpio. La revisión\nfinal verá contrato, entrega y pruebas públicas reales; se hará una vez y no\nregenerará una entrega después de evaluar el conjunto reservado.\n\nEl evaluador de comportamiento recibirá un ID opaco y archivos de entrega;\nno recibirá el método o ledger. La evaluación de adherencia necesariamente\nverá el proceso y no se llamará ciega. Rúbricas separadas: funcionalidad,\nREADME/uso/errores/límites, adherencia exigida a cada guía y cumplimiento de\nun conjunto común de requisitos. Ausencia de un artefacto significa ausencia,\nsin imputar cumplimiento por una puntuación alta de código.\n\n## Presupuesto propuesto y detenciones\n\nPor celda: máximo 40 llamadas nativas totales, 180 s por llamada, 6000 s\nglobales desde la primera admisión, 128000 bytes por entrada, 2 MiB de salida\npor stream y 1 MiB acumulado de entradas nativas; hasta dos ejecuciones por\ntest público, cada una 120 s, 1 GiB/2 CPU/128 pids. Una segunda medición exige\ncambio material de código/argv. Es necesario verificar si estos límites\nadmiten el recorrido completo antes de congelarlos; no se aumentarán durante\nlas celdas. Reparaciones sólo con feedback público dentro del presupuesto.\n\nAntes de generar se registrarán límite total de campaña, orden exacto, hashes\ny regla de cuota. Falta todavía justificar y fijar esos valores con el consumo\nde ingeniería y la capacidad actual; esta propuesta no inicia ninguna celda.\nNo habrá reemplazo de tareas, modelos, cuentas o seeds por fallo. Un error de\ncliente o formato tendrá recibo y resultado terminal de su celda; un proceso\nincierto se reconciliará sin duplicarlo. Una negativa de cuota detendrá nuevos\nenvíos a esa cuenta; se distinguirán celdas fallidas, pendientes y no iniciadas.\nUn estudio incompleto no cumplirá el criterio de cierre de la goal.\n\nSe conservarán tiempos, llamadas, bytes, ejecuciones, intervenciones y uso\nnativo cuando esté disponible. Tokens, dinero o capacidad no observables\nseguirán siendo desconocidos. Las cuotas actuales son una lectura previa,\nno una garantía de acabar 28 celdas. No se comprarán servicios ni se usarán\nresets/créditos/cuentas secundarias para suplir una detención.\n\n## Pendientes para un protocolo ejecutable\n\nDefinir contratos y ejemplos públicos; crear y auditar evaluador privado;\nfijar rúbricas y regla de agregación de faltantes; implementar las tres rutas\ny la ablación sin fabricar aprobaciones; verificar sus presupuestos con\nfixtures ajenas al estudio; revisión separada del protocolo y manifiesto\ninmutable antes de la primera generación. Publicar también ambos intentos\nde ingeniería y todas las celdas adversas, junto a límites del estudio.\n",
+  "capacity": {
+    "capturedAt": "2026-10-05T04:01:22.707Z",
+    "minimax": [
+      {
+        "key": "interval_general",
+        "remainingPercent": 88
+      },
+      {
+        "key": "weekly_general",
+        "remainingPercent": 98
+      }
+    ],
+    "gemini": [
+      {
+        "key": "Gemini-5h",
+        "remainingPercent": 90
+      },
+      {
+        "key": "Gemini-sem",
+        "remainingPercent": 49
+      }
+    ],
+    "codex_remaining_weekly_percent": 4
+  },
+  "catalog_route": {
+    "model": "minimax/MiniMax-M3",
+    "provider": "minimax",
+    "cli": "opencode",
+    "cli_path": "/home/stev/.local/bin/opencode",
+    "native": "minimax/MiniMax-M3"
+  }
+}
