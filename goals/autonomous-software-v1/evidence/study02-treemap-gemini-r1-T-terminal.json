@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "cell_id": "treemap-gemini-r1-T",
+  "classification": "terminal controller review/approval intervention budget failure; no retry",
+  "failure": {
+    "automatic_retry": false,
+    "error_type": "ControllerError",
+    "grade": null,
+    "reason": "controller role budget exhausted"
+  },
+  "revision": 15,
+  "accepted_phases": [
+    "frame"
+  ],
+  "controller_history": [
+    {
+      "action": "author",
+      "actor": "agent:gemini-isolated-author",
+      "cost": null,
+      "findings": [],
+      "job_id": "role-01-frame-author",
+      "phase": "frame",
+      "reason": "Formulación de los artefactos del marco del proyecto que nombran la necesidad de un inventariador estricto para evaluación, los actores que interactúan con el sistema autónomo, y los límites operacionales y funcionales técnicos requeridos.",
+      "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/software-comparison-v2/cells/treemap-gemini-r1-T/transport/host-journal/role-01-frame-author/receipt.json",
+      "source_files_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "source_fingerprint": "7cabe4515e2e1e4ccbb912a8ecc56138d3317ec2d16a281cd5691e7259384295",
+      "source_phase_snapshot": "f9a34206d21cd981a14d17c1bd04526c39f80708bcb39286008c619c7e8a8431",
+      "usage_reported": {
+        "cache_read_tokens": 0,
+        "input_tokens": 18442,
+        "output_tokens": 2462,
+        "thinking_tokens": 2062,
+        "total_tokens": 20904
+      }
+    },
+    {
+      "action": "review",
+      "actor": "reviewer:codex-isolated-review",
+      "cost": null,
+      "findings": [],
+      "job_id": "role-02-frame-review",
+      "phase": "frame",
+      "reason": "El snapshot vigente (p1, a1 y b1, todos versión 1) delimita una necesidad de inventario determinista para evaluación autónoma, identifica al operador afectado y al evaluador consumidor, y acota la observación a metadatos de un árbol estático bajo límites operacionales concretos. El contrato suministrado precisa las exclusiones: contenidos, seguimiento de symlinks, modificaciones, backup y análisis de seguridad. La formulación orientada a una herramienta corresponde al encargo autorizado; las formulaciones rivales deberán examinarse en critique, sin presumir superioridad del software. Esta aceptación se limita al marco actual y no acredita ejecución, eficacia de campo ni aprobación de decisiones posteriores.",
+      "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/software-comparison-v2/cells/treemap-gemini-r1-T/transport/host-journal/role-02-frame-review/receipt.json",
+      "source_files_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "source_fingerprint": "ddc615483399d10a648a00ffb15aee16f5987bdbc158d44f8845c7bba7822cb9",
+      "source_phase_snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b",
+      "usage_reported": {
+        "cache_write_input_tokens": 0,
+        "cached_input_tokens": 0,
+        "input_tokens": 12675,
+        "output_tokens": 213,
+        "reasoning_output_tokens": 38
+      },
+      "verdict": "accept"
+    },
+    {
+      "action": "author",
+      "actor": "agent:gemini-isolated-author",
+      "cost": null,
+      "findings": [],
+      "job_id": "role-03-critique-author",
+      "phase": "critique",
+      "reason": "Se han estructurado los artefactos de crítica requeridos: el concepto y la suposición modelan la interacción con el sistema para leer metadatos de forma segura; se plantean dos opciones contrastantes para realizar el proceso (CLI dedicada en Python versus ensamble de herramientas shell); y la norma asienta la supremacía de la seguridad y reproducibilidad para el operador y evaluador.",
+      "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/software-comparison-v2/cells/treemap-gemini-r1-T/transport/host-journal/role-03-critique-author/receipt.json",
+      "source_files_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "source_fingerprint": "fb89046f018a1dfaab66d4a10e9a379304f90f43e747503f61a1793414bdb20a",
+      "source_phase_snapshot": "c5b3aae846c3df469dd246bdfb3090b8f07277bdc01c3f2c439e58574f04c8a2",
+      "usage_reported": {
+        "cache_read_tokens": 0,
+        "input_tokens": 20101,
+        "output_tokens": 3219,
+        "thinking_tokens": 2537,
+        "total_tokens": 23320
+      }
+    },
+    {
+      "action": "approval",
+      "actor": "reviewer:codex-isolated-review",
+      "cost": null,
+      "findings": [],
+      "job_id": "role-04-critique-approval",
+      "phase": "critique",
+      "reason": "n1 versión 1, vinculada a p1 y a1 versión 1, es conforme al mandato delegado: prioriza preservar el árbol, no acceder a contenidos y producir un inventario determinista, dentro de los límites de b1 versión 1 y del contrato. Su prioridad normativa es compatible con c1, as1 y las alternativas fo1 y fo2 vigentes; no acredita la exactitud de esos supuestos ni la superioridad de una alternativa. Esta conformidad se limita al objetivo n1 del snapshot suministrado: no autentica identidad humana, no registra una elección personal del operador ni constituye aceptación integral de critique, ejecución o beneficio de campo.",
+      "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/software-comparison-v2/cells/treemap-gemini-r1-T/transport/host-journal/role-04-critique-approval/receipt.json",
+      "source_files_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "source_fingerprint": "031d75e064b338232be982aa705cd955a7efe3b78cbedc0e91103815913601bc",
+      "source_phase_snapshot": "006ce36f10afca003601d8e8f60b52216a5bffd5b5ff0e2a471d1c30f78b8ab9",
+      "usage_reported": {
+        "cache_write_input_tokens": 0,
+        "cached_input_tokens": 0,
+        "input_tokens": 14555,
+        "output_tokens": 231,
+        "reasoning_output_tokens": 51
+      },
+      "verdict": "accept"
+    },
+    {
+      "action": "review",
+      "actor": "reviewer:codex-isolated-review",
+      "cost": null,
+      "findings": [
+        {
+          "artifact": "c1",
+          "correction": "Definir determinismo como igualdad del resultado para el mismo árbol estático y los mismos argumentos, con selección, rutas, tamaños y orden establecidos por el contrato. Separar esa propiedad de la prohibición de leer contenidos o modificar el árbol.",
+          "problem": "La definición describe un inventario sin acceso a contenidos, pero no define qué hace determinista su resultado; un registro sistemático también puede variar en orden o representación."
+        },
+        {
+          "artifact": "fo1 y fo2",
+          "correction": "Ampliar ambas alternativas con razones, límites y tensiones respecto de n1 y b1. Para fo2, precisar los supuestos de disponibilidad y portabilidad de las herramientas y las dificultades de representar nombres válidos y errores atómicos en JSON; para fo1, explicitar el coste de desarrollar y verificar una implementación propia. Mantener estas consideraciones como propuestas o incertidumbres, sin afirmar superioridad demostrada.",
+          "problem": "Las alternativas difieren técnicamente, pero sólo describen mecanismos. No explican sus fundamentos ni los conflictos entre reproducibilidad, privacidad, complejidad y dependencia del entorno que exige revisar el contrato de critique."
+        }
+      ],
+      "job_id": "role-05-critique-review",
+      "phase": "critique",
+      "reason": "El snapshot de critique contiene los cinco artefactos requeridos y sus dependencias vigentes: p1, a1 y b1 versión 1. n1 versión 1 tiene aprobación local declarada compatible con el mandato existente, sin acreditar una elección personal ni identidad humana. Sin embargo, la definición de determinismo y los fundamentos de las alternativas son insuficientes para satisfacer la revisión sustantiva de esta fase. No se acredita ejecución, superioridad comparativa ni beneficio de campo.",
+      "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/software-comparison-v2/cells/treemap-gemini-r1-T/transport/host-journal/role-05-critique-review/receipt.json",
+      "source_files_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "source_fingerprint": "77f3ba3be1c6a272733053e14a53567ac0e90fff955345fbe2b082021c49a06f",
+      "source_phase_snapshot": "a9b6e44173b96a961a166cb6c952acc68459d4e906c98bae509d8430ff085a4a",
+      "usage_reported": {
+        "cache_write_input_tokens": 0,
+        "cached_input_tokens": 0,
+        "input_tokens": 14604,
+        "output_tokens": 433,
+        "reasoning_output_tokens": 70
+      },
+      "verdict": "reject"
+    },
+    {
+      "action": "author",
+      "actor": "agent:gemini-isolated-author",
+      "cost": null,
+      "findings": [],
+      "job_id": "role-06-critique-author",
+      "phase": "critique",
+      "reason": "Se han actualizado c1, fo1 y fo2 para atender las correcciones del revisor. En c1 se definió formalmente el determinismo como la igualdad estricta de resultados (selección, rutas, tamaños y orden) y se separó explícitamente de la prohibición de acceder a contenidos. En fo1 y fo2 se explicitaron las tensiones y límites respecto de b1 y n1: el coste y esfuerzo de desarrollo de una solución propia para fo1, y las dificultades de portabilidad, manejo de nombres arbitrarios y emisión de errores atómicos en JSON para fo2, abordando ambas alternativas como propuestas sin afirmar superioridad.",
+      "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/software-comparison-v2/cells/treemap-gemini-r1-T/transport/host-journal/role-06-critique-author/receipt.json",
+      "source_files_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "source_fingerprint": "2ba3d90dcee95fcd5d1b415af78b4a3f4e41e7c85e16d7459d61e3416f33470a",
+      "source_phase_snapshot": "a9b6e44173b96a961a166cb6c952acc68459d4e906c98bae509d8430ff085a4a",
+      "usage_reported": {
+        "cache_read_tokens": 0,
+        "input_tokens": 21858,
+        "output_tokens": 3718,
+        "thinking_tokens": 3064,
+        "total_tokens": 25576
+      }
+    }
+  ],
+  "native_packets": 6,
+  "phase_review_approval_cap": 2,
+  "critique_review_verdict": "reject",
+  "correction_authored": true,
+  "correction_independently_reviewed": false,
+  "programme_generated": false,
+  "public_measurements": 0,
+  "functional_score": null,
+  "reserved_feedback_used": false,
+  "next_fixed_cell": "treemap-gemini-r1-N"
+}
