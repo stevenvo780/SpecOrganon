@@ -56,3 +56,28 @@ No se ha demostrado todavía una entrega nueva9fases ni liberado evaluación
 reservada. Consultar checkpoint.json y recibos posteriores para la evolución;
 esta aceptación estática demuestra preparación de ingeniería, con ejecución
 y resultados metodológicos pendientes.
+
+## Primer hito nativo completo y físicamente elegible
+
+La celdaT primaria cerró las9fases con23llamadas nativas,1prueba propia real
+pasada y1,302,492bytes renderizados acumulados; elapsed1526.46s dentro de6000.
+La auditoría final Gemini aceptó D8/G6/H9 y el verificador físico confirmó
+statuseligible, SHA91b38c9670666a2d725c13e7b37cdaf353b5be8505fefd1138498aba297eda98.
+Hay exactamente1de42generaciones terminales y41pendientes.
+
+La observación de cuota expiró antes del test; se conservó el mismo paso,
+artefactos y reloj, se actualizó la observación y la prueba se ejecutó una vez.
+validate corrigió un enlace incompleto a baseline antes de su aceptación,
+manteniendo versiones e historia; no se modificó el programa sellado ni
+se repitió la prueba. La evidencia de estas recuperaciones procede del flujo real.
+
+El expediente conserva assessmentno_demostrado: la matriz reservada y la
+línea base comparativa no se han medido. La auditoría nativa del paquete es
+un juicio técnico; la funcionalidad completa se medirá tras cerrar las42
+generaciones y liberar una sola evaluación. No existe resultado F reservado.
+
+El reporte y los recibos de este hito están en evidence/comparison-v3-primary-T-*.
+El paquete legible de tres archivos es una copia exacta de la entrega sellada
+en el workspace privado, sin nueva generación ni reejecución. El registro,
+software y protocolo siguen congelados. La instalación final y publicación
+quedan pendientes del cierre de toda la campaña; la goal permanece activa.
