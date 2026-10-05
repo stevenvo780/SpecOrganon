@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "job_id": "792faaaef4b64601825c35a0fb10247d",
+  "status": "succeeded",
+  "provider": "Gemini/Antigravity",
+  "model": "gemini/3.8-flash",
+  "access": "text",
+  "scope": "Initial advisory contract proposal, before addition of runtime-source guard; reviewer did not execute tests",
+  "review": {
+    "verdict": "accept",
+    "findings": [
+      {
+        "severity": "minor",
+        "problem": "Contract guidance on decisive assessment requirements risks nudging agents into template boilerplate or hallucinated rationale if guidance contains illustrative threshold/effect values.",
+        "fix": "Restrict contract guidance strictly to structural field names, required types, and validator locators, completely omitting illustrative data, sample thresholds, or narrative examples."
+      },
+      {
+        "severity": "minor",
+        "problem": "Fallback to summary/counts under the 4096-byte cap could lead agents to assume unlisted descendants are valid unless truncation semantics are unequivocal.",
+        "fix": "Enforce explicit truncation metadata (e.g. `truncated: true` and state.json reference pointer) whenever descending dependency lists are condensed to counts."
+      }
+    ],
+    "tests_executed": false,
+    "reason": "The proposal strictly preserves historical immutability, retains all schema7 phase/author/call budgets under schema8, does not weaken engine gates or create schema aliases, and limits intervention to static contract clarity and read-only dependency diagnostics."
+  }
+}

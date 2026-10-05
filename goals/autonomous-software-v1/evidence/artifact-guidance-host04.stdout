@@ -1,0 +1,65 @@
+........F..F............................................................ [ 85%]
+............                                                             [100%]
+=================================== FAILURES ===================================
+____ test_registered_runner_rejects_imports_without_actual_module_bindings _____
+
+    def test_registered_runner_rejects_imports_without_actual_module_bindings():
+        from scripts.csvshape_delivery import verify_runtime_sources, RegistrationError
+        source = Path(__file__).absolute().parents[1]
+>       with pytest.raises(RegistrationError, match='runtime module is not source-bound'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'runtime module is not source-bound'
+E         Actual message: 'runtime module lacks registered source file: experiments'
+
+tests/test_artifact_guidance.py:116: AssertionError
+_ test_registered_runtime_accepts_current_bound_modules_and_rejects_outside_import _
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-117/test_registered_runtime_accept0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff1a3e3f110>
+
+    def test_registered_runtime_accepts_current_bound_modules_and_rejects_outside_import(tmp_path, monkeypatch):
+        import sys
+        import types
+        from scripts.csvshape_delivery import verify_runtime_sources, RegistrationError
+        from specorganon.role_jobs import digest
+        source = Path(__file__).absolute().parents[1]
+        bindings = {}
+        for name, module in list(sys.modules.items()):
+            if name in ('specorganon', 'scripts', 'experiments') or name.startswith(('specorganon.', 'scripts.', 'experiments.')):
+                filename = getattr(module, '__file__', None)
+                if filename is not None:
+                    path = Path(filename).absolute()
+                    bindings[str(path.relative_to(source))] = digest(path.read_bytes())
+>       verify_runtime_sources(source, bindings)
+
+tests/test_artifact_guidance.py:171: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+source = PosixPath('/home/stev/.codex/worktrees/artifact-repair-contract/SpecOrganon')
+bindings = {'src/specorganon/__init__.py': 'cbfd011a2da30410ed99125aaf779fb4ad070c49834a5bbdd932a0125f269f56', 'src/specorganon/a...10ba', 'src/specorganon/review_provenance.py': '3b2a59bd195a9b77819f716d35ba8527180235cd978030dc4b7351dc8dc033a3', ...}
+
+    def verify_runtime_sources(source, bindings):
+        """Source-only registered runner cannot import a different checkout/wheel."""
+        source = _safe(source)
+        if _safe(__file__) != source / 'scripts/csvshape_delivery.py':
+            raise RegistrationError('registered driver is not the executing source checkout')
+        for name, module in sorted(sys.modules.items()):
+            if (name not in ('specorganon', 'scripts', 'experiments') and not name.startswith(('specorganon.', 'scripts.', 'experiments.'))):
+                continue
+            file = getattr(module, '__file__', None)
+            if file is None:
+                # Only these two real source-only namespace roots lack __file__.
+                spec = getattr(module, '__spec__', None)
+                locations = getattr(spec, 'submodule_search_locations', None)
+                if (name not in ('scripts', 'experiments') or spec is None
+                        or spec.origin is not None or locations is None
+                        or list(locations) != [str(source / name)]):
+>                   raise RegistrationError('runtime module lacks registered source file: ' + name)
+E                   scripts.csvshape_delivery.RegistrationError: runtime module lacks registered source file: experiments
+
+scripts/csvshape_delivery.py:44: RegistrationError
+=========================== short test summary info ============================
+FAILED tests/test_artifact_guidance.py::test_registered_runner_rejects_imports_without_actual_module_bindings
+FAILED tests/test_artifact_guidance.py::test_registered_runtime_accepts_current_bound_modules_and_rejects_outside_import
+2 failed, 82 passed in 5.21s

@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "at": "2026-10-05T11:49:52.211930+00:00",
+  "scope": "read-only closed case diagnosis, no native generation/review/acceptance",
+  "CSVShape_revision": 22,
+  "ledger_before_sha256": "7f712eb1453f7300a95a2c94f58d7161523915ffaac0ff9860d542bd96d58206",
+  "ledger_after_sha256": "7f712eb1453f7300a95a2c94f58d7161523915ffaac0ff9860d542bd96d58206",
+  "hint": {
+    "schema": 1,
+    "scope": "Read-only advisory; not a repair, source authenticity check or phase acceptance",
+    "authority": "state.json/items: complete text, data, deps, versions, stale and issues",
+    "instructions": "For every changed upstream item, reconsider all descendants using complete deps. Explicitly put justified corrections in dependency order. Updating a leaf cannot clear an older ancestor. Do not refresh versions without semantic reconsideration; never fabricate evidence or approvals.",
+    "counts": {
+      "items": 14,
+      "direct_version_mismatches": 1,
+      "stale_items": 2,
+      "invalid_items": 1,
+      "unresolved_dependency_nodes": 0
+    },
+    "mode": "complete_hint",
+    "direct_version_mismatches": [
+      [
+        "evidence-doc-csv",
+        "protocol-verification",
+        1,
+        2
+      ]
+    ],
+    "stale_item_ids": [
+      "evidence-doc-csv",
+      "indicator-checks-passed"
+    ],
+    "invalid_item_ids": [
+      "evidence-parser-probes"
+    ],
+    "dependency_order": [
+      "actor-operator",
+      "problem-preimport",
+      "boundary-csvshape",
+      "assumption-strict-failure",
+      "concept-structural-inspection",
+      "frame-permissive-recovery",
+      "frame-strict-validation",
+      "norm-structural-integrity",
+      "question-conformance",
+      "hypothesis-conformance",
+      "protocol-verification",
+      "evidence-doc-csv",
+      "evidence-parser-probes",
+      "indicator-checks-passed"
+    ],
+    "unresolved_dependency_node_ids": []
+  },
+  "old_registration_rejected_before_journal_mutation": "registered driver is not the executing source checkout",
+  "CSVShape_frozen_sources": 179,
+  "CSVShape_source_mismatches": [],
+  "comparison02_frozen_sources": 48,
+  "comparison02_source_mismatches": [],
+  "backup_inputs": 30,
+  "backup_mismatches": [],
+  "GOAL_sha256": "e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36"
+}

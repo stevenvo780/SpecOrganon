@@ -1,0 +1,38 @@
+.........F.............................................................. [100%]
+=================================== FAILURES ===================================
+__ test_explicit_upstream_then_descendant_puts_clear_real_engine_stale_flags ___
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-115/test_explicit_upstream_then_de0')
+
+    def test_explicit_upstream_then_descendant_puts_clear_real_engine_stale_flags(tmp_path):
+        case = tmp_path / 'case'
+        engine.create_case(case, 'Synthetic version propagation control', 'development', 'human:owner', approval_policy='local')
+        def put(identity, kind, refs, data, text='Synthetic diagnostic artifact, no native acceptance'):
+            state = engine.get_state(case)
+            engine.put_item(case, identity, kind, text, refs, data, 'agent:synthetic-control',
+                            expected_version=state['items'].get(identity, {}).get('version', 0),
+                            expected_deps={r: state['items'][r]['version'] for r in refs})
+>       put('p', 'problem', [], {})
+
+tests/test_artifact_guidance.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_artifact_guidance.py:125: in put
+    engine.put_item(case, identity, kind, text, refs, data, 'agent:synthetic-control',
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-stev/pytest-115/test_explicit_upstream_then_de0/case')
+id = 'p', kind = 'problem'
+text = 'Synthetic diagnostic artifact, no native acceptance', refs = []
+data = {}, actor = 'agent:synthetic-control', expected_version = 0
+expected_deps = {}
+
+    def put_item(path: str | Path, id: str, kind: str, text: str, refs: list[str], data: dict, actor: str, *,
+                 expected_version: int | None = None, expected_deps: dict[str, int] | None = None) -> dict[str, Any]:
+        if not isinstance(id, str) or not ITEM_ID.fullmatch(id):
+>           raise MethodError("item id must start with a letter and contain 2–64 letters, digits, _ or -")
+E           specorganon.engine.MethodError: item id must start with a letter and contain 2–64 letters, digits, _ or -
+
+src/specorganon/engine.py:1667: MethodError
+=========================== short test summary info ============================
+FAILED tests/test_artifact_guidance.py::test_explicit_upstream_then_descendant_puts_clear_real_engine_stale_flags
+1 failed, 71 passed in 5.30s
