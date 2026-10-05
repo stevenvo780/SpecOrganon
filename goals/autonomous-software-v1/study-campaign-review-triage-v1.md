@@ -78,3 +78,13 @@ La nueva verificación local del catálogo pasó11 controles. Cualquier versión
 prospectiva posterior requiere otra revisión y congelación, con las mismas tareas,
 identidades, orden, cuentas y presupuestos. No hay solución ni puntuación observada
 para seleccionar una réplica favorable; no se declara completada la goal.
+
+Revisión conjunta03 job92561c8419d04e83801a82705aae90fd: accept sobre47fuentes,
+tests_executed=false; guard nuevo y selección de metadata pública original. No
+garantiza ausencia de otros fallos de pipeline ni acepta una entrega de software.
+Verificación limpia posterior:91 controles pasados; preflight real de catálogo y
+features en la imagen nativa original pasó sin llamadas a modelos. Prerregistro02
+2026-10-05T09:17:56.237379+00:00,48fuentes incluido recibo, SHA
+231dbf966a2155c283e671c6de0c3340793b1eaccd19ba30112bcfbb7df30be7.
+La primera llamada real de autor usa la misma primera identidad de la población
+antes de cualquier solución generada; el intento previo permanece cerrado.
