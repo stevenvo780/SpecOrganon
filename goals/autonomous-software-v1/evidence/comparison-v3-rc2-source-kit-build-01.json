@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "source_kit_sha256": "4ea547052bc1497fd851535ec891a980b334363a84e0dae3dde491bb76723c56",
+  "manifest_verified": true,
+  "checks": [
+    {
+      "name": "kit-release-build",
+      "argv": [
+        "docker",
+        "build",
+        "-f",
+        "docker/release/Dockerfile",
+        "-t",
+        "specorganon-rc2-kit-release:verification",
+        "."
+      ],
+      "cwd": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/rc2-codex-lab-01/source-kit/specorganon-autonomous-candidate-0.2.0rc2",
+      "exit_code": 0,
+      "seconds": 4.372287750244141,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "05d8c7b2dc153e560fa421912cb1ef299116b5dec87b5b8ca5b24da92167d39c"
+    },
+    {
+      "name": "kit-codex-build",
+      "argv": [
+        "docker",
+        "build",
+        "--build-arg",
+        "SPECORGANON_IMAGE=specorganon-rc2-kit-release:verification",
+        "-f",
+        "docker/codex/Dockerfile",
+        "-t",
+        "specorganon-rc2-kit-codex:verification",
+        "."
+      ],
+      "cwd": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/rc2-codex-lab-01/source-kit/specorganon-autonomous-candidate-0.2.0rc2",
+      "exit_code": 0,
+      "seconds": 12.778797626495361,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "85f792342ca567db95b25604320b26956644b50b754976020264aa3f910699f0"
+    },
+    {
+      "name": "kit-stdio-smoke",
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--cap-drop=ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--security-opt",
+        "seccomp:/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/rc2-codex-lab-01/source-kit/specorganon-autonomous-candidate-0.2.0rc2/docker/codex/seccomp-codex.json",
+        "--security-opt",
+        "apparmor:unconfined",
+        "--tmpfs",
+        "/workspace:rw,nosuid,size=64m,uid=1000,gid=1000",
+        "--tmpfs",
+        "/home/codex/.codex:rw,nosuid,size=16m,uid=1000,gid=1000",
+        "specorganon-rc2-kit-codex:verification",
+        "python",
+        "/opt/codex-lab/smoke.py"
+      ],
+      "cwd": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/rc2-codex-lab-01/source-kit/specorganon-autonomous-candidate-0.2.0rc2",
+      "exit_code": 0,
+      "seconds": 3.8191723823547363,
+      "stdout_sha256": "7a68d808419ae8697fc659679b9bb5446e620ad642b6b06990ae586c9beb4cf3",
+      "stderr_sha256": "e9d5c981211ecab018121d7487c098fd969843ad888d87677daaa0e08826fa5a"
+    }
+  ],
+  "fixtures_only": true,
+  "native_model_calls": 0,
+  "original_volumes_mounted": false
+}
