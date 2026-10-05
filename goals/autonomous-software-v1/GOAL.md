@@ -1,6 +1,7 @@
 # Goal: versión autónoma de SpecOrganon para software pequeño
 
-Estado: activa. Autorización: petición del dueño «crea una goal para lograrlo»,
+Estado: hito local entregado y verificado, con comparación adversa y reparación
+posterior de agregación documentada. Autorización: petición del dueño «crea una goal para lograrlo»,
 2026-10-04. La goal nativa de este chat es la referencia de estado de ejecución.
 
 ## Resultado que se entregará
@@ -62,6 +63,12 @@ Recibos: `evidence/source-audit-baseline.stdout` y
 SHA-256 del GOAL.md original al iniciar:
 `e8341bea380cc357ad9e02ec4689a4ed47fe198ba06e4c98639f29264c314c36`.
 
-Siguiente trabajo: localizar la fijación y evidencia de revisión del extractor,
+Al iniciar, el siguiente trabajo era localizar la fijación y evidencia de revisión del extractor,
 explicar la diferencia de bytes y decidir una reparación reproducible sin
 debilitar el auditor. No se ha declarado reparado ni ejecutada una nueva campaña.
+
+
+Cierre del hito local: [auditoría final](completion-audit-final.md) y
+[criterios con recibo público](completion-audit-final.json). El informe primario
+falló; su reparación complementaria y los resultados adversos están publicados.
+La goal nativa del chat conserva el estado de ejecución definitivo.
