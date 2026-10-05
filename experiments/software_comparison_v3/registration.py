@@ -13,7 +13,6 @@ import re
 import time
 
 from specorganon.role_jobs import canonical,digest,_json,_read,_safe
-from specorganon.software_controller import safe_file
 from specorganon.ledger import strict_json_loads
 from experiments.software_comparison_v3.budget import CELL_LIMITS,CAMPAIGN_LIMITS
 from experiments.software_comparison_v3.reserved import recipes,TASK_COUNTS
@@ -41,6 +40,18 @@ class RegistrationError(ValueError):pass
 
 def require(condition,message):
     if not condition:raise RegistrationError(message)
+
+
+def source_file(name):
+    """Repository paths include hidden skill directories and dependency locks.
+
+    Delivery-file extensions/hidden-directory restrictions do not apply here;
+    relative canonical paths and path-traversal rejection still do.
+    """
+    require(type(name) is str and 0<len(name)<=4096
+        and all(part not in ('.','..') and re.fullmatch(r'[A-Za-z0-9_.-]+',part)
+                for part in name.split('/')),'unsafe registered source name')
+    return name
 
 
 def utc(value):
@@ -129,12 +140,12 @@ class Registration:
         cells=fixed_schedule(value['private_schedule'])
         require(value['private_schedule_sha256']==SCHEDULE_SHA and value['cells']==cells
                 and value['primary_T']=='cell-01','original fixed cohort/primary differs')
-        bindings=value['source_sha256'];review_name=safe_file(value['accepted_review'])
+        bindings=value['source_sha256'];review_name=source_file(value['accepted_review'])
         require(type(bindings) is dict and required_sources(source)|{review_name,value['public_catalog']}<=set(bindings),
                 'full executable/protocol/rubric/contract/test/dependency snapshot required')
         for name,sha in bindings.items():
             require(type(sha) is str and re.fullmatch('[0-9a-f]{64}',sha),'source SHA256 required')
-            require(digest(_read(source/safe_file(name)))==sha,'registered source changed: '+name)
+            require(digest(_read(source/source_file(name)))==sha,'registered source changed: '+name)
         review=_json(source/review_name)
         require(review.get('schema')==1 and review.get('verdict')=='accept'
                 and review.get('scope')=='full_v3_protocol_harness_provenance_rubric_evaluator_and_registration'
