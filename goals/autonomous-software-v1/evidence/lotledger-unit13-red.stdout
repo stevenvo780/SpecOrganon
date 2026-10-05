@@ -1,0 +1,14 @@
+
+==================================== ERRORS ====================================
+______________ ERROR collecting tests/test_lotledger_reserved.py _______________
+tests/test_lotledger_reserved.py:34: in <module>
+    @pytest.mark.parametrize('recipe', recipes(), ids=lambda r: r['id'])
+                                       ^^^^^^^^^
+experiments/lotledger_delivery_v1/reserved.py:156: in recipes
+    assert [sum(r['group'] == g for r in result) for g in GROUPS] == [11, 10, 10, 13, 10, 19]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError
+=========================== short test summary info ============================
+ERROR tests/test_lotledger_reserved.py - AssertionError
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.09s
