@@ -19,7 +19,8 @@ leer stdin. No leer perfiles, red, archivos auxiliares ni variables para los dat
 
 Máximo **65536 bytes de stdin inclusive**, incluidos whitespace y LF final;
 65537 bytes es error contractual. UTF-8 estricto, sin BOM inicial ni byte NUL.
-LF separa eventos JSON. Se permite un único LF final. Vacío es válido y tiene
+LF separa eventos JSON. Después del último evento se permiten cero o un LF final:
+un evento completo sin LF final es válido. Vacío es válido y tiene
 cero eventos; LF solo, líneas vacías, una línea de whitespace o dos LF finales
 son errores. CR antes de LF cuenta como whitespace JSON y es permitido.
 Whitespace JSON alrededor del objeto en su línea es permitido. Un objeto debe

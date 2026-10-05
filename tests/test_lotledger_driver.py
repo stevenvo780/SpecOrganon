@@ -1,6 +1,8 @@
 """Read-only pre-registration admission checks; no case or model calls."""
 import hashlib
 import ast
+import datetime
+import json
 from pathlib import Path
 
 import pytest
@@ -42,7 +44,30 @@ def test_trial_freeze_covers_local_import_closure_and_loaded_modules():
     assert 'src/specorganon/engine.py' in names
     assert 'src/specorganon/role_jobs.py' in names
     assert 'src/specorganon/docker_roles.py' in names
+    assert 'tests/test_lotledger_driver.py' in names
+    assert 'tests/test_lotledger_reserved.py' in names
     assert 'scripts/analyze_bread_survey.py' not in names
+
+
+@pytest.mark.parametrize('key', ['public_catalog', 'public_context', 'mandate'])
+def test_registration_rejects_substituted_public_paths_before_loading_packet(tmp_path, key):
+    from scripts.lotledger_delivery import PUBLIC_PATHS
+    value = {'schema':1, 'identity':'lotledger-delivery-v1', 'matrix_count':63,
+             'registered_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+             'source_root':str(SOURCE), 'case':str(SOURCE/'cases/lotledger_v1'),
+             'run_root':str(tmp_path/'run'),
+             'routes':{'author':{'provider':'codex','model':'gpt-6.1-sol','effort':'medium'},
+                       'review':{'provider':'gemini','model':'Gemini 3.8 Flash (Medium)'}},
+             'profiles':{'codex_volume':'specorganon-lab_codex-home',
+                         'gemini_profile':'/home/stev/.gemini','gemini_executable':'/home/stev/.local/bin/agy'},
+             'limits':{'max_calls':40,'max_total_input_bytes':3145728,'max_elapsed_seconds':6000},
+             'images':{}, 'source_sha256':{}, 'review':'not_created', 'review_sha256':'',
+             'matrix_sha256':'', **PUBLIC_PATHS}
+    value[key] = 'experiments/lotledger_delivery_v1/reserved.py'
+    path=tmp_path/'registration.json'; path.write_text(json.dumps(value))
+    with pytest.raises(RegistrationError, match='fixed canonical public catalog/context/mandate paths'):
+        verify_registration(path)
+    assert not (tmp_path/'run').exists()
 
 
 def test_binding_cannot_omit_or_change_actual_loaded_core_module():

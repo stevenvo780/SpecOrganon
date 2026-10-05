@@ -1,4 +1,4 @@
-"""Sixty prospective LotLedger recipes; never mounted to generation roles."""
+"""Sixty-three prospective LotLedger recipes; never mounted to generation roles."""
 from __future__ import annotations
 
 import json
@@ -60,6 +60,8 @@ def recipes():
         expected(1, rows=[('L', 'A', 1)]))
     add('legal', 'balance-beyond-event-bound', lines(event('a', quantity=10**9),
         event('b', quantity=10**9)), expected(2, rows=[('L', 'A', 2 * 10**9)]))
+    add('legal', 'no-final-LF', lines(event()).rstrip(b'\n'),
+        expected(1, rows=[('L', 'A', 1)]))
 
     a = event()
     add('identity', 'duplicate', lines(a, a), expected(1, 1, [('L', 'A', 1)]))
@@ -99,6 +101,8 @@ def recipes():
     add('types', 'invalid-utf8', b'\xff\n')
     add('types', 'surrogate-escape', json.dumps(event(lot='\ud800')).encode('ascii') + b'\n')
     add('types', 'nul-escape', lines(event(lot='L\x00')))
+    add('types', 'cr-escape', lines(event(lot='L\r')))
+    add('types', 'lf-escape', lines(event(lot='L\n')))
 
     add('format', 'extra-key', lines(event(extra=1)))
     missing = event(); del missing['site']
@@ -133,8 +137,8 @@ def recipes():
         event('b', 'move', lot='Y', site='z', to='a', quantity=2)),
         expected(2, rows=[('Y', 'a', 2), ('Y', 'z', 3)]), relation='bijective-lot-site-renaming')
     add('boundaries', 'empty-id', lines(event('')))
-    assert len(result) == 60 and len({r['id'] for r in result}) == 60
-    assert all(sum(r['group'] == g for r in result) == 10 for g in GROUPS)
+    assert len(result) == 63 and len({r['id'] for r in result}) == 63
+    assert [sum(r['group'] == g for r in result) for g in GROUPS] == [11, 10, 10, 12, 10, 10]
     return result
 
 

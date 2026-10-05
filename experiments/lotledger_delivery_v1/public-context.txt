@@ -20,7 +20,8 @@ leer stdin. No leer perfiles, red, archivos auxiliares ni variables para los dat
 
 Máximo **65536 bytes de stdin inclusive**, incluidos whitespace y LF final;
 65537 bytes es error contractual. UTF-8 estricto, sin BOM inicial ni byte NUL.
-LF separa eventos JSON. Se permite un único LF final. Vacío es válido y tiene
+LF separa eventos JSON. Después del último evento se permiten cero o un LF final:
+un evento completo sin LF final es válido. Vacío es válido y tiene
 cero eventos; LF solo, líneas vacías, una línea de whitespace o dos LF finales
 son errores. CR antes de LF cuenta como whitespace JSON y es permitido.
 Whitespace JSON alrededor del objeto en su línea es permitido. Un objeto debe
@@ -191,7 +192,7 @@ no son baseline de conformidad del programa. No sustituir una métrica por otra 
 inventar baseline0. La selección de indicadores debe declarar su población propia.
 
 Criterios anteriores a build, sin compensación: F pruebas propias pertinentes
-pasadas con recibo exacto y ejemplos correctos, reserva externa60/60 para conformidad
+pasadas con recibo exacto y ejemplos correctos, reserva externa63/63 para conformidad
 completa; D documentación8/8; M nueve fases aceptadas con argumentos sustantivos,
 trazas vigentes y auditoría6/6. Pruebas propias no prueban F reservado. D/M se miden
 externamente después del cierre, sin completar el ledger retrospectivamente.
@@ -232,22 +233,40 @@ C8 SIGKILL después del recibo reusa sin llamadas/eventos duplicados y antes del
 queda inconcluso sin relanzar. C5–C8 son controles sintéticos del mecanismo, separados
 del caso y revalidados pertinentemente. Faltante/incierto no es satisfecho.
 
-Matriz de60recetas en reserved.py:6grupos de10,2ejemplos públicos incluidos. Cobertura
+Matriz de63recetas en reserved.py: legal11, identity10, order10, types12, format10,
+boundaries10;2ejemplos públicos incluidos. Las60recetas originales se conservan y
+se añaden ausencia de LF final, CR escapado y LF escapado antes de registro/autores. Cobertura
 determinista finita, no potencia estadística ni prueba exhaustiva de todo input. No
 selección por resultados. Expectativas explícitas y metamorfismos fijados antes de
 generar; nunca construir oráculo a partir del programa. Una invocación por receta,
-3s/2CPU/1GiB/128pids/2MiB por stream. Ausencia de programa cuenta60fallos, no omisión.
+3s/2CPU/1GiB/128pids/2MiB por stream. Ausencia de programa cuenta63fallos, no omisión.
 Timeout/crash/salida truncada del sujeto es fallo; infraestructura incierta se publica
 como inconclusa. El evaluador conserva códigos, tiempos, hashes y streams privados,
 y sólo reusa recibos cerrados con idénticos inputs/entrega.
 
-completed_technical requiere C1–C8, gate9,D8/8,M6/6,F60/60, README/tests/paquete real.
+completed_technical requiere C1–C8, gate9,D8/8,M6/6,F63/63, README/tests/paquete real.
 Otro resultado se publica delivery_failed, infra_inconclusive o not_started, con
 denominadores fijos. Este hito no basta para cerrar la goal. Después se requiere
 la campaña NUEVA multitype N/S/T/ablación de experiments/software_comparison_v3/
 protocol-draft.md, congelada y revisada antes de sus autores, y release/publicación
 finales. Ese protocolo es requisito de la comparación, no permiso para iniciarla
 por aceptar LotLedger; no se eligen tareas a partir de una victoria de LotLedger.
+
+## Red, identidad y custodia de perfiles nativos
+
+Los sujetos y tests de entrega tienen red none y no montan credenciales. Autor y
+revisor nativos necesitan red para sus proveedores y usan exclusivamente sus
+perfiles originales, sin copiar credenciales ni montar casos, evaluadores o recetas.
+Las imágenes verificadas declaran USER codex (nativa) y USER ubuntu (test); el
+comando id ejecutado sin perfiles observó uid1000 en ambas. La ausencia de --user
+en el transporte nativo hereda ese usuario de imagen; no implica ejecución root.
+Se conservan readonly/cap-drop ALL/no-new-privileges/2CPU/1GiB/128pids y mounts de
+entrada readonly. Los perfiles permanecen escribibles para el CLI autorizado y
+renovación de sesión. Esto confía en esos CLIs/perfiles para autenticación: no es
+una garantía criptográfica ni bloqueo absoluto de herramientas internas de Gemini.
+El programa sujeto separado sí carece de perfiles y red; los recibos de los roles
+y montajes distinguen ambos ámbitos. No convertir esta diferencia en evidencia
+de seguridad universal ni ocultar el uso de red/autenticación de los proveedores.
 
 
 FILE public-evidence.md

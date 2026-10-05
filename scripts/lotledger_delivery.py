@@ -29,6 +29,9 @@ RUNTIME_SCRIPTS = (
     'lotledger_delivery.py', 'evaluate_lotledger_delivery.py', 'controller_native_role.py',
     'study_cell_budget.py', 'study_campaign.py', 'software_study_harness.py', 'study_assessment.py',
 )
+PUBLIC_PATHS = {'public_catalog': 'experiments/lotledger_delivery_v1/public-models.json',
+                'public_context': 'experiments/lotledger_delivery_v1/public-context.txt',
+                'mandate': 'experiments/lotledger_delivery_v1/mandate.md'}
 
 
 def registration_source_names(source, *, public_catalog, public_context, mandate):
@@ -46,6 +49,7 @@ def registration_source_names(source, *, public_catalog, public_context, mandate
               'experiments/lotledger_delivery_v1/public-evidence.md',
               'experiments/lotledger_delivery_v1/public-sqlite-observations.json',
               'experiments/software_comparison_v3/protocol-draft.md',
+              'tests/test_lotledger_driver.py', 'tests/test_lotledger_reserved.py',
               public_catalog, public_context, mandate}
     return names
 
@@ -85,7 +89,7 @@ def verify_registration(path, *, check_sources=True):
                 'source_sha256', 'images', 'routes', 'profiles', 'limits', 'public_catalog',
                 'public_context', 'mandate', 'review', 'review_sha256', 'matrix_sha256', 'matrix_count'}
     if (type(value) is not dict or set(value) != required or value['schema'] != 1
-            or value['identity'] != 'lotledger-delivery-v1' or value['matrix_count'] != 60):
+            or value['identity'] != 'lotledger-delivery-v1' or value['matrix_count'] != 63):
         raise RegistrationError('immutable LotLedger registration schema required')
     source = _safe(value['source_root']); case = _safe(value['case']); root = _safe(value['run_root'])
     try:
@@ -105,6 +109,8 @@ def verify_registration(path, *, check_sources=True):
         raise RegistrationError('fixed original routes/profiles required')
     if value['limits'] != {'max_calls': 40, 'max_total_input_bytes': 3145728, 'max_elapsed_seconds': 6000}:
         raise RegistrationError('fixed prospective limits required')
+    if {key: value[key] for key in PUBLIC_PATHS} != PUBLIC_PATHS:
+        raise RegistrationError('fixed canonical public catalog/context/mandate paths required')
     if (type(value['images']) is not dict or set(value['images']) != {'native', 'test'}
             or any(type(v) is not str or not re.fullmatch('sha256:[0-9a-f]{64}', v) for v in value['images'].values())):
         raise RegistrationError('immutable images required')
