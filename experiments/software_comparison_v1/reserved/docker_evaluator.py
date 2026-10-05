@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import posixpath
 import re
+import shutil
 import stat
 
 from specorganon.docker_roles import DockerRoles
@@ -38,6 +39,10 @@ def delivery_inventory(root):
 
 def fixture_inventory(root, entries):
     result = []
+    if root.exists():
+        info = root.lstat()
+        result.append({'root': True, 'mode': info.st_mode, 'ino': info.st_ino,
+                       'mtime_ns': info.st_mtime_ns, 'ctime_ns': info.st_ctime_ns})
     for entry in entries:
         path = (os.fsencode(root) + b"/" + bytes.fromhex(entry["path_bytes_hex"])
                 if "path_bytes_hex" in entry else root / entry["path"])
@@ -62,8 +67,10 @@ def link_target_observations(raw):
     quoted = r'("(?:[^"\\]|\\.)*")'
     shared_fs = 'CLONE_FS' in raw
     for original in raw.splitlines():
-        prefix = re.match(r'^\[pid\s+(\d+)\]\s+(.*)$', original)
-        pid, line = (prefix.group(1), prefix.group(2)) if prefix else ("main", original)
+        prefix = re.match(r'^(?:\[pid\s+(\d+)\]|(\d+))\s+(.*)$', original)
+        pid, line = ((prefix.group(1) or prefix.group(2)), prefix.group(3)) if prefix else ("main", original)
+        if line.startswith('execve("/opt/specorganon/venv/bin/python"') and len(cwd) == 1:
+            cwd[pid] = cwd['main']
         base = cwd.get(pid)
         child = re.match(r'(?:clone|clone3|fork|vfork)\(.*\)\s*=\s*(\d+)\s*$', line)
         if child:
@@ -119,7 +126,7 @@ def link_target_observations(raw):
 def probe_open_observations(raw):
     matches = []
     for original in raw.splitlines():
-        line = re.sub(r'^\[pid\s+\d+\]\s+', '', original)
+        line = re.sub(r'^(?:\[pid\s+\d+\]|\d+)\s+', '', original)
         if not re.match(r'(?:open|openat|openat2|creat)\(', line):
             continue
         descriptor = re.search(r'=\s*\d+<([^>]+)>', line)
@@ -145,12 +152,12 @@ def content_audit(case, result):
         return {"status": "inconclusive", "reason": result["infrastructure_error"]}
     if result.get("timed_out") or result.get("truncated_streams") or result["exit_code"]:
         return {"status": "fail", "reason": "audit subject did not close successfully"}
-    # A subject can forge trace-looking lines on stderr. Never parse that
-    # shared stream as trusted tracer evidence. Separate collector is pending;
-    # the current Docker trace path therefore returns inconclusive.
+    # Only the isolated collector channel may supply tracer evidence.
     if type(result.get('trace')) is not bytes:
         return {"status": "inconclusive", "reason": "isolated tracer stream not collected"}
     raw = result['trace'].decode("utf-8", errors="replace")
+    if result['stderr']:
+        return {'status': 'fail', 'reason': 'audit subject stderr framing'}
     if not re.search(r'execve\("/opt/specorganon/venv/bin/python".*= 0', raw):
         return {"status": "inconclusive", "reason": "tracer did not observe Python launch"}
     if not re.search(r'\bexit_group\(0\)', raw):
@@ -174,7 +181,7 @@ def content_audit(case, result):
 
 def audit_case():
     return {"id": "content-probe", "task": "treemap", "group": "content-access",
-            "entries": [{"kind": "file", "path": "probe.txt", "size": 3},
+            "entries": [{"kind": "file", "path": "probe.txt", "size": 3, "mode": 0o644},
                         {"kind": "link", "path": "link", "target": "probe.txt"}],
             "argv": ["--root", "/fixture/root"], "stdin_hex": "",
             "expected": {"files": [{"path": "probe.txt", "bytes": 3}],
@@ -188,9 +195,15 @@ class ReservedDocker:
         self.root.mkdir(parents=True, mode=0o700, exist_ok=True)
         self.image = DockerRoles._image(image)
         self.store = JobStore(self.root / "journal", max_jobs=512, max_elapsed_seconds=6000)
-        policy = {"schema": 1, "image": self.image, "invocation_seconds": 3,
+        self.collector = Path(__file__).with_name('trace_collector.py')
+        policy = {"schema": 2, "image": self.image, "invocation_seconds": 3,
                   "attach_seconds": 10, "memory": "1g", "cpus": "2", "pids": 128,
                   "stream_cap_bytes": 2_097_152,
+                  "collector_sha256": digest(self.collector.read_bytes()),
+                  "transport_source_sha256": digest(Path(__file__).read_bytes()),
+                  "fixture_source_sha256": digest(Path(__file__).with_name('evaluator.py').read_bytes()),
+                  "trace_subject_uid": 65534,
+                  "trace_collector_capabilities": ['DAC_OVERRIDE', 'SETUID', 'SETGID', 'SYS_PTRACE'],
                   "scope": "reserved evaluator draft, never native generation"}
         path = self.root / "policy.json"
         if path.exists() and _json(path) != policy:
@@ -260,26 +273,49 @@ class ReservedDocker:
                 path.write_text(text, encoding="utf-8")
             fixture = folder / "fixture"
             fixture.mkdir(mode=0o755)
+            fixture.chmod(0o755)
             if case["task"] == "treemap":
                 materialize(fixture / "root", case["entries"])
             subject = ["/opt/specorganon/venv/bin/python", "-E", "-s", "-B",
                        "/input/delivery/" + case["task"] + ".py", *case["argv"]]
-            traced = (["/usr/bin/strace", "-f", "-qq", "-yy", "-s", "4096", "-e",
-                       "trace=%file,%network,%process,exit_group", *subject] if case.get("trace") else subject)
-            command = ["/usr/bin/timeout", "--signal=KILL", "3s", *traced]
+            collector_input = None
+            if case.get('trace'):
+                if os.geteuid() != 1000 or case['task'] != 'treemap' or case['stdin_hex']:
+                    raise EvaluationError('trace probe requires host UID1000 and fixed stdin-free TreeMap subject')
+                # Subject UID65534 can read code, but cannot traverse the private
+                # output directory owned by the host UID1000. Root collector
+                # writes there using DAC_OVERRIDE; no CHOWN or host privilege.
+                for path in [inp, delivery, *delivery.rglob('*')]:
+                    path.chmod(0o755 if path.is_dir() else 0o644)
+                collector_input = folder / 'collector-input'
+                collector_input.mkdir(mode=0o700)
+                collector_input.chmod(0o700)
+                shutil.copy2(self.collector, collector_input / 'collector.py')
+                (collector_input / 'config.json').write_bytes(encoded({'argv': subject}))
+                (folder / 'collector-output').mkdir(mode=0o700)
+                command = ['/opt/specorganon/venv/bin/python', '-I', '-B', '/collector-input/collector.py']
+            else:
+                command = ["/usr/bin/timeout", "--signal=KILL", "3s", *subject]
             label = digest(canonical({"root": str(self.root), "job": job_id}))[:24]
             name = "specorganon-eval-" + label
             args = ["create", "--name", name, "--label", "specorganon.reserved=" + label,
                     "--interactive", "--read-only", "--network", "none", "--cap-drop=ALL",
-                    "--security-opt", "no-new-privileges", "--user", "1000:1000",
+                    "--security-opt", "no-new-privileges", "--user", "0:0" if case.get('trace') else "1000:1000",
                     "--memory", "1g", "--cpus", "2", "--pids-limit", "128",
                     "--tmpfs", "/tmp:rw,nosuid,size=256m", "-e", "HOME=/tmp", "-e", "TMPDIR=/tmp",
                     "--mount", f"type=bind,src={inp},dst=/input,readonly",
-                    "--mount", f"type=bind,src={fixture},dst=/fixture,readonly",
-                    "-w", case.get("cwd", "/input/delivery"), "--entrypoint", "", self.image, *command]
+                    "--mount", f"type=bind,src={fixture},dst=/fixture,readonly"]
+            if case.get('trace'):
+                for capability in ['DAC_OVERRIDE', 'SETUID', 'SETGID', 'SYS_PTRACE']:
+                    args += ['--cap-add', capability]
+                args += ['--mount', f'type=bind,src={collector_input},dst=/collector-input,readonly',
+                         '--mount', f'type=bind,src={folder / "collector-output"},dst=/collector-output']
+            args += ["-w", case.get("cwd", "/input/delivery"), "--entrypoint", "", self.image, *command]
             fixture_index = fixture_inventory(fixture / "root", case.get("entries", []))
             plan = {"schema": 1, "name": name, "label": label, "request": request,
                     "fixture_index": fixture_index,
+                    "collector_input_sha256": ({p.name: digest(p.read_bytes()) for p in collector_input.iterdir()}
+                                               if collector_input else None),
                     "create_argv": args, "subject_argv": subject, "container_id": None}
             _write(folder / "plan.json", plan)
         # Delivery bytes are the only subject code available. Verify before and
@@ -288,6 +324,13 @@ class ReservedDocker:
             raise EvaluationError("prepared subject files diverged")
         if fixture_inventory(folder / "fixture/root", case.get("entries", [])) != plan["fixture_index"]:
             raise EvaluationError("prepared fixture metadata diverged")
+        if case.get('trace') and ({p.name: digest(p.read_bytes()) for p in (folder / 'collector-input').iterdir()}
+                                 != plan['collector_input_sha256']):
+            raise EvaluationError('trusted collector/config bytes diverged')
+        if case.get('trace'):
+            out = (folder / 'collector-output').stat()
+            if out.st_uid != 1000 or stat.S_IMODE(out.st_mode) != 0o700:
+                raise EvaluationError('collector output privacy changed')
         value = self._inspect(plan)
         if plan["container_id"] is None:
             if value is None:
@@ -333,6 +376,32 @@ class ReservedDocker:
                   "timed_out": code == 137 or receipt["timed_out"],
                   "truncated_streams": receipt["truncated_streams"],
                   "infrastructure_error": "attachment deadline" if receipt["timed_out"] else None}
+        collector_packet = None
+        if case.get('trace') and not (code or receipt['timed_out'] or receipt['truncated_streams']):
+            if job['stderr']:
+                raise EvaluationError('trusted collector emitted diagnostics; not subject evidence')
+            collector_packet = exact_json(job['stdout'])
+            if (type(collector_packet) is not dict or set(collector_packet) != {
+                    'schema', 'subject_argv', 'tracer_argv', 'subject_uid', 'subject_gid', 'exit_code',
+                    'timed_out', 'truncated_streams', 'duration_seconds', 'streams'}
+                    or collector_packet['schema'] != 1 or collector_packet['subject_argv'] != plan['subject_argv']
+                    or collector_packet['subject_uid'] != 65534 or collector_packet['subject_gid'] != 65534
+                    or type(collector_packet['exit_code']) is not int or type(collector_packet['timed_out']) is not bool
+                    or set(collector_packet['streams']) != {'stdout', 'stderr', 'trace'}):
+                raise EvaluationError('invalid trusted collector packet')
+            if ({p.name: digest(p.read_bytes()) for p in (folder / 'collector-input').iterdir()}
+                    != plan['collector_input_sha256']):
+                raise EvaluationError('collector/config changed during execution')
+            from specorganon.role_jobs import _read
+            for name in ['stdout', 'stderr', 'trace']:
+                path = folder / 'collector-output' / (name + '.bin')
+                raw = _read(path, 2_097_152)
+                stream = collector_packet['streams'][name]
+                if path.lstat().st_uid != 0 or stream != {'bytes': len(raw), 'sha256': digest(raw)}:
+                    raise EvaluationError('root collector artifact/packet diverged')
+                result[name] = raw
+            result.update(exit_code=collector_packet['exit_code'], timed_out=collector_packet['timed_out'],
+                          truncated_streams=collector_packet['truncated_streams'])
         # OOM is an observed subject resource failure; it is not promoted to a
         # pass, even if an optimistic partial JSON was flushed first.
         verdict = content_audit(case, result) if case.get("trace") else judge(case, result)
@@ -342,5 +411,9 @@ class ReservedDocker:
                     "stdout_sha256": receipt["stdout_sha256"], "stderr_sha256": receipt["stderr_sha256"],
                     "request": request, "subject_argv": plan["subject_argv"],
                     "reused_closed_receipt": job["reused"], "native_model_calls": 0}
+        if collector_packet is not None:
+            measured.update(subject_exit_code=collector_packet['exit_code'], collector_exit_code=code,
+                            collector_packet=collector_packet,
+                            isolated_streams_root=str(folder / 'collector-output'))
         _write(folder / "verdict.json", measured)
         return measured

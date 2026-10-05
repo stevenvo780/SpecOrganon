@@ -145,6 +145,13 @@ def test_one_conditional_repair_and_no_test_identity_quota_reset(tmp_path, mutat
     else:
         assert repair(ctrl)['build_stage'] == 'repair'
         assert ctrl.step()['passed'] is True
+        current=engine.get_state(ctrl.case)
+        current_tests=[item for item in current['items'].values() if item['kind']=='test']
+        assert len(current_tests)==1 and current_tests[0]['id']=='t1'
+        assert current_tests[0]['data']['delivery_tree_sha256']==digest(canonical(ctrl._files()))
+        measured=[entry for entry in _json(ctrl.root/'progress.json')['history'] if entry['action']=='test']
+        assert [entry['passed'] for entry in measured]==[False,True]
+        assert current_tests[0]['data']['test_job_ref'].endswith('test-2/receipt.json')
         ctrl.transport.result = {'schema':1, 'verdict':'reject', 'reason':'Synthetic semantic rejection', 'findings':[]}
         assert ctrl.step()['verdict'] == 'reject'
         with pytest.raises(ControllerError, match='budget'): ctrl.step()
@@ -180,8 +187,13 @@ def test_oversized_test_logs_retained_without_passed_or_partial_ledger_write(tmp
     assert len(ctrl.executor.calls)==1
 
 
-def test_maximum_full_validate_context_keeps_all_items_files_and_test_streams(tmp_path):
+@pytest.mark.parametrize('public_contract',[None,'routeplan','treemap'])
+def test_maximum_full_validate_context_keeps_all_items_files_and_test_streams(tmp_path,public_contract):
     ctrl=build_fixture(tmp_path);ctrl.executor=Executor(tmp_path,stdout=b'X'*3994,stderr=b'Y'*3994);program(ctrl);stage_tests(ctrl);ctrl.step()
+    if public_contract:
+        repository=Path(__file__).parents[1]
+        ctrl.contract=(repository/'experiments/software_comparison_v1/public'/ (public_contract+'.md')).read_text()
+        ctrl.mandate=(repository/'experiments/software_comparison_v1/public/existing-mandate.md').read_text()
     state=engine.get_state(ctrl.case)
     state['phases']['build']['accepted']=True
     # Model a final current snapshot at each declared phase cap. All complete
@@ -217,7 +229,9 @@ def test_maximum_full_validate_context_keeps_all_items_files_and_test_streams(tm
     streams=json.loads(request['documents']['measured-test-records.json'])['t1']['streams']
     assert streams['stdout']=={'text':'X'*3994,'complete':True}
     assert streams['stderr']=={'text':'Y'*3994,'complete':True}
-    print(json.dumps({'classification':'synthetic maximum item/files/log contribution fixture', 'request_bytes':len(canonical(request)), 'request_limit':110000,'phase_count':9,'phase_item_limit':6,'phase_encoded_limit':6000,'files_encoded_bytes':encoded_contribution(files),'stream_encoded_bytes':encoded_contribution('X'*3994),'state_preserved':True,'C1_satisfied':False}))
+    from scripts.controller_native_role import render_prompt
+    rendered_bytes=len(render_prompt(canonical(request))[1].encode('utf-8'))
+    print(json.dumps({'classification':'synthetic maximum item/files/log contribution fixture', 'public_contract':public_contract,'request_bytes':len(canonical(request)), 'rendered_bytes':rendered_bytes,'request_limit':110000,'phase_count':9,'phase_item_limit':6,'phase_encoded_limit':6000,'files_encoded_bytes':encoded_contribution(files),'stream_encoded_bytes':encoded_contribution('X'*3994),'state_preserved':True,'C1_satisfied':False}))
 
 
 @pytest.mark.parametrize('stage,operation',[('program','rename'),('program','put'),('tests','put'),('tests','seal')])

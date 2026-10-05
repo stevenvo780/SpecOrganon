@@ -330,6 +330,7 @@ def materialize(root, entries):
     """Create owned fixtures only; never discover expected values from delivery."""
     root = Path(root)
     root.mkdir(parents=True, exist_ok=False)
+    root.chmod(0o755)
     deferred = []
     for entry in entries:
         if "path_bytes_hex" in entry:
@@ -342,6 +343,7 @@ def materialize(root, entries):
         kind = entry["kind"]
         if kind == "dir":
             os.mkdir(path, 0o755)
+            os.chmod(path, 0o755)
         elif kind == "file":
             with open(path, "xb") as stream:
                 stream.truncate(entry["size"])

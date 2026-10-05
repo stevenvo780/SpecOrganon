@@ -1,0 +1,31 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "```json\n{\n  \"verdict\": \"accept_draft\",\n  \"findings\": [],\n  \"limitations\": [\n    \"CLONE_FS traces with unknown relative directory resolution are mapped to inconclusive, never inferred clean, preventing false passes in complex multi-thread execution topologies.\",\n    \"O_PATH file descriptor opens with O_NOFOLLOW on symlinks, combined with /proc/self/fd/ readlink, allow discovery of path metadata without accessing actual target content; this remains observable but is not penalized.\",\n    \"Host filesystem timestamps and inventory metadata hashes are used for preparation integrity but are not considered cryptographic custody attestations.\",\n    \"Isolation relies on strict OS-level enforcement (UID 65534 vs root tracer, isolated pipes, read-only mounts, network none) rather than exhaustive proof of tracer code against all adversarial payloads.\",\n    \"Sourceguard trace absence yields an inconclusive verdict rather than an explicit pass.\"\n  ],\n  \"tests_executed\": false\n}\n```\n\n[cloud-offload provider=gemini model=gemini/pro access=text cwd=/datos/workspaces/personal/SpecOrganon duration_s=46.7 depth=0 agy_model=Gemini 3.1 Pro (High)]"
+    }
+  ],
+  "structuredContent": {
+    "job_id": "415dab7d34ea4d6aae94ef34f9119e38",
+    "status": "succeeded",
+    "submitted_at": 1791184433.289168,
+    "owner_pid": 3776792,
+    "owner_start": "8664844",
+    "owner_instance": "76d3fa0516e24ae59a015b9631c0a0df",
+    "model": "gemini/pro",
+    "access": "text",
+    "codex_account": null,
+    "started_at": 1791184433.2895744,
+    "finished_at": 1791184480.027982,
+    "text": "```json\n{\n  \"verdict\": \"accept_draft\",\n  \"findings\": [],\n  \"limitations\": [\n    \"CLONE_FS traces with unknown relative directory resolution are mapped to inconclusive, never inferred clean, preventing false passes in complex multi-thread execution topologies.\",\n    \"O_PATH file descriptor opens with O_NOFOLLOW on symlinks, combined with /proc/self/fd/ readlink, allow discovery of path metadata without accessing actual target content; this remains observable but is not penalized.\",\n    \"Host filesystem timestamps and inventory metadata hashes are used for preparation integrity but are not considered cryptographic custody attestations.\",\n    \"Isolation relies on strict OS-level enforcement (UID 65534 vs root tracer, isolated pipes, read-only mounts, network none) rather than exhaustive proof of tracer code against all adversarial payloads.\",\n    \"Sourceguard trace absence yields an inconclusive verdict rather than an explicit pass.\"\n  ],\n  \"tests_executed\": false\n}\n```",
+    "meta": {
+      "agy_model": "Gemini 3.1 Pro (High)",
+      "provider": "gemini",
+      "model": "gemini/pro",
+      "access": "text",
+      "cwd": "/datos/workspaces/personal/SpecOrganon",
+      "duration_s": 46.7,
+      "depth": 0
+    }
+  }
+}

@@ -12,7 +12,7 @@ TreeMap obtiene esperados de una descripción declarativa independiente del
 recorrido del programa. Ambos comprueban tipos y conjuntos de claves JSON,
 enmarcado de streams y códigos de salida, conservando incertidumbre de infra.
 
-Docker sólo monta entrega opaca y fixture actual, ambos readonly. No monta
+En invocaciones ordinarias Docker sólo monta entrega opaca y fixture actual, ambos readonly. No monta
 esperados, suite, evaluador, ledger, perfiles, journal ni daemon. Usa imagen
 inmutable, red none, UID1000, cap-drop ALL, 1GiB/2CPU/128pids y scratch tmpfs.
 El límite de ejecución se impone con timeout3s dentro del contenedor; el host
@@ -54,9 +54,38 @@ harness/protocolo, antes de prerregistrar.
 
 La revisión de transporte03 fue reject. Control04 reprodujo falsa aceptación
 por stderr/traza compartidos y falso rechazo por substring. Control05 ahora
-queda inconcluso: se eliminó usar stderr como traza. Falta recolector separado
-que el sujeto no pueda alterar; la medición de contenidos todavía no se acepta.
+queda inconcluso: se eliminó usar stderr como traza. En ese punto faltaba un
+recolector separado que el sujeto no pudiera alterar; control05 no acepta la medición.
 Los15 controles históricos03 no son prueba de robustez ante esos defects.
 Los23 checks unitarios actuales pasan host y cleanDocker02; no suplen esa
 medición pendiente. Ver study-evaluator-review-triage-v1.md y archivos de
 evidence/study-evaluator-findings-04-05.tar.gz para la evidencia preservada.
+
+## Recolector aislado posterior: aceptación acotada del borrador
+
+El probe auxiliar ahora usa un recolector/trazador UID0 y sujeto UID65534,
+sin capacidades efectivas. Sólo ese contenedor añade DAC_OVERRIDE, SETUID,
+SETGID y SYS_PTRACE sobre cap-drop ALL; mantiene red none y root readonly.
+La captura de stdout/stderr/traza ocurre en archivos y pipes separados. El
+sujeto no puede acceder al directorio del recolector, alterar su traza ni
+matar al trazador. Los sujetos ordinarios conservan UID1000/cap-drop ALL.
+No se montan perfiles, esperados, evaluador, método, ledger ni Docker daemon.
+
+Control06 falló por permisos de directorios afectados por umask027. Se
+conservó antes de fijar explícitamente0755 en directorios declarativos y0644
+en el probe. Control07 pasó los15 controles reales y reutilizó un recibo
+cerrado. Isolation08 pasó seis controles reales: frontera de UID/capacidades,
+spoof de stderr rechazado, ruta similar en scratch admitida, metadata O_PATH
+permitida, readlinkat detectado y timeout. El archivo raw tiene349 archivos,
+incluida la corrida negativa06; las fixtures se reconstruyen desde sus recetas.
+
+Gemini3.1ProHigh job415dab7d34ea4d6aae94ef34f9119e38 emitió accept_draft sin
+hallazgos, tests_executed=false. Los bytes de su input coinciden con las fuentes
+actuales del trazador. Esa revisión no acepta el harness/protocolo ni una entrega
+de software. La traza CLONE_FS de resolución desconocida queda inconclusa; no
+se afirma custodia criptográfica o resistencia frente a todos los programas.
+
+El harness de celdas y su presupuesto común ya tienen controles sintéticos,
+pero su revisión01 fue reject y se corrigieron cierres terminales después.
+La auditoría conjunta, gate de campaña, presupuesto acumulado y prerregistro
+permanecen pendientes. No hay soluciones nuevas generadas.
