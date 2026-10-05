@@ -59,3 +59,29 @@ de `src` y confirma que specorganon se importa desde site-packages.
 El paquete fuente no incluye perfiles, credenciales ni un registro portátil de
 la campaña activa. Su manifest liga los bytes exportados; el registro privado
 original permanece separado.
+
+## Controles de bloqueo sobre copias
+
+Con el wheel instalado se ejecutaron tres perturbaciones sintéticas en copias
+independientes del ledger de la entrega nativa FractionMix original. Una objeción
+declarada dejó build sin aceptación e impidió avanzar; retirar el receipt de un
+test manteniendo passed=true también bloqueó el avance. Cambiar p1 dejó27
+descendientes obsoletos y reabrió validación. Restaurar el texto creó otra versión
+y no recuperó las aceptaciones anteriores. Cada avance rechazado dejó intacto
+el ledger. El expediente sellado original conservó su hash.
+
+Son controles del instrumento sobre copias, con perturbaciones identificadas
+como sintéticas. No acreditan detección semántica automática de contradicciones,
+una nueva revisión nativa ni una corrida adicional de la cohorte. No hubo
+llamadas a proveedores ni sujetos reservados. La reanudación tras SIGKILL y el
+replay sin duplicación tienen además el recibo de CLI/MCP de esta instalación.
+
+El driver ejecutado está en
+experiments/autonomous_release/controls/native_ledger_perturbations.py. Para
+reproducirlo, monta sólo una carpeta con organon.json de un caso local completo
+en /seed con readonly, el driver en /exercise.py con readonly y una carpeta
+escribible vacía en /runs. Ejecuta python -B /exercise.py en la imagen de
+instalación, sin red ni perfiles de autenticación. El driver consulta status,
+report y next-task antes de cada perturbación y escribe result.json en /runs.
+No uses el directorio del caso original como /runs. Los resultados y el comando
+real observado están junto al driver.
