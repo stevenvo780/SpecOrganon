@@ -110,3 +110,10 @@ de bridge: falló antes de producir el ZIP y se corrigió usando fuentes registr
 El paquete final local tiene104entradas más manifest, no contiene perfiles ni el
 registro privado portátil de la campaña. Candidato no publicado ni release final.
 Los306bindings históricos, GOAL original y ledgers CSV/Lot permanecen intactos.
+
+T6 cerró las nueve fases actuales y su auditoría final nativa; la comprobación
+física produjo eligible, con deliverySHAef8072333ab051347b54aded78950c2432f4aa8c61c8d258d0eb33934bb229b4.
+Tiempo original1014.271s. Ya hay dos entregas T9eligible, ambas FractionMix/Codex
+en las dos repeticiones fijadas. No constituyen diversidad de tareas/familias
+ni resultados F; faltan36cierres y la evaluación. No se repitió el programa
+tras su prueba ni se usaron sujetos reservados.
