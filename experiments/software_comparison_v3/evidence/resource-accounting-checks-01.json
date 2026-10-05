@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "at": "2026-10-05T15:39:34.380035+00:00",
+  "scope": "synthetic controller accounting/guards, not actual native software delivery",
+  "source_sha256": {
+    "src/specorganon/software_controller.py": "0a5fcfa1aa48c47ccac2e338ed0bb974fce826e88fcf85d27623d64059629233",
+    "tests/test_artifact_guidance.py": "8cc7cc6788462e80df7a63cf875bdbf99997438056854aadc56f82f3cf32730e",
+    "tests/test_resource_accounting.py": "16b0f643512f0033845273570b23db0b785cc409fd283ecf0fc6edf0df3c17bc"
+  },
+  "host": {
+    "python": "3.12.13",
+    "passed": 65,
+    "failed": 0,
+    "exit_code": 0,
+    "seconds": 5.43
+  },
+  "Docker_source_mounted": {
+    "image": "sha256:98723123de528a5f0201a1c341fe044f88d885345b2e1bedd6a89574c4796d92",
+    "python": "3.12.3",
+    "passed": 65,
+    "failed": 0,
+    "exit_code": 0,
+    "seconds": 6.63,
+    "network": "none",
+    "delivery_source_readonly": true,
+    "new_wheel_installed": false
+  },
+  "tests": [
+    "tests/test_resource_accounting.py",
+    "tests/test_artifact_guidance.py",
+    "tests/test_software_controller.py",
+    "tests/test_software_controller_resources.py"
+  ],
+  "preserved_failed_checks": [
+    {
+      "passed": 63,
+      "failed": 2,
+      "reason": "added guidance exceeded110000 request cap in RoutePlan/TreeMap maximum fixtures"
+    },
+    {
+      "passed": 64,
+      "failed": 1,
+      "reason": "TreeMap maximum fixture still exceeded110000 after first compaction"
+    },
+    {
+      "passed": 64,
+      "failed": 1,
+      "reason": "TreeMap maximum fixture still exceeded110000 after second compaction"
+    }
+  ],
+  "fix": "compact advisory/current-cost rows and redundant instruction wording; full state/files/streams retained, all original caps unchanged",
+  "new_nine_phase_deliveries": 0,
+  "comparison_generated_cells": 0,
+  "goal_complete": false
+}

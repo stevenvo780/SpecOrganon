@@ -89,14 +89,17 @@ def test_new_request_adds_guidance_and_preserves_complete_authoritative_state(tm
     assert json.loads(request['documents']['reference-maintenance.json'])['scope'].startswith('Read-only advisory')
     assert (ctrl.case / 'organon.json').read_bytes() == before
     policy = _json(ctrl.root / 'controller.json')
-    assert policy['schema'] == 8 and policy['max_author_per_phase'] == 2
+    assert policy['schema'] == 9 and policy['max_author_per_phase'] == 2
     assert policy['max_role_calls'] == 40 and policy['max_phase_encoded_bytes'] == 6000
 
 
-def test_schema7_rejected_before_recreating_delivery_tree_or_touching_case(tmp_path):
+@pytest.mark.parametrize('old_schema', [7, 8])
+def test_old_guidance_rejected_before_recreating_delivery_tree_or_touching_case(tmp_path, old_schema):
     ctrl = create_controller(tmp_path)
-    policy = _json(ctrl.root / 'controller.json'); policy['schema'] = 7
-    for key in ('artifact_data_contract_sha256', 'artifact_guidance_source_sha256', 'reference_hint_schema', 'max_reference_hint_bytes'): policy.pop(key)
+    policy = _json(ctrl.root / 'controller.json'); policy['schema'] = old_schema
+    if old_schema == 7:
+        for key in ('artifact_data_contract_sha256', 'artifact_guidance_source_sha256', 'reference_hint_schema', 'max_reference_hint_bytes'): policy.pop(key)
+    for key in ('resource_hint_schema', 'resource_guidance_source_sha256'): policy.pop(key)
     _write(ctrl.root / 'controller.json', policy); ctrl.delivery.rmdir()
     before = (ctrl.case / 'organon.json').read_bytes()
     with pytest.raises(ControllerError, match='versioned run'):

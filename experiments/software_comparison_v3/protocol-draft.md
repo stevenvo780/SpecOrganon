@@ -20,7 +20,7 @@ Tres familias propuestas, un contrato por familia para todos los métodos/modelo
 |---|---|---|
 | FractionMix | aritmética exacta | Sumar racionales con numeradores/denominadores enteros; resultado canónico reducido, límites y errores exactos |
 | PolicyPick | reglas de decisión | Elegir regla coincidente por prioridad y desempate, tags/strings exactos, reglas sin match y forma JSON |
-| ListPatch | edición de secuencias | Aplicar insert/replace/remove en índices del estado vigente; resultado atómico y errores por índice/tipo |
+| ListPatch | edición de secuencias | Aplicar insert/replace/delete en índices del estado vigente; resultado atómico y errores por índice/tipo |
 
 La tabla selecciona ámbitos, no contratos completos ni oráculos. Contratos exactos,
 2ejemplos públicos y60recetas por tarea se fijarán y revisarán antes de la primera
@@ -59,7 +59,7 @@ N recibe contrato, formato de entrega y criterios comunes; elige su proceso.
 S recibe además guía fija especificación→diseño→tareas→construcción→verificación:
 requisitos/criterios antes de medir, alternativas/decisiones, tareas trazables y
 tests/README. La guía íntegra se congelará; no representa todas las prácticas SDD.
-T usa engine/controller schema8, guía9fases y revisiones/mandatos separados.
+T usa engine/controller schema9 (candidato prospectivo separado), guía9fases y revisiones/mandatos separados.
 A usa la misma guía/código de registro de borradores de T sin revisión/gate intermedio.
 No fabricar aceptación en A para satisfacer un checklist exclusivo de T.
 
@@ -135,3 +135,19 @@ código/recibos no sensibles, uso desconocido y fallos históricos conservados.
 La goal requiere la entrega NUEVA9fases, campaña completa y release final limpia/
 publicada. Una comparación adversa completa puede cumplir su requisito; una
 campaña detenida, hashes o sólo una CLI verde no lo cumplen.
+
+## Revisión de diseño y contabilidad prospectiva
+
+Los tres contratos candidatos en public/ concretan los ámbitos seleccionados;
+revisión nativa Gemini3.8Flash01 exige clarificar conversión decimal grande,
+duplicados de requires/tags y delete. La revisión no ejecutó pruebas ni aceptó
+registro/harnesses/recetas. No se han admitido celdas. El nuevo controlador candidato
+schema9 explica el coste completo almacenado y muestra mediciones del snapshot.
+Conserva6 items/6000bytes por fase,40llamadas/20000bytes de archivos; no es una
+migración ni una reapertura del LotLedger cerrado. La guía compacta debe superar
+los controles de contexto máximo sin aumentar110000bytes de request/128000render.
+
+La revisión conjunta definitiva debe verificar también el orden de hitos de la
+goal: entrega nueva real de9fases antes de la evaluación comparativa. Este borrador
+no autoriza un caso de sustitución para perseguir victoria ni iniciar42generaciones
+antes de resolver ese orden. Los contratos/oráculos pueden prepararse sin autores.
