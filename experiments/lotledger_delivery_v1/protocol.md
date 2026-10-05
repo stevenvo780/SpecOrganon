@@ -76,7 +76,7 @@ no son baseline de conformidad del programa. No sustituir una métrica por otra 
 inventar baseline0. La selección de indicadores debe declarar su población propia.
 
 Criterios anteriores a build, sin compensación: F pruebas propias pertinentes
-pasadas con recibo exacto y ejemplos correctos, reserva externa68/68 para conformidad
+pasadas con recibo exacto y ejemplos correctos, reserva externa73/73 para conformidad
 completa; D documentación8/8; M nueve fases aceptadas con argumentos sustantivos,
 trazas vigentes y auditoría6/6. Pruebas propias no prueban F reservado. D/M se miden
 externamente después del cierre, sin completar el ledger retrospectivamente.
@@ -117,19 +117,20 @@ C8 SIGKILL después del recibo reusa sin llamadas/eventos duplicados y antes del
 queda inconcluso sin relanzar. C5–C8 son controles sintéticos del mecanismo, separados
 del caso y revalidados pertinentemente. Faltante/incierto no es satisfecho.
 
-Matriz de68recetas en reserved.py: legal11, identity10, order10, types12, format10,
-boundaries15;2ejemplos públicos incluidos. Las60recetas originales se conservan y
+Matriz de73recetas en reserved.py: legal11, identity10, order10, types13, format10,
+boundaries19;2ejemplos públicos incluidos. Las60recetas originales se conservan y
 se añaden ausencia de LF final, CR/LF escapados y cinco bordes de strings id/site/
-from/to antes de registro/autores. Esto amplía el corpus sin retirar recetas. Cobertura
+from/to antes de registro/autores. También se añaden lot/site/from/to vacíos y byte NUL crudo.
+Esto amplía el corpus sin retirar recetas. Cobertura
 determinista finita, no potencia estadística ni prueba exhaustiva de todo input. No
 selección por resultados. Expectativas explícitas y metamorfismos fijados antes de
 generar; nunca construir oráculo a partir del programa. Una invocación por receta,
-3s/2CPU/1GiB/128pids/2MiB por stream. Ausencia de programa cuenta68fallos, no omisión.
+3s/2CPU/1GiB/128pids/2MiB por stream. Ausencia de programa cuenta73fallos, no omisión.
 Timeout/crash/salida truncada del sujeto es fallo; infraestructura incierta se publica
 como inconclusa. El evaluador conserva códigos, tiempos, hashes y streams privados,
 y sólo reusa recibos cerrados con idénticos inputs/entrega.
 
-completed_technical requiere C1–C8, gate9,D8/8,M6/6,F68/68, README/tests/paquete real.
+completed_technical requiere C1–C8, gate9,D8/8,M6/6,F73/73, README/tests/paquete real.
 Otro resultado se publica delivery_failed, infra_inconclusive o not_started, con
 denominadores fijos. Este hito no basta para cerrar la goal. Después se requiere
 la campaña NUEVA multitype N/S/T/ablación de experiments/software_comparison_v3/

@@ -1,4 +1,4 @@
-"""Sixty-eight prospective LotLedger recipes; never mounted to generation roles."""
+"""Seventy-three prospective LotLedger recipes; never mounted to generation roles."""
 from __future__ import annotations
 
 import json
@@ -103,6 +103,7 @@ def recipes():
     add('types', 'nul-escape', lines(event(lot='L\x00')))
     add('types', 'cr-escape', lines(event(lot='L\r')))
     add('types', 'lf-escape', lines(event(lot='L\n')))
+    add('types', 'raw-NUL', lines(event()) + b'\x00')
 
     add('format', 'extra-key', lines(event(extra=1)))
     missing = event(); del missing['site']
@@ -144,8 +145,12 @@ def recipes():
         event('b', 'move', lot='Y', site='z', to='a', quantity=2)),
         expected(2, rows=[('Y', 'a', 2), ('Y', 'z', 3)]), relation='bijective-lot-site-renaming')
     add('boundaries', 'empty-id', lines(event('')))
-    assert len(result) == 68 and len({r['id'] for r in result}) == 68
-    assert [sum(r['group'] == g for r in result) for g in GROUPS] == [11, 10, 10, 12, 10, 15]
+    add('boundaries', 'empty-lot', lines(event(lot='')))
+    add('boundaries', 'empty-site', lines(event(site='')))
+    add('boundaries', 'empty-from', lines(event(op='move', site='')))
+    add('boundaries', 'empty-to', lines(event('a'), event('b', 'move', to='')))
+    assert len(result) == 73 and len({r['id'] for r in result}) == 73
+    assert [sum(r['group'] == g for r in result) for g in GROUPS] == [11, 10, 10, 13, 10, 19]
     return result
 
 

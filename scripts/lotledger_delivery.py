@@ -90,7 +90,7 @@ def verify_registration(path, *, check_sources=True):
                 'source_sha256', 'images', 'routes', 'profiles', 'limits', 'public_catalog',
                 'public_context', 'mandate', 'review', 'review_sha256', 'matrix_sha256', 'matrix_count'}
     if (type(value) is not dict or set(value) != required or value['schema'] != 1
-            or value['identity'] != 'lotledger-delivery-v1' or value['matrix_count'] != 68):
+            or value['identity'] != 'lotledger-delivery-v1' or value['matrix_count'] != 73):
         raise RegistrationError('immutable LotLedger registration schema required')
     source = _safe(value['source_root']); case = _safe(value['case']); root = _safe(value['run_root'])
     try:

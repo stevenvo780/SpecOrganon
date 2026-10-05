@@ -73,7 +73,7 @@ def test_original_quota_admission_keeps_unknown_age_and_exhaustion_controls(tmp_
 @pytest.mark.parametrize('key', ['public_catalog', 'public_context', 'mandate'])
 def test_registration_rejects_substituted_public_paths_before_loading_packet(tmp_path, key):
     from scripts.lotledger_delivery import PUBLIC_PATHS
-    value = {'schema':1, 'identity':'lotledger-delivery-v1', 'matrix_count':68,
+    value = {'schema':1, 'identity':'lotledger-delivery-v1', 'matrix_count':73,
              'registered_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
              'source_root':str(SOURCE), 'case':str(SOURCE/'cases/lotledger_v1'),
              'run_root':str(tmp_path/'run'),
@@ -102,10 +102,18 @@ def test_binding_cannot_omit_or_change_actual_loaded_core_module():
             verify_runtime_sources(SOURCE, checksums)
 
 
-def test_old_closed_registration_never_admits_new_identity_or_writes_history():
-    old = Path('/home/stev/.codex/worktrees/prospective-software-repairs/SpecOrganon')
-    registration = old / 'experiments/csvshape_delivery_v1/frozen/registration.json'
-    ledger = old / 'cases/csvshape_v1/organon.json'
+def test_other_identity_never_admits_or_writes_synthetic_history(tmp_path):
+    # Explicit synthetic negative control; actual historical preservation is
+    # verified separately by the coordinator, not a dependency of unit tests.
+    registration = tmp_path / 'registration.json'
+    keys = {'schema', 'identity', 'registered_at', 'source_root', 'case', 'run_root',
+            'source_sha256', 'images', 'routes', 'profiles', 'limits', 'public_catalog',
+            'public_context', 'mandate', 'review', 'review_sha256', 'matrix_sha256', 'matrix_count'}
+    value = {key: None for key in keys}
+    value.update({'schema':1, 'identity':'csvshape-delivery-v1', 'matrix_count':73})
+    registration.write_text(json.dumps(value))
+    ledger = tmp_path / 'organon.json'
+    ledger.write_bytes(b'{"schema":1,"events":[],"synthetic":true}\n')
     before = ledger.read_bytes()
     with pytest.raises(RegistrationError, match='immutable LotLedger registration schema required'):
         verify_registration(registration)
