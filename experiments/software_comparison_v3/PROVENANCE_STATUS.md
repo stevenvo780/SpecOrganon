@@ -1,5 +1,10 @@
 # Verificador candidato de evidencia nativa y física
 
+Este registro conserva la evidencia del snapshot7cb78818. El ejecutor posterior
+añade failed_role/MilestoneRejected y conecta verificación/outcomes; esos cambios
+no pertenecen a la aceptación anterior y requieren revisión nueva. Véase
+RUNNER_STATUS.md. No hay nueva entrega9/9 o campaña admitida.
+
 provenance.py lee diarios existentes por descriptor de sólo lectura y valida
 request/admisión/cierre/streams. No construye diarios, copia perfiles, llama a
 modelos ni cambia ledgers. Comprueba inputs y library/bridge contra fuente,
@@ -47,7 +52,7 @@ target/dependencias principales completos y excerpts explícitos del controlador
 journal/Toolkit. Se conserva el resultado fenced original. Su mención de HMAC
 en limitations se corrige arriba. Revisó13controles de provenance; los10guards
 de inspección añadidos después pasaron host/Docker pero no aquella revisión.
-El código de runtime revisado permanece idéntico a lo enviado. La revisión previa
+El código de runtime en7cb78818 permanecía idéntico a lo enviado. La revisión previa
 access=read job5169b8b52f0c47d4a219fe04beccabba agotó240s sin veredicto; se conserva.
 
 Diagnósticos corregidos: NameError inicial al situar el check de catálogo fuera

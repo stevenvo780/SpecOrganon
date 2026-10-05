@@ -7,6 +7,12 @@ fuentes, no sólo devolver un hash sin leerlos. Otro valida cuota actual antes d
 cada admisión nueva. Estos callbacks y el runner de registro aún deben conectarse.
 Construir la clase no registra el estudio. No hay CLI de generación v3.
 
+Actualización candidata posterior: registration.py/campaign.py/evaluation.py
+conectan callbacks, verificación física, cierres/export opacos y evaluación única.
+La CLI ahora existe; no hay registro completo aceptado o autores. RUNNER_STATUS.md
+describe esa integración y sus límites. El resto conserva el punto previo de
+control/revisión, sin aplicarlo retrospectivamente al ejecutor nuevo.
+
 Los handles admitidos conservan sus bindings y se reconcilian sin renovar relojes
 ni asignar reemplazos. Quedan pendientes hasta comprobar su outcome; una excepción
 incierta bloquea cierre. Falta conectar reconciliación y clasificación nativa de

@@ -34,6 +34,31 @@ class Transport:
     def verify_test(self,*args,**kwargs): return True
 
 
+def test_prepared_but_unstarted_resumption_rechecks_quota_without_reallocating(tmp_path):
+    observations=[]
+    j=setup(tmp_path,quota=lambda:observations.append('read') or {'scope':'synthetic quota'})
+    binding={'role':'author','request_sha256':'b'*64,'rendered_input_bytes':100}
+    j.admit('fixture-00','first','roles',binding)
+    before=_json(j.root/'progress.json')['cells']['fixture-00']['clock']
+    j.recheck_prepared_dispatch('fixture-00','first','roles')
+    after=_json(j.root/'progress.json')['cells']['fixture-00']
+    assert len(observations)==2 and before==after['clock'] and len(after['roles'])==1
+    j.quota=lambda:(_ for _ in ()).throw(ValueError('synthetic expired capacity'))
+    with pytest.raises(ValueError):j.recheck_prepared_dispatch('fixture-00','first','roles')
+    assert j.summary()['admitted_native_jobs']==1
+
+
+def test_prepared_resumption_cannot_bypass_original_deadline_or_sealed_outcome(tmp_path):
+    from experiments.software_comparison_v3 import budget
+    j=setup(tmp_path);binding={'role':'author','request_sha256':'b'*64,'rendered_input_bytes':100}
+    j.admit('fixture-00','first','roles',binding)
+    state=_json(j.root/'progress.json');state['cells']['fixture-00']['clock']['monotonic']-=6000
+    _write(j.root/'progress.json',state)
+    with pytest.raises(BudgetError,match='deadline'):j.recheck_prepared_dispatch('fixture-00','first','roles')
+    j.outcome('fixture-00','first','roles',{'scope':'synthetic stopped witness'})
+    with pytest.raises(BudgetError,match='unresolved'):j.recheck_prepared_dispatch('fixture-00','first','roles')
+
+
 def test_prompt_uses_actual_bytes_API_and_counts_complete_rendered_text(tmp_path):
     j=setup(tmp_path);t=Transport();b=RoleBudget(j,'fixture-00',t);req=request('é'*70)
     parsed,text=render_prompt(canonical(req))

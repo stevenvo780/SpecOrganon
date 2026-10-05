@@ -28,6 +28,10 @@ class ProvenanceError(ValueError):
     pass
 
 
+class MilestoneRejected(ProvenanceError):
+    """Actual validated final native judgment explicitly rejects this milestone."""
+
+
 def require(condition,message):
     if not condition: raise ProvenanceError(message)
 
@@ -66,7 +70,7 @@ class NativeEvidence:
                 and p['gemini_original_profile']=='/home/stev/.gemini','original authorized profiles required')
         require(set(p['routes'])=={'author','review'} and {v[0] for v in p['routes'].values()}=={'codex','gemini'},'distinct registered author/reviewer families required')
 
-    def _execution(self, job_id, role, *, allow_failed_test=False):
+    def _execution(self, job_id, role, *, allow_failed_test=False, allow_failed_native=False):
         identifier(job_id);folder=self.root/'jobs'/job_id;plan=_json(folder/'launch.json')
         require(plan['job_id']==job_id and plan['role']==role,'role/launch identity differs')
         require(plan['image_id']==self.policy['images']['test' if role=='test' else 'native'],'launch image differs')
@@ -81,12 +85,13 @@ class NativeEvidence:
         require(envelope['request']==request and outer['metadata']==expected and outer['cwd']==str(self.root)
                 and outer['argv']==['/usr/bin/docker','start','--attach',plan['container_id']]
                 and envelope['cancel_argv']==['/usr/bin/docker','kill',plan['container_id']],'host receipt differs from prepared container dispatch')
-        require(allow_failed_test or not outer['timed_out'] and not outer['truncated_streams'],'bounded execution failed/inconclusive')
+        allow_failure=allow_failed_test or allow_failed_native
+        require(allow_failure or not outer['timed_out'] and not outer['truncated_streams'],'bounded execution failed/inconclusive')
         terminal=_json(folder/'terminal-container.json');observed=self.transport._inspect(plan)
         require(observed is not None and observed['Id']==plan['container_id'] and observed['Image']==plan['image_id'],'recorded terminal container missing or changed')
-        require(not observed['State']['Running'] and not observed['State']['OOMKilled']
-                and (observed['State']['ExitCode']==outer['exit_code'] or allow_failed_test and (outer['timed_out'] or outer['truncated_streams'])),'container and captured exit differ')
-        require(terminal=={'id':plan['container_id'],'exit_code':observed['State']['ExitCode'],'image_id':plan['image_id'],'oom_killed':False},'saved terminal container differs')
+        require(not observed['State']['Running'] and (not observed['State']['OOMKilled'] or allow_failed_native)
+                and (observed['State']['ExitCode']==outer['exit_code'] or allow_failure and (outer['timed_out'] or outer['truncated_streams'])),'container and captured exit differ')
+        require(terminal=={'id':plan['container_id'],'exit_code':observed['State']['ExitCode'],'image_id':plan['image_id'],'oom_killed':observed['State']['OOMKilled']},'saved terminal container differs')
         host=observed['HostConfig']
         require(host['ReadonlyRootfs'] is True and host['Privileged'] is False and 'ALL' in host['CapDrop']
                 and any(x.startswith('no-new-privileges') for x in host['SecurityOpt']),'container isolation differs')
@@ -113,16 +118,19 @@ class NativeEvidence:
                     and observed['Config']['WorkingDir']=='/input','physical native bridge/working directory differs')
         return folder,plan,request,outer,streams
 
-    def role(self, job_id, role, *, request=None, packet=None):
-        require(role in ('author','review'),'native role required')
-        folder,plan,actual,outer,streams=self._execution(job_id,role)
-        require(outer['exit_code']==0,'native bridge did not succeed')
-        if request is not None:require(request==actual,'supplied native request differs')
+    def _source_snapshot(self,folder,plan):
         manifest=plan['input_manifest'];source=self.transport.source
         require(manifest['bridge.py']==digest(_read(source/'scripts/controller_native_role.py')),'copied bridge differs from source registration')
         expected={str(p.relative_to(source/'src')):digest(_read(p)) for p in (source/'src/specorganon').rglob('*.py')}
         copied={k.removeprefix('library/'):v for k,v in manifest.items() if k.startswith('library/') and k.endswith('.py')}
         require(copied==expected,'copied library differs from registered source')
+
+    def role(self, job_id, role, *, request=None, packet=None):
+        require(role in ('author','review'),'native role required')
+        folder,plan,actual,outer,streams=self._execution(job_id,role)
+        require(outer['exit_code']==0,'native bridge did not succeed')
+        if request is not None:require(request==actual,'supplied native request differs')
+        self._source_snapshot(folder,plan);manifest=plan['input_manifest']
         inner,env,native=journal_receipt(folder/'output/native','call')
         require(inner['exit_code']==0 and not inner['timed_out'] and not inner['truncated_streams'] and inner['stdin_complete'],'actual native process failed/inconclusive')
         provider,model=plan['provider'],plan['model'];parsed,prompt=render_prompt(canonical(actual))
@@ -171,6 +179,29 @@ class NativeEvidence:
                 'native_receipt_sha256':digest(canonical(inner)),'rendered_input_bytes':len(prompt.encode()),
                 'usage_reported':usage,'money':None,'identity_scope':'trusted original profiles/argv/streams, not remote weights or cryptographic identity',
                 'Gemini_internal_tools_absolute_off_proven':False}
+
+    def failed_role(self,job_id,role,request):
+        """Only a CLOSED actual failed bridge, never an observation timeout.
+
+Known exact format diagnostics close a failed generation. Other actual failures
+retain unknown account/quota cause and stop the campaign, without substitution.
+No positive role or nine-phase result is inferred from this terminal witness.
+"""
+        require(role in ('author','review'),'native role required')
+        folder,plan,actual,outer,streams=self._execution(job_id,role,allow_failed_native=True)
+        self._source_snapshot(folder,plan)
+        require(actual==request,'failed native input differs')
+        require(outer['exit_code']!=0 or outer['timed_out'] or outer['truncated_streams'],
+                'successful bridge is not a closed native failure')
+        diagnostic=streams['stderr'].decode(errors='replace').strip()
+        messages={'invalid native role request schema','invalid role result schema','invalid review result contract','invalid author result contract',
+                  'invalid exact finite JSON','empty role response','role response must be one JSON object',
+                  'multiple native final messages','native Codex response is incomplete','incomplete Gemini native stream'}
+        controlled=diagnostic in {'native role inconclusive: NativeRoleError: '+m for m in messages}
+        return {'schema':1,'job_id':job_id,'status':'generation_failed' if controlled else 'infra_inconclusive',
+                'reason':'invalid actual native role format' if controlled else 'actual native execution failed; account/quota cause unknown',
+                'container_id':plan['container_id'],'request_sha256':plan['request_sha256'],
+                'receipt_sha256':digest(canonical(outer)),'native_restarted':False,'positive_acceptance':False}
 
     def test(self, job_id, files, *, require_passed=True):
         folder,plan,request,receipt,streams=self._execution(job_id,'test',allow_failed_test=not require_passed)
@@ -234,6 +265,8 @@ def toolkit_milestone(runner,evidence):
     require(final_request==actual,'final native snapshot differs from current package')
     audit=final_packet['result']['audit'];binding=strict_json_loads(final_request['documents']['audit-binding.json'])
     verify_locators(audit,'T',binding,final_request['documents'])
+    if final_packet['result']['verdict']=='reject' or any(point['status']=='fail' for group in ('D','G','H') for point in audit[group].values()):
+        raise MilestoneRejected('actual final native audit rejects substantive/documentation/grounding milestone')
     require(final_packet['result']['verdict']=='accept' and all(point['status']=='pass' for group in ('D','G','H') for point in audit[group].values()),'final native substantive/documentation/grounding audit incomplete')
     require(final['container_id'] not in {cid for group in authors.values() for cid in group},'final reviewer must be physically separate from authors')
     result={'schema':1,'status':'eligible','delivery_sha256':digest(canonical(files)),'state_sha256':digest(canonical(state)),

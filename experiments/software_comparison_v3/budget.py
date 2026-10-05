@@ -158,6 +158,28 @@ class RunJournal:
             if entry['outcome'] is not None and entry['outcome'] != value: raise BudgetError('closed execution outcome changed')
             entry['outcome'] = value; _write(self.root/'progress.json',state)
 
+    def recheck_prepared_dispatch(self,cell_id,job_id,kind):
+        """A reserved but never-started job needs capacity and original clocks.
+
+No role/test counter or clock is renewed. The transport calls this ONLY when
+there is no execution admission/receipt, before starting its prepared handle.
+Already-started jobs must reconcile their existing receipt/handle instead.
+"""
+        if kind not in ('roles','tests'):raise BudgetError('invalid pending execution kind')
+        with self.lock():
+            self.validate();state=_json(self.root/'progress.json');cell=self._cell(state,cell_id)
+            entry=cell[kind].get(job_id)
+            if entry is None or entry['outcome'] is not None or cell['terminal'] is not None or state['evaluation'] is not None:
+                raise BudgetError('prepared job must be admitted, unresolved and unsealed')
+            duration=180 if kind=='roles' else 120
+            def remaining():
+                return self.elapsed(cell['clock'])+duration<=CELL_LIMITS['seconds'] and self.elapsed(state['global_clock'])+duration<=CAMPAIGN_LIMITS['seconds']
+            if not remaining():raise BudgetError('original pending execution deadline exhausted')
+            observation=self.quota()
+            if not remaining():raise BudgetError('pending deadline exhausted during quota observation')
+            entry['pre_dispatch_observation']=observation;_write(self.root/'progress.json',state)
+            return observation
+
     def close_cell(self, cell_id, *, status, delivery_sha256):
         if status not in TERMINAL: raise BudgetError('generation terminal status required')
         with self.lock():
