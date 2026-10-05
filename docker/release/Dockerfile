@@ -9,7 +9,8 @@ RUN apt-get update \
 RUN python3 -m venv /opt/build-tools \
     && /opt/build-tools/bin/pip install --no-cache-dir "uv==${UV_VERSION}"
 ENV PATH="/opt/specorganon/venv/bin:/opt/build-tools/bin:${PATH}" \
-    UV_PYTHON_DOWNLOADS=never PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1
+    UV_PYTHON_DOWNLOADS=never PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1 \
+    SOURCE_DATE_EPOCH=1791230400
 WORKDIR /opt/specorganon
 COPY pyproject.toml uv.lock README.md ./
 COPY src ./src

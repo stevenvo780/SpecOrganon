@@ -35,6 +35,16 @@ fueron idénticos en el mismo entorno fijado y con SOURCE_DATE_EPOCH=1791230400.
 La construcción usó el cache offline de una imagen local fijada y una nueva venv;
 no equivale a reconstruir independientemente todo el sistema operativo.
 
+El laboratorio Codex se construyó además con los Dockerfiles públicos de este
+paquete: primero docker/release/Dockerfile y luego docker/codex/Dockerfile.
+El wheel producido conserva el digest
+343bf555a92f911209bef98786a9241b3a3feb3282fca88407147cbd64cafd31.
+En un proyecto Compose separado, sin autenticar y sin montar perfiles del host,
+Codex 0.160.0 descubrió el MCP y el smoke pasó con sus 24 herramientas, rechazo
+de escritura obsoleta y de rutas externas, persistencia y paridad CLI/MCP.
+No se hicieron llamadas a modelos. Los builds pueden reutilizar capas de Docker;
+los recibos distinguen esta construcción del control offline de instalación.
+
 ## Reproducción de la interfaz
 
 Con el paquete fuente extraído, `docker build -f docker/release/Dockerfile -t
@@ -59,6 +69,12 @@ de `src` y confirma que specorganon se importa desde site-packages.
 El paquete fuente no incluye perfiles, credenciales ni un registro portátil de
 la campaña activa. Su manifest liga los bytes exportados; el registro privado
 original permanece separado.
+
+Para el laboratorio interactivo de Codex y su login separado, sigue
+docker/codex/README.md. Compose se ejecuta desde la carpeta que contiene
+compose.yaml o mediante -f con su ruta absoluta. No usa los volúmenes del
+laboratorio histórico ni de la campaña activa. Sus resultados de construcción
+y transporte están en experiments/autonomous_release/laboratory.
 
 ## Controles de bloqueo sobre copias
 
