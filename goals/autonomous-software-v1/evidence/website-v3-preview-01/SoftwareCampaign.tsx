@@ -1,0 +1,34 @@
+import { ArrowUpRight } from 'lucide-react';
+import raw from '../software-campaign-v3.json';
+
+type Score = { applicable?: boolean; pass: number; fail: number; inconclusive: number; denominator: number; lower: number | null; upper: number | null; not_evaluated?: number };
+type Row = { id: string; task: string; family: string; method: string; rep: number; status: string; native_calls: number; own_tests: number; elapsed_seconds: number | null; accepted_phases: number | null; native_T9_eligible: boolean; scores: Record<string, Score | null>; full_package: boolean | null };
+type Comparison = { n_blocks: number; mean: {lower: number; upper: number}; scope: string };
+type Campaign = { updated_at: string; registered_at: string; planned_cells: number; terminal_cells: number; completed_deliveries: number; eligible_T9: number; F_evaluated: boolean; rows: Row[]; comparisons: Record<string, Comparison>; candidate_version: string; candidate_controls: number; candidate_CLI_operations: number; candidate_MCP_operations: number; goal_completed: boolean };
+const data = raw as Campaign;
+const methods: Record<string,string> = {N:'Trabajo libre', S:'SDD', T:'SpecOrganon', A:'Ablación'};
+const statuses: Record<string,string> = {not_started:'Sin iniciar', open:'Sin cierre', complete:'Entrega cerrada', generation_failed:'Fallida', infra_inconclusive:'Infraestructura inconclusa'};
+function score(value: Score | null){
+  if(!value) return 'Pendiente';
+  if(value.applicable===false || value.denominator===0) return 'No aplica';
+  if(value.not_evaluated) return 'Sin evaluación';
+  return `${value.pass}/${value.denominator}${value.inconclusive ? ` · ${value.inconclusive} inconclusos` : ''}`;
+}
+function interval(lower: number,upper: number){ return `${(100*lower).toFixed(1)} a ${(100*upper).toFixed(1)} pp`; }
+
+export default function SoftwareCampaign(){
+  return <section aria-labelledby="software-campaign-title">
+    <h4 id="software-campaign-title">Campaña v3: tres tareas, dos familias de modelos</h4>
+    <p>Registrada el {new Date(data.registered_at).toLocaleString('es-CO',{timeZone:'America/Bogota'})}, antes de generar. FractionMix, PolicyPick y ListPatch conservan el orden de las <strong>42 celdas originales</strong>: 12 de trabajo libre, 12 de SDD, 12 de SpecOrganon y 6 de ablación. Codex y Gemini alternan autor y revisor separado, con dos repeticiones por tarea y familia. La ablación conserva borradores de las fases y elimina sus revisiones y compuertas intermedias.</p>
+    <div className="backup-counts">{[[String(data.terminal_cells)+'/42','cierres de generación'],[String(data.completed_deliveries),'entregas cerradas'],[String(data.eligible_T9),'entregas T de nueve fases verificadas'],[data.F_evaluated?'Evaluada':'Pendiente','evaluación funcional reservada']].map(([number,label])=><div key={label}><strong>{number}</strong><span>{label}</span></div>)}</div>
+    <p>La evaluación reservada requiere cerrar las 42 generaciones y comprobar físicamente los hitos T. Las pruebas propias y las auditorías nativas finales se conservan por separado. <strong>{data.F_evaluated?'El informe muestra resultados del protocolo finito; no prueba corrección universal ni superioridad causal general.':'Todavía no hay puntuaciones funcionales reservadas ni un ganador comparativo.'}</strong> Los fallos de formato, presupuesto y revisión conservan su celda; no se sustituyen.</p>
+    <details><summary>Las 42 celdas: estado, recursos y dimensiones</summary><div className="backup-table-wrap"><table><caption>Corte {new Date(data.updated_at).toLocaleString('es-CO',{timeZone:'America/Bogota'})} · F: funcional · D: documentación · G: gobernanza · H: adherencia</caption><thead><tr><th scope="col">Celda / tarea</th><th scope="col">Método / autor</th><th scope="col">Estado</th><th scope="col">Llamadas / pruebas propias</th><th scope="col">F</th><th scope="col">D</th><th scope="col">G</th><th scope="col">H</th></tr></thead><tbody>{data.rows.map(row=><tr key={row.id}><th scope="row">{row.id}<br/>{row.task} · r{row.rep}</th><td>{methods[row.method]}<br/>{row.family}</td><td>{statuses[row.status]}{row.native_T9_eligible?' · T9 verificado':''}</td><td>{row.native_calls} / {row.own_tests}</td>{['F','D','G','H'].map(d=><td key={d}>{d==='H' && row.method==='N' ? 'No aplica' : score(row.scores[d])}</td>)}</tr>)}</tbody></table></div></details>
+    <p>H no se exige a trabajo libre. Los casos contractuales reservados son observaciones del programa; las unidades de comparación son las celdas de autor, tarea, familia y repetición. Se conservan 12 pares T–N, 12 T–S y 6 T–A, además de sus estratos por tarea y familia, sin seleccionar victorias. Los intervalos por resultados desconocidos no son intervalos de confianza.</p>
+    {Object.keys(data.comparisons).length>0 && <div className="backup-table-wrap"><table><caption>Diferencias descriptivas apareadas · media de límites en puntos porcentuales</caption><thead><tr><th scope="col">Dimensión y comparación</th><th scope="col">Pares</th><th scope="col">Límites de la media</th></tr></thead><tbody>{Object.entries(data.comparisons).map(([name,value])=><tr key={name}><th scope="row">{name}</th><td>{value.n_blocks}</td><td>{interval(value.mean.lower,value.mean.upper)}</td></tr>)}</tbody></table></div>}
+    <h4>Instalación candidata {data.candidate_version}</h4>
+    <p>Un checkout separado conserva la campaña congelada. La instalación nueva pasó {data.candidate_controls} controles, verificó los 29 módulos instalados y ejerció {data.candidate_CLI_operations} operaciones de CLI y {data.candidate_MCP_operations} de MCP por stdio real. La extracción produjo 20 páginas y rechazó hashes incorrectos. Los dos builds del wheel fueron idénticos en el mismo entorno fijado. Estos controles usan fixtures y no cuentan como entregas nativas.</p>
+    <p>Sobre copias del ledger real se introdujeron perturbaciones sintéticas: una contradicción declarada bloqueó el avance; passed=true sin receipt quedó invalidado; cambiar la premisa dejó 27 descendientes obsoletos y reabrió validación. Restaurar el texto no recuperó las aceptaciones. El original permaneció intacto. Esto comprueba las compuertas ante objeciones explícitas, sin demostrar detección semántica automática. La instalación también verificó replay y reanudación tras SIGKILL.</p>
+    <p>Los contadores declarados por cada proveedor se publicarán con sus categorías originales. Tokens normalizados, facturación y coste monetario siguen desconocidos. El modo local conserva un mandato declarado; no autentica identidad ni custodia externa. La eficacia de campo y la tesis general no están demostradas.</p>
+    <div className="software-lab-downloads"><a className="text-link" href="/resultados/software/campana-v3.json">Campaña v3 · datos y límites<ArrowUpRight size={15}/></a></div>
+  </section>;
+}

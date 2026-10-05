@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "at": "2026-10-05T20:54:01.654583+00:00",
+  "checks": [
+    {
+      "name": "compose-config",
+      "argv": [
+        "docker",
+        "compose",
+        "config",
+        "--format",
+        "json"
+      ],
+      "cwd": "/home/stev/.codex/worktrees/autonomous-release/SpecOrganon",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.05347609519958496,
+      "stdout_sha256": "d862f2d365da85e37bb888aeab499280f416bdfcd379e3313595888724c6ea1e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "codex-version",
+      "argv": [
+        "docker",
+        "compose",
+        "run",
+        "--rm",
+        "-T",
+        "codex",
+        "codex",
+        "--version"
+      ],
+      "cwd": "/home/stev/.codex/worktrees/autonomous-release/SpecOrganon",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.515167236328125,
+      "stdout_sha256": "f6464b8cc67af75deb2589fe1dbcde152fc15ffb76a91de1cf0686b4623afb1e",
+      "stderr_sha256": "5079e76f52358ea65c3d4ce09404c039e91a958b02430775fef3e6617e42ab1a"
+    },
+    {
+      "name": "MCP-list",
+      "argv": [
+        "docker",
+        "compose",
+        "run",
+        "--rm",
+        "-T",
+        "codex",
+        "codex",
+        "mcp",
+        "list",
+        "--json"
+      ],
+      "cwd": "/home/stev/.codex/worktrees/autonomous-release/SpecOrganon",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.4615018367767334,
+      "stdout_sha256": "417d02f91bd35139fc67754eb3e3c76db0a0614755c9dbcfc93a47f72f8744b8",
+      "stderr_sha256": "6d56ed07b6c5bbc809a92516a015c8ec9d568437cd983297d498ecd1be55ac60"
+    },
+    {
+      "name": "stdio-smoke",
+      "argv": [
+        "docker",
+        "compose",
+        "run",
+        "--rm",
+        "-T",
+        "codex",
+        "python",
+        "/opt/codex-lab/smoke.py"
+      ],
+      "cwd": "/home/stev/.codex/worktrees/autonomous-release/SpecOrganon",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 3.698572874069214,
+      "stdout_sha256": "5ca8be89d1fed6a41c85bcc951f1198ffe1168d8091c464425d92e23154797ae",
+      "stderr_sha256": "01071c090896d7731ac5baa876ecbbfdd4a9640495f0661daa5ee310f70c7d0e"
+    },
+    {
+      "name": "installed-origin",
+      "argv": [
+        "docker",
+        "compose",
+        "run",
+        "--rm",
+        "-T",
+        "codex",
+        "python",
+        "-c",
+        "import specorganon, pathlib, hashlib, json; w=next(pathlib.Path(\"/opt/specorganon/dist\").glob(\"*.whl\")); print(json.dumps({\"version\":specorganon.__version__,\"module\":specorganon.__file__,\"wheel_sha256\":hashlib.sha256(w.read_bytes()).hexdigest(),\"authenticated\":pathlib.Path(\"/home/codex/.codex/auth.json\").exists(),\"extractor_sha256\":hashlib.sha256(pathlib.Path(\"/usr/bin/pdftotext\").read_bytes()).hexdigest()}))"
+      ],
+      "cwd": "/home/stev/.codex/worktrees/autonomous-release/SpecOrganon",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.905003547668457,
+      "stdout_sha256": "a63a4758844a99321215172845a36d005dddacf1ba22ec42dea6470284ee56e2",
+      "stderr_sha256": "4f7272a7088fe4a2aeea61da5231156426a648879b29acdce8aec9730049b644"
+    }
+  ],
+  "scope": "fresh unauthenticated separate laboratory; actual stdio/CLI; no native model dispatch"
+}
