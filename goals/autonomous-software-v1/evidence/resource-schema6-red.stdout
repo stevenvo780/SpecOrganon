@@ -1,0 +1,207 @@
+..............FFF.FF...                                                  [100%]
+=================================== FAILURES ===================================
+_ test_failed_test_needs_changed_author_work_before_bounded_second_measurement[code] _
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-95/test_failed_test_needs_changed0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8ebbd76a50>
+repair = 'code'
+
+    @pytest.mark.parametrize('repair', ['code', 'readme_only'])
+    def test_failed_test_needs_changed_author_work_before_bounded_second_measurement(tmp_path, monkeypatch, repair):
+        transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport)
+        engine.put_item(ctrl.case, 't1', 'test', 'Synthetic process exit criterion', [],
+                        {'argv': ['/usr/bin/python3', '-c', 'raise SystemExit(1)']}, 'agent:synthetic',
+                        expected_version=0, expected_deps={})
+        def task(state):
+            return {'action': 'execute_test', 'phase': 'build', 'test_execution_targets': [{'id': 't1'}]}
+        monkeypatch.setattr('specorganon.software_controller.describe_task', task)
+        class Executor:
+            def __init__(self): self.calls = []
+            def measure(self, job_id, argv, files):
+                self.calls.append(job_id)
+                folder = tmp_path / ('measurement-' + str(len(self.calls))); folder.mkdir()
+                for name in ('stdout', 'stderr'): (folder / (name + '.bin')).write_bytes(b'')
+                _write(folder / 'receipt.json', {'synthetic': True})
+                return {'subject_argv': argv, 'delivery_tree_sha256': digest(canonical(files)),
+                        'exit_code': 1 if len(self.calls) == 1 else 0, 'timed_out': False,
+                        'truncated_streams': [], 'test_job_ref': str(folder / 'receipt.json'),
+                        'stdout_sha256': digest(b''), 'stderr_sha256': digest(b''), 'provenance': 'synthetic'}
+            def verify_test(self, *args, **kwargs): return True
+        ctrl.executor = Executor()
+>       assert ctrl.step()['passed'] is False
+               ^^^^^^^^^^^
+
+tests/test_software_controller.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.software_controller.Controller object at 0x7f8ebbd75190>
+
+    def step(self):
+        with self._lock():
+            progress = _json(self.root / 'progress.json')
+            pending = progress['pending']
+            if pending is None:
+                state = engine.get_state(self.case); task = describe_task(state); phase = task['phase']
+                if task['action'] == 'complete': return {'action': 'complete', 'package_allowed': self.package_gate()}
+                if task['action'] in {'resolve_contradiction', 'observe_test'}:
+                    raise ControllerError('live contradiction/unsupported observation blocks controller')
+                repair_after_failed_test = False
+                if phase == 'build':
+                    stage = self._build_stage()
+                    if task['action'] == 'execute_test' and stage != 'repair':
+>                       raise ControllerError('test measurement requires both sealed build stages')
+E                       specorganon.software_controller.ControllerError: test measurement requires both sealed build stages
+
+src/specorganon/software_controller.py:498: ControllerError
+_ test_failed_test_needs_changed_author_work_before_bounded_second_measurement[readme_only] _
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-95/test_failed_test_needs_changed1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8ebbd74770>
+repair = 'readme_only'
+
+    @pytest.mark.parametrize('repair', ['code', 'readme_only'])
+    def test_failed_test_needs_changed_author_work_before_bounded_second_measurement(tmp_path, monkeypatch, repair):
+        transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport)
+        engine.put_item(ctrl.case, 't1', 'test', 'Synthetic process exit criterion', [],
+                        {'argv': ['/usr/bin/python3', '-c', 'raise SystemExit(1)']}, 'agent:synthetic',
+                        expected_version=0, expected_deps={})
+        def task(state):
+            return {'action': 'execute_test', 'phase': 'build', 'test_execution_targets': [{'id': 't1'}]}
+        monkeypatch.setattr('specorganon.software_controller.describe_task', task)
+        class Executor:
+            def __init__(self): self.calls = []
+            def measure(self, job_id, argv, files):
+                self.calls.append(job_id)
+                folder = tmp_path / ('measurement-' + str(len(self.calls))); folder.mkdir()
+                for name in ('stdout', 'stderr'): (folder / (name + '.bin')).write_bytes(b'')
+                _write(folder / 'receipt.json', {'synthetic': True})
+                return {'subject_argv': argv, 'delivery_tree_sha256': digest(canonical(files)),
+                        'exit_code': 1 if len(self.calls) == 1 else 0, 'timed_out': False,
+                        'truncated_streams': [], 'test_job_ref': str(folder / 'receipt.json'),
+                        'stdout_sha256': digest(b''), 'stderr_sha256': digest(b''), 'provenance': 'synthetic'}
+            def verify_test(self, *args, **kwargs): return True
+        ctrl.executor = Executor()
+>       assert ctrl.step()['passed'] is False
+               ^^^^^^^^^^^
+
+tests/test_software_controller.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.software_controller.Controller object at 0x7f8ebbd74410>
+
+    def step(self):
+        with self._lock():
+            progress = _json(self.root / 'progress.json')
+            pending = progress['pending']
+            if pending is None:
+                state = engine.get_state(self.case); task = describe_task(state); phase = task['phase']
+                if task['action'] == 'complete': return {'action': 'complete', 'package_allowed': self.package_gate()}
+                if task['action'] in {'resolve_contradiction', 'observe_test'}:
+                    raise ControllerError('live contradiction/unsupported observation blocks controller')
+                repair_after_failed_test = False
+                if phase == 'build':
+                    stage = self._build_stage()
+                    if task['action'] == 'execute_test' and stage != 'repair':
+>                       raise ControllerError('test measurement requires both sealed build stages')
+E                       specorganon.software_controller.ControllerError: test measurement requires both sealed build stages
+
+src/specorganon/software_controller.py:498: ControllerError
+____ test_measured_test_rejects_invalid_stream_binding_before_ledger_write _____
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-95/test_measured_test_rejects_inv0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8ebbd76f90>
+
+    def test_measured_test_rejects_invalid_stream_binding_before_ledger_write(tmp_path, monkeypatch):
+        ctrl = controller(tmp_path, SyntheticTransport(frame_response()))
+        engine.put_item(ctrl.case, 't1', 'test', 'Synthetic exit criterion', [],
+                        {'argv': ['/usr/bin/python3', '-c', 'pass']}, 'agent:synthetic',
+                        expected_version=0, expected_deps={})
+        monkeypatch.setattr('specorganon.software_controller.describe_task', lambda state: {
+            'action': 'execute_test', 'phase': 'build', 'test_execution_targets': [{'id': 't1'}]})
+        class Executor:
+            def measure(self, job_id, argv, files):
+                return {'subject_argv': argv, 'delivery_tree_sha256': digest(canonical(files)),
+                        'exit_code': 0, 'timed_out': False, 'truncated_streams': [],
+                        'test_job_ref': 'synthetic:bad-stream-hash', 'stdout_sha256': [],
+                        'stderr_sha256': digest(b''), 'provenance': 'synthetic'}
+        ctrl.executor = Executor(); before = engine.get_state(ctrl.case)['revision']
+>       with pytest.raises(ControllerError, match='binding'): ctrl.step()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'binding'
+E         Actual message: 'test measurement requires both sealed build stages'
+
+tests/test_software_controller.py:233: AssertionError
+_ test_sigkill_after_engine_mutation_before_progress_commit_resumes_once[put_item] _
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-95/test_sigkill_after_engine_muta0')
+operation = 'put_item'
+
+    @pytest.mark.parametrize('operation', ['put_item', 'run_manifest', 'review_phase', 'advance'])
+    def test_sigkill_after_engine_mutation_before_progress_commit_resumes_once(tmp_path, operation):
+        case = tmp_path / 'case'; root = tmp_path / 'run'
+        engine.create_case(case, 'Synthetic post-mutation recovery', 'development', 'human:owner', approval_policy='local')
+        ctrl = construct(case, root)
+        author_operation = operation in {'put_item', 'run_manifest'}
+        if not author_operation: ctrl.step()
+        target = 'controller' if operation == 'run_manifest' else 'controller.engine'
+        code = (f'import sys, os, signal\nfrom pathlib import Path\nsys.path.insert(0, {str(Path(__file__).parent)!r})\n'
+                'from test_controller_recovery import construct\nimport specorganon.software_controller as controller\n'
+                f'original = {target}.{operation}\n'
+                'def interrupted(*args, **kwargs):\n'
+                '    result = original(*args, **kwargs)\n'
+                '    os.kill(os.getpid(), signal.SIGKILL)\n'
+                f'{target}.{operation} = interrupted\n'
+                f'construct(Path({str(case)!r}), Path({str(root)!r})).step()\n')
+        child = subprocess.Popen([sys.executable, '-c', code], stdin=subprocess.DEVNULL,
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
+        try:
+            _, stderr = child.communicate(timeout=20)
+            assert child.returncode == -signal.SIGKILL, stderr.decode(errors='replace')
+>           assert _json(root / 'controller/progress.json')['pending']['status'] == 'applying'
+E           AssertionError: assert 'closed' == 'applying'
+E             
+E             - applying
+E             + closed
+
+tests/test_controller_recovery.py:105: AssertionError
+_ test_sigkill_after_engine_mutation_before_progress_commit_resumes_once[run_manifest] _
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-95/test_sigkill_after_engine_muta1')
+operation = 'run_manifest'
+
+    @pytest.mark.parametrize('operation', ['put_item', 'run_manifest', 'review_phase', 'advance'])
+    def test_sigkill_after_engine_mutation_before_progress_commit_resumes_once(tmp_path, operation):
+        case = tmp_path / 'case'; root = tmp_path / 'run'
+        engine.create_case(case, 'Synthetic post-mutation recovery', 'development', 'human:owner', approval_policy='local')
+        ctrl = construct(case, root)
+        author_operation = operation in {'put_item', 'run_manifest'}
+        if not author_operation: ctrl.step()
+        target = 'controller' if operation == 'run_manifest' else 'controller.engine'
+        code = (f'import sys, os, signal\nfrom pathlib import Path\nsys.path.insert(0, {str(Path(__file__).parent)!r})\n'
+                'from test_controller_recovery import construct\nimport specorganon.software_controller as controller\n'
+                f'original = {target}.{operation}\n'
+                'def interrupted(*args, **kwargs):\n'
+                '    result = original(*args, **kwargs)\n'
+                '    os.kill(os.getpid(), signal.SIGKILL)\n'
+                f'{target}.{operation} = interrupted\n'
+                f'construct(Path({str(case)!r}), Path({str(root)!r})).step()\n')
+        child = subprocess.Popen([sys.executable, '-c', code], stdin=subprocess.DEVNULL,
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
+        try:
+            _, stderr = child.communicate(timeout=20)
+            assert child.returncode == -signal.SIGKILL, stderr.decode(errors='replace')
+>           assert _json(root / 'controller/progress.json')['pending']['status'] == 'applying'
+E           AssertionError: assert 'closed' == 'applying'
+E             
+E             - applying
+E             + closed
+
+tests/test_controller_recovery.py:105: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_software_controller.py::test_failed_test_needs_changed_author_work_before_bounded_second_measurement[code]
+FAILED tests/test_software_controller.py::test_failed_test_needs_changed_author_work_before_bounded_second_measurement[readme_only]
+FAILED tests/test_software_controller.py::test_measured_test_rejects_invalid_stream_binding_before_ledger_write
+FAILED tests/test_controller_recovery.py::test_sigkill_after_engine_mutation_before_progress_commit_resumes_once[put_item]
+FAILED tests/test_controller_recovery.py::test_sigkill_after_engine_mutation_before_progress_commit_resumes_once[run_manifest]
+5 failed, 18 passed in 0.76s

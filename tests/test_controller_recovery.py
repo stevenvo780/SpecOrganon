@@ -32,7 +32,8 @@ class PersistentSynthetic:
                    'p.write_text(str(int(p.read_text())+1) if p.exists() else "1"); '
                    f'print(json.dumps({response!r}))')
         result = self.store.execute(job_id, [sys.executable, '-c', program], request,
-                                    cwd=self.root, timeout_seconds=10)
+                                    cwd=self.root, timeout_seconds=10,
+                                    env={'PATH': os.defpath, 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8'})
         if self.kill: os.kill(os.getpid(), signal.SIGKILL)
         return {'result': json.loads(result['stdout']), 'request_sha256': digest(canonical(request)),
                 'actor': ('agent:synthetic-recovery' if role == 'author' else 'reviewer:synthetic-recovery'),
@@ -94,7 +95,7 @@ def test_sigkill_after_engine_mutation_before_progress_commit_resumes_once(tmp_p
             f'original = {target}.{operation}\n'
             'def interrupted(*args, **kwargs):\n'
             '    result = original(*args, **kwargs)\n'
-            '    os.kill(os.getpid(), signal.SIGKILL)\n'
+            f'    if Path(args[0]) == Path({str(case)!r}): os.kill(os.getpid(), signal.SIGKILL)\n'
             f'{target}.{operation} = interrupted\n'
             f'construct(Path({str(case)!r}), Path({str(root)!r})).step()\n')
     child = subprocess.Popen([sys.executable, '-c', code], stdin=subprocess.DEVNULL,

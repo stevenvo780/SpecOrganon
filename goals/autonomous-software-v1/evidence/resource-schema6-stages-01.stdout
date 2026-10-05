@@ -1,0 +1,499 @@
+EF......F.FFFFFF                                                         [100%]
+==================================== ERRORS ====================================
+___________________________ ERROR at setup of tests ____________________________
+file /datos/workspaces/personal/SpecOrganon/tests/test_software_controller_resources.py, line 50
+  def tests(ctrl):
+E       fixture 'ctrl' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, doctest_namespace, enable_fixture_policy, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/datos/workspaces/personal/SpecOrganon/tests/test_software_controller_resources.py:50
+=================================== FAILURES ===================================
+________ test_program_then_tests_preserves_seal_and_defers_measurement _________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-96/test_program_then_tests_preser0')
+
+    def test_program_then_tests_preserves_seal_and_defers_measurement(tmp_path):
+        ctrl = build_fixture(tmp_path); ctrl.executor = Executor(tmp_path)
+        assert program(ctrl)['build_stage'] == 'program'
+        assert len(ctrl.transport.calls) == 1 and ctrl.executor.calls == []
+        seal = (ctrl.root / 'build-program.json').read_bytes()
+        assert tests(ctrl)['build_stage'] == 'tests'
+        assert (ctrl.root / 'build-program.json').read_bytes() == seal
+        assert ctrl._files()['count.py'] == 'print(10)\n'
+>       assert ctrl.step()['passed'] is True
+               ^^^^^^^^^^^
+
+tests/test_software_controller_resources.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.software_controller.Controller object at 0x7f95e78ea9f0>
+
+    def step(self):
+        with self._lock():
+            progress = _json(self.root / 'progress.json')
+            pending = progress['pending']
+            if pending is None:
+                state = engine.get_state(self.case); task = describe_task(state); phase = task['phase']
+                if task['action'] == 'complete': return {'action': 'complete', 'package_allowed': self.package_gate()}
+                if task['action'] in {'resolve_contradiction', 'observe_test'}:
+                    raise ControllerError('live contradiction/unsupported observation blocks controller')
+                repair_after_failed_test = False
+                if phase == 'build':
+                    stage = self._build_stage()
+                    if task['action'] == 'execute_test' and stage != 'repair':
+                        raise ControllerError('test measurement requires both sealed build stages')
+                if task['action'] == 'execute_test':
+                    if self.executor is None: raise ControllerError('isolated measured executor required')
+                    target = task['test_execution_targets'][0]; item = state['items'][target['id']]
+                    sealed_tests = self._checkpoint('tests'); program = self._checkpoint('program')
+                    if (not sealed_tests or item['id'] != sealed_tests['test_id'] or not program
+                            or state['items'][program['implementation_id']]['data'].get('delivery_tree_sha256')
+                                != digest(canonical(self._files()))):
+                        raise ControllerError('test ID/current implementation differ from sealed build stages')
+                    attempts = sum(entry['action'] == 'test' and entry['test_id'] == item['id'] for entry in progress['history'])
+                    if attempts >= 2: raise ControllerError('test attempt budget exhausted')
+                    previous = next((entry for entry in reversed(progress['history']) if entry['action'] == 'test' and entry['test_id'] == item['id']), None)
+                    files = self._files()
+                    unchanged = bool(previous
+                        and previous['source_executable_sha256'] == executable_fingerprint(files, item['data']['argv']))
+                    if unchanged and previous['passed']:
+                        raise ControllerError('second measurement requires changed executable bytes/argv')
+                    repair_after_failed_test = unchanged and previous['passed'] is False
+                    if not repair_after_failed_test:
+                        pending = {'job_id': 'test-' + digest(canonical({'item': item, 'files': files}))[:24],
+                               'action': 'test', 'phase': 'build', 'test_id': item['id'], 'source_state': state,
+                               'source_fingerprint': fingerprint(state), 'source_files': files, 'status': 'prepared'}
+                        progress['pending'] = pending; _write(self.root / 'progress.json', progress)
+                        measurement = self.executor.measure(pending['job_id'], item['data']['argv'], files)
+                        pending['packet'] = measurement; pending['status'] = 'closed'; _write(self.root / 'progress.json', progress)
+                        return self._apply_test(progress, pending)
+                if task['action'] == 'advance_phase':
+                    engine.advance(self.case, phase, 'agent:software-controller')
+                    return {'action': 'advance', 'phase': phase}
+                action = 'author' if repair_after_failed_test else 'approval' if task['action'] == 'human_approval' else 'review' if task['action'] == 'review_phase' else 'author'
+                history = progress['history']
+                last = next((entry for entry in reversed(history) if entry['phase'] == phase and entry['action'] == 'review'), None)
+                repair_after_rejection = bool(action == 'review' and last and last.get('verdict') == 'reject'
+                    and last['source_phase_snapshot'] == state['phases'][phase]['snapshot']
+                    and last['source_files_sha256'] == digest(canonical(self._files())))
+                if repair_after_rejection:
+                    action = 'author'
+                completed = sum(entry['action'] != 'test' for entry in history)
+                count = sum(entry['phase'] == phase and (entry['action'] == 'author' if action == 'author'
+                            else entry['action'] in {'review', 'approval'}) for entry in history)
+                cap = 3 if phase == 'build' and action == 'author' else 2
+                if completed >= 40 or count >= cap: raise ControllerError('controller role budget exhausted')
+                if phase == 'build' and action == 'author' and self._build_stage() == 'repair' and not (
+                        repair_after_rejection or repair_after_failed_test):
+>                   raise ControllerError('third build author requires actual failure or current semantic rejection')
+E                   specorganon.software_controller.ControllerError: third build author requires actual failure or current semantic rejection
+
+src/specorganon/software_controller.py:542: ControllerError
+__ test_whole_author_packet_is_admitted_before_first_real_file_or_put[files] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-96/test_whole_author_packet_is_ad2')
+oversize = 'files'
+
+    @pytest.mark.parametrize('oversize', ['count', 'phase', 'files', 'late_conflict'])
+    def test_whole_author_packet_is_admitted_before_first_real_file_or_put(tmp_path, oversize):
+        ctrl = controller(tmp_path, SyntheticTransport(frame_response()))
+        if oversize == 'count':
+            ctrl.transport.result['manifest']['steps'] += [put('p'+str(i), 'problem', []) for i in range(2,6)]
+        if oversize == 'phase': ctrl.transport.result['manifest']['steps'][-1]['text'] = '\\"' * 4000
+        if oversize == 'files':
+>           ctrl = build_fixture(tmp_path); ctrl.transport.result = response([put('impl1','implementation',['req1'])],
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+                {'count.py': 'print(10)\n' + '#' * 21000, 'README.md': README})
+
+tests/test_software_controller_resources.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_software_controller_resources.py:27: in build_fixture
+    ctrl = controller(tmp_path, SyntheticTransport(frame_response()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_software_controller.py:29: in controller
+    case = tmp_path / 'case'; engine.create_case(case, 'Synthetic controller guards', 'development', 'human:owner', approval_policy='local')
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/engine.py:1660: in create_case
+    init_project(path, title, domain, actor, approval_policy, test_gate_policy)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/tmp/pytest-of-stev/pytest-96/test_whole_author_packet_is_ad2/case')
+title = 'Synthetic controller guards', domain = 'development'
+actor = 'human:owner', approval_policy = 'local'
+test_gate_policy = 'local_report'
+
+    def init_project(directory: str | Path, title: str, domain: str, actor: str,
+                     approval_policy: str = "signed", test_gate_policy: str = "signed_report") -> dict[str, Any]:
+        """Create a project, refusing to replace an existing ledger."""
+        if not all(isinstance(v, str) and v.strip() for v in (title, domain, actor)):
+            raise LedgerError("title, domain and actor must be nonempty strings")
+        if approval_policy not in {"signed", "fixture", "local"}:
+            raise LedgerError("approval_policy must be signed, fixture or local")
+        if approval_policy == "local":
+            if (not actor.startswith("human:") or not actor.removeprefix("human:").strip()
+                    or actor != "human:" + actor.removeprefix("human:").strip() or actor == "human:fixture"):
+                raise LedgerError("local case requires a declared human:<owner>")
+            if test_gate_policy == "signed_report":
+                test_gate_policy = "local_report"
+        if test_gate_policy not in {"signed_report", "signed_observed", "local_report"}:
+            raise LedgerError("test_gate_policy must be signed_report, signed_observed or local_report")
+        if (test_gate_policy == "local_report") != (approval_policy == "local"):
+            raise LedgerError("local_report test gate requires local approval policy")
+        if test_gate_policy == "signed_observed" and approval_policy != "signed":
+            raise LedgerError("signed_observed test gate requires signed approval policy")
+        directory = Path(directory)
+        with _locked(directory):
+            target = project_file(directory)
+            if os.path.lexists(target):
+>               raise LedgerError(f"project already exists: {target}")
+E               specorganon.ledger.LedgerError: project already exists: /tmp/pytest-of-stev/pytest-96/test_whole_author_packet_is_ad2/case/organon.json
+
+src/specorganon/ledger.py:175: LedgerError
+__________________ test_cannot_measure_unsealed_injected_test __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-96/test_cannot_measure_unsealed_i0')
+
+    def test_cannot_measure_unsealed_injected_test(tmp_path):
+        ctrl = build_fixture(tmp_path); program(ctrl); ctrl.executor = Executor(tmp_path)
+        state = engine.get_state(ctrl.case)
+        engine.put_item(ctrl.case, 't1', 'test', 'Injected draft must not execute', ['impl1','crit1'],
+                        {'argv':['/usr/bin/python3','-c','pass']}, 'agent:synthetic-injection',
+                        expected_version=0, expected_deps={r:state['items'][r]['version'] for r in ['impl1','crit1']})
+>       with pytest.raises(ControllerError, match='both sealed'): ctrl.step()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'both sealed'
+E         Actual message: 'build stage needs exactly its implementation/test puts'
+
+tests/test_software_controller_resources.py:125: AssertionError
+______ test_one_conditional_repair_and_no_test_identity_quota_reset[code] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-96/test_one_conditional_repair_an0')
+mutation = 'code'
+
+    @pytest.mark.parametrize('mutation', ['code', 'docs_only', 'test_id'])
+    def test_one_conditional_repair_and_no_test_identity_quota_reset(tmp_path, mutation):
+        ctrl = build_fixture(tmp_path); ctrl.executor = Executor(tmp_path, (1,0)); program(ctrl); tests(ctrl)
+>       assert ctrl.step()['passed'] is False
+               ^^^^^^^^^^^
+
+tests/test_software_controller_resources.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.software_controller.Controller object at 0x7f95e6b01a90>
+
+    def step(self):
+        with self._lock():
+            progress = _json(self.root / 'progress.json')
+            pending = progress['pending']
+            if pending is None:
+                state = engine.get_state(self.case); task = describe_task(state); phase = task['phase']
+                if task['action'] == 'complete': return {'action': 'complete', 'package_allowed': self.package_gate()}
+                if task['action'] in {'resolve_contradiction', 'observe_test'}:
+                    raise ControllerError('live contradiction/unsupported observation blocks controller')
+                repair_after_failed_test = False
+                if phase == 'build':
+                    stage = self._build_stage()
+                    if task['action'] == 'execute_test' and stage != 'repair':
+                        raise ControllerError('test measurement requires both sealed build stages')
+                if task['action'] == 'execute_test':
+                    if self.executor is None: raise ControllerError('isolated measured executor required')
+                    target = task['test_execution_targets'][0]; item = state['items'][target['id']]
+                    sealed_tests = self._checkpoint('tests'); program = self._checkpoint('program')
+                    if (not sealed_tests or item['id'] != sealed_tests['test_id'] or not program
+                            or state['items'][program['implementation_id']]['data'].get('delivery_tree_sha256')
+                                != digest(canonical(self._files()))):
+                        raise ControllerError('test ID/current implementation differ from sealed build stages')
+                    attempts = sum(entry['action'] == 'test' and entry['test_id'] == item['id'] for entry in progress['history'])
+                    if attempts >= 2: raise ControllerError('test attempt budget exhausted')
+                    previous = next((entry for entry in reversed(progress['history']) if entry['action'] == 'test' and entry['test_id'] == item['id']), None)
+                    files = self._files()
+                    unchanged = bool(previous
+                        and previous['source_executable_sha256'] == executable_fingerprint(files, item['data']['argv']))
+                    if unchanged and previous['passed']:
+                        raise ControllerError('second measurement requires changed executable bytes/argv')
+                    repair_after_failed_test = unchanged and previous['passed'] is False
+                    if not repair_after_failed_test:
+                        pending = {'job_id': 'test-' + digest(canonical({'item': item, 'files': files}))[:24],
+                               'action': 'test', 'phase': 'build', 'test_id': item['id'], 'source_state': state,
+                               'source_fingerprint': fingerprint(state), 'source_files': files, 'status': 'prepared'}
+                        progress['pending'] = pending; _write(self.root / 'progress.json', progress)
+                        measurement = self.executor.measure(pending['job_id'], item['data']['argv'], files)
+                        pending['packet'] = measurement; pending['status'] = 'closed'; _write(self.root / 'progress.json', progress)
+                        return self._apply_test(progress, pending)
+                if task['action'] == 'advance_phase':
+                    engine.advance(self.case, phase, 'agent:software-controller')
+                    return {'action': 'advance', 'phase': phase}
+                action = 'author' if repair_after_failed_test else 'approval' if task['action'] == 'human_approval' else 'review' if task['action'] == 'review_phase' else 'author'
+                history = progress['history']
+                last = next((entry for entry in reversed(history) if entry['phase'] == phase and entry['action'] == 'review'), None)
+                repair_after_rejection = bool(action == 'review' and last and last.get('verdict') == 'reject'
+                    and last['source_phase_snapshot'] == state['phases'][phase]['snapshot']
+                    and last['source_files_sha256'] == digest(canonical(self._files())))
+                if repair_after_rejection:
+                    action = 'author'
+                completed = sum(entry['action'] != 'test' for entry in history)
+                count = sum(entry['phase'] == phase and (entry['action'] == 'author' if action == 'author'
+                            else entry['action'] in {'review', 'approval'}) for entry in history)
+                cap = 3 if phase == 'build' and action == 'author' else 2
+                if completed >= 40 or count >= cap: raise ControllerError('controller role budget exhausted')
+                if phase == 'build' and action == 'author' and self._build_stage() == 'repair' and not (
+                        repair_after_rejection or repair_after_failed_test):
+>                   raise ControllerError('third build author requires actual failure or current semantic rejection')
+E                   specorganon.software_controller.ControllerError: third build author requires actual failure or current semantic rejection
+
+src/specorganon/software_controller.py:542: ControllerError
+___ test_one_conditional_repair_and_no_test_identity_quota_reset[docs_only] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-96/test_one_conditional_repair_an1')
+mutation = 'docs_only'
+
+    @pytest.mark.parametrize('mutation', ['code', 'docs_only', 'test_id'])
+    def test_one_conditional_repair_and_no_test_identity_quota_reset(tmp_path, mutation):
+        ctrl = build_fixture(tmp_path); ctrl.executor = Executor(tmp_path, (1,0)); program(ctrl); tests(ctrl)
+>       assert ctrl.step()['passed'] is False
+               ^^^^^^^^^^^
+
+tests/test_software_controller_resources.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.software_controller.Controller object at 0x7f95e7a5aea0>
+
+    def step(self):
+        with self._lock():
+            progress = _json(self.root / 'progress.json')
+            pending = progress['pending']
+            if pending is None:
+                state = engine.get_state(self.case); task = describe_task(state); phase = task['phase']
+                if task['action'] == 'complete': return {'action': 'complete', 'package_allowed': self.package_gate()}
+                if task['action'] in {'resolve_contradiction', 'observe_test'}:
+                    raise ControllerError('live contradiction/unsupported observation blocks controller')
+                repair_after_failed_test = False
+                if phase == 'build':
+                    stage = self._build_stage()
+                    if task['action'] == 'execute_test' and stage != 'repair':
+                        raise ControllerError('test measurement requires both sealed build stages')
+                if task['action'] == 'execute_test':
+                    if self.executor is None: raise ControllerError('isolated measured executor required')
+                    target = task['test_execution_targets'][0]; item = state['items'][target['id']]
+                    sealed_tests = self._checkpoint('tests'); program = self._checkpoint('program')
+                    if (not sealed_tests or item['id'] != sealed_tests['test_id'] or not program
+                            or state['items'][program['implementation_id']]['data'].get('delivery_tree_sha256')
+                                != digest(canonical(self._files()))):
+                        raise ControllerError('test ID/current implementation differ from sealed build stages')
+                    attempts = sum(entry['action'] == 'test' and entry['test_id'] == item['id'] for entry in progress['history'])
+                    if attempts >= 2: raise ControllerError('test attempt budget exhausted')
+                    previous = next((entry for entry in reversed(progress['history']) if entry['action'] == 'test' and entry['test_id'] == item['id']), None)
+                    files = self._files()
+                    unchanged = bool(previous
+                        and previous['source_executable_sha256'] == executable_fingerprint(files, item['data']['argv']))
+                    if unchanged and previous['passed']:
+                        raise ControllerError('second measurement requires changed executable bytes/argv')
+                    repair_after_failed_test = unchanged and previous['passed'] is False
+                    if not repair_after_failed_test:
+                        pending = {'job_id': 'test-' + digest(canonical({'item': item, 'files': files}))[:24],
+                               'action': 'test', 'phase': 'build', 'test_id': item['id'], 'source_state': state,
+                               'source_fingerprint': fingerprint(state), 'source_files': files, 'status': 'prepared'}
+                        progress['pending'] = pending; _write(self.root / 'progress.json', progress)
+                        measurement = self.executor.measure(pending['job_id'], item['data']['argv'], files)
+                        pending['packet'] = measurement; pending['status'] = 'closed'; _write(self.root / 'progress.json', progress)
+                        return self._apply_test(progress, pending)
+                if task['action'] == 'advance_phase':
+                    engine.advance(self.case, phase, 'agent:software-controller')
+                    return {'action': 'advance', 'phase': phase}
+                action = 'author' if repair_after_failed_test else 'approval' if task['action'] == 'human_approval' else 'review' if task['action'] == 'review_phase' else 'author'
+                history = progress['history']
+                last = next((entry for entry in reversed(history) if entry['phase'] == phase and entry['action'] == 'review'), None)
+                repair_after_rejection = bool(action == 'review' and last and last.get('verdict') == 'reject'
+                    and last['source_phase_snapshot'] == state['phases'][phase]['snapshot']
+                    and last['source_files_sha256'] == digest(canonical(self._files())))
+                if repair_after_rejection:
+                    action = 'author'
+                completed = sum(entry['action'] != 'test' for entry in history)
+                count = sum(entry['phase'] == phase and (entry['action'] == 'author' if action == 'author'
+                            else entry['action'] in {'review', 'approval'}) for entry in history)
+                cap = 3 if phase == 'build' and action == 'author' else 2
+                if completed >= 40 or count >= cap: raise ControllerError('controller role budget exhausted')
+                if phase == 'build' and action == 'author' and self._build_stage() == 'repair' and not (
+                        repair_after_rejection or repair_after_failed_test):
+>                   raise ControllerError('third build author requires actual failure or current semantic rejection')
+E                   specorganon.software_controller.ControllerError: third build author requires actual failure or current semantic rejection
+
+src/specorganon/software_controller.py:542: ControllerError
+____ test_one_conditional_repair_and_no_test_identity_quota_reset[test_id] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-96/test_one_conditional_repair_an2')
+mutation = 'test_id'
+
+    @pytest.mark.parametrize('mutation', ['code', 'docs_only', 'test_id'])
+    def test_one_conditional_repair_and_no_test_identity_quota_reset(tmp_path, mutation):
+        ctrl = build_fixture(tmp_path); ctrl.executor = Executor(tmp_path, (1,0)); program(ctrl); tests(ctrl)
+>       assert ctrl.step()['passed'] is False
+               ^^^^^^^^^^^
+
+tests/test_software_controller_resources.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.software_controller.Controller object at 0x7f95e7859100>
+
+    def step(self):
+        with self._lock():
+            progress = _json(self.root / 'progress.json')
+            pending = progress['pending']
+            if pending is None:
+                state = engine.get_state(self.case); task = describe_task(state); phase = task['phase']
+                if task['action'] == 'complete': return {'action': 'complete', 'package_allowed': self.package_gate()}
+                if task['action'] in {'resolve_contradiction', 'observe_test'}:
+                    raise ControllerError('live contradiction/unsupported observation blocks controller')
+                repair_after_failed_test = False
+                if phase == 'build':
+                    stage = self._build_stage()
+                    if task['action'] == 'execute_test' and stage != 'repair':
+                        raise ControllerError('test measurement requires both sealed build stages')
+                if task['action'] == 'execute_test':
+                    if self.executor is None: raise ControllerError('isolated measured executor required')
+                    target = task['test_execution_targets'][0]; item = state['items'][target['id']]
+                    sealed_tests = self._checkpoint('tests'); program = self._checkpoint('program')
+                    if (not sealed_tests or item['id'] != sealed_tests['test_id'] or not program
+                            or state['items'][program['implementation_id']]['data'].get('delivery_tree_sha256')
+                                != digest(canonical(self._files()))):
+                        raise ControllerError('test ID/current implementation differ from sealed build stages')
+                    attempts = sum(entry['action'] == 'test' and entry['test_id'] == item['id'] for entry in progress['history'])
+                    if attempts >= 2: raise ControllerError('test attempt budget exhausted')
+                    previous = next((entry for entry in reversed(progress['history']) if entry['action'] == 'test' and entry['test_id'] == item['id']), None)
+                    files = self._files()
+                    unchanged = bool(previous
+                        and previous['source_executable_sha256'] == executable_fingerprint(files, item['data']['argv']))
+                    if unchanged and previous['passed']:
+                        raise ControllerError('second measurement requires changed executable bytes/argv')
+                    repair_after_failed_test = unchanged and previous['passed'] is False
+                    if not repair_after_failed_test:
+                        pending = {'job_id': 'test-' + digest(canonical({'item': item, 'files': files}))[:24],
+                               'action': 'test', 'phase': 'build', 'test_id': item['id'], 'source_state': state,
+                               'source_fingerprint': fingerprint(state), 'source_files': files, 'status': 'prepared'}
+                        progress['pending'] = pending; _write(self.root / 'progress.json', progress)
+                        measurement = self.executor.measure(pending['job_id'], item['data']['argv'], files)
+                        pending['packet'] = measurement; pending['status'] = 'closed'; _write(self.root / 'progress.json', progress)
+                        return self._apply_test(progress, pending)
+                if task['action'] == 'advance_phase':
+                    engine.advance(self.case, phase, 'agent:software-controller')
+                    return {'action': 'advance', 'phase': phase}
+                action = 'author' if repair_after_failed_test else 'approval' if task['action'] == 'human_approval' else 'review' if task['action'] == 'review_phase' else 'author'
+                history = progress['history']
+                last = next((entry for entry in reversed(history) if entry['phase'] == phase and entry['action'] == 'review'), None)
+                repair_after_rejection = bool(action == 'review' and last and last.get('verdict') == 'reject'
+                    and last['source_phase_snapshot'] == state['phases'][phase]['snapshot']
+                    and last['source_files_sha256'] == digest(canonical(self._files())))
+                if repair_after_rejection:
+                    action = 'author'
+                completed = sum(entry['action'] != 'test' for entry in history)
+                count = sum(entry['phase'] == phase and (entry['action'] == 'author' if action == 'author'
+                            else entry['action'] in {'review', 'approval'}) for entry in history)
+                cap = 3 if phase == 'build' and action == 'author' else 2
+                if completed >= 40 or count >= cap: raise ControllerError('controller role budget exhausted')
+                if phase == 'build' and action == 'author' and self._build_stage() == 'repair' and not (
+                        repair_after_rejection or repair_after_failed_test):
+>                   raise ControllerError('third build author requires actual failure or current semantic rejection')
+E                   specorganon.software_controller.ControllerError: third build author requires actual failure or current semantic rejection
+
+src/specorganon/software_controller.py:542: ControllerError
+____ test_passed_first_measurement_cannot_repeat_after_documentation_change ____
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-96/test_passed_first_measurement_0')
+
+    def test_passed_first_measurement_cannot_repeat_after_documentation_change(tmp_path):
+>       ctrl = build_fixture(tmp_path); ctrl.executor = Executor(tmp_path); program(ctrl); tests(ctrl); ctrl.step()
+                                                                                                        ^^^^^^^^^^^
+
+tests/test_software_controller_resources.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.software_controller.Controller object at 0x7f95e785b020>
+
+    def step(self):
+        with self._lock():
+            progress = _json(self.root / 'progress.json')
+            pending = progress['pending']
+            if pending is None:
+                state = engine.get_state(self.case); task = describe_task(state); phase = task['phase']
+                if task['action'] == 'complete': return {'action': 'complete', 'package_allowed': self.package_gate()}
+                if task['action'] in {'resolve_contradiction', 'observe_test'}:
+                    raise ControllerError('live contradiction/unsupported observation blocks controller')
+                repair_after_failed_test = False
+                if phase == 'build':
+                    stage = self._build_stage()
+                    if task['action'] == 'execute_test' and stage != 'repair':
+                        raise ControllerError('test measurement requires both sealed build stages')
+                if task['action'] == 'execute_test':
+                    if self.executor is None: raise ControllerError('isolated measured executor required')
+                    target = task['test_execution_targets'][0]; item = state['items'][target['id']]
+                    sealed_tests = self._checkpoint('tests'); program = self._checkpoint('program')
+                    if (not sealed_tests or item['id'] != sealed_tests['test_id'] or not program
+                            or state['items'][program['implementation_id']]['data'].get('delivery_tree_sha256')
+                                != digest(canonical(self._files()))):
+                        raise ControllerError('test ID/current implementation differ from sealed build stages')
+                    attempts = sum(entry['action'] == 'test' and entry['test_id'] == item['id'] for entry in progress['history'])
+                    if attempts >= 2: raise ControllerError('test attempt budget exhausted')
+                    previous = next((entry for entry in reversed(progress['history']) if entry['action'] == 'test' and entry['test_id'] == item['id']), None)
+                    files = self._files()
+                    unchanged = bool(previous
+                        and previous['source_executable_sha256'] == executable_fingerprint(files, item['data']['argv']))
+                    if unchanged and previous['passed']:
+                        raise ControllerError('second measurement requires changed executable bytes/argv')
+                    repair_after_failed_test = unchanged and previous['passed'] is False
+                    if not repair_after_failed_test:
+                        pending = {'job_id': 'test-' + digest(canonical({'item': item, 'files': files}))[:24],
+                               'action': 'test', 'phase': 'build', 'test_id': item['id'], 'source_state': state,
+                               'source_fingerprint': fingerprint(state), 'source_files': files, 'status': 'prepared'}
+                        progress['pending'] = pending; _write(self.root / 'progress.json', progress)
+                        measurement = self.executor.measure(pending['job_id'], item['data']['argv'], files)
+                        pending['packet'] = measurement; pending['status'] = 'closed'; _write(self.root / 'progress.json', progress)
+                        return self._apply_test(progress, pending)
+                if task['action'] == 'advance_phase':
+                    engine.advance(self.case, phase, 'agent:software-controller')
+                    return {'action': 'advance', 'phase': phase}
+                action = 'author' if repair_after_failed_test else 'approval' if task['action'] == 'human_approval' else 'review' if task['action'] == 'review_phase' else 'author'
+                history = progress['history']
+                last = next((entry for entry in reversed(history) if entry['phase'] == phase and entry['action'] == 'review'), None)
+                repair_after_rejection = bool(action == 'review' and last and last.get('verdict') == 'reject'
+                    and last['source_phase_snapshot'] == state['phases'][phase]['snapshot']
+                    and last['source_files_sha256'] == digest(canonical(self._files())))
+                if repair_after_rejection:
+                    action = 'author'
+                completed = sum(entry['action'] != 'test' for entry in history)
+                count = sum(entry['phase'] == phase and (entry['action'] == 'author' if action == 'author'
+                            else entry['action'] in {'review', 'approval'}) for entry in history)
+                cap = 3 if phase == 'build' and action == 'author' else 2
+                if completed >= 40 or count >= cap: raise ControllerError('controller role budget exhausted')
+                if phase == 'build' and action == 'author' and self._build_stage() == 'repair' and not (
+                        repair_after_rejection or repair_after_failed_test):
+>                   raise ControllerError('third build author requires actual failure or current semantic rejection')
+E                   specorganon.software_controller.ControllerError: third build author requires actual failure or current semantic rejection
+
+src/specorganon/software_controller.py:542: ControllerError
+___ test_oversized_test_logs_retained_without_passed_or_partial_ledger_write ___
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-96/test_oversized_test_logs_retai0')
+
+    def test_oversized_test_logs_retained_without_passed_or_partial_ledger_write(tmp_path):
+        ctrl=build_fixture(tmp_path);ctrl.executor=Executor(tmp_path,stdout=b'\\'*2100);program(ctrl);tests(ctrl)
+        before=(ctrl.case/'organon.json').read_bytes()
+>       with pytest.raises(ControllerError,match='stream resource'):ctrl.step()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'stream resource'
+E         Actual message: 'third build author requires actual failure or current semantic rejection'
+
+tests/test_software_controller_resources.py:175: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_software_controller_resources.py::test_program_then_tests_preserves_seal_and_defers_measurement
+FAILED tests/test_software_controller_resources.py::test_whole_author_packet_is_admitted_before_first_real_file_or_put[files]
+FAILED tests/test_software_controller_resources.py::test_cannot_measure_unsealed_injected_test
+FAILED tests/test_software_controller_resources.py::test_one_conditional_repair_and_no_test_identity_quota_reset[code]
+FAILED tests/test_software_controller_resources.py::test_one_conditional_repair_and_no_test_identity_quota_reset[docs_only]
+FAILED tests/test_software_controller_resources.py::test_one_conditional_repair_and_no_test_identity_quota_reset[test_id]
+FAILED tests/test_software_controller_resources.py::test_passed_first_measurement_cannot_repeat_after_documentation_change
+FAILED tests/test_software_controller_resources.py::test_oversized_test_logs_retained_without_passed_or_partial_ledger_write
+ERROR tests/test_software_controller_resources.py::tests
+8 failed, 7 passed, 1 error in 2.01s

@@ -14,6 +14,7 @@ import os
 from pathlib import Path, PurePosixPath
 import re
 import shlex
+import tempfile
 
 from . import engine
 from .ledger import _open_regular_file
@@ -62,6 +63,11 @@ def fingerprint(state):
     return digest(canonical(state))
 
 
+def encoded_contribution(value):
+    """Bytes contributed by a complete JSON document embedded in the request."""
+    return len(canonical(canonical(value).decode()))
+
+
 def executable_fingerprint(files, argv):
     # This bounded Python delivery contract permits a second execution after
     # changing executable bytes/argv, not after cosmetic documentation edits.
@@ -95,9 +101,12 @@ class Controller:
             raise ControllerError('private owned run root required')
         self.delivery = self.root / 'delivery'; self.delivery.mkdir(mode=0o700, exist_ok=True)
         self.contract = contract; self.mandate = mandate
-        policy = {'schema': 5, 'case': str(self.case), 'project_sha256': state['project_sha256'],
+        policy = {'schema': 6, 'case': str(self.case), 'project_sha256': state['project_sha256'],
                   'contract': contract, 'mandate': mandate, 'fixture_mode': fixture_mode,
-                  'max_author_per_phase': 2, 'max_review_per_phase': 2, 'max_role_calls': 40}
+                  'max_author_per_phase': 2, 'max_build_authors': 3,
+                  'max_review_per_phase': 2, 'max_role_calls': 40,
+                  'max_phase_items': 6, 'max_phase_encoded_bytes': 6000,
+                  'max_files_encoded_bytes': 20000, 'max_test_stream_encoded_bytes': 4000}
         with self._lock():
             path = self.root / 'controller.json'
             if path.exists():
@@ -121,7 +130,105 @@ class Controller:
         if len(canonical(result)) > 128_000: raise ControllerError('delivery exceeds bounded controller packet')
         return result
 
+    def _limits(self, state, files):
+        for phase in PHASE_BY_ID:
+            items = {key: item for key, item in state['items'].items()
+                     if KIND_TO_PHASE[item['kind']] == phase}
+            if len(items) > 6 or encoded_contribution(items) > 6000:
+                raise ControllerError('phase item resource admission exceeded: ' + phase)
+        if encoded_contribution(files) > 20000:
+            raise ControllerError('delivery resource admission exceeded')
+
+    def _prevalidate(self, manifest, files, actor):
+        # The exact ledger is replayed privately, including already applied
+        # steps after SIGKILL. No production event/file precedes admission.
+        with tempfile.TemporaryDirectory(prefix='admission-', dir=self.root) as name:
+            shadow = Path(name)
+            (shadow / 'organon.json').write_bytes(_read(self.case / 'organon.json', 64 * 1024 * 1024))
+            run_manifest(shadow, manifest, actor)
+            state = engine.get_state(shadow)
+            self._limits(state, files)
+
+    def _checkpoint(self, name):
+        path = self.root / ('build-' + name + '.json')
+        if not path.exists(): return None
+        value = _json(path)
+        if value.get('sha256') != digest(canonical(value.get('binding'))):
+            raise ControllerError('build checkpoint integrity invalid')
+        return value['binding']
+
+    def _seal(self, name, binding):
+        path = self.root / ('build-' + name + '.json')
+        value = {'binding': binding, 'sha256': digest(canonical(binding))}
+        if path.exists():
+            if _json(path) != value: raise ControllerError('build checkpoint diverged during recovery')
+        else: _write(path, value)
+
+    def _build_stage(self):
+        if self._checkpoint('program') is None: return 'program'
+        if self._checkpoint('tests') is None: return 'tests'
+        return 'repair'
+
+    def _build_manifest(self, pending, manifest, files, progress):
+        stage = pending['build_stage']; steps = manifest['steps']
+        implementations = [s for s in steps if s['kind'] == 'implementation']
+        tests = [s for s in steps if s['kind'] == 'test']
+        if len(implementations) != 1 or len(steps) != (1 if stage == 'program' else 2):
+            raise ControllerError('build stage needs exactly its implementation/test puts')
+        implementation = implementations[0]
+        if stage == 'program':
+            if tests or implementation['expected_version'] != 0 or pending['source_files']:
+                raise ControllerError('program stage must start a new implementation without tests')
+            if (len(files.get('README.md', '').strip()) < 200
+                    or not any(n.endswith('.py') for n in files)
+                    or any(PurePosixPath(n).name.startswith('test_') for n in files)):
+                raise ControllerError('program stage needs program and useful README, no tests')
+            return
+        program = self._checkpoint('program')
+        if not program or implementation['id'] != program['implementation_id'] or len(tests) != 1:
+            raise ControllerError('build stages must update the sealed implementation and one test ID')
+        test = tests[0]
+        if stage == 'tests':
+            if test['expected_version'] != 0:
+                raise ControllerError('tests stage must create its sole new test ID')
+            for name, sha in program['files'].items():
+                if digest(files.get(name, '').encode()) != sha:
+                    raise ControllerError('sealed program changed during tests stage')
+            new = set(files) - set(program['files'])
+            if not new or any(not PurePosixPath(n).name.startswith('test_') or not n.endswith('.py') for n in new):
+                raise ControllerError('tests stage only adds authored test_*.py files')
+            if pending['source_state']['items'][implementation['id']]['version'] != program['implementation_version']:
+                raise ControllerError('sealed implementation version changed before tests')
+        elif stage == 'repair':
+            sealed_tests = self._checkpoint('tests')
+            if (not sealed_tests or test['id'] != sealed_tests['test_id']
+                    or not pending.get('repair_after_rejection')):
+                raise ControllerError('repair requires a current actual failure/rejection and the same test ID')
+            previous = next((entry for entry in reversed(progress['history'])
+                             if entry['action'] == 'test' and entry['test_id'] == test['id']), None)
+            if not previous or previous['source_executable_sha256'] == executable_fingerprint(files, test['data'].get('argv')):
+                raise ControllerError('repair must change executable bytes/argv before second measurement')
+        else: raise ControllerError('unknown build stage')
+        if implementation['id'] not in test['refs']:
+            raise ControllerError('authored tests must reference their updated implementation')
+        if not any(pending['source_state']['items'].get(ref, {}).get('kind') == 'criterion'
+                   for ref in test['refs']):
+            raise ControllerError('authored tests must reference a predeclared criterion')
+
+    def _test_streams(self, receipt, hashes=None):
+        result = {}
+        for name in ('stdout', 'stderr'):
+            raw = _read(Path(receipt).parent / (name + '.bin'), 2 * 1024 * 1024)
+            if hashes is not None and digest(raw) != hashes[name + '_sha256']:
+                raise ControllerError('test measurement stream binding invalid')
+            text = raw.decode(errors='replace')
+            if encoded_contribution(text) > 4000:
+                raise ControllerError('test stream resource admission exceeded; raw receipt retained')
+            result[name] = {'text': text, 'complete': True}
+        return result
+
     def _request(self, state, action, progress):
+        self._limits(state, self._files())
         task = describe_task(state)
         # State carries every complete item. The task view previously repeated
         # their text/data (with another JSON escaping layer), exhausting the
@@ -158,6 +265,16 @@ class Controller:
             'Judge semantic substance, source scope, alternatives, traceability, pertinent tests and useful docs; do not accept by field count. '
             'Phase acceptance applies only to this snapshot, never to comparative superiority or field impact.'
         )
+        instructions += (' Prospective schema6 admission: at most six current items per phase; '
+                         'their full map contributes at most 6000 JSON-encoded bytes. '
+                         'Complete delivery-files map contributes at most 20000 encoded bytes. '
+                         'Excess responses fail before any production writes. '
+                         'For build obey build-stage.json: program writes exactly one new implementation '
+                         'and program/README (>=200 characters), no tests. Tests stage adds only test_*.py '
+                         'files, one new test draft and a new version of the SAME implementation ID; '
+                         'sealed program/README stay byte-identical. Optional repair updates SAME '
+                         'implementation and test IDs after actual failure/rejection, changing executable '
+                         'bytes/argv. All tests must refer to criterion and current implementation.')
         documents = {'contract.md': self.contract, 'existing-mandate.md': self.mandate,
                      'artifact-format-guidance.txt': ARTIFACT_GUIDANCE,
                      'state.json': canonical(state).decode(), 'next-task.json': canonical(task_view).decode(),
@@ -166,6 +283,10 @@ class Controller:
                      'previous-role-history.json': canonical(progress['history'][-3:]).decode(),
                      'approval-target-ids.json': canonical([item['id'] for item in task.get('approval_targets', [])]).decode(),
                      'action.txt': action}
+        if task['phase'] == 'build':
+            documents['build-stage.json'] = canonical({'stage': self._build_stage(),
+                'program_checkpoint': self._checkpoint('program'),
+                'tests_checkpoint': self._checkpoint('tests')}).decode()
         measurements = {}
         for item in state['items'].values():
             if item['kind'] == 'test' and item['data'].get('test_job_ref'):
@@ -174,10 +295,7 @@ class Controller:
                 receipt = Path(item['data']['test_job_ref'])
                 measurements[item['id']] = {'applies_to_current_delivery':
                     item['data'].get('delivery_tree_sha256') == digest(canonical(self._files())),
-                    'receipt': _json(receipt), 'streams': {
-                    name: {'text': _read(receipt.parent / (name + '.bin')).decode(errors='replace')[:8000],
-                           'preview_limit_characters': 8000}
-                    for name in ('stdout', 'stderr')}}
+                    'receipt': _json(receipt), 'streams': self._test_streams(receipt)}
         documents['measured-test-records.json'] = canonical(measurements).decode()
         request = {'schema': 1, 'role': 'author' if action == 'author' else 'review',
                    'role_instructions': instructions, 'documents': documents}
@@ -222,6 +340,15 @@ class Controller:
         for step in prepared:
             if step['kind'] == 'implementation':
                 step['data'] = {**step['data'], 'delivery_tree_sha256': digest(canonical(merged))}
+            elif step['kind'] == 'test':
+                argv = step['data'].get('argv')
+                if (type(argv) is not list or not argv or any(type(v) is not str or not v for v in argv)
+                        or not Path(argv[0]).is_absolute()):
+                    raise ControllerError('test draft needs an explicit absolute executable argv')
+                # A command is a mechanical rendering of the authored vector,
+                # never a claimed test outcome. Avoid a draft stranded before
+                # execute_test merely because its redundant rendering is absent.
+                step['data'] = {**step['data'], 'command': shlex.join(argv)}
         if pending.get('repair_after_rejection'):
             changed = merged != pending['source_files']
             for step in prepared:
@@ -273,10 +400,25 @@ class Controller:
             raise ControllerError('case/delivery snapshot changed during role execution')
         if action == 'author':
             manifest = self._author_manifest(pending, response)
+            files = {**pending['source_files'], **response['files']}
+            if phase == 'build': self._build_manifest(pending, manifest, files, progress)
+            self._prevalidate(manifest, files, packet['actor'])
             pending['status'] = 'applying'; _write(self.root / 'progress.json', progress)
             self._write_files(pending, response['files'])
             run_manifest(self.case, manifest, actor=packet['actor'])
             result = {'action': action, 'phase': phase, 'reason': response['reason']}
+            if phase == 'build':
+                stage = pending['build_stage']; result['build_stage'] = stage
+                if stage == 'program':
+                    implementation = manifest['steps'][0]
+                    self._seal('program', {'job_id': pending['job_id'],
+                        'implementation_id': implementation['id'],
+                        'implementation_version': implementation['expected_version'] + 1,
+                        'files': {name: digest(text.encode()) for name, text in files.items()}})
+                elif stage == 'tests':
+                    test = next(s for s in manifest['steps'] if s['kind'] == 'test')
+                    self._seal('tests', {'job_id': pending['job_id'], 'test_id': test['id'],
+                                        'delivery_tree_sha256': digest(canonical(files))})
         else:
             if (action == 'review' and current['phases'][phase]['snapshot'] != pending['source_state']['phases'][phase]['snapshot']
                     or self._files() != pending['source_files']):
@@ -334,6 +476,7 @@ class Controller:
                        for key in ('stdout_sha256', 'stderr_sha256'))):
             raise ControllerError('test measurement argv/input/result binding invalid')
         passed = measurement['exit_code'] == 0 and not measurement['timed_out'] and not measurement.get('truncated_streams')
+        self._test_streams(measurement['test_job_ref'], measurement)
         data = {**item['data'], 'passed': passed, 'command': shlex.join(item['data']['argv']),
                 'test_job_ref': measurement['test_job_ref'], 'delivery_tree_sha256': measurement['delivery_tree_sha256'],
                 'receipt': {'argv': item['data']['argv'], **{key: measurement[key] for key in
@@ -341,6 +484,7 @@ class Controller:
         data['receipt']['result_sha256'] = engine.local_test_result_sha256(data)
         manifest = {'schema': 1, 'steps': [{'op': 'put', 'id': item['id'], 'kind': 'test', 'text': item['text'],
                      'refs': list(item['deps']), 'data': data, 'expected_version': item['version'], 'expected_deps': item['deps']}]}
+        self._prevalidate(manifest, pending['source_files'], 'executor:isolated-software-controller')
         pending['status'] = 'applying'; _write(self.root / 'progress.json', progress)
         run_manifest(self.case, manifest, 'executor:isolated-software-controller')
         result = {'action': 'test', 'phase': 'build', 'test_id': item['id'], 'passed': passed,
@@ -360,15 +504,27 @@ class Controller:
                 if task['action'] in {'resolve_contradiction', 'observe_test'}:
                     raise ControllerError('live contradiction/unsupported observation blocks controller')
                 repair_after_failed_test = False
+                if phase == 'build':
+                    stage = self._build_stage()
+                    if task['action'] == 'execute_test' and stage != 'repair':
+                        raise ControllerError('test measurement requires both sealed build stages')
                 if task['action'] == 'execute_test':
                     if self.executor is None: raise ControllerError('isolated measured executor required')
                     target = task['test_execution_targets'][0]; item = state['items'][target['id']]
+                    sealed_tests = self._checkpoint('tests'); program = self._checkpoint('program')
+                    if (not sealed_tests or item['id'] != sealed_tests['test_id'] or not program
+                            or state['items'][program['implementation_id']]['data'].get('delivery_tree_sha256')
+                                != digest(canonical(self._files()))):
+                        raise ControllerError('test ID/current implementation differ from sealed build stages')
                     attempts = sum(entry['action'] == 'test' and entry['test_id'] == item['id'] for entry in progress['history'])
                     if attempts >= 2: raise ControllerError('test attempt budget exhausted')
                     previous = next((entry for entry in reversed(progress['history']) if entry['action'] == 'test' and entry['test_id'] == item['id']), None)
                     files = self._files()
-                    repair_after_failed_test = bool(previous and previous['passed'] is False
+                    unchanged = bool(previous
                         and previous['source_executable_sha256'] == executable_fingerprint(files, item['data']['argv']))
+                    if unchanged and previous['passed']:
+                        raise ControllerError('second measurement requires changed executable bytes/argv')
+                    repair_after_failed_test = unchanged and previous['passed'] is False
                     if not repair_after_failed_test:
                         pending = {'job_id': 'test-' + digest(canonical({'item': item, 'files': files}))[:24],
                                'action': 'test', 'phase': 'build', 'test_id': item['id'], 'source_state': state,
@@ -391,12 +547,17 @@ class Controller:
                 completed = sum(entry['action'] != 'test' for entry in history)
                 count = sum(entry['phase'] == phase and (entry['action'] == 'author' if action == 'author'
                             else entry['action'] in {'review', 'approval'}) for entry in history)
-                if completed >= 40 or count >= 2: raise ControllerError('controller role budget exhausted')
+                cap = 3 if phase == 'build' and action == 'author' else 2
+                if completed >= 40 or count >= cap: raise ControllerError('controller role budget exhausted')
+                if phase == 'build' and action == 'author' and self._build_stage() == 'repair' and not (
+                        repair_after_rejection or repair_after_failed_test):
+                    raise ControllerError('third build author requires actual failure or current semantic rejection')
                 request = self._request(state, action, progress)
                 pending = {'job_id': f'role-{completed + 1:02d}-{phase}-{action}', 'phase': phase, 'action': action,
                            'source_state': state, 'source_fingerprint': fingerprint(state), 'source_files': self._files(),
                            'request': request, 'status': 'prepared'}
                 pending['repair_after_rejection'] = repair_after_rejection or repair_after_failed_test
+                if phase == 'build': pending['build_stage'] = self._build_stage()
                 progress['pending'] = pending; _write(self.root / 'progress.json', progress)
             if pending['status'] == 'prepared':
                 if fingerprint(engine.get_state(self.case)) != pending['source_fingerprint'] or self._files() != pending['source_files']:
@@ -424,6 +585,15 @@ class Controller:
             if item['kind'] == 'test' and not item['data'].get('test_job_ref'):
                 raise ControllerError('package needs actual external measured test provenance')
         files = self._files(); readme = files.get('README.md', '')
+        self._limits(state, files)
+        program = self._checkpoint('program'); tests = self._checkpoint('tests')
+        if (not program or not tests
+                or program['implementation_id'] not in state['items']
+                or tests['test_id'] not in state['items']
+                or {i['id'] for i in state['items'].values() if i['kind'] == 'implementation'} != {program['implementation_id']}
+                or {i['id'] for i in state['items'].values() if i['kind'] == 'test'} != {tests['test_id']}
+                or state['items'][program['implementation_id']]['data'].get('delivery_tree_sha256') != digest(canonical(files))):
+            raise ControllerError('package needs both sealed build stages and their sole implementation/test IDs')
         if self.executor is None: raise ControllerError('package needs verified isolated test executor')
         for item in state['items'].values():
             if item['kind'] == 'test': self.executor.verify_test(item['data'], files)

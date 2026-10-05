@@ -24,9 +24,15 @@ class FixtureReviews:
     def __init__(self):
         self.calls = []
         self.verdict = 'accept'
+        self.authors = []
 
     def call(self, job_id, role, request):
         self.calls.append((job_id, role, request['documents']['action.txt']))
+        if role == 'author' and self.authors:
+            result = self.authors.pop(0)
+            return {'schema': 1, 'result': result, 'request_sha256': digest(canonical(request)),
+                    'actor': 'author:synthetic-controls', 'receipt_ref': 'synthetic:' + job_id,
+                    'provenance': 'synthetic', 'usage_reported': None}
         if role != 'review':
             raise ControllerError('fixture stops at repair request; no replacement reviewer')
         result = {'schema': 1, 'verdict': self.verdict, 'findings': [],
@@ -64,11 +70,26 @@ def baseline(root, source, executor):
              'It prints the constructed count 10 and requires no dependencies, credentials '
              'or network. There is no input format or empirical claim. This documentation '
              'and every phase argument/review are invented mechanism fixtures only.\n'}
-    ctrl._write_files({'source_files': {}}, files)
     steps = json.loads((source / 'workflows/synthetic_full.json').read_text())['steps']
     for original in steps:
         step = copy.deepcopy(original)
         if step['op'] == 'put':
+            if step['kind'] == 'implementation':
+                test = {'op': 'put', 'id': 't1', 'kind': 'test', 'text': 'Synthetic test of actual count output',
+                        'refs': ['impl1', 'crit1'], 'data': {'argv': ['/opt/specorganon/venv/bin/python',
+                        '-E', '-s', '-B', '/input/delivery/test_count.py']}}
+                reviews.authors.extend([
+                    {'schema': 1, 'manifest': {'schema': 1, 'steps': [step]}, 'files': files,
+                     'reason': 'Invented program stage of synthetic positive control'},
+                    {'schema': 1, 'manifest': {'schema': 1, 'steps': [copy.deepcopy(step), test]},
+                     'files': {'test_count.py': 'import subprocess, sys\n'
+                         'p = subprocess.run([sys.executable, "-E", "-s", "-B", "/input/delivery/count.py"], capture_output=True)\n'
+                         'assert p.returncode == 0 and p.stdout == b"10\\n" and p.stderr == b""\n'},
+                     'reason': 'Invented stage-two authored process-output check'}])
+                assert ctrl.step()['build_stage'] == 'program'
+                assert ctrl.step()['build_stage'] == 'tests'
+                continue
+            if step['kind'] == 'test': continue
             if step['kind'] == 'test':
                 step['data'] = {'argv': ['/opt/specorganon/venv/bin/python', '-E', '-s', '-B',
                                        '/input/delivery/count.py']}
@@ -183,10 +204,11 @@ def main():
     args = parser.parse_args()
     args.run_root.mkdir(parents=True, exist_ok=False)
     plan = {'schema': 1, 'classification': 'prospective synthetic C5-C7 engineering controls',
-            'engineering_version': 4, 'prior_attempts': [
+            'engineering_version': 6, 'controller_schema': 6, 'prior_attempts': [
                 'formal-controls-01 stopped before Docker: fixture missing command; retained',
                 'formal-controls-02 measured Docker but fixture assessment omitted risk; retained',
-                'formal-controls-03 withdrawal satisfied; fixture called pending-task request on completed case; retained'],
+                'formal-controls-03 withdrawal satisfied; fixture called pending-task request on completed case; retained',
+                'formal-controls-04 accepted schema4 baseline/guards; retained, not reclassified'],
             'conditions': ['C5-withdrawal', 'C5-rejection', 'C6-challenge', 'C7-premise'],
             'runs_per_condition': 1, 'timeout_seconds_per_condition': 120,
             'native_model_calls': 0, 'positive_baseline_required': 'nine accepted synthetic phases and package gate true',

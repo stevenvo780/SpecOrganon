@@ -1157,6 +1157,179 @@
       },
       "prev_hash": "8705c11b4cdf319a51750dc4fc3f245aa19e65728daea0c7b3ed8cb9b3095040",
       "seq": 53
+    },
+    {
+      "actor": "agent:codex-coordinator",
+      "at": "2026-10-05T04:45:11+00:00",
+      "hash": "251a0569ccc366adaf2f9d4d2587267519c96a6f6db73a3bc99ef823a6e8cf6d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "authority": "existing owner mandate to finish autonomous local software goal",
+          "contract": "goals/autonomous-software-v1/resource-contract-v2.md",
+          "contract_sha256": "66e3fbca3186d592be439afdf31088a70cdac95a9ed16579c8f82a7f5c6fd114",
+          "delegated_technical": true,
+          "engineering_iteration": 3,
+          "global_timeout_seconds": 6000,
+          "max_build_authors": 3,
+          "max_other_authors": 2,
+          "max_role_calls": 40,
+          "new_trial_started": false,
+          "old_runs_migrated": false,
+          "prior_IntervalDesk_verdict": "terminal_inconclusive_seven_of_nine_retained",
+          "prior_LogLens_verdict": "terminal_inconclusive_retained",
+          "role_timeout_seconds": 180,
+          "selected_option": "o2"
+        },
+        "deps": {
+          "cmp1": 1,
+          "d1": 2,
+          "e1": 1,
+          "n1": 1,
+          "risk1": 1
+        },
+        "id": "d_resource",
+        "kind": "decision",
+        "text": "Extender o2 con schema6 nuevo: dos etapas de build y una sola reparación opcional condicionada, topes prospectivos de contexto/archivos y revisión nativa separada. Preferible a repetir la construcción fallida o aumentar sus límites retroactivamente. Es elección técnica delegada por el dueño, sin afirmar que él eligió personalmente esta arquitectura. Los intentos anteriores permanecen terminales; la comparación necesita otro prerregistro antes de generar.",
+        "version": 1
+      },
+      "prev_hash": "9a63d3aed1fcf53d6470d97e82c5739f9dbb0e11bbabb6edde557eacd4492654",
+      "seq": 54
+    },
+    {
+      "actor": "agent:codex-coordinator",
+      "at": "2026-10-05T04:45:11+00:00",
+      "hash": "3587e636b866010b5ec990f611d7154f97d39c02a8a4d64fb15bbcf92062c15e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "contract": "goals/autonomous-software-v1/resource-contract-v2.md",
+          "contract_sha256": "66e3fbca3186d592be439afdf31088a70cdac95a9ed16579c8f82a7f5c6fd114",
+          "engineering_iteration": 3,
+          "new_trial_started": false,
+          "old_runs_migrated": false,
+          "prior_IntervalDesk_verdict": "terminal_inconclusive_seven_of_nine_retained",
+          "prior_LogLens_verdict": "terminal_inconclusive_retained",
+          "resource_controls": [
+            "R1",
+            "R2",
+            "R3",
+            "R4",
+            "R5",
+            "R6",
+            "R7",
+            "R8"
+          ],
+          "scope": "prospective schema6 small software runs; historical candidates unchanged"
+        },
+        "deps": {
+          "d_resource": 1,
+          "e1": 1,
+          "n1": 1,
+          "p1": 1,
+          "pr1": 1,
+          "req1": 3
+        },
+        "id": "req_resource",
+        "kind": "requirement",
+        "text": "Implementar las transiciones programa->tests->medición/revisión->reparación condicionada/terminal del contrato v2. Programa/README de etapa1 son inmutables en2; todo put se prevalida, los excedidos conservan evidencia sin writes reales y una segunda medición exige cambio ejecutable. No eludir cupos mediante IDs nuevos ni reanudar roles inconclusos. Conservar nueve fases, revisores/ejecutor aislados, trazas, documentación e historial.",
+        "version": 1
+      },
+      "prev_hash": "251a0569ccc366adaf2f9d4d2587267519c96a6f6db73a3bc99ef823a6e8cf6d",
+      "seq": 55
+    },
+    {
+      "actor": "agent:codex-coordinator",
+      "at": "2026-10-05T04:45:12+00:00",
+      "hash": "a61fa2befad23ade04542e972e9dda32e078996f6262c870e23fdbbf3bf45c1b",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "C1_C4_source": "predeclared future reserved study cases; no replacement of engineering trials",
+          "additional_required_controls": [
+            "R1",
+            "R2",
+            "R3",
+            "R4",
+            "R5",
+            "R6",
+            "R7",
+            "R8"
+          ],
+          "contract": "goals/autonomous-software-v1/resource-contract-v2.md",
+          "contract_sha256": "66e3fbca3186d592be439afdf31088a70cdac95a9ed16579c8f82a7f5c6fd114",
+          "denominator": 8,
+          "engineering_iteration": 3,
+          "measurement_value": null,
+          "metric": "local_delivery_controls_satisfied",
+          "new_trial_started": false,
+          "old_runs_migrated": false,
+          "prior_IntervalDesk_verdict": "terminal_inconclusive_seven_of_nine_retained",
+          "prior_LogLens_verdict": "terminal_inconclusive_retained",
+          "reject": "any failed or inconclusive delivery control; any failed resource admission/recovery control; missing complete new case or prospective evaluation",
+          "threshold": 8,
+          "unit": "count"
+        },
+        "deps": {
+          "cr1": 3,
+          "d_resource": 1,
+          "e1": 1,
+          "i1": 2,
+          "n1": 1,
+          "p1": 1,
+          "pr1": 1,
+          "req_resource": 1
+        },
+        "id": "cr_resource",
+        "kind": "criterion",
+        "text": "Criterio de la release nueva: mantener los ocho controles locales de entrega originales y satisfacer además R1–R8 antes de la campaña. C1–C4 sólo se cumplen con un caso NUEVO de nueve fases semánticas, programa/tests/docs reales y trazas, del conjunto prospectivo congelado; ninguna fixture de recursos los sustituye. LogLens/IntervalDesk conservan sus propios veredictos adversos. La comparación debe ejecutar el conjunto declarado y publicar todas las celdas y costes desconocidos, sin selección por victoria.",
+        "version": 1
+      },
+      "prev_hash": "3587e636b866010b5ec990f611d7154f97d39c02a8a4d64fb15bbcf92062c15e",
+      "seq": 56
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-05T04:51:35+00:00",
+      "hash": "2ece97376d4f705944abaea393225060d1f4a0e7f168f213eaccbf8acee2552d",
+      "kind": "approval",
+      "payload": {
+        "id": "d_resource",
+        "provenance": "local_declared",
+        "reason": "Existing local owner mandate; technical conformity judged separately by reviewer:gemini-isolated-review (/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/resource-design-review-02/transport/host-journal/role-01-specify-approval/receipt.json): La decisión d_resource cumple con el mandato existente. Extiende la arquitectura o2 hacia schema6 como una elección técnica delegada, declarando explícitamente que no es una elección personal del dueño y sin inventar una autorización nueva. Además, conserva los resultados inconclusos anteriores y los límites del entorno local, respetando el alcance autorizado.",
+        "version": 1
+      },
+      "prev_hash": "a61fa2befad23ade04542e972e9dda32e078996f6262c870e23fdbbf3bf45c1b",
+      "seq": 57
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-05T04:52:38+00:00",
+      "hash": "65ba1ef28d9c1e9fb5bf31ad0a7e01f80c7469bbdc218d2f86b0951bf2a124d4",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "specify",
+        "provenance": "local_declared",
+        "reason": "La especificación integra correctamente el contrato de schema6 sobre la arquitectura o2. Las decisiones, requisitos y criterios (d_resource, req_resource, cr_resource) reflejan fielmente las nuevas etapas de build y los controles de admisión de recursos (R1-R8). La trazabilidad es exhaustiva y conecta con problema, norma aprobada, evidencia observada y protocolo. Además, los criterios referencian correctamente el indicador i1 con la misma métrica (local_delivery_controls_satisfied) y preceden de forma válida a los resultados (measurement_value nulo o inexistente). Se mantienen los veredictos previos sin afirmar éxito prematuro. [role receipt: /datos/workspaces/personal/specorganon-validation/autonomous-software-v1/resource-design-review-02/transport/host-journal/role-02-specify-review/receipt.json]",
+        "snapshot": "71f19d7cac557f35e6ea53977f6057af8add92a9b30e5f4d0fe384db523369d3",
+        "verdict": "accept"
+      },
+      "prev_hash": "2ece97376d4f705944abaea393225060d1f4a0e7f168f213eaccbf8acee2552d",
+      "seq": 58
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-05T04:52:38+00:00",
+      "hash": "ccf4055663915023dbe6b7d03755a63c7738530bde08c16de08d2f20ada9969b",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "specify",
+        "review_seq": 58,
+        "snapshot": "71f19d7cac557f35e6ea53977f6057af8add92a9b30e5f4d0fe384db523369d3"
+      },
+      "prev_hash": "65ba1ef28d9c1e9fb5bf31ad0a7e01f80c7469bbdc218d2f86b0951bf2a124d4",
+      "seq": 59
     }
   ],
   "project": {

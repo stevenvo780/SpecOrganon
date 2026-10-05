@@ -1,0 +1,74 @@
+...............{"classification": "synthetic maximum item/files/log contribution fixture", "request_bytes": 100972, "request_limit": 110000, "phase_count": 9, "phase_item_limit": 6, "phase_encoded_limit": 6000, "files_encoded_bytes": 19999, "stream_encoded_bytes": 4000, "state_preserved": true, "C1_satisfied": false}
+....................F..........................
+=================================== FAILURES ===================================
+_ test_sigkill_after_actual_role_receipt_before_puts_reuses_job_and_applies_once _
+
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-0/test_sigkill_after_actual_role0')
+
+>   ???
+
+/datos/workspaces/personal/SpecOrganon/tests/test_controller_recovery.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/specorganon/venv/lib/python3.12/site-packages/specorganon/software_controller.py:569: in step
+    packet = self.transport.call(pending['job_id'], pending['request']['role'], pending['request'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/datos/workspaces/personal/SpecOrganon/tests/test_controller_recovery.py:34: in call
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.role_jobs.JobStore object at 0x7f829fa8f980>
+job_id = 'role-01-frame-author'
+argv = ['/opt/specorganon/venv/bin/python', '-c', "from pathlib import Path; import json; p=Path('/tmp/pytest-of-ubuntu/pytes...sm only', 'refs': ['p1'], 'data': {}}]}, 'files': {}, 'reason': 'Synthetic control; no model or semantic approval'}))"]
+request = {'documents': {'action.txt': 'author', 'approval-target-ids.json': '[]', 'artifact-format-guidance.txt': 'All puts use...rejection, changing executable bytes/argv. All tests must refer to criterion and current implementation.', 'schema': 1}
+cwd = PosixPath('/tmp/pytest-of-ubuntu/pytest-0/test_sigkill_after_actual_role0/run/transport')
+timeout_seconds = 10, env = None, metadata = None, cancel_argv = None
+stdin_bytes = None
+
+    def execute(self, job_id, argv, request, *, cwd, timeout_seconds=180, env=None,
+                metadata=None, cancel_argv=None, stdin_bytes=None):
+        if type(job_id) is not str or re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}", job_id) is None:
+            raise JobError("invalid job ID")
+        argv = _argv(argv)
+        timeout_seconds = _positive(timeout_seconds, 180, "timeout")
+        cwd = _safe(cwd)
+        if not cwd.is_dir(): raise JobError("job cwd must exist")
+        if env is not None and (type(env) is not dict or any(type(k) is not str or type(v) is not str or "\0" in k + v for k, v in env.items())):
+            raise JobError("invalid process environment")
+        if cancel_argv is not None: _argv(cancel_argv)
+        if stdin_bytes is not None and (type(stdin_bytes) is not bytes or len(stdin_bytes) > 128_000):
+            raise JobError("stdin must be bounded bytes")
+        # Environment values can contain credentials: retain only their digest.
+        effective_env = dict(os.environ) if env is None else dict(env)
+        envelope = {"request": request, "argv": argv, "cwd": str(cwd),
+                    "environment_sha256": digest(canonical(effective_env)),
+                    "metadata": metadata, "timeout_seconds": timeout_seconds,
+                    "cancel_argv": cancel_argv,
+                    "stdin_sha256": digest(stdin_bytes) if stdin_bytes is not None else None}
+        raw = canonical(envelope)
+        if len(raw) > self.policy["max_request_bytes"]:
+            raise JobError("job request exceeds budget")
+        fingerprint = digest(raw)
+        with self._lock():
+            path = _safe(self.root / job_id)
+            if path.exists() and not path.is_dir(): raise JobError("job path must be a directory")
+            if (path / "receipt.json").exists():
+                receipt = self._json(path / "receipt.json")
+                if (type(receipt) is not dict or receipt.get("request_sha256") != fingerprint
+                        or self._read(path / "request.json") != raw):
+>                   raise JobError("closed job inputs/argv changed")
+E                   specorganon.role_jobs.JobError: closed job inputs/argv changed
+
+/opt/specorganon/venv/lib/python3.12/site-packages/specorganon/role_jobs.py:240: JobError
+=============================== warnings summary ===============================
+../opt/specorganon/venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:469
+  /opt/specorganon/venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:469: PytestCacheWarning: could not create cache path /input/tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/input/tests/pytest-cache-files-1_q53txi'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../opt/specorganon/venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:423
+  /opt/specorganon/venv/lib/python3.12/site-packages/_pytest/cacheprovider.py:423: PytestCacheWarning: could not create cache path /input/tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/input/tests/pytest-cache-files-z9vu0wzt'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../input/tests/test_controller_recovery.py::test_sigkill_after_actual_role_receipt_before_puts_reuses_job_and_applies_once
+1 failed, 61 passed, 2 warnings in 9.86s

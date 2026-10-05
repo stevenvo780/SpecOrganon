@@ -31,12 +31,18 @@ def controller(tmp_path, transport):
                       mandate='Synthetic local owner mandate for guard tests', fixture_mode=True)
 
 
-def test_new_review_contract_does_not_silently_resume_old_run(tmp_path):
+@pytest.mark.parametrize('old_schema', [2, 5])
+def test_new_review_contract_does_not_silently_resume_old_run(tmp_path, old_schema):
     transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport)
     ctrl.step()
     policy_path = ctrl.root / 'controller.json'
     from specorganon.role_jobs import _json
-    policy = _json(policy_path); policy['schema'] = 2; _write(policy_path, policy)
+    policy = _json(policy_path); policy['schema'] = old_schema
+    if old_schema == 5:
+        for key in ('max_build_authors', 'max_phase_items', 'max_phase_encoded_bytes',
+                    'max_files_encoded_bytes', 'max_test_stream_encoded_bytes'):
+            policy.pop(key)
+    _write(policy_path, policy)
     before = (ctrl.case / 'organon.json').read_bytes()
     with pytest.raises(ControllerError, match='versioned run'):
         Controller(ctrl.case, ctrl.root, transport, contract=ctrl.contract,
@@ -175,60 +181,14 @@ def test_no_replacement_review_when_author_changes_nothing_after_rejection(tmp_p
     assert not engine.get_state(ctrl.case)['phases']['frame']['accepted']
 
 
-@pytest.mark.parametrize('repair', ['code', 'readme_only'])
-def test_failed_test_needs_changed_author_work_before_bounded_second_measurement(tmp_path, monkeypatch, repair):
-    transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport)
-    engine.put_item(ctrl.case, 't1', 'test', 'Synthetic process exit criterion', [],
-                    {'argv': ['/usr/bin/python3', '-c', 'raise SystemExit(1)']}, 'agent:synthetic',
-                    expected_version=0, expected_deps={})
-    def task(state):
-        return {'action': 'execute_test', 'phase': 'build', 'test_execution_targets': [{'id': 't1'}]}
-    monkeypatch.setattr('specorganon.software_controller.describe_task', task)
-    class Executor:
-        def __init__(self): self.calls = []
-        def measure(self, job_id, argv, files):
-            self.calls.append(job_id)
-            folder = tmp_path / ('measurement-' + str(len(self.calls))); folder.mkdir()
-            for name in ('stdout', 'stderr'): (folder / (name + '.bin')).write_bytes(b'')
-            _write(folder / 'receipt.json', {'synthetic': True})
-            return {'subject_argv': argv, 'delivery_tree_sha256': digest(canonical(files)),
-                    'exit_code': 1 if len(self.calls) == 1 else 0, 'timed_out': False,
-                    'truncated_streams': [], 'test_job_ref': str(folder / 'receipt.json'),
-                    'stdout_sha256': digest(b''), 'stderr_sha256': digest(b''), 'provenance': 'synthetic'}
-        def verify_test(self, *args, **kwargs): return True
-    ctrl.executor = Executor()
-    assert ctrl.step()['passed'] is False
-    transport.result = {'schema': 1, 'manifest': {'schema': 1, 'steps': [
-        {'op': 'put', 'id': 't1', 'kind': 'test', 'text': 'Repaired synthetic exit criterion', 'refs': [],
-         'data': {'argv': ['/usr/bin/python3', '-c', 'raise SystemExit(0)']}}]},
-        'files': {'probe.py': 'raise SystemExit(0)\n'}, 'reason': 'Synthetic engineering repair after measured exit1'}
-    if repair == 'readme_only':
-        transport.result['files'] = {'README.md': 'Documentation-only change after failure'}
-        transport.result['manifest']['steps'][0]['data']['argv'] = ['/usr/bin/python3', '-c', 'raise SystemExit(1)']
-    assert ctrl.step()['action'] == 'author'
-    assert len(ctrl.executor.calls) == 1
-    if repair == 'readme_only':
-        with pytest.raises(ControllerError, match='material|budget'): ctrl.step()
-        assert len(ctrl.executor.calls) == 1
-        return
-    assert ctrl.step()['passed'] is True
-    assert len(ctrl.executor.calls) == 2
-    with pytest.raises(ControllerError, match='budget'): ctrl.step()
-
-
-def test_measured_test_rejects_invalid_stream_binding_before_ledger_write(tmp_path, monkeypatch):
-    ctrl = controller(tmp_path, SyntheticTransport(frame_response()))
-    engine.put_item(ctrl.case, 't1', 'test', 'Synthetic exit criterion', [],
-                    {'argv': ['/usr/bin/python3', '-c', 'pass']}, 'agent:synthetic',
-                    expected_version=0, expected_deps={})
-    monkeypatch.setattr('specorganon.software_controller.describe_task', lambda state: {
-        'action': 'execute_test', 'phase': 'build', 'test_execution_targets': [{'id': 't1'}]})
-    class Executor:
-        def measure(self, job_id, argv, files):
-            return {'subject_argv': argv, 'delivery_tree_sha256': digest(canonical(files)),
-                    'exit_code': 0, 'timed_out': False, 'truncated_streams': [],
-                    'test_job_ref': 'synthetic:bad-stream-hash', 'stdout_sha256': [],
-                    'stderr_sha256': digest(b''), 'provenance': 'synthetic'}
-    ctrl.executor = Executor(); before = engine.get_state(ctrl.case)['revision']
+def test_measurement_rejects_invalid_stream_binding_after_valid_stages(tmp_path):
+    from test_software_controller_resources import build_fixture, program, stage_tests, Executor
+    ctrl = build_fixture(tmp_path); program(ctrl); stage_tests(ctrl)
+    class InvalidExecutor(Executor):
+        def measure(self, *args):
+            result = super().measure(*args); result['stdout_sha256'] = []
+            return result
+    ctrl.executor = InvalidExecutor(tmp_path)
+    before = (ctrl.case / 'organon.json').read_bytes()
     with pytest.raises(ControllerError, match='binding'): ctrl.step()
-    assert engine.get_state(ctrl.case)['revision'] == before
+    assert (ctrl.case / 'organon.json').read_bytes() == before

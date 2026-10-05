@@ -1,0 +1,35 @@
+...............F.........................                                [100%]
+=================================== FAILURES ===================================
+__ test_maximum_full_validate_context_keeps_all_items_files_and_test_streams ___
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-98/test_maximum_full_validate_con0')
+
+    def test_maximum_full_validate_context_keeps_all_items_files_and_test_streams(tmp_path):
+        ctrl=build_fixture(tmp_path);ctrl.executor=Executor(tmp_path,stdout=b'X'*3998);program(ctrl);stage_tests(ctrl);ctrl.step()
+        state=engine.get_state(ctrl.case)
+        state['phases']['build']['accepted']=True
+        # Model a final current snapshot at each declared phase cap. All complete
+        # item maps remain in the request, including issues/deps and test receipt.
+        for phase in state['phases']:
+            group={k:v for k,v in state['items'].items() if KIND_TO_PHASE[v['kind']]==phase}
+            if not group:
+                item=copy.deepcopy(state['items']['p1']);item.update(id='res1',kind='result')
+                state['items']['res1']=item;group={'res1':item}
+            template=next(iter(group.values()))
+            for index in range(len(group),6):
+                item=copy.deepcopy(template);item['id']=phase+str(index);item['data']={};item['text']='Synthetic cap'
+                # No cloned measured job refs: a receipt is kept once, in t1.
+                item['test_execution_provenance']=None
+                group[item['id']]=item;state['items'][item['id']]=item
+            target=next(iter(group.values()))
+            while encoded_contribution(group)<6000:
+                target['text']+='x'
+            target['text']=target['text'][:-1]
+>           assert 5990<=encoded_contribution(group)<=6000
+E           AssertionError: assert 6061 <= 6000
+E            +  where 6061 = encoded_contribution({'res1': {'data': {}, 'deps': {}, 'id': 'res1', 'kind': 'result', ...}, 'validate1': {'data': {}, 'deps': {}, 'id': 'v...lidate2', 'kind': 'result', ...}, 'validate3': {'data': {}, 'deps': {}, 'id': 'validate3', 'kind': 'result', ...}, ...})
+
+tests/test_software_controller_resources.py:204: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_software_controller_resources.py::test_maximum_full_validate_context_keeps_all_items_files_and_test_streams
+1 failed, 40 passed in 4.43s

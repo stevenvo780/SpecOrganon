@@ -1,0 +1,40 @@
+usage: autonomous_software_controller.py [-h] --case CASE --run-root RUN_ROOT
+                                         --contract CONTRACT --mandate MANDATE
+                                         --native-image NATIVE_IMAGE
+                                         --test-image TEST_IMAGE
+                                         --public-catalog PUBLIC_CATALOG
+                                         [--source-root SOURCE_ROOT]
+                                         [--author-provider {codex,gemini}]
+                                         [--author-model AUTHOR_MODEL]
+                                         [--reviewer-provider {codex,gemini}]
+                                         [--reviewer-model REVIEWER_MODEL]
+                                         [--codex-volume CODEX_VOLUME]
+                                         [--gemini-profile GEMINI_PROFILE]
+                                         [--gemini-executable GEMINI_EXECUTABLE]
+                                         [--seccomp SECCOMP] [--steps STEPS]
+
+Explicit external Docker controller. Original provider profiles stay in place.
+
+options:
+  -h, --help            show this help message and exit
+  --case CASE           Existing local case; never recreated on resume
+  --run-root RUN_ROOT   Private persistent host directory, outside provider
+                        mounts
+  --contract CONTRACT   Public delivery contract saved before generation
+  --mandate MANDATE     Existing owner mandate; no new consent is inferred
+  --native-image NATIVE_IMAGE
+                        Inspected immutable sha256 image ID
+  --test-image TEST_IMAGE
+                        Inspected immutable sha256 image ID
+  --public-catalog PUBLIC_CATALOG
+                        Public pinned CLI model metadata; not profile data
+  --source-root SOURCE_ROOT
+  --author-provider {codex,gemini}
+  --author-model AUTHOR_MODEL
+  --reviewer-provider {codex,gemini}
+  --reviewer-model REVIEWER_MODEL
+  --codex-volume CODEX_VOLUME
+  --gemini-profile GEMINI_PROFILE
+  --gemini-executable GEMINI_EXECUTABLE
+  --seccomp SECCOMP
+  --steps STEPS         Explicit bounded dispatch count, maximum80

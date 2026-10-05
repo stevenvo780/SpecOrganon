@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/review_resource_controller01.py", line 17, in <module>
+    raw=canonical(request);_,prompt=render_prompt(raw)
+                                    ^^^^^^^^^^^^^^^^^^
+  File "/datos/workspaces/personal/SpecOrganon/scripts/controller_native_role.py", line 177, in render_prompt
+    if len(prompt.encode()) > 128_000: raise NativeRoleError("rendered prompt exceeds preregistered limit")
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts.controller_native_role.NativeRoleError: rendered prompt exceeds preregistered limit
