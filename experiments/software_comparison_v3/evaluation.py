@@ -31,6 +31,28 @@ def score_points(points):
             'denominator':n,'lower':passed/n if n else None,'upper':(passed+unknown)/n if n else None}
 
 
+def comparison_groups(rows,*,nst_blocks,a_blocks):
+    """Fixed cell pairs, including unknown intervals, within one design stratum."""
+    result={}
+    for group in ('F','D','G','H'):
+        for control in ('N','S','A'):
+            if group=='H' and control=='N':continue
+            pairs=[]
+            for block in sorted({r['block_id'] for r in rows}):
+                members=[r for r in rows if r['block_id']==block]
+                cells={r['method']:r for r in members}
+                require(len(cells)==len(members) and set(cells) in ({'N','S','T'},{'N','S','T','A'}),
+                        'fixed distinct methods required in every paired block')
+                if control not in cells:continue
+                def interval(item):
+                    score=item['functional']['F_total'] if group=='F' else item['qualitative']['scores'][group]
+                    return {k:score[k] for k in ('lower','upper')}
+                pairs.append((block,interval(cells['T']),interval(cells[control])))
+            require(len(pairs)==(a_blocks if control=='A' else nst_blocks),'all fixed paired blocks required')
+            result[group+'_T-'+control]=descriptive_differences(pairs)
+    return result
+
+
 class Evaluation:
     def __init__(self,campaign):self.campaign=campaign;self.root=campaign.root/'evaluation'
 
@@ -171,21 +193,12 @@ class Evaluation:
                     'evaluation_status':'evaluated' if evaluated else gate['status'],'functional':functional,
                     'qualitative':qualitative,'full_package':functional['contract_complete'] and points_ok,
                     'resources':self.resources(row)})
-            comparisons={}
-            for group in ('F','D','G','H'):
-                for control in ('N','S','A'):
-                    if group=='H' and control=='N':continue
-                    pairs=[]
-                    for block in sorted({r['block_id'] for r in rows}):
-                        cells={r['method']:r for r in rows if r['block_id']==block}
-                        if control not in cells:continue
-                        def interval(item):
-                            score=item['functional']['F_total'] if group=='F' else item['qualitative']['scores'][group]
-                            return {k:score[k] for k in ('lower','upper')}
-                        pairs.append((block,interval(cells['T']),interval(cells[control])))
-                    require(len(pairs)==(6 if control=='A' else 12),'all fixed paired blocks required')
-                    comparisons[group+'_T-'+control]=descriptive_differences(pairs)
-            result={'schema':1,'registration_sha256':c.registration.sha,'gate':gate,'cells':rows,'comparisons':comparisons,
+            comparisons=comparison_groups(rows,nst_blocks=12,a_blocks=6)
+            strata={}
+            for dimension,nst_count,a_count in (('task',4,2),('family',6,3)):
+                strata[dimension]={identity:comparison_groups([r for r in rows if r[dimension]==identity],
+                    nst_blocks=nst_count,a_blocks=a_count) for identity in sorted({r[dimension] for r in rows})}
+            result={'schema':1,'registration_sha256':c.registration.sha,'gate':gate,'cells':rows,'comparisons':comparisons,'strata':strata,
                 'generation_cells':42,'evaluation_complete':evaluated,'design_denominator':42,
                 'field_or_general_thesis_proven':False,'native_replicate_unit':'author/task/family/rep cell, not each recipe'}
             path=c.root/'report.json'

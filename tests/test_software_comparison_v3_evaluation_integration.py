@@ -78,3 +78,21 @@ def test_unknown_rubric_points_keep_interval_and_N_has_no_H_penalty():
     result=score_points({'one':{'status':'pass'},'two':{'status':'fail'},'three':{'status':'inconclusive'}})
     assert result['lower']==pytest.approx(1/3) and result['upper']==pytest.approx(2/3)
     assert score_points({})=={'applicable':False,'pass':0,'fail':0,'inconclusive':0,'denominator':0,'lower':None,'upper':None}
+
+
+def test_paired_strata_keep_every_unknown_block_and_reject_dropped_or_duplicate_cells():
+    from experiments.software_comparison_v3.evaluation import comparison_groups
+    rows=[]
+    for block in range(4):
+        for method in ('N','S','T','A') if block%2==0 else ('N','S','T'):
+            interval={'lower':0,'upper':1} if block==3 else {'lower':1,'upper':1}
+            rows.append({'block_id':f'b{block}','method':method,'functional':{'F_total':interval},
+                'qualitative':{'scores':{k:interval for k in ('D','G','H')}}})
+    result=comparison_groups(rows,nst_blocks=4,a_blocks=2)
+    assert result['F_T-N']['n_blocks']==4 and result['F_T-A']['n_blocks']==2
+    assert result['F_T-N']['mean']=={'lower':-.25,'upper':.25}
+    assert 'H_T-N' not in result
+    with pytest.raises(EvaluationError,match='all fixed paired blocks'):
+        comparison_groups([r for r in rows if r['block_id']!='b3'],nst_blocks=4,a_blocks=2)
+    with pytest.raises(EvaluationError,match='distinct methods'):
+        comparison_groups(rows+[copy.deepcopy(rows[0])],nst_blocks=4,a_blocks=2)

@@ -39,6 +39,8 @@ con [0,1]; si el hito es inconcluso, no se sella informe final ni falso fracaso.
 El informe reutiliza la auditoría final ya cargada al budget y liga su recibo
 nativo/files/locators. Presenta F,D,G,H separados, intervalos por desconocidos,
 12pares T-N/T-S y6pares T-A, sin H impuesto a N ni p-values/causalidad general.
+Además conserva estratos por tarea (4pares N/S,2A) y familia (6pares N/S,3A),
+con todos los bloques y los intervalos desconocidos, sin seleccionar victorias.
 Conserva llamadas/bytes/tests/tiempos y uso declarado por job, sin normalizar
 quantidades desconocidas a tokens ni inventar dinero. El evaluador automatizado
 no recibe labels de método/modelo; las entregas pueden autoidentificarse en su
