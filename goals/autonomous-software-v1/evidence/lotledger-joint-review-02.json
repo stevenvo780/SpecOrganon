@@ -1,0 +1,80 @@
+{
+  "account_identity": "not observed",
+  "at": "2026-10-05T13:14:25.911465+00:00",
+  "duration_seconds": 51.35388692401466,
+  "exit_code": 0,
+  "input": {
+    "account": "original Muse configuration; identity not observed",
+    "at": "2026-10-05T13:05:32.535719+00:00",
+    "control_summary_sha256": "3528ac5a3d53de53f64a1d49ce60913b95195a3113cb06dbbfdf9c1428291f3e",
+    "effort": "medium",
+    "model": "muse-spark-1.3",
+    "native_generation_calls": 0,
+    "prompt_bytes": 87229,
+    "prompt_sha256": "a0370daa0cf5003372c0fd758325acf9329cb312f93e1def251a768769984444",
+    "provider": "meta",
+    "quota": "unknown",
+    "registration_created": false,
+    "reviewed_files": {
+      "experiments/lotledger_delivery_v1/contract.md": "aeb517125a520a4a5c8862b496795c0c3a277c949194e4be060ba58718b8e436",
+      "experiments/lotledger_delivery_v1/mandate.md": "0af5ee3bdd2845a6ab42198bd0ed500707d6d97f5e42fb80400e8c2dc57ed928",
+      "experiments/lotledger_delivery_v1/protocol.md": "e8cbc9eb9e30e2d0d0a8fcb26b1365897ded70ef1ef9a2a5abad7570c165afa3",
+      "experiments/lotledger_delivery_v1/public-evidence.md": "11703ade844fc5bc44ef822c0a05be7764563e0f5ff94f469c63f26c5cf0b8ce",
+      "experiments/lotledger_delivery_v1/public-sqlite-observations.json": "2995013473784d41470ee0240d1ab6843fb7b9018e899de278a41de760bae1ee",
+      "experiments/lotledger_delivery_v1/reserved.py": "a5c8d9ea3d306f76890329caeabd9fafbd3dff249ed6c78f81d81458cb6403a7",
+      "experiments/lotledger_delivery_v1/subjects.py": "4aef2e9abfae58d236734d86fe346b2dd2413d895dbcacc43119b89c1e6cebd2",
+      "experiments/software_comparison_v3/protocol-draft.md": "18371a09dc5a580a35941b1975f0767e20576e676c26b51534524ac0098af4c9",
+      "scripts/evaluate_lotledger_delivery.py": "ab76856ab736412424d4a7175409bcbaecae6d3bc779321671eedf04b5220af4",
+      "scripts/lotledger_delivery.py": "da350baec46732318467f9343f08d517402971fc9391c62db3401ab33980afbe",
+      "tests/test_lotledger_reserved.py": "5ffe640e46bbfb4bee7312e4f8c2a8a82a1530d67d5fe9d33c8c8820394ce3ba"
+    },
+    "schema": 1,
+    "source_root": "/home/stev/.codex/worktrees/artifact-repair-contract/SpecOrganon"
+  },
+  "job_id": "joint-review-02",
+  "model": "muse-spark-1.3",
+  "native_generation_calls": 0,
+  "native_tests_executed": false,
+  "private_root": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-joint-review-02",
+  "provider": "Meta via original Muse Code",
+  "quota": "unknown",
+  "review": {
+    "comparison_registration_ready": false,
+    "findings": [
+      {
+        "issue": "No immutable registration record and no independent accepted-review receipt yet exist; initialize/first native call are explicitly gated on them.",
+        "required_change": "Obtain text-only independent native accept review binding reviewed_source_sha256 to all frozen sources, then create immutable registration schema1 with identity lotledger-delivery-v1, 60-matrix hash, images, routes/profiles, limits, catalog/context/mandate paths and UTC timestamp before initialize; verify_registration must pass with check_sources true.",
+        "severity": "major",
+        "target": "experiments/lotledger_delivery_v1 + scripts/lotledger_delivery.py:verify_registration"
+      },
+      {
+        "issue": "Comparative v3 is explicitly scope/budget draft only: definitive per-task contracts, 2 public examples, 60 recipes/oracles per task, N/S/T/A harnesses, rubrics, full order/opaque mapping, images/sources and accepted review are incomplete.",
+        "required_change": "Complete and independently review all definitive comparative artifacts/hashes/controls before any comparative registration or cell; do not start comparison from a LotLedger outcome and do not claim LotLedger registration completes the goal.",
+        "severity": "major",
+        "target": "experiments/software_comparison_v3/protocol-draft.md"
+      },
+      {
+        "issue": "Full F/D/M conformance must remain externally measured only after closure; SQLite 6-primitive observations must not be borrowed as programme baseline.",
+        "required_change": "Retain unknown/not-demonstrated for absent programme conformance/baseline/field efficacy, keep 60/60 + D8/8 + M6/6 + C1-C8 gates unweakened, retain delivery_failed/infra_inconclusive/not_started with fixed denominators and retain LotLedger outcome even on failure with no replacement identity.",
+        "severity": "major",
+        "target": "experiments/lotledger_delivery_v1/protocol.md + scripts/evaluate_lotledger_delivery.py"
+      },
+      {
+        "issue": "Output/input strictness including duplicate keys and NaN/Infinity rejection depends on ledger implementation not excerpted in review files.",
+        "required_change": "Ensure frozen source set includes ledger implementation and accepted review explicitly binds its strictness; do not change sources after freeze.",
+        "severity": "minor",
+        "target": "specorganon.ledger:strict_json_loads via experiments/lotledger_delivery_v1/reserved.py:judge"
+      }
+    ],
+    "lotledger_registration_ready": false,
+    "oracle_audit": "Text-only audit of 60 explicit oracles against contract.md. Counts 6x10, 2 public, matrix assertions present. legal 10: empty, transfer with key-order duplicate yielding unique3/dupe1/A2/B3, accumulate, zero-omitted, move-all, lot/case order, CRLF/whitespace framing, 2e9 balance beyond per-event bound all match order/no-transient-negative/global-rollback/typed-output rules. identity 10: exact-duplicate/key-order/3x idempotence, consume/move-after-depletion idempotent with A0/B1 retained, 5 conflict/invalid-shape-second-event cases correctly error because shape is validated before id check. order 10: empty/insufficient/future-credit/transient-overdraw correctly error, recredit/chain/same-site-distinctness correct. types 11+? grouped 10: 6 quantity-type/range errors plus unicode-no-normalize ordering, invalid-utf8, isolated-surrogate-escape, NUL-escape correctly error. format 10: extra/missing/duplicate-JSON-key/array/unknown-op/blank-line/double-LF/whitespace-line/BOM/argv---help correctly error with exit2 exact stderr. boundaries 10: 64B pass vs 65B error, 65536B pass vs 65537B error, 1000 pass unique1/dupe999 vs 1001 error, metamorphic base/duplicates/bijection quantities conserved, empty-id error. No size/count/idempotence leak found in text. Judge in reserved.py checks only framing/typed equality/stream/exit behaviour; coordinator tests/test_lotledger_reserved.py validate that framing, not domain-oracle correctness; this audit supplies the domain-expectation check textually without execution.",
+    "scope": "Independent pre-registration joint review, text only, no tools/shell/web/write/delegation, under original Meta/Muse Code configuration. Reviewed LotLedger contract, protocol, mandate, public evidence/observations, 60-recipe reserved matrix plus judge/subjects/driver/evaluator, LotLedger unit/coordinator tests, synthetic evaluator control summary, and comparison v3 draft. Assessed LotLedger design/evaluator/driver readiness separately from comparative registration readiness. Did not generate programme, phases, registration record, or future results; did not execute tests.",
+    "tests_executed": false,
+    "verdict": "revise"
+  },
+  "review_is_not_registration": true,
+  "schema": 1,
+  "stderr_sha256": "b725b04256a9739c8ac53b8e09f41134096ce2a306b9053ffa09d78c8a7733aa",
+  "stdout_sha256": "9f9699fdce4914b5cb61d98a1cf868feb22dad080f975579961e8aece3b604fc",
+  "verdict_preserved": true
+}

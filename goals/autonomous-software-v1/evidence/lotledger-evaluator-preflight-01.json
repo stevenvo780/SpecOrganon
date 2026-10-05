@@ -1,0 +1,272 @@
+{
+  "actual_subject_invocations": 8,
+  "at": "2026-10-05T13:14:25.911627+00:00",
+  "controls": 13,
+  "coordinator_script_sha256": "7f6fdf80d59678a8bede8ae32455b04f365b27119831f1a8d4006571a58576af",
+  "domain_oracles_text_review": "Muse joint-review02 found no domain error, retained revise on overall pre-registration readiness",
+  "new_nine_phase_delivery": false,
+  "private_root": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-evaluator-preflight-01",
+  "registration_created": false,
+  "schema": 1,
+  "stream_copies": {
+    "stderr.txt": {
+      "file": "lotledger-evaluator-preflight-01-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout.txt": {
+      "file": "lotledger-evaluator-preflight-01-stdout.txt",
+      "sha256": "9e18ed0c524c964e9ff27084479a26b73dbb9bf4c6df9fdc0283d1368b5eac40"
+    },
+    "unit02.stderr": {
+      "file": "lotledger-evaluator-preflight-01-unit02.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "unit02.stdout": {
+      "file": "lotledger-evaluator-preflight-01-unit02.stdout",
+      "sha256": "d81dc173fe376a792fe8c1d8b14c93042e50c4e3a0707d2c0b57181531df5b03"
+    }
+  },
+  "summary": {
+    "checks": [
+      {
+        "container_id": "051be0005699a3036ca1412f78afc8d06d38926498a17113eed1d2356c0254f4",
+        "control": "correct-empty",
+        "duration_seconds": 0.14915765699697658,
+        "exit_code": 0,
+        "id": "legal-public-empty",
+        "mounts": [
+          {
+            "destination": "/input/delivery",
+            "readonly": true
+          }
+        ],
+        "network": "none",
+        "oom_killed": false,
+        "public": true,
+        "reason": "exact typed contract and framing",
+        "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-evaluator-preflight-01/correct-empty/journal/dee8ab44c41074f6aa1c8d9e519a80a64fdfe2e5ad913625b949340f15e65208/receipt.json",
+        "status": "pass",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "43c56647b35475d7283482647adb0465271487cf7aadbb5b7ec34cc76f44140c",
+        "synthetic_contents": true,
+        "timed_out": false
+      },
+      {
+        "control": "closed-replay",
+        "new_invocations": 0,
+        "passed": true,
+        "receipt_sha256": "f3166e2042c3ab7bb23ecf27591031bc65e391768fef7ef896de66674003bb77",
+        "synthetic_contents": true
+      },
+      {
+        "control": "changed-delivery",
+        "reason": "closed subject inputs changed",
+        "rejected": true,
+        "synthetic_contents": true
+      },
+      {
+        "control": "changed-recipe",
+        "reason": "unregistered recipe or invalid delivery",
+        "rejected": true,
+        "synthetic_contents": true
+      },
+      {
+        "control": "missing-programme",
+        "reason": "unregistered recipe or invalid delivery",
+        "rejected": true,
+        "synthetic_contents": true
+      },
+      {
+        "container_id": "5c0956ba0d8016a1b4c468e4a7f5062b10e6869cc7b23c03c3ed06849e27fdd3",
+        "control": "correct-error",
+        "duration_seconds": 0.15120506801758893,
+        "exit_code": 2,
+        "id": "format-blank-line",
+        "mounts": [
+          {
+            "destination": "/input/delivery",
+            "readonly": true
+          }
+        ],
+        "network": "none",
+        "oom_killed": false,
+        "public": false,
+        "reason": "exact typed contract and framing",
+        "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-evaluator-preflight-01/correct-error/journal/1064120914a3a8805698eba30d1d14e6c9078a96a7143ad5bd8868f9d538b45d/receipt.json",
+        "status": "pass",
+        "stderr_sha256": "521ae7ef95afcb2f14e65d170d3f30a8ead6fe8e3b2445544ed3fef0efc5cf2b",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "synthetic_contents": true,
+        "timed_out": false
+      },
+      {
+        "container_id": "6fc6dc36bdf65812e6637b41cc50a3bee0821a9b1acfc4150bed251e000018ed",
+        "control": "correct-pretty-transfer",
+        "duration_seconds": 0.14724483800819144,
+        "exit_code": 0,
+        "id": "legal-public-transfer",
+        "mounts": [
+          {
+            "destination": "/input/delivery",
+            "readonly": true
+          }
+        ],
+        "network": "none",
+        "oom_killed": false,
+        "public": true,
+        "reason": "exact typed contract and framing",
+        "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-evaluator-preflight-01/correct-pretty-transfer/journal/e04161aee34d9eef41224d76cbc3b4dc2e6bcdfa56734a4e07489df771d2fd53/receipt.json",
+        "status": "pass",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "26fa5637056b94dcaa0fae7d74991cb7e68fb44760dd65c6410d9d29559b0a6c",
+        "synthetic_contents": true,
+        "timed_out": false
+      },
+      {
+        "container_id": "a5f44727e491d6e13be984ba19ad152e5f50b5bb099639c6cfb0ce0d1bd28c05",
+        "control": "wrong-always-empty",
+        "duration_seconds": 0.13222644798224792,
+        "exit_code": 0,
+        "id": "legal-public-transfer",
+        "mounts": [
+          {
+            "destination": "/input/delivery",
+            "readonly": true
+          }
+        ],
+        "network": "none",
+        "oom_killed": false,
+        "public": true,
+        "reason": "exact typed contract and framing",
+        "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-evaluator-preflight-01/wrong-always-empty/journal/e04161aee34d9eef41224d76cbc3b4dc2e6bcdfa56734a4e07489df771d2fd53/receipt.json",
+        "status": "fail",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "43c56647b35475d7283482647adb0465271487cf7aadbb5b7ec34cc76f44140c",
+        "synthetic_contents": true,
+        "timed_out": false
+      },
+      {
+        "container_id": "da2d70707f6b35efc51aef1f3bc228b2cf51ed33b7e3506a7830609ed2ed5566",
+        "control": "wrong-bool",
+        "duration_seconds": 0.1289821859973017,
+        "exit_code": 0,
+        "id": "legal-public-empty",
+        "mounts": [
+          {
+            "destination": "/input/delivery",
+            "readonly": true
+          }
+        ],
+        "network": "none",
+        "oom_killed": false,
+        "public": true,
+        "reason": "exact typed contract and framing",
+        "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-evaluator-preflight-01/wrong-bool/journal/dee8ab44c41074f6aa1c8d9e519a80a64fdfe2e5ad913625b949340f15e65208/receipt.json",
+        "status": "fail",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "94919a7db3b8006929172085f4af9941e1c96e75dfc81d1b06d59172e8cc6396",
+        "synthetic_contents": true,
+        "timed_out": false
+      },
+      {
+        "container_id": "631a6f90b4e099684353ed5fcdd3c3a018540acf922686f173441cdcb9f924c0",
+        "control": "wrong-duplicate-output-keys",
+        "duration_seconds": 0.14498430598177947,
+        "exit_code": 0,
+        "id": "legal-public-empty",
+        "mounts": [
+          {
+            "destination": "/input/delivery",
+            "readonly": true
+          }
+        ],
+        "network": "none",
+        "oom_killed": false,
+        "public": true,
+        "reason": "exact typed contract and framing",
+        "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-evaluator-preflight-01/wrong-duplicate-output-keys/journal/dee8ab44c41074f6aa1c8d9e519a80a64fdfe2e5ad913625b949340f15e65208/receipt.json",
+        "status": "fail",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "87dbb2c14d6686789fc2b555ae0ae559d1090f76b91145986994351ba1ab1f68",
+        "synthetic_contents": true,
+        "timed_out": false
+      },
+      {
+        "container_id": "c7b0fbeff3189aaed5606ecd46fef31610ec54c5a1d7c5304c561b15d5d2d1dc",
+        "control": "subject-timeout",
+        "duration_seconds": 3.117990575003205,
+        "exit_code": 137,
+        "id": "legal-public-empty",
+        "mounts": [
+          {
+            "destination": "/input/delivery",
+            "readonly": true
+          }
+        ],
+        "network": "none",
+        "oom_killed": false,
+        "public": true,
+        "reason": "subject resource/stream limit",
+        "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-evaluator-preflight-01/subject-timeout/journal/dee8ab44c41074f6aa1c8d9e519a80a64fdfe2e5ad913625b949340f15e65208/receipt.json",
+        "status": "fail",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "synthetic_contents": true,
+        "timed_out": true
+      },
+      {
+        "container_id": "684aead6c8df955bfe075c472ebba1dc2ec4c4365e294a868058ce882a3ad789",
+        "control": "subject-isolation",
+        "duration_seconds": 0.1990973350184504,
+        "exit_code": 0,
+        "id": "legal-public-empty",
+        "mounts": [
+          {
+            "destination": "/input/delivery",
+            "readonly": true
+          }
+        ],
+        "network": "none",
+        "oom_killed": false,
+        "public": true,
+        "reason": "exact typed contract and framing",
+        "receipt_ref": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-evaluator-preflight-01/subject-isolation/journal/dee8ab44c41074f6aa1c8d9e519a80a64fdfe2e5ad913625b949340f15e65208/receipt.json",
+        "status": "pass",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "43c56647b35475d7283482647adb0465271487cf7aadbb5b7ec34cc76f44140c",
+        "synthetic_contents": true,
+        "timed_out": false
+      },
+      {
+        "control": "missing-accounting",
+        "counts": {
+          "fail": 60,
+          "inconclusive": 0,
+          "pass": 0
+        },
+        "passed": true,
+        "scope": "synthetic terminal plus mocked registration reader only",
+        "synthetic_contents": true
+      }
+    ],
+    "generated_deliveries": 0,
+    "group_counts": {
+      "boundaries": 10,
+      "format": 10,
+      "identity": 10,
+      "legal": 10,
+      "order": 10,
+      "types": 10
+    },
+    "image": "sha256:98723123de528a5f0201a1c341fe044f88d885345b2e1bedd6a89574c4796d92",
+    "matrix_count": 60,
+    "matrix_sha256": "be25952e519f52a32947861737ae5fd7b8a53819ba34a0f4c5cf7bbff210fe61",
+    "native_provider_calls": 0,
+    "new_nine_phase_case": false,
+    "registration_created": false,
+    "schema": 1,
+    "scope": "actual isolated evaluator execution controls on synthetic subjects; not domain-oracle validation"
+  },
+  "unit_controls_passed": 85,
+  "unit_controls_scope": "framing/matrix invariants/current source binding/read-only old-registration rejection; not generated programme or confirmation of domain oracle"
+}
