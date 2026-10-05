@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/datos/workspaces/personal/SpecOrganon/scripts/check_software_controller_controls.py", line 207, in <module>
+    main()
+  File "/datos/workspaces/personal/SpecOrganon/scripts/check_software_controller_controls.py", line 199, in main
+    outcomes[condition] = run_condition(condition, args.run_root / condition, args.source_root, transport)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/datos/workspaces/personal/SpecOrganon/scripts/check_software_controller_controls.py", line 103, in run_condition
+    ctrl, reviews = baseline(root, source, executor)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/datos/workspaces/personal/SpecOrganon/scripts/check_software_controller_controls.py", line 85, in baseline
+    ctrl.step()
+  File "/datos/workspaces/personal/SpecOrganon/src/specorganon/software_controller.py", line 386, in step
+    packet = self.transport.call(pending['job_id'], pending['request']['role'], pending['request'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/datos/workspaces/personal/SpecOrganon/scripts/check_software_controller_controls.py", line 31, in call
+    raise ControllerError('fixture stops at repair request; no replacement reviewer')
+specorganon.software_controller.ControllerError: fixture stops at repair request; no replacement reviewer

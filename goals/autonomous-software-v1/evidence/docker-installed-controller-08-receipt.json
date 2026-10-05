@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "image_id": "sha256:cc229ddddcf2cca004204d4d8d3a724be348022d9f353cf10c1ffe516daed06e",
+  "argv": [
+    "docker",
+    "run",
+    "--rm",
+    "--network",
+    "none",
+    "--read-only",
+    "--cap-drop=ALL",
+    "--security-opt",
+    "no-new-privileges",
+    "sha256:cc229ddddcf2cca004204d4d8d3a724be348022d9f353cf10c1ffe516daed06e",
+    "/opt/specorganon/venv/bin/python",
+    "-E",
+    "-s",
+    "-B",
+    "-c",
+    "import hashlib,importlib,json; names=[\"specorganon.software_controller\",\"specorganon.docker_roles\",\"specorganon.role_jobs\"]; print(json.dumps({n:hashlib.sha256(open(importlib.import_module(n).__file__,\"rb\").read()).hexdigest() for n in names}))"
+  ],
+  "exit_code": 0,
+  "installed_source_sha256": {
+    "specorganon.software_controller": "dfa17574a2c7e5071085a0a913b21945c9bb33866ad9857ed0a29191abde52c3",
+    "specorganon.docker_roles": "9297a09f6f20a46fc69022d49f7e6e8953f1eaa548732239d0cc67f09de2a623",
+    "specorganon.role_jobs": "fe6ef4ec117fe135972481d0bcef9964cd9b1d94c13bca3c2e43965140806ed3"
+  },
+  "expected_source_sha256": {
+    "specorganon.software_controller": "dfa17574a2c7e5071085a0a913b21945c9bb33866ad9857ed0a29191abde52c3",
+    "specorganon.docker_roles": "9297a09f6f20a46fc69022d49f7e6e8953f1eaa548732239d0cc67f09de2a623",
+    "specorganon.role_jobs": "fe6ef4ec117fe135972481d0bcef9964cd9b1d94c13bca3c2e43965140806ed3"
+  },
+  "controller_code_matches": true,
+  "scope": "installed wheel module bytes, not case or thesis acceptance"
+}

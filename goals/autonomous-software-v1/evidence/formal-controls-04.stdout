@@ -1,0 +1,87 @@
+{
+  "C5-withdrawal": {
+    "positive_baseline_package_allowed": true,
+    "baseline_nine_accepted": true,
+    "synthetic_arguments_and_reviews": true,
+    "advance_error": {
+      "type": "MethodError",
+      "reason": "phase cannot advance: e1: evidence lacks date; e1: evidence lacks locator; e1: evidence lacks source; e1: evidence origin must be published, observed, derived or simulated; inf1 depends on an older revision; needs 1 valid inference; has 0"
+    },
+    "package_error": {
+      "type": "ControllerError",
+      "reason": "package needs nine current accepted phases and valid uncontested artifacts"
+    },
+    "history_prefix_preserved": true,
+    "new_advance_events": 0,
+    "verdict": "satisfied",
+    "scope": "synthetic mechanism, not C1 or independent model review"
+  },
+  "C5-rejection": {
+    "positive_baseline_package_allowed": true,
+    "baseline_nine_accepted": true,
+    "synthetic_arguments_and_reviews": true,
+    "repair_required_error": {
+      "type": "ControllerError",
+      "reason": "fixture stops at repair request; no replacement reviewer"
+    },
+    "replacement_review_calls": 0,
+    "advance_error": {
+      "type": "MethodError",
+      "reason": "phase needs an accepted review of its current snapshot"
+    },
+    "package_error": {
+      "type": "ControllerError",
+      "reason": "package needs nine current accepted phases and valid uncontested artifacts"
+    },
+    "history_prefix_preserved": true,
+    "new_advance_events": 0,
+    "verdict": "satisfied",
+    "scope": "synthetic mechanism, not C1 or independent model review"
+  },
+  "C6-challenge": {
+    "positive_baseline_package_allowed": true,
+    "baseline_nine_accepted": true,
+    "synthetic_arguments_and_reviews": true,
+    "controller_error": {
+      "type": "ControllerError",
+      "reason": "live contradiction/unsupported observation blocks controller"
+    },
+    "advance_error": {
+      "type": "MethodError",
+      "reason": "phase cannot advance: e0 has an unresolved contradiction; e0 must link a valid protocol with hypothesis, question and problem; e1 has an unresolved contradiction; e1 must link a valid protocol with hypothesis, question and problem; inf1 has an unresolved contradiction; inf1 must link evidence to a valid protocol and problem chain; needs 1 valid evidence; has 0; needs 1 valid inference; has 0; previous phase is not currently accepted"
+    },
+    "package_error": {
+      "type": "ControllerError",
+      "reason": "package needs nine current accepted phases and valid uncontested artifacts"
+    },
+    "history_prefix_preserved": true,
+    "new_advance_events": 0,
+    "verdict": "satisfied",
+    "scope": "synthetic mechanism, not C1 or independent model review"
+  },
+  "C7-premise": {
+    "positive_baseline_package_allowed": true,
+    "baseline_nine_accepted": true,
+    "synthetic_arguments_and_reviews": true,
+    "old_put_error": {
+      "type": "ManifestError",
+      "reason": "step 0 diverges from item p1 version 2"
+    },
+    "old_review_error": {
+      "type": "ControllerError",
+      "reason": "case/delivery snapshot changed during role execution"
+    },
+    "advance_error": {
+      "type": "MethodError",
+      "reason": "phase cannot advance: ass1 depends on an older revision; base1 depends on an older revision; needs 1 valid assessment; has 0; needs 1 valid baseline; has 0; needs 1 valid result; has 0; previous phase is not currently accepted; res1 depends on an older revision"
+    },
+    "package_error": {
+      "type": "ControllerError",
+      "reason": "package needs nine current accepted phases and valid uncontested artifacts"
+    },
+    "history_prefix_preserved": true,
+    "new_advance_events": 0,
+    "verdict": "satisfied",
+    "scope": "synthetic mechanism, not C1 or independent model review"
+  }
+}

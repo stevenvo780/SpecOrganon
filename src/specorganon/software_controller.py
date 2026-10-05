@@ -50,7 +50,7 @@ declare data.argv as an explicit absolute executable vector; Python is available
 executor. No profiles, network or mutable input. Never supply passed/receipt/test_job_ref.
 Only build returns complete files; include program, pertinent tests and README.
 validate: baseline/result data has origin technical/simulation/published, source,date,
-and honestly measured values/limits. Assessment traces result,baseline,criterion, has
+and honestly measured values/limits. Assessment traces result,baseline,criterion,risk, has
 verdict cumplido/incumplido/no_demostrado, claim_scope technical/simulation, uncertainty,
 adverse_effects,cost (unknown when unavailable). A technical contract result is not
 field efficacy or comparative superiority. Use supplied measured records and scope.
@@ -94,7 +94,7 @@ class Controller:
             raise ControllerError('private owned run root required')
         self.delivery = self.root / 'delivery'; self.delivery.mkdir(mode=0o700, exist_ok=True)
         self.contract = contract; self.mandate = mandate
-        policy = {'schema': 3, 'case': str(self.case), 'project_sha256': state['project_sha256'],
+        policy = {'schema': 4, 'case': str(self.case), 'project_sha256': state['project_sha256'],
                   'contract': contract, 'mandate': mandate, 'fixture_mode': fixture_mode,
                   'max_author_per_phase': 2, 'max_review_per_phase': 2, 'max_role_calls': 40}
         with self._lock():

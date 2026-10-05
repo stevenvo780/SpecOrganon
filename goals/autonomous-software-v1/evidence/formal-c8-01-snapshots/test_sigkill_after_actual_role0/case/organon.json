@@ -1,0 +1,66 @@
+{
+  "events": [
+    {
+      "actor": "agent:synthetic-recovery",
+      "at": "2026-10-05T03:15:25+00:00",
+      "hash": "cd2e6ed4b620755a4e0dd374437f20dd238d041915177780fa35fc53866b8965",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "p1",
+        "kind": "problem",
+        "text": "Synthetic recovery mechanics",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:synthetic-recovery",
+      "at": "2026-10-05T03:15:25+00:00",
+      "hash": "f739d001cf6d34d8b3cc0cbf7bd9e8b0785d5a790ed577cf3dcf6bd477d36ad1",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "a1",
+        "kind": "actor",
+        "text": "Synthetic test actor",
+        "version": 1
+      },
+      "prev_hash": "cd2e6ed4b620755a4e0dd374437f20dd238d041915177780fa35fc53866b8965",
+      "seq": 2
+    },
+    {
+      "actor": "agent:synthetic-recovery",
+      "at": "2026-10-05T03:15:25+00:00",
+      "hash": "13b533c01f16a7bc5ed179b9e3c9997e4dfb113b5c494cc36387bf5711ec7ef9",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "b1",
+        "kind": "boundary",
+        "text": "Synthetic local mechanism only",
+        "version": 1
+      },
+      "prev_hash": "f739d001cf6d34d8b3cc0cbf7bd9e8b0785d5a790ed577cf3dcf6bd477d36ad1",
+      "seq": 3
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "f15d1b3f-a5ac-4430-a233-26f5da3279e9",
+    "created_at": "2026-10-05T03:15:25+00:00",
+    "created_by": "human:owner",
+    "domain": "development",
+    "test_gate_policy": "local_report",
+    "title": "Synthetic crash recovery"
+  },
+  "schema": 1
+}
