@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "review": {
+    "comparison_registration_ready": false,
+    "findings": [
+      {
+        "issue": "Contract requires strict JSON rejection of non-JSON constants such as NaN and Infinity, but no 75-matrix input recipe exercises a NaN/Infinity literal line. A delivery using Python json allow_nan could accept such input and still pass F75/75.",
+        "required_change": "Add explicit finite input recipes for NaN and Infinity literals (e.g. quantity NaN, bare NaN line) with expected error, before any registration/authors, preserving all 60/63/68/73 originals and updating counts/hashes/controls.",
+        "severity": "major",
+        "target": "experiments/lotledger_delivery_v1/reserved.py"
+      },
+      {
+        "issue": "Held-open PIPE probe (2.5s supervisor, outer 3s cap) detects blocking read before --help validation but cannot detect non-blocking fd0 introspection such as poll/select or O_NONBLOCK read that returns immediately then errors. Contract states error before reading stdin without qualifying blocking-only.",
+        "required_change": "Strengthen ordering proof to exclude any fd0 read/poll (e.g. closed-stdin variant, syscall tracing, or seccomp observation) or narrow the contractual claim explicitly to blocking reads and bind that narrowed claim in contract/protocol/judge before freeze.",
+        "severity": "major",
+        "target": "experiments/lotledger_delivery_v1/subjects.py:format-argv-before-stdin"
+      }
+    ],
+    "lotledger_sources_ready_to_freeze": false,
+    "oracle_audit": "Audited contract.md vs reserved.py 75 recipes groups 11/10/10/13/12/19 with 2 publics; original60 generator source SHA a5c8d9ea preserved and canonical60 data SHA be25952e matched by hermetic test; judge enforces exit 0/2, empty stdout/stderr framing, strict_json_loads, typed equality, pretty/key-order tolerance, and timeout/truncation/infrastructure handling; added legal-no-final-LF, types cr-escape/lf-escape/raw-NUL, boundaries id-65/site-65/move-from-to-64/move-from-65/move-to-65/empty-lot/empty-site/empty-from/empty-to, and format argv-with-payload/argv-before-stdin preserve all prior IDs; source closure 48 files bound, import closure and identity/public-packet/original60/argv checks present; 113 hermetic checks and 29 synthetic controls verify framing/isolation/replay/order probes, not domain-oracle proof or field efficacy. Remaining gaps: no NaN/Infinity input oracle; argv probe limited to blocking reads as disclosed.",
+    "rationale": "Revise because two concrete pre-registration oracle/control gaps remain despite 48-file self-contained 113-pass receipt and 29 synthetic controls: missing NaN/Infinity input coverage permits a non-compliant pass, and the argv ordering probe proves only blocking-read ordering. F75/75, D8/8, M6/6 and nine phases remain future post-generation gates, not achieved; no generation, registration, or comparison admission is authorized by this review.",
+    "tests_executed": false,
+    "verdict": "revise"
+  },
+  "execution": {
+    "argv": [
+      "/home/stev/.local/bin/muse",
+      "exec",
+      "--provider",
+      "meta",
+      "--model",
+      "muse-spark-1.3",
+      "--reasoning-effort",
+      "medium",
+      "--prompt-file",
+      "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-muse-source-review-13/input.txt",
+      "--max-model-steps",
+      "1",
+      "--disable-shell",
+      "--disable-write",
+      "--disable-web-tools",
+      "--no-foreign-personal-context",
+      "--no-parallel-tool-calls",
+      "--no-session-log",
+      "--workspace",
+      "/home/stev/.codex/worktrees/artifact-repair-contract/SpecOrganon"
+    ],
+    "cancel_exit_code": null,
+    "cwd": "/home/stev/.codex/worktrees/artifact-repair-contract/SpecOrganon",
+    "duration_seconds": 65.8569984420028,
+    "exit_code": 0,
+    "finished_epoch": 1791211295.8760302,
+    "job_id": "lotledger-source-review-13",
+    "metadata": {
+      "access": "text",
+      "account_identity": "not observed; original existing Muse configuration",
+      "model": "muse-spark-1.3",
+      "provider": "meta",
+      "quota": "unknown"
+    },
+    "request_sha256": "b6c3eaedfb749555a72044672075758b1d116e1c58fc0c12e6fd437bebe9817c",
+    "schema": 1,
+    "stderr_bytes": 432,
+    "stderr_sha256": "b725b04256a9739c8ac53b8e09f41134096ce2a306b9053ffa09d78c8a7733aa",
+    "stdin_bytes_expected": 0,
+    "stdin_bytes_sent": 0,
+    "stdin_complete": true,
+    "stdout_bytes": 2822,
+    "stdout_sha256": "3aaf6ff6ea6497a00bc87ff9386f7add01d029b977128c4ef4447c2a38dd03d2",
+    "timed_out": false,
+    "truncated_streams": []
+  },
+  "private_root": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-muse-source-review-13",
+  "registry_created": false,
+  "native_generation_calls": 0
+}
