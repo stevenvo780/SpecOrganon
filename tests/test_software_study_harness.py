@@ -151,3 +151,36 @@ def test_verbose_public_stream_closes_cell_with_raw_evidence_preserved(tmp_path)
     assert result['action']=='failed' and 'stream input ceiling' in result['failure']['reason']
     assert (folder/'stdout.bin').read_bytes()==b'X'*5000
     assert len(t.calls)==2 and c.step()['action']=='failed'
+
+
+def test_toolkit_terminal_state_survives_outer_checkpoint_failure(tmp_path):
+    from scripts.software_study_harness import ToolkitCell
+    from specorganon.software_controller import ControllerError
+    c=object.__new__(ToolkitCell);c.root=tmp_path
+    started=[]
+    def bad_step():
+        started.append('synthetic failed role');raise ControllerError('synthetic invalid contribution')
+    c._step=bad_step
+    first=c.step()
+    assert first['action']=='failed' and c.step()==first and len(started)==1
+
+
+def test_toolkit_retains_failed_and_current_attempts_without_promoting_old_test(tmp_path):
+    from types import SimpleNamespace
+    from scripts.software_study_harness import ToolkitCell
+    c=object.__new__(ToolkitCell);c.root=tmp_path
+    files={'routeplan.py':'synthetic changed programme'}
+    refs={};history=[];verified=[]
+    for id,passed,tree in [('first',False,'a'*64),('second',True,digest(canonical(files)))]:
+        folder=tmp_path/id;folder.mkdir();_write(folder/'receipt.json',{'synthetic':True})
+        refs[id]={'test_job_ref':str(folder/'receipt.json'),'subject_argv':['synthetic'],
+                  'delivery_tree_sha256':tree,'passed':passed}
+        history.append({'action':'test','job_id':id,'source_files_sha256':tree,'passed':passed})
+    _write(tmp_path/'progress.json',{'history':history})
+    def verify(data,current,**kwargs):verified.append(kwargs)
+    c.transport=SimpleNamespace(test_record=lambda id:refs[id],verify_test=verify)
+    c.controller=SimpleNamespace(root=tmp_path,_test_streams=lambda ref,measured:{'synthetic':True})
+    records=c.public_attempts(files)
+    assert [r['measurement']['passed'] for r in records.values()]==[False,True]
+    assert [r['applies_to_current_delivery'] for r in records.values()]==[False,True]
+    assert verified==[{'require_passed':False,'require_current':False}]*2

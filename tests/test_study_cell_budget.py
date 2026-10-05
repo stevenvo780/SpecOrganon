@@ -86,3 +86,20 @@ def test_registration_rechecked_before_each_call_or_closed_reuse(tmp_path):
     b.call('first','author',request())
     with pytest.raises(StudyBudgetError,match='source changed'): b.call('first','author',request())
     assert len(t.started)==1
+
+
+def test_oversized_rendered_prompt_is_refused_before_admission(tmp_path):
+    from scripts.controller_native_role import NativeRoleError
+    t=RecordedTransport();b=budget(tmp_path/'budget',t)
+    with pytest.raises(NativeRoleError):b.call('oversized','author',request('X'*128000))
+    assert not t.started and b.summary()['admitted_native_jobs']==0
+
+
+def test_boot_discontinuity_pauses_without_new_admission_or_clock_renewal(tmp_path):
+    from scripts.study_cell_budget import StudyClockPause
+    from specorganon.role_jobs import _json,_write
+    t=RecordedTransport();b=budget(tmp_path/'budget',t);b.call('first','author',request())
+    anchor=_json(b.root/'clock.json');anchor['boot_id_sha256']='synthetic-other-boot'
+    _write(b.root/'clock.json',anchor);before=(b.root/'clock.json').read_bytes()
+    with pytest.raises(StudyClockPause):b.call('second','author',request())
+    assert t.started=={'first'} and (b.root/'clock.json').read_bytes()==before

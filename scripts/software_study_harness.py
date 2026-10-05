@@ -6,7 +6,6 @@ The ablation stores unaccepted phase drafts outside the engine, never approvals.
 """
 from __future__ import annotations
 
-import argparse
 from contextlib import contextmanager
 import fcntl
 import os
@@ -19,11 +18,12 @@ from specorganon import engine
 from specorganon.docker_roles import DockerRoles, DockerRoleError
 from specorganon.report import case_report
 from specorganon.runner import describe_task
-from specorganon.role_jobs import canonical, digest, _read, _json, _write, _safe
-from specorganon.software_controller import Controller, encoded_contribution, safe_file
+from specorganon.role_jobs import canonical, digest, _read, _json, _write, _safe, UncertainJob
+from specorganon.software_controller import Controller, ControllerError, encoded_contribution, safe_file
 from specorganon.workflow import PHASES
 from scripts.controller_native_role import render_prompt, validate_result, NativeRoleError
 from scripts.study_cell_budget import CellBudget, StudyBudgetError
+from scripts.study_assessment import instructions as assessment_instructions, observe as observe_assessment
 
 
 class StudyHarnessError(ValueError):
@@ -32,6 +32,7 @@ class StudyHarnessError(ValueError):
 
 REQUIRED_SOURCES = {
     'scripts/software_study_harness.py', 'scripts/study_cell_budget.py',
+    'scripts/study_campaign.py', 'scripts/study_assessment.py',
     'scripts/controller_native_role.py', 'src/specorganon/software_controller.py',
     'src/specorganon/docker_roles.py', 'src/specorganon/role_jobs.py',
     'experiments/software_comparison_v1/public/routeplan.md',
@@ -42,28 +43,32 @@ REQUIRED_SOURCES = {
     'experiments/software_comparison_v1/reserved/evaluator.py',
     'experiments/software_comparison_v1/reserved/docker_evaluator.py',
     'experiments/software_comparison_v1/reserved/trace_collector.py',
+    'experiments/software_comparison_v1/reserved/campaign_evaluation.py',
     'experiments/software_comparison_v1/reserved/suite-draft.json',
 }
 
 
 def registration(path, source):
+    source=_safe(source)
     raw = _read(path, 2_097_152); value = _json(path)
-    if (type(value) is not dict or value.get('schema') != 1
+    if (type(value) is not dict or value.get('schema') != 2
             or value.get('status') != 'preregistered'
             or not value.get('independent_review_receipt')
             or not value.get('protocol') or not value.get('rubric')
             or not value.get('mandate') or not value.get('stopping_rule')):
         raise StudyHarnessError('reviewed full preregistration required before generation')
     hashes = value.get('source_sha256')
-    if type(hashes) is not dict or not REQUIRED_SOURCES <= hashes.keys():
+    required=REQUIRED_SOURCES | {str(p.relative_to(source)) for p in (source/'src/specorganon').rglob('*.py')}
+    if type(hashes) is not dict or not required <= hashes.keys():
         raise StudyHarnessError('registration omits required source bindings')
     for name, expected in hashes.items():
+        if type(name) is not str: raise StudyHarnessError('source binding path must be text')
         parts = Path(name)
         if (parts.is_absolute() or '..' in parts.parts or type(expected) is not str
                 or re.fullmatch('[0-9a-f]{64}', expected) is None
                 or digest(_read(source / parts, 8_388_608)) != expected):
             raise StudyHarnessError('registered source changed: ' + name)
-    for name in (value['protocol'], value['rubric'], value['independent_review_receipt']):
+    for name in (value['protocol'], value['rubric'], value['mandate'], value['independent_review_receipt']):
         if type(name) is not str or name not in hashes:
             raise StudyHarnessError('protocol/rubric/review must have bound file bytes')
     cells = value.get('cells')
@@ -79,6 +84,8 @@ def registration(path, source):
                 or re.fullmatch('[A-Za-z0-9][A-Za-z0-9_-]{0,63}', cell['id']) is None
                 or type(cell['repetition']) is not int):
             raise StudyHarnessError('invalid fixed cell identity')
+        if any(type(cell[k]) is not str for k in ('task','family','method')):
+            raise StudyHarnessError('invalid fixed cell categories')
         key = (cell['task'],cell['family'],cell['repetition'],cell['method'])
         if key not in wanted or key in seen or cell['id'] in ids:
             raise StudyHarnessError('missing/duplicated/replaced fixed cell')
@@ -96,14 +103,16 @@ def common_request(role, contract, documents, instructions):
 class BasicCell:
     """N/S/A routes, with common sealed code/tests and one final review."""
     def __init__(self, root, transport, *, method, task, contract, sdd_guide,
-                 protocol_sha256, fixture_mode=False):
+                 protocol_sha256, fixture_mode=False, rubric=''):
         if method not in {'N','S','A'} or task not in {'routeplan','treemap'}:
             raise StudyHarnessError('unsupported basic route')
         self.root = _safe(root); self.root.mkdir(parents=True, mode=0o700, exist_ok=True)
         self.transport = transport; self.method = method; self.task = task
         self.contract = contract; self.sdd = sdd_guide; self.fixture = fixture_mode
-        policy = {'schema':1,'method':method,'task':task,'contract_sha256':digest(contract.encode()),
+        self.rubric=rubric
+        policy = {'schema':2,'method':method,'task':task,'contract_sha256':digest(contract.encode()),
                   'sdd_sha256':digest(sdd_guide.encode()),'protocol_sha256':protocol_sha256,
+                  'rubric_sha256':digest(rubric.encode()),
                   'fixture_mode':fixture_mode}
         with self._lock():
             path = self.root/'policy.json'
@@ -175,6 +184,7 @@ class BasicCell:
                 'Original process documents remain sealed; explain deviations in reason. No third execution.')
         elif stage == 'final-review':
             docs['method.txt']=self.method
+            docs['assessment-rubric.md']=self.rubric
             if self.method=='S': docs['sdd-guide.md']=self.sdd
             if self.method=='A': docs['phase-contracts.json']=canonical([p.__dict__ for p in PHASES]).decode()
             instructions = ('Independent FINAL review, once, no repairs afterwards. Judge public contract, delivery, '
@@ -182,6 +192,7 @@ class BasicCell:
                 'verdict accept/reject/inconclusive, nonempty reason, findings as array of nonempty objects, '
                 'tests_executed=false. No reserved tests, expected outputs or results are supplied. '
                 'Do not infer field benefits, comparative superiority or accepted engine phases from these files.')
+            instructions += assessment_instructions(self.method)
         return common_request('review' if stage == 'final-review' else 'author', self.contract, docs, instructions)
 
     def _apply(self, state, stage, packet):
@@ -189,6 +200,7 @@ class BasicCell:
             raise StudyHarnessError('actual isolated role provenance required')
         response = validate_result(packet['result'], 'review' if stage=='final-review' else 'author')
         if stage == 'final-review':
+            _write(self.root/'assessment.json',observe_assessment(response,self.method))
             state['final_review'] = response; state['complete'] = True
             return
         if response['manifest'].get('schema') != 1 or response['manifest'].get('steps') != []:
@@ -238,7 +250,9 @@ class BasicCell:
             state = _json(self.root/'progress.json')
             if state.get('terminal_failure'):
                 return {'action':'failed','complete':False,'failure':state['terminal_failure']}
-            if state['complete']: return {'action':'complete','classification':'synthetic' if self.fixture else 'native-cell'}
+            if state['complete']:
+                self.validate_closed(state)
+                return {'action':'complete','classification':'synthetic' if self.fixture else 'native-cell'}
             stage = state['stages'][state['index']]
             job_id = 'step-'+str(state['index']+1).zfill(2)+'-'+stage
             # Input snapshot is durable before dispatch. Closed transport packets
@@ -266,6 +280,18 @@ class BasicCell:
             _write(self.root/'progress.json',state)
             return {'action':stage,'complete':state['complete']}
 
+    def validate_closed(self,state):
+        last=state['history'][-1]
+        if last['stage']!='final-review': raise StudyHarnessError('completion lacks final review')
+        packet=_json(self.root/(last['job_id']+'-packet.json'))
+        request=_json(self.root/(last['job_id']+'-request.json'))
+        if (digest(canonical(packet))!=last['packet_sha256']
+                or packet['request_sha256']!=digest(canonical(request))
+                or request['documents']['delivery-files.json']!=canonical(state['files']).decode()
+                or request['documents']['process-documents.json']!=canonical(state['process']).decode()
+                or packet['result']!=state['final_review']):
+            raise StudyHarnessError('completed delivery differs from reviewed snapshot')
+
     def step(self):
         try: return self._step()
         except (StudyHarnessError,StudyBudgetError,NativeRoleError,DockerRoleError) as exc:
@@ -275,7 +301,8 @@ class BasicCell:
             # receive an invented model failure or a new call ID.
             with self._lock():
                 state=_json(self.root/'progress.json')
-                failure={'status':'generation_failed','stage':state['stages'][state['index']],
+                stage=state['stages'][state['index']] if state['index']<len(state['stages']) else 'closed_snapshot'
+                failure={'status':'generation_failed','stage':stage,
                          'error_type':type(exc).__name__,'reason':str(exc),
                          'automatic_retry':False,'grade':None}
                 state['terminal_failure']=failure
@@ -286,13 +313,15 @@ class BasicCell:
 
 class ToolkitCell:
     """Real T engine/controller route plus the same one-time final review."""
-    def __init__(self, root, transport, *, task, contract, mandate, protocol_sha256):
+    def __init__(self, root, transport, *, task, contract, mandate, protocol_sha256, rubric=''):
         if (task not in {'routeplan','treemap'} or type(protocol_sha256) is not str
                 or re.fullmatch('[0-9a-f]{64}',protocol_sha256) is None):
             raise StudyHarnessError('explicit toolkit cell identity required')
         self.root=_safe(root); self.root.mkdir(parents=True,mode=0o700,exist_ok=True)
         self.transport=transport; self.contract=contract; self.mandate=mandate
-        policy={'schema':1,'task':task,'protocol_sha256':protocol_sha256,
+        self.rubric=rubric
+        policy={'schema':2,'task':task,'protocol_sha256':protocol_sha256,
+                'rubric_sha256':digest(rubric.encode()),
                 'contract_sha256':digest(contract.encode()),'mandate_sha256':digest(mandate.encode())}
         path=self.root/'toolkit-policy.json'
         if path.exists() and _json(path)!=policy: raise StudyHarnessError('toolkit cell identity changed')
@@ -310,9 +339,16 @@ class ToolkitCell:
         self.controller=Controller(self.case,self.root/'controller',transport,
                                    contract=contract,mandate=mandate,executor=transport)
 
-    def step(self):
+    def _step(self):
         path=self.root/'common-final-review.json'
-        if path.exists(): return {'action':'complete','final_review':_json(path)['result']}
+        if path.exists():
+            self.controller.package_gate()
+            packet=_json(path);request=_json(self.root/'common-final-request.json')
+            if (packet.get('provenance')!='native' or packet.get('request_sha256')!=digest(canonical(request))
+                    or request['documents']['delivery-files.json']!=canonical(self.controller._files()).decode()):
+                raise StudyHarnessError('completed toolkit delivery differs from final review')
+            _write(self.root/'assessment.json',observe_assessment(packet['result'],'T'))
+            return {'action':'complete','final_review':packet['result'],'nine_phase_package_allowed':True}
         result=self.controller.step()
         if result['action']!='complete': return result
         files=self.controller._files()
@@ -324,16 +360,10 @@ class ToolkitCell:
                 # test ID. Historical failed receipts stay in controller history;
                 # they are not reinterpreted as tests of the final delivery.
                 data=item['data']; self.transport.verify_test(data,files)
-                records[item['id']]={'receipt':_json(Path(data['test_job_ref'])),
-                    'streams':self.controller._test_streams(data['test_job_ref'])}
-        request=common_request('review',self.contract,{
-            'method.txt':'T','state.json':canonical(state).decode(),
-            'delivery-files.json':canonical(files).decode(),
-            'public-measurements.json':canonical(records).decode()},
-            'One independent common FINAL review, no regeneration afterwards. Judge contract, useful README, '
-            'pertinent code/tests, substantive nine accepted phases and valid traceability. Only supplied '
-            'public measurements were executed; no reserved results or field benefit. Return schema=1, '
-            'verdict accept/reject/inconclusive, nonempty reason, findings as array of objects, tests_executed=false.')
+                records[item['id']]={'current_test_job_ref':data['test_job_ref'],
+                                    'delivery_tree_sha256':digest(canonical(files))}
+        records['all_public_attempts']=self.public_attempts(files)
+        request=self.final_request(state,files,records)
         prepared=self.root/'common-final-request.json'
         if prepared.exists() and _json(prepared)!=request: raise StudyHarnessError('final snapshot changed')
         if not prepared.exists(): _write(prepared,request)
@@ -342,31 +372,52 @@ class ToolkitCell:
             raise StudyHarnessError('final native review provenance/binding invalid')
         validate_result(packet['result'],'review')
         _write(path,packet)
+        _write(self.root/'assessment.json',observe_assessment(packet['result'],'T'))
         return {'action':'complete','nine_phase_package_allowed':result['package_allowed'],
                 'final_review':packet['result']}
 
+    def public_attempts(self,files):
+        attempts={}
+        for entry in _json(self.controller.root/'progress.json')['history']:
+            if entry['action']!='test':continue
+            measured=self.transport.test_record(entry['job_id'])
+            data={'test_job_ref':measured['test_job_ref'],'argv':measured['subject_argv'],
+                  'delivery_tree_sha256':measured['delivery_tree_sha256']}
+            self.transport.verify_test(data,files,require_passed=False,require_current=False)
+            if measured['delivery_tree_sha256']!=entry['source_files_sha256']:
+                raise StudyHarnessError('historical measured test differs from sealed source snapshot')
+            attempts[entry['job_id']]={'measurement':measured,
+                'applies_to_current_delivery':measured['delivery_tree_sha256']==digest(canonical(files)),
+                'receipt':_json(Path(measured['test_job_ref'])),
+                'streams':self.controller._test_streams(measured['test_job_ref'],measured)}
+        return attempts
+
+    def step(self):
+        terminal=self.root/'terminal-failure.json'
+        if terminal.exists():return _json(terminal)
+        try:return self._step()
+        except (ControllerError,StudyBudgetError,StudyHarnessError,NativeRoleError,DockerRoleError,UncertainJob) as exc:
+            result={'action':'failed','failure':{'error_type':type(exc).__name__,'reason':str(exc),
+                    'automatic_retry':False,'grade':None}}
+            _write(terminal,result)
+            return result
+
+    def final_request(self,state,files,records):
+        return common_request('review',self.contract,{
+            'assessment-rubric.md':self.rubric,
+            'method.txt':'T','state.json':canonical(state).decode(),
+            'delivery-files.json':canonical(files).decode(),
+            'public-measurements.json':canonical(records).decode()},
+            'One independent common FINAL review, no regeneration afterwards. Judge contract, useful README, '
+            'pertinent code/tests, substantive nine accepted phases and valid traceability. Only supplied '
+            'public measurements were executed; no reserved results or field benefit. Return schema=1, '
+            'verdict accept/reject/inconclusive, nonempty reason, findings as array of objects, tests_executed=false.'
+            +assessment_instructions('T'))
+
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--registration',type=Path,required=True)
-    parser.add_argument('--cell',required=True)
-    parser.add_argument('--run-root',type=Path,required=True)
-    parser.add_argument('--source-root',type=Path,default=Path(__file__).resolve().parents[1])
-    parser.add_argument('--steps',type=int,default=1)
-    args=parser.parse_args()
-    if not 1<=args.steps<=80: parser.error('--steps must be 1..80')
-    value, sha=registration(args.registration,args.source_root)
-    cell=next((c for c in value['cells'] if c['id']==args.cell),None)
-    if cell is None: raise StudyHarnessError('cell not in fixed registration')
-    root=_safe(args.run_root); root.mkdir(parents=True,mode=0o700,exist_ok=True)
-    binding={'registration_sha256':sha,'cell':cell}
-    if (root/'cell.json').exists() and _json(root/'cell.json')!=binding: raise StudyHarnessError('cell identity changed')
-    if not (root/'cell.json').exists(): _write(root/'cell.json',binding)
-    # This command executes ONE registered cell. Campaign ordering/quota admission
-    # must be implemented and independently reviewed before using this CLI.
-    if not value.get('campaign_admission_implemented'):
-        raise StudyHarnessError('campaign order/quota admission gate not implemented; generation disabled')
-    raise StudyHarnessError('native campaign dispatch disabled until full harness audit and freeze')
+    from scripts.study_campaign import main as campaign_main
+    return campaign_main()
 
 
 if __name__=='__main__':

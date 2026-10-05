@@ -21,6 +21,10 @@ class StudyBudgetError(ValueError):
     pass
 
 
+class StudyClockPause(ValueError):
+    """Clock continuity unknown; admit nothing and never renew the budget."""
+
+
 class CellBudget:
     def __init__(self, root, *, protocol_sha256, max_calls, max_total_input_bytes,
                  max_elapsed_seconds, transport, validate=None):
@@ -60,7 +64,7 @@ class CellBudget:
         if clock.exists():
             anchor = _json(clock)
             if anchor['boot_id_sha256'] != JobStore._boot_id():
-                raise StudyBudgetError('admission clock changed')
+                raise StudyClockPause('admission clock changed; no new job until continuity is resolved')
             elapsed = time.monotonic() - anchor['monotonic']
             if elapsed < 0 or elapsed >= self.policy['max_elapsed_seconds']:
                 raise StudyBudgetError('global cell deadline exhausted')
@@ -79,6 +83,8 @@ class CellBudget:
             raise StudyBudgetError('native role differs from request')
         _, rendered = render_prompt(canonical(request))
         size = len(rendered.encode('utf-8'))
+        if size>self.policy['max_rendered_input_bytes']:
+            raise StudyBudgetError('individual rendered prompt ceiling exhausted')
         binding = {'role':role, 'request_sha256':digest(canonical(request)), 'rendered_input_bytes':size}
         with self._lock():
             self.validate()
@@ -124,6 +130,9 @@ class CellBudget:
 
     def verify_test(self, *args, **kwargs):
         return self.transport.verify_test(*args, **kwargs)
+
+    def test_record(self,job_id):
+        return self.transport.test_record(job_id)
 
     def summary(self):
         with self._lock():

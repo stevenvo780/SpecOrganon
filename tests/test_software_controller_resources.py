@@ -232,6 +232,45 @@ def test_maximum_full_validate_context_keeps_all_items_files_and_test_streams(tm
     from scripts.controller_native_role import render_prompt
     rendered_bytes=len(render_prompt(canonical(request))[1].encode('utf-8'))
     print(json.dumps({'classification':'synthetic maximum item/files/log contribution fixture', 'public_contract':public_contract,'request_bytes':len(canonical(request)), 'rendered_bytes':rendered_bytes,'request_limit':110000,'phase_count':9,'phase_item_limit':6,'phase_encoded_limit':6000,'files_encoded_bytes':encoded_contribution(files),'stream_encoded_bytes':encoded_contribution('X'*3994),'state_preserved':True,'C1_satisfied':False}))
+    if public_contract:
+        from scripts.software_study_harness import ToolkitCell
+        final=object.__new__(ToolkitCell);final.contract=ctrl.contract
+        final.rubric=(Path(__file__).parents[1]/'experiments/software_comparison_v1/public/assessment-rubric.md').read_text()
+        records=json.loads(request['documents']['measured-test-records.json'])
+        current=records['t1']
+        # Final review receives both attempts exactly once. Historical streams
+        # remain complete but are not claimed as tests of the current code.
+        records={'t1':{'current_test_job_ref':state['items']['t1']['data']['test_job_ref'],
+                       'delivery_tree_sha256':digest(canonical(files))},
+                 'all_public_attempts':{str(i):{'measurement':{'passed':bool(i),
+                     'delivery_tree_sha256':digest(canonical(files)) if i else 'a'*64},
+                     'applies_to_current_delivery':bool(i), **current} for i in (0,1)}}
+        final_bytes=len(render_prompt(canonical(final.final_request(state,files,records)))[1].encode())
+        assert final_bytes<=128000
+        snapshots=[];phases=list(state['phases']);original_files=ctrl._files
+        try:
+            for index,phase in enumerate(phases):
+                prefix=copy.deepcopy(state)
+                available=set(phases[:index+1])
+                if index>=phases.index('study'): available.add('observe') # early documentary evidence
+                prefix['items']={k:v for k,v in prefix['items'].items() if KIND_TO_PHASE[v['kind']] in available}
+                for n,p in enumerate(phases): prefix['phases'][p]['accepted']=n<index
+                ctrl._files=lambda:files if phase in {'build','validate'} else {}
+                role_request=ctrl._request(prefix,'review',progress)
+                size=len(render_prompt(canonical(role_request))[1].encode())
+                snapshots.append({'phase':phase,'rendered_bytes':size,
+                                  'nominal_calls':3 if phase in {'critique','specify','build'} else 2,
+                                  'maximum_stage_calls':5 if phase=='build' else 4})
+        finally: ctrl._files=original_files
+        nominal=sum(row['rendered_bytes']*row['nominal_calls'] for row in snapshots)+final_bytes
+        maximum=sum(row['rendered_bytes']*row['maximum_stage_calls'] for row in snapshots)+final_bytes
+        print(json.dumps({'classification':'synthetic phase-prefix cumulative load, not bound on arbitrary native reasons/metadata',
+                          'public_contract':public_contract,'phase_snapshots':snapshots,'common_final_rendered_bytes':final_bytes,
+                          'nominal_22_role_inputs_bytes':nominal,'maximum_stage_38_role_inputs_bytes':maximum,
+                          'prior_1MiB_fits_this_fixture':maximum<=1_048_576,'proposed_2MiB_fits_this_fixture':maximum<=2_097_152,
+                          'proposed_3MiB_fits_this_fixture':maximum<=3_145_728,
+                          'native_model_calls':0,'study_cells_generated':0,'C1_satisfied':False}))
+        assert maximum<=3_145_728
 
 
 @pytest.mark.parametrize('stage,operation',[('program','rename'),('program','put'),('tests','put'),('tests','seal')])

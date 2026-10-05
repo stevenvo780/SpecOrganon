@@ -39,8 +39,12 @@ por extensión del texto ni por afirmar una prueba inexistente.
 10. Alcance local, restricciones y limitaciones; no atribuye beneficios de campo medidos.
 
 Se publica puntuación confirmada /10 junto a faltantes e inconclusos. Los dos
-ejemplos documentados se reejecutan después del sellado, en un proceso sin
-perfiles/red y sin devolver feedback al autor. Código y README conservan hashes.
+ejemplos públicos se ejecutan después del sellado mediante recetas contractuales
+fijas, en un proceso sin perfiles/red y sin devolver feedback al autor. En TreeMap
+se sustituye la raíz de ejemplo por /fixture/root. El revisor juzga si los comandos
+del README corresponden a esas recetas; no se ejecuta texto shell arbitrario del
+README. D3/D4 requieren tanto el juicio favorable con localizador como la ejecución
+pasada de la receta. Código y README conservan hashes y se publica esta limitación.
 
 ## Requisitos comunes: seis puntos separados
 

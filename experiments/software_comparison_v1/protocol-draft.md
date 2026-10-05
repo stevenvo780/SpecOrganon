@@ -1,8 +1,8 @@
 # Protocolo prospectivo de software v1 — no prerregistrado
 
 Estado: diseño ejecutable en preparación. Cero soluciones/celdas generadas.
-Antes de generar deben completarse el admission gate de campaña, el load check
-con contratos completos, la auditoría conjunta y el manifiesto de congelación.
+Antes de generar deben completarse la auditoría del admission gate de campaña,
+los checks finales de contexto/rúbrica y el manifiesto de congelación.
 No se autoriza generación mediante la mera existencia de este documento.
 
 ## Pregunta, población y unidades
@@ -74,8 +74,10 @@ Techos comunes propuestos:40 llamadas nativas por celda, incluida revisión fina
 2MiB por stream;20000 bytes codificados de archivos;54000 bytes codificados de
 documentos de proceso;4000 bytes codificados por stream que se devuelve como
 contexto. Docker:1GiB/2CPU/128pids, root readonly y no-new-privileges. Tests públicos
-120s, reservados3s. El presupuesto acumulado de entrada permanece pendiente:
-la propuesta previa de1MiB debe probarse con contextos completos antes de fijarlo.
+120s, reservados3s. El presupuesto acumulado propuesto es3MiB por celda. Las
+propuestas de1MiB y2MiB no admitieron la fixture completa de fases permitidas;
+sus rechazos se conservan antes de cualquier generación. La fixture cabe en3MiB,
+sin garantizar que cualquier respuesta nativa posible complete el método.
 
 La campaña máxima será la suma de28 techos, sin ampliar tras observar resultados.
 No acumular presupuesto no usado por otro método ni descontar revisiones del
@@ -88,8 +90,11 @@ de campaña y conserva las restantes no iniciadas. No cambiar cuenta, comprar
 créditos, forzar reset ni aprovechar otra máquina como cuota distinta. La
 consulta actual de cuota es evidencia previa, nunca garantía de terminar.
 
-Falta implementar el gate que distingue detención de cuenta y fallo de celda;
-por eso la CLI del harness todavía bloquea generación. No interpretar exit0
+El gate distingue fallo terminal de celda y pausa sin admisión por cuota vieja
+o agotada. Un fallo nativo real no clasificable como formato controlado detiene
+la campaña sin reanudación automática. Eso puede dejar filas no iniciadas; no
+se cubren con otra cuenta. La CLI exige revisión conjunta aceptada y fuentes
+prerregistradas, todavía inexistentes. No interpretar exit0
 del cliente o ausencia de error visible como review/phase/study aceptada.
 
 ## Medición y cierre
@@ -100,6 +105,13 @@ infra_inconclusa; no eliminar filas adversas. Mostrar por tarea/familia/repetici
 las diferencias N/S/T y T/A, medias/rangos descriptivos y denominadores. No
 realizar selección de mejor réplica, inferencia causal universal ni ranking
 basado en adherencia de guías con denominadores diferentes.
+
+El driver reservado sólo admite medición después de cerrar toda la generación
+o de una parada terminal real de infraestructura; nunca durante una celda pendiente.
+Cada invocación incierta queda inconclusa con su ID original, sin sustituirla.
+Los ejemplos se ejecutan mediante recetas públicas fijas; la correspondencia de
+los comandos del README se juzga con localizadores en la revisión independiente,
+sin ejecutar shell arbitrario del documento. D3/D4 requieren ambas evidencias.
 
 Registrar llamadas, tiempos, bytes renderizados, tests y native usage reportado.
 Tokens faltantes, dinero y capacidad no observada quedan desconocidos; no

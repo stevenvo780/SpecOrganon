@@ -1,0 +1,175 @@
+{"classification": "synthetic maximum item/files/log contribution fixture", "public_contract": null, "request_bytes": 101066, "rendered_bytes": 103698, "request_limit": 110000, "phase_count": 9, "phase_item_limit": 6, "phase_encoded_limit": 6000, "files_encoded_bytes": 19999, "stream_encoded_bytes": 4000, "state_preserved": true, "C1_satisfied": false}
+.{"classification": "synthetic maximum item/files/log contribution fixture", "public_contract": "routeplan", "request_bytes": 106508, "rendered_bytes": 109140, "request_limit": 110000, "phase_count": 9, "phase_item_limit": 6, "phase_encoded_limit": 6000, "files_encoded_bytes": 19999, "stream_encoded_bytes": 4000, "state_preserved": true, "C1_satisfied": false}
+{"classification": "synthetic phase-prefix cumulative load, not bound on arbitrary native reasons/metadata", "public_contract": "routeplan", "phase_snapshots": [{"phase": "frame", "rendered_bytes": 30269, "nominal_calls": 2, "maximum_stage_calls": 4}, {"phase": "critique", "rendered_bytes": 37860, "nominal_calls": 3, "maximum_stage_calls": 4}, {"phase": "study", "rendered_bytes": 50182, "nominal_calls": 2, "maximum_stage_calls": 4}, {"phase": "observe", "rendered_bytes": 49677, "nominal_calls": 2, "maximum_stage_calls": 4}, {"phase": "explain", "rendered_bytes": 56160, "nominal_calls": 2, "maximum_stage_calls": 4}, {"phase": "compare", "rendered_bytes": 63252, "nominal_calls": 2, "maximum_stage_calls": 4}, {"phase": "specify", "rendered_bytes": 70428, "nominal_calls": 3, "maximum_stage_calls": 4}, {"phase": "build", "rendered_bytes": 102468, "nominal_calls": 3, "maximum_stage_calls": 5}, {"phase": "validate", "rendered_bytes": 109140, "nominal_calls": 2, "maximum_stage_calls": 4}], "common_final_rendered_bytes": 99596, "nominal_22_role_inputs_bytes": 1449224, "maximum_stage_38_role_inputs_bytes": 2479808, "prior_1MiB_fits_this_fixture": false, "proposed_2MiB_fits_this_fixture": false, "native_model_calls": 0, "study_cells_generated": 0, "C1_satisfied": false}
+F{"classification": "synthetic maximum item/files/log contribution fixture", "public_contract": "treemap", "request_bytes": 107700, "rendered_bytes": 110332, "request_limit": 110000, "phase_count": 9, "phase_item_limit": 6, "phase_encoded_limit": 6000, "files_encoded_bytes": 19999, "stream_encoded_bytes": 4000, "state_preserved": true, "C1_satisfied": false}
+{"classification": "synthetic phase-prefix cumulative load, not bound on arbitrary native reasons/metadata", "public_contract": "treemap", "phase_snapshots": [{"phase": "frame", "rendered_bytes": 31461, "nominal_calls": 2, "maximum_stage_calls": 4}, {"phase": "critique", "rendered_bytes": 39052, "nominal_calls": 3, "maximum_stage_calls": 4}, {"phase": "study", "rendered_bytes": 51374, "nominal_calls": 2, "maximum_stage_calls": 4}, {"phase": "observe", "rendered_bytes": 50869, "nominal_calls": 2, "maximum_stage_calls": 4}, {"phase": "explain", "rendered_bytes": 57352, "nominal_calls": 2, "maximum_stage_calls": 4}, {"phase": "compare", "rendered_bytes": 64444, "nominal_calls": 2, "maximum_stage_calls": 4}, {"phase": "specify", "rendered_bytes": 71620, "nominal_calls": 3, "maximum_stage_calls": 4}, {"phase": "build", "rendered_bytes": 103660, "nominal_calls": 3, "maximum_stage_calls": 5}, {"phase": "validate", "rendered_bytes": 110332, "nominal_calls": 2, "maximum_stage_calls": 4}], "common_final_rendered_bytes": 100788, "nominal_22_role_inputs_bytes": 1475448, "maximum_stage_38_role_inputs_bytes": 2525104, "prior_1MiB_fits_this_fixture": false, "proposed_2MiB_fits_this_fixture": false, "native_model_calls": 0, "study_cells_generated": 0, "C1_satisfied": false}
+F
+=================================== FAILURES ===================================
+_ test_maximum_full_validate_context_keeps_all_items_files_and_test_streams[routeplan] _
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/effort-verification-01/tmp/pytest-of-stev/pytest-21/test_maximum_full_validate_con1')
+public_contract = 'routeplan'
+
+    @pytest.mark.parametrize('public_contract',[None,'routeplan','treemap'])
+    def test_maximum_full_validate_context_keeps_all_items_files_and_test_streams(tmp_path,public_contract):
+        ctrl=build_fixture(tmp_path);ctrl.executor=Executor(tmp_path,stdout=b'X'*3994,stderr=b'Y'*3994);program(ctrl);stage_tests(ctrl);ctrl.step()
+        if public_contract:
+            repository=Path(__file__).parents[1]
+            ctrl.contract=(repository/'experiments/software_comparison_v1/public'/ (public_contract+'.md')).read_text()
+            ctrl.mandate=(repository/'experiments/software_comparison_v1/public/existing-mandate.md').read_text()
+        state=engine.get_state(ctrl.case)
+        state['phases']['build']['accepted']=True
+        # Model a final current snapshot at each declared phase cap. All complete
+        # item maps remain in the request, including issues/deps and test receipt.
+        for phase in state['phases']:
+            group={k:v for k,v in state['items'].items() if KIND_TO_PHASE[v['kind']]==phase}
+            if not group:
+                item=copy.deepcopy(state['items']['p1']);item.update(id='res1',kind='result')
+                state['items']['res1']=item;group={'res1':item}
+            template=next(iter(group.values()))
+            for index in range(len(group),6):
+                item=copy.deepcopy(template);item['id']=phase+str(index);item['data']={};item['text']='Synthetic cap'
+                # No cloned measured job refs: a receipt is kept once, in t1.
+                item['test_execution_provenance']=None
+                group[item['id']]=item;state['items'][item['id']]=item
+            target=next(iter(group.values()))
+            while encoded_contribution(group)>6000: target['text']=target['text'][:-1]
+            while encoded_contribution(group)<6000:
+                target['text']+='x'
+            target['text']=target['text'][:-1]
+            assert 5990<=encoded_contribution(group)<=6000
+        files=ctrl._files();files['README.md']+='x'*17000
+        while encoded_contribution(files)<20000:files['README.md']+='x'
+        files['README.md']=files['README.md'][:-1]
+        ctrl._write_files({'source_files':ctrl._files()},{'README.md':files['README.md']})
+        progress=_json(ctrl.root/'progress.json')
+        # History is complete for this fixture. Arbitrarily large native reasons
+        # remain subject to the independent final 110000-byte admission guard.
+        request=ctrl._request(state,'review',progress)
+        assert len(canonical(request))<=110000
+        assert request['documents']['state.json']==canonical(state).decode()
+        assert json.loads(request['documents']['delivery-files.json'])==files
+        streams=json.loads(request['documents']['measured-test-records.json'])['t1']['streams']
+        assert streams['stdout']=={'text':'X'*3994,'complete':True}
+        assert streams['stderr']=={'text':'Y'*3994,'complete':True}
+        from scripts.controller_native_role import render_prompt
+        rendered_bytes=len(render_prompt(canonical(request))[1].encode('utf-8'))
+        print(json.dumps({'classification':'synthetic maximum item/files/log contribution fixture', 'public_contract':public_contract,'request_bytes':len(canonical(request)), 'rendered_bytes':rendered_bytes,'request_limit':110000,'phase_count':9,'phase_item_limit':6,'phase_encoded_limit':6000,'files_encoded_bytes':encoded_contribution(files),'stream_encoded_bytes':encoded_contribution('X'*3994),'state_preserved':True,'C1_satisfied':False}))
+        if public_contract:
+            from scripts.software_study_harness import ToolkitCell
+            final=object.__new__(ToolkitCell);final.contract=ctrl.contract
+            final.rubric=(Path(__file__).parents[1]/'experiments/software_comparison_v1/public/assessment-rubric.md').read_text()
+            records=json.loads(request['documents']['measured-test-records.json'])
+            final_bytes=len(render_prompt(canonical(final.final_request(state,files,records)))[1].encode())
+            snapshots=[];phases=list(state['phases']);original_files=ctrl._files
+            try:
+                for index,phase in enumerate(phases):
+                    prefix=copy.deepcopy(state)
+                    available=set(phases[:index+1])
+                    if index>=phases.index('study'): available.add('observe') # early documentary evidence
+                    prefix['items']={k:v for k,v in prefix['items'].items() if KIND_TO_PHASE[v['kind']] in available}
+                    for n,p in enumerate(phases): prefix['phases'][p]['accepted']=n<index
+                    ctrl._files=lambda:files if phase in {'build','validate'} else {}
+                    role_request=ctrl._request(prefix,'review',progress)
+                    size=len(render_prompt(canonical(role_request))[1].encode())
+                    snapshots.append({'phase':phase,'rendered_bytes':size,
+                                      'nominal_calls':3 if phase in {'critique','specify','build'} else 2,
+                                      'maximum_stage_calls':5 if phase=='build' else 4})
+            finally: ctrl._files=original_files
+            nominal=sum(row['rendered_bytes']*row['nominal_calls'] for row in snapshots)+final_bytes
+            maximum=sum(row['rendered_bytes']*row['maximum_stage_calls'] for row in snapshots)+final_bytes
+            print(json.dumps({'classification':'synthetic phase-prefix cumulative load, not bound on arbitrary native reasons/metadata',
+                              'public_contract':public_contract,'phase_snapshots':snapshots,'common_final_rendered_bytes':final_bytes,
+                              'nominal_22_role_inputs_bytes':nominal,'maximum_stage_38_role_inputs_bytes':maximum,
+                              'prior_1MiB_fits_this_fixture':maximum<=1_048_576,'proposed_2MiB_fits_this_fixture':maximum<=2_097_152,
+                              'native_model_calls':0,'study_cells_generated':0,'C1_satisfied':False}))
+>           assert maximum<=2_097_152
+E           assert 2479808 <= 2097152
+
+tests/test_software_controller_resources.py:263: AssertionError
+_ test_maximum_full_validate_context_keeps_all_items_files_and_test_streams[treemap] _
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/effort-verification-01/tmp/pytest-of-stev/pytest-21/test_maximum_full_validate_con2')
+public_contract = 'treemap'
+
+    @pytest.mark.parametrize('public_contract',[None,'routeplan','treemap'])
+    def test_maximum_full_validate_context_keeps_all_items_files_and_test_streams(tmp_path,public_contract):
+        ctrl=build_fixture(tmp_path);ctrl.executor=Executor(tmp_path,stdout=b'X'*3994,stderr=b'Y'*3994);program(ctrl);stage_tests(ctrl);ctrl.step()
+        if public_contract:
+            repository=Path(__file__).parents[1]
+            ctrl.contract=(repository/'experiments/software_comparison_v1/public'/ (public_contract+'.md')).read_text()
+            ctrl.mandate=(repository/'experiments/software_comparison_v1/public/existing-mandate.md').read_text()
+        state=engine.get_state(ctrl.case)
+        state['phases']['build']['accepted']=True
+        # Model a final current snapshot at each declared phase cap. All complete
+        # item maps remain in the request, including issues/deps and test receipt.
+        for phase in state['phases']:
+            group={k:v for k,v in state['items'].items() if KIND_TO_PHASE[v['kind']]==phase}
+            if not group:
+                item=copy.deepcopy(state['items']['p1']);item.update(id='res1',kind='result')
+                state['items']['res1']=item;group={'res1':item}
+            template=next(iter(group.values()))
+            for index in range(len(group),6):
+                item=copy.deepcopy(template);item['id']=phase+str(index);item['data']={};item['text']='Synthetic cap'
+                # No cloned measured job refs: a receipt is kept once, in t1.
+                item['test_execution_provenance']=None
+                group[item['id']]=item;state['items'][item['id']]=item
+            target=next(iter(group.values()))
+            while encoded_contribution(group)>6000: target['text']=target['text'][:-1]
+            while encoded_contribution(group)<6000:
+                target['text']+='x'
+            target['text']=target['text'][:-1]
+            assert 5990<=encoded_contribution(group)<=6000
+        files=ctrl._files();files['README.md']+='x'*17000
+        while encoded_contribution(files)<20000:files['README.md']+='x'
+        files['README.md']=files['README.md'][:-1]
+        ctrl._write_files({'source_files':ctrl._files()},{'README.md':files['README.md']})
+        progress=_json(ctrl.root/'progress.json')
+        # History is complete for this fixture. Arbitrarily large native reasons
+        # remain subject to the independent final 110000-byte admission guard.
+        request=ctrl._request(state,'review',progress)
+        assert len(canonical(request))<=110000
+        assert request['documents']['state.json']==canonical(state).decode()
+        assert json.loads(request['documents']['delivery-files.json'])==files
+        streams=json.loads(request['documents']['measured-test-records.json'])['t1']['streams']
+        assert streams['stdout']=={'text':'X'*3994,'complete':True}
+        assert streams['stderr']=={'text':'Y'*3994,'complete':True}
+        from scripts.controller_native_role import render_prompt
+        rendered_bytes=len(render_prompt(canonical(request))[1].encode('utf-8'))
+        print(json.dumps({'classification':'synthetic maximum item/files/log contribution fixture', 'public_contract':public_contract,'request_bytes':len(canonical(request)), 'rendered_bytes':rendered_bytes,'request_limit':110000,'phase_count':9,'phase_item_limit':6,'phase_encoded_limit':6000,'files_encoded_bytes':encoded_contribution(files),'stream_encoded_bytes':encoded_contribution('X'*3994),'state_preserved':True,'C1_satisfied':False}))
+        if public_contract:
+            from scripts.software_study_harness import ToolkitCell
+            final=object.__new__(ToolkitCell);final.contract=ctrl.contract
+            final.rubric=(Path(__file__).parents[1]/'experiments/software_comparison_v1/public/assessment-rubric.md').read_text()
+            records=json.loads(request['documents']['measured-test-records.json'])
+            final_bytes=len(render_prompt(canonical(final.final_request(state,files,records)))[1].encode())
+            snapshots=[];phases=list(state['phases']);original_files=ctrl._files
+            try:
+                for index,phase in enumerate(phases):
+                    prefix=copy.deepcopy(state)
+                    available=set(phases[:index+1])
+                    if index>=phases.index('study'): available.add('observe') # early documentary evidence
+                    prefix['items']={k:v for k,v in prefix['items'].items() if KIND_TO_PHASE[v['kind']] in available}
+                    for n,p in enumerate(phases): prefix['phases'][p]['accepted']=n<index
+                    ctrl._files=lambda:files if phase in {'build','validate'} else {}
+                    role_request=ctrl._request(prefix,'review',progress)
+                    size=len(render_prompt(canonical(role_request))[1].encode())
+                    snapshots.append({'phase':phase,'rendered_bytes':size,
+                                      'nominal_calls':3 if phase in {'critique','specify','build'} else 2,
+                                      'maximum_stage_calls':5 if phase=='build' else 4})
+            finally: ctrl._files=original_files
+            nominal=sum(row['rendered_bytes']*row['nominal_calls'] for row in snapshots)+final_bytes
+            maximum=sum(row['rendered_bytes']*row['maximum_stage_calls'] for row in snapshots)+final_bytes
+            print(json.dumps({'classification':'synthetic phase-prefix cumulative load, not bound on arbitrary native reasons/metadata',
+                              'public_contract':public_contract,'phase_snapshots':snapshots,'common_final_rendered_bytes':final_bytes,
+                              'nominal_22_role_inputs_bytes':nominal,'maximum_stage_38_role_inputs_bytes':maximum,
+                              'prior_1MiB_fits_this_fixture':maximum<=1_048_576,'proposed_2MiB_fits_this_fixture':maximum<=2_097_152,
+                              'native_model_calls':0,'study_cells_generated':0,'C1_satisfied':False}))
+>           assert maximum<=2_097_152
+E           assert 2525104 <= 2097152
+
+tests/test_software_controller_resources.py:263: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_software_controller_resources.py::test_maximum_full_validate_context_keeps_all_items_files_and_test_streams[routeplan]
+FAILED tests/test_software_controller_resources.py::test_maximum_full_validate_context_keeps_all_items_files_and_test_streams[treemap]
+2 failed, 1 passed, 19 deselected in 2.99s
