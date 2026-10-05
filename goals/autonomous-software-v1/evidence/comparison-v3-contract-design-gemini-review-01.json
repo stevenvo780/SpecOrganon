@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "job_id": "1d4700bf4e494e44b7813c197a8a375f",
+  "status": "succeeded",
+  "submitted_at": 1791213891.8467882,
+  "finished_at": 1791213927.3365667,
+  "provider": "gemini",
+  "model": "gemini/3.8-flash",
+  "native_model": "Gemini 3.8 Flash (Medium)",
+  "access": "text",
+  "cwd": "/home/stev/.codex/worktrees/comparison-v3-budget/SpecOrganon",
+  "duration_seconds": 35.5,
+  "scope": "candidate contracts design only, before recipes/harnesses/registration",
+  "review": {
+    "schema": 1,
+    "verdict": "revise",
+    "reason": "Los contratos candidatos presentan solidez estructural, pero requieren ajustes de precisión semántica y de entorno antes del freeze: FractionMix puede exceder el límite por defecto de 4300 dígitos de conversión entero-cadena en Python 3.12 provocando fallos no controlados; ListPatch requiere blindar 'delete' contra remanentes del borrador 'remove' y clarificar rechazo de claves extra en dicha operación; y PolicyPick debe unificar la tolerancia a duplicados en 'requires' además de 'tags'.",
+    "findings": [
+      {
+        "task": "fractionmix",
+        "problem": "Python 3.12 aplica por defecto un límite de 4300 dígitos en conversiones entero-a-cadena (CVE-2020-10735 / sys.get_int_max_str_digits()). En una entrada de hasta 65536 bytes con hasta 1000 términos y denominadores coprimos de hasta 10^9, el numerador y denominador irreducibles pueden superar ampliamente los 4300 dígitos. Sin una directiva explícita, tanto la serialización json.dumps en la entrega como json.loads/dumps en el oráculo/evaluador lanzarán ValueError no controlado, provocando fallos espurios de ejecución en lugar de éxito exit 0.",
+        "correction": "Declarar explícitamente en el contrato y en la especificación del harness/oráculo que las soluciones y evaluadores deben habilitar enteros de longitud arbitraria sin límite de conversión decimal (p. ej. sys.set_int_max_str_digits(0)) al iniciar la ejecución, preservando la suma aritmética exacta sin acotar artificialmente la entrada ni relajar el límite de 65536 bytes."
+      },
+      {
+        "task": "listpatch",
+        "problem": "El contrato candidato fija la operación pública como 'delete', pero borradores previos usaban 'remove'. Si no se explicita en el contrato y en las 60 recetas, implementaciones o tests que asuman 'remove' fallarán con invalid_input. Asimismo, debe quedar inequívoco que 'delete' con propiedades extra como 'value' debe ser rechazado como invalid_input (exit 2).",
+        "correction": "Fijar formalmente en el contrato, rubricas y banco de recetas F60 que 'delete' es el único identificador contractual válido para eliminación (rechazando 'remove' con exit 2) y confirmar que la presencia de cualquier clave ajena a 'op' e 'index' en un objeto de operación 'delete' invalida la entrada."
+      },
+      {
+        "task": "policypick",
+        "problem": "El contrato actual especifica que 'Los tags repetidos en una misma lista son válidos e ignorados al comparar conjuntos', pero no explicita la misma regla para la lista 'requires' de las reglas. Además, no se fija explícitamente el resultado para las entradas de frontera con listas vacías ('rules': [] y 'queries': []).",
+        "correction": "Aclarar que elementos duplicados tanto en 'requires' como en 'tags' son válidos y se reducen a conjuntos (sin originar invalid_input), y explicitar que si 'rules' es una lista vacía toda consulta mapea a null, y si 'queries' es una lista vacía el resultado de stdout es {'decisions':[]}."
+      },
+      {
+        "task": "fractionmix",
+        "problem": "Existe potencial asimetría entre la restricción de stdout ('empieza con { y termina con }\\n, sin whitespace exterior') y la cláusula que autoriza pretty printing ('Whitespace interior y orden de claves son insignificantes, incluido pretty printing'). Si pretty-printing inserta indentación o saltos de línea tras el primer '{' o antes del '}', la aserción de que empiece exactamente por '{' y termine en '}\\n' debe ser interpretada rígidamente por los validadores.",
+        "correction": "Especificar que el validador estricto debe verificar `stdout.startswith('{') and stdout.endswith('}\\n')` y decodificar el cuerpo como un único documento JSON, asegurando que no existan bytes previos al '{' inicial ni posteriores al salto de línea final."
+      }
+    ],
+    "tests_executed": false,
+    "registration_ready": false
+  },
+  "prompt_sha256": "040ae3125876f7b08ded1aca534ae32a158f3ee2e2998d0b313ae6c9cba1d8c4",
+  "prompt_bytes": 12729
+}
