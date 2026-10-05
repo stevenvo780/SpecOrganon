@@ -31,7 +31,7 @@ admisión/evaluador, controles del evaluador ejecutados, hashes de todos esos
 fuentes, observaciones públicas, tests, revisión, contexto/catálogo públicos e
 imágenes inmutables. El registro debe preceder cualquier caso/primera admisión.
 Cambiar fuentes después del freeze invalida y cierra la identidad; no autoriza otra.
-El registro vincula todos los módulos del toolkit, los siete scripts importados o
+El registro vincula todos los módulos del toolkit, los cinco scripts importados o
 ejecutados por este trial, los módulos LotLedger, documentos/contexto/catálogo y
 los controles pertinentes. No incluye scripts históricos ajenos a esa ejecución.
 El guard de módulos cargados sigue rechazando cualquier import local no vinculado;
@@ -76,7 +76,7 @@ no son baseline de conformidad del programa. No sustituir una métrica por otra 
 inventar baseline0. La selección de indicadores debe declarar su población propia.
 
 Criterios anteriores a build, sin compensación: F pruebas propias pertinentes
-pasadas con recibo exacto y ejemplos correctos, reserva externa63/63 para conformidad
+pasadas con recibo exacto y ejemplos correctos, reserva externa68/68 para conformidad
 completa; D documentación8/8; M nueve fases aceptadas con argumentos sustantivos,
 trazas vigentes y auditoría6/6. Pruebas propias no prueban F reservado. D/M se miden
 externamente después del cierre, sin completar el ledger retrospectivamente.
@@ -117,18 +117,19 @@ C8 SIGKILL después del recibo reusa sin llamadas/eventos duplicados y antes del
 queda inconcluso sin relanzar. C5–C8 son controles sintéticos del mecanismo, separados
 del caso y revalidados pertinentemente. Faltante/incierto no es satisfecho.
 
-Matriz de63recetas en reserved.py: legal11, identity10, order10, types12, format10,
-boundaries10;2ejemplos públicos incluidos. Las60recetas originales se conservan y
-se añaden ausencia de LF final, CR escapado y LF escapado antes de registro/autores. Cobertura
+Matriz de68recetas en reserved.py: legal11, identity10, order10, types12, format10,
+boundaries15;2ejemplos públicos incluidos. Las60recetas originales se conservan y
+se añaden ausencia de LF final, CR/LF escapados y cinco bordes de strings id/site/
+from/to antes de registro/autores. Esto amplía el corpus sin retirar recetas. Cobertura
 determinista finita, no potencia estadística ni prueba exhaustiva de todo input. No
 selección por resultados. Expectativas explícitas y metamorfismos fijados antes de
 generar; nunca construir oráculo a partir del programa. Una invocación por receta,
-3s/2CPU/1GiB/128pids/2MiB por stream. Ausencia de programa cuenta63fallos, no omisión.
+3s/2CPU/1GiB/128pids/2MiB por stream. Ausencia de programa cuenta68fallos, no omisión.
 Timeout/crash/salida truncada del sujeto es fallo; infraestructura incierta se publica
 como inconclusa. El evaluador conserva códigos, tiempos, hashes y streams privados,
 y sólo reusa recibos cerrados con idénticos inputs/entrega.
 
-completed_technical requiere C1–C8, gate9,D8/8,M6/6,F63/63, README/tests/paquete real.
+completed_technical requiere C1–C8, gate9,D8/8,M6/6,F68/68, README/tests/paquete real.
 Otro resultado se publica delivery_failed, infra_inconclusive o not_started, con
 denominadores fijos. Este hito no basta para cerrar la goal. Después se requiere
 la campaña NUEVA multitype N/S/T/ablación de experiments/software_comparison_v3/
@@ -142,7 +143,9 @@ Los sujetos y tests de entrega tienen red none y no montan credenciales. Autor y
 revisor nativos necesitan red para sus proveedores y usan exclusivamente sus
 perfiles originales, sin copiar credenciales ni montar casos, evaluadores o recetas.
 Las imágenes verificadas declaran USER codex (nativa) y USER ubuntu (test); el
-comando id ejecutado sin perfiles observó uid1000 en ambas. La ausencia de --user
+comando id ejecutado sin perfiles observó uid1000 en ambas. El recibo image-users.json
+es obligatorio en el freeze y el guard exige que sus IDs/uid1000 coincidan con ambas
+imágenes configuradas antes de admitir ejecución. La ausencia de --user
 en el transporte nativo hereda ese usuario de imagen; no implica ejecución root.
 Se conservan readonly/cap-drop ALL/no-new-privileges/2CPU/1GiB/128pids y mounts de
 entrada readonly. Los perfiles permanecen escribibles para el CLI autorizado y
@@ -151,3 +154,8 @@ una garantía criptográfica ni bloqueo absoluto de herramientas internas de Gem
 El programa sujeto separado sí carece de perfiles y red; los recibos de los roles
 y montajes distinguen ambos ámbitos. No convertir esta diferencia en evidencia
 de seguridad universal ni ocultar el uso de red/autenticación de los proveedores.
+
+La admisión de cuotas usa original_profile_quota.py, sin importar ni ejecutar los
+harnesses o archivos de datos de campañas históricas. Conserva cuentas originales,
+unknown explícito, rechazo de timestamps vencidos/futuros y pausa por cuota agotada;
+no consulta tokens, sustituye cuentas ni renueva presupuestos.

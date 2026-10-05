@@ -1,4 +1,4 @@
-"""Sixty-three prospective LotLedger recipes; never mounted to generation roles."""
+"""Sixty-eight prospective LotLedger recipes; never mounted to generation roles."""
 from __future__ import annotations
 
 import json
@@ -120,6 +120,13 @@ def recipes():
     add('boundaries', 'strings-64', lines(event(string64, lot=string64, site=string64)),
         expected(1, rows=[(string64, string64, 1)]))
     add('boundaries', 'string-65', lines(event(lot=string64 + 'a')))
+    add('boundaries', 'id-65', lines(event(string64 + 'a')))
+    add('boundaries', 'site-65', lines(event(site=string64 + 'a')))
+    add('boundaries', 'move-from-to-64', lines(event('a', site=string64, quantity=2),
+        event('b', 'move', site=string64, to='t' * 64)),
+        expected(2, rows=[('L', 't' * 64, 1), ('L', string64, 1)]))
+    add('boundaries', 'move-from-65', lines(event('a', 'move', site=string64 + 'a')))
+    add('boundaries', 'move-to-65', lines(event('a'), event('b', 'move', to=string64 + 'a')))
     raw = lines(event())
     boundary = raw[:-1] + b' ' * (65536 - len(raw)) + b'\n'
     assert len(boundary) == 65536
@@ -137,8 +144,8 @@ def recipes():
         event('b', 'move', lot='Y', site='z', to='a', quantity=2)),
         expected(2, rows=[('Y', 'a', 2), ('Y', 'z', 3)]), relation='bijective-lot-site-renaming')
     add('boundaries', 'empty-id', lines(event('')))
-    assert len(result) == 63 and len({r['id'] for r in result}) == 63
-    assert [sum(r['group'] == g for r in result) for g in GROUPS] == [11, 10, 10, 12, 10, 10]
+    assert len(result) == 68 and len({r['id'] for r in result}) == 68
+    assert [sum(r['group'] == g for r in result) for g in GROUPS] == [11, 10, 10, 12, 10, 15]
     return result
 
 

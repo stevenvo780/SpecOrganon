@@ -46,13 +46,34 @@ def test_trial_freeze_covers_local_import_closure_and_loaded_modules():
     assert 'src/specorganon/docker_roles.py' in names
     assert 'tests/test_lotledger_driver.py' in names
     assert 'tests/test_lotledger_reserved.py' in names
+    assert 'experiments/lotledger_delivery_v1/image-users.json' in names
+    assert 'scripts/original_profile_quota.py' in names
+    assert 'scripts/study_campaign.py' not in names
+    assert 'scripts/software_study_harness.py' not in names
     assert 'scripts/analyze_bread_survey.py' not in names
+
+
+def test_original_quota_admission_keeps_unknown_age_and_exhaustion_controls(tmp_path):
+    from scripts.original_profile_quota import current_quota, CampaignPause
+    captured = datetime.datetime.now(datetime.timezone.utc)
+    unknown = {'status':'unknown','remaining_percent':[], 'reason':'synthetic no-poll observation'}
+    row = {'schema':1, 'accounts':{'codex':'original_lab_profile','gemini':'original_primary_profile'},
+           'captured_at':captured.isoformat(),'providers':{'codex':unknown,'gemini':unknown}}
+    path=tmp_path/'quota.json'; path.write_text(json.dumps(row))
+    assert current_quota(path, now=captured.timestamp())['capacity_guaranteed'] is False
+    with pytest.raises(CampaignPause, match='older than600s'):
+        current_quota(path, now=captured.timestamp()+601)
+    row['providers']['gemini']={'status':'observed','remaining_percent':[99,0],
+        'source':'synthetic current quota control','observed_at':captured.isoformat()}
+    path.write_text(json.dumps(row))
+    with pytest.raises(CampaignPause, match='quota depleted'):
+        current_quota(path, now=captured.timestamp())
 
 
 @pytest.mark.parametrize('key', ['public_catalog', 'public_context', 'mandate'])
 def test_registration_rejects_substituted_public_paths_before_loading_packet(tmp_path, key):
     from scripts.lotledger_delivery import PUBLIC_PATHS
-    value = {'schema':1, 'identity':'lotledger-delivery-v1', 'matrix_count':63,
+    value = {'schema':1, 'identity':'lotledger-delivery-v1', 'matrix_count':68,
              'registered_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
              'source_root':str(SOURCE), 'case':str(SOURCE/'cases/lotledger_v1'),
              'run_root':str(tmp_path/'run'),

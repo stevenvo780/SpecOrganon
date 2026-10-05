@@ -18,7 +18,7 @@ from specorganon.role_jobs import JobError, _read, _json, _write, _safe, canonic
 from specorganon.runner import describe_task
 from specorganon.software_controller import Controller, ControllerError
 from scripts.study_cell_budget import CellBudget, StudyBudgetError, StudyClockPause
-from scripts.study_campaign import current_quota, CampaignPause
+from scripts.original_profile_quota import current_quota, CampaignPause
 
 
 class RegistrationError(ValueError):
@@ -27,7 +27,7 @@ class RegistrationError(ValueError):
 
 RUNTIME_SCRIPTS = (
     'lotledger_delivery.py', 'evaluate_lotledger_delivery.py', 'controller_native_role.py',
-    'study_cell_budget.py', 'study_campaign.py', 'software_study_harness.py', 'study_assessment.py',
+    'study_cell_budget.py', 'original_profile_quota.py',
 )
 PUBLIC_PATHS = {'public_catalog': 'experiments/lotledger_delivery_v1/public-models.json',
                 'public_context': 'experiments/lotledger_delivery_v1/public-context.txt',
@@ -48,6 +48,7 @@ def registration_source_names(source, *, public_catalog, public_context, mandate
               'experiments/lotledger_delivery_v1/contract.md',
               'experiments/lotledger_delivery_v1/public-evidence.md',
               'experiments/lotledger_delivery_v1/public-sqlite-observations.json',
+              'experiments/lotledger_delivery_v1/image-users.json',
               'experiments/software_comparison_v3/protocol-draft.md',
               'tests/test_lotledger_driver.py', 'tests/test_lotledger_reserved.py',
               public_catalog, public_context, mandate}
@@ -89,7 +90,7 @@ def verify_registration(path, *, check_sources=True):
                 'source_sha256', 'images', 'routes', 'profiles', 'limits', 'public_catalog',
                 'public_context', 'mandate', 'review', 'review_sha256', 'matrix_sha256', 'matrix_count'}
     if (type(value) is not dict or set(value) != required or value['schema'] != 1
-            or value['identity'] != 'lotledger-delivery-v1' or value['matrix_count'] != 63):
+            or value['identity'] != 'lotledger-delivery-v1' or value['matrix_count'] != 68):
         raise RegistrationError('immutable LotLedger registration schema required')
     source = _safe(value['source_root']); case = _safe(value['case']); root = _safe(value['run_root'])
     try:
@@ -127,6 +128,13 @@ def verify_registration(path, *, check_sources=True):
         if check_sources and digest(_read(source / name, 2097152)) != checksum:
             raise RegistrationError('registered source changed: ' + name)
     verify_runtime_sources(source, sources)
+    image_users = _json(source / 'experiments/lotledger_delivery_v1/image-users.json')
+    if (image_users.get('schema') != 1 or set(image_users.get('images', {})) != {'native', 'test'}
+            or any(row.get('image_id') != value['images'][role]
+                   or type(row.get('uid')) is not int or row['uid'] != 1000
+                   or row.get('exit_code') != 0
+                   for role, row in image_users['images'].items())):
+        raise RegistrationError('bound actual uid1000 observations must match both immutable image IDs')
     review_path = Path(value['review'])
     if review_path.is_absolute() or '..' in review_path.parts:
         raise RegistrationError('unsafe review path')
