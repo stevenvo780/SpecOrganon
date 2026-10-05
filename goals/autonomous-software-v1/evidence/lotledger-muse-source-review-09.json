@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "native_review": {
+    "comparison_registration_ready": false,
+    "findings": [
+      {
+        "issue": "Reads unbound absolute historical checkout /home/stev/.codex/worktrees/prospective-software-repairs/SpecOrganon/.../registration.json and cases/csvshape_v1/organon.json. Neither path is in registration_source_names, hashed, or supplied in this full-source set. On a clean install the files are absent so the test errors instead of passing; where present it reintroduces unbound history the freeze was narrowed to exclude.",
+        "required_change": "Make the control hermetic before freeze: construct a synthetic non-LotLedger registration plus tmp ledger under tmp_path, assert verify_registration rejects with immutable-schema error and leaves the tmp ledger bytes unchanged, and remove the absolute worktree dependency. Do not add the historical checkout to the freeze.",
+        "severity": "high",
+        "target": "tests/test_lotledger_driver.py::test_old_closed_registration_never_admits_new_identity_or_writes_history"
+      },
+      {
+        "issue": "String-nonempty boundary covers only empty id (boundaries-empty-id). Contract requires nonempty id/lot/site/from/to with no NUL/CR/LF after escape decoding. A subject that validates id but accepts empty lot, empty site, or empty move from/to would still pass 68/68. Raw NUL byte stdin is likewise not exercised separately from nul-escape and invalid-utf8.",
+        "required_change": "Add explicit rejection recipes for empty lot, empty site, empty move from, empty move to, and raw NUL byte stdin before freeze, preserving all existing 68 data/expected outputs, and update matrix_count/matrix_sha256, group counts, protocol/driver/evaluator accounting, and docs together. Do not narrow the contract, drop recipes, or lower gates.",
+        "severity": "medium",
+        "target": "experiments/lotledger_delivery_v1/reserved.py:68-recipe matrix"
+      }
+    ],
+    "lotledger_sources_ready_to_freeze": false,
+    "oracle_audit": "Checked contract quantity bound 1e9 in contract.md and reserved.py over-max 10**9+1 plus balance-beyond 2*10**9; no 1e6 prose in supplied code/docs. Checked 68-recipe accounting, group counts 11/10/10/12/10/15, no-final-LF plus CR/LF escapes, five string-boundary recipes, byte/event caps, strict JSON framing with typed bool/int distinction, duplicate-key/NaN rejection path, 3s/2CPU/1GiB/128pids/2MiB caps, --user 1000:1000 subjects vs image-USER native observation uid1000, test/native image IDs, original-profile quota unknown/age/exhaustion, AST closure plus loaded-module guard, PUBLIC_PATHS pinning. Six SQLite primitives are synthetic-primitive observations only, not a LotLedger programme baseline; tokens/money remain None/unknown; scope stays technical. Two concrete freeze blockers remain above; comparison v3 remains a separate unregistered draft with no generation authorized.",
+    "rationale": "LotLedger source custody is substantially complete and internally consistent on the 68-contract, but freeze is blocked by a non-hermetic test dependency on an unbound historical checkout and by evaluator blind spots for empty lot/site/from/to and raw NUL that let a nonconforming subject pass. Fix those pre-registration sources/controls, then re-review. No registration, case generation, comparison registration, or approval is granted.",
+    "tests_executed": false,
+    "verdict": "revise"
+  },
+  "execution_receipt": {
+    "argv": [
+      "/home/stev/.local/bin/muse",
+      "exec",
+      "--provider",
+      "meta",
+      "--model",
+      "muse-spark-1.3",
+      "--reasoning-effort",
+      "medium",
+      "--prompt-file",
+      "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-muse-source-review-09/input.txt",
+      "--max-model-steps",
+      "1",
+      "--disable-shell",
+      "--disable-write",
+      "--disable-web-tools",
+      "--no-foreign-personal-context",
+      "--no-parallel-tool-calls",
+      "--no-session-log",
+      "--workspace",
+      "/home/stev/.codex/worktrees/artifact-repair-contract/SpecOrganon"
+    ],
+    "cancel_exit_code": null,
+    "cwd": "/home/stev/.codex/worktrees/artifact-repair-contract/SpecOrganon",
+    "duration_seconds": 147.47097305199713,
+    "exit_code": 0,
+    "finished_epoch": 1791209197.3613634,
+    "job_id": "lotledger-source-review-09",
+    "metadata": {
+      "access": "text",
+      "account_identity": "not observed; original existing Muse configuration",
+      "model": "muse-spark-1.3",
+      "provider": "meta",
+      "quota": "unknown"
+    },
+    "request_sha256": "889444cdad2eefbfc4920a559cc877393ba6041e4ff504e28afb4318c92df383",
+    "schema": 1,
+    "stderr_bytes": 432,
+    "stderr_sha256": "b725b04256a9739c8ac53b8e09f41134096ce2a306b9053ffa09d78c8a7733aa",
+    "stdin_bytes_expected": 0,
+    "stdin_bytes_sent": 0,
+    "stdin_complete": true,
+    "stdout_bytes": 3236,
+    "stdout_sha256": "9eab254bf33d01850c517919e85b9360fdf1fc3079cb62b4359379c881866a80",
+    "timed_out": false,
+    "truncated_streams": []
+  },
+  "native_tests_executed": false,
+  "accepted_review": false,
+  "registration_created": false,
+  "native_generation_calls": 0
+}

@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "actual_uncredentialed_docker_invocations": 2,
+  "images": {
+    "native": {
+      "id": "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+      "Config.User": "codex",
+      "id_stdout": "uid=1000(codex) gid=1000(codex) groups=1000(codex)",
+      "exit_code": 0
+    },
+    "test": {
+      "id": "sha256:98723123de528a5f0201a1c341fe044f88d885345b2e1bedd6a89574c4796d92",
+      "Config.User": "ubuntu",
+      "uid": 1000,
+      "gid": 1000,
+      "exit_code": 0
+    }
+  },
+  "argv_template": [
+    "/usr/bin/docker",
+    "run",
+    "--rm",
+    "--read-only",
+    "--network",
+    "none",
+    "--cap-drop",
+    "ALL",
+    "--security-opt",
+    "no-new-privileges",
+    "--entrypoint",
+    "/usr/bin/id",
+    "IMAGE_ID"
+  ],
+  "credentials_mounted": false,
+  "native_provider_calls": 0,
+  "claim_scope": "image default UID observed; actual providers need network and original profiles, not claimed offline"
+}

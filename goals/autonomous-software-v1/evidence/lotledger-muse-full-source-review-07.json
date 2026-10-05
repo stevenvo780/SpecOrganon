@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "native_review": {
+    "comparison_registration_ready": false,
+    "findings": [
+      {
+        "issue": "Binds src/specorganon 29 modules, 7 scripts, experiments/lotledger_delivery_v1/*.py and named docs/catalog/context, but does not bind tests/test_lotledger_driver.py or tests/test_lotledger_reserved.py despite review claim that tests are bound. Controls are therefore hash-unbound at freeze.",
+        "required_change": "Add both test files to registration_source_names freeze or correct the custody claim to exclude tests and define where controls are versioned.",
+        "severity": "major",
+        "target": "scripts/lotledger_delivery.py:registration_source_names"
+      },
+      {
+        "issue": "Accepts arbitrary public_catalog/public_context/mandate relative paths as long as they are in source_sha256; does not pin them to experiments/lotledger_delivery_v1/public-models.json, public-context.txt and mandate.md. A registration could substitute different public bytes and still verify.",
+        "required_change": "Pin the three paths to exact canonical values and reject any registration with different names before checking digests.",
+        "severity": "major",
+        "target": "scripts/lotledger_delivery.py:verify_registration"
+      },
+      {
+        "issue": "Contract says LF separates events and a single final LF is allowed, leaving whether events without any trailing LF are legal ambiguous. All legal recipes end with LF via lines(); no recipe covers missing-final-LF input, so a future programme is unconstrained on that framing edge.",
+        "required_change": "Clarify contract to require or allow zero final LF with events and add at least one recipe fixing the expected legal/error outcome.",
+        "severity": "major",
+        "target": "experiments/lotledger_delivery_v1/contract.md vs reserved.py"
+      },
+      {
+        "issue": "Contract requires rejecting NUL/CR/LF after escape interpretation in id/lot/site/from/to and rejecting isolated surrogates. Matrix covers NUL escape, surrogate escape, invalid UTF-8, but has no CR (\\r) or LF (\\n) inside-string invalid recipes.",
+        "required_change": "Add invalid recipes with \\r and \\n escapes in a string field to lock the stated CR/LF rejection.",
+        "severity": "major",
+        "target": "experiments/lotledger_delivery_v1/reserved.py:types"
+      },
+      {
+        "issue": "Test/subject containers use --network none and --user 1000:1000 with readonly delivery; native author/review containers omit --network none and --user while mounting original credential-bearing profiles and allowing provider network. Isolation claim does not explain this privilege difference.",
+        "required_change": "Document why native roles require network/root or apply least-privilege flags/user/read-only consistent with the stated isolation model.",
+        "severity": "minor",
+        "target": "src/specorganon/docker_roles.py:_prepare native role"
+      }
+    ],
+    "lotledger_sources_ready_to_freeze": false,
+    "oracle_audit": "Checked supplied bytes only: contract quantity is 1 to 1000000000 inclusive with resulting balances allowed to exceed 1000000000; reserved.py balance-beyond-event-bound uses 10**9+10**9 and expects 2*10**9, confirming 1e9 not the prior 1e6 prose error. Strict JSON, duplicate-key, NaN/Infinity, bool-vs-int typed equality, start-{/end-}\\n framing, pretty-print/key-order tolerance, stock ordering by Python codepoint, duplicate validate-before-id and idempotent consume/move-after-depletion semantics match recipes. Loaded-module path/hash rejection plus AST local-import-closure test present. Immutable native/test image IDs, fixed codex/gemini routes/effort/profiles, 40/3145728/6000 caps, two-test with executable-change rule, closed-replay and uncertain-handle no-recreate paths, final D8/M6 audit shape and post-terminal reserved evaluation without author feedback present with token/money null and technical-not-field scope. Six SQLite observations are primitive-only, not a full-programme baseline; 60/60 F, 8/8 D, 6/6 M are post-closure gates. 86 unit and 13 synthetic evaluator summaries are component/framing/isolation checks with synthetic subjects and mocked registration, not programme or method evidence.",
+    "rationale": "Source custody is substantially complete and internally consistent, but concrete freeze gaps remain: unbound test controls, unpinned public paths, two contract-vs-matrix edge gaps, and unexplained native privilege difference. Freeze must wait for coordinator fixes; this is custody selection only, not goal acceptance. Comparison v3 remains a separate unregistered draft with no generation authorized.",
+    "tests_executed": false,
+    "verdict": "revise"
+  },
+  "execution_receipt": {
+    "argv": [
+      "/home/stev/.local/bin/muse",
+      "exec",
+      "--provider",
+      "meta",
+      "--model",
+      "muse-spark-1.3",
+      "--reasoning-effort",
+      "medium",
+      "--prompt-file",
+      "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-muse-full-source-review-07/input.txt",
+      "--max-model-steps",
+      "1",
+      "--disable-shell",
+      "--disable-write",
+      "--disable-web-tools",
+      "--no-foreign-personal-context",
+      "--no-parallel-tool-calls",
+      "--no-session-log",
+      "--workspace",
+      "/home/stev/.codex/worktrees/artifact-repair-contract/SpecOrganon"
+    ],
+    "cancel_exit_code": null,
+    "cwd": "/home/stev/.codex/worktrees/artifact-repair-contract/SpecOrganon",
+    "duration_seconds": 84.76049323100597,
+    "exit_code": 0,
+    "finished_epoch": 1791207951.7460487,
+    "job_id": "lotledger-full-source-review-07",
+    "metadata": {
+      "access": "text",
+      "account_identity": "not observed; original existing Muse configuration",
+      "model": "muse-spark-1.3",
+      "provider": "meta",
+      "quota": "unknown"
+    },
+    "request_sha256": "4354b8181ddf867e860399a5c52efd391f25b8ebac5899e0e6e6d382907e062c",
+    "schema": 1,
+    "stderr_bytes": 432,
+    "stderr_sha256": "b725b04256a9739c8ac53b8e09f41134096ce2a306b9053ffa09d78c8a7733aa",
+    "stdin_bytes_expected": 0,
+    "stdin_bytes_sent": 0,
+    "stdin_complete": true,
+    "stdout_bytes": 4407,
+    "stdout_sha256": "24631dee1c67e65d9c7e2596979892bb34cd000c6af15a68c8bc271826f64075",
+    "timed_out": false,
+    "truncated_streams": []
+  },
+  "native_tests_executed": false,
+  "accepted_review": false,
+  "registration_created": false,
+  "native_generation_calls": 0
+}

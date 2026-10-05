@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "provider": "meta",
+  "model": "muse-spark-1.3",
+  "machine": "Kratos",
+  "account_identity": "not observed; original existing Muse configuration",
+  "quota": "unknown",
+  "native_tests_executed": false,
+  "execution_receipt": {
+    "argv": [
+      "/home/stev/.local/bin/muse",
+      "exec",
+      "--json",
+      "--provider",
+      "meta",
+      "--model",
+      "muse-spark-1.3",
+      "--reasoning-effort",
+      "medium",
+      "--prompt-file",
+      "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-muse-source-review-05/input.txt",
+      "--max-model-steps",
+      "1",
+      "--disable-shell",
+      "--disable-write",
+      "--disable-web-tools",
+      "--no-foreign-personal-context",
+      "--no-parallel-tool-calls",
+      "--no-session-log",
+      "--workspace",
+      "/home/stev/.codex/worktrees/artifact-repair-contract/SpecOrganon"
+    ],
+    "cancel_exit_code": null,
+    "cwd": "/home/stev/.codex/worktrees/artifact-repair-contract/SpecOrganon",
+    "duration_seconds": 64.51018217598903,
+    "exit_code": 0,
+    "finished_epoch": 1791207381.1652768,
+    "job_id": "lotledger-source-review-05",
+    "metadata": {
+      "access": "text",
+      "account_identity": "not observed; original existing Muse configuration",
+      "model": "muse-spark-1.3",
+      "provider": "meta",
+      "quota": "unknown"
+    },
+    "request_sha256": "9f2808747f9a55d13b49f5da84707ccfb40147ecf93866ffb671511e0c60902b",
+    "schema": 1,
+    "stderr_bytes": 432,
+    "stderr_sha256": "b725b04256a9739c8ac53b8e09f41134096ce2a306b9053ffa09d78c8a7733aa",
+    "stdin_bytes_expected": 0,
+    "stdin_bytes_sent": 0,
+    "stdin_complete": true,
+    "stdout_bytes": 432304,
+    "stdout_sha256": "688ddd9f0b93a6da390efd4d7e00343210c32f0090a094aa586c7f97941570c7",
+    "timed_out": false,
+    "truncated_streams": []
+  },
+  "native_review": {
+    "comparison_registration_ready": false,
+    "findings": [
+      {
+        "issue": "Only named excerpted files were supplied in full; most freeze-scoped sources are hashes only. Cannot claim to have read all indexed bytes. Prevents complete judgment of runtime/source binding, isolation, replay, driver stopping/budget, and post-closure evaluation.",
+        "required_change": "Supply full text of all freeze-scoped sources or explicitly narrow freeze scope, then complete native review, evaluator controls, hashes, public observations/tests/review, and immutable images before initialization. Do not freeze on hashes alone.",
+        "severity": "major",
+        "target": "SOURCE BINDING INDEX hash-only dependencies"
+      },
+      {
+        "issue": "Supplied excerpts show correct intent for source-bound runtime, read-only/no-network/2CPU/1GiB/128pids/3s/2MiB isolation, closed-subject replay/binding, call/byte/time caps, and post-terminal reserved evaluation without author feedback, but depended implementations CellBudget/JobStore/DockerRoles/engine/Controller/test-execution are hash-only and unverified here.",
+        "required_change": "Provide those dependency sources for review and verify closed replay, uncertain-handle reconciliation, budget/pause/terminal behavior, and sealed post-closure evaluation before freeze/registration.",
+        "severity": "major",
+        "target": "scripts/lotledger_delivery.py + scripts/evaluate_lotledger_delivery.py + experiments/lotledger_delivery_v1/subjects.py"
+      },
+      {
+        "issue": "Comparison v3 remains candidate only: tasks are scopes not exact contracts, and definitive contracts/examples, 60 recipes per task, N/S/T/A harnesses, rubrics, analysis, full order/opaque mapping, images, sources, and accepted review are absent.",
+        "required_change": "Keep comparative incompleteness explicit as separate later prerequisite. Do not register, generate, measure native task outputs as calibration, select tasks from LotLedger outcome, or rename on failure. Freeze/review comparison only after its own complete prerequisites.",
+        "severity": "major",
+        "target": "experiments/software_comparison_v3/protocol-draft.md"
+      },
+      {
+        "issue": "No concrete domain-oracle mismatch found in supplied 60 recipes on text inspection, but judge-unit correct outputs and mocked missing-programme accounting are evaluator/judge checks, not domain-oracle proof or registration acceptance.",
+        "required_change": "Preserve that full functional 60/60, documentation 8/8, and method 6/6 occur only after closed nine-phase delivery with no feedback repair; preserve unknown tokens/cost and technical-not-field scope; do not invent full-programme baseline from six SQLite primitives.",
+        "severity": "info",
+        "target": "experiments/lotledger_delivery_v1/reserved.py + tests/test_lotledger_reserved.py"
+      }
+    ],
+    "lotledger_sources_ready_to_freeze": false,
+    "oracle_audit": "Text-audited contract against all 60 supplied recipes: legal 10, identity 10, order 10, types 10, format 10, boundaries 10. Empty/transfer/accumulation/zero-omission/move-all/ordering/case/whitespace-CRLF/balance-overflow; duplicate/key-order/triple/post-depletion idempotence/conflict/invalid-duplicate validation-before-id; empty/insufficient/future-credit/recredit/chain/same-site/transient-overdraw; quantity bool/float/negative/zero/over-max/string/unicode-no-normalize/invalid-utf8/surrogate/NUL; extra/missing/duplicate-key/array/unknown-op/blank/two-LF/whitespace-line/BOM/argv; 64-byte/65536-byte/1000-event limits and metamorphic/base/duplicate/bijection/empty-id. Expectations read consistent with strict JSON, exact keys, 1..1000000 quantity, 64-byte/65536-byte/1000-event bounds, order/no-transient-negative, validate-before-id, identical-content idempotence, typed exact output framing, and invalid_input exit2 framing. Full strict_json_loads parser now supplied and reads consistent with duplicate-key/NaN-Infinity/decimal-loss rejection. Judge framing/typed-equality/timeout-truncation-stderr/inconclusive handling reads consistent. Correct judge fixtures alone do not prove domain oracles. Isolation/replay/budget/post-closure behavior incompletely verifiable due to hash-only dependencies.",
+    "rationale": "Retain revise per prior Muse joint revise. Present accepted review must precede registration/initialization, so its absence is not itself the defect; real gaps are incomplete source visibility and unverified binding/isolation/replay/budget/closure controls. Comparison v3 incompleteness stays separate and does not authorize registration/generation. Claude Opus review03 180s and Sonnet review04 360s timed out with no output and approved nothing. No generated LotLedger programme or nine-phase artifacts exist. Evaluator 85 unit and 13 synthetic including 8 Docker controls are preflight evidence only, not programme results. Goal of genuinely new nine-phase delivery plus complete multitype two-family N/S/T plus ablation, reproducible release, and honest publication is not complete.",
+    "tests_executed": false,
+    "verdict": "revise"
+  },
+  "accepted_review": false,
+  "registration_created": false,
+  "native_generation_calls": 0
+}
