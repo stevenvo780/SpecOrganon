@@ -85,7 +85,7 @@ def required_sources(source):
     source=_safe(source)
     required={str(p.relative_to(source)) for base,glob in [('src/specorganon','*.py'),('experiments/software_comparison_v3','*.py'),('tests','test_software_comparison_v3_*.py')] for p in (source/base).rglob(glob)}
     required|=set(CONTRACTS.values())|{MANDATE,SDD,PROTOCOL,RUBRIC,'scripts/controller_native_role.py',
-        'pyproject.toml','uv.lock','docs/metodologia.md','docs/workflow_operativo.md','.agents/skills/specorganon/SKILL.md'}
+        'scripts/study_cell_budget.py','pyproject.toml','uv.lock','docs/metodologia.md','docs/workflow_operativo.md','.agents/skills/specorganon/SKILL.md'}
     return required
 
 
@@ -103,7 +103,7 @@ def review_result(text):
 def runtime_sources(source):
     modules=['specorganon.'+n for n in ('engine','ledger','workflow','runner','role_jobs','docker_roles','software_controller')]
     modules+=['experiments.software_comparison_v3.'+n for n in ('registration','budget','cells','provenance','reserved','subjects','rubric','analysis','audit_evidence','campaign','evaluation')]
-    modules+=['scripts.controller_native_role']
+    modules+=['scripts.controller_native_role','scripts.study_cell_budget']
     for name in modules:
         module=importlib.import_module(name);expected=(source/'src' if name.startswith('specorganon.') else source)/Path(*name.split('.')).with_suffix('.py')
         require(Path(module.__file__).absolute()==expected,'runtime module imported from different checkout: '+name)

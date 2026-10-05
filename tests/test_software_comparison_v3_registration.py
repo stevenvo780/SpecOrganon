@@ -59,4 +59,13 @@ def test_original_schedule_binding_refuses_regenerated_identical_shape(tmp_path)
 def test_minimum_snapshot_covers_current_executable_layers_and_documents():
     source=Path(__file__).absolute().parents[1];required=reg.required_sources(source)
     assert {f'experiments/software_comparison_v3/{n}.py' for n in ('registration','campaign','evaluation','provenance','budget','cells','subjects','reserved','rubric','analysis')}<=required
-    assert set(reg.CONTRACTS.values())|{reg.MANDATE,reg.SDD,reg.PROTOCOL,reg.RUBRIC,'scripts/controller_native_role.py','uv.lock'}<=required
+    assert set(reg.CONTRACTS.values())|{reg.MANDATE,reg.SDD,reg.PROTOCOL,reg.RUBRIC,'scripts/controller_native_role.py','scripts/study_cell_budget.py','uv.lock'}<=required
+
+
+def test_legacy_exception_dependency_imported_from_other_checkout_is_rejected(tmp_path,monkeypatch):
+    from scripts import study_cell_budget
+    source=Path(__file__).absolute().parents[1]
+    reg.runtime_sources(source)
+    monkeypatch.setattr(study_cell_budget,'__file__',str(tmp_path/'study_cell_budget.py'))
+    with pytest.raises(reg.RegistrationError,match='scripts.study_cell_budget'):
+        reg.runtime_sources(source)
