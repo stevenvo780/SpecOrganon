@@ -1,0 +1,132 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+______ test_malformed_role_and_verdict_have_controlled_schema_error[bad0] ______
+
+bad = []
+
+    @pytest.mark.parametrize('bad', [[], {}])
+    def test_malformed_role_and_verdict_have_controlled_schema_error(bad):
+        from scripts.controller_native_role import render_prompt, validate_result
+        request = {'schema': 1, 'role': bad, 'role_instructions': 'review', 'documents': {}}
+>       with pytest.raises(NativeRoleError): render_prompt(json.dumps(request).encode())
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_controller_native_role.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'{"schema": 1, "role": [], "role_instructions": "review", "documents": {}}'
+
+    def render_prompt(raw):
+        request = strict(raw.decode())
+        if (type(request) is not dict or set(request) != {"schema", "role", "role_instructions", "documents"}
+                or type(request["schema"]) is not int or request["schema"] != 1
+>               or request["role"] not in {"review", "author"}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                or type(request["role_instructions"]) is not str or not request["role_instructions"].strip()
+                or type(request["documents"]) is not dict
+                or any(type(k) is not str or type(v) is not str for k, v in request["documents"].items())):
+E               TypeError: unhashable type: 'list'
+
+scripts/controller_native_role.py:117: TypeError
+______ test_malformed_role_and_verdict_have_controlled_schema_error[bad1] ______
+
+bad = {}
+
+    @pytest.mark.parametrize('bad', [[], {}])
+    def test_malformed_role_and_verdict_have_controlled_schema_error(bad):
+        from scripts.controller_native_role import render_prompt, validate_result
+        request = {'schema': 1, 'role': bad, 'role_instructions': 'review', 'documents': {}}
+>       with pytest.raises(NativeRoleError): render_prompt(json.dumps(request).encode())
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_controller_native_role.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'{"schema": 1, "role": {}, "role_instructions": "review", "documents": {}}'
+
+    def render_prompt(raw):
+        request = strict(raw.decode())
+        if (type(request) is not dict or set(request) != {"schema", "role", "role_instructions", "documents"}
+                or type(request["schema"]) is not int or request["schema"] != 1
+>               or request["role"] not in {"review", "author"}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                or type(request["role_instructions"]) is not str or not request["role_instructions"].strip()
+                or type(request["documents"]) is not dict
+                or any(type(k) is not str or type(v) is not str for k, v in request["documents"].items())):
+E               TypeError: unhashable type: 'dict'
+
+scripts/controller_native_role.py:117: TypeError
+_________ test_malformed_event_type_is_a_controlled_native_error[bad0] _________
+
+bad = []
+
+    @pytest.mark.parametrize('bad', [[], {}])
+    def test_malformed_event_type_is_a_controlled_native_error(bad):
+>       with pytest.raises(NativeRoleError): parse_native('codex', json.dumps({'type': bad}))
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_controller_native_role.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+provider = 'codex', raw = '{"type": []}'
+
+    def parse_native(provider, raw):
+        if provider == "gemini":
+            value = strict(raw)
+            if type(value) is not dict or value.get("status") != "SUCCESS" or value.get("denied_actions"):
+                raise NativeRoleError("native Gemini execution failed or permission was denied")
+            return response_json(value.get("response")), value.get("usage")
+        if provider != "codex": raise NativeRoleError("unsupported provider")
+        # Fail closed for this observed Codex 0.160.0 JSONL format. Future native
+        # event formats require a reviewed adapter version, not silent skipping.
+        final = None; usage = None; state = "initial"; items = {}
+        for line in raw.splitlines():
+            if not line.strip(): continue
+            value = strict(line)
+            if type(value) is not dict: raise NativeRoleError("native Codex event must be an object")
+            kind = value.get("type")
+>           if kind in {"turn.failed", "error"}: raise NativeRoleError("native Codex turn failed")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: unhashable type: 'list'
+
+scripts/controller_native_role.py:72: TypeError
+_________ test_malformed_event_type_is_a_controlled_native_error[bad1] _________
+
+bad = {}
+
+    @pytest.mark.parametrize('bad', [[], {}])
+    def test_malformed_event_type_is_a_controlled_native_error(bad):
+>       with pytest.raises(NativeRoleError): parse_native('codex', json.dumps({'type': bad}))
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_controller_native_role.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+provider = 'codex', raw = '{"type": {}}'
+
+    def parse_native(provider, raw):
+        if provider == "gemini":
+            value = strict(raw)
+            if type(value) is not dict or value.get("status") != "SUCCESS" or value.get("denied_actions"):
+                raise NativeRoleError("native Gemini execution failed or permission was denied")
+            return response_json(value.get("response")), value.get("usage")
+        if provider != "codex": raise NativeRoleError("unsupported provider")
+        # Fail closed for this observed Codex 0.160.0 JSONL format. Future native
+        # event formats require a reviewed adapter version, not silent skipping.
+        final = None; usage = None; state = "initial"; items = {}
+        for line in raw.splitlines():
+            if not line.strip(): continue
+            value = strict(line)
+            if type(value) is not dict: raise NativeRoleError("native Codex event must be an object")
+            kind = value.get("type")
+>           if kind in {"turn.failed", "error"}: raise NativeRoleError("native Codex turn failed")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: unhashable type: 'dict'
+
+scripts/controller_native_role.py:72: TypeError
+=========================== short test summary info ============================
+FAILED tests/test_controller_native_role.py::test_malformed_role_and_verdict_have_controlled_schema_error[bad0]
+FAILED tests/test_controller_native_role.py::test_malformed_role_and_verdict_have_controlled_schema_error[bad1]
+FAILED tests/test_controller_native_role.py::test_malformed_event_type_is_a_controlled_native_error[bad0]
+FAILED tests/test_controller_native_role.py::test_malformed_event_type_is_a_controlled_native_error[bad1]
+4 failed, 29 deselected in 0.11s

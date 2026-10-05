@@ -1,0 +1,18 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_large_stdin_and_both_streams_do_not_deadlock_and_bind_the_input _____
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/role-jobs-stdin-red/test_large_stdin_and_both_stre0')
+
+    def test_large_stdin_and_both_streams_do_not_deadlock_and_bind_the_input(tmp_path):
+        store = JobStore(tmp_path / "jobs")
+        code = "import os,sys;os.write(1,b'x'*80000);os.write(2,b'y'*80000);print(len(sys.stdin.buffer.read()))"
+        args = [sys.executable, "-c", code]
+>       first = store.execute("duplex-01", args, {}, cwd=tmp_path,
+                              timeout_seconds=5, stdin_bytes=b"z" * 100000)
+E       TypeError: JobStore.execute() got an unexpected keyword argument 'stdin_bytes'
+
+tests/test_role_jobs.py:83: TypeError
+=========================== short test summary info ============================
+FAILED tests/test_role_jobs.py::test_large_stdin_and_both_streams_do_not_deadlock_and_bind_the_input
+1 failed, 10 deselected in 0.07s

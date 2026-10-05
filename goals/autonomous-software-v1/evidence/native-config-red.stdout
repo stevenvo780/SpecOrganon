@@ -1,0 +1,33 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+____ test_codex_runtime_override_uses_cli_literal_safe_key_not_quoted_table ____
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/native-config-red/test_codex_runtime_override_us0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5850951f30>
+
+    def test_codex_runtime_override_uses_cli_literal_safe_key_not_quoted_table(tmp_path, monkeypatch):
+        # Synthetic config only: no real profile, session or credentials are copied.
+        (tmp_path / "config.toml").write_text('[mcp_servers.specorganon]\ncommand="fake-fixture"\n')
+        monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+        args = native_argv("codex", "gpt-6.1-sol", "fixture text")
+>       assert "mcp_servers.specorganon.enabled=false" in args
+E       assert 'mcp_servers.specorganon.enabled=false' in ['/usr/local/bin/codex', 'exec', '-s', 'read-only', '-c', 'approval_policy="never"', ...]
+
+tests/test_controller_native_role.py:46: AssertionError
+_____________ test_non_literal_mcp_key_stops_before_native_launch ______________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/native-config-red/test_non_literal_mcp_key_stops0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5850952060>
+
+    def test_non_literal_mcp_key_stops_before_native_launch(tmp_path, monkeypatch):
+        (tmp_path / "config.toml").write_text('[mcp_servers."unsafe.name"]\ncommand="fake-fixture"\n')
+        monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+>       with pytest.raises(NativeRoleError, match="key"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeRoleError
+
+tests/test_controller_native_role.py:52: Failed
+=========================== short test summary info ============================
+FAILED tests/test_controller_native_role.py::test_codex_runtime_override_uses_cli_literal_safe_key_not_quoted_table
+FAILED tests/test_controller_native_role.py::test_non_literal_mcp_key_stops_before_native_launch
+2 failed, 9 deselected in 0.06s

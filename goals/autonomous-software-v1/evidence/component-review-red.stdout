@@ -1,0 +1,172 @@
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_mutated_terminal_receipt_cannot_override_measured_failure[exit_code-0] __
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/component-review-red/test_mutated_terminal_receipt_0')
+field = 'exit_code', value = 0
+
+    @pytest.mark.parametrize("field,value", [("exit_code", 0), ("timed_out", True), ("job_id", "other")])
+    def test_mutated_terminal_receipt_cannot_override_measured_failure(tmp_path, field, value):
+        store = JobStore(tmp_path / "jobs")
+        args = [sys.executable, "-c", "raise SystemExit(3)"]
+        store.execute("failed-01", args, {}, cwd=tmp_path, timeout_seconds=5)
+        path = store.root / "failed-01/receipt.json"
+        receipt = json.loads(path.read_text()); receipt[field] = value; path.write_text(json.dumps(receipt))
+>       with pytest.raises(JobError):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE JobError
+
+tests/test_role_jobs.py:176: Failed
+_ test_mutated_terminal_receipt_cannot_override_measured_failure[timed_out-True] _
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/component-review-red/test_mutated_terminal_receipt_1')
+field = 'timed_out', value = True
+
+    @pytest.mark.parametrize("field,value", [("exit_code", 0), ("timed_out", True), ("job_id", "other")])
+    def test_mutated_terminal_receipt_cannot_override_measured_failure(tmp_path, field, value):
+        store = JobStore(tmp_path / "jobs")
+        args = [sys.executable, "-c", "raise SystemExit(3)"]
+        store.execute("failed-01", args, {}, cwd=tmp_path, timeout_seconds=5)
+        path = store.root / "failed-01/receipt.json"
+        receipt = json.loads(path.read_text()); receipt[field] = value; path.write_text(json.dumps(receipt))
+>       with pytest.raises(JobError):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE JobError
+
+tests/test_role_jobs.py:176: Failed
+_ test_mutated_terminal_receipt_cannot_override_measured_failure[job_id-other] _
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/component-review-red/test_mutated_terminal_receipt_2')
+field = 'job_id', value = 'other'
+
+    @pytest.mark.parametrize("field,value", [("exit_code", 0), ("timed_out", True), ("job_id", "other")])
+    def test_mutated_terminal_receipt_cannot_override_measured_failure(tmp_path, field, value):
+        store = JobStore(tmp_path / "jobs")
+        args = [sys.executable, "-c", "raise SystemExit(3)"]
+        store.execute("failed-01", args, {}, cwd=tmp_path, timeout_seconds=5)
+        path = store.root / "failed-01/receipt.json"
+        receipt = json.loads(path.read_text()); receipt[field] = value; path.write_text(json.dumps(receipt))
+>       with pytest.raises(JobError):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE JobError
+
+tests/test_role_jobs.py:176: Failed
+___________ test_returned_stream_bytes_are_the_verified_measurement ____________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/component-review-red/test_returned_stream_bytes_are0')
+
+    def test_returned_stream_bytes_are_the_verified_measurement(tmp_path):
+        store = JobStore(tmp_path / "jobs")
+        result = store.execute("author-01", command(tmp_path / "counter"), {}, cwd=tmp_path, timeout_seconds=5)
+        (store.root / "author-01/stdout.bin").write_bytes(b"later mutation")
+>       assert result["stdout"] == b"done\n" and result["stderr"] == b"diagnostic\n"
+               ^^^^^^^^^^^^^^^^
+E       KeyError: 'stdout'
+
+tests/test_role_jobs.py:184: KeyError
+________ test_inherited_environment_change_invalidates_cached_execution ________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/component-review-red/test_inherited_environment_cha0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f861d982b10>
+
+    def test_inherited_environment_change_invalidates_cached_execution(tmp_path, monkeypatch):
+        store = JobStore(tmp_path / "jobs"); counter = tmp_path / "counter"
+        monkeypatch.setenv("SPECORGANON_TEST_ENV_BINDING", "first")
+        store.execute("author-01", command(counter), {}, cwd=tmp_path, timeout_seconds=5)
+        monkeypatch.setenv("SPECORGANON_TEST_ENV_BINDING", "second")
+>       with pytest.raises(JobError):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE JobError
+
+tests/test_role_jobs.py:192: Failed
+________ test_process_closing_pipes_is_still_supervised_until_deadline _________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/component-review-red/test_process_closing_pipes_is_0')
+
+    def test_process_closing_pipes_is_still_supervised_until_deadline(tmp_path):
+        store = JobStore(tmp_path / "jobs")
+        args = [sys.executable, "-c", "import os,time;os.close(1);os.close(2);time.sleep(30)"]
+        began = time.monotonic()
+>       result = store.execute("closed-pipes", args, {}, cwd=tmp_path, timeout_seconds=1)["receipt"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_role_jobs.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/role_jobs.py:189: in execute
+    receipt = self._run(path, argv, cwd, env, min(timeout_seconds, remaining), cancel_argv, started, stdin_bytes)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/role_jobs.py:261: in _run
+    code = process.wait(timeout=5)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:1279: in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Popen: returncode: None args: ['/datos/workspaces/personal/SpecOrganon/goal...>
+timeout = 5
+
+    def _wait(self, timeout):
+        """Internal implementation of wait() on POSIX."""
+        if self.returncode is not None:
+            return self.returncode
+    
+        if timeout is not None:
+            endtime = _time() + timeout
+            # Enter a busy loop if we have a timeout.  This busy loop was
+            # cribbed from Lib/threading.py in Thread.wait() at r71065.
+            delay = 0.0005 # 500 us -> initial delay of 1 ms
+            while True:
+                if self._waitpid_lock.acquire(False):
+                    try:
+                        if self.returncode is not None:
+                            break  # Another thread waited.
+                        (pid, sts) = self._try_wait(os.WNOHANG)
+                        assert pid == self.pid or pid == 0
+                        if pid == self.pid:
+                            self._handle_exitstatus(sts)
+                            break
+                    finally:
+                        self._waitpid_lock.release()
+                remaining = self._remaining_time(endtime)
+                if remaining <= 0:
+>                   raise TimeoutExpired(self.args, timeout)
+E                   subprocess.TimeoutExpired: Command '['/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/python', '-c', 'import os,time;os.close(1);os.close(2);time.sleep(30)']' timed out after 5 seconds
+
+/usr/lib/python3.14/subprocess.py:2076: TimeoutExpired
+___________ test_post_spawn_checkpoint_error_terminates_owned_child ____________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/component-review-red/test_post_spawn_checkpoint_err0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f861d9835c0>
+
+    def test_post_spawn_checkpoint_error_terminates_owned_child(tmp_path, monkeypatch):
+        import specorganon.role_jobs as jobs
+        store = JobStore(tmp_path / "jobs"); children = []
+        original_spawn, original_write = jobs.subprocess.Popen, jobs._write
+        def spawn(*args, **kwargs):
+            child = original_spawn(*args, **kwargs); children.append(child); return child
+        def write(path, value):
+            if path.name == "started.json" and value.get("pid") is not None:
+                raise JobError("injected checkpoint failure after spawn")
+            return original_write(path, value)
+        monkeypatch.setattr(jobs.subprocess, "Popen", spawn); monkeypatch.setattr(jobs, "_write", write)
+        try:
+            with pytest.raises(JobError):
+                store.execute("checkpoint-error", [sys.executable, "-c", "import time;time.sleep(30)"],
+                              {}, cwd=tmp_path, timeout_seconds=5)
+>           assert len(children) == 1 and children[0].poll() is not None
+E           AssertionError: assert (1 == 1 and None is not None)
+E            +  where 1 = len([<Popen: returncode: None args: ['/datos/workspaces/personal/SpecOrganon/goal...>])
+E            +  and   None = poll()
+E            +    where poll = <Popen: returncode: None args: ['/datos/workspaces/personal/SpecOrganon/goal...>.poll
+
+tests/test_role_jobs.py:221: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_role_jobs.py::test_mutated_terminal_receipt_cannot_override_measured_failure[exit_code-0]
+FAILED tests/test_role_jobs.py::test_mutated_terminal_receipt_cannot_override_measured_failure[timed_out-True]
+FAILED tests/test_role_jobs.py::test_mutated_terminal_receipt_cannot_override_measured_failure[job_id-other]
+FAILED tests/test_role_jobs.py::test_returned_stream_bytes_are_the_verified_measurement
+FAILED tests/test_role_jobs.py::test_inherited_environment_change_invalidates_cached_execution
+FAILED tests/test_role_jobs.py::test_process_closing_pipes_is_still_supervised_until_deadline
+FAILED tests/test_role_jobs.py::test_post_spawn_checkpoint_error_terminates_owned_child
+7 failed, 11 deselected in 5.28s

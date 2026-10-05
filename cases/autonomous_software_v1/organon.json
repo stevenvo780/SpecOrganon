@@ -728,6 +728,155 @@
       },
       "prev_hash": "9dbe7609e775f2d7974a41ee67b62736beec61041df80b1175608d1309cec9f6",
       "seq": 38
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:37:16+00:00",
+      "hash": "f625dfcba35f0843cfd53c50ad1e7088e7915824f4db6435b4685e0d294313dd",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "authority": "existing owner instruction to achieve autonomous local software goal; owner did not personally choose architecture",
+          "delegated_technical": true,
+          "selected_option": "o2",
+          "specification_sha256": "cd2e43303d7b33922d8a8536c96ea6121e8416a2fd990e9a5f38df2f6821c2dc"
+        },
+        "deps": {
+          "cmp1": 1,
+          "e1": 1,
+          "n1": 1,
+          "risk1": 1
+        },
+        "id": "d1",
+        "kind": "decision",
+        "text": "Selecciono provisionalmente o2, controlador externo acotado sobre motor/runner, dentro de la delegación técnica del dueño. Minimiza cambios universales y trata secuenciación, recibos, roles y documentación; comparación causal queda pendiente.",
+        "version": 1
+      },
+      "prev_hash": "f62d62f4e64614b499253a239e5b8cc6ec8b8019ee29f04381e8059ce10965cd",
+      "seq": 39
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:37:16+00:00",
+      "hash": "15d5b34f2ae11c2b599d6861c8347c1a08f4d1201bdfb5a18ca0b9bb63ab5c42",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "requirements": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "scope": "trusted_local_software",
+          "specification": "goals/autonomous-software-v1/controller-specification.md",
+          "specification_sha256": "cd2e43303d7b33922d8a8536c96ea6121e8416a2fd990e9a5f38df2f6821c2dc"
+        },
+        "deps": {
+          "d1": 1,
+          "e1": 1,
+          "n1": 1,
+          "p1": 1
+        },
+        "id": "req1",
+        "kind": "requirement",
+        "text": "El controlador debe despachar roles separados, conservar nueve compuertas, aplicar puts guardados y capturar resultados reales; rechazo/evidencia insuficiente/contradicción/staleness/reanudación deben impedir una entrega injustificada. README y trazas son obligatorios.",
+        "version": 1
+      },
+      "prev_hash": "f625dfcba35f0843cfd53c50ad1e7088e7915824f4db6435b4685e0d294313dd",
+      "seq": 40
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:37:16+00:00",
+      "hash": "434fdc81d9a8b01289441285d0d165054c80a5bb8be560dc7b099e35657371b4",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "controls": [
+            "C1",
+            "C2",
+            "C3",
+            "C4",
+            "C5",
+            "C6",
+            "C7",
+            "C8"
+          ],
+          "denominator": 8,
+          "max_prompt_bytes": 128000,
+          "max_role_calls": 40,
+          "max_stream_bytes": 2097152,
+          "max_test_attempts": 2,
+          "metric": "local_delivery_controls_satisfied",
+          "overall_timeout_seconds": 6000,
+          "reject": "any failed or inconclusive control; no compensation, no renamed success",
+          "role_timeout_seconds": 180,
+          "source": "goals/autonomous-software-v1/controller-specification.md",
+          "specification_sha256": "cd2e43303d7b33922d8a8536c96ea6121e8416a2fd990e9a5f38df2f6821c2dc",
+          "test_timeout_seconds": 120,
+          "threshold": 8,
+          "unit": "count"
+        },
+        "deps": {
+          "d1": 1,
+          "e1": 1,
+          "i1": 2,
+          "n1": 1,
+          "req1": 1
+        },
+        "id": "cr1",
+        "kind": "criterion",
+        "text": "C1–C8 de la especificación deben satisfacerse con sus evidencias asignadas. C1–C4 usan caso nuevo LogLens, procesos y revisión reales; C5–C8 son adversariales sintéticos etiquetados. Criterios, denominador ocho y límites preceden implementación y medidas nuevas.",
+        "version": 1
+      },
+      "prev_hash": "15d5b34f2ae11c2b599d6861c8347c1a08f4d1201bdfb5a18ca0b9bb63ab5c42",
+      "seq": 41
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-05T00:37:16+00:00",
+      "hash": "3601292fd919acb180e4cc5be1abded76ca9d031591dfbf95b9c003ef94d37dc",
+      "kind": "approval",
+      "payload": {
+        "id": "d1",
+        "provenance": "local_declared",
+        "reason": "Registra la delegación técnica existente del dueño: pidió lograr la goal de software de forma autónoma, autorizó revisión/local y proveedores existentes. Codex elige o2 dentro de n1; no se afirma elección personal del dueño ni consentimiento nuevo o de campo.",
+        "version": 1
+      },
+      "prev_hash": "434fdc81d9a8b01289441285d0d165054c80a5bb8be560dc7b099e35657371b4",
+      "seq": 42
+    },
+    {
+      "actor": "reviewer:gemini-docker-review-07",
+      "at": "2026-10-05T00:42:08+00:00",
+      "hash": "6223bed4c50a409897304c25d263608a0e80988604e426a142a7c7fc669a1d74",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "specify",
+        "provenance": "local_declared",
+        "reason": "Revisión independiente Gemini Pro text-only, informe review-07-verdict.md y receipt review-07-receipt.json: d1/req1/cr1 y especificación con hash fijado, ocho controles, límites y LogLens separado de meta-caso. Acepta sólo diseño; no ejecutó pruebas ni aprobó build/validate/campaña futura.",
+        "snapshot": "cbc656ea75581b4f3d3d22c96e68d3464aa955d53af0bd78c34ace7b6d19b616",
+        "verdict": "accept"
+      },
+      "prev_hash": "3601292fd919acb180e4cc5be1abded76ca9d031591dfbf95b9c003ef94d37dc",
+      "seq": 43
+    },
+    {
+      "actor": "agent:codex-orchestrator",
+      "at": "2026-10-05T00:42:08+00:00",
+      "hash": "41c1b8296a58f536ca9a15b372a99ae8ddbd298c38346b82377567fb35bc1ea4",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "specify",
+        "review_seq": 43,
+        "snapshot": "cbc656ea75581b4f3d3d22c96e68d3464aa955d53af0bd78c34ace7b6d19b616"
+      },
+      "prev_hash": "6223bed4c50a409897304c25d263608a0e80988604e426a142a7c7fc669a1d74",
+      "seq": 44
     }
   ],
   "project": {

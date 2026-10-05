@@ -1,0 +1,248 @@
+FFFFFFFFFFFFF                                                            [100%]
+=================================== FAILURES ===================================
+_ test_codex_event_state_machine_rejects_unassociated_or_unknown_output[unknown] _
+
+mutation = 'unknown'
+
+    @pytest.mark.parametrize("mutation", ["unknown", "second_turn", "early_completion", "after_completion",
+                                          "malformed_item", "multiple_answers", "unmatched_update"])
+    def test_codex_event_state_machine_rejects_unassociated_or_unknown_output(mutation):
+        events = codex_transcript()
+        if mutation == "unknown": events.insert(2, {"type": "provider.unknown", "item": {"type": "command_execution"}})
+        elif mutation == "second_turn": events += events[1:]
+        elif mutation == "early_completion": events[1], events[-1] = events[-1], events[1]
+        elif mutation == "after_completion": events.append(events[2])
+        elif mutation == "malformed_item": events[2]["item"] = []
+        elif mutation == "multiple_answers":
+            events.insert(3, {"type": "item.completed", "item": {"id": "item_1", "type": "agent_message", "text": '{"verdict":"accept"}'}})
+        else: events.insert(2, {"type": "item.updated", "item": {"id": "item_x", "type": "reasoning", "text": "unstarted"}})
+>       with pytest.raises(NativeRoleError): parse_native("codex", "\n".join(map(json.dumps, events)))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeRoleError
+
+tests/test_controller_native_role.py:77: Failed
+_ test_codex_event_state_machine_rejects_unassociated_or_unknown_output[second_turn] _
+
+mutation = 'second_turn'
+
+    @pytest.mark.parametrize("mutation", ["unknown", "second_turn", "early_completion", "after_completion",
+                                          "malformed_item", "multiple_answers", "unmatched_update"])
+    def test_codex_event_state_machine_rejects_unassociated_or_unknown_output(mutation):
+        events = codex_transcript()
+        if mutation == "unknown": events.insert(2, {"type": "provider.unknown", "item": {"type": "command_execution"}})
+        elif mutation == "second_turn": events += events[1:]
+        elif mutation == "early_completion": events[1], events[-1] = events[-1], events[1]
+        elif mutation == "after_completion": events.append(events[2])
+        elif mutation == "malformed_item": events[2]["item"] = []
+        elif mutation == "multiple_answers":
+            events.insert(3, {"type": "item.completed", "item": {"id": "item_1", "type": "agent_message", "text": '{"verdict":"accept"}'}})
+        else: events.insert(2, {"type": "item.updated", "item": {"id": "item_x", "type": "reasoning", "text": "unstarted"}})
+>       with pytest.raises(NativeRoleError): parse_native("codex", "\n".join(map(json.dumps, events)))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeRoleError
+
+tests/test_controller_native_role.py:77: Failed
+_ test_codex_event_state_machine_rejects_unassociated_or_unknown_output[early_completion] _
+
+mutation = 'early_completion'
+
+    @pytest.mark.parametrize("mutation", ["unknown", "second_turn", "early_completion", "after_completion",
+                                          "malformed_item", "multiple_answers", "unmatched_update"])
+    def test_codex_event_state_machine_rejects_unassociated_or_unknown_output(mutation):
+        events = codex_transcript()
+        if mutation == "unknown": events.insert(2, {"type": "provider.unknown", "item": {"type": "command_execution"}})
+        elif mutation == "second_turn": events += events[1:]
+        elif mutation == "early_completion": events[1], events[-1] = events[-1], events[1]
+        elif mutation == "after_completion": events.append(events[2])
+        elif mutation == "malformed_item": events[2]["item"] = []
+        elif mutation == "multiple_answers":
+            events.insert(3, {"type": "item.completed", "item": {"id": "item_1", "type": "agent_message", "text": '{"verdict":"accept"}'}})
+        else: events.insert(2, {"type": "item.updated", "item": {"id": "item_x", "type": "reasoning", "text": "unstarted"}})
+>       with pytest.raises(NativeRoleError): parse_native("codex", "\n".join(map(json.dumps, events)))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeRoleError
+
+tests/test_controller_native_role.py:77: Failed
+_ test_codex_event_state_machine_rejects_unassociated_or_unknown_output[after_completion] _
+
+mutation = 'after_completion'
+
+    @pytest.mark.parametrize("mutation", ["unknown", "second_turn", "early_completion", "after_completion",
+                                          "malformed_item", "multiple_answers", "unmatched_update"])
+    def test_codex_event_state_machine_rejects_unassociated_or_unknown_output(mutation):
+        events = codex_transcript()
+        if mutation == "unknown": events.insert(2, {"type": "provider.unknown", "item": {"type": "command_execution"}})
+        elif mutation == "second_turn": events += events[1:]
+        elif mutation == "early_completion": events[1], events[-1] = events[-1], events[1]
+        elif mutation == "after_completion": events.append(events[2])
+        elif mutation == "malformed_item": events[2]["item"] = []
+        elif mutation == "multiple_answers":
+            events.insert(3, {"type": "item.completed", "item": {"id": "item_1", "type": "agent_message", "text": '{"verdict":"accept"}'}})
+        else: events.insert(2, {"type": "item.updated", "item": {"id": "item_x", "type": "reasoning", "text": "unstarted"}})
+>       with pytest.raises(NativeRoleError): parse_native("codex", "\n".join(map(json.dumps, events)))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeRoleError
+
+tests/test_controller_native_role.py:77: Failed
+_ test_codex_event_state_machine_rejects_unassociated_or_unknown_output[malformed_item] _
+
+mutation = 'malformed_item'
+
+    @pytest.mark.parametrize("mutation", ["unknown", "second_turn", "early_completion", "after_completion",
+                                          "malformed_item", "multiple_answers", "unmatched_update"])
+    def test_codex_event_state_machine_rejects_unassociated_or_unknown_output(mutation):
+        events = codex_transcript()
+        if mutation == "unknown": events.insert(2, {"type": "provider.unknown", "item": {"type": "command_execution"}})
+        elif mutation == "second_turn": events += events[1:]
+        elif mutation == "early_completion": events[1], events[-1] = events[-1], events[1]
+        elif mutation == "after_completion": events.append(events[2])
+        elif mutation == "malformed_item": events[2]["item"] = []
+        elif mutation == "multiple_answers":
+            events.insert(3, {"type": "item.completed", "item": {"id": "item_1", "type": "agent_message", "text": '{"verdict":"accept"}'}})
+        else: events.insert(2, {"type": "item.updated", "item": {"id": "item_x", "type": "reasoning", "text": "unstarted"}})
+>       with pytest.raises(NativeRoleError): parse_native("codex", "\n".join(map(json.dumps, events)))
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_controller_native_role.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+provider = 'codex'
+raw = '{"type": "thread.started", "thread_id": "synthetic-thread"}\n{"type": "turn.started"}\n{"type": "item.completed", "item": []}\n{"type": "turn.completed", "usage": {"input_tokens": 12}}'
+
+    def parse_native(provider, raw):
+        if provider == "gemini":
+            value = strict(raw)
+            if type(value) is not dict or value.get("status") != "SUCCESS" or value.get("denied_actions"):
+                raise NativeRoleError("native Gemini execution failed or permission was denied")
+            return response_json(value.get("response")), value.get("usage")
+        if provider != "codex": raise NativeRoleError("unsupported provider")
+        final = None; usage = None; completed = False
+        for line in raw.splitlines():
+            if not line.strip(): continue
+            value = strict(line)
+            if type(value) is not dict: raise NativeRoleError("native Codex event must be an object")
+            if value.get("type") in {"turn.failed", "error"}: raise NativeRoleError("native Codex turn failed")
+            item = value.get("item", {})
+            if value.get("type") in {"item.started", "item.completed"}:
+>               if item.get("type") not in {"agent_message", "reasoning"}:
+                   ^^^^^^^^
+E               AttributeError: 'list' object has no attribute 'get'
+
+scripts/controller_native_role.py:57: AttributeError
+_ test_codex_event_state_machine_rejects_unassociated_or_unknown_output[multiple_answers] _
+
+mutation = 'multiple_answers'
+
+    @pytest.mark.parametrize("mutation", ["unknown", "second_turn", "early_completion", "after_completion",
+                                          "malformed_item", "multiple_answers", "unmatched_update"])
+    def test_codex_event_state_machine_rejects_unassociated_or_unknown_output(mutation):
+        events = codex_transcript()
+        if mutation == "unknown": events.insert(2, {"type": "provider.unknown", "item": {"type": "command_execution"}})
+        elif mutation == "second_turn": events += events[1:]
+        elif mutation == "early_completion": events[1], events[-1] = events[-1], events[1]
+        elif mutation == "after_completion": events.append(events[2])
+        elif mutation == "malformed_item": events[2]["item"] = []
+        elif mutation == "multiple_answers":
+            events.insert(3, {"type": "item.completed", "item": {"id": "item_1", "type": "agent_message", "text": '{"verdict":"accept"}'}})
+        else: events.insert(2, {"type": "item.updated", "item": {"id": "item_x", "type": "reasoning", "text": "unstarted"}})
+>       with pytest.raises(NativeRoleError): parse_native("codex", "\n".join(map(json.dumps, events)))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeRoleError
+
+tests/test_controller_native_role.py:77: Failed
+_ test_codex_event_state_machine_rejects_unassociated_or_unknown_output[unmatched_update] _
+
+mutation = 'unmatched_update'
+
+    @pytest.mark.parametrize("mutation", ["unknown", "second_turn", "early_completion", "after_completion",
+                                          "malformed_item", "multiple_answers", "unmatched_update"])
+    def test_codex_event_state_machine_rejects_unassociated_or_unknown_output(mutation):
+        events = codex_transcript()
+        if mutation == "unknown": events.insert(2, {"type": "provider.unknown", "item": {"type": "command_execution"}})
+        elif mutation == "second_turn": events += events[1:]
+        elif mutation == "early_completion": events[1], events[-1] = events[-1], events[1]
+        elif mutation == "after_completion": events.append(events[2])
+        elif mutation == "malformed_item": events[2]["item"] = []
+        elif mutation == "multiple_answers":
+            events.insert(3, {"type": "item.completed", "item": {"id": "item_1", "type": "agent_message", "text": '{"verdict":"accept"}'}})
+        else: events.insert(2, {"type": "item.updated", "item": {"id": "item_x", "type": "reasoning", "text": "unstarted"}})
+>       with pytest.raises(NativeRoleError): parse_native("codex", "\n".join(map(json.dumps, events)))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeRoleError
+
+tests/test_controller_native_role.py:77: Failed
+___________ test_request_schema_is_checked_before_rendering[value0] ____________
+
+value = []
+
+    @pytest.mark.parametrize("value", [[], {"role_instructions": 5}, {"role_instructions": ""},
+                                         {"role_instructions": "review", "unexpected": "value"}])
+    def test_request_schema_is_checked_before_rendering(value):
+>       from scripts.controller_native_role import render_prompt
+E       ImportError: cannot import name 'render_prompt' from 'scripts.controller_native_role' (/datos/workspaces/personal/SpecOrganon/scripts/controller_native_role.py)
+
+tests/test_controller_native_role.py:83: ImportError
+___________ test_request_schema_is_checked_before_rendering[value1] ____________
+
+value = {'role_instructions': 5}
+
+    @pytest.mark.parametrize("value", [[], {"role_instructions": 5}, {"role_instructions": ""},
+                                         {"role_instructions": "review", "unexpected": "value"}])
+    def test_request_schema_is_checked_before_rendering(value):
+>       from scripts.controller_native_role import render_prompt
+E       ImportError: cannot import name 'render_prompt' from 'scripts.controller_native_role' (/datos/workspaces/personal/SpecOrganon/scripts/controller_native_role.py)
+
+tests/test_controller_native_role.py:83: ImportError
+___________ test_request_schema_is_checked_before_rendering[value2] ____________
+
+value = {'role_instructions': ''}
+
+    @pytest.mark.parametrize("value", [[], {"role_instructions": 5}, {"role_instructions": ""},
+                                         {"role_instructions": "review", "unexpected": "value"}])
+    def test_request_schema_is_checked_before_rendering(value):
+>       from scripts.controller_native_role import render_prompt
+E       ImportError: cannot import name 'render_prompt' from 'scripts.controller_native_role' (/datos/workspaces/personal/SpecOrganon/scripts/controller_native_role.py)
+
+tests/test_controller_native_role.py:83: ImportError
+___________ test_request_schema_is_checked_before_rendering[value3] ____________
+
+value = {'role_instructions': 'review', 'unexpected': 'value'}
+
+    @pytest.mark.parametrize("value", [[], {"role_instructions": 5}, {"role_instructions": ""},
+                                         {"role_instructions": "review", "unexpected": "value"}])
+    def test_request_schema_is_checked_before_rendering(value):
+>       from scripts.controller_native_role import render_prompt
+E       ImportError: cannot import name 'render_prompt' from 'scripts.controller_native_role' (/datos/workspaces/personal/SpecOrganon/scripts/controller_native_role.py)
+
+tests/test_controller_native_role.py:83: ImportError
+_________ test_bounded_request_reader_rejects_large_files_and_symlinks _________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-77/test_bounded_request_reader_re0')
+
+    def test_bounded_request_reader_rejects_large_files_and_symlinks(tmp_path):
+>       from scripts.controller_native_role import read_request
+E       ImportError: cannot import name 'read_request' from 'scripts.controller_native_role' (/datos/workspaces/personal/SpecOrganon/scripts/controller_native_role.py)
+
+tests/test_controller_native_role.py:88: ImportError
+_______________ test_requested_review_result_contract_is_checked _______________
+
+    def test_requested_review_result_contract_is_checked():
+>       from scripts.controller_native_role import validate_result
+E       ImportError: cannot import name 'validate_result' from 'scripts.controller_native_role' (/datos/workspaces/personal/SpecOrganon/scripts/controller_native_role.py)
+
+tests/test_controller_native_role.py:96: ImportError
+=========================== short test summary info ============================
+FAILED tests/test_controller_native_role.py::test_codex_event_state_machine_rejects_unassociated_or_unknown_output[unknown]
+FAILED tests/test_controller_native_role.py::test_codex_event_state_machine_rejects_unassociated_or_unknown_output[second_turn]
+FAILED tests/test_controller_native_role.py::test_codex_event_state_machine_rejects_unassociated_or_unknown_output[early_completion]
+FAILED tests/test_controller_native_role.py::test_codex_event_state_machine_rejects_unassociated_or_unknown_output[after_completion]
+FAILED tests/test_controller_native_role.py::test_codex_event_state_machine_rejects_unassociated_or_unknown_output[malformed_item]
+FAILED tests/test_controller_native_role.py::test_codex_event_state_machine_rejects_unassociated_or_unknown_output[multiple_answers]
+FAILED tests/test_controller_native_role.py::test_codex_event_state_machine_rejects_unassociated_or_unknown_output[unmatched_update]
+FAILED tests/test_controller_native_role.py::test_request_schema_is_checked_before_rendering[value0]
+FAILED tests/test_controller_native_role.py::test_request_schema_is_checked_before_rendering[value1]
+FAILED tests/test_controller_native_role.py::test_request_schema_is_checked_before_rendering[value2]
+FAILED tests/test_controller_native_role.py::test_request_schema_is_checked_before_rendering[value3]
+FAILED tests/test_controller_native_role.py::test_bounded_request_reader_rejects_large_files_and_symlinks
+FAILED tests/test_controller_native_role.py::test_requested_review_result_contract_is_checked
+13 failed, 11 deselected in 0.10s

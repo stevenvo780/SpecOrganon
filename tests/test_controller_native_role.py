@@ -1,0 +1,179 @@
+"""Parser fixtures, not actual provider invocations or independent approvals."""
+import json
+
+import pytest
+
+from scripts.controller_native_role import NativeRoleError, native_argv, parse_native, response_json
+
+
+def test_gemini_native_usage_is_preserved_and_missing_usage_stays_unknown():
+    value = {"status": "SUCCESS", "response": '{"verdict":"reject","reason":"insufficient evidence"}'}
+    response, usage = parse_native("gemini", json.dumps(value))
+    assert response["verdict"] == "reject" and usage is None
+    value["usage"] = {"input_tokens": 5, "output_tokens": 3, "cache_read_tokens": 2}
+    assert parse_native("gemini", json.dumps(value))[1] == value["usage"]
+
+
+@pytest.mark.parametrize("change", ["denied", "empty", "failed"])
+def test_success_exit_label_cannot_hide_denial_or_empty_response(change):
+    value = {"status": "SUCCESS", "response": '{"verdict":"accept"}'}
+    if change == "denied": value["denied_actions"] = [{"action": "command"}]
+    elif change == "empty": value["response"] = ""
+    else: value["status"] = "FAILED"
+    with pytest.raises(NativeRoleError): parse_native("gemini", json.dumps(value))
+
+
+def test_codex_requires_completed_turn_and_rejects_tool_calls():
+    events = codex_transcript()
+    with pytest.raises(NativeRoleError): parse_native("codex", json.dumps(events[2]))
+    assert parse_native("codex", "\n".join(map(json.dumps, events))) == ({"verdict": "reject"}, {"input_tokens": 12})
+    events.insert(2, {"type": "item.started", "item": {"type": "command_execution"}})
+    with pytest.raises(NativeRoleError, match="tool"): parse_native("codex", "\n".join(map(json.dumps, events)))
+
+
+@pytest.mark.parametrize("text", ['{"value":736.00000000000000001}', '{"verdict":"accept","verdict":"reject"}',
+                                 '{"value":NaN}', 'Narrative before {"verdict":"accept"}'])
+def test_bridge_cannot_round_duplicate_or_extract_a_fake_final_json(text):
+    with pytest.raises(NativeRoleError): response_json(text)
+
+
+def test_codex_runtime_override_uses_cli_literal_safe_key_not_quoted_table(tmp_path, monkeypatch):
+    # Synthetic config only: no real profile, session or credentials are copied.
+    (tmp_path / "config.toml").write_text('[mcp_servers.specorganon]\ncommand="fake-fixture"\n')
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+    args = native_argv("codex", "gpt-6.1-sol", "fixture text")
+    assert "mcp_servers.specorganon.enabled=false" in args
+
+
+def test_non_literal_mcp_key_stops_before_native_launch(tmp_path, monkeypatch):
+    (tmp_path / "config.toml").write_text('[mcp_servers."unsafe.name"]\ncommand="fake-fixture"\n')
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+    with pytest.raises(NativeRoleError, match="key"):
+        native_argv("codex", "gpt-6.1-sol", "fixture text")
+
+
+def codex_transcript():
+    return [
+        {"type": "thread.started", "thread_id": "synthetic-thread"},
+        {"type": "turn.started"},
+        {"type": "item.completed", "item": {"id": "item_0", "type": "agent_message", "text": '{"verdict":"reject"}'}},
+        {"type": "turn.completed", "usage": {"input_tokens": 12}},
+    ]
+
+
+@pytest.mark.parametrize("mutation", ["unknown", "second_turn", "early_completion", "after_completion",
+                                      "malformed_item", "multiple_answers", "unmatched_update"])
+def test_codex_event_state_machine_rejects_unassociated_or_unknown_output(mutation):
+    events = codex_transcript()
+    if mutation == "unknown": events.insert(2, {"type": "provider.unknown", "item": {"type": "command_execution"}})
+    elif mutation == "second_turn": events += events[1:]
+    elif mutation == "early_completion": events[1], events[-1] = events[-1], events[1]
+    elif mutation == "after_completion": events.append(events[2])
+    elif mutation == "malformed_item": events[2]["item"] = []
+    elif mutation == "multiple_answers":
+        events.insert(3, {"type": "item.completed", "item": {"id": "item_1", "type": "agent_message", "text": '{"verdict":"accept"}'}})
+    else: events.insert(2, {"type": "item.updated", "item": {"id": "item_x", "type": "reasoning", "text": "unstarted"}})
+    with pytest.raises(NativeRoleError): parse_native("codex", "\n".join(map(json.dumps, events)))
+
+
+@pytest.mark.parametrize("value", [[], {"role_instructions": 5}, {"role_instructions": ""},
+                                     {"role_instructions": "review", "unexpected": "value"}])
+def test_request_schema_is_checked_before_rendering(value):
+    from scripts.controller_native_role import render_prompt
+    with pytest.raises(NativeRoleError): render_prompt(json.dumps(value).encode())
+
+
+def test_bounded_request_reader_rejects_large_files_and_symlinks(tmp_path):
+    from scripts.controller_native_role import read_request
+    path = tmp_path / "request.json"; path.write_bytes(b"x" * 128001)
+    with pytest.raises(NativeRoleError): read_request(path)
+    path.unlink(); path.symlink_to(tmp_path / "absent")
+    with pytest.raises(NativeRoleError): read_request(path)
+
+
+def test_requested_review_result_contract_is_checked():
+    from scripts.controller_native_role import validate_result
+    assert validate_result({"schema": 1, "verdict": "reject", "reason": "actual finding", "findings": []}, "review")["verdict"] == "reject"
+    for value in [{}, {"schema": 1, "verdict": "accept", "reason": "", "findings": []},
+                  {"schema": 1, "verdict": "magic", "reason": "finding", "findings": []},
+                  {"schema": 1, "verdict": "accept", "reason": "finding", "findings": "missing"}]:
+        with pytest.raises(NativeRoleError): validate_result(value, "review")
+
+
+def test_complete_request_and_nested_numbers_round_trip_exactly():
+    from scripts.controller_native_role import render_prompt
+    request = {"schema": 1, "role": "review", "role_instructions": "Judge supplied data only", "documents": {"sample": "actual sample"}}
+    parsed, prompt = render_prompt(json.dumps(request).encode())
+    assert parsed == request and "actual sample" in prompt
+    value = response_json('{"nested":[{"decimal":0.1,"integer":9007199254740993}]}')
+    assert response_json(json.dumps(value)) == value
+    with pytest.raises(NativeRoleError): response_json('{"nested":[{"decimal":1e-400}]}')
+
+
+def test_execution_identity_requires_pinned_image_and_binds_nonsecret_config(tmp_path, monkeypatch):
+    from scripts.controller_native_role import execution_identity
+    exe = tmp_path / "native"; exe.write_bytes(b"synthetic executable")
+    monkeypatch.delenv("SPECORGANON_ROLE_IMAGE_ID", raising=False)
+    with pytest.raises(NativeRoleError, match="image"): execution_identity("codex", str(exe))
+    monkeypatch.setenv("SPECORGANON_ROLE_IMAGE_ID", "sha256:" + "a" * 64)
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+    config = tmp_path / "config.toml"; config.write_text('model="synthetic"')
+    identity = execution_identity("codex", str(exe))
+    config.write_text('model="changed"')
+    assert identity != execution_identity("codex", str(exe))
+    assert "other_effective_configuration" in identity
+
+
+def test_observed_codex_0160_native_review_transcript_preserves_real_rejection():
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    evidence = root / "goals/autonomous-software-v1/evidence"
+    raw = (evidence / "component-review-03-native.stdout.jsonl").read_text()
+    result, usage = parse_native("codex", raw)
+    recorded = json.loads((evidence / "component-review-03.stdout.json").read_text())
+    assert result == recorded["result"] and usage == recorded["usage_reported"]
+    assert result["verdict"] == "reject" and result["tests_executed"] is False
+
+
+def test_actual_effective_catalogue_controls_shell_registration_not_backend_flag():
+    from pathlib import Path
+    from scripts.controller_native_role import validate_codex_features
+    root = Path(__file__).resolve().parents[1]
+    raw = (root / 'goals/autonomous-software-v1/evidence/controller-codex-effective-features.stdout').read_text()
+    measured = validate_codex_features(raw)
+    assert measured['unified_exec_observed'] is True
+    assert measured['complete_configuration_isolation'] is False
+    with pytest.raises(NativeRoleError): validate_codex_features(raw.replace('shell_tool                               stable             false', 'shell_tool                               stable             true'))
+
+
+def test_effective_feature_probe_uses_same_overrides_without_native_exec_command(tmp_path, monkeypatch):
+    from scripts.controller_native_role import codex_feature_argv
+    monkeypatch.setenv('CODEX_HOME', str(tmp_path))
+    native = native_argv('codex', 'gpt-6.1-sol', 'fixture')
+    probe = codex_feature_argv(native)
+    assert probe[-2:] == ['features', 'list'] and 'exec' not in probe
+    assert 'web_search="disabled"' in probe and 'shell_tool' in probe
+
+
+@pytest.mark.parametrize('bad', [[], {}])
+def test_malformed_role_and_verdict_have_controlled_schema_error(bad):
+    from scripts.controller_native_role import render_prompt, validate_result
+    request = {'schema': 1, 'role': bad, 'role_instructions': 'review', 'documents': {}}
+    with pytest.raises(NativeRoleError): render_prompt(json.dumps(request).encode())
+    value = {'schema': 1, 'verdict': bad, 'reason': 'finding', 'findings': []}
+    with pytest.raises(NativeRoleError): validate_result(value, 'review')
+
+
+@pytest.mark.parametrize('bad', [[], {}])
+def test_malformed_event_type_is_a_controlled_native_error(bad):
+    with pytest.raises(NativeRoleError): parse_native('codex', json.dumps({'type': bad}))
+
+
+def test_actual_native_startup_error_keeps_followup_inconclusive():
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    evidence = root / 'goals/autonomous-software-v1/evidence'
+    raw = (evidence / 'component-review-04-native-call.stdout.jsonl').read_text()
+    with pytest.raises(NativeRoleError): parse_native('codex', raw)
+    text = json.loads((evidence / 'component-review-04-textual-verdict.json').read_text())
+    assert text['verdict'] == 'reject' and text['tests_executed'] is False

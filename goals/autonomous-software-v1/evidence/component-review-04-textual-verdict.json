@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "verdict": "reject",
+  "reason": "The current code addresses the principal defects in the preserved previous REJECT, but malformed role/result values can still bypass controlled schema-error handling. Supplied outputs report 50 and 48 passing tests; I executed none and verified no hashes. The preserved 23/24 failure, fresh actual 23/23 required-feature probe and tagged-source explanation support shell_tool=false as the command-exposure gate, not full role isolation or binary attestation. Trusted operator/storage boundaries and pending controller work are not component defects. The phase loop/Docker lifecycle controller, LogLens, C1–C8, comparative thesis and release remain unaccepted; parent progress remains 7/9 phases. No consent is sought or given.",
+  "findings": [
+    {
+      "severity": "low",
+      "location": "scripts/controller_native_role.py: render_prompt and validate_result",
+      "problem": "Schema validation performs set membership on unvalidated values: request['role'] and value.get('verdict'). A JSON array or object in either field raises TypeError because it is unhashable, rather than NativeRoleError. main does not catch TypeError, so malformed input produces an uncontrolled traceback instead of the documented inconclusive error path. This fails closed but is a concrete validation defect; the supplied tests do not cover these values.",
+      "fix": "Check that role and verdict are strings before set membership. Add malformed-array/object fixtures requiring NativeRoleError and controlled adapter failure."
+    }
+  ],
+  "tests_executed": false
+}

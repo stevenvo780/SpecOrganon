@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "verdict": "reject",
+  "reason": "The supplied components have unresolved receipt-integrity, process-lifecycle, cache-binding and provider-parser defects. The current literal MCP override addresses the supplied quoted-key failure, but does not establish complete isolation. The supplied 22-pass output is evidence of a sampled test run only; I executed no tests, independently verified no hashes, and make no phase-dispatch, C1–C8, build, thesis or release acceptance claim.",
+  "findings": [
+    {
+      "severity": "high",
+      "location": "src/specorganon/role_jobs.py: JobStore.execute cached receipt branch",
+      "problem": "Reuse checks request bytes and stream hashes but does not validate receipt schema, job identity, terminal-field types or consistency with started.json. Editing exit_code, timed_out or stdin_complete can turn a failed execution into apparent success without changing stream hashes. A writer able to replace all records can forge a coherent receipt; local hashes do not authenticate execution.",
+      "fix": "Validate the complete receipt and admission-record relationship before reuse. Protect journal storage from role writes and document its trusted-storage boundary. Use an independently protected receipt authority if authenticity against journal writers is required."
+    },
+    {
+      "severity": "high",
+      "location": "src/specorganon/role_jobs.py: _safe, _read, _write and _lock; scripts/controller_native_role.py: stdout.read_text",
+      "problem": "Ancestor symlink checks occur before path-based operations, leaving directory-replacement races; O_NOFOLLOW protects only the final opened component. Replacing the lock pathname can also create separate lock domains. The adapter reopens stdout after JobStore verifies it, using an unbounded read that follows symlinks, so parsed bytes need not be the measured bytes.",
+      "fix": "Anchor operations to trusted directory descriptors and prevent directory/lock replacement through ownership and mount controls. Return the verified stream bytes from JobStore and parse those bytes directly. Explicitly retain the trusted-local-storage limitation."
+    },
+    {
+      "severity": "high",
+      "location": "src/specorganon/role_jobs.py: JobStore._run process setup and termination",
+      "problem": "After Popen succeeds, writing started.json and registering pipes occur outside the exception handler that terminates the child. Failures there can leave execution running. If all pipes close while the child continues, process.wait(timeout=5) abandons the configured deadline and leaves an uncertain record. SIGKILL of the journal owner also leaves the separately sessioned child running, as the supplied test cleanup demonstrates. Process-group termination does not contain descendants that escape the group.",
+      "fix": "Place all post-launch setup inside guaranteed cleanup handling, supervise process exit independently of pipe readiness, and enforce the deadline through reaping. Use container or cgroup lifecycle controls for descendant containment and owner-death cleanup; retain uncertainty when no terminal receipt exists."
+    },
+    {
+      "severity": "medium",
+      "location": "src/specorganon/role_jobs.py: cancellation subprocesses and elapsed budget",
+      "problem": "Cancellation commands are outside the primary process group, receive no cwd/env binding, and may leave descendants after subprocess.run times out. The exception-path cancellation also inherits stdin. The global elapsed limit uses mutable wall time and permits cleanup beyond the remaining budget; it is not a hard runtime ceiling.",
+      "fix": "Run cancellation with explicit stdin, cwd and environment under the same containment policy. Bound and account for cleanup, and distinguish persisted wall-clock admission budgeting from monotonic execution deadlines."
+    },
+    {
+      "severity": "high",
+      "location": "src/specorganon/role_jobs.py: execution envelope; scripts/controller_native_role.py: native invocation",
+      "problem": "With env=None, the inherited environment is represented only by null, so changed environment or profile configuration can reuse an old receipt. Executable contents, image identity and provider configuration are also not intrinsically bound. JobStore provides a metadata field, but this adapter does not supply these identities.",
+      "fix": "Pass an explicit controlled environment and include immutable execution-image, executable and relevant configuration identities in admission metadata. Define which profile changes invalidate reuse without storing credentials."
+    },
+    {
+      "severity": "high",
+      "location": "scripts/controller_native_role.py: parse_native('codex', raw)",
+      "problem": "The parser checks tool types only on item.started and item.completed, ignores other event types, and accepts any completed turn plus the last agent message anywhere in the stream. It does not enforce event ordering, a single turn or a final response belonging to that completed turn. Malformed item values can raise uncaught attribute errors. These checks do not establish that a native execution was text-only.",
+      "fix": "Validate provider event shapes and implement a documented event-state machine with explicit handling of tool, denial, unknown and failure events. Require a final message associated with the permitted completed turn. Enforce tool restrictions before execution rather than relying only on retrospective parsing."
+    },
+    {
+      "severity": "medium",
+      "location": "scripts/controller_native_role.py: native_argv and profile isolation",
+      "problem": "The current safe literal MCP keys correctly avoid the quoted parallel-table construction in the supplied fixture. However, disabling servers enumerated from one config.toml is a snapshot and assumes it covers every effective configuration source. Read-only execution still permits reads of accessible profile data; mounting profiles in an existing volume does not itself prove separation between roles or prevent profile writes elsewhere.",
+      "fix": "Establish the effective configuration and mount boundaries outside the model, prevent configuration races, and demonstrate that each role sees only its intended profile. Add integration evidence for the actual native CLI and container configuration; the supplied fixtures do not verify those properties."
+    },
+    {
+      "severity": "medium",
+      "location": "scripts/controller_native_role.py: main request loading and Gemini invocation",
+      "problem": "The request is read completely before its size is checked. Gemini places the rendered prompt in argv, which is then duplicated in the JobStore envelope alongside other fields: a prompt permitted by the 128000-byte check can exceed max_request_bytes. Request object shape and role_instructions type are also unchecked before indexing and concatenation.",
+      "fix": "Read requests with a bounded regular-file reader, validate their schema, and use a provider-supported stdin transport or calculate and enforce the complete serialized-envelope budget before admission."
+    },
+    {
+      "severity": "medium",
+      "location": "scripts/controller_native_role.py: strict/response_json and supplied parser tests",
+      "problem": "Exact-number behavior depends on strict_json_loads, whose implementation was not supplied. The fixtures show an intended rejection of one rounded decimal but cannot establish exact handling across nested values, provider usage and final serialization. Provider formats are demonstrated by synthetic fixtures rather than actual native transcripts. The adapter also accepts any response object without validating the requested result schema.",
+      "fix": "Supply and review the strict parser implementation, test numeric boundaries and serialization end to end, validate role-result schemas, and add versioned real provider-format fixtures. Preserve the distinction between these component checks and the entire controller specification."
+    }
+  ],
+  "tests_executed": false
+}
