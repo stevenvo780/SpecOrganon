@@ -121,11 +121,13 @@ Matriz de73recetas en reserved.py: legal11, identity10, order10, types13, format
 boundaries19;2ejemplos públicos incluidos. Las60recetas originales se conservan y
 se añaden ausencia de LF final, CR/LF escapados y cinco bordes de strings id/site/
 from/to antes de registro/autores. También se añaden lot/site/from/to vacíos y byte NUL crudo.
-El snapshot original60-recipes.json conserva los bytes canónicos de las60
-recetas del commit895d9a2fc6d528b7be223969673e65bfb1bbdc31, SHA256
+original60_reserved.py conserva íntegra la fuente generadora de las60 recetas
+del commit895d9a2fc6d528b7be223969673e65bfb1bbdc31. Sus datos canónicos tienen SHA256
 be25952e519f52a32947861737ae5fd7b8a53819ba34a0f4c5cf7bbff210fe61.
-Se vincula y suministra completo al revisor, y un control compara cada receta
-original con la matriz actual por ID, incluidos stdin/argv/expected. No se monta
+La fuente se vincula y suministra completa al revisor; un control materializa sus
+recetas y compara hash y cada ID/input/argv/expected con la matriz actual. El
+snapshot JSON original de523407bytes también se conserva en custodia privada;
+no se introduce un programa de referencia LotLedger ni se ejecutan entregas. No se monta
 a autores ni revisores de fases. El draft comparativo posterior no pertenece al
 freeze de LotLedger; modificarlo no altera esta identidad. Esto amplía el corpus
 sin retirar recetas. Cobertura

@@ -49,7 +49,6 @@ def registration_source_names(source, *, public_catalog, public_context, mandate
               'experiments/lotledger_delivery_v1/public-evidence.md',
               'experiments/lotledger_delivery_v1/public-sqlite-observations.json',
               'experiments/lotledger_delivery_v1/image-users.json',
-              'experiments/lotledger_delivery_v1/original60-recipes.json',
               'tests/test_lotledger_driver.py', 'tests/test_lotledger_reserved.py',
               'tests/test_controller_native_role.py',
               public_catalog, public_context, mandate}

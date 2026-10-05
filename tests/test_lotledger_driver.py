@@ -52,7 +52,7 @@ def test_trial_freeze_covers_local_import_closure_and_loaded_modules():
     assert 'scripts/software_study_harness.py' not in names
     assert 'scripts/analyze_bread_survey.py' not in names
     assert 'experiments/software_comparison_v3/protocol-draft.md' not in names
-    assert 'experiments/lotledger_delivery_v1/original60-recipes.json' in names
+    assert 'experiments/lotledger_delivery_v1/original60_reserved.py' in names
 
 
 @pytest.mark.parametrize('text', ['```json\n{}\n```', '```\n{}\n```', '{}\nCommentary', '{} {}'])
