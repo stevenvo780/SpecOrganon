@@ -76,7 +76,7 @@ no son baseline de conformidad del programa. No sustituir una métrica por otra 
 inventar baseline0. La selección de indicadores debe declarar su población propia.
 
 Criterios anteriores a build, sin compensación: F pruebas propias pertinentes
-pasadas con recibo exacto y ejemplos correctos, reserva externa75/75 para conformidad
+pasadas con recibo exacto y ejemplos correctos, reserva externa80/80 para conformidad
 completa; D documentación8/8; M nueve fases aceptadas con argumentos sustantivos,
 trazas vigentes y auditoría6/6. Pruebas propias no prueban F reservado. D/M se miden
 externamente después del cierre, sin completar el ledger retrospectivamente.
@@ -117,7 +117,7 @@ C8 SIGKILL después del recibo reusa sin llamadas/eventos duplicados y antes del
 queda inconcluso sin relanzar. C5–C8 son controles sintéticos del mecanismo, separados
 del caso y revalidados pertinentemente. Faltante/incierto no es satisfecho.
 
-Matriz de75recetas en reserved.py: legal11, identity10, order10, types13, format12,
+Matriz de80recetas en reserved.py: legal11, identity10, order10, types18, format12,
 boundaries19;2ejemplos públicos incluidos. Las60recetas originales se conservan y
 se añaden ausencia de LF final, CR/LF escapados y cinco bordes de strings id/site/
 from/to antes de registro/autores. También se añaden lot/site/from/to vacíos y byte NUL crudo.
@@ -134,12 +134,12 @@ sin retirar recetas. Cobertura
 determinista finita, no potencia estadística ni prueba exhaustiva de todo input. No
 selección por resultados. Expectativas explícitas y metamorfismos fijados antes de
 generar; nunca construir oráculo a partir del programa. Una invocación por receta,
-3s/2CPU/1GiB/128pids/2MiB por stream. Ausencia de programa cuenta75fallos, no omisión.
+3s/2CPU/1GiB/128pids/2MiB por stream. Ausencia de programa cuenta80fallos, no omisión.
 Timeout/crash/salida truncada del sujeto es fallo; infraestructura incierta se publica
 como inconclusa. El evaluador conserva códigos, tiempos, hashes y streams privados,
 y sólo reusa recibos cerrados con idénticos inputs/entrega.
 
-completed_technical requiere C1–C8, gate9,D8/8,M6/6,F75/75, README/tests/paquete real.
+completed_technical requiere C1–C8, gate9,D8/8,M6/6,F80/80, README/tests/paquete real.
 Otro resultado se publica delivery_failed, infra_inconclusive o not_started, con
 denominadores fijos. Este hito no basta para cerrar la goal. Después se requiere
 la campaña NUEVA multitype N/S/T/ablación de experiments/software_comparison_v3/
@@ -190,3 +190,24 @@ llegar antes de que se cierre stdin. Esta sonda detecta lecturas bloqueantes ant
 de validar --help; no demuestra ausencia de toda introspección posible de fd0.
 La receta con payload sola no acredita orden; ambas extienden cobertura finita,
 sin alterar ninguna de las60/63/68/73 originales y antes de autores/registro.
+
+## Observación de stdin y constantes no JSON
+
+Se preservan las75 recetas previas y se agregan cinco inputs explícitos NaN,
+Infinity y -Infinity (líneas bare y quantity). El sujeto con --help se ejecuta
+bajo strace ya presente en la imagen inmutable: -f -qq -yy, syscalls de lectura
+y poll/select/mmap relevantes. El supervisor conserva stdin PIPE abierto y
+observa su inode; una línea anotada con ese pipe, incluso tras dup o read
+O_NONBLOCK, invalida el resultado (125). Timeout sigue124/2.5s y techo externo3s.
+El reporte/trace se conserva en un mount privado /observer escribible sólo para
+esta sonda; la entrega permanece readonly y los streams correctos no se alteran.
+El host vincula report/trace por hash al cierre, sin usarlos para reemplazar códigos
+o streams medidos. El código sujeto comparte ese mount: esto supone integridad
+del instrumento en un ensayo de conformidad y no prueba resistencia a sabotaje
+malicioso. El resto de recetas no monta /observer.
+La herramienta pertenece a la imagen fijada; no se elevan privilegios ni copian
+credenciales. Son observaciones de las rutas de syscall enumeradas, no una prueba
+universal contra todo programa malicioso o mecanismos de IO arbitrarios. El
+contrato conserva error antes de leer stdin; no se reduce a lectura bloqueante.
+Los controles distinguen read-first bloqueante, read O_NONBLOCK, alias dup de fd0
+y poll/select del pipe. No se convierten esas observaciones en eficacia de campo.

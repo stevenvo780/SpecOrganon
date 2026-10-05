@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 
 from specorganon.docker_roles import DockerRoles
-from specorganon.role_jobs import JobStore, UncertainJob, _json, _write, _safe, canonical, digest
+from specorganon.role_jobs import JobStore, UncertainJob, _json, _read, _write, _safe, canonical, digest
 from specorganon.software_controller import safe_file, encoded_contribution
 from .reserved import judge, recipes
 
@@ -15,8 +15,11 @@ class SubjectError(ValueError):
     pass
 
 
-HELD_OPEN_WRAPPER = '''import subprocess,sys
-p=subprocess.Popen(sys.argv[1:],stdin=subprocess.PIPE)
+HELD_OPEN_WRAPPER = '''import subprocess,sys,os,json,hashlib
+trace='/observer/lotledger-stdin.trace'
+calls='read,readv,pread64,preadv,preadv2,splice,vmsplice,sendfile,copy_file_range,recvfrom,recvmsg,recvmmsg,poll,ppoll,select,pselect6,mmap'
+p=subprocess.Popen(['/usr/bin/strace','-f','-qq','-yy','-s','64','-o',trace,'-e','trace='+calls,*sys.argv[1:]],stdin=subprocess.PIPE)
+inode=os.fstat(p.stdin.fileno()).st_ino
 try:
     code=p.wait(timeout=2.5)
 except subprocess.TimeoutExpired:
@@ -25,6 +28,16 @@ except subprocess.TimeoutExpired:
     code=124
 finally:
     p.stdin.close()
+try:
+    with open(trace,'rb') as stream: raw=stream.read(2097153)
+    if len(raw)>2097152: raise ValueError('trace cap')
+    marker=('pipe:['+str(inode)+']').encode()
+    violations=[line.decode('utf-8','strict') for line in raw.splitlines() if marker in line]
+    if violations and code!=124: code=125
+    report={'schema':1,'stdin_pipe_inode':inode,'observed_stdin_syscalls':violations[:64],'trace_sha256':hashlib.sha256(raw).hexdigest(),'trace_bytes':len(raw),'exit_code':code,'scope':'listed syscalls with stdin pipe annotation; finite observation'}
+    with open('/observer/lotledger-observer.json','w') as stream: json.dump(report,stream)
+except (OSError,ValueError,UnicodeError):
+    code=126
 sys.exit(code)
 '''
 
@@ -110,6 +123,9 @@ class Subjects:
                         '-e', 'HOME=/tmp', '-e', 'TMPDIR=/tmp', '--mount',
                         f'type=bind,src={delivery},dst=/input/delivery,readonly',
                         '-w', '/input/delivery', '--entrypoint', '', self.image, *command]
+                if recipe.get('stdin_mode') == 'held_open':
+                    observer=folder/'observer';observer.mkdir(mode=0o700)
+                    args[1:1]=['--mount',f'type=bind,src={observer},dst=/observer']
                 plan = {'schema': 1, 'binding': binding, 'name': name, 'label': label,
                         'create_argv': args, 'subject_command': command, 'container_id': None,
                         'inventory': DockerRoles._inventory(delivery)}
@@ -150,9 +166,24 @@ class Subjects:
                       'timed_out': code == 137 or (code == 124 and recipe.get('stdin_mode') == 'held_open') or receipt['timed_out'], 'truncated_streams': receipt['truncated_streams'],
                       'infrastructure_error': 'attachment timeout' if receipt['timed_out'] else None}
             verdict = judge(recipe, result)
+            observer_ref=None;observer_sha=None
+            if recipe.get('stdin_mode') == 'held_open':
+                report=folder/'observer/lotledger-observer.json'
+                if report.exists():
+                    # Observer output is private evidence, never authority for
+                    # overriding the captured child/container status or streams.
+                    observed=_json(report)
+                    trace=folder/'observer/lotledger-stdin.trace'
+                    if (observed.get('schema')!=1 or observed.get('exit_code')!=code
+                            or observed.get('trace_sha256')!=digest(_read(trace,2097152))):
+                        raise SubjectError('closed observer trace/report diverged')
+                    observer_ref=str(report);observer_sha=digest(canonical(observed))
+                elif code==2:
+                    raise UncertainJob('closed ordering probe lacks observer report; never replay execution')
             public = {'id': identity, 'public': recipe['public'], **verdict, 'receipt_ref': str(self.store.root / job_id / 'receipt.json'),
                       'exit_code': code, 'timed_out': result['timed_out'], 'oom_killed': value['State']['OOMKilled'],
                       'stdout_sha256': digest(job['stdout']), 'stderr_sha256': digest(job['stderr']),
+                      'observer_ref':observer_ref,'observer_sha256':observer_sha,
                       'duration_seconds': receipt['duration_seconds']}
             _write(folder / 'verdict.json', public)
             return public

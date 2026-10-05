@@ -47,6 +47,7 @@ def test_trial_freeze_covers_local_import_closure_and_loaded_modules():
     assert 'tests/test_lotledger_driver.py' in names
     assert 'tests/test_lotledger_reserved.py' in names
     assert 'experiments/lotledger_delivery_v1/image-users.json' in names
+    assert 'experiments/lotledger_delivery_v1/stdin-observer-controls.json' in names
     assert 'scripts/original_profile_quota.py' in names
     assert 'scripts/study_campaign.py' not in names
     assert 'scripts/software_study_harness.py' not in names
@@ -112,7 +113,7 @@ def test_original_quota_admission_keeps_unknown_age_and_exhaustion_controls(tmp_
 @pytest.mark.parametrize('key', ['public_catalog', 'public_context', 'mandate'])
 def test_registration_rejects_substituted_public_paths_before_loading_packet(tmp_path, key):
     from scripts.lotledger_delivery import PUBLIC_PATHS
-    value = {'schema':1, 'identity':'lotledger-delivery-v1', 'matrix_count':75,
+    value = {'schema':1, 'identity':'lotledger-delivery-v1', 'matrix_count':80,
              'registered_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
              'source_root':str(SOURCE), 'case':str(SOURCE/'cases/lotledger_v1'),
              'run_root':str(tmp_path/'run'),
@@ -149,7 +150,7 @@ def test_other_identity_never_admits_or_writes_synthetic_history(tmp_path):
             'source_sha256', 'images', 'routes', 'profiles', 'limits', 'public_catalog',
             'public_context', 'mandate', 'review', 'review_sha256', 'matrix_sha256', 'matrix_count'}
     value = {key: None for key in keys}
-    value.update({'schema':1, 'identity':'csvshape-delivery-v1', 'matrix_count':75})
+    value.update({'schema':1, 'identity':'csvshape-delivery-v1', 'matrix_count':80})
     registration.write_text(json.dumps(value))
     ledger = tmp_path / 'organon.json'
     ledger.write_bytes(b'{"schema":1,"events":[],"synthetic":true}\n')

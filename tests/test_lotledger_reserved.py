@@ -39,7 +39,7 @@ def ideal(recipe):
 @pytest.mark.parametrize('recipe', recipes(), ids=lambda r: r['id'])
 def test_declared_oracle_and_opposite_result(recipe):
     # Each declared expected result passes framing; each opposite outcome fails.
-    # This checks the judge, not correctness of the 75 domain oracles.
+    # This checks the judge, not correctness of the 80 domain oracles.
     good = ideal(recipe)
     assert judge(recipe, good)['status'] == 'pass'
     bad = execution(b'{}\n') if recipe['expected'] is None else execution(
@@ -99,9 +99,9 @@ def test_wrong_stock_order_duplicates_and_quantity_types_are_rejected():
 
 def test_matrix_allocation_boundaries_and_named_metamorphic_relations():
     matrix = recipes(); indexed = {r['id']: r for r in matrix}
-    assert len(indexed) == 75
+    assert len(indexed) == 80
     assert sum(r['public'] for r in matrix) == 2
-    assert [sum(r['group'] == g for r in matrix) for g in GROUPS] == [11, 10, 10, 13, 12, 19]
+    assert [sum(r['group'] == g for r in matrix) for g in GROUPS] == [11, 10, 10, 18, 12, 19]
     for n in (65536, 65537):
         assert len(bytes.fromhex(indexed['boundaries-bytes-' + str(n)]['stdin_hex'])) == n
     for n in (1000, 1001):
