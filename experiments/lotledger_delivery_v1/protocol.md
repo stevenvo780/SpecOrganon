@@ -31,6 +31,13 @@ admisión/evaluador, controles del evaluador ejecutados, hashes de todos esos
 fuentes, observaciones públicas, tests, revisión, contexto/catálogo públicos e
 imágenes inmutables. El registro debe preceder cualquier caso/primera admisión.
 Cambiar fuentes después del freeze invalida y cierra la identidad; no autoriza otra.
+El registro vincula todos los módulos del toolkit, los siete scripts importados o
+ejecutados por este trial, los módulos LotLedger, documentos/contexto/catálogo y
+los controles pertinentes. No incluye scripts históricos ajenos a esa ejecución.
+El guard de módulos cargados sigue rechazando cualquier import local no vinculado;
+un control adicional comprueba el cierre de imports de los scripts registrados.
+La revisión recibe completos todos los archivos vinculados, sin sustituir código
+por una lista de hashes. Esto delimita custodia de fuentes, no reduce el objetivo.
 
 Schema8: techo40 llamadas incluyendo auditoría final,180s/llamada,6000s desde
 primera admisión,128000bytes de prompt renderizado/llamada,3145728 acumulados,

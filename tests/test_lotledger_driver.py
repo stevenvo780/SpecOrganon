@@ -1,10 +1,11 @@
 """Read-only pre-registration admission checks; no case or model calls."""
 import hashlib
+import ast
 from pathlib import Path
 
 import pytest
 
-from scripts.lotledger_delivery import RegistrationError, verify_registration, verify_runtime_sources
+from scripts.lotledger_delivery import RegistrationError, verify_registration, verify_runtime_sources, registration_source_names
 
 
 SOURCE = Path(__file__).resolve().parents[1]
@@ -18,6 +19,30 @@ def bindings():
 
 def test_actual_loaded_source_modules_match_new_driver_checkout():
     verify_runtime_sources(SOURCE, bindings())
+
+
+def test_trial_freeze_covers_local_import_closure_and_loaded_modules():
+    names = registration_source_names(SOURCE,
+        public_catalog='experiments/lotledger_delivery_v1/public-models.json',
+        public_context='experiments/lotledger_delivery_v1/public-context.txt',
+        mandate='experiments/lotledger_delivery_v1/mandate.md')
+    frozen = {n: hashlib.sha256((SOURCE/n).read_bytes()).hexdigest() for n in names}
+    verify_runtime_sources(SOURCE, frozen)
+    # Each local import anywhere in the registered scripts, including functions,
+    # must itself be included. No executing trial dependency may be hash-only.
+    for name in names:
+        if not name.startswith('scripts/') or not name.endswith('.py'): continue
+        for node in ast.walk(ast.parse((SOURCE/name).read_text())):
+            modules = ([node.module] if isinstance(node, ast.ImportFrom) else
+                       [entry.name for entry in node.names] if isinstance(node, ast.Import) else [])
+            for module in modules:
+                if not module or not module.startswith(('scripts.', 'experiments.')): continue
+                relative = module.replace('.', '/') + '.py'
+                if (SOURCE/relative).is_file(): assert relative in names
+    assert 'src/specorganon/engine.py' in names
+    assert 'src/specorganon/role_jobs.py' in names
+    assert 'src/specorganon/docker_roles.py' in names
+    assert 'scripts/analyze_bread_survey.py' not in names
 
 
 def test_binding_cannot_omit_or_change_actual_loaded_core_module():

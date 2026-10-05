@@ -25,6 +25,31 @@ class RegistrationError(ValueError):
     pass
 
 
+RUNTIME_SCRIPTS = (
+    'lotledger_delivery.py', 'evaluate_lotledger_delivery.py', 'controller_native_role.py',
+    'study_cell_budget.py', 'study_campaign.py', 'software_study_harness.py', 'study_assessment.py',
+)
+
+
+def registration_source_names(source, *, public_catalog, public_context, mandate):
+    """Bind the complete toolkit and actual imported/executed trial dependencies.
+
+    Historical unrelated field-analysis scripts are not runtime dependencies of
+    this identity. Loaded-module checks below still refuse unbound source imports.
+    """
+    source = Path(source)
+    names = {'scripts/' + name for name in RUNTIME_SCRIPTS}
+    names |= {str(p.relative_to(source)) for p in (source / 'src/specorganon').rglob('*.py')}
+    names |= {str(p.relative_to(source)) for p in (source / 'experiments/lotledger_delivery_v1').rglob('*.py')}
+    names |= {'experiments/lotledger_delivery_v1/protocol.md',
+              'experiments/lotledger_delivery_v1/contract.md',
+              'experiments/lotledger_delivery_v1/public-evidence.md',
+              'experiments/lotledger_delivery_v1/public-sqlite-observations.json',
+              'experiments/software_comparison_v3/protocol-draft.md',
+              public_catalog, public_context, mandate}
+    return names
+
+
 def verify_runtime_sources(source, bindings):
     """Source-only registered runner cannot import a different checkout/wheel."""
     source = _safe(source)
@@ -85,17 +110,8 @@ def verify_registration(path, *, check_sources=True):
         raise RegistrationError('immutable images required')
     sources = value['source_sha256']
     if type(sources) is not dict or not sources: raise RegistrationError('source bindings required')
-    core = {'scripts/lotledger_delivery.py', 'scripts/study_cell_budget.py', 'scripts/study_campaign.py',
-            'scripts/controller_native_role.py', 'experiments/lotledger_delivery_v1/reserved.py',
-            'experiments/lotledger_delivery_v1/subjects.py', 'experiments/lotledger_delivery_v1/protocol.md',
-            'experiments/lotledger_delivery_v1/contract.md', 'experiments/lotledger_delivery_v1/public-evidence.md'}
-    core |= {str(p.relative_to(source)) for p in (source / 'src/specorganon').rglob('*.py')}
-    core |= {str(p.relative_to(source)) for p in (source / 'scripts').rglob('*.py')}
-    core |= {str(p.relative_to(source)) for p in (source / 'experiments/software_comparison_v1').rglob('*.py')}
-    core |= {str(p.relative_to(source)) for p in (source / 'experiments/lotledger_delivery_v1').rglob('*.py')}
-    core |= {'experiments/software_comparison_v3/protocol-draft.md',
-             'experiments/lotledger_delivery_v1/public-sqlite-observations.json'}
-    core |= {value[key] for key in ('public_catalog', 'public_context', 'mandate')}
+    core = registration_source_names(source, **{key: value[key]
+                                               for key in ('public_catalog', 'public_context', 'mandate')})
     if not core <= sources.keys(): raise RegistrationError('incomplete source freeze')
     for name, checksum in sources.items():
         p = Path(name)
