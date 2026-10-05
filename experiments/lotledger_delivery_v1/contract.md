@@ -13,7 +13,7 @@ humana, reducción de pérdidas, eficacia alimentaria o superioridad metodológi
 ## Interfaz y entrada
 
 Entregar `lotledger.py`, Python 3.12, biblioteca estándar. Invocación sin argumentos:
-`/opt/specorganon/venv/bin/python -E -s -B /delivery/lotledger.py`.
+`/opt/specorganon/venv/bin/python -E -s -B /input/delivery/lotledger.py`.
 Leer sólo stdin; cualquier argumento, incluido `--help`, produce error antes de
 leer stdin. No leer perfiles, red, archivos auxiliares ni variables para los datos.
 

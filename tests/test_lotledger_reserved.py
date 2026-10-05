@@ -1,10 +1,23 @@
 """Evaluator controls, not generated LotLedger deliveries or nine-phase cases."""
 import copy
 import json
+import hashlib
+from pathlib import Path
 
 import pytest
 
 from experiments.lotledger_delivery_v1.reserved import GROUPS, judge, recipes
+
+
+def test_original_sixty_recipe_bytes_are_preserved_in_current_matrix():
+    from specorganon.role_jobs import canonical
+    path = Path(__file__).resolve().parents[1]/'experiments/lotledger_delivery_v1/original60-recipes.json'
+    raw = path.read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == 'be25952e519f52a32947861737ae5fd7b8a53819ba34a0f4c5cf7bbff210fe61'
+    original = json.loads(raw)
+    assert len(original) == 60 and raw == canonical(original)
+    current = {row['id']:row for row in recipes()}
+    assert canonical([current[row['id']] for row in original]) == raw
 
 
 def execution(stdout=b'', stderr=b'', exit_code=0, **extra):

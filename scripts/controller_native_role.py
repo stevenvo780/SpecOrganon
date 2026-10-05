@@ -47,8 +47,6 @@ def strict(raw):
 def response_json(text):
     if type(text) is not str or not text.strip(): raise NativeRoleError("empty role response")
     text = text.strip()
-    if text.startswith("```json\n") and text.endswith("\n```"): text = text[8:-4]
-    elif text.startswith("```\n") and text.endswith("\n```"): text = text[4:-4]
     value = strict(text)
     if type(value) is not dict: raise NativeRoleError("role response must be one JSON object")
     return value

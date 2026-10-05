@@ -51,6 +51,31 @@ def test_trial_freeze_covers_local_import_closure_and_loaded_modules():
     assert 'scripts/study_campaign.py' not in names
     assert 'scripts/software_study_harness.py' not in names
     assert 'scripts/analyze_bread_survey.py' not in names
+    assert 'experiments/software_comparison_v3/protocol-draft.md' not in names
+    assert 'experiments/lotledger_delivery_v1/original60-recipes.json' in names
+
+
+@pytest.mark.parametrize('text', ['```json\n{}\n```', '```\n{}\n```', '{}\nCommentary', '{} {}'])
+def test_native_role_rejects_fences_and_extra_text(text):
+    from scripts.controller_native_role import response_json, NativeRoleError
+    with pytest.raises(NativeRoleError): response_json(text)
+
+
+def test_native_role_accepts_one_strict_object_only():
+    from scripts.controller_native_role import response_json, NativeRoleError
+    assert response_json(' \n{"value":1}\n') == {'value':1}
+    with pytest.raises(NativeRoleError): response_json('[]')
+
+
+def test_contract_invocation_matches_both_subject_and_native_test_transport():
+    folder = SOURCE / 'experiments/lotledger_delivery_v1'
+    assert '`/opt/specorganon/venv/bin/python -E -s -B /input/delivery/lotledger.py`' in (folder/'contract.md').read_text()
+    tree = ast.parse((folder/'subjects.py').read_text())
+    values = {node.value for node in ast.walk(tree) if isinstance(node, ast.Constant) and isinstance(node.value,str)}
+    assert '/input/delivery/lotledger.py' in values
+    assert '-w' in values and '/input/delivery' in values
+    native_tree = ast.parse((SOURCE/'src/specorganon/docker_roles.py').read_text())
+    assert '/input/delivery' in {node.value for node in ast.walk(native_tree) if isinstance(node, ast.Constant) and isinstance(node.value,str)}
 
 
 def test_original_quota_admission_keeps_unknown_age_and_exhaustion_controls(tmp_path):
