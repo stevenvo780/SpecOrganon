@@ -1,0 +1,63 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_______ test_rejected_snapshot_is_repaired_before_another_reviewer_call ________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-81/test_rejected_snapshot_is_repa0')
+
+    def test_rejected_snapshot_is_repaired_before_another_reviewer_call(tmp_path):
+        transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport); ctrl.step()
+        transport.result = {'schema': 1, 'verdict': 'reject', 'reason': 'Synthetic missing actor detail', 'findings': []}; ctrl.step()
+        transport.result = frame_response(); transport.result['manifest']['steps'][1]['text'] = 'Repaired synthetic actor detail'
+>       result = ctrl.step()
+                 ^^^^^^^^^^^
+
+tests/test_software_controller.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/software_controller.py:234: in step
+    return self._apply(progress, pending)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.software_controller.Controller object at 0x7f30c7babbc0>
+progress = {'history': [{'action': 'author', 'actor': 'agent:synthetic-author', 'cost': None, 'job_id': 'role-01-frame-author', ....d6ecff59597d4fbc173acec90f149dd5d972d9c6a', 'revision': 4, 'approval_trust': 'local_declared', ...}, ...}, 'schema': 1}
+pending = {'job_id': 'role-03-frame-review', 'phase': 'frame', 'action': 'review', 'source_state': {'project': {'approval_policy...d9a47934ab5279d6ecff59597d4fbc173acec90f149dd5d972d9c6a', 'revision': 4, 'approval_trust': 'local_declared', ...}, ...}
+
+    def _apply(self, progress, pending):
+        packet = pending['packet']; response = self._packet(pending, packet)
+        action = pending['action']; phase = pending['phase']
+        current = engine.get_state(self.case)
+        if pending['status'] == 'closed' and (fingerprint(current) != pending['source_fingerprint']
+                or self._files() != pending['source_files']):
+            raise ControllerError('case/delivery snapshot changed during role execution')
+        if action == 'author':
+            manifest = self._author_manifest(pending, response)
+            pending['status'] = 'applying'; _write(self.root / 'progress.json', progress)
+            self._write_files(pending, response['files'])
+            run_manifest(self.case, manifest, actor=packet['actor'])
+            result = {'action': action, 'phase': phase, 'reason': response['reason']}
+        else:
+            verdict = response.get('verdict'); reason = response.get('reason')
+            if type(verdict) is not str or verdict not in {'accept', 'reject', 'inconclusive'} or type(reason) is not str or not reason.strip():
+>               raise ControllerError('invalid independent judgment')
+E               specorganon.software_controller.ControllerError: invalid independent judgment
+
+src/specorganon/software_controller.py:180: ControllerError
+____ test_no_replacement_review_when_author_changes_nothing_after_rejection ____
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-81/test_no_replacement_review_whe0')
+
+    def test_no_replacement_review_when_author_changes_nothing_after_rejection(tmp_path):
+        transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport); ctrl.step()
+        transport.result = {'schema': 1, 'verdict': 'reject', 'reason': 'Synthetic failure retained', 'findings': []}; ctrl.step()
+        transport.result = frame_response()
+>       with pytest.raises(ControllerError, match='material'): ctrl.step()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'material'
+E         Actual message: 'invalid independent judgment'
+
+tests/test_software_controller.py:102: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_software_controller.py::test_rejected_snapshot_is_repaired_before_another_reviewer_call
+FAILED tests/test_software_controller.py::test_no_replacement_review_when_author_changes_nothing_after_rejection
+2 failed, 8 deselected in 0.09s

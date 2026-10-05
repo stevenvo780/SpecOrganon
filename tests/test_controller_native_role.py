@@ -6,6 +6,36 @@ import pytest
 from scripts.controller_native_role import NativeRoleError, native_argv, parse_native, response_json
 
 
+def test_gemini_role_documents_are_sent_on_stdin_not_exposed_in_argv():
+    prompt = 'PUBLIC_UNTRUSTED_DOCUMENT_MARKER_20261005'
+    argv = native_argv('gemini', 'gemini-3.1-pro-high', prompt)
+    assert prompt not in argv
+    assert argv[-3:] == ['--input-format', 'stream-json', '--print=']
+
+
+def test_actual_gemini_stdin_stream_transport_stays_semantically_inconclusive():
+    from scripts.controller_native_role import parse_gemini_stream
+    from pathlib import Path
+    raw = Path('goals/autonomous-software-v1/evidence/gemini-stream-surface-03-native.stdout.jsonl').read_text()
+    result, usage = parse_gemini_stream(raw)
+    assert result['verdict'] == 'inconclusive' and result['nonce'] == 'gemini-stream-20261005-v3'
+    assert usage['total_tokens'] == 13147
+
+
+@pytest.mark.parametrize('fault', ['tool', 'duplicate_turn', 'wrong_text', 'after_result', 'malformed_step'])
+def test_gemini_stream_refuses_tool_or_unbound_completion(fault):
+    from scripts.controller_native_role import parse_gemini_stream
+    from pathlib import Path
+    import json
+    events = [json.loads(line) for line in Path('goals/autonomous-software-v1/evidence/gemini-stream-surface-03-native.stdout.jsonl').read_text().splitlines()]
+    if fault == 'tool': events[2]['step_update']['step_type'] = 'run_command'
+    elif fault == 'duplicate_turn': events.insert(2, events[1])
+    elif fault == 'wrong_text': events[-1]['result']['response'] = '{"verdict":"accept"}'
+    elif fault == 'after_result': events.append(events[-1])
+    else: events[2]['step_update']['step_type'] = []
+    with pytest.raises(NativeRoleError): parse_gemini_stream('\n'.join(json.dumps(v) for v in events))
+
+
 def test_gemini_native_usage_is_preserved_and_missing_usage_stays_unknown():
     value = {"status": "SUCCESS", "response": '{"verdict":"reject","reason":"insufficient evidence"}'}
     response, usage = parse_native("gemini", json.dumps(value))
@@ -177,3 +207,36 @@ def test_actual_native_startup_error_keeps_followup_inconclusive():
     with pytest.raises(NativeRoleError): parse_native('codex', raw)
     text = json.loads((evidence / 'component-review-04-textual-verdict.json').read_text())
     assert text['verdict'] == 'reject' and text['tests_executed'] is False
+
+
+def test_public_model_catalog_normalizes_only_role_tool_surface():
+    from scripts.controller_native_role import role_model_catalog
+    original = {'slug': 'gpt-6.1-sol', 'description': 'fixture model', 'tool_mode': 'code_mode_only',
+                'shell_type': 'unified_exec', 'apply_patch_tool_type': 'freeform',
+                'experimental_supported_tools': ['fake_tool'], 'supports_search_tool': True, 'web_search_tool_type': 'text'}
+    result = role_model_catalog({'models': [original]}, 'gpt-6.1-sol')
+    model = result['models'][0]
+    assert model['slug'] == original['slug'] and model['description'] == original['description']
+    assert original['tool_mode'] == 'code_mode_only'
+    assert model['tool_mode'] == 'direct' and model['shell_type'] == 'disabled'
+    assert model['apply_patch_tool_type'] is None and model['experimental_supported_tools'] == []
+    assert model['supports_search_tool'] is False and model['web_search_tool_type'] == original['web_search_tool_type']
+    with pytest.raises(NativeRoleError): role_model_catalog({'models': [original, original]}, original['slug'])
+    with pytest.raises(NativeRoleError): role_model_catalog({'models': [original]}, 'not-catalogued')
+
+
+def test_model_catalog_override_is_bound_to_same_preflight_and_native_request(tmp_path, monkeypatch):
+    from scripts.controller_native_role import codex_feature_argv
+    monkeypatch.setenv('CODEX_HOME', str(tmp_path))
+    catalog = tmp_path / 'catalog.json'
+    args = native_argv('codex', 'gpt-6.1-sol', 'fixture', model_catalog=catalog)
+    override = 'model_catalog_json=' + json.dumps(str(catalog))
+    assert override in args and override in codex_feature_argv(args)
+
+
+def test_actual_restricted_catalog_native_transport_stays_semantically_inconclusive():
+    from pathlib import Path
+    e = Path(__file__).resolve().parents[1] / 'goals/autonomous-software-v1/evidence'
+    result, usage = parse_native('codex', (e / 'native-surface-01-native-call.stdout.jsonl').read_text())
+    assert result['verdict'] == 'inconclusive' and result['nonce'] == 'native-surface-v1-20261005'
+    assert usage == json.loads((e / 'native-surface-01-receipt.json').read_text())['usage_reported']

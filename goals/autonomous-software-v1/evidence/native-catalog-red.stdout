@@ -1,0 +1,27 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_________ test_public_model_catalog_normalizes_only_role_tool_surface __________
+
+    def test_public_model_catalog_normalizes_only_role_tool_surface():
+>       from scripts.controller_native_role import role_model_catalog
+E       ImportError: cannot import name 'role_model_catalog' from 'scripts.controller_native_role' (/datos/workspaces/personal/SpecOrganon/scripts/controller_native_role.py)
+
+tests/test_controller_native_role.py:183: ImportError
+__ test_model_catalog_override_is_bound_to_same_preflight_and_native_request ___
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-78/test_model_catalog_override_is0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fbdfb1c3470>
+
+    def test_model_catalog_override_is_bound_to_same_preflight_and_native_request(tmp_path, monkeypatch):
+        from scripts.controller_native_role import codex_feature_argv
+        monkeypatch.setenv('CODEX_HOME', str(tmp_path))
+        catalog = tmp_path / 'catalog.json'
+>       args = native_argv('codex', 'gpt-6.1-sol', 'fixture', model_catalog=catalog)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: native_argv() got an unexpected keyword argument 'model_catalog'
+
+tests/test_controller_native_role.py:202: TypeError
+=========================== short test summary info ============================
+FAILED tests/test_controller_native_role.py::test_public_model_catalog_normalizes_only_role_tool_surface
+FAILED tests/test_controller_native_role.py::test_model_catalog_override_is_bound_to_same_preflight_and_native_request
+2 failed, 34 deselected in 0.07s

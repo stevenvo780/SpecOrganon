@@ -1,7 +1,8 @@
 # Componentes de ejecución — versión de ingeniería 2026-10-05
 
-Estos componentes están en desarrollo. No forman todavía el controlador de
-nueve fases ni una entrega LogLens. La revisión independiente
+Estos componentes están en desarrollo. Ya existe el loop externo de fases,
+el transporte Docker y el ejecutor, pero no hay entrega LogLens ni aceptación
+del controlador completo. La revisión independiente
 `component-review-03` rechazó la versión inicial; su transcripción y los fallos
 reproducidos se conservan. El follow-up `component-review-04` devolvió otro rechazo
 textual, con una validación de tipos malformados luego reparada. Su cliente nativo
@@ -63,8 +64,9 @@ La entrada nueva tiene este contrato (los pedidos históricos quedan intactos):
 
 `role` permite `review` o `author`. El reader limita tamaño antes de leer,
 rechaza enlaces y valida tipos. El prompt renderizado y el envelope **completo**
-deben caber en el límite; un prompt Gemini en argv puede quedar rechazado antes
-de ejecutar por el overhead del envelope. Codex recibe stdin duplex acotado.
+deben caber en el límite. Ambos clientes reciben stdin duplex acotado; Gemini
+usa un único mensaje `event=user` por `stream-json`. El payload codificado
+tiene límite de 128000 bytes. Los documentos no se colocan en argv.
 Las instrucciones exactas del contrato de salida deben incluirse en el pedido.
 
 Una revisión devuelve schema 1, verdict accept/reject/inconclusive, reason no
@@ -93,19 +95,62 @@ El parser Codex exige thread.started → turn.started → ítems de texto válid
 turn.completed, un único mensaje final asociado a ese turno y ningún evento
 posterior/desconocido/herramienta. Un formato nativo nuevo queda inconcluso hasta
 adaptarlo explícitamente. AGY exige SUCCESS, respuesta no vacía y ausencia de
-acciones denegadas. Se usa el parser JSON estricto del motor, que rechaza claves
+acciones denegadas. La ruta Gemini de producción exige init, un user_input,
+un agent_response cerrado y result coincidente de un solo turno. Rechaza pasos
+de herramientas, eventos desconocidos, turnos duplicados y texto de cierre
+distinto de los deltas observados. Los fixtures JSON históricos quedan separados
+de esa ruta. Se usa el parser JSON estricto del motor, que rechaza claves
 duplicadas, no finitos y pérdida decimal; no extrae JSON de narrativas. Usage
 faltante permanece desconocido y no se inventa un coste.
 
+## Controlador y contenedores actuales
+
+`specorganon.software_controller.Controller` conserva su checkpoint privado,
+consulta la siguiente tarea, aplica puts guardados del autor, solicita juicios
+separados de conformidad con el mandato y de fase, y mide tests con el ejecutor.
+Un rechazo conserva la fase pendiente y exige cambio material antes de otro
+juicio. Una prueba fallida requiere trabajo nuevo del autor antes de medir otra
+vez. Aprobaciones y revisiones comparten el máximo de dos juicios por fase.
+
+`specorganon.docker_roles.DockerRoles` fija imágenes por ID, snapshots RO,
+journal del host inaccesible a los roles y perfiles originales montados sólo
+en su cliente. Los tests usan otro contenedor sin red ni perfiles. Nombre,
+etiqueta e intención se guardan antes de crear, y el ID antes de arrancar.
+Un attach interrumpido sin recibo mata el contenedor propio al reconciliar y
+sigue inconcluso; no infiere un recibo perdido desde el exit del contenedor.
+El launcher explícito es `scripts/autonomous_software_controller.py --help`.
+Su compuerta final exige nueve fases vigentes, trazas, recibos de test verificados,
+bytes revisados y README. No publica ni despliega implícitamente.
+
+`controller-04-receipt.json` mide **81 pruebas host**, incluidos SIGKILL tras
+cierre y después de puts/review/advance con contenido sintético. Las dos pruebas
+reales Docker están en `docker-controller-01-receipt.json` y
+`controller-02-receipt.json`: cierre reutilizado sin repetir y dueño muerto
+antes del recibo que queda inconcluso tras parar su contenedor. Son controles
+de ingeniería; C1–C8 siguen sin veredicto formal. Candidate07 es la base limpia
+de tests y todavía no contiene estos módulos nuevos en su wheel.
+
+`controller-review-05` fue un rechazo real de Gemini. El bloqueo de fingerprint
+no se reprodujo en los puntos ensayados, porque `applying` ya usa operaciones
+idempotentes. El prompt Gemini por argv fue reemplazado por stdin. Los intentos
+de texto sin argumento/vacío fallaron antes de generar; guion produjo una
+respuesta nativa que el parser rechazó porque no había recibido el pedido.
+El stream se descubrió con dos errores de entrada sin turnos y una observación
+nativa; `gemini-stdin-surface-04` probó luego el adaptador completo con nonce,
+usage y juicio deliberadamente inconcluso. Los fallos y rechazos se conservan.
+
+Codex conserva el evento de arranque antiguo. La ruta nueva selecciona un
+catálogo público de la versión 0.160.0 fijado por commit; cambia sólo el modo
+local de herramientas del modelo, sin cambiar modelo remoto, cuenta o perfil.
+`native-surface-01` midió un turno nativo sin errores/herramientas, con juicio
+deliberadamente inconcluso. Ningún probe de transporte acepta una fase.
+
 ## Pendientes que mantienen la fase abierta
 
-- Launcher Docker con admisión, journal host inaccesible a roles, límites,
-  configuración efectiva y recuperación de contenedores después de SIGKILL.
-- Resolver explícitamente el modo nativo de herramientas/Code Mode: la ausencia
-  del host emitió un error de arranque en el follow-up; no se suprime el evento
-  para aparentar éxito ni se acepta su respuesta automáticamente.
-- Loop de fases, manifests con precondiciones, juicio de decisiones delegadas,
-  registro de revisiones reales y medición de tests fuera del autor.
+- Cerrar revisión independiente y recuperación de aplicación parcial/temporales
+  de escritura después de SIGKILL; no basta con los puntos probados.
+- Verificar una nueva wheel limpia con módulos y launcher actuales y precisar
+  fuentes efectivas de configuración más allá del archivo conocido.
 - Entrega real LogLens y controles C1–C8, con veredictos individuales.
 - Nueva revisión independiente de los cambios y del controlador completo.
 - Protocolo reservado N/S/T de dos familias, ablación, paquetes y publicación.

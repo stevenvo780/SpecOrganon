@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "argv": [
+    "/datos/workspaces/personal/SpecOrganon/.venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_docker_roles.py",
+    "--basetemp=/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/docker-controller-01-test"
+  ],
+  "cwd": "/datos/workspaces/personal/SpecOrganon",
+  "environment_override": {
+    "SPECORGANON_DOCKER_COMPONENT_TESTS": "1"
+  },
+  "before": {
+    "src/specorganon/docker_roles.py": "de19213a4642877027e4aa8e70a825cdffbe1e70144a969dc8608f9de2c898af",
+    "src/specorganon/software_controller.py": "fee46b85577457c8dde987cad1511e01de99849bb96f910c77a33bd66b645e87",
+    "src/specorganon/role_jobs.py": "61c5428afa521f157c4e28b844ba4279df7173728accf05b67c2b153b4adc450",
+    "tests/test_docker_roles.py": "f4ffe4d9678b9398b5aaf67e8c551cdae3a59ef6eb69d9b09273ad7b057f16ed"
+  },
+  "timeout_seconds": 60,
+  "scope": "two prospective real Docker engineering scenarios, zero native model calls; not formal C1-C8 acceptance",
+  "expected": "closed receipt avoids second container command; SIGKILL before host receipt stops owned container and stays uncertain",
+  "rerun_rule": "retain failure, repair and version before new engineering attempt"
+}

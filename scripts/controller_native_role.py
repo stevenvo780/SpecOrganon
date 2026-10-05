@@ -17,7 +17,7 @@ import subprocess
 import sys
 import tomllib
 
-from specorganon.role_jobs import JobStore, JobError, _read, canonical, digest
+from specorganon.role_jobs import JobStore, JobError, _read, _write, canonical, digest
 from specorganon.ledger import strict_json_loads
 
 
@@ -52,6 +52,53 @@ def response_json(text):
     value = strict(text)
     if type(value) is not dict: raise NativeRoleError("role response must be one JSON object")
     return value
+
+
+def parse_gemini_stream(raw):
+    """Observed AGY stream-json: one user/agent turn, no tool/unknown events."""
+    state = 'initial'; conversation = None; text = ''; agent_done = False; user_seen = False
+    for line in raw.splitlines():
+        if not line.strip(): continue
+        value = strict(line)
+        if type(value) is not dict or type(value.get('event')) is not str:
+            raise NativeRoleError('invalid Gemini stream event')
+        event = value['event']
+        if event == 'init' and state == 'initial':
+            if (set(value) != {'event', 'conversation_id', 'init'} or type(value['conversation_id']) is not str
+                    or not value['conversation_id'] or type(value['init']) is not dict):
+                raise NativeRoleError('invalid Gemini stream initialization')
+            conversation = value['conversation_id']; state = 'turn'
+        elif event == 'step_update' and state == 'turn':
+            step = value.get('step_update')
+            if (set(value) != {'event', 'step_update'} or type(step) is not dict
+                    or step.get('conversation_id') != conversation or type(step.get('step_index')) is not int
+                    or type(step.get('step_type')) is not str or type(step.get('state')) is not str):
+                raise NativeRoleError('invalid Gemini stream step')
+            if step['step_type'] == 'user_input':
+                if (user_seen or step['step_index'] != 0 or step['state'] != 'DONE'
+                        or set(step) != {'conversation_id', 'step_index', 'state', 'step_type'}):
+                    raise NativeRoleError('unexpected Gemini stream user turn')
+                user_seen = True
+            elif step['step_type'] == 'agent_response':
+                if (not user_seen or agent_done or step['step_index'] != 1 or step['state'] not in {'ACTIVE', 'DONE'}
+                        or type(step.get('text_delta')) is not str
+                        or not set(step) <= {'conversation_id', 'step_index', 'state', 'step_type',
+                                            'text_delta', 'duration_seconds', 'usage'}):
+                    raise NativeRoleError('unexpected Gemini stream response')
+                text += step['text_delta']; agent_done = step['state'] == 'DONE'
+            else: raise NativeRoleError('text-only Gemini role invoked a tool or unknown step')
+        elif event == 'result' and state == 'turn':
+            result = value.get('result')
+            if (set(value) != {'event', 'result'} or type(result) is not dict or not agent_done
+                    or result.get('conversation_id') != conversation or result.get('status') != 'SUCCESS'
+                    or result.get('error') or result.get('denied_actions')
+                    or type(result.get('num_turns')) is not int or result['num_turns'] != 1
+                    or result.get('response') != text or not text.strip()):
+                raise NativeRoleError('Gemini stream did not close its exact single text turn')
+            final = response_json(text); usage = result.get('usage'); state = 'complete'
+        else: raise NativeRoleError('unknown or unordered Gemini stream event')
+    if state != 'complete': raise NativeRoleError('incomplete Gemini native stream')
+    return final, usage
 
 
 def parse_native(provider, raw):
@@ -181,16 +228,18 @@ def execution_identity(provider, executable):
             "other_effective_configuration": "unknown; trusted launcher/profile boundary"}
 
 
-def native_argv(provider, model, prompt):
+def native_argv(provider, model, prompt, *, model_catalog=None):
     if provider == "gemini":
         return ["/usr/local/bin/agy", "--model", model, "--sandbox", "--disable-slash-commands",
-                "--print-timeout", "180s", "--output-format", "json", "--print", prompt]
+                "--print-timeout", "180s", "--output-format", "stream-json", "--input-format", "stream-json", "--print="]
     if provider != "codex": raise NativeRoleError("unsupported provider")
     args = ["/usr/local/bin/codex", "exec", "-s", "read-only", "-c", 'approval_policy="never"']
     # These names are verified in Codex 0.160.0. Overrides affect this invocation;
     # they do not modify the existing profile or authorize additional tools.
     for feature in CODEX_TEXT_ONLY_DISABLED:
         args += ["--disable", feature]
+    if model_catalog is not None:
+        args += ["-c", "model_catalog_json=" + json.dumps(str(model_catalog))]
     home = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex")))
     config = home / "config.toml"
     if config.exists():
@@ -204,6 +253,22 @@ def native_argv(provider, model, prompt):
             args += ["-c", "mcp_servers." + name + ".enabled=false"]
     args += ["-c", 'web_search="disabled"', "-m", model, "-C", "/input", "--skip-git-repo-check", "--json", "-"]
     return args
+
+
+def role_model_catalog(value, model):
+    """Project public model metadata into the invocation's restricted surface.
+
+    This is not a session/profile copy or a change of remote model. The original
+    public catalog stays read-only; retain all metadata except local tool fields.
+    """
+    if type(value) is not dict or type(value.get("models")) is not list:
+        raise NativeRoleError("invalid public model catalog")
+    found = [entry for entry in value["models"] if type(entry) is dict and entry.get("slug") == model]
+    if len(found) != 1: raise NativeRoleError("requested model must occur once in public catalog")
+    restricted = dict(found[0])
+    restricted.update(tool_mode="direct", shell_type="disabled", apply_patch_tool_type=None,
+                      experimental_supported_tools=[], supports_search_tool=False)
+    return {"models": [restricted]}
 
 
 def codex_feature_argv(native_args):
@@ -236,17 +301,33 @@ def main(argv=None):
     parser.add_argument("--model", required=True)
     parser.add_argument("--request", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--model-catalog", type=Path)
     options = parser.parse_args(argv)
     options.output_dir.mkdir(parents=True, exist_ok=True)
     raw = read_request(options.request)
     request, prompt = render_prompt(raw)
     executable = "/usr/local/bin/codex" if options.provider == "codex" else "/usr/local/bin/agy"
     metadata = execution_identity(options.provider, executable)
-    args = native_argv(options.provider, options.model, prompt)
+    catalog_metadata = {}; catalog_path = None
+    if options.provider == "codex":
+        if options.model_catalog is None: raise NativeRoleError("Codex role requires a pinned public model catalog")
+        public = _read(options.model_catalog)
+        normalized = canonical(role_model_catalog(strict(public.decode()), options.model))
+        catalog_path = options.output_dir / "runtime-model-catalog.json"
+        if catalog_path.exists():
+            if _read(catalog_path) != normalized: raise NativeRoleError("runtime model catalog changed")
+        else: _write(catalog_path, strict(normalized.decode()))
+        catalog_metadata = {"public_model_catalog_sha256": digest(public),
+                            "runtime_model_catalog_sha256": digest(normalized),
+                            "tool_surface_override": "direct; no shell, patch, search or experimental tools"}
+    elif options.model_catalog is not None: raise NativeRoleError("model catalog is only supported for Codex")
+    args = native_argv(options.provider, options.model, prompt, model_catalog=catalog_path)
     if metadata != execution_identity(options.provider, executable):
         raise NativeRoleError("provider configuration/executable changed before dispatch")
-    payload = prompt.encode() if options.provider == "codex" else None
+    payload = (canonical({'event': 'user', 'message': {'role': 'user',
+               'content': [{'type': 'text', 'text': prompt}]}}) + b'\n') if options.provider == 'gemini' else prompt.encode()
     environment = dict(os.environ)
+    metadata = {**metadata, **catalog_metadata}
     store = JobStore(options.output_dir / "native", max_jobs=2)
     if options.provider == "codex":
         preflight = store.execute("configuration-check", codex_feature_argv(args),
@@ -263,11 +344,16 @@ def main(argv=None):
     if (receipt["exit_code"] != 0 or receipt["timed_out"] or receipt["truncated_streams"]
             or receipt.get("stdin_complete") is False):
         raise NativeRoleError("native process failed, timed out, truncated or could not receive full input")
-    response, usage = parse_native(options.provider, job["stdout"].decode())
-    if {k: v for k, v in metadata.items() if k != "effective_features"} != execution_identity(options.provider, args[0]):
+    response, usage = (parse_gemini_stream(job["stdout"].decode()) if options.provider == 'gemini'
+                       else parse_native(options.provider, job["stdout"].decode()))
+    if {k: v for k, v in metadata.items() if k != "effective_features" and k not in catalog_metadata} != execution_identity(options.provider, args[0]):
         raise NativeRoleError("provider configuration/executable changed during execution")
+    if catalog_path is not None and (digest(_read(catalog_path)) != catalog_metadata["runtime_model_catalog_sha256"]
+            or digest(_read(options.model_catalog)) != catalog_metadata["public_model_catalog_sha256"]):
+        raise NativeRoleError("model catalog changed during execution")
     validate_result(response, request["role"])
     print(json.dumps({"schema": 1, "provider": options.provider, "model": options.model,
+                      "request_sha256": digest(raw), "invocation_metadata": metadata,
                       "native_exit_code": receipt["exit_code"], "usage_reported": usage,
                       "result": response}, ensure_ascii=False, allow_nan=False))
 

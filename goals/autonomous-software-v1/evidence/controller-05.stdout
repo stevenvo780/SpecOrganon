@@ -1,0 +1,16 @@
+..F..................................................................... [ 85%]
+............                                                             [100%]
+=================================== FAILURES ===================================
+_ test_actual_test_timeout_preserves_subject_and_attachment_codes_without_success _
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/controller-05-test/test_actual_test_timeout_prese0')
+
+    def test_actual_test_timeout_preserves_subject_and_attachment_codes_without_success(tmp_path):
+>       transport = DockerRoles(tmp_path / 'transport', **OPTIONS, test_timeout_seconds=1)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: DockerRoles.__init__() got an unexpected keyword argument 'test_timeout_seconds'
+
+tests/test_docker_roles.py:99: TypeError
+=========================== short test summary info ============================
+FAILED tests/test_docker_roles.py::test_actual_test_timeout_preserves_subject_and_attachment_codes_without_success
+1 failed, 83 passed in 5.94s

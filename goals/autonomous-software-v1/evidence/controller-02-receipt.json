@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "argv": [
+    "/datos/workspaces/personal/SpecOrganon/.venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_docker_roles.py",
+    "tests/test_software_controller.py",
+    "tests/test_role_jobs.py",
+    "tests/test_controller_native_role.py",
+    "--basetemp=/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/controller-02-test"
+  ],
+  "cwd": "/datos/workspaces/personal/SpecOrganon",
+  "before": {
+    "src/specorganon/docker_roles.py": "e1eaa8d0a4f764701f7785ece9aae45d27f8af28427299fdd2578a858c052253",
+    "src/specorganon/software_controller.py": "c4cf42400abb50a5a1e03977cef627f3b072cf6ce317cf73ee7256e3b91c9539",
+    "src/specorganon/role_jobs.py": "61c5428afa521f157c4e28b844ba4279df7173728accf05b67c2b153b4adc450",
+    "scripts/controller_native_role.py": "4a7d63846a5d945f13f9c1796565c945fd59a8d98f88f06dda087911d9e1b1b3",
+    "scripts/autonomous_software_controller.py": "3878ace2f4319a9619fec8120fb31072cbc2b787662c835c327f0898516dddf7",
+    "tests/test_docker_roles.py": "f4ffe4d9678b9398b5aaf67e8c551cdae3a59ef6eb69d9b09273ad7b057f16ed",
+    "tests/test_software_controller.py": "ba67466ca71d0edf2ec514d5c06a170f95e385bb5b5aa1d8f67a4e73d1605a8a",
+    "tests/test_role_jobs.py": "a1d52fc507868d458592b5f263dea3ccce3cdd51572b7173e63284d07ed7b549",
+    "tests/test_controller_native_role.py": "f6665dbcf820ba332561152ee1142a0421015ab70e40065fd2d22b0a773e4d7b"
+  },
+  "environment_override": {
+    "SPECORGANON_DOCKER_COMPONENT_TESTS": "1"
+  },
+  "timeout_seconds": 60,
+  "scope": "new engineering version, zero provider calls, synthetic engine packets and real subprocess/Docker controls",
+  "reason_for_recheck": "Docker control plane now bounds reads and reaps process groups; failed-test repairs and role budgets changed. Previous scenario pass retained; no confirmatory model rerun.",
+  "after": {
+    "src/specorganon/docker_roles.py": "e1eaa8d0a4f764701f7785ece9aae45d27f8af28427299fdd2578a858c052253",
+    "src/specorganon/software_controller.py": "c4cf42400abb50a5a1e03977cef627f3b072cf6ce317cf73ee7256e3b91c9539",
+    "src/specorganon/role_jobs.py": "61c5428afa521f157c4e28b844ba4279df7173728accf05b67c2b153b4adc450",
+    "scripts/controller_native_role.py": "4a7d63846a5d945f13f9c1796565c945fd59a8d98f88f06dda087911d9e1b1b3",
+    "scripts/autonomous_software_controller.py": "3878ace2f4319a9619fec8120fb31072cbc2b787662c835c327f0898516dddf7",
+    "tests/test_docker_roles.py": "f4ffe4d9678b9398b5aaf67e8c551cdae3a59ef6eb69d9b09273ad7b057f16ed",
+    "tests/test_software_controller.py": "ba67466ca71d0edf2ec514d5c06a170f95e385bb5b5aa1d8f67a4e73d1605a8a",
+    "tests/test_role_jobs.py": "a1d52fc507868d458592b5f263dea3ccce3cdd51572b7173e63284d07ed7b549",
+    "tests/test_controller_native_role.py": "f6665dbcf820ba332561152ee1142a0421015ab70e40065fd2d22b0a773e4d7b"
+  },
+  "inputs_unchanged": true,
+  "exit_code": 0,
+  "timed_out": false,
+  "duration_seconds": 6.017330652000965,
+  "stdout_sha256": "76c6ec8a219acd968997b61a6a5b9161cc4c5aaa46f601ddd1fe08ea4f24bf1f",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

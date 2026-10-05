@@ -371,6 +371,9 @@ class JobStore:
                         selector.unregister(key.fileobj); key.fileobj.close(); continue
                     name = key.data; room = self.policy["max_stream_bytes"] - sizes[name]
                     streams[name].write(block[:room]); sizes[name] += min(len(block), room)
+                    # Keep observed prefixes inspectable when this owner is
+                    # SIGKILLed before a terminal receipt. This is not closure.
+                    streams[name].flush()
                     if len(block) > room and name not in truncated:
                         truncated.append(name)
                         if stopped_at is None:

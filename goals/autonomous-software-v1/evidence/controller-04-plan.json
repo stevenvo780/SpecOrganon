@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "argv": [
+    "/datos/workspaces/personal/SpecOrganon/.venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_controller_recovery.py",
+    "tests/test_software_controller.py",
+    "tests/test_role_jobs.py",
+    "tests/test_controller_native_role.py",
+    "--basetemp=/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/controller-04-test"
+  ],
+  "cwd": "/datos/workspaces/personal/SpecOrganon",
+  "before": {
+    "src/specorganon/docker_roles.py": "e1eaa8d0a4f764701f7785ece9aae45d27f8af28427299fdd2578a858c052253",
+    "src/specorganon/software_controller.py": "90b537db072ad7b2f01bbcc77a09762c1817adf51357698c547bd2e34164f5a2",
+    "src/specorganon/role_jobs.py": "61c5428afa521f157c4e28b844ba4279df7173728accf05b67c2b153b4adc450",
+    "scripts/controller_native_role.py": "329f7caa60651602bc6a08d37ddc6464111f04de56048fc3b65bb37559a1ca15",
+    "scripts/autonomous_software_controller.py": "3878ace2f4319a9619fec8120fb31072cbc2b787662c835c327f0898516dddf7",
+    "tests/test_docker_roles.py": "f4ffe4d9678b9398b5aaf67e8c551cdae3a59ef6eb69d9b09273ad7b057f16ed",
+    "tests/test_software_controller.py": "ba67466ca71d0edf2ec514d5c06a170f95e385bb5b5aa1d8f67a4e73d1605a8a",
+    "tests/test_role_jobs.py": "a1d52fc507868d458592b5f263dea3ccce3cdd51572b7173e63284d07ed7b549",
+    "tests/test_controller_native_role.py": "4730a2ce8519775311292356fc176dcf551a80089e87664beacaf93a2feee391",
+    "tests/test_controller_recovery.py": "b66e3a51aee50804f49dcf78ed27cc78bd6b95e5330df1233fca420921a2694d"
+  },
+  "timeout_seconds": 30,
+  "scope": "engineering component guards, real subprocess/SIGKILL with synthetic author/review content; no native generation or phase semantic acceptance",
+  "reason_for_recheck": "new strict Gemini stream parser, actual observed transcript, and public artifact guidance; no repeat of unchanged real Docker scenarios"
+}
