@@ -26,6 +26,22 @@ class EvaluationError(ValueError):
     pass
 
 
+def invocation_identity(logical_id, case):
+    """Bind a recipe's logical identity to a safe internal execution handle.
+
+    Do not include mutable recipe bytes in the handle: changed inputs must
+    encounter the old plan and be rejected rather than launch another subject.
+    """
+    if (type(logical_id) is not str or not logical_id or type(case) is not dict
+            or type(case.get('id')) is not str or case['id'] != logical_id):
+        raise EvaluationError('invalid or unbound logical invocation identity')
+    try:
+        logical_id.encode('utf-8', errors='strict')
+    except UnicodeError as exc:
+        raise EvaluationError('logical invocation identity must be UTF-8') from exc
+    return digest(canonical({'namespace': 'specorganon.reserved.invocation.v3', 'id': logical_id}))
+
+
 def delivery_inventory(root):
     result = {}
     for path in root.rglob("*"):
@@ -192,11 +208,9 @@ class ReservedDocker:
     """One private journal per opaque delivery, immutable inputs, no reruns."""
     def __init__(self, root, image):
         self.root = _safe(root)
-        self.root.mkdir(parents=True, mode=0o700, exist_ok=True)
         self.image = DockerRoles._image(image)
-        self.store = JobStore(self.root / "journal", max_jobs=512, max_elapsed_seconds=6000)
         self.collector = Path(__file__).with_name('trace_collector.py')
-        policy = {"schema": 2, "image": self.image, "invocation_seconds": 3,
+        policy = {"schema": 3, "image": self.image, "invocation_seconds": 3,
                   "attach_seconds": 10, "memory": "1g", "cpus": "2", "pids": 128,
                   "stream_cap_bytes": 2_097_152,
                   "collector_sha256": digest(self.collector.read_bytes()),
@@ -208,6 +222,8 @@ class ReservedDocker:
         path = self.root / "policy.json"
         if path.exists() and _json(path) != policy:
             raise EvaluationError("reserved policy changed; no silent migration")
+        self.root.mkdir(parents=True, mode=0o700, exist_ok=True)
+        self.store = JobStore(self.root / "journal", max_jobs=512, max_elapsed_seconds=6000)
         if not path.exists():
             _write(path, policy)
 
@@ -239,11 +255,13 @@ class ReservedDocker:
         _write(folder / "uncertain.json", {"status": "inconclusive",
                                            "handle_missing": value is None, "restarted": False})
 
-    def run(self, job_id, case, files):
+    def run(self, logical_id, case, files):
+        # Identity failures do not even create a lock or invocation directory.
+        job_id = invocation_identity(logical_id, case)
         with self._lock():
-            return self._run(job_id, case, files)
+            return self._run(job_id, case, files, logical_id=logical_id)
 
-    def _run(self, job_id, case, files):
+    def _run(self, job_id, case, files, *, logical_id):
         if type(job_id) is not str or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", job_id) is None:
             raise EvaluationError("invalid opaque invocation ID")
         if case["task"] not in {"routeplan", "treemap"}:
@@ -253,7 +271,8 @@ class ReservedDocker:
         for name in files:
             safe_file(name)
         folder = self.root / "invocations" / job_id
-        request = {"schema": 1, "fixture_sha256": digest(encoded(case)),
+        request = {"schema": 2, "logical_id": logical_id, "opaque_id": job_id,
+                   "fixture_sha256": digest(encoded(case)),
                    "delivery_sha256": digest(canonical(files))}
         if folder.exists():
             if not (folder / "plan.json").exists():

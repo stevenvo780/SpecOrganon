@@ -95,23 +95,29 @@ class Controller:
         state = engine.get_state(self.case)
         if state['project']['approval_policy'] != 'local':
             raise ControllerError('external software controller requires explicit local policy')
+        self.contract = contract; self.mandate = mandate
+        policy = {'schema': 7, 'case': str(self.case), 'project_sha256': state['project_sha256'],
+                  'contract': contract, 'mandate': mandate, 'fixture_mode': fixture_mode,
+                  'max_author_per_phase': 2, 'max_build_authors': 3,
+                  'max_review_per_phase': 2, 'max_approval_per_phase': 2, 'max_role_calls': 40,
+                  'max_phase_items': 6, 'max_phase_encoded_bytes': 6000,
+                  'max_files_encoded_bytes': 20000, 'max_test_stream_encoded_bytes': 4000}
+        path = self.root / 'controller.json'
+        # Reject legacy budgets before recreating even an empty delivery tree.
+        # Recheck under the case lock below to cover concurrent initialization.
+        if path.exists() and _json(path) != policy:
+            raise ControllerError('controller policy changed; use a versioned run')
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
         info = self.root.stat()
         if info.st_uid != os.geteuid() or info.st_mode & 0o022:
             raise ControllerError('private owned run root required')
-        self.delivery = self.root / 'delivery'; self.delivery.mkdir(mode=0o700, exist_ok=True)
-        self.contract = contract; self.mandate = mandate
-        policy = {'schema': 6, 'case': str(self.case), 'project_sha256': state['project_sha256'],
-                  'contract': contract, 'mandate': mandate, 'fixture_mode': fixture_mode,
-                  'max_author_per_phase': 2, 'max_build_authors': 3,
-                  'max_review_per_phase': 2, 'max_role_calls': 40,
-                  'max_phase_items': 6, 'max_phase_encoded_bytes': 6000,
-                  'max_files_encoded_bytes': 20000, 'max_test_stream_encoded_bytes': 4000}
+        self.delivery = self.root / 'delivery'
         with self._lock():
             path = self.root / 'controller.json'
             if path.exists():
                 if _json(path) != policy: raise ControllerError('controller policy changed; use a versioned run')
             else: _write(path, policy)
+            self.delivery.mkdir(mode=0o700, exist_ok=True)
             history = self.root / 'progress.json'
             if not history.exists(): _write(history, {'schema': 1, 'history': [], 'pending': None})
 
@@ -265,7 +271,10 @@ class Controller:
             'Judge semantic substance, source scope, alternatives, traceability, pertinent tests and useful docs; do not accept by field count. '
             'Phase acceptance applies only to this snapshot, never to comparative superiority or field impact.'
         )
-        instructions += (' Prospective schema6 admission: at most six current items per phase; '
+        instructions += (' Prospective schema7 admission: at most two authors per phase (three in build), '
+                         'two mandate approvals and two phase reviews counted independently; '
+                         'at most forty native roles across all phases, without resetting on edits or resume. '
+                         'At most six current items per phase; '
                          'their full map contributes at most 6000 JSON-encoded bytes. '
                          'Complete delivery-files map contributes at most 20000 encoded bytes. '
                          'Excess responses fail before any production writes. '
@@ -545,8 +554,7 @@ class Controller:
                 if repair_after_rejection:
                     action = 'author'
                 completed = sum(entry['action'] != 'test' for entry in history)
-                count = sum(entry['phase'] == phase and (entry['action'] == 'author' if action == 'author'
-                            else entry['action'] in {'review', 'approval'}) for entry in history)
+                count = sum(entry['phase'] == phase and entry['action'] == action for entry in history)
                 cap = 3 if phase == 'build' and action == 'author' else 2
                 if completed >= 40 or count >= cap: raise ControllerError('controller role budget exhausted')
                 if phase == 'build' and action == 'author' and self._build_stage() == 'repair' and not (
