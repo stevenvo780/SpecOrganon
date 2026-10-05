@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "job_id": "afb05b4038424e66b34132450c9fde11",
+  "status": "succeeded",
+  "submitted_at": 1791195080.68332,
+  "finished_at": 1791195124.681,
+  "review": {
+    "verdict": "accept",
+    "findings": [
+      {
+        "id": "R1-identity-isolation",
+        "problem": "Actualmente docker_evaluator.py usa un job_id opaco provisto externamente validado mediante regex. Esto delega la responsabilidad de unicidad y expone el sistema a posibles manipulaciones o reutilización de estado si la vinculación lógica externa falla.",
+        "correction": "Adoptar la derivación de ID interno de 64 caracteres en hexadecimal mediante SHA256 del JSON canónico definido (namespace v3 + ID lógico). Almacenar obligatoriamente el ID lógico original en el plan.json privado junto a los hashes de entrega para validar colisiones, garantizando un rechazo temprano."
+      },
+      {
+        "id": "R1-guard-enforcement",
+        "problem": "El cambio a schema3 requiere prevenir que una raíz con política antigua (schema2) intente ejecutar código o migrar estado de manera imprevista.",
+        "correction": "La aserción de schema3 y el rechazo de la política antigua deben ocurrir como la primera guarda absoluta (antes de inicializar fixtures, crear directorios de invocación o afectar el fs), asegurando que la campaña02 quede intacta."
+      },
+      {
+        "id": "R2-budget-counters",
+        "problem": "En el estado actual (schema6), la comprobación de límites del Controller fusiona acciones distintas: `entry['action'] in {'review', 'approval'}`. Esto causa que aprobar una norma consuma prematuramente una revisión técnica y agote el presupuesto de forma errónea.",
+        "correction": "Implementar schema7 separando lógicamente los contadores (`entry['action'] == action`), asegurando estrictamente 2 aportes de autor (3 en build), 2 aprobaciones y 2 revisiones técnicas independientes por fase. Respetar el límite global de 40."
+      },
+      {
+        "id": "R2-legacy-rejection",
+        "problem": "La reanudación de procesos schema6 con la nueva lógica podría corromper el ledger inmutable al introducir semánticas de presupuesto que no aplicaban originalmente.",
+        "correction": "Añadir una verificación de versión en el progress.json o en la raíz para rechazar de manera contundente la carga de esquemas anteriores (schema6 o inferior) sin intentar migración, cortando el dispatch de inmediato."
+      }
+    ],
+    "reason": "El diseño propuesto soluciona problemas de fondo sobre la confianza en los identificadores externos y los contadores combinados. R1 impone una identidad determinista y criptográfica que aísla de manera robusta al sujeto frente a caracteres peligrosos (Unicode/separadores), y previene de raíz la suplantación, colisiones o mutaciones de receta al no usarlas como parte de la semilla del hash pero sí resguardarlas en el inventario. R2 introduce un manejo presupuestario maduro (schema7), separando revisiones de aprobaciones y garantizando que un rechazo/corrección pueda tener una segunda evaluación justa sin agotar límites ortogonales. La política de no migración para R1 y R2 protege los historiales de las campañas cerradas.",
+    "tests_executed": false
+  },
+  "raw_text": "```json\n{\n  \"verdict\": \"accept\",\n  \"findings\": [\n    {\n      \"id\": \"R1-identity-isolation\",\n      \"problem\": \"Actualmente docker_evaluator.py usa un job_id opaco provisto externamente validado mediante regex. Esto delega la responsabilidad de unicidad y expone el sistema a posibles manipulaciones o reutilización de estado si la vinculación lógica externa falla.\",\n      \"correction\": \"Adoptar la derivación de ID interno de 64 caracteres en hexadecimal mediante SHA256 del JSON canónico definido (namespace v3 + ID lógico). Almacenar obligatoriamente el ID lógico original en el plan.json privado junto a los hashes de entrega para validar colisiones, garantizando un rechazo temprano.\"\n    },\n    {\n      \"id\": \"R1-guard-enforcement\",\n      \"problem\": \"El cambio a schema3 requiere prevenir que una raíz con política antigua (schema2) intente ejecutar código o migrar estado de manera imprevista.\",\n      \"correction\": \"La aserción de schema3 y el rechazo de la política antigua deben ocurrir como la primera guarda absoluta (antes de inicializar fixtures, crear directorios de invocación o afectar el fs), asegurando que la campaña02 quede intacta.\"\n    },\n    {\n      \"id\": \"R2-budget-counters\",\n      \"problem\": \"En el estado actual (schema6), la comprobación de límites del Controller fusiona acciones distintas: `entry['action'] in {'review', 'approval'}`. Esto causa que aprobar una norma consuma prematuramente una revisión técnica y agote el presupuesto de forma errónea.\",\n      \"correction\": \"Implementar schema7 separando lógicamente los contadores (`entry['action'] == action`), asegurando estrictamente 2 aportes de autor (3 en build), 2 aprobaciones y 2 revisiones técnicas independientes por fase. Respetar el límite global de 40.\"\n    },\n    {\n      \"id\": \"R2-legacy-rejection\",\n      \"problem\": \"La reanudación de procesos schema6 con la nueva lógica podría corromper el ledger inmutable al introducir semánticas de presupuesto que no aplicaban originalmente.\",\n      \"correction\": \"Añadir una verificación de versión en el progress.json o en la raíz para rechazar de manera contundente la carga de esquemas anteriores (schema6 o inferior) sin intentar migración, cortando el dispatch de inmediato.\"\n    }\n  ],\n  \"reason\": \"El diseño propuesto soluciona problemas de fondo sobre la confianza en los identificadores externos y los contadores combinados. R1 impone una identidad determinista y criptográfica que aísla de manera robusta al sujeto frente a caracteres peligrosos (Unicode/separadores), y previene de raíz la suplantación, colisiones o mutaciones de receta al no usarlas como parte de la semilla del hash pero sí resguardarlas en el inventario. R2 introduce un manejo presupuestario maduro (schema7), separando revisiones de aprobaciones y garantizando que un rechazo/corrección pueda tener una segunda evaluación justa sin agotar límites ortogonales. La política de no migración para R1 y R2 protege los historiales de las campañas cerradas.\",\n  \"tests_executed\": false\n}\n```",
+  "metadata": {
+    "agy_model": "Gemini 3.1 Pro (High)",
+    "provider": "gemini",
+    "model": "gemini/pro",
+    "access": "text",
+    "cwd": "/home/stev/.codex/worktrees/prospective-software-repairs/SpecOrganon",
+    "duration_s": 44,
+    "depth": 0
+  },
+  "account": "original_primary_profile",
+  "coordinator_qualification": "Text design acceptance only; no test execution. Hash collisions are detected by bound logical identity/recipe, not proven impossible. Legacy rejection is based on immutable controller policy, not migrating progress schema."
+}

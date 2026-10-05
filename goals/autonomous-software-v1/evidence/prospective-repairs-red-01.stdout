@@ -1,0 +1,277 @@
+FF..FFFFFFFF                                                             [100%]
+=================================== FAILURES ===================================
+______ test_approval_rejection_correction_can_receive_second_phase_review ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/effort-verification-01/tmp/pytest-of-stev/pytest-29/test_approval_rejection_correc0')
+
+    def test_approval_rejection_correction_can_receive_second_phase_review(tmp_path):
+        ctrl = critique_controller(tmp_path)
+        approve_and_reject(ctrl)
+        correct_concept(ctrl)
+        ctrl.transport.result = judgment('accept')
+>       assert ctrl.step()['verdict'] == 'accept'
+               ^^^^^^^^^^^
+
+tests/test_prospective_software_repairs.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.software_controller.Controller object at 0x7f728cf7f6b0>
+
+    def step(self):
+        with self._lock():
+            progress = _json(self.root / 'progress.json')
+            pending = progress['pending']
+            if pending is None:
+                state = engine.get_state(self.case); task = describe_task(state); phase = task['phase']
+                if task['action'] == 'complete': return {'action': 'complete', 'package_allowed': self.package_gate()}
+                if task['action'] in {'resolve_contradiction', 'observe_test'}:
+                    raise ControllerError('live contradiction/unsupported observation blocks controller')
+                repair_after_failed_test = False
+                if phase == 'build':
+                    stage = self._build_stage()
+                    if task['action'] == 'execute_test' and stage != 'repair':
+                        raise ControllerError('test measurement requires both sealed build stages')
+                if task['action'] == 'execute_test':
+                    if self.executor is None: raise ControllerError('isolated measured executor required')
+                    target = task['test_execution_targets'][0]; item = state['items'][target['id']]
+                    sealed_tests = self._checkpoint('tests'); program = self._checkpoint('program')
+                    if (not sealed_tests or item['id'] != sealed_tests['test_id'] or not program
+                            or state['items'][program['implementation_id']]['data'].get('delivery_tree_sha256')
+                                != digest(canonical(self._files()))):
+                        raise ControllerError('test ID/current implementation differ from sealed build stages')
+                    attempts = sum(entry['action'] == 'test' and entry['test_id'] == item['id'] for entry in progress['history'])
+                    if attempts >= 2: raise ControllerError('test attempt budget exhausted')
+                    previous = next((entry for entry in reversed(progress['history']) if entry['action'] == 'test' and entry['test_id'] == item['id']), None)
+                    files = self._files()
+                    unchanged = bool(previous
+                        and previous['source_executable_sha256'] == executable_fingerprint(files, item['data']['argv']))
+                    if unchanged and previous['passed']:
+                        raise ControllerError('second measurement requires changed executable bytes/argv')
+                    repair_after_failed_test = unchanged and previous['passed'] is False
+                    if not repair_after_failed_test:
+                        pending = {'job_id': 'test-' + digest(canonical({'item': item, 'files': files}))[:24],
+                               'action': 'test', 'phase': 'build', 'test_id': item['id'], 'source_state': state,
+                               'source_fingerprint': fingerprint(state), 'source_files': files, 'status': 'prepared'}
+                        progress['pending'] = pending; _write(self.root / 'progress.json', progress)
+                        measurement = self.executor.measure(pending['job_id'], item['data']['argv'], files)
+                        pending['packet'] = measurement; pending['status'] = 'closed'; _write(self.root / 'progress.json', progress)
+                        return self._apply_test(progress, pending)
+                if task['action'] == 'advance_phase':
+                    engine.advance(self.case, phase, 'agent:software-controller')
+                    return {'action': 'advance', 'phase': phase}
+                action = 'author' if repair_after_failed_test else 'approval' if task['action'] == 'human_approval' else 'review' if task['action'] == 'review_phase' else 'author'
+                history = progress['history']
+                last = next((entry for entry in reversed(history) if entry['phase'] == phase and entry['action'] == 'review'), None)
+                repair_after_rejection = bool(action == 'review' and last and last.get('verdict') == 'reject'
+                    and last['source_phase_snapshot'] == state['phases'][phase]['snapshot']
+                    and last['source_files_sha256'] == digest(canonical(self._files())))
+                if repair_after_rejection:
+                    action = 'author'
+                completed = sum(entry['action'] != 'test' for entry in history)
+                count = sum(entry['phase'] == phase and (entry['action'] == 'author' if action == 'author'
+                            else entry['action'] in {'review', 'approval'}) for entry in history)
+                cap = 3 if phase == 'build' and action == 'author' else 2
+>               if completed >= 40 or count >= cap: raise ControllerError('controller role budget exhausted')
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               specorganon.software_controller.ControllerError: controller role budget exhausted
+
+src/specorganon/software_controller.py:551: ControllerError
+___ test_persistent_rejection_terminates_without_third_author_or_acceptance ____
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/effort-verification-01/tmp/pytest-of-stev/pytest-29/test_persistent_rejection_term0')
+
+    def test_persistent_rejection_terminates_without_third_author_or_acceptance(tmp_path):
+        ctrl = critique_controller(tmp_path)
+        approve_and_reject(ctrl)
+        correct_concept(ctrl)
+        ctrl.transport.result = judgment('reject')
+>       assert ctrl.step()['verdict'] == 'reject'
+               ^^^^^^^^^^^
+
+tests/test_prospective_software_repairs.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.software_controller.Controller object at 0x7f728cfc1160>
+
+    def step(self):
+        with self._lock():
+            progress = _json(self.root / 'progress.json')
+            pending = progress['pending']
+            if pending is None:
+                state = engine.get_state(self.case); task = describe_task(state); phase = task['phase']
+                if task['action'] == 'complete': return {'action': 'complete', 'package_allowed': self.package_gate()}
+                if task['action'] in {'resolve_contradiction', 'observe_test'}:
+                    raise ControllerError('live contradiction/unsupported observation blocks controller')
+                repair_after_failed_test = False
+                if phase == 'build':
+                    stage = self._build_stage()
+                    if task['action'] == 'execute_test' and stage != 'repair':
+                        raise ControllerError('test measurement requires both sealed build stages')
+                if task['action'] == 'execute_test':
+                    if self.executor is None: raise ControllerError('isolated measured executor required')
+                    target = task['test_execution_targets'][0]; item = state['items'][target['id']]
+                    sealed_tests = self._checkpoint('tests'); program = self._checkpoint('program')
+                    if (not sealed_tests or item['id'] != sealed_tests['test_id'] or not program
+                            or state['items'][program['implementation_id']]['data'].get('delivery_tree_sha256')
+                                != digest(canonical(self._files()))):
+                        raise ControllerError('test ID/current implementation differ from sealed build stages')
+                    attempts = sum(entry['action'] == 'test' and entry['test_id'] == item['id'] for entry in progress['history'])
+                    if attempts >= 2: raise ControllerError('test attempt budget exhausted')
+                    previous = next((entry for entry in reversed(progress['history']) if entry['action'] == 'test' and entry['test_id'] == item['id']), None)
+                    files = self._files()
+                    unchanged = bool(previous
+                        and previous['source_executable_sha256'] == executable_fingerprint(files, item['data']['argv']))
+                    if unchanged and previous['passed']:
+                        raise ControllerError('second measurement requires changed executable bytes/argv')
+                    repair_after_failed_test = unchanged and previous['passed'] is False
+                    if not repair_after_failed_test:
+                        pending = {'job_id': 'test-' + digest(canonical({'item': item, 'files': files}))[:24],
+                               'action': 'test', 'phase': 'build', 'test_id': item['id'], 'source_state': state,
+                               'source_fingerprint': fingerprint(state), 'source_files': files, 'status': 'prepared'}
+                        progress['pending'] = pending; _write(self.root / 'progress.json', progress)
+                        measurement = self.executor.measure(pending['job_id'], item['data']['argv'], files)
+                        pending['packet'] = measurement; pending['status'] = 'closed'; _write(self.root / 'progress.json', progress)
+                        return self._apply_test(progress, pending)
+                if task['action'] == 'advance_phase':
+                    engine.advance(self.case, phase, 'agent:software-controller')
+                    return {'action': 'advance', 'phase': phase}
+                action = 'author' if repair_after_failed_test else 'approval' if task['action'] == 'human_approval' else 'review' if task['action'] == 'review_phase' else 'author'
+                history = progress['history']
+                last = next((entry for entry in reversed(history) if entry['phase'] == phase and entry['action'] == 'review'), None)
+                repair_after_rejection = bool(action == 'review' and last and last.get('verdict') == 'reject'
+                    and last['source_phase_snapshot'] == state['phases'][phase]['snapshot']
+                    and last['source_files_sha256'] == digest(canonical(self._files())))
+                if repair_after_rejection:
+                    action = 'author'
+                completed = sum(entry['action'] != 'test' for entry in history)
+                count = sum(entry['phase'] == phase and (entry['action'] == 'author' if action == 'author'
+                            else entry['action'] in {'review', 'approval'}) for entry in history)
+                cap = 3 if phase == 'build' and action == 'author' else 2
+>               if completed >= 40 or count >= cap: raise ControllerError('controller role budget exhausted')
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               specorganon.software_controller.ControllerError: controller role budget exhausted
+
+src/specorganon/software_controller.py:551: ControllerError
+___________ test_schema6_policy_rejected_before_recreating_delivery ____________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/effort-verification-01/tmp/pytest-of-stev/pytest-29/test_schema6_policy_rejected_b0')
+
+    def test_schema6_policy_rejected_before_recreating_delivery(tmp_path):
+        ctrl = controller(tmp_path, SyntheticTransport(frame_response()))
+        path = ctrl.root / 'controller.json'
+        policy = _json(path)
+        policy['schema'] = 6
+        policy.pop('max_approval_per_phase', None)
+        _write(path, policy)
+        ctrl.delivery.rmdir()
+        before = (ctrl.case / 'organon.json').read_bytes()
+>       with pytest.raises(ControllerError, match='versioned'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ControllerError
+
+tests/test_prospective_software_repairs.py:125: Failed
+______ test_logical_identity_is_safe_distinct_and_not_unicode_normalized _______
+
+    def test_logical_identity_is_safe_distinct_and_not_unicode_normalized():
+        ids = ['new-control.float', 'nuevo-١', 'suffix-..', '../outside', '/absolute',
+               'é', 'e\u0301', 'normal']
+>       mapped = [D.invocation_identity(x, {'id': x}) for x in ids]
+                  ^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'experiments.software_comparison_v1.reserved.docker_evaluator' has no attribute 'invocation_identity'
+
+tests/test_prospective_software_repairs.py:136: AttributeError
+_____ test_invalid_or_unbound_identity_rejected_before_invocation[-case0] ______
+
+id = '', case = {'id': ''}
+
+    @pytest.mark.parametrize('id,case', [('', {'id': ''}), (True, {'id': True}),
+        ('x', {'id': 'y'}), ('x', {}), ('\udcff', {'id': '\udcff'})])
+    def test_invalid_or_unbound_identity_rejected_before_invocation(id, case):
+        with pytest.raises(D.EvaluationError):
+>           D.invocation_identity(id, case)
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'experiments.software_comparison_v1.reserved.docker_evaluator' has no attribute 'invocation_identity'
+
+tests/test_prospective_software_repairs.py:146: AttributeError
+___ test_invalid_or_unbound_identity_rejected_before_invocation[True-case1] ____
+
+id = True, case = {'id': True}
+
+    @pytest.mark.parametrize('id,case', [('', {'id': ''}), (True, {'id': True}),
+        ('x', {'id': 'y'}), ('x', {}), ('\udcff', {'id': '\udcff'})])
+    def test_invalid_or_unbound_identity_rejected_before_invocation(id, case):
+        with pytest.raises(D.EvaluationError):
+>           D.invocation_identity(id, case)
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'experiments.software_comparison_v1.reserved.docker_evaluator' has no attribute 'invocation_identity'
+
+tests/test_prospective_software_repairs.py:146: AttributeError
+_____ test_invalid_or_unbound_identity_rejected_before_invocation[x-case2] _____
+
+id = 'x', case = {'id': 'y'}
+
+    @pytest.mark.parametrize('id,case', [('', {'id': ''}), (True, {'id': True}),
+        ('x', {'id': 'y'}), ('x', {}), ('\udcff', {'id': '\udcff'})])
+    def test_invalid_or_unbound_identity_rejected_before_invocation(id, case):
+        with pytest.raises(D.EvaluationError):
+>           D.invocation_identity(id, case)
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'experiments.software_comparison_v1.reserved.docker_evaluator' has no attribute 'invocation_identity'
+
+tests/test_prospective_software_repairs.py:146: AttributeError
+_____ test_invalid_or_unbound_identity_rejected_before_invocation[x-case3] _____
+
+id = 'x', case = {}
+
+    @pytest.mark.parametrize('id,case', [('', {'id': ''}), (True, {'id': True}),
+        ('x', {'id': 'y'}), ('x', {}), ('\udcff', {'id': '\udcff'})])
+    def test_invalid_or_unbound_identity_rejected_before_invocation(id, case):
+        with pytest.raises(D.EvaluationError):
+>           D.invocation_identity(id, case)
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'experiments.software_comparison_v1.reserved.docker_evaluator' has no attribute 'invocation_identity'
+
+tests/test_prospective_software_repairs.py:146: AttributeError
+__ test_invalid_or_unbound_identity_rejected_before_invocation[\udcff-case4] ___
+
+id = '\udcff', case = {'id': '\udcff'}
+
+    @pytest.mark.parametrize('id,case', [('', {'id': ''}), (True, {'id': True}),
+        ('x', {'id': 'y'}), ('x', {}), ('\udcff', {'id': '\udcff'})])
+    def test_invalid_or_unbound_identity_rejected_before_invocation(id, case):
+        with pytest.raises(D.EvaluationError):
+>           D.invocation_identity(id, case)
+            ^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'experiments.software_comparison_v1.reserved.docker_evaluator' has no attribute 'invocation_identity'
+
+tests/test_prospective_software_repairs.py:146: AttributeError
+________ test_legacy_evaluator_policy_rejected_before_journal_creation _________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/effort-verification-01/tmp/pytest-of-stev/pytest-29/test_legacy_evaluator_policy_r0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f728cf857f0>
+
+    def test_legacy_evaluator_policy_rejected_before_journal_creation(tmp_path, monkeypatch):
+        monkeypatch.setattr(D.DockerRoles, '_image', staticmethod(lambda image: image))
+        root = tmp_path / 'old'
+        root.mkdir(mode=0o700)
+        _write(root / 'policy.json', {'schema': 2})
+        with pytest.raises(D.EvaluationError, match='policy'):
+            D.ReservedDocker(root, 'sha256:' + 'a' * 64)
+>       assert not (root / 'journal').exists()
+E       AssertionError: assert not True
+E        +  where True = exists()
+E        +    where exists = (PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/effort-verification-01/tmp/pytest-of-stev/pytest-29/test_legacy_evaluator_policy_r0/old') / 'journal').exists
+
+tests/test_prospective_software_repairs.py:156: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_prospective_software_repairs.py::test_approval_rejection_correction_can_receive_second_phase_review
+FAILED tests/test_prospective_software_repairs.py::test_persistent_rejection_terminates_without_third_author_or_acceptance
+FAILED tests/test_prospective_software_repairs.py::test_schema6_policy_rejected_before_recreating_delivery
+FAILED tests/test_prospective_software_repairs.py::test_logical_identity_is_safe_distinct_and_not_unicode_normalized
+FAILED tests/test_prospective_software_repairs.py::test_invalid_or_unbound_identity_rejected_before_invocation[-case0]
+FAILED tests/test_prospective_software_repairs.py::test_invalid_or_unbound_identity_rejected_before_invocation[True-case1]
+FAILED tests/test_prospective_software_repairs.py::test_invalid_or_unbound_identity_rejected_before_invocation[x-case2]
+FAILED tests/test_prospective_software_repairs.py::test_invalid_or_unbound_identity_rejected_before_invocation[x-case3]
+FAILED tests/test_prospective_software_repairs.py::test_invalid_or_unbound_identity_rejected_before_invocation[\udcff-case4]
+FAILED tests/test_prospective_software_repairs.py::test_legacy_evaluator_policy_rejected_before_journal_creation
+10 failed, 2 passed in 0.85s
