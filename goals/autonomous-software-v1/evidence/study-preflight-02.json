@@ -1,0 +1,92 @@
+{
+  "capturedAt": "2026-10-05T05:55:23.290Z",
+  "providers": {
+    "gemini#1": {
+      "kind": "detected-percent",
+      "ok": true,
+      "observedAt": "2026-10-05T05:55:20.000Z",
+      "ageSeconds": 3,
+      "windows": [
+        {
+          "key": "Gemini-5h",
+          "usedPercent": 14,
+          "remainingPercent": 86
+        },
+        {
+          "key": "Gemini-sem",
+          "usedPercent": 51,
+          "remainingPercent": 49
+        },
+        {
+          "key": "Claude/GPT-5h",
+          "usedPercent": 0,
+          "remainingPercent": 100
+        },
+        {
+          "key": "Claude/GPT-sem",
+          "usedPercent": 0,
+          "remainingPercent": 100
+        }
+      ]
+    },
+    "minimax": {
+      "kind": "detected-percent",
+      "ok": true,
+      "observedAt": "2026-10-05T05:55:19.892Z",
+      "ageSeconds": 3,
+      "windows": [
+        {
+          "key": "interval_general",
+          "usedPercent": 13,
+          "remainingPercent": 87
+        },
+        {
+          "key": "weekly_general",
+          "usedPercent": 4,
+          "remainingPercent": 96
+        }
+      ]
+    },
+    "codex1": {
+      "kind": "unknown",
+      "ok": false,
+      "windows": []
+    }
+  },
+  "routes": [
+    {
+      "model": "codex/gpt-6.1-sol",
+      "provider": "codex",
+      "cli": "codex",
+      "cli_path": "/home/stev/.local/bin/codex",
+      "native": "gpt-6.1-sol"
+    },
+    {
+      "model": "gemini/pro",
+      "provider": "gemini",
+      "cli": "agy",
+      "cli_path": "/home/stev/.local/bin/agy",
+      "native": "pro"
+    },
+    {
+      "model": "minimax/MiniMax-M3",
+      "provider": "minimax",
+      "cli": "opencode",
+      "cli_path": "/home/stev/.local/bin/opencode",
+      "native": "minimax/MiniMax-M3"
+    }
+  ],
+  "server_version": "2.2.0-personal",
+  "audit_launch": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"job_id\": \"76f57831568c490eb8aff580293af184\", \"status\": \"queued\"}"
+      }
+    ],
+    "structuredContent": {
+      "job_id": "76f57831568c490eb8aff580293af184",
+      "status": "queued"
+    }
+  }
+}

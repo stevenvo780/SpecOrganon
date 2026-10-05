@@ -29,17 +29,24 @@ class DockerRoleError(ValueError):
 
 
 class DockerRoles:
+    _CODEX_REASONING_EFFORTS = ('low', 'medium', 'high', 'xhigh')
+
     def __init__(self, root, *, native_image, test_image, source_root, public_catalog,
                  author_provider='codex', author_model='gpt-6.1-sol',
                  reviewer_provider='gemini', reviewer_model='gemini-3.1-pro-high',
                  codex_volume='specorganon-lab_codex-home', gemini_profile='/home/stev/.gemini',
-                 gemini_executable='/home/stev/.local/bin/agy', seccomp=None, test_timeout_seconds=120):
+                 gemini_executable='/home/stev/.local/bin/agy', seccomp=None, test_timeout_seconds=120,
+                 codex_reasoning_effort='low'):
         self.root = _safe(root); self.root.mkdir(parents=True, mode=0o700, exist_ok=True)
         self.source = _safe(source_root); self.catalog = _safe(public_catalog)
         self.images = {'native': self._image(native_image), 'test': self._image(test_image)}
         self.routes = {'author': (author_provider, author_model), 'review': (reviewer_provider, reviewer_model)}
         if any(provider not in {'codex', 'gemini'} or type(model) is not str or not model for provider, model in self.routes.values()):
             raise DockerRoleError('unsupported explicit native route')
+        if (type(codex_reasoning_effort) is not str
+                or codex_reasoning_effort not in self._CODEX_REASONING_EFFORTS):
+            raise DockerRoleError('codex_reasoning_effort must be one of low/medium/high/xhigh')
+        self.codex_reasoning_effort = codex_reasoning_effort
         if re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*', codex_volume) is None:
             raise DockerRoleError('invalid original Codex volume name')
         self.volume = codex_volume; self.gemini_profile = _safe(gemini_profile)
@@ -49,14 +56,18 @@ class DockerRoles:
             raise DockerRoleError('test timeout must be 1..120 seconds')
         self.test_timeout = test_timeout_seconds
         self.store = JobStore(self.root / 'host-journal', max_jobs=80, max_elapsed_seconds=6000)
-        policy = {'schema': 2, 'images': self.images, 'routes': self.routes, 'test_timeout_seconds': self.test_timeout,
+        policy = {'schema': 3, 'images': self.images, 'routes': self.routes, 'test_timeout_seconds': self.test_timeout,
                   'source_root': str(self.source), 'public_catalog_sha256': digest(_read(self.catalog)),
                   'codex_original_volume': self.volume, 'gemini_original_profile': str(self.gemini_profile),
                   'gemini_executable_sha256': digest(_read(self.gemini_executable, 536870912)),
+                  'codex_reasoning_effort': self.codex_reasoning_effort,
                   'seccomp_sha256': digest(_read(self.seccomp)) if self.seccomp else None}
         path = self.root / 'transport-policy.json'
         if path.exists():
-            if _json(path) != strict_json_loads(canonical(policy).decode()):
+            existing = _json(path)
+            if type(existing) is not dict or existing.get('schema') != 3:
+                raise DockerRoleError('transport schema3 required; previous schema cannot resume silently')
+            if existing != strict_json_loads(canonical(policy).decode()):
                 raise DockerRoleError('transport policy changed; use an explicitly versioned run')
         else: _write(path, policy)
 
@@ -156,10 +167,13 @@ class DockerRoles:
             args += ['-e', 'OPENAI_API_KEY=', '-e', 'PYTHONPATH=/input/library', '-e', 'SPECORGANON_ROLE_IMAGE_ID=' + image,
                      '-w', '/input', '--entrypoint', '/opt/specorganon/.venv/bin/python', image,
                      '/input/bridge.py', '--provider', provider, '--model', model, '--request', '/input/request.json', '--output-dir', '/output']
-            if provider == 'codex': args += ['--model-catalog', '/input/public-models.json']
+            if provider == 'codex':
+                args += ['--model-catalog', '/input/public-models.json',
+                         '--codex-reasoning-effort', self.codex_reasoning_effort]
         plan = {'schema': 1, 'job_id': job_id, 'role': role, 'provider': provider, 'model': model,
                 'request_sha256': digest(request_raw), 'image_id': image, 'name': name, 'label': label,
-                'create_argv': args, 'container_id': None, 'input_manifest': self._inventory(inp)}
+                'create_argv': args, 'container_id': None, 'input_manifest': self._inventory(inp),
+                'codex_reasoning_effort': self.codex_reasoning_effort if provider == 'codex' else None}
         # Persist the name/intent first. A crash after Docker create is reconciled
         # by that exact name and label; no second container or native role call.
         _write(plan_path, plan)

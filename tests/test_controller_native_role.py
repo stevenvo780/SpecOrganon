@@ -1,9 +1,11 @@
 """Parser fixtures, not actual provider invocations or independent approvals."""
 import json
+from pathlib import Path
 
 import pytest
 
 from scripts.controller_native_role import NativeRoleError, native_argv, parse_native, response_json
+from specorganon.role_jobs import digest
 
 
 def test_gemini_role_documents_are_sent_on_stdin_not_exposed_in_argv():
@@ -71,7 +73,7 @@ def test_codex_runtime_override_uses_cli_literal_safe_key_not_quoted_table(tmp_p
     # Synthetic config only: no real profile, session or credentials are copied.
     (tmp_path / "config.toml").write_text('[mcp_servers.specorganon]\ncommand="fake-fixture"\n')
     monkeypatch.setenv("CODEX_HOME", str(tmp_path))
-    args = native_argv("codex", "gpt-6.1-sol", "fixture text")
+    args = native_argv("codex", "gpt-6.1-sol", "fixture text", reasoning_effort="low")
     assert "mcp_servers.specorganon.enabled=false" in args
 
 
@@ -79,7 +81,7 @@ def test_non_literal_mcp_key_stops_before_native_launch(tmp_path, monkeypatch):
     (tmp_path / "config.toml").write_text('[mcp_servers."unsafe.name"]\ncommand="fake-fixture"\n')
     monkeypatch.setenv("CODEX_HOME", str(tmp_path))
     with pytest.raises(NativeRoleError, match="key"):
-        native_argv("codex", "gpt-6.1-sol", "fixture text")
+        native_argv("codex", "gpt-6.1-sol", "fixture text", reasoning_effort="low")
 
 
 def codex_transcript():
@@ -181,7 +183,7 @@ def test_actual_effective_catalogue_controls_shell_registration_not_backend_flag
 def test_effective_feature_probe_uses_same_overrides_without_native_exec_command(tmp_path, monkeypatch):
     from scripts.controller_native_role import codex_feature_argv
     monkeypatch.setenv('CODEX_HOME', str(tmp_path))
-    native = native_argv('codex', 'gpt-6.1-sol', 'fixture')
+    native = native_argv('codex', 'gpt-6.1-sol', 'fixture', reasoning_effort='low')
     probe = codex_feature_argv(native)
     assert probe[-2:] == ['features', 'list'] and 'exec' not in probe
     assert 'web_search="disabled"' in probe and 'shell_tool' in probe
@@ -231,7 +233,7 @@ def test_model_catalog_override_is_bound_to_same_preflight_and_native_request(tm
     from scripts.controller_native_role import codex_feature_argv
     monkeypatch.setenv('CODEX_HOME', str(tmp_path))
     catalog = tmp_path / 'catalog.json'
-    args = native_argv('codex', 'gpt-6.1-sol', 'fixture', model_catalog=catalog)
+    args = native_argv('codex', 'gpt-6.1-sol', 'fixture', model_catalog=catalog, reasoning_effort='low')
     override = 'model_catalog_json=' + json.dumps(str(catalog))
     assert override in args and override in codex_feature_argv(args)
 
@@ -242,3 +244,102 @@ def test_actual_restricted_catalog_native_transport_stays_semantically_inconclus
     result, usage = parse_native('codex', (e / 'native-surface-01-native-call.stdout.jsonl').read_text())
     assert result['verdict'] == 'inconclusive' and result['nonce'] == 'native-surface-v1-20261005'
     assert usage == json.loads((e / 'native-surface-01-receipt.json').read_text())['usage_reported']
+
+
+def test_codex_native_argv_requires_explicit_bounded_reasoning_effort():
+    with pytest.raises(NativeRoleError, match="reasoning effort"):
+        native_argv("codex", "gpt-6.1-sol", "fixture")
+    with pytest.raises(NativeRoleError, match="reasoning effort"):
+        native_argv("codex", "gpt-6.1-sol", "fixture", reasoning_effort=None)
+
+
+@pytest.mark.parametrize("bad", ["min", "max", "ultra", "default", "", "LOW"])
+def test_codex_native_argv_rejects_out_of_set_reasoning_effort(bad):
+    with pytest.raises(NativeRoleError, match="reasoning effort"):
+        native_argv("codex", "gpt-6.1-sol", "fixture", reasoning_effort=bad)
+
+
+@pytest.mark.parametrize("effort", ["low", "medium", "high", "xhigh"])
+def test_codex_native_argv_emits_model_reasoning_effort_override(tmp_path, monkeypatch, effort):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+    args = native_argv("codex", "gpt-6.1-sol", "fixture", reasoning_effort=effort)
+    assert f'model_reasoning_effort="{effort}"' in args
+
+
+def test_gemini_native_argv_rejects_explicit_reasoning_effort():
+    with pytest.raises(NativeRoleError, match="Gemini"):
+        native_argv("gemini", "gemini-3.1-pro-high", "fixture", reasoning_effort="low")
+
+
+def test_explicit_low_override_leaves_synthetic_profile_bytes_unchanged(tmp_path, monkeypatch):
+    # Synthetic high-effort profile: CLI override must not rewrite profile bytes
+    # on disk; it is only a dotted -c override that travels inside argv.
+    config = tmp_path / "config.toml"
+    original_bytes = b'model_reasoning_effort = "high"\n'
+    config.write_bytes(original_bytes)
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+    args = native_argv("codex", "gpt-6.1-sol", "fixture", reasoning_effort="low")
+    assert config.read_bytes() == original_bytes
+    assert 'model_reasoning_effort="low"' in args
+    # The original on-disk entry remains as written (no profile mutation).
+    assert b'model_reasoning_effort = "high"' in config.read_bytes()
+
+
+def _stub_identity(monkeypatch):
+    """Bypass execution_identity() file resolution so main() can be exercised
+    without the real /usr/local/bin/codex executable."""
+    monkeypatch.setenv("SPECORGANON_ROLE_IMAGE_ID", "sha256:" + "a" * 64)
+    from scripts.controller_native_role import execution_identity
+    def _fake(provider, executable, _real=execution_identity):
+        return _real(provider, executable) if Path(executable).exists() else {
+            "schema": 1, "image_id": "sha256:" + "a" * 64,
+            "executable_path": executable, "executable_sha256": digest(b"synthetic"),
+            "known_configuration_path": str(Path(executable).parent / "config.toml"),
+            "known_configuration_sha256": None,
+            "other_effective_configuration": "unknown; trusted launcher/profile boundary"}
+    monkeypatch.setattr("scripts.controller_native_role.execution_identity", _fake)
+
+
+def test_native_role_main_rejects_missing_effort_for_codex_before_native_launch(tmp_path, monkeypatch):
+    from scripts.controller_native_role import main
+    _stub_identity(monkeypatch)
+    request = tmp_path / "request.json"
+    request.write_text(json.dumps({"schema": 1, "role": "review", "role_instructions": "fixture",
+                                    "documents": {}}))
+    catalog = tmp_path / "catalog.json"
+    catalog.write_text(json.dumps({"models": [{"slug": "gpt-6.1-sol",
+        "supported_reasoning_levels": [{"effort": "low"}, {"effort": "medium"}]}]}))
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+    with pytest.raises(NativeRoleError, match="--codex-reasoning-effort"):
+        main(["--provider", "codex", "--model", "gpt-6.1-sol",
+              "--request", str(request), "--output-dir", str(tmp_path / "out"),
+              "--model-catalog", str(catalog)])
+
+
+def test_native_role_main_rejects_effort_for_gemini_before_native_launch(tmp_path, monkeypatch):
+    from scripts.controller_native_role import main
+    _stub_identity(monkeypatch)
+    request = tmp_path / "request.json"
+    request.write_text(json.dumps({"schema": 1, "role": "review", "role_instructions": "fixture",
+                                    "documents": {}}))
+    with pytest.raises(NativeRoleError, match="Gemini"):
+        main(["--provider", "gemini", "--model", "gemini-3.1-pro-high",
+              "--request", str(request), "--output-dir", str(tmp_path / "out"),
+              "--codex-reasoning-effort", "low"])
+
+
+def test_native_role_main_rejects_unsupported_catalog_reasoning_level(tmp_path, monkeypatch):
+    from scripts.controller_native_role import main
+    _stub_identity(monkeypatch)
+    request = tmp_path / "request.json"
+    request.write_text(json.dumps({"schema": 1, "role": "review", "role_instructions": "fixture",
+                                    "documents": {}}))
+    # Catalog lists low/medium but not high for this model.
+    catalog = tmp_path / "catalog.json"
+    catalog.write_text(json.dumps({"models": [{"slug": "fixture-model",
+        "supported_reasoning_levels": [{"effort": "low"}, {"effort": "medium"}]}]}))
+    with pytest.raises(NativeRoleError, match="supported_reasoning_levels"):
+        main(["--provider", "codex", "--model", "fixture-model",
+              "--request", str(request), "--output-dir", str(tmp_path / "out"),
+              "--model-catalog", str(catalog),
+              "--codex-reasoning-effort", "high"])

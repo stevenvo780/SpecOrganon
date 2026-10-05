@@ -1,0 +1,526 @@
+# SpecOrganon: release autónoma reproducible para software pequeño
+
+Desarrollo local con autores y mandato declarados.
+
+Revisión del expediente: 59. Fases aceptadas: 7/9.
+
+## Siguiente trabajo
+
+Producir los artefactos faltantes con contenido y fuentes verificables\.
+
+Fase: build. Acción: create\_artifacts.
+
+Bloqueos:
+
+- needs 1 valid implementation; has 0
+- needs 1 valid test; has 0
+
+## Recorrido
+
+| Frente | Fase | Estado |
+| --- | --- | --- |
+| philosophy | frame | aceptada |
+| philosophy | critique | aceptada |
+| science | study | aceptada |
+| science | observe | aceptada |
+| science | explain | aceptada |
+| engineering | compare | aceptada |
+| engineering | specify | aceptada |
+| engineering | build | pendiente |
+| validation | validate | pendiente |
+
+## Artefactos y trazabilidad
+
+### p1 · problem · v1
+
+Necesitamos una release reproducible del toolkit que permita a agentes completar el método y entregar software pequeño con evidencia, documentación y comparación prospectiva\. El piloto previo produjo buen código pero no aplicación completa\.
+
+Autor: agent:codex\-orchestrator.
+
+### a1 · actor · v1
+
+El dueño autoriza el hito local; Codex investiga e implementa; otros agentes revisan evidencia técnica sin editar la solución; evaluadores reservados observan la entrega\. Los actores del campo alimentario quedan fuera de este hito\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: p1 v1.
+
+### b1 · boundary · v1
+
+Software pequeño en este workspace, cuentas existentes y web Vercel actual\. Preservar GOAL raíz, inputs congelados y entregas del piloto anterior\. No contratar servicios ni fabricar aprobación/campo\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: a1 v1, p1 v1.
+
+### c1 · concept · v1
+
+Reproducibilidad significa fijar entorno, fuentes y procedimientos con recibos comparables; integridad significa rechazar bytes no revisados\. Autonomía es trabajar dentro del mandato, no inventar autorización\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: p1 v1.
+
+### s1 · assumption · v1
+
+Los proveedores existentes pueden permitir una comparación acotada entre dos familias\. Debe verificarse acceso efectivo y recursos antes del calendario; un catálogo y una cuota no prueban una corrida\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: p1 v1.
+
+### f1 · frame\_option · v1
+
+Enmarcar el problema como reproducción estricta de la instalación histórica: recuperar el extractor original y su entorno completo, conservando las mismas dependencias\. Ventaja: correspondencia histórica; riesgo: disponibilidad y coste de mantener ese entorno\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: c1 v1, p1 v1.
+
+### f2 · frame\_option · v1
+
+Enmarcarlo como portabilidad revisada: separar reglas semánticas y perfiles de extracción explícitos, validar nuevas extracciones y calificar sus diferencias\. Ventaja: instalaciones actuales; riesgo: afirmar equivalencia fuera de los pasajes cotejados\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: c1 v1, p1 v1.
+
+### f3 · frame\_option · v1
+
+Enmarcarlo como entrega exclusivamente software sin PDF: aislar la funcionalidad de fuentes como opcional\. Reduce dependencias pero no repara la plataforma ni cumple esta goal por sí solo\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: c1 v1, p1 v1.
+
+### n1 · norm · v1
+
+El dueño pidió crear la goal para cerrar la versión autónoma de software\. Delega elecciones técnicas; exige evidencia y publicación honesta, conservación del piloto y separación del objetivo de campo\. Esta norma registra ese mandato existente, no una autorización inventada\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: a1 v1, b1 v1, p1 v1.
+
+Aprobación vigente: sí.
+
+```json
+{
+  "scope": "local software release and prospective evaluation",
+  "source": "Conversación del dueño, 2026-10-04: crea una goal para lograrlo"
+}
+```
+
+### q1 · question · v1
+
+¿Un controlador explícito con revisión separada, criterios previos y recibos medidos permite cerrar un caso NUEVO de software, detectar artefactos insuficientes y reanudar sin alterar historia?
+
+Autor: agent:codex.
+
+Depende de: b1 v1, c1 v1, p1 v1.
+
+### h1 · hypothesis · v1
+
+Un controlador que materialice dependencias y someta cada fase a juicio real separado puede evitar los ledgers incompletos del piloto; puede fallar por falta de evidencia, criterios vacíos, revisiones superficiales o límites de proveedor\. Es una hipótesis de factibilidad técnica local, no superioridad causal general\.
+
+Autor: agent:codex.
+
+Depende de: q1 v1, s1 v1.
+
+### pr1 · protocol · v1
+
+Protocolo local prospectivo del controlador y la entrega: distinguir exploración técnica ya observada de las mediciones nuevas posteriores a la aceptación de este diseño\. La comparación N/S/T requiere otro protocolo con tareas y presupuesto congelados antes de generar\.
+
+Autor: agent:codex.
+
+Depende de: h1 v1, n1 v1, q1 v1.
+
+```json
+{
+  "comparison": "Toolkit sin controlador (estado actual/diagnóstico) frente a controlador nuevo sobre el mismo contrato local. Contrastar entrega normal, evidencia insuficiente, contradicción, cambio de premisa y recuperación de interrupción. La eficacia comparativa con modelos N/S/T se medirá después, por protocolo separado; no usar el antiguo piloto como nueva evaluación reservada.",
+  "measurement_start": "after accepted study review and predeclared specify criteria",
+  "method": "Antes de las mediciones nuevas, fijar requisitos, criterio y comandos. Registrar bytes, argv, salida, retorno, timeout, versiones y hashes. Revisor real en Docker con fuente RO y salida propia decide cada fase. Evaluador de controles no recibe permisos de escritura del autor. Exigir README reproducible y conservar fallos. Los 145 tests y pruebas exploratorias actuales son línea base diagnóstica, no cumplimiento retrospectivo de este protocolo.",
+  "population": "Un caso real nuevo de release y su controlador; controles adversariales sintéticos separados, etiquetados como tales. Ninguna intervención alimentaria ni ledger del piloto backup.",
+  "status": "draft_pending_independent_study_review",
+  "stop_rule": "Cada control tiene intento y timeout fijados; un rechazo conserva la traza. No repetir una campaña de modelos para buscar victoria. No cambiar cuenta, gastar por API ni usar resultados anteriores como nuevos.",
+  "uncertainty": "Un caso de ingeniería no estima efecto causal general. Actor local declarado no autentica identidad; revisiones pueden ser incompletas. Informar ausencia o fallos y no ajustar los criterios tras medir. Fuentes heredadas, códigos y presupuestos se fijarán en el protocolo comparativo antes de autorías nuevas."
+}
+```
+
+### e1 · evidence · v1
+
+Los doce snapshots T del piloto anterior no completaron las nueve fases; README presente 0/12\. Los bloqueos observados incluyen norma sin vínculo problem/actor, indicador sin métrica y evidencia sin origen válido\. Son datos históricos para diagnosticar la entrega, no resultados del controlador nuevo\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: pr1 v1.
+
+```json
+{
+  "date": "2026-10-05",
+  "locator": "observations[*].observation.phases; secondary-outcomes.T.{1,2}.readmes; evidence/method-diagnostic-baseline.json",
+  "method": "Inspección determinista de los dos JSON persistidos y agregación con denominadores; hashes registrados, sin modificar entregas.",
+  "origin": "observed",
+  "purpose": "diagnostic_baseline_not_control_fulfillment",
+  "source": "experiments/backup_pilot/analysis/method/method-report.json; analysis/secondary-outcomes.json"
+}
+```
+
+### inf1 · inference · v1
+
+La disponibilidad de herramientas y artefactos no garantizó recorridos aceptados ni documentación\. Un controlador podría hacer visibles y resolver pendientes de formato, exigir resultados medidos y entregar README; la evidencia no distingue todavía entre falta de instrucciones, límites de tiempo, criterio semántico o dificultad del modelo\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: e1 v1, h1 v1.
+
+```json
+{
+  "classification": "hypothesis_supported_as_design_motivation_not_causal_demonstration"
+}
+```
+
+### sy1 · synthesis · v1
+
+El piloto permite localizar fallos de adherencia concretos y conservables\. La imagen nueva resuelve una precondición técnica pero no prueba la intervención metodológica\. El diseño deberá comprobar si el circuito completo satisface criterios fijados antes de ejecutar, y preservar todo control que falle\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: e1 v1, inf1 v1, pr1 v1.
+
+```json
+{
+  "scope": "engineering_diagnosis"
+}
+```
+
+### u1 · uncertainty · v1
+
+Un informe de doce snapshots de una sola familia no estima causalidad del nuevo diseño\. Reglas mecánicas detectan referencias y recibos, no calidad de argumentos; identidad local no está autenticada; la revisión puede aceptar contenido insuficiente\. Tiempo y tokens por solución son desconocidos hasta medición; dinero de suscripción no se atribuye por tokens\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: e1 v1, sy1 v1.
+
+```json
+{
+  "alternatives": [
+    "insufficient role instructions",
+    "time limits",
+    "invalid schema",
+    "semantic weakness",
+    "controller cannot correct reasoning"
+  ]
+}
+```
+
+### o1 · option · v1
+
+Conservar CLI/MCP y runner actuales, sin software adicional: dar instrucciones explícitas por fase y exigir lectura de next\-task, README y recibos\. Menor superficie nueva y revisión humana/agente más transparente; depende de que cada agente cumpla instrucciones, el fallo documentado del piloto\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: n1 v1, sy1 v1.
+
+```json
+{
+  "affected_actors": "author and reviewer carry sequencing/document checks",
+  "cost_measurement": "unknown",
+  "estimated_engineering_effort": "low",
+  "software_change": "none"
+}
+```
+
+### o2 · option · v1
+
+Controlador externo acotado: el motor conserva estado/compuertas; el controlador despacha tareas concretas, captura argv/streams/hash y entrega snapshots inmutables al revisor independiente\. Publica una entrega sólo si las nueve fases aceptadas vigentes, trazas, recibos y documentación cumplen criterios previos\. Reanudación consume checkpoints sin repetir trabajos cerrados\. El controlador no inventa veredictos ni consentimiento\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: n1 v1, sy1 v1.
+
+```json
+{
+  "affected_actors": "author produces artifacts, separate reviewer judges, controller records evidence",
+  "cost_measurement": "unknown",
+  "estimated_engineering_effort": "medium",
+  "scope": "small trusted local software cases",
+  "software_change": "external orchestration around existing engine"
+}
+```
+
+### o3 · option · v1
+
+Ampliar el motor para imponer campos y documentación de software obligatorios en toda fase: compuertas deterministas más fuertes pero mayor cambio del toolkit general, riesgo de rechazar casos no software y de confundir formatos con buen razonamiento\. Aun requiere revisión externa y ejecución de pruebas\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: n1 v1, sy1 v1.
+
+```json
+{
+  "affected_actors": "all toolkit domains and existing cases",
+  "cost_measurement": "unknown",
+  "estimated_engineering_effort": "high",
+  "software_change": "core engine schema and universal release gates"
+}
+```
+
+### cmp1 · comparison · v1
+
+Comparación de diseño, sin puntuaciones medidas: o1 requiere menos ingeniería pero conserva dependencia de instrucciones; o2 reutiliza compuertas comprobadas y permite aislar roles/capturar ejecución, con coste de infraestructura; o3 endurece todo el motor y puede invalidar dominios existentes sin asegurar calidad semántica\. Preferencia técnica provisional o2 para software local; o1 será línea base pertinente\. Esfuerzo low/medium/high es estimación, no benchmark ni coste monetario\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: o1 v1, o2 v1, o3 v1, u1 v1.
+
+```json
+{
+  "dimensions": [
+    "fit_to_observed_failures",
+    "role_isolation",
+    "resume_integrity",
+    "implementation_scope",
+    "effects_on_other_domains"
+  ],
+  "measurement_status": "design_reasoning_only",
+  "money": null,
+  "preferred_candidate": "o2",
+  "tokens": null
+}
+```
+
+### risk1 · risk · v1
+
+El controlador puede congelar razonamiento superficial, confiar en etiquetas locales, repetir acciones tras una interrupción o divulgar evaluación reservada\. Mitigar mediante revisor real con fuente RO, recibos de proceso, rechazo ante falta de evidencia, premisas versionadas, reanudación idempotente y montajes separados\. Fallos del proveedor se registran inconclusos y no disparan cambio de cuenta\. El caso nuevo y controles sintéticos conservan clasificaciones distintas\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: cmp1 v1, o2 v1, u1 v1.
+
+```json
+{
+  "residual_risk": "Semantic reviewer error and external custody remain open; no general causal thesis conclusion."
+}
+```
+
+### i1 · indicator · v2
+
+Controles técnicos locales satisfechos, con criterio y prueba individual, sin sumarlos a una tesis general\. La evidencia histórica e1 motiva estos controles; no asigna valor al indicador nuevo ni satisface ninguno de sus ocho controles\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: e1 v1, n1 v1, p1 v1, pr1 v1.
+
+```json
+{
+  "definition": "Contar criterios prerregistrados satisfechos: recorrido real revisado, trazabilidad, prueba medida, documentación, rechazo por evidencia insuficiente, contradicción, reapertura y recuperación. Exigir veredicto separado por control; denominador 8. Una fase aceptada por etiqueta o un template no satisface el recorrido real.",
+  "evidence_role": "e1 motivates the choice of delivery controls from historical failures; it is not a measured value for this new indicator",
+  "measurement_value": null,
+  "metric": "local_delivery_controls_satisfied",
+  "scope": "new_local_software_controller",
+  "unit": "count"
+}
+```
+
+### d1 · decision · v2
+
+Selecciono provisionalmente o2, controlador externo acotado sobre motor/runner, dentro de la delegación técnica del dueño\. Minimiza cambios universales y trata secuenciación, recibos, roles y documentación; comparación causal queda pendiente\. Propongo una sola transferencia nueva IntervalDesk dentro del mandato técnico existente, después de reparaciones materiales; LogLens permanece inconcluso y ambos intentos se reportan\. La propuesta v2 requiere nueva conformidad técnica separada; no es elección personal del dueño ni cambio de la tesis\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: cmp1 v1, e1 v1, n1 v1, risk1 v1.
+
+Aprobación vigente: sí.
+
+```json
+{
+  "authority": "existing owner instruction to achieve autonomous local software goal; owner did not personally choose architecture",
+  "candidate_case": "IntervalDesk v1",
+  "delegated_technical": true,
+  "engineering_iteration": 2,
+  "original_specification_sha256": "cd2e43303d7b33922d8a8536c96ea6121e8416a2fd990e9a5f38df2f6821c2dc",
+  "prior_LogLens_verdict": "terminal_inconclusive_retained_not_rescored",
+  "proposal": "goals/autonomous-software-v1/transfer-v2-proposal.md",
+  "proposal_sha256": "d171ab0837de62eb912debd05085a4d19af0ea0fcef96f9e2c7c0f3698f7e49e",
+  "selected_option": "o2",
+  "specification_sha256": "cd2e43303d7b33922d8a8536c96ea6121e8416a2fd990e9a5f38df2f6821c2dc"
+}
+```
+
+### req1 · requirement · v3
+
+El controlador debe despachar roles separados, conservar nueve compuertas, aplicar puts guardados y capturar resultados reales; rechazo/evidencia insuficiente/contradicción/staleness/reanudación deben impedir una entrega injustificada\. README y trazas son obligatorios\. En la versión de ingeniería2, aplicar el contrato público IntervalDesk y conservar el intento anterior sin reemplazar su resultado\. Se explicitan además p1 y pr1 como referencias directas para facilitar lectura de las rutas transitivas ya existentes\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: d1 v2, e1 v1, n1 v1, p1 v1, pr1 v1.
+
+```json
+{
+  "candidate_case": "IntervalDesk v1",
+  "engineering_iteration": 2,
+  "original_specification_sha256": "cd2e43303d7b33922d8a8536c96ea6121e8416a2fd990e9a5f38df2f6821c2dc",
+  "prior_LogLens_verdict": "terminal_inconclusive_retained_not_rescored",
+  "proposal": "goals/autonomous-software-v1/transfer-v2-proposal.md",
+  "proposal_sha256": "d171ab0837de62eb912debd05085a4d19af0ea0fcef96f9e2c7c0f3698f7e49e",
+  "requirements": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "scope": "trusted_local_software",
+  "specification": "goals/autonomous-software-v1/controller-specification.md",
+  "specification_sha256": "cd2e43303d7b33922d8a8536c96ea6121e8416a2fd990e9a5f38df2f6821c2dc"
+}
+```
+
+### cr1 · criterion · v3
+
+Criterio de ingeniería2: C1–C4 requieren el NUEVO caso IntervalDesk con nueve fases/revisiones nativas, trazas, pruebas y README; C5–C8 conservan criterios del diseño original y evidencia sintética del mismo código revisado\. Denominador ocho, threshold ocho y límites sin reducir\. Los veredictos originales de LogLens permanecen inconclusos/no medidos\. Una sola ejecución nueva, sin repetir casos hasta obtener victoria\. Se explicitan además p1 y pr1 como referencias directas para facilitar lectura de las rutas transitivas ya existentes\.
+
+Autor: agent:codex\-orchestrator.
+
+Depende de: d1 v2, e1 v1, i1 v2, n1 v1, p1 v1, pr1 v1, req1 v3.
+
+```json
+{
+  "candidate_case": "IntervalDesk v1",
+  "controls": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "C6",
+    "C7",
+    "C8"
+  ],
+  "denominator": 8,
+  "engineering_iteration": 2,
+  "max_prompt_bytes": 128000,
+  "max_role_calls": 40,
+  "max_stream_bytes": 2097152,
+  "max_test_attempts": 2,
+  "measurement_population": "new candidate engineering delivery, not a repeat/confirmatory N/S/T task",
+  "metric": "local_delivery_controls_satisfied",
+  "original_specification_sha256": "cd2e43303d7b33922d8a8536c96ea6121e8416a2fd990e9a5f38df2f6821c2dc",
+  "overall_timeout_seconds": 6000,
+  "prior_LogLens_verdict": "terminal_inconclusive_retained_not_rescored",
+  "proposal": "goals/autonomous-software-v1/transfer-v2-proposal.md",
+  "proposal_sha256": "d171ab0837de62eb912debd05085a4d19af0ea0fcef96f9e2c7c0f3698f7e49e",
+  "reject": "any failed or inconclusive control; no compensation, no renamed success",
+  "role_timeout_seconds": 180,
+  "source": "goals/autonomous-software-v1/transfer-v2-proposal.md",
+  "specification_sha256": "cd2e43303d7b33922d8a8536c96ea6121e8416a2fd990e9a5f38df2f6821c2dc",
+  "test_timeout_seconds": 120,
+  "threshold": 8,
+  "unit": "count"
+}
+```
+
+### d\_resource · decision · v1
+
+Extender o2 con schema6 nuevo: dos etapas de build y una sola reparación opcional condicionada, topes prospectivos de contexto/archivos y revisión nativa separada\. Preferible a repetir la construcción fallida o aumentar sus límites retroactivamente\. Es elección técnica delegada por el dueño, sin afirmar que él eligió personalmente esta arquitectura\. Los intentos anteriores permanecen terminales; la comparación necesita otro prerregistro antes de generar\.
+
+Autor: agent:codex\-coordinator.
+
+Depende de: cmp1 v1, d1 v2, e1 v1, n1 v1, risk1 v1.
+
+Aprobación vigente: sí.
+
+```json
+{
+  "authority": "existing owner mandate to finish autonomous local software goal",
+  "contract": "goals/autonomous-software-v1/resource-contract-v2.md",
+  "contract_sha256": "66e3fbca3186d592be439afdf31088a70cdac95a9ed16579c8f82a7f5c6fd114",
+  "delegated_technical": true,
+  "engineering_iteration": 3,
+  "global_timeout_seconds": 6000,
+  "max_build_authors": 3,
+  "max_other_authors": 2,
+  "max_role_calls": 40,
+  "new_trial_started": false,
+  "old_runs_migrated": false,
+  "prior_IntervalDesk_verdict": "terminal_inconclusive_seven_of_nine_retained",
+  "prior_LogLens_verdict": "terminal_inconclusive_retained",
+  "role_timeout_seconds": 180,
+  "selected_option": "o2"
+}
+```
+
+### req\_resource · requirement · v1
+
+Implementar las transiciones programa\-\>tests\-\>medición/revisión\-\>reparación condicionada/terminal del contrato v2\. Programa/README de etapa1 son inmutables en2; todo put se prevalida, los excedidos conservan evidencia sin writes reales y una segunda medición exige cambio ejecutable\. No eludir cupos mediante IDs nuevos ni reanudar roles inconclusos\. Conservar nueve fases, revisores/ejecutor aislados, trazas, documentación e historial\.
+
+Autor: agent:codex\-coordinator.
+
+Depende de: d\_resource v1, e1 v1, n1 v1, p1 v1, pr1 v1, req1 v3.
+
+```json
+{
+  "contract": "goals/autonomous-software-v1/resource-contract-v2.md",
+  "contract_sha256": "66e3fbca3186d592be439afdf31088a70cdac95a9ed16579c8f82a7f5c6fd114",
+  "engineering_iteration": 3,
+  "new_trial_started": false,
+  "old_runs_migrated": false,
+  "prior_IntervalDesk_verdict": "terminal_inconclusive_seven_of_nine_retained",
+  "prior_LogLens_verdict": "terminal_inconclusive_retained",
+  "resource_controls": [
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5",
+    "R6",
+    "R7",
+    "R8"
+  ],
+  "scope": "prospective schema6 small software runs; historical candidates unchanged"
+}
+```
+
+### cr\_resource · criterion · v1
+
+Criterio de la release nueva: mantener los ocho controles locales de entrega originales y satisfacer además R1–R8 antes de la campaña\. C1–C4 sólo se cumplen con un caso NUEVO de nueve fases semánticas, programa/tests/docs reales y trazas, del conjunto prospectivo congelado; ninguna fixture de recursos los sustituye\. LogLens/IntervalDesk conservan sus propios veredictos adversos\. La comparación debe ejecutar el conjunto declarado y publicar todas las celdas y costes desconocidos, sin selección por victoria\.
+
+Autor: agent:codex\-coordinator.
+
+Depende de: cr1 v3, d\_resource v1, e1 v1, i1 v2, n1 v1, p1 v1, pr1 v1, req\_resource v1.
+
+```json
+{
+  "C1_C4_source": "predeclared future reserved study cases; no replacement of engineering trials",
+  "additional_required_controls": [
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5",
+    "R6",
+    "R7",
+    "R8"
+  ],
+  "contract": "goals/autonomous-software-v1/resource-contract-v2.md",
+  "contract_sha256": "66e3fbca3186d592be439afdf31088a70cdac95a9ed16579c8f82a7f5c6fd114",
+  "denominator": 8,
+  "engineering_iteration": 3,
+  "measurement_value": null,
+  "metric": "local_delivery_controls_satisfied",
+  "new_trial_started": false,
+  "old_runs_migrated": false,
+  "prior_IntervalDesk_verdict": "terminal_inconclusive_seven_of_nine_retained",
+  "prior_LogLens_verdict": "terminal_inconclusive_retained",
+  "reject": "any failed or inconclusive delivery control; any failed resource admission/recovery control; missing complete new case or prospective evaluation",
+  "threshold": 8,
+  "unit": "count"
+}
+```
+
+## Alcance del informe
+
+- El informe resume el expediente; no verifica por sí solo la verdad de sus fuentes\.
+- Aceptar fases no demuestra superioridad metodológica ni impacto de campo\.
+- El modo local no autentica identidades ni custodia externa; sus revisiones y recibos son declaraciones del entorno de trabajo\.

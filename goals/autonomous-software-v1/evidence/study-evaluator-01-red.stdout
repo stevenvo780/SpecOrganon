@@ -1,0 +1,24 @@
+................F..                                                      [100%]
+=================================== FAILURES ===================================
+______ test_reserved_suite_is_deterministic_and_not_a_release_or_delivery ______
+
+    def test_reserved_suite_is_deterministic_and_not_a_release_or_delivery():
+        a, b = E.suite(), E.suite()
+        assert E.encoded(a) == E.encoded(b)
+        assert a["status"] == "draft_not_preregistered"
+        assert {c["task"] for c in a["cases"]} == {"routeplan", "treemap"}
+        route = {c["id"]: c for c in a["cases"] if c["task"] == "routeplan"}
+        assert len(bytes.fromhex(route["byte-cap"]["stdin_hex"])) == 65536
+        assert len(bytes.fromhex(route["byte-over-cap"]["stdin_hex"])) == 65537
+        assert len(json.loads(bytes.fromhex(route["edge-cap"]["stdin_hex"]))["edges"]) == 128
+>       assert route["full-list-tie"]["expected"]["path"] == ["S", "a", "c", "Z"]
+E       AssertionError: assert ['S', 'Z'] == ['S', 'a', 'c', 'Z']
+E         
+E         At index 1 diff: 'Z' != 'a'
+E         Right contains 2 more items, first extra item: 'c'
+E         Use -v to get more diff
+
+tests/test_software_study_evaluator.py:76: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_software_study_evaluator.py::test_reserved_suite_is_deterministic_and_not_a_release_or_delivery
+1 failed, 18 passed in 0.08s

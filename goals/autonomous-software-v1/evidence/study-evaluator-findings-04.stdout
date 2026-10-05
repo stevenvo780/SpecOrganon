@@ -1,0 +1,3 @@
+{"finding_control": "stderr-state-spoof", "verdict": {"status": "pass", "reason": "no forbidden probe access observed", "matching_syscalls": []}}
+{"finding_control": "safe-similar-scratch-path", "verdict": {"status": "fail", "reason": "observed content/link-target access", "matching_syscalls": ["openat(AT_FDCWD</input/delivery>, \"/tmp/fixture/root/probe.txt\", O_WRONLY|O_CREAT|O_TRUNC|O_CLOEXEC, 0666) = 3</tmp/fixture/root/probe.txt>", "openat(AT_FDCWD</input/delivery>, \"/tmp/fixture/root/probe.txt\", O_RDONLY|O_CLOEXEC) = 3</tmp/fixture/root/probe.txt>"]}}
+{"finding_control": "opath-proc-link-inspection", "verdict": {"status": "pass", "reason": "no forbidden probe access observed", "matching_syscalls": []}}

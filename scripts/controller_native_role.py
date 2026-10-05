@@ -228,11 +228,17 @@ def execution_identity(provider, executable):
             "other_effective_configuration": "unknown; trusted launcher/profile boundary"}
 
 
-def native_argv(provider, model, prompt, *, model_catalog=None):
+def native_argv(provider, model, prompt, *, model_catalog=None, reasoning_effort=None):
     if provider == "gemini":
+        if reasoning_effort is not None:
+            raise NativeRoleError("Gemini provider does not accept codex_reasoning_effort")
         return ["/usr/local/bin/agy", "--model", model, "--sandbox", "--disable-slash-commands",
                 "--print-timeout", "180s", "--output-format", "stream-json", "--input-format", "stream-json", "--print="]
     if provider != "codex": raise NativeRoleError("unsupported provider")
+    if (reasoning_effort is None
+            or type(reasoning_effort) is not str
+            or reasoning_effort not in {"low", "medium", "high", "xhigh"}):
+        raise NativeRoleError("Codex provider requires explicit bounded reasoning effort (low/medium/high/xhigh)")
     args = ["/usr/local/bin/codex", "exec", "-s", "read-only", "-c", 'approval_policy="never"']
     # These names are verified in Codex 0.160.0. Overrides affect this invocation;
     # they do not modify the existing profile or authorize additional tools.
@@ -240,6 +246,9 @@ def native_argv(provider, model, prompt, *, model_catalog=None):
         args += ["--disable", feature]
     if model_catalog is not None:
         args += ["-c", "model_catalog_json=" + json.dumps(str(model_catalog))]
+    # Override the original profile's reasoning effort on this invocation only.
+    # The original config.toml is not edited; this is a -c dotted override.
+    args += ["-c", "model_reasoning_effort=" + json.dumps(reasoning_effort)]
     home = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex")))
     config = home / "config.toml"
     if config.exists():
@@ -302,6 +311,7 @@ def main(argv=None):
     parser.add_argument("--request", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--model-catalog", type=Path)
+    parser.add_argument("--codex-reasoning-effort", choices=("low", "medium", "high", "xhigh"))
     options = parser.parse_args(argv)
     options.output_dir.mkdir(parents=True, exist_ok=True)
     raw = read_request(options.request)
@@ -310,18 +320,39 @@ def main(argv=None):
     metadata = execution_identity(options.provider, executable)
     catalog_metadata = {}; catalog_path = None
     if options.provider == "codex":
+        if options.codex_reasoning_effort is None:
+            raise NativeRoleError("Codex role requires an explicit --codex-reasoning-effort")
         if options.model_catalog is None: raise NativeRoleError("Codex role requires a pinned public model catalog")
         public = _read(options.model_catalog)
-        normalized = canonical(role_model_catalog(strict(public.decode()), options.model))
+        normalized_source = strict(public.decode())
+        projected = role_model_catalog(normalized_source, options.model)
+        # Validate the requested effort against the selected model's projected
+        # public catalog's supported_reasoning_levels (entries .effort). This
+        # does not claim the remote server honors the value, only that the
+        # public catalog lists it as a supported option for this model.
+        supported = projected["models"][0].get("supported_reasoning_levels", [])
+        if type(supported) is not list or not any(
+                isinstance(entry, dict) and entry.get("effort") == options.codex_reasoning_effort
+                for entry in supported):
+            raise NativeRoleError(
+                f"Codex model {options.model!r} public catalog does not list reasoning effort "
+                f"{options.codex_reasoning_effort!r} in supported_reasoning_levels")
+        normalized = canonical(projected)
         catalog_path = options.output_dir / "runtime-model-catalog.json"
         if catalog_path.exists():
             if _read(catalog_path) != normalized: raise NativeRoleError("runtime model catalog changed")
         else: _write(catalog_path, strict(normalized.decode()))
         catalog_metadata = {"public_model_catalog_sha256": digest(public),
                             "runtime_model_catalog_sha256": digest(normalized),
-                            "tool_surface_override": "direct; no shell, patch, search or experimental tools"}
+                            "tool_surface_override": "direct; no shell, patch, search or experimental tools",
+                            "requested_reasoning_effort": options.codex_reasoning_effort,
+                            "effective_remote_reasoning_effort": "not observed"}
+    elif options.codex_reasoning_effort is not None:
+        raise NativeRoleError("Gemini provider does not accept --codex-reasoning-effort")
     elif options.model_catalog is not None: raise NativeRoleError("model catalog is only supported for Codex")
-    args = native_argv(options.provider, options.model, prompt, model_catalog=catalog_path)
+    args = native_argv(options.provider, options.model, prompt,
+                       model_catalog=catalog_path,
+                       reasoning_effort=options.codex_reasoning_effort)
     if metadata != execution_identity(options.provider, executable):
         raise NativeRoleError("provider configuration/executable changed before dispatch")
     payload = (canonical({'event': 'user', 'message': {'role': 'user',

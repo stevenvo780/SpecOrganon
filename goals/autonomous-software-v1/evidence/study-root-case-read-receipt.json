@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "reads": [
+    {
+      "argv": [
+        "uv",
+        "run",
+        "organon",
+        "status",
+        "cases/autonomous_software_v1"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "42d22c57239af8b42ba8722ebb30fdc5e4480e912274091444bcc5434d6a3359",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "organon",
+        "report",
+        "cases/autonomous_software_v1",
+        "--format",
+        "markdown"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "e3a3d088b5adc88e04f423c86bac3e1decd54bb1068ed980f3d6cf3293dfa80d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "organon",
+        "next-task",
+        "cases/autonomous_software_v1"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "d894b9a3ac42b22fdb3f09b369cd7f234e2c623c6ed8e6403762d3d071d3b71a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "case_bytes_unchanged": true,
+  "scope": "Read-only existing engineeringcase, revision59/sevenaccepted; no newsoftwaredelivery"
+}

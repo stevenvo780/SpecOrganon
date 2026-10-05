@@ -32,6 +32,8 @@ def main():
     parser.add_argument('--gemini-profile', default='/home/stev/.gemini')
     parser.add_argument('--gemini-executable', default='/home/stev/.local/bin/agy')
     parser.add_argument('--seccomp')
+    parser.add_argument('--codex-reasoning-effort', choices=('low', 'medium', 'high', 'xhigh'),
+                        default='low', help='Bounded explicit native Codex reasoning effort')
     parser.add_argument('--steps', type=int, default=1, help='Explicit bounded dispatch count, maximum80')
     args = parser.parse_args()
     if not 1 <= args.steps <= 80: parser.error('--steps must be 1..80')
@@ -48,7 +50,8 @@ def main():
             author_provider=args.author_provider, author_model=args.author_model,
             reviewer_provider=args.reviewer_provider, reviewer_model=args.reviewer_model,
             codex_volume=args.codex_volume, gemini_profile=args.gemini_profile,
-            gemini_executable=args.gemini_executable, seccomp=args.seccomp)
+            gemini_executable=args.gemini_executable, seccomp=args.seccomp,
+            codex_reasoning_effort=args.codex_reasoning_effort)
         controller = Controller(args.case, root / 'controller', transport,
             contract=_read(args.contract, 64_000).decode(), mandate=_read(args.mandate, 16_000).decode(), executor=transport)
         _write(root / 'last-initial-report.json', initial_report)

@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "scope": "documentary API context, not task outcome or method benefit; not evaluator/solution disclosure",
+  "checked_date_utc": "2026-10-05",
+  "interpreter_target": "pinned Python3.12.3 image, maintenance docs currently3.12.15; relevant API semantics, not exact binary identity",
+  "sources": [
+    {
+      "url": "https://docs.python.org/3.12/library/json.html",
+      "claims": [
+        "object_pairs_hook receives ordered key/value pairs",
+        "parse_float and parse_constant allow custom decoding",
+        "default accepts some nonstandard numerical values; task contract intentionally stricter"
+      ],
+      "locator": "json.load, object_pairs_hook, parse_float, parse_constant"
+    },
+    {
+      "url": "https://docs.python.org/3.12/library/os.html#os.lstat",
+      "claims": [
+        "lstat does not follow symbolic links",
+        "stat_result.st_size is file size in bytes; distinct from allocated block count"
+      ],
+      "locator": "os.lstat, os.stat_result.st_size, st_blocks"
+    },
+    {
+      "url": "https://docs.python.org/3.12/library/stat.html#stat.S_ISLNK",
+      "claims": [
+        "file-mode predicates classify regular files, directories, symlinks and FIFO"
+      ],
+      "locator": "S_ISREG, S_ISDIR, S_ISLNK, S_ISFIFO"
+    }
+  ]
+}
