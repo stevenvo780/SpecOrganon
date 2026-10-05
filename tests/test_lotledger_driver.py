@@ -53,6 +53,9 @@ def test_trial_freeze_covers_local_import_closure_and_loaded_modules():
     assert 'scripts/analyze_bread_survey.py' not in names
     assert 'experiments/software_comparison_v3/protocol-draft.md' not in names
     assert 'experiments/lotledger_delivery_v1/original60_reserved.py' in names
+    # Broader adapter regression tests use historical observations and remain
+    # outside this identity. Hermetic parser regressions below are source-bound.
+    assert 'tests/test_controller_native_role.py' not in names
 
 
 @pytest.mark.parametrize('text', ['```json\n{}\n```', '```\n{}\n```', '{}\nCommentary', '{} {}'])
@@ -78,6 +81,17 @@ def test_contract_invocation_matches_both_subject_and_native_test_transport():
     assert '/input/delivery' in {node.value for node in ast.walk(native_tree) if isinstance(node, ast.Constant) and isinstance(node.value,str)}
 
 
+def test_argv_probe_keeps_child_stdin_open_and_preserves_exact_child_argv():
+    from experiments.lotledger_delivery_v1.subjects import subject_command, HELD_OPEN_WRAPPER
+    from experiments.lotledger_delivery_v1.reserved import recipes
+    probe=next(row for row in recipes() if row['id']=='format-argv-before-stdin')
+    args=subject_command(probe)
+    assert args[-6:]==['/opt/specorganon/venv/bin/python','-E','-s','-B','/input/delivery/lotledger.py','--help']
+    assert HELD_OPEN_WRAPPER in args and 'stdin=subprocess.PIPE' in HELD_OPEN_WRAPPER
+    assert 'p.wait(timeout=2.5)' in HELD_OPEN_WRAPPER
+    assert 'communicate(' not in HELD_OPEN_WRAPPER and 'write(' not in HELD_OPEN_WRAPPER
+
+
 def test_original_quota_admission_keeps_unknown_age_and_exhaustion_controls(tmp_path):
     from scripts.original_profile_quota import current_quota, CampaignPause
     captured = datetime.datetime.now(datetime.timezone.utc)
@@ -98,7 +112,7 @@ def test_original_quota_admission_keeps_unknown_age_and_exhaustion_controls(tmp_
 @pytest.mark.parametrize('key', ['public_catalog', 'public_context', 'mandate'])
 def test_registration_rejects_substituted_public_paths_before_loading_packet(tmp_path, key):
     from scripts.lotledger_delivery import PUBLIC_PATHS
-    value = {'schema':1, 'identity':'lotledger-delivery-v1', 'matrix_count':73,
+    value = {'schema':1, 'identity':'lotledger-delivery-v1', 'matrix_count':75,
              'registered_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
              'source_root':str(SOURCE), 'case':str(SOURCE/'cases/lotledger_v1'),
              'run_root':str(tmp_path/'run'),
@@ -135,7 +149,7 @@ def test_other_identity_never_admits_or_writes_synthetic_history(tmp_path):
             'source_sha256', 'images', 'routes', 'profiles', 'limits', 'public_catalog',
             'public_context', 'mandate', 'review', 'review_sha256', 'matrix_sha256', 'matrix_count'}
     value = {key: None for key in keys}
-    value.update({'schema':1, 'identity':'csvshape-delivery-v1', 'matrix_count':73})
+    value.update({'schema':1, 'identity':'csvshape-delivery-v1', 'matrix_count':75})
     registration.write_text(json.dumps(value))
     ledger = tmp_path / 'organon.json'
     ledger.write_bytes(b'{"schema":1,"events":[],"synthetic":true}\n')

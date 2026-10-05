@@ -15,6 +15,29 @@ class SubjectError(ValueError):
     pass
 
 
+HELD_OPEN_WRAPPER = '''import subprocess,sys
+p=subprocess.Popen(sys.argv[1:],stdin=subprocess.PIPE)
+try:
+    code=p.wait(timeout=2.5)
+except subprocess.TimeoutExpired:
+    p.kill()
+    p.wait()
+    code=124
+finally:
+    p.stdin.close()
+sys.exit(code)
+'''
+
+
+def subject_command(recipe):
+    """Fixed argv; one registered probe keeps child stdin open with no data/EOF."""
+    python='/opt/specorganon/venv/bin/python'
+    child=[python,'-E','-s','-B','/input/delivery/lotledger.py',*recipe['argv']]
+    if recipe.get('stdin_mode') == 'held_open':
+        child=[python,'-E','-s','-B','-c',HELD_OPEN_WRAPPER,*child]
+    return ['/usr/bin/timeout','--signal=KILL','3s',*child]
+
+
 class Subjects:
     def __init__(self, root, image):
         self.root = _safe(root)
@@ -79,8 +102,7 @@ class Subjects:
                     path.write_text(content, encoding='utf-8')
                 label = digest(canonical({'root': str(self.root), 'job': job_id}))
                 name = 'specorganon-lot-' + label
-                command = ['/usr/bin/timeout', '--signal=KILL', '3s', '/opt/specorganon/venv/bin/python',
-                           '-E', '-s', '-B', '/input/delivery/lotledger.py', *recipe['argv']]
+                command = subject_command(recipe)
                 args = ['create', '--name', name, '--label', 'specorganon.lotledger=' + label,
                         '--interactive', '--read-only', '--network', 'none', '--cap-drop=ALL',
                         '--security-opt', 'no-new-privileges', '--user', '1000:1000', '--memory', '1g',
@@ -125,7 +147,7 @@ class Subjects:
             if code != receipt['exit_code'] and not (receipt['timed_out'] or receipt['truncated_streams']):
                 raise SubjectError('attachment and subject exit diverged')
             result = {'exit_code': code, 'stdout': job['stdout'], 'stderr': job['stderr'],
-                      'timed_out': code == 137 or receipt['timed_out'], 'truncated_streams': receipt['truncated_streams'],
+                      'timed_out': code == 137 or (code == 124 and recipe.get('stdin_mode') == 'held_open') or receipt['timed_out'], 'truncated_streams': receipt['truncated_streams'],
                       'infrastructure_error': 'attachment timeout' if receipt['timed_out'] else None}
             verdict = judge(recipe, result)
             public = {'id': identity, 'public': recipe['public'], **verdict, 'receipt_ref': str(self.store.root / job_id / 'receipt.json'),

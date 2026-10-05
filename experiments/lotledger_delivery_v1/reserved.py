@@ -1,4 +1,4 @@
-"""Seventy-three prospective LotLedger recipes; never mounted to generation roles."""
+"""Seventy-five prospective LotLedger recipes; never mounted to generation roles."""
 from __future__ import annotations
 
 import json
@@ -116,6 +116,9 @@ def recipes():
     add('format', 'whitespace-line', b' \t\r\n')
     add('format', 'BOM', b'\xef\xbb\xbf' + lines(event()))
     add('format', 'argv', b'', argv=['--help'])
+    add('format', 'argv-with-payload', lines(event()), argv=['--help'])
+    add('format', 'argv-before-stdin', b'', argv=['--help'])
+    result[-1]['stdin_mode'] = 'held_open'
 
     string64 = 'é' * 32
     add('boundaries', 'strings-64', lines(event(string64, lot=string64, site=string64)),
@@ -149,8 +152,8 @@ def recipes():
     add('boundaries', 'empty-site', lines(event(site='')))
     add('boundaries', 'empty-from', lines(event(op='move', site='')))
     add('boundaries', 'empty-to', lines(event('a'), event('b', 'move', to='')))
-    assert len(result) == 73 and len({r['id'] for r in result}) == 73
-    assert [sum(r['group'] == g for r in result) for g in GROUPS] == [11, 10, 10, 13, 10, 19]
+    assert len(result) == 75 and len({r['id'] for r in result}) == 75
+    assert [sum(r['group'] == g for r in result) for g in GROUPS] == [11, 10, 10, 13, 12, 19]
     return result
 
 
