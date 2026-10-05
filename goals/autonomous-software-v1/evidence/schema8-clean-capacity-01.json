@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "captured_at": "2026-10-05T12:02:01.452Z",
+  "scope": "actual preflight for engineering/design work; historical snapshot after completion, refresh before future admission",
+  "providers": {
+    "Gemini_original": {
+      "observed_at": "2026-10-05T12:01:50.000Z",
+      "age_at_capture_seconds": 11,
+      "windows": [
+        {
+          "key": "Gemini-5h",
+          "remainingPercent": 76,
+          "resetAt": "2026-10-05T12:51:01.451Z"
+        },
+        {
+          "key": "Gemini-sem",
+          "remainingPercent": 45,
+          "resetAt": "2026-10-07T13:21:01.451Z"
+        }
+      ]
+    },
+    "MiniMax": {
+      "observed_at": "2026-10-05T12:01:47.232Z",
+      "windows": [
+        {
+          "key": "interval_general",
+          "remainingPercent": 84
+        },
+        {
+          "key": "weekly_general",
+          "remainingPercent": 92
+        }
+      ]
+    },
+    "Codex_original_Docker": {
+      "quota": "unknown",
+      "local_polling": "deliberately disabled, not re-enabled"
+    },
+    "Claude": {
+      "quota": "unknown"
+    },
+    "Muse": {
+      "quota": "unknown",
+      "account_identity": "not observed",
+      "original_configuration": true
+    }
+  },
+  "catalog": {
+    "server": "cloud-offload",
+    "version": "2.2.0-personal",
+    "routes": [
+      {
+        "model": "codex/gpt-6.1-sol",
+        "provider": "codex",
+        "cli": "codex",
+        "cli_path": "/home/stev/.local/bin/codex",
+        "native": "gpt-6.1-sol"
+      },
+      {
+        "model": "feihoa/Qwen3.8-27B-Uncensored",
+        "provider": "qwen",
+        "cli": "opencode",
+        "cli_path": "/home/stev/.local/bin/opencode",
+        "native": "feihoa/Qwen3.8-27B-Uncensored"
+      },
+      {
+        "model": "gemini/3.8-flash",
+        "provider": "gemini",
+        "cli": "agy",
+        "cli_path": "/home/stev/.local/bin/agy",
+        "native": "Gemini 3.8 Flash (Medium)"
+      },
+      {
+        "model": "minimax/MiniMax-M3",
+        "provider": "minimax",
+        "cli": "opencode",
+        "cli_path": "/home/stev/.local/bin/opencode",
+        "native": "minimax/MiniMax-M3"
+      }
+    ]
+  },
+  "account_switch": false,
+  "credits_purchased": false
+}

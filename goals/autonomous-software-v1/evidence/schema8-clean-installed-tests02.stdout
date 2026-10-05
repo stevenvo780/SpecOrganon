@@ -1,0 +1,120 @@
+................................FF..................................     [100%]
+=================================== FAILURES ===================================
+_ test_maximum_full_validate_context_keeps_all_items_files_and_test_streams[routeplan] _
+
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-0/test_maximum_full_validate_con1')
+public_contract = 'routeplan'
+
+    @pytest.mark.parametrize('public_contract',[None,'routeplan','treemap'])
+    def test_maximum_full_validate_context_keeps_all_items_files_and_test_streams(tmp_path,public_contract):
+        ctrl=build_fixture(tmp_path);ctrl.executor=Executor(tmp_path,stdout=b'X'*3994,stderr=b'Y'*3994);program(ctrl);stage_tests(ctrl);ctrl.step()
+        if public_contract:
+            repository=Path(__file__).parents[1]
+            ctrl.contract=(repository/'experiments/software_comparison_v1/public'/ (public_contract+'.md')).read_text()
+            ctrl.mandate=(repository/'experiments/software_comparison_v1/public/existing-mandate.md').read_text()
+        state=engine.get_state(ctrl.case)
+        state['phases']['build']['accepted']=True
+        # Model a final current snapshot at each declared phase cap. All complete
+        # item maps remain in the request, including issues/deps and test receipt.
+        for phase in state['phases']:
+            group={k:v for k,v in state['items'].items() if KIND_TO_PHASE[v['kind']]==phase}
+            if not group:
+                item=copy.deepcopy(state['items']['p1']);item.update(id='res1',kind='result')
+                state['items']['res1']=item;group={'res1':item}
+            template=next(iter(group.values()))
+            for index in range(len(group),6):
+                item=copy.deepcopy(template);item['id']=phase+str(index);item['data']={};item['text']='Synthetic cap'
+                # No cloned measured job refs: a receipt is kept once, in t1.
+                item['test_execution_provenance']=None
+                group[item['id']]=item;state['items'][item['id']]=item
+            target=next(iter(group.values()))
+            while encoded_contribution(group)>6000: target['text']=target['text'][:-1]
+            while encoded_contribution(group)<6000:
+                target['text']+='x'
+            target['text']=target['text'][:-1]
+            assert 5990<=encoded_contribution(group)<=6000
+        files=ctrl._files();files['README.md']+='x'*17000
+        while encoded_contribution(files)<20000:files['README.md']+='x'
+        files['README.md']=files['README.md'][:-1]
+        ctrl._write_files({'source_files':ctrl._files()},{'README.md':files['README.md']})
+        progress=_json(ctrl.root/'progress.json')
+        # History is complete for this fixture. Arbitrarily large native reasons
+        # remain subject to the independent final 110000-byte admission guard.
+        request=ctrl._request(state,'review',progress)
+        assert len(canonical(request))<=110000
+        assert request['documents']['state.json']==canonical(state).decode()
+        assert json.loads(request['documents']['delivery-files.json'])==files
+        streams=json.loads(request['documents']['measured-test-records.json'])['t1']['streams']
+        assert streams['stdout']=={'text':'X'*3994,'complete':True}
+        assert streams['stderr']=={'text':'Y'*3994,'complete':True}
+        from scripts.controller_native_role import render_prompt
+        rendered_bytes=len(render_prompt(canonical(request))[1].encode('utf-8'))
+        print(json.dumps({'classification':'synthetic maximum item/files/log contribution fixture', 'public_contract':public_contract,'request_bytes':len(canonical(request)), 'rendered_bytes':rendered_bytes,'request_limit':110000,'phase_count':9,'phase_item_limit':6,'phase_encoded_limit':6000,'files_encoded_bytes':encoded_contribution(files),'stream_encoded_bytes':encoded_contribution('X'*3994),'state_preserved':True,'C1_satisfied':False}))
+        if public_contract:
+>           from scripts.software_study_harness import ToolkitCell
+E           ModuleNotFoundError: No module named 'scripts.software_study_harness'
+
+tests/test_software_controller_resources.py:236: ModuleNotFoundError
+----------------------------- Captured stdout call -----------------------------
+{"classification": "synthetic maximum item/files/log contribution fixture", "public_contract": "routeplan", "request_bytes": 108682, "rendered_bytes": 111513, "request_limit": 110000, "phase_count": 9, "phase_item_limit": 6, "phase_encoded_limit": 6000, "files_encoded_bytes": 19999, "stream_encoded_bytes": 4000, "state_preserved": true, "C1_satisfied": false}
+_ test_maximum_full_validate_context_keeps_all_items_files_and_test_streams[treemap] _
+
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-0/test_maximum_full_validate_con2')
+public_contract = 'treemap'
+
+    @pytest.mark.parametrize('public_contract',[None,'routeplan','treemap'])
+    def test_maximum_full_validate_context_keeps_all_items_files_and_test_streams(tmp_path,public_contract):
+        ctrl=build_fixture(tmp_path);ctrl.executor=Executor(tmp_path,stdout=b'X'*3994,stderr=b'Y'*3994);program(ctrl);stage_tests(ctrl);ctrl.step()
+        if public_contract:
+            repository=Path(__file__).parents[1]
+            ctrl.contract=(repository/'experiments/software_comparison_v1/public'/ (public_contract+'.md')).read_text()
+            ctrl.mandate=(repository/'experiments/software_comparison_v1/public/existing-mandate.md').read_text()
+        state=engine.get_state(ctrl.case)
+        state['phases']['build']['accepted']=True
+        # Model a final current snapshot at each declared phase cap. All complete
+        # item maps remain in the request, including issues/deps and test receipt.
+        for phase in state['phases']:
+            group={k:v for k,v in state['items'].items() if KIND_TO_PHASE[v['kind']]==phase}
+            if not group:
+                item=copy.deepcopy(state['items']['p1']);item.update(id='res1',kind='result')
+                state['items']['res1']=item;group={'res1':item}
+            template=next(iter(group.values()))
+            for index in range(len(group),6):
+                item=copy.deepcopy(template);item['id']=phase+str(index);item['data']={};item['text']='Synthetic cap'
+                # No cloned measured job refs: a receipt is kept once, in t1.
+                item['test_execution_provenance']=None
+                group[item['id']]=item;state['items'][item['id']]=item
+            target=next(iter(group.values()))
+            while encoded_contribution(group)>6000: target['text']=target['text'][:-1]
+            while encoded_contribution(group)<6000:
+                target['text']+='x'
+            target['text']=target['text'][:-1]
+            assert 5990<=encoded_contribution(group)<=6000
+        files=ctrl._files();files['README.md']+='x'*17000
+        while encoded_contribution(files)<20000:files['README.md']+='x'
+        files['README.md']=files['README.md'][:-1]
+        ctrl._write_files({'source_files':ctrl._files()},{'README.md':files['README.md']})
+        progress=_json(ctrl.root/'progress.json')
+        # History is complete for this fixture. Arbitrarily large native reasons
+        # remain subject to the independent final 110000-byte admission guard.
+        request=ctrl._request(state,'review',progress)
+        assert len(canonical(request))<=110000
+        assert request['documents']['state.json']==canonical(state).decode()
+        assert json.loads(request['documents']['delivery-files.json'])==files
+        streams=json.loads(request['documents']['measured-test-records.json'])['t1']['streams']
+        assert streams['stdout']=={'text':'X'*3994,'complete':True}
+        assert streams['stderr']=={'text':'Y'*3994,'complete':True}
+        from scripts.controller_native_role import render_prompt
+        rendered_bytes=len(render_prompt(canonical(request))[1].encode('utf-8'))
+        print(json.dumps({'classification':'synthetic maximum item/files/log contribution fixture', 'public_contract':public_contract,'request_bytes':len(canonical(request)), 'rendered_bytes':rendered_bytes,'request_limit':110000,'phase_count':9,'phase_item_limit':6,'phase_encoded_limit':6000,'files_encoded_bytes':encoded_contribution(files),'stream_encoded_bytes':encoded_contribution('X'*3994),'state_preserved':True,'C1_satisfied':False}))
+        if public_contract:
+>           from scripts.software_study_harness import ToolkitCell
+E           ModuleNotFoundError: No module named 'scripts.software_study_harness'
+
+tests/test_software_controller_resources.py:236: ModuleNotFoundError
+----------------------------- Captured stdout call -----------------------------
+{"classification": "synthetic maximum item/files/log contribution fixture", "public_contract": "treemap", "request_bytes": 109874, "rendered_bytes": 112705, "request_limit": 110000, "phase_count": 9, "phase_item_limit": 6, "phase_encoded_limit": 6000, "files_encoded_bytes": 19999, "stream_encoded_bytes": 4000, "state_preserved": true, "C1_satisfied": false}
+=========================== short test summary info ============================
+FAILED tests/test_software_controller_resources.py::test_maximum_full_validate_context_keeps_all_items_files_and_test_streams[routeplan]
+FAILED tests/test_software_controller_resources.py::test_maximum_full_validate_context_keeps_all_items_files_and_test_streams[treemap]
+2 failed, 66 passed, 5 deselected in 6.63s

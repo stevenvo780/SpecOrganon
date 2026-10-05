@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "model": "muse-spark-1.3",
+  "provider": "Meta via Muse Code original configuration",
+  "quota": "unknown",
+  "account_identity": "not observed",
+  "scope": "pre-registration design only; no generation",
+  "input": {
+    "effort": "medium",
+    "model": "muse-spark-1.3",
+    "prompt_sha256": "8e82ec2f3e75dae6fa2dd95fa155563137c051f0f16a94f41caecce1e3feef3d",
+    "proposal_sha256": "52b671f9e762a5ef01839cc5ffc94eb296f7282f4b7fbaa333854330abfb3d6e",
+    "provider": "meta",
+    "schema": 1
+  },
+  "review": {
+    "verdict": "revise_draft",
+    "reasons": [
+      "New LotLedger family is operationally distinct from LogLens/IntervalDesk/CSVShape and single-identity no-replacement rule respects no-victory-seeking constraint, but draft is not yet executable.",
+      "Functional core is unusually strict and testable, yet several boundary definitions remain ambiguous for a frozen exact contract.",
+      "SQLite transactional alternative is substantive in principle, but no measured primitive evidence in fixed image exists yet; docs-only references cannot support baseline honesty.",
+      "60-recipe reserved set lacks coverage rationale and frozen evaluator preconditions are only sketched.",
+      "Roles/budgets/stopping are well bounded under schema8, but N/S/T multitype comparison and release gates are deferred without pointer to their prospective protocol."
+    ],
+    "findings": [
+      {
+        "severity": "major",
+        "section": "Justificaci\u00f3n y l\u00edmite contra selecci\u00f3n favorable",
+        "issue": "Single identity lotledger-delivery-v1 with publish-on-fail is correct, but freeze/registration sequence is informal.",
+        "required_change": "Require written freeze receipt: exact contract hash plus evaluator hash plus independent review sign-off before first admission; forbid edits after freeze except new identity."
+      },
+      {
+        "severity": "major",
+        "section": "Contrato funcional propuesto",
+        "issue": "Input size/count limit ambiguous: 65536 bytes inclusive and 1000 events; unclear whether total stdin bytes, treatment of final LF, and oversize handling as invalid_input vs infrastructure fail.",
+        "required_change": "Define measured unit, inclusive boundary, oversize verdict with exit/streams, and empty vs single-LF vs whitespace-only inputs."
+      },
+      {
+        "severity": "major",
+        "section": "Contrato funcional propuesto",
+        "issue": "Duplicate/idempotency accounting underspecified: unique_events/duplicate_events counting, first-invalid vs duplicate-invalid precedence, and key-order-only equality need exact rules.",
+        "required_change": "Specify distinct-id counting, duplicate occurrence counting, that any invalid event invalidates whole input before dedup, and canonical comparison rule without adding implementation."
+      },
+      {
+        "severity": "major",
+        "section": "Contrato funcional propuesto",
+        "issue": "Output exactness incomplete: top-level/row key sets, key order significance, integer types, single trailing newline, and argv-error streams not fully pinned.",
+        "required_change": "State exact allowed keys, no-extra-keys rule top and row level, output whitespace/newline rule, and argv-violation exit/streams identical to invalid_input."
+      },
+      {
+        "severity": "major",
+        "section": "Contrato funcional propuesto",
+        "issue": "Stock model and ordering need closure: key is implied (lot,site), move semantics same-lot cross-site, zero-stock omission, Python string ordering version dependence.",
+        "required_change": "Explicitly define stock key, move lot invariance, positive-only omission rule, and Python 3.12 string comparison reference with locale-independent behavior."
+      },
+      {
+        "severity": "major",
+        "section": "Evidencia, alternativas y veredictos",
+        "issue": "No measured SQLite primitive observations in fixed image; only two doc URLs dated 2026-10-05. Baseline honesty rule stated but unsatisfied.",
+        "required_change": "Add prerequisite: pre-generation observable primitive note with image digest, population/procedure/location, and actually measured values; prohibit invented baseline0 and post-hoc copying into criteria."
+      },
+      {
+        "severity": "major",
+        "section": "Evaluaci\u00f3n reservada",
+        "issue": "60 recipes asserted without rationale; coverage categories listed but no count-to-coverage mapping, metamorphism definitions, or power justification.",
+        "required_change": "Provide recipe-count rationale: category allocation table, why 60 not fewer/more, metamorphic relations named only, plus frozen evaluator hash and no-leak rule."
+      },
+      {
+        "severity": "major",
+        "section": "Roles, presupuesto y parada",
+        "issue": "Author/reviewer models, ORIGINAL volumes/profiles, separation, and schema8 slot/time/byte caps are clear, but N/S/T two-family repetitions plus ablation and clean release/publication remain external.",
+        "required_change": "Mark as missing prerequisites: separate prospective N/S/T multitype protocol reference and C1-C8 exact gate text; confirm this draft alone does not authorize that comparison."
+      },
+      {
+        "severity": "minor",
+        "section": "Anti-leakage/evaluator preconditions",
+        "issue": "Controls named but evaluator isolation, receipt preservation, and quota-freshness enforcement lack operational hook.",
+        "required_change": "Require reserved evaluator frozen before generation, invocation/streams/timeout/code retention, sentinel/missing/timeout controls separated, quota age<=600s check logged per admission."
+      }
+    ],
+    "registration_ready": false,
+    "tests_executed": false
+  },
+  "job_id": "design-01",
+  "private_run_root": "/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-design-review-01",
+  "exit_code": 0,
+  "duration_seconds": 39.40593667398207,
+  "stdout_sha256": "f044846f2d332d820a6c17135ec55d2c64d3a5a78d33f41778f519af4b206d0c",
+  "stderr_sha256": "b725b04256a9739c8ac53b8e09f41134096ce2a306b9053ffa09d78c8a7733aa",
+  "native_tests_executed": false
+}
