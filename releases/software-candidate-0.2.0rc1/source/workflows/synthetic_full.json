@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Synthetic full-path mechanics fixture",
+  "description": "Invented inputs for workflow tests only; no field evidence or impact claim.",
+  "steps": [
+    {"op": "put", "id": "p1", "kind": "problem", "text": "Synthetic problem for an execution fixture.", "refs": [], "data": {}},
+    {"op": "put", "id": "a1", "kind": "actor", "text": "Synthetic affected actor.", "refs": ["p1"], "data": {}},
+    {"op": "put", "id": "b1", "kind": "boundary", "text": "Only this synthetic case is in scope.", "refs": ["p1"], "data": {}},
+    {"op": "advance", "phase": "frame"},
+
+    {"op": "put", "id": "c1", "kind": "concept", "text": "The measured quantity is a constructed count.", "refs": ["p1"], "data": {}},
+    {"op": "put", "id": "s1", "kind": "assumption", "text": "The fixture count is available.", "refs": ["p1"], "data": {}},
+    {"op": "put", "id": "f1", "kind": "frame_option", "text": "Frame as a count problem.", "refs": ["p1"], "data": {}},
+    {"op": "put", "id": "f2", "kind": "frame_option", "text": "Frame as a coordination problem.", "refs": ["p1"], "data": {}},
+    {"op": "put", "id": "n1", "kind": "norm", "text": "In this fixture, the declared goal is to avoid negative counts.", "refs": ["p1", "a1"], "data": {}},
+    {"op": "advance", "phase": "critique"},
+
+    {"op": "put", "id": "q1", "kind": "question", "text": "What is the constructed count?", "refs": ["p1"], "data": {}},
+    {"op": "put", "id": "h1", "kind": "hypothesis", "text": "The constructed count is nonnegative.", "refs": ["q1"], "data": {}},
+    {"op": "put", "id": "pr1", "kind": "protocol", "text": "Enumerate the fixture values before comparing them.", "refs": ["q1", "h1"], "data": {"population": "synthetic values", "method": "fixture enumeration", "comparison": "synthetic baseline", "uncertainty": "not an empirical sample"}},
+    {"op": "put", "id": "e0", "kind": "evidence", "text": "Predeclared synthetic context for choosing the count indicator.", "refs": ["pr1"], "data": {"origin": "simulated", "source": "synthetic_full.json fixture", "date": "2026-09-26", "locator": "e0"}},
+    {"op": "put", "id": "i1", "kind": "indicator", "text": "Count fixture units.", "refs": ["p1", "n1", "e0"], "data": {"metric": "count", "unit": "count"}},
+    {"op": "advance", "phase": "study"},
+
+    {"op": "put", "id": "e1", "kind": "evidence", "text": "The fixture assigns count 10.", "refs": ["pr1"], "data": {"origin": "simulated", "source": "synthetic_full.json fixture", "date": "2026-09-26", "locator": "e1", "metric_key": "count", "scope": "fixture", "unit": "count", "value": 10}},
+    {"op": "put", "id": "inf1", "kind": "inference", "text": "The assigned count is nonnegative in this fixture.", "refs": ["e1", "h1"], "data": {}},
+    {"op": "advance", "phase": "observe"},
+
+    {"op": "put", "id": "syn1", "kind": "synthesis", "text": "Fixture count is 10, with no field interpretation.", "refs": ["inf1", "e1"], "data": {}},
+    {"op": "put", "id": "u1", "kind": "uncertainty", "text": "All values are constructed and say nothing about real populations.", "refs": ["syn1"], "data": {}},
+    {"op": "advance", "phase": "explain"},
+
+    {"op": "put", "id": "o1", "kind": "option", "text": "Synthetic option A: manual tally.", "refs": ["syn1", "n1"], "data": {}},
+    {"op": "put", "id": "o2", "kind": "option", "text": "Synthetic option B: scripted tally.", "refs": ["syn1", "n1"], "data": {}},
+    {"op": "put", "id": "cmp1", "kind": "comparison", "text": "Compare two fixture tallies only.", "refs": ["o1", "o2"], "data": {}},
+    {"op": "put", "id": "r1", "kind": "risk", "text": "Fixture code might miscount.", "refs": ["o1"], "data": {}},
+    {"op": "advance", "phase": "compare"},
+
+    {"op": "put", "id": "d1", "kind": "decision", "text": "Select synthetic option A for the fixture.", "refs": ["cmp1", "n1", "e1"], "data": {}},
+    {"op": "put", "id": "req1", "kind": "requirement", "text": "Fixture tally must be nonnegative.", "refs": ["d1"], "data": {}},
+    {"op": "put", "id": "crit1", "kind": "criterion", "text": "Reject a negative fixture tally.", "refs": ["req1", "i1"], "data": {"metric": "count", "threshold": 0, "reject": "count < 0"}},
+    {"op": "advance", "phase": "specify"},
+
+    {"op": "put", "id": "impl1", "kind": "implementation", "text": "Fixture tally implementation declaration.", "refs": ["req1"], "data": {}},
+    {"op": "put", "id": "t1", "kind": "test", "text": "Synthetic passing-test artifact for engine mechanics only.", "refs": ["impl1", "crit1"], "data": {"passed": true, "command": "fixture-only: no external command invoked by this artifact"}},
+    {"op": "advance", "phase": "build"},
+
+    {"op": "put", "id": "base1", "kind": "baseline", "text": "Synthetic baseline count.", "refs": ["crit1"], "data": {"origin": "simulation", "source": "synthetic_full.json fixture", "date": "2026-09-26"}},
+    {"op": "put", "id": "res1", "kind": "result", "text": "Synthetic result count.", "refs": ["base1", "crit1"], "data": {"origin": "simulation", "source": "synthetic_full.json fixture", "date": "2026-09-26"}},
+    {"op": "put", "id": "ass1", "kind": "assessment", "text": "Field effectiveness is not demonstrated by this fixture.", "refs": ["res1", "r1"], "data": {"verdict": "no_demostrado", "claim_scope": "field", "uncertainty": "constructed values only", "adverse_effects": "not measured", "cost": "not measured"}},
+    {"op": "advance", "phase": "validate"}
+  ]
+}
