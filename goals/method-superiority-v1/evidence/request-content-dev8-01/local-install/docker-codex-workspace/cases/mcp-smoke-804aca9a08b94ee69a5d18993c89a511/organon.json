@@ -1,0 +1,66 @@
+{
+  "events": [
+    {
+      "actor": "agent:smoke",
+      "at": "2026-10-06T09:10:38+00:00",
+      "hash": "263a5f6774dfaf35142c85d4e08cf619be2d821b580d37897d00f260e31904f9",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "p1",
+        "kind": "problem",
+        "text": "Docker integration test: problem",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:smoke",
+      "at": "2026-10-06T09:10:38+00:00",
+      "hash": "23ad5ccef94495dff6d0efeadbb912717025e7f3d29e924e066ce2c230ca944d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "a1",
+        "kind": "actor",
+        "text": "Docker integration test: actor",
+        "version": 1
+      },
+      "prev_hash": "263a5f6774dfaf35142c85d4e08cf619be2d821b580d37897d00f260e31904f9",
+      "seq": 2
+    },
+    {
+      "actor": "agent:smoke",
+      "at": "2026-10-06T09:10:38+00:00",
+      "hash": "78fd385951e171e1e7ab9622f37c5f227284e1ca2d1c399302d55bce16a1f578",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "b1",
+        "kind": "boundary",
+        "text": "Docker integration test: boundary",
+        "version": 1
+      },
+      "prev_hash": "23ad5ccef94495dff6d0efeadbb912717025e7f3d29e924e066ce2c230ca944d",
+      "seq": 3
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "e5009737-0e21-48ba-8cb6-5e16ea6979ad",
+    "created_at": "2026-10-06T09:10:38+00:00",
+    "created_by": "human:owner",
+    "domain": "software integration",
+    "test_gate_policy": "local_report",
+    "title": "Real Docker MCP transport test"
+  },
+  "schema": 1
+}
