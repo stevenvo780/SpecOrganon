@@ -18,7 +18,8 @@ COPY workflows /opt/specorganon/workflows
 COPY docs /opt/specorganon/docs
 COPY .agents /opt/specorganon/.agents
 COPY docker/codex /opt/codex-lab
-RUN chmod -R a+rX /opt/specorganon /opt/codex-lab \
+RUN ln -s /opt/specorganon/venv /opt/specorganon/.venv \
+    && chmod -R a+rX /opt/specorganon /opt/codex-lab \
     && chmod +x /opt/codex-lab/entrypoint.sh
 ENV ORGANON_ROOT=/workspace
 USER codex
