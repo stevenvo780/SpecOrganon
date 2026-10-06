@@ -199,9 +199,12 @@ def author_format_from_request(request):
     raw = request['documents'].get('author-response-format.json')
     if raw is None: return 'manifest-v1'
     declared = strict(raw)
-    if request['role'] != 'author' or declared != {'schema': 1, 'format': 'items-v1'} or type(declared['schema']) is not int:
+    if (request['role'] != 'author' or type(declared) is not dict
+            or set(declared) != {'schema', 'format'} or type(declared['schema']) is not int
+            or declared['schema'] != 1 or type(declared['format']) is not str
+            or declared['format'] not in {'items-v1', 'files-v1'}):
         raise NativeRoleError('invalid declared author response format')
-    return 'items-v1'
+    return declared['format']
 
 
 def response_contract_from_request(request):
@@ -210,8 +213,16 @@ def response_contract_from_request(request):
     if action is not None and (type(action) is not str or action not in {'author', 'review', 'approval'}
             or (action == 'author') != (request['role'] == 'author')):
         raise NativeRoleError('native action and role differ')
+    declared = request['documents'].get('review-response-format.json')
+    audit = None
+    if declared is not None:
+        if request['role'] != 'review' or action == 'approval':
+            raise NativeRoleError('common audit format requires a non-approval reviewer')
+        from specorganon.common_review import declaration
+        try: audit = declaration(strict(declared))
+        except ValueError as exc: raise NativeRoleError('invalid common audit declaration') from exc
     return response_schema(request['role'], author_format=author_format_from_request(request),
-                           approval=action == 'approval')
+                           approval=action == 'approval', common_audit=audit)
 
 
 def validate_result(value, role, *, author_format='manifest-v1'):
@@ -225,6 +236,10 @@ def validate_result(value, role, *, author_format='manifest-v1'):
                 or any(type(f) is not dict or not f for f in value["findings"])):
             raise NativeRoleError("invalid review result contract")
     elif role == "author":
+        if author_format == 'files-v1':
+            from specorganon.neutral_author import neutral_author_content
+            try: return neutral_author_content(value)
+            except ValueError as exc: raise NativeRoleError('invalid neutral author content contract') from exc
         if author_format == 'items-v1':
             from specorganon.author_contract import typed_author_manifest
             try: typed_author_manifest(value)

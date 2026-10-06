@@ -1,0 +1,24 @@
+{
+  "job_id": "7bc43161af354986bb5323ad72bed171",
+  "status": "succeeded",
+  "submitted_at": 1791260079.5985854,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "codex/gpt-6.1-sol",
+  "access": "read",
+  "codex_account": "principal",
+  "started_at": 1791260079.5996861,
+  "finished_at": 1791260263.1988764,
+  "text": "{\n  \"verdict\": \"reject\",\n  \"reason\": \"Hay una discrepancia confirmada de tipado exacto en las entradas directas del audit. El rechazo se limita a este defecto del helper.\",\n  \"findings\": [\n    {\n      \"severity\": \"medium\",\n      \"path\": \"src/specorganon/common_review.py\",\n      \"line\": 93,\n      \"problem\": \"summarize_assertions acepta schema: 1.0: Draft7Validator considera enteros los floats integrales y su enum equipara 1.0 con 1. validate_bound_audit hereda esta aceptación. La ruta nativa lo rechaza mediante validate_result, pero estas entradas directas no mantienen el mismo contrato de entero exacto.\",\n      \"correction\": \"Comprobar explícitamente que la respuesta sea un dict y que type(value.get('schema')) is int y su valor sea 1 antes de validar el esquema, sin convertir ni reparar el valor.\"\n    }\n  ],\n  \"tests_executed\": false,\n  \"scope\": {\n    \"candidate\": \"dev6, fuente mutable no registrada\",\n    \"baseline\": \"a1f569406388d57a8c64e155fb3d37abb9a6bdd8\",\n    \"review\": \"Comparación estática de los nueve archivos indicados y lectura de módulos relacionados; solo lectura, sin delegación ni generaciones.\",\n    \"assessment\": \"Formato neutral explícito, default legacy conservado, assertions separadas de comprobaciones físicas y callbacks failclosed. Sin otros defectos bloqueantes confirmados.\",\n    \"limits\": \"No aprueba el motor de nueve fases ni acredita common_complete, verdad semántica, cronología de etapas, independencia o F. Los controladores pendientes no se exigieron para esta revisión. La documentación presenta presupuesto y fairness, sin eficacia probada; conserva el rechazo de diseño24fde8d y F7 pendiente.\"\n  }\n}",
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "read",
+    "cwd": "/home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon",
+    "duration_s": 183.6,
+    "depth": 0
+  }
+}

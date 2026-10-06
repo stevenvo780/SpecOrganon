@@ -12,10 +12,11 @@ from .engine import ITEM_ID
 from .workflow import KIND_TO_PHASE
 
 
-def response_schema(role, *, author_format='manifest-v1', approval=False):
+def response_schema(role, *, author_format='manifest-v1', approval=False, common_audit=None):
     if (type(role) is not str or role not in {'author', 'review'}
-            or type(author_format) is not str or author_format not in {'manifest-v1', 'items-v1'}
-            or type(approval) is not bool or approval and role != 'review'):
+            or type(author_format) is not str or author_format not in {'manifest-v1', 'items-v1', 'files-v1'}
+            or type(approval) is not bool or approval and role != 'review'
+            or common_audit is not None and (role != 'review' or approval)):
         raise ValueError('unsupported native response contract')
     text = {'type': 'string', 'pattern': r'\S'}
     item_id = {'type': 'string', 'pattern': ITEM_ID.pattern}
@@ -28,6 +29,15 @@ def response_schema(role, *, author_format='manifest-v1', approval=False):
             # No fixed verdict/conformity/target values: the reviewer decides.
             fields.update(mandate_conformity={'type': 'boolean'},
                           approval_targets={'type': 'array', 'items': item_id, 'uniqueItems': True})
+        if common_audit is not None:
+            from .common_review import audit_schema
+            fields['audit'] = audit_schema(common_audit)
+    elif author_format == 'files-v1':
+        from .neutral_author import PATH_PATTERN
+        content = {'type': 'object', 'propertyNames': {'type': 'string', 'maxLength': 200, 'pattern': PATH_PATTERN,
+                                                    'not': {'pattern': r'[\r\n]'}},
+                   'additionalProperties': {'type': 'string'}}
+        fields.update(files=content, documents=content)
     else:
         put = {'id': item_id, 'kind': {'type': 'string', 'enum': sorted(KIND_TO_PHASE)},
                'text': text, 'refs': {'type': 'array', 'items': item_id, 'uniqueItems': True},
@@ -49,8 +59,11 @@ def response_schema(role, *, author_format='manifest-v1', approval=False):
                 'schema': {'type': 'integer', 'enum': [1]}, 'steps': collection,
                 'name': text, 'description': {'type': 'string'}},
                 'required': ['schema', 'steps'], 'additionalProperties': False}
-    return {'$schema': 'http://json-schema.org/draft-07/schema#', 'type': 'object',
+    result = {'$schema': 'http://json-schema.org/draft-07/schema#', 'type': 'object',
             'properties': fields, 'required': list(fields), 'additionalProperties': False}
+    if role == 'author' and author_format == 'files-v1':
+        result['anyOf'] = [{'properties': {name: {'minProperties': 1}}} for name in ('files','documents')]
+    return result
 
 
 def validate_response_schema(value, schema):
@@ -58,4 +71,3 @@ def validate_response_schema(value, schema):
     Draft7Validator.check_schema(schema)
     if next(Draft7Validator(schema).iter_errors(value), None) is not None:
         raise ValueError('native response violates the bound output schema')
-
