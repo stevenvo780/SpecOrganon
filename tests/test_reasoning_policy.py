@@ -77,10 +77,10 @@ def _options(docker_ctx):
             'gemini_executable': docker_ctx['gemini_executable'], 'gemini_profile': docker_ctx['gemini_profile']}
 
 
-def test_transport_policy_is_persisted_with_schema4_and_effort(docker_cli_patched, tmp_path):
+def test_transport_policy_is_persisted_with_schema5_and_effort(docker_cli_patched, tmp_path):
     DockerRoles(tmp_path / "transport", **_options(docker_cli_patched))
     policy = _json(tmp_path / "transport" / "transport-policy.json")
-    assert policy["schema"] == 4
+    assert policy["schema"] == 5
     assert policy["codex_reasoning_effort"] == "low"
 
 
@@ -88,7 +88,7 @@ def test_transport_policy_accepts_explicit_effort_and_round_trips(docker_cli_pat
     DockerRoles(tmp_path / "transport", codex_reasoning_effort="high", **_options(docker_cli_patched))
     DockerRoles(tmp_path / "transport", codex_reasoning_effort="high", **_options(docker_cli_patched))
     policy = _json(tmp_path / "transport" / "transport-policy.json")
-    assert policy["codex_reasoning_effort"] == "high" and policy["schema"] == 4
+    assert policy["codex_reasoning_effort"] == "high" and policy["schema"] == 5
 
 
 def test_transport_policy_refuses_schema2_silent_resume(docker_cli_patched, tmp_path):
@@ -104,7 +104,7 @@ def test_transport_policy_refuses_schema2_silent_resume(docker_cli_patched, tmp_
             "gemini_executable_sha256": "deadbeef" * 8, "seccomp_sha256": None}
     root.mkdir(parents=True, mode=0o700)
     _write(policy_path, fake)
-    with pytest.raises(DockerRoleError, match="schema4"):
+    with pytest.raises(DockerRoleError, match="schema5"):
         DockerRoles(root, **_options(docker_cli_patched))
 
 

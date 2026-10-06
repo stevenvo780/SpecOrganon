@@ -5,10 +5,16 @@ for their native role. A created container's handle is persisted before start;
 an interrupted attachment without a host receipt remains uncertain and is never
 restarted. Reconciliation kills that exact owned container, retaining its files.
 The trusted operator owns the journals and Docker daemon; hashes do not attest it.
+Control calls each have a 15-second deadline. JobStore checks its 6000-second
+elapsed admission budget (including prior preparation) before payload dispatch;
+it does not reserve Docker preparation or impose a hard end-to-end deadline.
+Denied payload admission can leave an owned never-started container for diagnosis.
+Full cohort wall time, rather than receipt-duration sums, measures efficiency.
 """
 from __future__ import annotations
 
 from contextlib import contextmanager
+from datetime import datetime, timezone
 import fcntl
 import json
 import os
@@ -18,6 +24,7 @@ import selectors
 import signal
 import subprocess
 import time
+import uuid
 
 from .ledger import strict_json_loads, _open_regular_file
 from .role_jobs import JobStore, JobError, UncertainJob, canonical, digest, _read, _json, _write, _safe
@@ -25,6 +32,14 @@ from .role_jobs import JobStore, JobError, UncertainJob, canonical, digest, _rea
 
 class DockerRoleError(ValueError):
     pass
+
+
+class DockerControlDeadlineError(DockerRoleError):
+    """Only the CLI deadline expired; the daemon operation may have completed."""
+
+    def __init__(self, operation):
+        self.operation = operation
+        super().__init__('Docker control deadline exceeded: ' + operation)
 
 
 class DockerRoles:
@@ -69,7 +84,8 @@ class DockerRoles:
                 raise DockerRoleError('transport input differs from registered source binding')
         self.native_sources = {name:digest(raw) for name,raw in sources.items()}
         self.launch_input_sha256 = {name:digest(raw) for name,raw in inputs.items()}
-        policy = {'schema': 4, 'images': self.images, 'routes': self.routes, 'test_timeout_seconds': self.test_timeout,
+        policy = {'schema': 5, 'create_recovery': 'owned-never-started-after-create-deadline-v1',
+                  'images': self.images, 'routes': self.routes, 'test_timeout_seconds': self.test_timeout,
                   'source_root': str(self.source), 'public_catalog_sha256': self.launch_input_sha256['public-models.json'],
                   'native_source_sha256': self.native_sources,
                   'registered_source_bindings_sha256': digest(canonical(self.source_bindings)) if self.source_bindings is not None else None,
@@ -80,8 +96,8 @@ class DockerRoles:
         path = self.root / 'transport-policy.json'
         if path.exists():
             existing = _json(path)
-            if type(existing) is not dict or existing.get('schema') != 4:
-                raise DockerRoleError('transport schema4 required; previous schema cannot resume silently')
+            if type(existing) is not dict or existing.get('schema') != 5:
+                raise DockerRoleError('transport schema5 required; previous schema cannot resume silently')
             if existing != strict_json_loads(canonical(policy).decode()):
                 raise DockerRoleError('transport policy changed; use an explicitly versioned run')
         else: _write(path, policy)
@@ -99,7 +115,7 @@ class DockerRoles:
                 selector.register(pipe, selectors.EVENT_READ, name)
             while selector.get_map() or process.poll() is None:
                 remaining = deadline - time.monotonic()
-                if remaining <= 0: raise DockerRoleError('Docker control deadline exceeded')
+                if remaining <= 0: raise DockerControlDeadlineError(argv[0])
                 for key, _ in selector.select(min(remaining, .05)):
                     raw = os.read(key.fd, 65536)
                     if not raw: selector.unregister(key.fileobj); continue
@@ -191,8 +207,11 @@ class DockerRoles:
                 target = inp / 'delivery' / safe_file(name); target.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
                 target.write_text(text)
         label = digest(canonical({'root': str(self.root), 'job_id': job_id}))[:24]
+        nonce = uuid.uuid4().hex
+        creation_not_before = datetime.now(timezone.utc).isoformat()
         name = 'specorganon-role-' + label
-        args = ['create', '--name', name, '--label', 'specorganon.run=' + label, '--read-only', '--cap-drop=ALL',
+        args = ['create', '--name', name, '--label', 'specorganon.run=' + label,
+                '--label', 'specorganon.execution_nonce=' + nonce, '--read-only', '--cap-drop=ALL',
                 '--security-opt', 'no-new-privileges', '--memory', '1g', '--cpus', '2', '--pids-limit', '128',
                 '--tmpfs', '/tmp:rw,nosuid,size=256m', '--mount', f'type=bind,src={inp},dst=/input,readonly',
                 '--mount', f'type=bind,src={folder / "output"},dst=/output', '-e', 'TMPDIR=/output']
@@ -210,9 +229,11 @@ class DockerRoles:
             if provider == 'codex':
                 args += ['--model-catalog', '/input/public-models.json',
                          '--codex-reasoning-effort', self.codex_reasoning_effort]
-        plan = {'schema': 1, 'job_id': job_id, 'role': role, 'provider': provider, 'model': model,
+        plan = {'schema': 2, 'job_id': job_id, 'role': role, 'provider': provider, 'model': model,
+                'execution_nonce': nonce, 'creation_not_before': creation_not_before,
                 'request_sha256': digest(request_raw), 'image_id': image, 'name': name, 'label': label,
-                'create_argv': args, 'container_id': None, 'input_manifest': self._inventory(inp),
+                'create_argv': args, 'container_id': None, 'control_recovery_sha256': None,
+                'input_manifest': self._inventory(inp),
                 'codex_reasoning_effort': self.codex_reasoning_effort if provider == 'codex' else None}
         # Persist the name/intent first. A crash after Docker create is reconciled
         # by that exact name and label; no second container or native role call.
@@ -225,19 +246,107 @@ class DockerRoles:
         records = strict_json_loads(result.stdout.decode())
         if type(records) is not list or len(records) != 1: raise DockerRoleError('invalid Docker inspection')
         value = records[0]
-        if value['Config']['Labels'].get('specorganon.run') != plan['label'] or value['Image'] != plan['image_id']:
+        labels = value['Config']['Labels']
+        if (plan.get('schema') != 2
+                or type(plan.get('execution_nonce')) is not str
+                or re.fullmatch(r'[0-9a-f]{32}', plan['execution_nonce']) is None
+                or labels.get('specorganon.run') != plan['label']
+                or labels.get('specorganon.execution_nonce') != plan['execution_nonce']
+                or value.get('Name') != '/' + plan['name']
+                or value['Image'] != plan['image_id']):
             raise DockerRoleError('container ownership/image binding diverged')
+        try:
+            created = datetime.fromisoformat(value['Created'].replace('Z', '+00:00'))
+            intent = datetime.fromisoformat(plan['creation_not_before'])
+            if created.tzinfo is None or intent.tzinfo is None or created < intent:
+                raise ValueError('creation predates persisted intent')
+        except (KeyError, TypeError, ValueError) as exc:
+            raise DockerRoleError('container creation time differs from persisted intent') from exc
         return value
+
+    @staticmethod
+    def _creation_attempt(plan):
+        return {'schema': 1, 'name': plan['name'], 'label': plan['label'],
+                'execution_nonce': plan['execution_nonce'], 'image_id': plan['image_id'],
+                'creation_not_before': plan['creation_not_before'],
+                'create_argv_sha256': digest(canonical(plan['create_argv']))}
+
+    def _never_started_handle(self, job_id, value):
+        state = value.get('State', {}) if value is not None else {}
+        container_id = value.get('Id') if value is not None else None
+        journal = self.store.root / job_id
+        if (type(container_id) is not str or re.fullmatch(r'[0-9a-f]{64}', container_id) is None
+                or state.get('Status') != 'created'
+                or any(state.get(key) is not False for key in ('Running', 'Restarting', 'Dead'))
+                or state.get('StartedAt') != '0001-01-01T00:00:00Z'
+                or any((journal / name).exists() for name in ('started.json', 'receipt.json'))):
+            raise UncertainJob('creation has no owned never-started container proof')
+        return container_id
+
+    @staticmethod
+    def _recovery_observation(plan, container_id):
+        return {'schema': 1, 'scope': 'control response recovery only; no role outcome or acceptance',
+                'operation': 'create', 'deadline_seconds': 15, 'name': plan['name'],
+                'label': plan['label'], 'image_id': plan['image_id'], 'container_id': container_id,
+                'execution_nonce': plan['execution_nonce'], 'creation_not_before': plan['creation_not_before'],
+                'state': {'Status': 'created', 'Running': False, 'Restarting': False, 'Dead': False,
+                          'StartedAt': '0001-01-01T00:00:00Z'},
+                'create_repeated': False, 'execution_started_at_observation': False}
+
+    def _recover_created(self, job_id, folder, plan, cause):
+        # Never repeat create, infer a completed role, or restart a container.
+        # Inspection retains its own 15-second deadline and ownership guards.
+        if cause.operation != 'create':
+            raise cause
+        if (not (folder / 'create-attempt.json').exists()
+                or _json(folder / 'create-attempt.json') != self._creation_attempt(plan)):
+            raise UncertainJob('create deadline lacks bound persisted attempt') from cause
+        value = self._inspect(plan)
+        container_id = self._never_started_handle(job_id, value)
+        observation = self._recovery_observation(plan, container_id)
+        path = folder / 'control-recovery.json'
+        if path.exists():
+            if _json(path) != observation:
+                raise UncertainJob('create recovery observation changed')
+        else:
+            _write(path, observation)
+        return container_id
 
     def _execute(self, job_id, role, request, files=None):
         folder, plan = self._prepare(job_id, role, request, files)
+        attempt = folder / 'create-attempt.json'
+        recovery = folder / 'control-recovery.json'
+        if attempt.exists() and _json(attempt) != self._creation_attempt(plan):
+            raise UncertainJob('persisted creation attempt changed')
+        if plan['container_id'] is not None:
+            if not attempt.exists():
+                raise UncertainJob('recorded handle lacks persisted creation attempt')
+            expected = plan.get('control_recovery_sha256')
+            if (recovery.exists() != (expected is not None)
+                    or recovery.exists() and (digest(_read(recovery)) != expected
+                        or _json(recovery) != self._recovery_observation(plan, plan['container_id']))):
+                raise UncertainJob('historical create recovery binding changed')
         record = self._inspect(plan)
         if plan['container_id'] is None:
-            if record is None:
-                created = self._cli(plan['create_argv']).stdout.decode().strip()
+            if (folder / 'control-recovery.json').exists():
+                plan['container_id'] = self._recover_created(job_id, folder, plan, DockerControlDeadlineError('create'))
+            elif record is None:
+                if attempt.exists():
+                    raise UncertainJob('creation previously attempted; missing handle must never be recreated')
+                # A crash immediately after this write still consumes the one
+                # creation opportunity. Missing proof cannot authorize a retry.
+                _write(attempt, self._creation_attempt(plan))
+                try:
+                    created = self._cli(plan['create_argv']).stdout.decode().strip()
+                except DockerControlDeadlineError as exc:
+                    created = self._recover_created(job_id, folder, plan, exc)
                 if re.fullmatch(r'[0-9a-f]{64}', created) is None: raise DockerRoleError('invalid created container handle')
                 plan['container_id'] = created
-            else: plan['container_id'] = record['Id']
+            else:
+                if not attempt.exists():
+                    raise UncertainJob('existing container lacks persisted creation attempt')
+                plan['container_id'] = self._never_started_handle(job_id, record)
+            plan['control_recovery_sha256'] = digest(_read(recovery)) if recovery.exists() else None
             _write(folder / 'launch.json', plan); record = self._inspect(plan)
         if record is None or record['Id'] != plan['container_id']:
             raise UncertainJob('recorded container handle missing; never recreate native call')
