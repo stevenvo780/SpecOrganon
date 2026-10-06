@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/stev/.codex/worktrees/strong-comparators-v2/SpecOrganon/goals/method-superiority-v1/evidence/docker-create-recovery-01/run_component_probe.py", line 95, in <module>
+    if __name__ == '__main__': main()
+                               ~~~~^^
+  File "/home/stev/.codex/worktrees/strong-comparators-v2/SpecOrganon/goals/method-superiority-v1/evidence/docker-create-recovery-01/run_component_probe.py", line 62, in main
+    measured = t.measure(job_id, ARGV, FILES)
+  File "/home/stev/.codex/worktrees/strong-comparators-v2/SpecOrganon/src/specorganon/docker_roles.py", line 347, in measure
+    folder, plan, job = self._execute(job_id, 'test', request, files)
+                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/stev/.codex/worktrees/strong-comparators-v2/SpecOrganon/src/specorganon/docker_roles.py", line 312, in _execute
+    raise DockerRoleError('attachment and container exit code diverged without bounded cancellation')
+specorganon.docker_roles.DockerRoleError: attachment and container exit code diverged without bounded cancellation

@@ -1,0 +1,24 @@
+{
+  "job_id": "b01852a8fa624b698f848ab724583c3a",
+  "status": "succeeded",
+  "submitted_at": 1791257833.245711,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "codex/gpt-6.1-sol",
+  "access": "text",
+  "codex_account": "principal",
+  "started_at": 1791257833.249505,
+  "finished_at": 1791257858.7977824,
+  "text": "{\n  \"verdict\": \"reject\",\n  \"tests_executed\": false,\n  \"findings\": [\n    {\n      \"id\": \"F1\",\n      \"severity\": \"high\",\n      \"location\": \"docker_roles.py: DockerRoles._execute\",\n      \"finding\": \"La rama resume puede repetir create si container_id sigue siendo null, no existe control-recovery.json y inspect devuelve None.\",\n      \"scenario\": \"El daemon crea el contenedor, vence el deadline y la recuperación falla o el proceso cae antes de persistir la observación. Si el contenedor desaparece, la siguiente llamada vuelve a ejecutar create_argv con el mismo nonce.\",\n      \"impact\": \"Incumple la prohibición de repetir create. El fixture nuevo protege únicamente el caso donde control-recovery.json ya fue persistido.\",\n      \"required_change\": \"Persistir una marca de intento antes de invocar create. Un intento previo sin handle recuperable debe quedar incierto y bloquear cualquier nuevo create.\"\n    },\n    {\n      \"id\": \"F2\",\n      \"severity\": \"high\",\n      \"location\": \"docker_roles.py: DockerRoles._execute, rama else con record existente\",\n      \"finding\": \"La adopción de un contenedor existente sin CID persistido evita los controles completos de _recover_created.\",\n      \"detail\": \"Se asigna record['Id'] directamente. Si Status es created, no se exige StartedAt cero ni Running/Restarting/Dead exactamente False. Tampoco se valida aquí el formato del ID. _inspect no comprueba explícitamente Name.\",\n      \"impact\": \"La ruta de reanudación admite evidencia ambigua que la recuperación tras deadline rechazaría.\",\n      \"required_change\": \"Aplicar una validación común de identidad exacta y estado nunca arrancado antes de adoptar cualquier contenedor sin CID persistido.\"\n    },\n    {\n      \"id\": \"F3\",\n      \"severity\": \"medium\",\n      \"location\": \"docker_roles.py: DockerRoles._execute y JobStore.execute\",\n      \"finding\": \"La admisión de JobStore ocurre después de preparar y potencialmente crear el contenedor.\",\n      \"impact\": \"Si JobStore rechaza por cantidad o tiempo, ya se consumieron recursos Docker y puede quedar un contenedor created. Los límites mostrados no acotan esas operaciones previas.\",\n      \"required_change\": \"Aclarar el alcance del presupuesto y, si debe cubrir el transporte, reservar admisión mediante el JobStore existente antes de create, conservando la reutilización de receipts cerrados.\"\n    },\n    {\n      \"id\": \"F4\",\n      \"severity\": \"info\",\n      \"location\": \"snapshot y evidencia suministrados\",\n      \"finding\": \"Faltan role_jobs.py, los cambios de versión y las fuentes que fijan los demás límites.\",\n      \"verification_limit\": \"No puedo verificar estáticamente reuseclosedreceipt, startedwithoutreceipt, el reloj monotónico desde creación del diario, ni la conservación de caproles40/autores2/build3. El rechazo explícito de políticas distintas de schema5 sí está visible.\",\n      \"evidence_limit\": \"El probe inyecta la pérdida de respuesta después de create; declara que no reproduce el timeout natural de 15 segundos. Sus controles no establecen una garantía formal de Docker ni prueban ausencia general de doble generación.\"\n    }\n  ]\n}",
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "text",
+    "cwd": "/home/stev/.codex/worktrees/strong-comparators-v2/SpecOrganon",
+    "duration_s": 25.5,
+    "depth": 0
+  }
+}

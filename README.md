@@ -113,3 +113,20 @@ Para conectar un cliente MCP stdio, usa `uv run organon-mcp` (o el ejecutable in
 - [Tests](tests/) de invalidación, contradicciones, gates, cliente MCP real, runner, concurrencia e interrupción por `SIGKILL`; la fixture [synthetic_full.json](workflows/synthetic_full.json) no es evidencia empírica.
 
 El ledger enlaza eventos mediante hashes, escribe de forma atómica y rechaza revisiones concurrentes obsoletas. Las firmas demuestran control de las claves públicas configuradas y atan la aprobación o revisión al UUID, ruta y metadatos del caso, la cabeza previa del ledger y el contenido exacto firmado. La identidad humana, custodia de clave, competencia e independencia real se verifican fuera del toolkit. Una clave ausente o revocada, una ruta distinta o metadatos alterados vuelven la firma no verificada al releer el ledger y bloquean las compuertas que la requieren. Los hashes de eventos no garantizan que el ledger sea append-only frente a alguien con escritura directa: puede borrar eventos o restaurar un prefijo firmado válido y recalcular la cadena. El verificador opcional de `ORGANON_LEDGER_ANCHORS_FILE` compara cada lectura con una cabeza externa exacta, pero requiere que un custodio independiente valide y actualice el registro tras **cada** transición legítima. Ninguna clave privada debe entrar en este repositorio, comandos o logs. El gate puede exigir estructura de medición y umbral previo; la autenticidad de fuentes, atribución causal y daños reales requieren revisión y datos externos.
+
+## Candidata dev5: recuperación del control Docker
+
+Dev5 mantiene las nueve fases y sus cuotas. Guarda un intento y un nonce antes
+de crear el contenedor; tras una respuesta perdida solo adopta el contenedor
+exacto con prueba de que nunca arrancó. Un intento incierto nunca autoriza
+volver a crear. La política de transporte pasa a schema5 y rechaza reanudar
+raíces schema4. En este corte hay 324 controles locales y tres controles Docker
+reales con pérdida de respuesta inyectada; no son generaciones de software ni
+una reproducción del timeout natural. La validación del wheel instalado se
+registra por separado en el recibo de ingeniería.
+
+La cohorte dev4 sigue con fuentes congeladas: al corte 03:43 UTC del 6 de
+octubre había seis intentos cerrados, dos entregas completas (LedgerFold y
+TopoPlan) y cuatro fallos. Su umbral de 9/10 ya no puede alcanzarse. El observador verificó
+las 45 fuentes y los recibos físicos sin nuevas llamadas a modelos o pruebas.
+La superioridad frente a libre y SDD sigue pendiente.

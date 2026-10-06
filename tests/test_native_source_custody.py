@@ -34,7 +34,7 @@ def test_source_change_cannot_resume_transport_or_prepare_next_native_job(tmp_pa
 def test_prior_schema3_cannot_silently_add_source_binding(tmp_path,monkeypatch):
     t,s,options=transport(tmp_path,monkeypatch);p=_json(t.root/'transport-policy.json')
     p['schema']=3;p.pop('native_source_sha256');_write(t.root/'transport-policy.json',p)
-    with pytest.raises(DockerRoleError,match='schema4'):DockerRoles(t.root,**options)
+    with pytest.raises(DockerRoleError,match='schema5'):DockerRoles(t.root,**options)
 
 
 def test_native_input_uses_exact_checked_bytes_not_second_copy_reads(tmp_path,monkeypatch):

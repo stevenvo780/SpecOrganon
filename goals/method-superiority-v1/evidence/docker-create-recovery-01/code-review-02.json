@@ -1,0 +1,24 @@
+{
+  "job_id": "ab307aed52044320a4d60d77f8de2b59",
+  "status": "succeeded",
+  "submitted_at": 1791258013.7133615,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "codex/gpt-6.1-sol",
+  "access": "text",
+  "codex_account": "principal",
+  "started_at": 1791258013.7138498,
+  "finished_at": 1791258038.4458447,
+  "text": "{\n  \"verdict\": \"reject\",\n  \"reason\": \"La revisión estática detecta una validación de recuperación omitida al reanudar con CID persistido. Las correcciones de recreación y adopción sin CID cierran las rutas previamente señaladas; el presupuesto ahora tiene un alcance explícito. No se infiere superioridad ni fiabilidad nueva.\",\n  \"findings\": [\n    {\n      \"id\": \"F1\",\n      \"severity\": \"medium\",\n      \"file\": \"src/specorganon/docker_roles.py\",\n      \"artifact\": \"DockerRoles._execute\",\n      \"problem\": \"create-attempt.json y control-recovery.json solo se verifican dentro de `if plan['container_id'] is None`. Después de persistir el CID, una reanudación omite ambos controles. Por tanto, una observación de recuperación modificada o un marker divergente puede coexistir con una reutilización exitosa del recibo cerrado. Esto contradice la afirmación de que la observación persistida se verifica al reanudar.\",\n      \"evidence\": \"Ruta estática: recuperación válida → persistencia de launch.json con CID → alteración de control-recovery.json o create-attempt.json → _execute omite la rama de validación → JobStore.execute puede devolver el recibo existente. Los tests incluidos comprueban divergencia antes de persistir el CID, pero no esta ruta.\",\n      \"correction\": \"Validar el marker en toda reanudación con CID. Si existe control-recovery.json, comprobar su contenido contra el plan y el CID persistidos, conservando su carácter de observación histórica; no exigir que el contenedor siga en estado created después de ejecutarse. Añadir cobertura de divergencia con CID persistido y recibo cerrado.\"\n    }\n  ],\n  \"tests_executed\": false\n}",
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "text",
+    "cwd": "/home/stev/.codex/worktrees/strong-comparators-v2/SpecOrganon",
+    "duration_s": 24.7,
+    "depth": 0
+  }
+}

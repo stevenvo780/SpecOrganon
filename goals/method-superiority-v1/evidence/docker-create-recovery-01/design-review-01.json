@@ -1,0 +1,23 @@
+{
+  "job_id": "5f33b54029a846a4a3ef9a973bb7cec1",
+  "status": "succeeded",
+  "submitted_at": 1791257582.321862,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "gemini/3.8-flash",
+  "access": "text",
+  "codex_account": null,
+  "started_at": 1791257582.4046016,
+  "finished_at": 1791257689.4635787,
+  "text": "```json\n{\n  \"verdict\": \"reject\",\n  \"tests_executed\": false,\n  \"findings\": {\n    \"double_execution_risk\": {\n      \"detected\": false,\n      \"analysis\": \"La recuperación NO arranca un modelo dos veces. En la máquina de estados de Docker (containerd/dockerd), el estado State.Status == 'created' con StartedAt igual a zero ('0001-01-01T00:00:00Z') y Running=False/Restarting=False/Dead=False garantiza formalmente que el proceso del contenedor jamás fue instanciado ni ejecutó instrucciones. Al validarse además la ausencia de receipt/started en el host y delegarse el arranque único al diario de JobStore (el cual no reinicia ejecuciones inciertas), se previene una doble ejecución del payload.\"\n    },\n    \"ambiguous_ownership_risk\": {\n      \"detected\": true,\n      \"analysis\": \"La recuperación acepta propiedad ambigua. La propuesta valida únicamente exactname, label estático e image. Si el label no incluye un nonce o ID único por intento de invocación (run_id/UUID), y no se valida que la marca de tiempo de creación del contenedor (Created de Docker) pertenezca a la ventana de la ejecución actual (Created >= launch_started_at), el procedimiento no puede distinguir entre el contenedor recién creado por la llamada que sufrió el deadline y un contenedor huérfano preexistente en estado 'created' dejado por una corrida abortada previa con el mismo nombre y label (como los 3 contenedores de la cohorte congelada dev4 si hubiera colisión de nombres).\"\n    },\n    \"crash_reanudacion_races\": {\n      \"detected\": true,\n      \"analysis\": \"Existe una ventana de carrera e inconsistencia entre la persistencia de control-recovery.json y la actualización de CID en launch.json: (1) Si el host o proceso sufre un crash tras escribir control-recovery.json pero antes de persistir launch.json con CID, la reanudación en frío reingresa a _execute con launch.json: container_id=null sin estar dentro del bloque 'except DockerControlDeadlineError', dejando los metadatos desincronizados y pudiendo bifurcar el flujo de control o clasificar incorrectamente el trabajo como no recuperado. (2) Al vencer el deadline de 15s, _cli mata únicamente al cliente Docker mientras dockerd continúa ejecutando la creación asíncronamente; si dockerd concluye milisegundos después del inspect de recuperación de 15s, el inspect falla, se declara UncertainJob sin reintento y se fuga un contenedor en estado 'created' idéntico a dev4.\"\n    }\n  },\n  \"recommended_minimal_adjustment\": {\n    \"summary\": \"Vincular propiedad por nonce efímero de ejecución y ventana temporal, unificando la reconciliación atómica en reanudación.\",\n    \"steps\": [\n      \"1. Inyección de Nonce en Label: Antes de invocar 'docker create', persistir en launch.json un 'execution_nonce' (UUIDv4) y pasarlo como etiqueta '--label specorganon.execution_nonce=<UUID>' al comando create.\",\n      \"2. Validación estricta en inspect: Al capturar DockerControlDeadlineError('create'), el inspect debe comprobar inequívocamente: Config.Labels['specorganon.execution_nonce'] == launch.execution_nonce Y Docker.Created >= launch.attempt_timestamp. Si no coincide el nonce o la ventana de tiempo, marcar UncertainJob sin adoptar.\",\n      \"3. Reconciliación en reanudación tras crash: En el arranque inicial de _execute, si launch.json tiene container_id:null pero existe control-recovery.json con el mismo execution_nonce validado, reconciliar actualizando launch.json antes de evaluar crear o arrancar, evitando desincronización de estado tras caída del proceso.\"\n    ]\n  }\n}\n```",
+  "meta": {
+    "agy_model": "Gemini 3.8 Flash (Medium)",
+    "provider": "gemini",
+    "model": "gemini/3.8-flash",
+    "access": "text",
+    "cwd": "/home/stev/.codex/worktrees/strong-comparators-v2/SpecOrganon",
+    "duration_s": 107.1,
+    "depth": 0
+  }
+}
