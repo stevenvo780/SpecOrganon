@@ -1,0 +1,44 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/engineering-02/public-reproduction/specorganon-candidate-0.2.0rc3.dev2
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collected 91 items / 3 errors
+
+==================================== ERRORS ====================================
+_____________ ERROR collecting tests/test_typed_author_content.py ______________
+ImportError while importing test module '/datos/workspaces/personal/specorganon-validation/method-superiority-v1/engineering-02/public-reproduction/specorganon-candidate-0.2.0rc3.dev2/tests/test_typed_author_content.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/stev/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_typed_author_content.py:15: in <module>
+    from scripts.controller_native_role import validate_result, author_format_from_request, NativeRoleError
+E   ModuleNotFoundError: No module named 'scripts'
+____________ ERROR collecting tests/test_controller_native_role.py _____________
+ImportError while importing test module '/datos/workspaces/personal/specorganon-validation/method-superiority-v1/engineering-02/public-reproduction/specorganon-candidate-0.2.0rc3.dev2/tests/test_controller_native_role.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/stev/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_controller_native_role.py:7: in <module>
+    from scripts.controller_native_role import NativeRoleError, native_argv, parse_native, response_json
+E   ModuleNotFoundError: No module named 'scripts'
+_________ ERROR collecting tests/test_software_comparison_v3_cells.py __________
+ImportError while importing test module '/datos/workspaces/personal/specorganon-validation/method-superiority-v1/engineering-02/public-reproduction/specorganon-candidate-0.2.0rc3.dev2/tests/test_software_comparison_v3_cells.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/stev/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_software_comparison_v3_cells.py:7: in <module>
+    from experiments.software_comparison_v3.cells import BasicCell,ToolkitCell,StudyHarnessError
+E   ModuleNotFoundError: No module named 'experiments'
+=========================== short test summary info ============================
+ERROR tests/test_typed_author_content.py
+ERROR tests/test_controller_native_role.py
+ERROR tests/test_software_comparison_v3_cells.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!
+============================== 3 errors in 0.35s ===============================

@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/datos/workspaces/personal/SpecOrganon/goals/method-superiority-v1/development/run_rangeaudit_public_checks.py", line 38, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/datos/workspaces/personal/SpecOrganon/goals/method-superiority-v1/development/run_rangeaudit_public_checks.py", line 23, in main
+    _write(root/'registration.json',{'schema':1,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        'classification':'post-generation independent public development checks; not reserved or blinded',
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        'checker_sha256':checker_sha,'delivery_source_sha256':{n:hashlib.sha256(s.encode()).hexdigest() for n,s in files.items()},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        'case_sources_unchanged':True,'automatic_retry':False})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/stev/.codex/worktrees/method-superiority/SpecOrganon/src/specorganon/role_jobs.py", line 105, in _write
+    parent_fd, name = _parent(path, dir_fd)
+                      ~~~~~~~^^^^^^^^^^^^^^
+  File "/home/stev/.codex/worktrees/method-superiority/SpecOrganon/src/specorganon/role_jobs.py", line 70, in _parent
+    next_fd = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+FileNotFoundError: [Errno 2] No such file or directory: 'independent-public-checks'
