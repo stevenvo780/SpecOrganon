@@ -1,0 +1,24 @@
+{
+  "job_id": "55fb9093b13c4b4dbbc905b079dd9aa0",
+  "status": "succeeded",
+  "submitted_at": 1791260337.769539,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "codex/gpt-6.1-sol",
+  "access": "read",
+  "codex_account": "principal",
+  "started_at": 1791260337.771426,
+  "finished_at": 1791260384.2573323,
+  "text": "{\n  \"verdict\": \"accept\",\n  \"reason\": \"La guarda en common_review.py:94 exige dict exacto y schema de tipo int con valor 1 antes de Draft7, sin coerción ni reparación. validate_bound_audit hereda el rechazo. Se conservan los juicios, la validación del binding y la exigencia de callback trusted para receipts. La lectura estática de los negativos confirma cobertura directa de 1.0, ambos booleanos, '1', None y 2; la entrada física cubre 1.0, True y '1'. No se identificaron bloqueos adicionales en el alcance revisado.\",\n  \"findings\": [],\n  \"tests_executed\": false,\n  \"scope\": {\n    \"candidate\": \"dev6 mutable, no congelada\",\n    \"account\": \"Codex principal, sin cambio de cuenta\",\n    \"review\": \"Revisión estática independiente del hallazgo de job7bc43161af354986bb5323ad72bed171 y los cuatro archivos solicitados; lectura complementaria de native_response_contract.py y validate_result en controller_native_role.py.\",\n    \"operations\": \"Solo lectura, sin delegación, escrituras, tests ni generaciones. Sin acceso a oráculos reservados, perfiles, credenciales o campañas externas.\",\n    \"acceptance\": \"Limitada a esta corrección y los helpers examinados; no aprueba ninguna fase del motor ni el diseño completo.\",\n    \"limits\": \"Los helpers verifican bytes, chain y audits, con callback trusted para receipts. Siguen pendientes la máquina de etapas N/S, counters/time, independencia y F, el método y el protocolo estadístico. No se acredita completitud ni superioridad.\",\n    \"read_error\": \"La consulta auxiliar de Git emitió un error de fsmonitor; la repetición con el monitor deshabilitado para esa consulta terminó sin error. No se utilizó para afirmar identidad con la revisión anterior.\"\n  }\n}",
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "read",
+    "cwd": "/home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon",
+    "duration_s": 46.5,
+    "depth": 0
+  }
+}
