@@ -1,0 +1,7 @@
+# Piloto original dev8 cerrado, seis posiciones
+
+Cuatro failed y dos review_ready; common_complete y F externo null en todos.648/648 comprobaciones públicas descriptivas de seis generaciones, no648 sujetos. El driver14349/PID2457956 y su padre terminaron:exit0 significa informe producido, no gate completo. Sin reemplazos, nuevos modelos, Docker ni pruebas para este archivo.
+
+RAW01/02 se conservan exactamente en ../neutral-native-dev8-progress-01/raw/;03 en ../neutral-native-dev8-progress-02/raw/. Esta carpeta añade04/05/06 y enlaces acumulativos en summary.json. Archive-verification comprueba todos los hashes sellados del runtime, los seis outcomes y su correspondencia con el informe terminal,56fuentes y plan original. Omite sólo locks vacíos del nuevo RAW; sus hashes figuran en cierres y en el recibo. No transfiere perfiles,auth,caches ni sesiones. El clon no puede reanudar ni relocalizar este run.
+
+01 falló transporte de auditoría, envoltorioGemini131246>128000;02 agotó admisión de autor de pruebas;04 añadió documentos prohibidos en esa etapa;06 agotó admisión de pruebas.03N/LedgerFold y05N/TopoPlan quedaron review_ready, no completos. RAW conserva todos los fallos y propuestas. T no participó. Preparación compartida/coste monetario/tokens comparables y ratio de tiempo desconocidos; las duraciones originales se informan sin inferencia comparativa. No demuestra competencia,calificación ni superioridad. Dev9 es ingeniería parcial distinta y el diagnóstico de factorización es una propuesta offline no implementada.

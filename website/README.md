@@ -166,3 +166,5 @@ La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wh
 El hito `#avance-dev8` publica ingeniería parcial de contexto lossless,156 pruebas seleccionadas y41 módulos instalados. Conserva dev7 terminal6/6 gates fallidos y94 descargas históricas; no acredita admisión, competencia,freeze completo ni superioridad. Fuentes y recibos se enlazan a main.
 
 El corte actual añade ingeniería parcial de custodia T dev9 (#avance-dev9) y una foto original dev8 de tres posiciones (#piloto-dev8), fechada en su índice. Preserva las94 descargas históricas. No acredita adaptador T completo, admisión T, competencia ni superioridad.
+
+El piloto dev8 terminó en seis posiciones:cuatro failed y dos review_ready,common_complete/F externo null. #piloto-dev8 muestra el cierre original; los cortes2/6 y3/6 se conservan históricos. La meta continúa activa.
