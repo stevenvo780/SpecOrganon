@@ -154,3 +154,7 @@ La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wh
 ## Dev7 instalado, ingeniería parcial
 
 `#avance-dev7` documenta controlador N libre durable v2 y driver instalado schema2: 186 pruebas seleccionadas, primer lote Docker19pass1fixturefail conservado, tres pruebas nuevas afectadas corregidas3pass (otros17 no repetidos), 40 módulos iguales en wheel/imágenes locales, CLI0.160 yMCP24. Revisión Gemini estática limitada; cero nativos/reservados ysin competencia ni superioridad. No release/registry nuevo; último wheel público dev5. Se conservan94 descargas exactas. Los cortes dev6 anteriores se presentan como históricos.
+
+## Piloto dev7: corte parcial report-01
+
+`#piloto-dev7` muestra2 cierres failed de6 y4 sin resultado en ese corte, no estado live. Ambos RangeAudit N/S pasaron115/115 pero sinD/Gfinal/paquetecomún; fallo compartido exactrequestbudget. Diagnóstico offline131968>110000bytes sin retry/dispatch:history89938 antesouterescaping,rolepackets30947,captures58708.504originales sellados e índiceSHA,511entradas de evidencia. No aumentarcuotas/reemplazar intentos; versión/registro futuros prospectivos. Último wheel público dev5,94descargas anteriores exactas,no ranking/competencia/superioridad. Corte dev7ingeniería previo separado.

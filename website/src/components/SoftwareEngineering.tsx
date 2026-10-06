@@ -7,6 +7,7 @@ import NeutralControls from './NeutralControls';
 import Dev4Closure from './Dev4Closure';
 import StagedControls from './StagedControls';
 import AutonomousControl from './AutonomousControl';
+import NativePilotProgress from './NativePilotProgress';
 
 export default function SoftwareEngineering(){
   const native=data.native_development;
@@ -26,6 +27,7 @@ export default function SoftwareEngineering(){
     <NeutralControls/>
     <StagedControls/>
     <AutonomousControl/>
+    <NativePilotProgress/>
     <Dev4Closure/>
     <h5 id="meta-mejor-metodo">Meta activa: demostrar que mejora la entrega</h5>
     <p>Codex tiene asignada la mejora y su validación. Para cerrar la meta, el candidato deberá satisfacer criterios fijados antes de las nuevas evaluaciones:</p>
