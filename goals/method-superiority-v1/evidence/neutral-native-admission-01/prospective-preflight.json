@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "plan_sha256": "ae62fd8daf0d592852aa1fff404585118b9b0a9d0120295a0fd0e90b19ae8827",
+  "source_commit": "6793593c688340d02e1c1cee8eae9fb49f966fab",
+  "bindings": 55,
+  "six_fixed_positions": [
+    {
+      "id": "attempt-01",
+      "method": "N",
+      "task": "rangeaudit"
+    },
+    {
+      "id": "attempt-02",
+      "method": "S",
+      "task": "rangeaudit"
+    },
+    {
+      "id": "attempt-03",
+      "method": "N",
+      "task": "ledgerfold"
+    },
+    {
+      "id": "attempt-04",
+      "method": "S",
+      "task": "ledgerfold"
+    },
+    {
+      "id": "attempt-05",
+      "method": "N",
+      "task": "topoplan"
+    },
+    {
+      "id": "attempt-06",
+      "method": "S",
+      "task": "topoplan"
+    }
+  ],
+  "fresh_runtime_absent": true,
+  "installed_report_exit_code": 2,
+  "commands": [
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "python",
+        "scripts/register_neutral_pilot.py",
+        "goals/method-superiority-v1/evidence/neutral-native-admission-01/pilot-plan.json",
+        "--source-root",
+        "/home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon",
+        "--run-root",
+        "/datos/workspaces/personal/specorganon-validation/method-superiority-v1/neutral-public-native-dev7-01",
+        "--pilot-id",
+        "neutral-public-native-dev7-01",
+        "--native-image",
+        "sha256:982382c95f1254d6e31d97f268c5069c9747cd21a2e0943b496093f4d6c00a22",
+        "--test-image",
+        "sha256:5357232868157b9dce5a7783076f865c2fb6736232434b61300023d7d0ea1325"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "goals/method-superiority-v1/evidence/neutral-autonomy-controller-01/local-install/venv/bin/organon-controls",
+        "report",
+        "goals/method-superiority-v1/evidence/neutral-native-admission-01/pilot-plan.json",
+        "--plan-sha256",
+        "ae62fd8daf0d592852aa1fff404585118b9b0a9d0120295a0fd0e90b19ae8827"
+      ],
+      "exit_code": 2
+    }
+  ],
+  "new_native_generations": 0,
+  "native_admission": false
+}
