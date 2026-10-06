@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "command": "uv run --frozen --extra dev pytest -q [selected native/controller tests]",
+  "exit_code": 2,
+  "classification": "collection error before test execution",
+  "reason": "pytest console entrypoint did not add repository root; scripts namespace was missing in three modules",
+  "correction": "use uv run --frozen --extra dev python -m pytest",
+  "original_stream_file": "not recorded; retained tool transcript",
+  "new_model_calls": 0,
+  "new_subjects": 0
+}
