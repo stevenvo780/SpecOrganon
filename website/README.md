@@ -130,3 +130,7 @@ La sección `#cohorte-nativa` publica una foto fechada de diez intentos fijos, s
 ## Candidato dev3 y snapshot 02
 
 La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wheel y límites del candidato schema12; no afirma eficacia nativa. `#cohorte-nativa` muestra el snapshot 02 dev2 de cinco cierres, cuatro fallos y una entrega. Los enlaces del snapshot 01 y las 38 descargas anteriores permanecen intactos. Las fuentes del frontend y sus JSON permiten reconstruir esta foto; no es un monitor en vivo.
+
+## Dev4 y cierre terminal de dev2
+
+`#avance-dev4` publica 296 controles del host y 296 del wheel instalado, CLI/MCP24 y nueve diagnósticos de sintaxis (seis fallos, tres válidos); no son generaciones de software. `#cohorte-nativa` muestra el cierre dev2: diez intentos, tres entregas y siete fallos, sin reemplazos. Se incumple el 90%; no hay superioridad demostrada. La cohorte dev4 02 está registrada prospectivamente con 45 fuentes, y está en ejecución; todavía no se publican resultados finales. Los 54 archivos descargables anteriores y sus manifiestos conservan sus bytes. Siete descargas nuevas se añaden en `avance-dev4/`, con hashes separados.
