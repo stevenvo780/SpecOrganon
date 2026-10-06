@@ -1,4 +1,5 @@
 import data from '../software-engineering-02.json';
+import NativeCohortProgress from './NativeCohortProgress';
 
 export default function SoftwareEngineering(){
   const native=data.native_development;
@@ -10,6 +11,7 @@ export default function SoftwareEngineering(){
     <p>Una CLI de biblioteca estándar para fusionar intervalos enteros y detectar huecos. Completó <strong>{native.accepted_phases.length}/9 fases</strong>, con {native.author_calls_completed} llamadas de Codex, {native.phase_reviews_completed} revisiones de Gemini y {native.mandate_checks_completed} comprobaciones del mandato. Una corrección de validación quedó contabilizada; el programa y su documentación se sellaron antes de generar las pruebas.</p>
     <p>Las pruebas generadas pasaron en el ejecutor aislado. Después, una comprobación pública separada pasó <strong>115/115 casos</strong>, con un oráculo de ocupación de celdas enteras, límites de entrada y rechazo atómico. Son comprobaciones de desarrollo posteriores a la generación, sin cegamiento ni comparación con otros métodos.</p>
     <p>Los trabajos aislados de este intento sumaron {Math.round(native.sum_isolated_job_seconds)} segundos; desde el registro hasta la entrega transcurrieron {Math.round(native.registration_to_completion_seconds)} segundos, incluidas las esperas de coordinación. Estos tiempos describen una ejecución. No demuestran eficiencia comparativa ni beneficio de campo.</p>
+    <NativeCohortProgress/>
     <h5 id="meta-mejor-metodo">Meta activa: demostrar que mejora la entrega</h5>
     <p>Codex tiene asignada la mejora y su validación. Para cerrar la meta, el candidato deberá satisfacer criterios fijados antes de las nuevas evaluaciones:</p>
     <ul>
@@ -18,7 +20,7 @@ export default function SoftwareEngineering(){
       <li>Funcionalidad no inferior, con margen máximo de cinco puntos porcentuales; tiempo medio total no mayor que el doble de cada alternativa.</li>
       <li>Tareas reservadas, incertidumbre simultánea del 95% y una réplica independiente de la misma versión.</li>
     </ul>
-    <p>El progreso actual es ingeniería verificada y un caso nativo completo. La superioridad continúa sin demostrar. La campaña v3, sus 42 celdas y sus puntajes permanecen cerrados.</p>
+    <p>El progreso incluye ingeniería verificada, una entrega anterior completa y la cohorte nueva aún en ejecución con su primer fallo conservado. La superioridad continúa sin demostrar. La campaña v3, sus 42 celdas y sus puntajes permanecen cerrados.</p>
     <div className="software-lab-downloads">
       <a className="text-link" href="/resultados/software/candidato-rc3-dev2-verificacion.json">Verificación y consumo observado</a>
       <a className="text-link" href="/resultados/software/specorganon-candidate-0.2.0rc3.dev2.zip">Fuentes del candidato</a>

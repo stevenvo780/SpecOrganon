@@ -8,6 +8,8 @@ Método y toolkit para formular problemas, investigar con evidencia, comparar in
 
 **Resultados y límites:** RangeAudit produjo una entrega nativa de nueve fases, con Codex como autor, Gemini como revisor y pruebas ejecutadas en Docker; pasó 115 comprobaciones públicas adicionales. Es un caso de desarrollo, sin evaluación reservada ni demostración de superioridad. La campaña comparativa v3 y el piloto anterior conservan sus resultados adversos y fuentes históricas: no se recalcularon con este código. La [meta para demostrar ventaja frente a libre y SDD](goals/method-superiority-v1/GOAL.md) sigue activa. El [GOAL original](GOAL.md) conserva el objetivo alimentario y sus límites de evidencia de campo.
 
+**Cohorte de fiabilidad en ejecución:** diez intentos fijados antes de generar: cuatro RangeAudit, tres LedgerFold y tres TopoPlan. El [snapshot público de 2026-10-06 01:55 UTC](goals/publication-main-20261006/cohort-progress-publication-01/progress-snapshot.json) conserva un fallo cerrado de RangeAudit en `compare` por el límite de recursos, cero generaciones completas y LedgerFold en curso. No se reemplazó el fallo ni se incorporó al denominador el caso anterior de 115/115. [Protocolo y límites](goals/method-superiority-v1/development/NATIVE_COHORT.md). Esta foto parcial puede quedar desactualizada; no acredita fiabilidad ni superioridad.
+
 ## Clonar y empezar
 
 ```sh

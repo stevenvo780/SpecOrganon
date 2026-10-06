@@ -122,3 +122,7 @@ distribuciones públicas.
 
 Sitio: https://specorganon.stevenvallejo.com/#resultados
 Informe sin JavaScript: /resultados/backup/RESULTADOS.html
+
+## Cohorte nativa en curso
+
+La sección `#cohorte-nativa` publica una foto fechada de diez intentos fijos, sus contratos y su primer fallo, sin mezclar la entrega RangeAudit anterior con el denominador. Las fuentes del registro y del driver están en main. La foto no es un monitor en vivo ni acredita fiabilidad o superioridad; los resultados posteriores se publican como nuevos hitos. Las 32 descargas históricas permanecen intactas.
