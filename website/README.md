@@ -33,26 +33,19 @@ npm run build
 npm run preview -- --host 0.0.0.0
 ```
 
-Para renovar el corte documental, desde la carpeta padre:
+## Datos y corte documental
 
-```sh
-python3 build_public.py
-```
+El clon incluye `src/project-data.json` y `public/project.json`, además de los
+resultados y manifiestos de descargas. `npm run build` utiliza esos archivos
+versionados y permite reproducir la presentación sin acceder al entorno original.
 
-El generador lee el checkout vecino y escribe exclusivamente los dos archivos
-de esta presentación: `public/project.json` y `src/project-data.json`. No ejecuta
-el código ni las pruebas de SpecOrganon. La disponibilidad de enlaces individuales
-a GitHub procede de `/tmp/specorganon-public-tree.json`, un inventario leído de la
-rama pública; si no existe, no genera enlaces a archivos sin verificar.
+La revisión `824d9f3`, su fecha y la valoración editorial conservan el corte
+histórico. Los avances posteriores se registran en los datos de campañas y del
+candidato rc3.dev2. Para actualizar contenido, modifica los datos correspondientes,
+conserva sus fuentes y verifica los enlaces a `main` antes de publicar.
 
-La evaluación editorial del responsable se conserva en `../public_assessment.json`.
-El generador la aplica a los cinco criterios, identifica su autor y conserva la
-auditoría documental anterior en `documentary_acceptance`. Para actualizar solo
-esta evaluación sobre el corte existente: `python3 build_public.py --assessment-only`
-desde la carpeta padre.
-
-La construcción en Vercel usa el JSON ya preparado y no necesita acceso al checkout
-vecino, Python ni al servidor del observatorio.
+Los comandos de generación del entorno original no forman parte de este clon.
+La construcción en Vercel usa el JSON preparado y las fuentes de esta carpeta.
 
 ## Publicar
 
@@ -76,14 +69,14 @@ la suite del proyecto. La evaluación actual del responsable declara completos
 C1–C5 y el sistema maduro para usarse; el siguiente paso es disponer de más casos
 de aplicación. El estado de los experimentos del corte documental se conserva.
 
-Al publicar, la rama pública de https://github.com/stevenvo780/SpecOrganon contenía
-únicamente `GOAL.md`. La guía operativa requiere el checkout completo de desarrollo.
-La página muestra esta diferencia y ofrece únicamente enlaces documentales
-comprobados en el árbol público.
+En el corte inicial, la rama pública contenía únicamente `GOAL.md`. Desde la
+publicación de avances del 6 de octubre de 2026, `main` contiene el toolkit, Docker,
+los ejemplos, las campañas y esta web. La guía operativa clona esa rama y sus
+enlaces documentales apuntan a archivos comprobados en el árbol público.
 
 Esta edición pública es un corte documental. El observatorio Python de la carpeta
 padre conserva su actualización local por SSE; Vercel no observa el filesystem
-del contenedor. Renovar la edición pública requiere generar el JSON y desplegar.
+del contenedor. Renovar la edición pública requiere actualizar los datos versionados y desplegar.
 
 ## Verificación
 
@@ -117,22 +110,15 @@ puntuaciones funcionales, los hallazgos adversos de documentación y adherencia,
 el producto seleccionado y la evidencia descargable. El piloto no acredita la
 tesis general ni completa el objetivo original de campo.
 
-Para volver a exportar la evidencia desde el checkout hermano de SpecOrganon:
+Los resultados de este piloto ya están exportados en `public/resultados/backup/`.
+El clon compartido permite construirlos con `npm ci` y `npm run build`, sin un
+checkout hermano ni dependencias Python. Los exportadores del entorno original
+pertenecen al historial de preparación y no son requisitos de esta distribución.
 
-```sh
-cd ..
-python3 publish_backup_results.py
-python3 build_public.py --assessment-only
-cd web
-npm run build
-```
-
-El exportador necesita Python y el paquete `markdown`, ya disponible en el host.
-El build de Vercel solo necesita las fuentes React y los archivos públicos ya
-exportados; no accede al checkout del experimento. Las exportaciones públicas
-omiten streams brutos, sesiones y rutas privadas. Solo cambia metadata de los
-dos archivos tar originales: las fuentes ejecutables se conservan byte a byte.
-`descargas-manifest.json` contiene los hashes de las distribuciones públicas.
+Las exportaciones públicas omiten streams brutos, sesiones y rutas privadas.
+Solo cambia metadata de los dos archivos tar originales: las fuentes ejecutables
+se conservan byte a byte. `descargas-manifest.json` contiene los hashes de las
+distribuciones públicas.
 
 Sitio: https://specorganon.stevenvallejo.com/#resultados
 Informe sin JavaScript: /resultados/backup/RESULTADOS.html
