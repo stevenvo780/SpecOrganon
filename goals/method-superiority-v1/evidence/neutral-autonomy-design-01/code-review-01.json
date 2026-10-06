@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "job_id": "be6f4c5e58e249fab7b642ab2ef11d04",
+  "status": "succeeded",
+  "meta": {
+    "agy_model": "Gemini 3.8 Flash (Medium)",
+    "provider": "gemini",
+    "model": "gemini/3.8-flash",
+    "access": "text",
+    "cwd": "/home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon",
+    "duration_s": 151.9,
+    "depth": 0
+  },
+  "review": {
+    "schema": 1,
+    "verdict": "reject",
+    "findings": [
+      {
+        "id": "accounting-impossible-roles-cap",
+        "severity": "high",
+        "location": "specorganon.free_control_policy:CAPS",
+        "problem": "CAPS['roles'] está fijado en 40, pero _counts exige estrictamente que value['roles'] == value['authors'] + value['reviewers']. Dado que authors tiene un tope de 5 y reviewers un tope de 4, roles nunca puede exceder 9. Esta carga imposible provoca que remaining() reporte hasta 31 slots de roles disponibles cuando tanto autores como revisores están completamente agotados, y convierte la guarda de agotamiento de roles en reserve() (result['roles'] >= CAPS['roles']) en código muerto inalcanzable.",
+        "fix": "Ajustar CAPS['roles'] a 9 (la suma de CAPS['authors'] y CAPS['reviewers']) para que remaining()['roles'] disminuya congruentemente hasta 0 y refleje con precisión la capacidad real de roles."
+      }
+    ],
+    "scope_limits": [
+      "Evaluación realizada exclusivamente mediante análisis estático del texto fuente y tests suministrados; no se ejecutaron pruebas (tests_executed es false).",
+      "Alcance estrictamente restringido a la definición de política wire libre v2 y contabilidad de recursos compartidos; no cubre implementación de controller, bucle de despacho, custodia de ejecución ni recuperación ante caídas.",
+      "La persistencia duradera de la reserva previa al transporte, la retención de la reserva ante fallos de decodificación o red, y la autenticación de la batería inmutable de pruebas son responsabilidades del caller/controller futuro no verificadas en este módulo.",
+      "La aceptación técnica queda circunscrita al código evaluado y en ningún caso constituye permiso para pilotos, admisión experimental o validación metodológica."
+    ],
+    "tests_executed": false
+  },
+  "source_files": {
+    "module": "code-submitted-01.py",
+    "tests": "tests-submitted-01.py"
+  },
+  "source_sha256": {
+    "module": "c7c9df21d66c5cfa104edbbe2c3f5de615e992f99c2620238b91352cdbf699a2",
+    "tests": "941a0a2fa691f45db25d22f77645a143249db563352df49e6bf9c2d388e09210"
+  }
+}

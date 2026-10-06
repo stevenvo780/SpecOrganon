@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "job_id": "0bb689edf7894b3eb5d1505051240869",
+  "status": "succeeded",
+  "meta": {
+    "agy_model": "Gemini 3.8 Flash (Medium)",
+    "provider": "gemini",
+    "model": "gemini/3.8-flash",
+    "access": "read",
+    "cwd": "/home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon",
+    "duration_s": 361.9,
+    "depth": 0
+  },
+  "review": {
+    "schema": 1,
+    "verdict": "accept",
+    "F06_design_resolved": true,
+    "findings": [
+      {
+        "id": "F06-01",
+        "severity": "medium",
+        "location": "goals/method-superiority-v1/development/neutral-autonomy-v2/PROTOCOL.md:81-84, 54-61",
+        "problem": "Subespecificación de interfaz para declarar la partición de la batería de pruebas: el protocolo estipula que la separación entre código bajo prueba y batería/dependencias debe declararse, validarse y capturarse antes de medir sin depender de extensiones, pero no define el canal ni el esquema formal de dicha declaración (mientras que controller-next.json queda restringido a exactamente {'action': A}). Esto es una subespecificación de contrato, no una contradicción insalvable, pero impide implementar el sellado inmutable sin una convención formal acordada.",
+        "fix": "Formalizar en el protocolo la vía de declaración antes de medir: bien permitiendo en controller-next.json un campo opcional 'test_files': [str] cuando action=='measure', o bien reservando un documento estricto 'test-manifest.json' en documents con la lista exhaustiva de rutas relativas de pruebas y fixtures a sellar."
+      },
+      {
+        "id": "F06-02",
+        "severity": "medium",
+        "location": "goals/method-superiority-v1/development/neutral-autonomy-v2/PROTOCOL.md:94-101",
+        "problem": "Ambigüedad operativa en la 5ª actualización para acciones 'continue' o 'review': si el autor agota su quinta actualización solicitando 'continue' (sin autores restantes) o 'review' (sin autores posteriores para actuar sobre el feedback o programar measure/audit), el protocolo no explicita si la acción se rechaza formalmente en admisión como inválida o si ejecuta la revisión para luego cerrar en fallo terminal. Por interpretación de las líneas 100-101 cualquier acción no admisible consume reserva y cierra en fallo, pero la máquina de estados debe ser inequívoca.",
+        "fix": "Declarar taxativamente en el protocolo que tras agotarse el cupo de autores (5/5), las únicas acciones operativas admisibles son 'measure' (que encadena auditoría si pasa) o 'audit' (si ya existe medición previa vigente); 'continue' y 'review' en la 5ª actualización constituyen acciones inválidas que consumen la reserva y provocan el cierre en fallo sin despacho."
+      },
+      {
+        "id": "F06-03",
+        "severity": "low",
+        "location": "goals/method-superiority-v1/development/neutral-autonomy-v2/PROTOCOL.md:54-61",
+        "problem": "Delimitación del espacio de nombres para controller-next.json: el protocolo lo define como un documento operativo reservado que se extrae y no entra en la entrega, pero no explicita que su ubicación exclusiva debe ser en el mapa documents y que su inclusión en files está estrictamente prohibida. Esto es una precisión de robustez para evitar que un autor contamine accidentalmente el delivery_sha256.",
+        "fix": "Estipular que controller-next.json solo es válido como clave de documents; su presencia en files debe ser causa de rechazo inmediato de admisión del parche."
+      },
+      {
+        "id": "F06-04",
+        "severity": "low",
+        "location": "goals/method-superiority-v1/development/neutral-autonomy-v2/PROTOCOL.md:72-76, 141-142; src/specorganon/common_review.py:27-34",
+        "problem": "Interpretación de la compuerta de criterios previos a la medición frente a la evaluación D/G: el protocolo exige criterios sustantivos previos a measure pero rechaza validar 'cadenas no vacías' mecánicamente, delegando G1/G2/G3 al revisor. Es una interpretación metodológica clarificar que el controlador del host solo valida la compuerta física (existencia de captura previa en la cronología), mientras que la verdad y utilidad sustantiva de los criterios recae exclusivamente en el revisor independiente bajo G2/G3 con localizadores de evidencia.",
+        "fix": "Hacer explícito en el texto que la verificación del host previa a la auditoría se limita a la condición física de precedencia temporal capturada, y que la ausencia de criterios válidos no detiene el controlador antes de tiempo sino que produce el veredicto fail/inconclusive vinculante del revisor en G2/G3."
+      },
+      {
+        "id": "F06-05",
+        "severity": "low",
+        "location": "goals/method-superiority-v1/development/neutral-autonomy-v2/PROTOCOL.md:60, 86-88",
+        "problem": "Interpretación de la invalidación de actualidad de medida frente a respuestas puramente operativas: la regla estipula que toda modificación de archivos o documentos tras una medida invalida su actualidad para auditoría, pero permite respuestas 'solo operativas' (ej. para pedir audit o review sin cambios). Es una interpretación que una respuesta puramente operativa (con files y documents idénticos al snapshot medido) NO invalida la actualidad del recibo de prueba.",
+        "fix": "Aclarar que la invalidación de actualidad se dispara exclusivamente por cambios en los hashes de files o documents respecto al snapshot de la medición; una respuesta del autor con parches vacíos o idempotentes preserva la vigencia del recibo medido previo para solicitar 'audit'."
+      }
+    ],
+    "scope_limits": [
+      "La aceptación del diseño PROTOCOL.md v2 resuelve formalmente el hallazgo F06 a nivel conceptual y contractual; no constituye aceptación de código, verificación de implementación, admisión experimental ni prueba de competencia o superioridad empírica de N.",
+      "Esta revisión fue puramente estática e independiente sobre los cuatro documentos designados; no se ejecutaron pruebas de software, entornos Docker, invocaciones de modelos, transportes ni inspección de perfiles.",
+      "La eliminación de notas obligatorias y artefactos SDD para N restablece el trabajo libre legítimo y la simetría de recursos (5 autores, 4 revisores, 2 medidas, 40 roles, 6000 s) sin otorgar privilegios indebidos, pero su competencia efectiva solo podrá evaluarse prospectivamente tras ejecución experimental.",
+      "Antes de cualquier ejecución nativa o piloto público deben corregirse los hallazgos F06-01 a F06-05, implementarse el controlador en una versión nueva aislada con registro independiente, y verificarse localmente sin modelos los controles negativos y de recuperación tras fallo.",
+      "Las compuertas físicas de custodia, inmutabilidad de la batería sellada y cronología de criterios siguen siendo prerrequisitos independientes; la auditoría D/G final en common_review.py permanece común y sin requisitos H para N."
+    ],
+    "tests_executed": false
+  },
+  "source_protocol_sha256": "18a841282edd4e40bfacef2d217a3ff4be72616a65511cc353769f1eeb27d188"
+}
