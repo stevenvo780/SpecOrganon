@@ -168,3 +168,19 @@ El hito `#avance-dev8` publica ingeniería parcial de contexto lossless,156 prue
 El corte actual añade ingeniería parcial de custodia T dev9 (#avance-dev9) y una foto original dev8 de tres posiciones (#piloto-dev8), fechada en su índice. Preserva las94 descargas históricas. No acredita adaptador T completo, admisión T, competencia ni superioridad.
 
 El piloto dev8 terminó en seis posiciones:cuatro failed y dos review_ready,common_complete/F externo null. #piloto-dev8 muestra el cierre original; los cortes2/6 y3/6 se conservan históricos. La meta continúa activa.
+
+
+El avance prospectivo actual es **dev10, ingeniería parcial**: controlador común T,
+custodia por transición y auditoría separada de las nueve revisiones. Hay 232
+pruebas sintéticas aprobadas y 45 módulos instalados idénticos en imágenes
+locales; los seguimientos de 45 y 19 controles se solapan. Continúan abiertos el
+deadline absoluto compartido por transporte/preparación/limpieza y la recuperación
+verificada de fallos nativos cerrados con salida no cero. El código final necesita
+revisión independiente. No hay nueva generación/admisión T, freeze completo,
+calificación ni superioridad. Los originales dev8 cerrados mantienen cuatro
+fallidos y dos review_ready, con F/common_complete null. El último wheel público
+sigue siendo dev5.
+
+[Web: avance dev10](https://specorganon.stevenvallejo.com/#avance-dev10) ·
+[Informe y evidencias en main](https://github.com/stevenvo780/SpecOrganon/blob/main/goals/method-superiority-v1/evidence/t-common-controller-dev10-01/README.md) ·
+[Repositorio compartible](https://github.com/stevenvo780/SpecOrganon/tree/main).

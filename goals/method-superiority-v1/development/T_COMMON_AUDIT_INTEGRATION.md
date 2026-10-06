@@ -5,6 +5,16 @@ adaptador y auditoría común todavía pendientes, sin admisión T. No cambia la
 fuentes fijadas por los planes públicos N/S dev7/dev8 ni las cohortes cerradas.
 La versión completa futura exige instalación, revisión y nuevos registros.
 
+## Siguiente candidata dev10, parcial y prospectiva
+
+La versión de trabajo dev10 factoriza el contrato D/G/H sin cambiar sus campos
+ni juicios, limita el stdin real antes del preflight y exige recuperar la medida
+original cerrada y verificar su journal antes de escribir `passed` en el engine.
+La política del controlador pasa a schema14. Los controles sintéticos delimitados
+pasaron; todavía no hay instalación, revisión independiente, admisión T ni
+adaptador común completo. No modifica las fuentes o resultados originales dev8/dev9.
+El recibo está en `../evidence/native-envelope-provenance-dev10-prospective-01/`.
+
 ## Base de custodia dev9
 
 `t_measurement_custody` guarda criterios completos de `specify`, ancestros,

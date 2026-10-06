@@ -54,6 +54,12 @@ def response_contract_from_request(request):
     except ValueError as exc: raise NativeRoleError(str(exc)) from exc
 
 
+def native_stdin_payload(provider, prompt):
+    from specorganon.native_response_contract import native_stdin_payload as shared
+    try: return shared(provider, prompt)
+    except ValueError as exc: raise NativeRoleError(str(exc)) from exc
+
+
 def execution_identity(provider, executable):
     """Bind runtime identity without reading credentials or claiming isolation.
 
@@ -125,6 +131,7 @@ def main(argv=None):
     raw = read_request(options.request)
     request, prompt = render_prompt(raw)
     requested_author_format = author_format_from_request(request)
+    payload = native_stdin_payload(options.provider, prompt)
     executable = "/usr/local/bin/codex" if options.provider == "codex" else "/usr/local/bin/agy"
     identity_before = execution_identity(options.provider, executable)
     if options.provider=='gemini' and (type(options.expected_executable_sha256) is not str
@@ -178,8 +185,6 @@ def main(argv=None):
                        reasoning_effort=options.codex_reasoning_effort)
     if identity_before != execution_identity(options.provider, executable):
         raise NativeRoleError("provider configuration/executable changed before dispatch")
-    payload = (canonical({'event': 'user', 'message': {'role': 'user',
-               'content': [{'type': 'text', 'text': prompt}]}}) + b'\n') if options.provider == 'gemini' else prompt.encode()
     environment = dict(os.environ)
     metadata = {**metadata, **catalog_metadata}
     store = JobStore(options.output_dir / "native", max_jobs=2)

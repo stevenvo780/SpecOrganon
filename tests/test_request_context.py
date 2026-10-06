@@ -7,6 +7,7 @@ import pytest
 from specorganon.neutral_controller import LIMITS, NeutralController, NeutralControllerError
 from specorganon.neutral_autonomy import AutonomousNeutralController
 from specorganon.request_content import decode_content
+from specorganon.request_tree import decode_tree
 from specorganon.role_jobs import canonical
 from test_neutral_controller import controller
 
@@ -14,6 +15,7 @@ from test_neutral_controller import controller
 def restore(text):
     document = json.loads(text)
     assert document['format'] == 'lossless-package-context-v1'
+    if document['encoding'] == 'tree-refs-v1': return decode_tree(document['context'])
     return (decode_content(document['context']) if document['encoding'] == 'content-refs-v1'
             else document['context'])
 

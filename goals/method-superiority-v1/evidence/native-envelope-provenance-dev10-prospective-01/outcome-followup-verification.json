@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "observed_utc": "2026-10-06T11:03:58.113651+00:00",
+  "classification": "Subsequent prospective measured-outcome guard only; no native attempt/installation/admission",
+  "reason": "Original Docker host result includes attachment exit; subject exit0 alone must not be promoted to passed when attachment failed. Require native passed field boolean and use exact verified host result.",
+  "command": [
+    "uv",
+    "run",
+    "--extra",
+    "dev",
+    "pytest",
+    "-q",
+    "tests/test_t_measurement_provenance.py",
+    "tests/test_t_measurement_custody.py",
+    "tests/test_software_controller_resources.py"
+  ],
+  "env_overrides": {
+    "PYTHONPATH": "."
+  },
+  "tool_session_id": 26792,
+  "observed_exit_code": 0,
+  "observed_result_excerpt": "53 passed in 12.21s",
+  "excerpt_is_full_raw_capture": false,
+  "source_pins": {
+    "src/specorganon/software_controller.py": "3bd7aac2cc74efc986b5afe0286713c86904390590b9b7ff52a056b970bc05a3",
+    "tests/test_t_measurement_provenance.py": "a5fe02c2276f3573298d44d04228698790ae5ef6829ca3d79eb316cd8784276b",
+    "goals/method-superiority-v1/development/T_COMMON_AUDIT_INTEGRATION.md": "91b4f1eac44571fd93e2aab6f5cee14cea0f37fb68b518ea9583bfbaf34bfd87"
+  },
+  "prior_broader_tests": "236 +46subtests and113native bridge regressions apply to preceding recorded source cut; modified measurement paths checked here separately, not summed."
+}

@@ -80,10 +80,12 @@ def audit_schema(value):
     fields = {'binding':{'type':'object','properties':{
         name:{'type':'string','enum':[expected]} for name,expected in declared['binding'].items()},
         'required':sorted(BINDING_KEYS),'additionalProperties':False}}
+    ref_point = {'$ref': '#/definitions/common_judgment'}
     for group,points in groups.items():
-        fields[group] = {'type':'object','properties':{name:copy.deepcopy(point) for name in points},
+        fields[group] = {'type':'object','properties':{name:copy.deepcopy(ref_point) for name in points},
                          'required':sorted(points),'additionalProperties':False}
-    return {'type':'object','properties':fields,'required':list(fields),'additionalProperties':False}
+    return {'type':'object','definitions':{'common_judgment':point},'properties':fields,'required':list(fields),'additionalProperties':False}
+
 
 
 def summarize_assertions(value, declared):

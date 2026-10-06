@@ -28,6 +28,7 @@ from .neutral_author import neutral_author_content
 from .role_jobs import JobStore, _safe, _read, _json, _write, _parent, canonical, digest
 from .software_controller import encoded_contribution, safe_file
 from .request_content import compact_content, decode_content
+from .request_tree import compact_tree, decode_tree
 from .ledger import strict_json_loads
 
 
@@ -50,6 +51,10 @@ CONTEXT_FORMAT = (
     'JSON tree with repeated long strings replaced by null; each string_references entry '
     'has a path of object keys/array indices and sha256. Resolve that exact null using '
     'context.content_by_sha256[sha256], retaining all metadata, history and chronology. '
+    'For tree-refs-v1 context is a specorganon-tree-refs-v1 envelope: nodes are postorder; root indexes the last node. '
+    'Nodes [null], [bool,value], [int,value], [float,value], [str,text] are scalars; [array,[ids]] lists values; '
+    '[object,[[key-id,value-id],...]] retains every member in order. References are backward zero-based indices; '
+    'object key nodes are strings. Expand references into fresh values; every text and scalar is included here. '
     'These are text references supplied here; no tools, paths or external fetch are needed. '
     'controller_context, when present, contains the complete autonomous control history and '
     'current battery partition/prior measurement binding including original criteria captures. '
@@ -68,12 +73,17 @@ AUDIT_CONTEXT_FORMAT = (
 def _context_document(value):
     """Encode readable context without dropping a result or changing stored bytes."""
     representation, compressed = compact_content(value)
-    restored = decode_content(representation) if compressed else representation
+    candidates = [('content-refs-v1' if compressed else 'plain-json', representation)]
+    tree, tree_compressed = compact_tree(value)
+    if tree_compressed:
+        candidates.append(('tree-refs-v1', tree))
+    encoding, representation = min(candidates, key=lambda option: len(canonical(option[1])))
+    restored = (decode_tree(representation) if encoding == 'tree-refs-v1' else
+                decode_content(representation) if encoding == 'content-refs-v1' else representation)
     if canonical(restored) != canonical(value):
         raise NeutralControllerError('lossless context reconstruction differs')
     return canonical({'schema':1, 'format':'lossless-package-context-v1',
-                      'encoding':'content-refs-v1' if compressed else 'plain-json',
-                      'context':representation}).decode()
+                      'encoding':encoding, 'context':representation}).decode()
 
 
 def _fingerprint(value): return digest(canonical(value))
@@ -119,7 +129,8 @@ class NeutralController:
             'transport_policy':copy.deepcopy(transport_policy),
             'controller_source_sha256':digest(_read(Path(__file__),128000)),
             'request_context_format':'lossless-package-context-v1',
-            'request_content_source_sha256':digest(_read(Path(__file__).with_name('request_content.py'),128000))}
+            'request_content_source_sha256':digest(_read(Path(__file__).with_name('request_content.py'),128000)),
+            'request_tree_source_sha256':digest(_read(Path(__file__).with_name('request_tree.py'),128000))}
         self.policy.update(self._policy_extra())
         self.root.mkdir(parents=True,exist_ok=True,mode=0o700)
         info=self.root.stat()

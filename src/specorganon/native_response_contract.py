@@ -26,6 +26,7 @@ def response_schema(role, *, author_format='manifest-v1', approval=False, common
     text = {'type': 'string', 'pattern': r'\S'}
     item_id = {'type': 'string', 'pattern': ITEM_ID.pattern}
     fields = {'schema': {'type': 'integer', 'enum': [1]}, 'reason': text}
+    schema_definitions = None
     if role == 'review':
         fields.update(verdict={'type': 'string', 'enum': ['accept', 'reject', 'inconclusive']},
                       findings={'type': 'array', 'items': {'type': 'object', 'minProperties': 1}},
@@ -36,7 +37,11 @@ def response_schema(role, *, author_format='manifest-v1', approval=False, common
                           approval_targets={'type': 'array', 'items': item_id, 'uniqueItems': True})
         if common_audit is not None:
             from .common_review import audit_schema
-            fields['audit'] = audit_schema(common_audit)
+            audit_obj = audit_schema(common_audit)
+            definitions = audit_obj.pop('definitions', None)
+            if definitions:
+                schema_definitions = definitions
+            fields['audit'] = audit_obj
     elif author_format == 'files-v1':
         from .neutral_author import PATH_PATTERN
         content = {'type': 'object', 'propertyNames': {'type': 'string', 'maxLength': 200, 'pattern': PATH_PATTERN,
@@ -66,6 +71,8 @@ def response_schema(role, *, author_format='manifest-v1', approval=False, common
                 'required': ['schema', 'steps'], 'additionalProperties': False}
     result = {'$schema': 'http://json-schema.org/draft-07/schema#', 'type': 'object',
             'properties': fields, 'required': list(fields), 'additionalProperties': False}
+    if schema_definitions is not None:
+        result['definitions'] = schema_definitions
     if role == 'author' and author_format == 'files-v1':
         result['anyOf'] = [{'properties': {name: {'minProperties': 1}}} for name in ('files','documents')]
     return result
@@ -76,6 +83,22 @@ def validate_response_schema(value, schema):
     Draft7Validator.check_schema(schema)
     if next(Draft7Validator(schema).iter_errors(value), None) is not None:
         raise ValueError('native response violates the bound output schema')
+
+
+def native_stdin_payload(provider, prompt):
+    """Format and bound real transport stdin payload per provider before launch."""
+    if type(provider) is not str or provider not in {'gemini', 'codex'}:
+        raise ValueError('unsupported provider')
+    if type(prompt) is not str:
+        raise ValueError('prompt must be a string')
+    if provider == 'gemini':
+        payload = canonical({'event': 'user', 'message': {'role': 'user',
+                             'content': [{'type': 'text', 'text': prompt}]}}) + b'\n'
+    else:
+        payload = prompt.encode('utf-8')
+    if len(payload) > 128_000:
+        raise ValueError(f'{provider} stdin payload exceeds 128000 byte limit: {len(payload)} bytes')
+    return payload
 
 
 def render_prompt(raw):

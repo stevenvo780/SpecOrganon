@@ -171,3 +171,19 @@ La superioridad frente a libre y SDD sigue pendiente.
 **Corte histórico de admisión pública N/S dev7 acotada:** una revisión Gemini acepta exclusivamente [seis posiciones prospectivas N/S](goals/method-superiority-v1/evidence/neutral-native-admission-01/pilot-plan.json), tres tipos y sin reemplazos. El driver original se inició según su checkpoint; en ese corte los resultados del piloto estaban pendientes. [Admisión y alcance](goals/method-superiority-v1/evidence/neutral-native-admission-01/admission-review.json) y [preflight corregido](goals/method-superiority-v1/evidence/neutral-native-admission-01/README.md) conservan el fallo inicial, la imagen local nueva y recibos reales del puente. No es congelación completa, competencia ni superioridad. El registro está vinculado al checkout/runtime originales y no puede continuarse desde un clon de main. En aquel hito la web conservó su corte anterior pre-piloto; no se redeployó entonces. La integración común T sigue siendo diseño futuro pendiente.
 
 **Corte documental parcial del piloto público dev7, report-01:** dos posiciones cerradas failed de seis fijadas (N/S RangeAudit); ambas pasaron115/115 públicos pero sin auditoríaD/Gfinal ni paquete común. Las otras cuatro no tienen resultado en este corte, no es monitor vivo. [Corte y límites](goals/method-superiority-v1/evidence/neutral-native-pilot-dev7-01/README.md), [informe original](goals/method-superiority-v1/evidence/neutral-native-pilot-dev7-01/report-01.stdout), [diagnóstico](goals/method-superiority-v1/evidence/neutral-native-pilot-dev7-01/first-request-diagnostic.json) y [web](https://specorganon.stevenvallejo.com/#piloto-dev7). Fallo común exactrequestbudget131968>110000bytes, sin retry ni ampliarcuotas. No competencia ni superioridad; mantener intentos originales y corregir prospectivamente en otra versión/registro.
+
+
+El avance prospectivo actual es **dev10, ingeniería parcial**: controlador común T,
+custodia por transición y auditoría separada de las nueve revisiones. Hay 232
+pruebas sintéticas aprobadas y 45 módulos instalados idénticos en imágenes
+locales; los seguimientos de 45 y 19 controles se solapan. Continúan abiertos el
+deadline absoluto compartido por transporte/preparación/limpieza y la recuperación
+verificada de fallos nativos cerrados con salida no cero. El código final necesita
+revisión independiente. No hay nueva generación/admisión T, freeze completo,
+calificación ni superioridad. Los originales dev8 cerrados mantienen cuatro
+fallidos y dos review_ready, con F/common_complete null. El último wheel público
+sigue siendo dev5.
+
+[Web: avance dev10](https://specorganon.stevenvallejo.com/#avance-dev10) ·
+[Informe y evidencias en main](https://github.com/stevenvo780/SpecOrganon/blob/main/goals/method-superiority-v1/evidence/t-common-controller-dev10-01/README.md) ·
+[Repositorio compartible](https://github.com/stevenvo780/SpecOrganon/tree/main).

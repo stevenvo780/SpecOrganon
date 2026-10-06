@@ -1,0 +1,32 @@
+{
+  "at_utc": "2026-10-06T11:44:09.172302+00:00",
+  "classification": "prospective partial synthetic engineering only",
+  "common_complete": null,
+  "complete_version_frozen": false,
+  "deselection_reason": "Known full common audit exceeds unchanged 54000-byte document cap; two positive integration expectations remain failing and are explicitly preserved as negatives, not asserted PASS.",
+  "external_F": null,
+  "fixture_execution_qualification": false,
+  "goal_achieved": false,
+  "independent_static_review_job": "3752eee98514447da1b2cee81623e049",
+  "lossless_codec_writer_job": "9c0cd75160b74fa1a54e4f27a16c6fed",
+  "native_admission": false,
+  "native_generations": 0,
+  "schema": 1,
+  "source_sha256": {
+    "src/specorganon/software_controller.py": "5cc15a5c4bf72b6d1bf9f443ce850a14cee987b518cbb4595470010086fd4779",
+    "src/specorganon/t_common_controller.py": "73860015da4eef465650b714ca3b972971c0b9dd656590a0cbc1dec93bd17bac",
+    "src/specorganon/t_common_snapshot.py": "b3fd11e2b92a2f3e40424bfe93cbca6cc81514fd5ac401f588e4d5a8830bc604",
+    "tests/test_t_common_controller.py": "759a4cefd74d1f301f2bd82ec08ebf8e40c6529aad77d2e4b51dc139c61bfad1",
+    "tests/test_t_common_snapshot.py": "d65c9c2fb65322bf5b8f55674359d221e292609669ca6dcad23003401532be76"
+  },
+  "tests": {
+    "command": "uv run python -m pytest -q tests/test_t_common_controller.py -k \"not separate_common\" tests/test_t_common_snapshot.py tests/test_t_measurement_custody.py tests/test_t_measurement_provenance.py tests/test_software_controller_resources.py",
+    "deselected": 2,
+    "duration_seconds": 13.12,
+    "exit_code": 0,
+    "passed": 85,
+    "stdout": "synthetic-custody-guards.stdout.txt",
+    "stdout_sha256": "62b26f9fc74af5c9bfc78e876b77d9f1c50c92db827b7bb73de78ac31810e15c"
+  },
+  "version": "0.2.0rc3.dev10"
+}

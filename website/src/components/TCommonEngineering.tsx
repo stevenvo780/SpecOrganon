@@ -1,0 +1,21 @@
+export default function TCommonEngineering(){
+ const repo='https://github.com/stevenvo780/SpecOrganon/tree/main';
+ const base='https://github.com/stevenvo780/SpecOrganon/blob/main/goals/method-superiority-v1/evidence/t-common-controller-dev10-01/';
+ const download='/resultados/software/avance-dev10/';
+ return <section aria-labelledby="avance-dev10">
+ <h5 id="avance-dev10">Dev10: integración común T, ingeniería parcial</h5>
+ <p><strong>0.2.0rc3.dev10 incorpora custodia por transición y una auditoría común separada de las nueve revisiones del motor.</strong> Conserva criterios previos, sus ancestros, estado, archivos, ledger, delivery, progreso y recibos originales. La representación DAG reconstruye los valores y localizadores auditados byte por byte.</p>
+ <p>La selección ampliada aprobó <strong>232 pruebas sintéticas</strong>; seguimientos sobre el corte final aprobaron 45 controles T/snapshot y 19 del exportador. Los recuentos se solapan: no se suman como intentos nativos. Las dos imágenes Docker locales verificadas contienen <strong>45 módulos byte iguales</strong>; la de release comprobó CLI y MCP por stdio de 24 herramientas, y la de Codex comprobó CLI 0.160.0. Los probes usaron red deshabilitada y cero montajes de credenciales, sin inferencias.</p>
+ <div className="backup-table-wrap"><table className="results-table"><thead><tr><th>Fixture sintética</th><th>Observación conservada</th></tr></thead><tbody>
+ <tr><td>Recorrido</td><td>Nueve fases y auditoría D/G/H separada; 23 comandos, 22 roles y una medición</td></tr>
+ <tr><td>Custodia</td><td>24 capturas, 77 localizadores y 22 recibos; reconstrucción exacta de todos los localizadores</td></tr>
+ <tr><td>Tamaños finales</td><td>40375 bytes de documentos codificados; petición 97929, prompt 105255, stdin Gemini 115303</td></tr>
+ <tr><td>Límites originales</td><td>54 000 bytes de documentos, 110 000 de petición y 128 000 de entrada nativa; sin aumentos</td></tr>
+ </tbody></table></div>
+ <p>La revisión estática anterior encontró seis problemas. Los guards y controles del corte final corrigen el estado actual, la custodia posterior al cierre y su replay semántico, el baseline inicial y las entradas mutables. Se conservan los rechazos y los fallos previos por tamaño.</p>
+ <p><strong>Siguen abiertos el deadline absoluto compartido por transporte, preparación y limpieza, y la recuperación verificada de fallos nativos cerrados con salida no cero.</strong> El cierre tardío pierde readiness, pero esa guarda no completa el deadline de todo el transporte. El código final, incluido codec e integración, necesita revisión independiente: la revisión anterior no acepta este corte.</p>
+ <p><strong>Cero generaciones nativas nuevas, cero sujetos reservados y sin nueva admisión T.</strong> La versión completa no está congelada; no hay calificación, competencia ni superioridad. common_complete y F externo siguen null. El piloto dev8 conserva sus seis cierres originales: cuatro fallidos y dos review_ready, 648 comprobaciones públicas descriptivas y ningún participante T. La goal continúa activa. El último wheel público sigue siendo dev5; las imágenes y wheels dev10 son locales, sin publicación en registry.</p>
+ <p><a href={repo} target="_blank" rel="noopener noreferrer">Repositorio compartible en main</a> · <a href={base+'README.md'} target="_blank" rel="noopener noreferrer">Informe y límites</a> · <a href={base+'engineering-receipt.json'} target="_blank" rel="noopener noreferrer">Recibo de ingeniería</a> · <a href={base+'independent-custody-review.json'} target="_blank" rel="noopener noreferrer">Revisión anterior y hallazgos</a> · <a href={base+'synthetic-final-metrics.json'} target="_blank" rel="noopener noreferrer">Métricas de la fixture</a> · <a href={base+'SHA256SUMS'} target="_blank" rel="noopener noreferrer">SHA de evidencias</a></p>
+ <p>Descargas del corte parcial: <a href={download+'informe.md'} download>informe</a> · <a href={download+'ingenieria.json'} download>recibo</a> · <a href={download+'revision-anterior.json'} download>revisión anterior</a> · <a href={download+'fixture.json'} download>métricas</a> · <a href={download+'fuentes-instaladas.json'} download>pins instalados</a> · <a href={download+'descargas-sha256.json'}>SHA-256 de las cinco descargas</a>. Las 94 descargas históricas permanecen intactas.</p>
+ </section>;
+}

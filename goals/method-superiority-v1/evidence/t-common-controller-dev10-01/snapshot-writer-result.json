@@ -1,0 +1,23 @@
+{
+  "job_id": "a7072b279877478a87aac82b3fda5475",
+  "status": "succeeded",
+  "submitted_at": 1791284864.7114825,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "gemini/3.8-flash",
+  "access": "write",
+  "codex_account": null,
+  "started_at": 1791284864.71227,
+  "finished_at": 1791285485.4952652,
+  "text": "### Resumen de implementación del exportador físico PURO (`dev10` / Método T)\n\nSe implementó el exportador físico puro [`export_snapshot`](file:///home/stev/.codex/worktrees/t-common-audit-v2/SpecOrganon/src/specorganon/t_common_snapshot.py) y su batería de pruebas sintéticas sin modificar archivos ajenos ni alterar el trabajo del padre escritor.\n\n#### Archivos intervenidos (único escritor)\n1. [`src/specorganon/t_common_snapshot.py`](file:///home/stev/.codex/worktrees/t-common-audit-v2/SpecOrganon/src/specorganon/t_common_snapshot.py):\n   - **Firma**: `export_snapshot(root, *, contract, policy, captures, receipts, streams) -> (snapshot, reference)`.\n   - **Validación previa profunda**: Valida límites físicos y presupuestos lógicos antes de tocar disco (contrato no vacío, política esquema/método T, captura cronológica $\\le 80$, delivery final no vacío, delivery $\\le 20\\,000$ encoded bytes, documents $\\le 54\\,000$ encoded bytes, receipts $\\le 80$, streams coincidentes en SHA/bytecounts y $\\le 4\\,000$ encoded bytes, y guardia de locators totales $\\le 512$).\n   - **Root seguro y atómico**: Raíz privada owned `mode 0700` sin symlinks; escrituras atómicas `0600` / `O_EXCL` / `O_NOFOLLOW` con fsync a nivel de archivo y directorio; deduplicación de capturas históricas idénticas; inmutabilidad estricta ante colisiones/tamper y recuperación crash completa ante escrituras interrumpidas.\n   - **Manifiesto Esquema 2 / Método T**: Emite manifiesto exacto con namespaces físicos separados (`host/`, `delivery/`, `documents/`, `checkpoints/`, `captures/`, `receipts/`, `streams/` y `snapshot.json`). Verifica la integridad mediante [`common_evidence.read_snapshot`](file:///home/stev/.codex/worktrees/t-common-audit-v2/SpecOrganon/src/specorganon/common_evidence.py#L45-L188) y devuelve la tupla `(snapshot, reference)` con referencia exacta `{'path': str(root_abs), 'manifest_sha256': pin}`.\n2. [`tests/test_t_common_snapshot.py`](file:///home/stev/.codex/worktrees/t-common-audit-v2/SpecOrganon/tests/test_t_common_snapshot.py):\n   - Pruebas sintéticas rigurosas que validan:\n     - Roundtrip de capturas cronológicas con delivery inicial vacío y posterior entrega poblada.\n     - Conservación íntegra de documentos de fase y packets de rol con reasons y findings.\n     - Correspondencia exacta de 2 streams por test receipt (stdout, stderr).\n     - Rechazo de symlinks en raíz, directorios o rutas internas, y detección de manipulación física post-escritura.\n     - Detección cerrada de streams faltantes, extras, SHA incorrecto, conteo divergente, streams no UTF-8, payloads sobredimensionados, tipos inválidos y IDs duplicados.\n     - Recuperación limpia e idempotente de interrupciones de escritura.\n     - Comprobación de que la evidencia exportada nunca sintetiza `nativepass`, `common_complete` ni `F`.\n\n---\n\n#### Ejecución de pruebas\nComando ejecutado:\n```bash\nPYTHONPATH=. uv run --extra dev pytest -q tests/test_t_common_snapshot.py tests/test_common_evidence.py\n```\n\nResultado exacto:\n```\n......................................                                   [100%]\n38 passed in 0.84s\n```\n*(10 pruebas en `test_t_common_snapshot.py` + 28 pruebas en `test_common_evidence.py`)*\n\n---\n\n#### Riesgos y límites del alcance\n- **Naturaleza parcial de `dev10`**: El exportador físico exporta y enlaza bytes pre-auditoría; no evalúa admisibilidad semántica, verdad sustantiva de aserciones ni completitud de método.\n- **Sin admisión nativa ni F**: Las pruebas sintéticas no invocan modelos reales ni transporte de contenedor. La verificación de ejecución y cronología real recae de forma independiente en el controlador padre y en el verificador de transporte (`validate_bound_audit`).\n- **Versiones congeladas intactas**: `dev8` y `dev9` permanecen inalteradas; ningún archivo previo fue modificado o eliminado.",
+  "meta": {
+    "agy_model": "Gemini 3.8 Flash (Medium)",
+    "provider": "gemini",
+    "model": "gemini/3.8-flash",
+    "access": "write",
+    "cwd": "/home/stev/.codex/worktrees/t-common-audit-v2/SpecOrganon",
+    "duration_s": 620.8,
+    "depth": 0
+  }
+}

@@ -3,7 +3,7 @@
 Desde la carpeta del paquete fuente extraído:
 
 ```sh
-docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev9 .
+docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev10 .
 docker compose build codex
 docker compose run --rm -T codex codex --version
 docker compose run --rm -T codex python /opt/codex-lab/smoke.py
