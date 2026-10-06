@@ -1,9 +1,9 @@
-# Codex y SpecOrganon MCP: candidato 0.2.0rc3.dev5
+# Build experimental de fuentes dev6 y laboratorio Codex/MCP
 
 Desde la carpeta del paquete fuente extraído:
 
 ```sh
-docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev5 .
+docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev6 .
 docker compose build codex
 docker compose run --rm -T codex codex --version
 docker compose run --rm -T codex python /opt/codex-lab/smoke.py
@@ -52,9 +52,11 @@ docker compose run --rm -T codex python /opt/codex-lab/trial.py
 El driver usa siete herramientas MCP autorizadas para su caso técnico, sin pedir aceptación de las nueve fases. Conserva los eventos y rechaza una inferencia sin llamadas MCP verificadas. Consume cuota de la cuenta autenticada.
 
 El nombre Compose `specorganon-main-dev2` se mantiene para conservar los volúmenes
-existentes del laboratorio main; la imagen candidata es dev5. La cohorte histórica
+existentes del laboratorio main; la etiqueta del build experimental es dev6. La cohorte histórica
 sigue en su checkout, imagen y volumen registrados. Dev3 conserva un smoke del wheel
 instalado en Docker; su corrección opt-in no ha sido evaluada en una cohorte nativa
 nueva. [Recibos y límites](../../goals/method-superiority-v1/development/BOUNDED_ADMISSION.md).
 
 Dev5 verifica el wheel instalado y tres controles Docker de recuperación sin modelos, con pérdida de respuesta inyectada; no reproduce el timeout natural ni cuenta como una cohorte nativa. La imagen del recibo es local y no se afirma publicada en un registry. Las fuentes, rechazos y [recibo final](../../goals/method-superiority-v1/evidence/docker-create-recovery-01/engineering-receipt.json) se conservan.
+
+Main contiene infraestructura dev6 parcial. El build anterior crea una imagen local desde esas fuentes y se etiqueta dev6 para no confundirla con el wheel público dev5. Esta publicación no construyó esa imagen ni ejecutó un smoke MCP nuevo de dev6; los recibos CLI/MCP citados corresponden a versiones anteriores. El wheel dev6 no se libera todavía. Deben completarse los controladores y la validación antes de congelar una versión para una nueva cohorte.

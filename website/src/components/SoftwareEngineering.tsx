@@ -3,12 +3,13 @@ import NativeCohortProgress from './NativeCohortProgress';
 import BoundedAdmission from './BoundedAdmission';
 import NativeSyntax from './NativeSyntax';
 import DockerRecovery from './DockerRecovery';
+import NeutralControls from './NeutralControls';
 
 export default function SoftwareEngineering(){
   const native=data.native_development;
   return <section aria-labelledby="avance-rc3">
     <h4 id="avance-rc3">Avance posterior: candidato 0.2.0rc3.dev2</h4>
-    <p>Este bloque conserva el hito anterior de dev2. Las fuentes y descargas originales permanecen disponibles; los avances históricos dev3/dev4 y actuales dev5 se detallan más abajo.</p>
+    <p>Este bloque conserva el hito anterior de dev2. Las fuentes y descargas originales permanecen disponibles; los avances históricos dev3/dev4/dev5 y la infraestructura parcial dev6 se detallan más abajo.</p>
     <p>El toolkit ya ensambla el manifiesto a partir del contenido tipado del autor. Conserva el paquete original, el manifiesto derivado y sus hashes; comprueba el snapshot y rechaza campos extra o contenido vacío. Se mantienen las nueve fases, las revisiones y los recibos reales de pruebas.</p>
     <p>La verificación del candidato pasó <strong>{data.host_tests_passed} pruebas y {data.host_subtests_passed} subpruebas</strong>. La instalación en Docker comprobó la CLI y el MCP por stdio, con {data.installed_runtime.MCP_tools_discovered} herramientas. La revisión estática de Gemini aceptó el código; esa revisión no ejecutó las pruebas.</p>
     <h5>RangeAudit: primera entrega nativa de esta versión</h5>
@@ -19,6 +20,7 @@ export default function SoftwareEngineering(){
     <BoundedAdmission/>
     <NativeSyntax/>
     <DockerRecovery/>
+    <NeutralControls/>
     <h5 id="meta-mejor-metodo">Meta activa: demostrar que mejora la entrega</h5>
     <p>Codex tiene asignada la mejora y su validación. Para cerrar la meta, el candidato deberá satisfacer criterios fijados antes de las nuevas evaluaciones:</p>
     <ul>

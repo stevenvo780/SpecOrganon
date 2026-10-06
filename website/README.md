@@ -138,3 +138,7 @@ La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wh
 ## Dev5 y observación de cohorte dev4
 
 `#avance-dev5` publica 328 controles del host y 328 del wheel instalado, CLI/MCP24 y tres controles Docker reales con pérdida de respuesta inyectada. No reproduce el timeout natural ni acredita fiabilidad nativa. La observación separada de dev4, fechada 03:43:23 UTC, conserva seis cierres, dos entregas y cuatro fallos; la cohorte sigue en sus fuentes congeladas. Dev5 no tiene cohorte nativa; libre/SDD sólidos son un diseño pendiente. Se conservan las 61 descargas anteriores y se añaden 12 en `avance-dev5/` con hashes separados.
+
+## Dev6 parcial, sin wheel liberado
+
+`#avance-dev6` publica formatos neutrales y helpers de evidencia común, 389 pruebas acotadas aprobadas y tres omitidas; las revisiones son estáticas y la aceptación se limita a helpers. El wheel dev6 sólo se probó localmente, con 34 módulos iguales y CLI exit0: no se descarga ni se presenta como versión completa. No hay smoke MCP nuevo, generación dev6 o comparación ejecutada. El último wheel público es dev5. Ocho descargas nuevas conservan protocolo pendiente, recibo, revisiones, logs y snapshot dev4 fechado; las 73 anteriores permanecen intactas.
