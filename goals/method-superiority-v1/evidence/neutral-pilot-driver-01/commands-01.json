@@ -1,0 +1,60 @@
+{
+  "selected_tests": {
+    "argv": [
+      "uv",
+      "run",
+      "--frozen",
+      "--extra",
+      "dev",
+      "python",
+      "-m",
+      "pytest",
+      "tests/test_neutral_pilot.py",
+      "tests/test_neutral_controller.py",
+      "tests/test_closed_native_role.py",
+      "tests/test_native_invocation_consistency.py",
+      "tests/test_neutral_snapshot_guards.py",
+      "tests/test_staged_review_regressions.py",
+      "-q"
+    ],
+    "exit_code": 0,
+    "stdout": "tests-01.stdout",
+    "stderr": "tests-01.stderr",
+    "passed": 130
+  },
+  "offline_Docker": {
+    "environment": {
+      "SPECORGANON_NEUTRAL_PILOT_DOCKER": "1"
+    },
+    "argv": [
+      "uv",
+      "run",
+      "--frozen",
+      "--extra",
+      "dev",
+      "python",
+      "-m",
+      "pytest",
+      "tests/test_neutral_pilot_docker.py",
+      "-q"
+    ],
+    "exit_code": 0,
+    "stdout": "docker-01.stdout",
+    "stderr": "docker-01.stderr",
+    "passed": 2,
+    "experimental_LLM_calls": 0
+  },
+  "initial_route_regression": {
+    "classification": "Observation summary from tool transcript; no raw log file available",
+    "passed": 21,
+    "failed": 1,
+    "reason": "Derived schema5 used reviewer instead of review key; corrected production mapping, assertion retained"
+  },
+  "installation": {
+    "wheel": "local-install/dist/specorganon-0.2.0rc3.dev6-py3-none-any.whl",
+    "published": false,
+    "probe": "probe_installed.py",
+    "receipt": "installed-receipt-01.json",
+    "new_native_Docker_image": false
+  }
+}

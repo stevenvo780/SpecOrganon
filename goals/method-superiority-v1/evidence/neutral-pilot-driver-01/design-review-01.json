@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "job_id": "3b5b080c206b4195a4fd38dff829249c",
+  "status": "succeeded",
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "text",
+    "cwd": "/home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon",
+    "duration_s": 87.6,
+    "depth": 0
+  },
+  "review": {
+    "verdict": "reject",
+    "findings": [
+      {
+        "id": "F01",
+        "severity": "high",
+        "problem": "La excepción para initializer y entry permite ejecutar código del paquete antes de verificarlo. Además, verificar todos los módulos registrados solo cubre la ejecución si el registro contiene todo el código ejecutable alcanzable.",
+        "fix": "ANTES de cualquier modelo: verificar los bytes de initializer y entry antes de ejecutarlos, o declararlos expresamente parte de la frontera confiable. Cerrar el inventario de código alcanzable y definir el tratamiento de dependencias, plugins y procesos auxiliares. No presentar esta comprobación como attestation del host."
+      },
+      {
+        "id": "F02",
+        "severity": "high",
+        "problem": "Revalidar archivos antes de cada step no elimina la separación entre los bytes verificados y los consumidos. Una sustitución entre comprobación y lectura puede afectar módulos, contratos, checker o entrega evaluada.",
+        "fix": "ANTES de cualquier modelo: establecer snapshots privados y consumir los mismos bytes verificados. Compilar directamente los bytes comprobados y evaluar una entrega congelada con identidad SHA persistida. Definir validación de rutas, symlinks y archivos regulares; nofollow en locks por sí solo no cubre estos artefactos."
+      },
+      {
+        "id": "F03",
+        "severity": "high",
+        "problem": "Detenerse en el handle exacto presupone que ese handle quedó registrado. Existe una ventana entre aceptar una operación externa y persistir su respuesta: tras un crash puede haber ejecución real sin handle recibido.",
+        "fix": "ANTES de cualquier modelo: persistir intención e identidad de operación antes del dispatch y disponer de reconciliación por esa identidad. Si el transporte no permite identificar la operación incierta, conservar estado unknown y detener la cohorte sin repetirla. Cubrir esta ventana también para generación, Docker y cleanup."
+      },
+      {
+        "id": "F04",
+        "severity": "high",
+        "problem": "No queda definido cómo sobreviven el inicio del intervalo externo y el límite de 6000 segundos a reinicios. Tampoco queda explícito si la evaluación pública consume ese presupuesto o tiene otro límite. Dos relojes con alcances distintos pueden producir admisiones inconsistentes.",
+        "fix": "ANTES de cualquier modelo: fijar unidad del presupuesto, actividades incluidas y regla de agotamiento. Persistir boot_id e inicio CLOCK_BOOTTIME antes del constructor; una recuperación en el mismo boot debe conservar el inicio original. Separar el presupuesto del controller y el coste observado del piloto cuando sus alcances difieran. Un cambio de boot conserva duración unknown."
+      },
+      {
+        "id": "F05",
+        "severity": "high",
+        "problem": "Recibo cerrado y checker JSON exacto todavía necesitan una relación de identidad explícita. Un resultado válido puede corresponder a otra entrega, intento o ejecución. También falta concretar qué hace autoritativo al recibo frente a archivos producidos por autores.",
+        "fix": "ANTES de cualquier modelo: exigir una cadena verificable entre intento, entrega SHA, checker SHA, imagen ID, operación Docker, terminación y salida parseada. Definir schemas y parsers estrictos, incluidos duplicados, valores no finitos y datos sobrantes. El cierre tras crash debe reconstruir esos vínculos y estados; cualquier discrepancia impide sellar."
+      },
+      {
+        "id": "F06",
+        "severity": "high",
+        "problem": "Los límites compartidos no bastan para establecer competencia de N. Falta precisar su autonomía dentro de notas, programación, pruebas y reparación, y si dispone de una oportunidad equivalente a la revisión y reparación previa del plan de S. El requisito de notas ya impide llamarlo libre irrestricto.",
+        "fix": "ANTES de cualquier modelo: congelar mandato, herramientas, oportunidades de revisión y contabilidad de roles para N. Permitirle elegir estrategia, descomposición y revisión de sus notas dentro de las restricciones comunes, sin imponer artefactos SDD. Declarar cualquier diferencia deliberada entre brazos. Mantener la denominación N provisional con notas obligatorias."
+      },
+      {
+        "id": "F07",
+        "severity": "medium",
+        "problem": "Evaluar programas aunque D/G rechace es útil, pero permite lecturas selectivas si el informe mezcla funcionalidad pública con cumplimiento o excluye entregas ausentes. El orden fijo tampoco elimina posibles efectos temporales.",
+        "fix": "ANTES de cualquier modelo: congelar estados y denominadores del informe para los seis intentos, incluidos no iniciados por interrupción, ausencias, rechazos y unknown. Mostrar funcionalidad pública y D/G por separado, sin agregado que equivalga a common_complete. Registrar el orden y limitar la comparación a descripción de estos pilotos."
+      }
+    ],
+    "free_control_competence": {
+      "verdict": "inconclusive",
+      "reason": "El diseño contempla planificación, construcción, pruebas y reparación, por lo que ofrece una base plausible para un control competente. Sin mandato operativo completo ni ejecución no puede afirmarse competencia efectiva. Las notas obligatorias lo convierten en un control restringido; rotularlo provisional reconoce correctamente esa limitación.",
+      "recommended_definition": "N público provisional: agente generalista con autonomía de estrategia y revisión, notas y criterios anteriores a las pruebas, acceso y recursos comunes explícitos, y oportunidades suficientes de programación, pruebas y reparación. Su competencia de diseño se valora por esas oportunidades; su desempeño se observará posteriormente. No representa todavía al libre N irrestricto del objetivo superior."
+    },
+    "scope_limits": [
+      "El rechazo corresponde a vacíos del contrato propuesto; no demuestra fallos de una implementación inspeccionada.",
+      "Antes de generar con cualquier modelo deben resolverse F01–F07 y verificarse localmente, sin modelos, las rutas de validación, interrupción, recuperación y cierre. Esta revisión no ejecutó esas verificaciones.",
+      "Los seis intentos siguen siendo pilotos públicos de desarrollo. Sus resultados podrán orientar ajustes de infraestructura y competencia, sin campañas sustitutas para fabricar una victoria.",
+      "Mantener public_development_functionality y external_F/common_complete null evita atribuir confirmación a la evaluación pública. H permanece separado del gate común.",
+      "El registro confirmatorio posterior debe fijar prospectivamente el indicador común, F, versiones congeladas, calificación de las nueve fases y umbral 9/10, reservado primario, réplica, análisis y reglas de incertidumbre. Debe preceder a esa campaña y no reetiquetar estos pilotos.",
+      "No se otorga superioridad frente a N, S o T, competencia empírica, calificación T ni evidencia reservada. Las fuentes históricas dev4 permanecen intactas.",
+      "Preparación compartida, comparación y coste monetario desconocidos deben permanecer declarados como desconocidos; no sustentan ratios."
+    ],
+    "tests_executed": false
+  }
+}

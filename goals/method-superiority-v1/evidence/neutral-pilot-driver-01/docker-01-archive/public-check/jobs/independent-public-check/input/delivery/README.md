@@ -1,0 +1,1 @@
+Intentionally broken offline mechanical fixture; no native generation.

@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "job_id": "a9cd6c30bdae4acaa57c6fa620113305",
+  "status": "succeeded",
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "read",
+    "cwd": "/home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon",
+    "duration_s": 146.7,
+    "depth": 0
+  },
+  "review": {
+    "verdict": "reject",
+    "findings": [
+      {
+        "id": "R01",
+        "severity": "high",
+        "file": "src/specorganon/neutral_pilot.py:346-353",
+        "problem": "Bloqueante: outcome.json no fija el inventario de evidencia existente al publicarlo. Tras un crash antes de closure.json, la recuperación reconstruye el resultado, pero sella el inventario actual. Una adición o modificación no consumida por la reconstrucción puede incorporarse sin detectar divergencia respecto al momento del outcome. El test de crash existente usa archivos vacíos y no comprueba esta mutación.",
+        "fix": "Persistir el inventario SHA junto con el outcome, antes de publicar ambos como resultado terminal, y exigir igualdad al recuperar y cerrar. Fixture sugerida, no ejecutada: extender test_crash_after_outcome_seals_same_terminal_result_without_new_step_or_clock; interrumpir antes de closure, agregar un archivo al intento y reanudar. Debe rechazar el cierre conservando outcome y reloj originales. Añadir otra variante con entrega Python y recibo cerrado, prohibiendo cualquier nueva llamada a measure."
+      },
+      {
+        "id": "R02",
+        "severity": "high",
+        "file": "src/specorganon/neutral_pilot.py:115-120,258-268",
+        "problem": "El parser exige que existan classification y task/oracle, pero no valida sus tipos ni valores. Puede aceptar como observado un resultado identificado con otra tarea o con alcance incorrecto si los conteos coinciden. load_plan tampoco liga checker_args y public_cases a la identidad funcional de cada tarea; fijar sus SHA no resuelve esa discrepancia interna.",
+        "fix": "Registrar y validar la identidad esperada de task/oracle y classification, además de la correspondencia entre tarea, argumentos del checker y denominador. Fixture sugerida, no ejecutada: usar PublicFixture para ledgerfold con task='topoplan', cases=104, passed=104 y exit_code=0; actualmente pasa las condiciones del parser. Debe conservar score=null y un fallo explícito de identidad."
+      },
+      {
+        "id": "R03",
+        "severity": "medium",
+        "file": "src/specorganon/neutral_pilot.py:263",
+        "problem": "La consistencia de failed se comprueba únicamente por longitud. Se admiten elementos arbitrarios o duplicados y entradas que declaren passed=true. El número de casos fallidos puede coincidir sin representar fallos distintos y válidos. El SHA de observaciones solo se valida como cadena hexadecimal.",
+        "fix": "Validar el schema real de cada fallo, su identidad y unicidad, y su coherencia con los conteos y el universo de casos registrado. Fixture sugerida, no ejecutada: cases=115, passed=113, failed=[null,null], exit_code=1 y los demás campos válidos; actualmente se acepta como observed. Debe rechazarse sin repetir el checker."
+      }
+    ],
+    "design_findings": {
+      "F01": "Atendido dentro de la frontera confiable declarada: initializer/entry, intérprete, dependencias y host. El bootstrap captura y compila los bytes registrados de los demás módulos, sin consumir pyc. No constituye atestación del host.",
+      "F02": "Las rutas inspeccionadas consumen bytes capturados y vinculan entrega/checker a SHA e inputs preparados. No se reabre la objeción sobre initializer/entry ya aceptados como frontera confiable. Los helpers externos al listado no se inspeccionaron.",
+      "F03": "Se conservan intención durable, identidad Docker y guards previamente revisados. No identifiqué en el driver una autorización nueva para repetir un checker incierto; pending cleanup propaga la detención antes del reloj terminal externo.",
+      "F04": "El inicio externo precede al constructor. Los relojes durables distinguen admisión de 6000 segundos y evaluación pública posterior de hasta 120 segundos; cambio de boot conserva duración desconocida. Los ratios comparativos siguen null.",
+      "F05": "Parcialmente atendido por intención, recibos, entrega/checker SHA y reconstrucción. R01 bloquea la garantía de inventario previo al cierre; R02 y R03 dejan incompleto el parsing semántico.",
+      "F06": "Pendiente reconocido: autonomía operativa de N y asimetría de revisión/reparación previa respecto de S. No se aprueba competencia ni ejecución nativa.",
+      "F07": "El informe mantiene seis posiciones, sin reemplazo, y separa funcionalidad pública de D/G y F. La identidad y exhaustividad interna del resultado del checker siguen limitadas por R02 y R03. No se aprueba comparación."
+    },
+    "scope_limits": [
+      "Dictamen exclusivamente de ingeniería parcial; no aprueba native Ready, competencia, superioridad ni metagoal.",
+      "Se leyeron los nueve archivos enumerados y source-review-01.json, design-review-01.json, tests-01.stdout y docker-01.stdout. Los trece SHA permanecieron iguales antes/después; los nueve de fuentes coinciden con source-review-01.json.",
+      "Los stdout aportados registran 130 y 2 tests aprobados, respectivamente. Son evidencia previa leída, no verificaciones ejecutadas en esta revisión.",
+      "No se ejecutaron tests, Docker, modelos ni delegación; no se modificaron archivos. Las reproducciones propuestas son estáticas y no fueron ejecutadas.",
+      "NeutralController y DockerRoles conservan sus guards previamente revisados. No se inspeccionaron archivos fuera del listado, incluidos implementaciones de helpers y fuentes de los checkers.",
+      "report se interpreta únicamente como consistencia de archivos y sello; no como reejecución, reconciliación Docker ni atestación.",
+      "La cuota del volumen Codex original permanece UNKNOWN."
+    ],
+    "tests_executed": false
+  }
+}
