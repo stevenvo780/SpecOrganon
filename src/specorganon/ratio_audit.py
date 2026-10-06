@@ -54,7 +54,9 @@ def _json_object(raw: bytes, label: str, maximum: int) -> dict[str, Any]:
             object_pairs_hook=_pairs_unique,
             parse_constant=_invalid_constant,
         )
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+    except RatioAuditError:
+        raise
+    except (ValueError, RecursionError) as exc:
         raise RatioAuditError(f"{label} must be a UTF-8 JSON object") from exc
     return _object(parsed, label)
 
