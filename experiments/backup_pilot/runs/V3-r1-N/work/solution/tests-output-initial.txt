@@ -1,0 +1,90 @@
+test_corruption_rejected_without_publishing_restores (__main__.ContractTests.test_corruption_rejected_without_publishing_restores) ... ok
+test_destination_symlinks_and_regular_file_rejected (__main__.ContractTests.test_destination_symlinks_and_regular_file_rejected) ... ok
+test_empty_existing_and_nested_destination (__main__.ContractTests.test_empty_existing_and_nested_destination) ... ok
+test_empty_source_and_new_repository (__main__.ContractTests.test_empty_source_and_new_repository) ... ok
+test_invalid_ids_and_missing_ids (__main__.ContractTests.test_invalid_ids_and_missing_ids) ... 
+  test_invalid_ids_and_missing_ids (__main__.ContractTests.test_invalid_ids_and_missing_ids) (identifier='-x', command='create') ... ERROR
+  test_invalid_ids_and_missing_ids (__main__.ContractTests.test_invalid_ids_and_missing_ids) (identifier='-x', command='verify') ... ERROR
+  test_invalid_ids_and_missing_ids (__main__.ContractTests.test_invalid_ids_and_missing_ids) (identifier='-x', command='restore') ... ERROR
+test_malformed_metadata_even_with_recomputed_outer_digest (__main__.ContractTests.test_malformed_metadata_even_with_recomputed_outer_digest) ... ok
+test_nonempty_destination_and_existing_id_unchanged (__main__.ContractTests.test_nonempty_destination_and_existing_id_unchanged) ... ok
+test_repo_symlinks_are_rejected_including_ancestors_and_remnants (__main__.ContractTests.test_repo_symlinks_are_rejected_including_ancestors_and_remnants) ... ok
+test_roundtrip_self_contained_and_source_unchanged (__main__.ContractTests.test_roundtrip_self_contained_and_source_unchanged) ... ok
+test_sigkill_create_and_retry_same_id (__main__.ContractTests.test_sigkill_create_and_retry_same_id) ... /trial/solution/tests.py:336: ResourceWarning: unclosed file <_io.BufferedReader name='/trial/solution/check-17g9gkvg/source/large'>
+  source_digest = hashlib.file_digest(large.open("rb"), "sha256").hexdigest()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_source_repository_overlap (__main__.ContractTests.test_source_repository_overlap) ... ok
+test_source_symlinks_are_rejected (__main__.ContractTests.test_source_symlinks_are_rejected) ... ok
+test_special_files_are_rejected (__main__.ContractTests.test_special_files_are_rejected) ... ERROR
+test_successive_versions_and_sorted_list (__main__.ContractTests.test_successive_versions_and_sorted_list) ... ok
+
+======================================================================
+ERROR: test_invalid_ids_and_missing_ids (__main__.ContractTests.test_invalid_ids_and_missing_ids) (identifier='-x', command='create')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/tests.py", line 164, in test_invalid_ids_and_missing_ids
+    self.cli(command, identifier=identifier, ok=False)
+  File "/trial/solution/tests.py", line 66, in cli
+    self.assertIn("error", json.loads(result.stderr))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+ERROR: test_invalid_ids_and_missing_ids (__main__.ContractTests.test_invalid_ids_and_missing_ids) (identifier='-x', command='verify')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/tests.py", line 164, in test_invalid_ids_and_missing_ids
+    self.cli(command, identifier=identifier, ok=False)
+  File "/trial/solution/tests.py", line 66, in cli
+    self.assertIn("error", json.loads(result.stderr))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+ERROR: test_invalid_ids_and_missing_ids (__main__.ContractTests.test_invalid_ids_and_missing_ids) (identifier='-x', command='restore')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/tests.py", line 164, in test_invalid_ids_and_missing_ids
+    self.cli(command, identifier=identifier, ok=False)
+  File "/trial/solution/tests.py", line 66, in cli
+    self.assertIn("error", json.loads(result.stderr))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+ERROR: test_special_files_are_rejected (__main__.ContractTests.test_special_files_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/tests.py", line 248, in test_special_files_are_rejected
+    sock.bind(str(sock_path))
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 14 tests in 4.911s
+
+FAILED (errors=4)

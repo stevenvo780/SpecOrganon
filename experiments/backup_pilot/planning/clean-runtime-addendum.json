@@ -1,0 +1,52 @@
+{
+  "registered_at": "2026-10-04T01:20:04.832395+00:00",
+  "registration": "post-freeze supplemental diagnostic, before inspection of pilot outcomes",
+  "generations_closed_at_registration": 14,
+  "pilot_outcomes_inspected": false,
+  "reason": "Actual frozen evaluator uses /opt/specorganon/.venv/bin/python with installed site enabled. Contract already requires Python3.12 standard library; runtime alone is insufficient to prove full dependency policy.",
+  "primary_protocol_changed": false,
+  "primary_scores_replaced": false,
+  "coverage": {
+    "runs": 18,
+    "stages_per_run": [
+      1,
+      2
+    ],
+    "expected_observations": 36,
+    "arms": [
+      "N",
+      "S",
+      "T"
+    ],
+    "selective_winner_only_check": false
+  },
+  "candidate_source": "Each frozen stage artifact/solution, matched to artifact receipt hashes. No repairs or model feedback.",
+  "runtime": {
+    "image_id": "sha256:8cc583d5518eb0193f0f1dbf6f7c9bb41b8a8054d953fd20b49d0632848bed58",
+    "base_image_id": "sha256:a1911c4ddadc0f60e7fdaba294e8eefa75c08882699c8bffc9814dcd7d3a1cee",
+    "evaluator_sha256": "526d15b96a8f08c223d0a4ef49a9113c62831eceeba2fd1258d8743fe6dbbc83",
+    "entry_sha256": "b914a8be2bb2d94f7d6fceb7b581ec8724064404ff3dcccbfb1c104e42db2862",
+    "flags": [
+      "-E",
+      "-s",
+      "-S",
+      "-B"
+    ],
+    "candidate_uid": 1000,
+    "network": "none",
+    "auth_volume": false,
+    "read_only_candidate": true
+  },
+  "workloads": "Use original per-row variant, stage and workload_seed. Preserve original20/22 check names, denominators and critical/inconclusive flags.",
+  "missing_product": "Explicit missing-product observation, primary failure retained. Never silently omit from arm denominators or claim dependency compliance.",
+  "infrastructure_failure": "Unknown supplemental result with receipt/error, never quality zero or favorable automatic rerun.",
+  "resource_reporting": "Separate post-campaign observer time, no model tokens; do not substitute runtime timings for frozen primary timings.",
+  "interpretation": "Exploratory robustness check using a second common runtime; report alongside original scores and phase dose. It does not prove causal mechanism, field efficacy or generalization.",
+  "source_review_required": true,
+  "source_review_scope": "Review imports, vendored code and external commands before asserting standard-library-only product; disabling site packages alone is not proof of the entire dependency policy.",
+  "controls": [
+    "development/delivery-clean-controls.json",
+    "development/delivery-dependency-control/proof.json"
+  ],
+  "unchanged_goal": "Original GOAL.md remains outside this technical pilot."
+}

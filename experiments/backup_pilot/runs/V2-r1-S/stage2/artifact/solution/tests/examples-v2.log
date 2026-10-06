@@ -1,0 +1,55 @@
+Comando: /usr/local/bin/python3.12 solution/tests/examples.py
+Python: 3.12.15 (main, Oct  1 2026, 21:50:06) [GCC 12.2.0]
+Preparación: fuente V1 con bytes 0..255 y directorio vacío Unicode.
+$ /usr/local/bin/python3.12 /trial/solution/backup.py list --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo
+exit=0
+stdout: {"snapshots": []}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py create --source /trial/solution/tests/.work/examples-rxv2j2t5/source --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo --id v1 --max-bytes 100000
+exit=0
+stdout: {"id": "v1"}
+Bytes regulares tras v1: 662 <= 100000
+Preparación V2: modificación, eliminación y adición.
+$ /usr/local/bin/python3.12 /trial/solution/backup.py create --source /trial/solution/tests/.work/examples-rxv2j2t5/source --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo --id v2 --max-bytes 100000
+exit=0
+stdout: {"id": "v2"}
+Preparación V3. Repo previo: 1082 bytes; límite de rechazo: 1081.
+$ /usr/local/bin/python3.12 /trial/solution/backup.py create --source /trial/solution/tests/.work/examples-rxv2j2t5/source --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo --id v3 --max-bytes 1081
+exit=1
+stderr: {"error": "El repositorio ya ocupa 1082 bytes; l\u00edmite 1081"}
+Comprobado: rechazo sin cambios ni crecimiento residual.
+$ /usr/local/bin/python3.12 /trial/solution/backup.py create --source /trial/solution/tests/.work/examples-rxv2j2t5/source --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo --id v3 --max-bytes 100000
+exit=0
+stdout: {"id": "v3"}
+Bytes regulares tras v3: 1361 <= 100000
+$ /usr/local/bin/python3.12 /trial/solution/backup.py list --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo
+exit=0
+stdout: {"snapshots": ["v1", "v2", "v3"]}
+Fuente eliminada: verificaciones y restauraciones autosuficientes.
+$ /usr/local/bin/python3.12 /trial/solution/backup.py verify --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo --id v3
+exit=0
+stdout: {"id": "v3", "valid": true}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py restore --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo --id v3 --dest /trial/solution/tests/.work/examples-rxv2j2t5/restored-v3
+exit=0
+stdout: {"id": "v3"}
+Comprobado: v3 restaura exactamente archivos, bytes y directorios.
+$ /usr/local/bin/python3.12 /trial/solution/backup.py verify --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo --id v1
+exit=0
+stdout: {"id": "v1", "valid": true}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py restore --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo --id v1 --dest /trial/solution/tests/.work/examples-rxv2j2t5/restored-v1
+exit=0
+stdout: {"id": "v1"}
+Comprobado: v1 restaura exactamente archivos, bytes y directorios.
+$ /usr/local/bin/python3.12 /trial/solution/backup.py verify --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo --id v2
+exit=0
+stdout: {"id": "v2", "valid": true}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py restore --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo --id v2 --dest /trial/solution/tests/.work/examples-rxv2j2t5/restored-v2
+exit=0
+stdout: {"id": "v2"}
+Comprobado: v2 restaura exactamente archivos, bytes y directorios.
+$ /usr/local/bin/python3.12 /trial/solution/backup.py restore --repo /trial/solution/tests/.work/examples-rxv2j2t5/repo --id v2 --dest /trial/solution/tests/.work/examples-rxv2j2t5/restored-v1
+exit=1
+stderr: {"error": "El destino preexistente no est\u00e1 vac\u00edo"}
+Comprobado: destino no vacío conserva todos sus bytes.
+Ejemplos V2: todas las comprobaciones pasan; datos temporales eliminados.
+
+Código de salida: 0

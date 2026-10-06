@@ -1,0 +1,35 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.evaluator
+#1 transferring dockerfile: 449B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/specorganon-codex:local
+#2 DONE 0.0s
+
+#3 [internal] load build context
+#3 transferring context: 21.33kB done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/specorganon-codex:local@sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae
+#4 resolve docker.io/library/specorganon-codex:local@sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae done
+#4 CACHED
+
+#5 [2/4] COPY experiments/backup_pilot/evaluator.py /eval/evaluator.py
+#5 DONE 0.0s
+
+#6 [3/4] RUN chmod 0700 /eval /eval/evaluator.py
+#6 DONE 0.1s
+
+#7 [4/4] WORKDIR /work
+#7 DONE 0.0s
+
+#8 exporting to image
+#8 exporting layers 0.0s done
+#8 exporting manifest sha256:95c4b540f0c57010bb477abce08188d11bc1e25d99d53ea9baa2c67736fd0a33 done
+#8 exporting config sha256:9cabf2c13a2fd1e0cc893439d313fec2bb4a1a01f14fddb6552ec4abcf29414a done
+#8 exporting attestation manifest sha256:9526c3a172a4cea535599da1a01fd6595f812887e19a29f02169426787aeed4b done
+#8 exporting manifest list sha256:c28ec91ea4415100606695e5329ab3fc3631bd8fb486efd1ab9a8d340abbc1e2 done
+#8 naming to docker.io/library/specorganon-backup-evaluator:dev done
+#8 unpacking to docker.io/library/specorganon-backup-evaluator:dev 0.0s done
+#8 DONE 0.1s

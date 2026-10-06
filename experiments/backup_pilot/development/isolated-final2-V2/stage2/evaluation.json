@@ -1,0 +1,1890 @@
+{
+  "score": 1.0,
+  "checks_passed": 22,
+  "checks_total": 22,
+  "inconclusive": false,
+  "critical_failures": [],
+  "metrics": {
+    "space": 4520,
+    "create_seconds": 0.03137981200052309,
+    "restore_seconds": 0.03142613200179767
+  },
+  "details": [
+    {
+      "name": "roundtrip_create",
+      "passed": true,
+      "inconclusive": false,
+      "info": {
+        "argv": [
+          "/opt/specorganon/.venv/bin/python",
+          "/candidate/backup.py",
+          "create",
+          "--source",
+          "/work/control/roundtrip-3jayf9db/source",
+          "--repo",
+          "/work/control/roundtrip-3jayf9db/repo",
+          "--id",
+          "round-1"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "duration_seconds": 0.03137981200052309,
+        "stdout_sha256": "03296e466279a21110dc8a729e4bb490b7844d83cd8877e8b55a36a1722dd96c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 18,
+        "stderr_bytes": 0,
+        "result": {
+          "id": "round-1"
+        },
+        "stderr": ""
+      }
+    },
+    {
+      "name": "source_intact",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "roundtrip_verify",
+      "passed": true,
+      "inconclusive": false,
+      "info": {
+        "argv": [
+          "/opt/specorganon/.venv/bin/python",
+          "/candidate/backup.py",
+          "verify",
+          "--repo",
+          "/work/control/roundtrip-3jayf9db/repo",
+          "--id",
+          "round-1"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "duration_seconds": 0.03139215200280887,
+        "stdout_sha256": "c6768a0d4174af127b9ded47ce2f175926e53853c41c256624b2fa863e6fad5f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 33,
+        "stderr_bytes": 0,
+        "result": {
+          "id": "round-1",
+          "valid": true
+        },
+        "stderr": ""
+      }
+    },
+    {
+      "name": "roundtrip_match",
+      "passed": true,
+      "inconclusive": false,
+      "info": {
+        "argv": [
+          "/opt/specorganon/.venv/bin/python",
+          "/candidate/backup.py",
+          "restore",
+          "--repo",
+          "/work/control/roundtrip-3jayf9db/repo",
+          "--id",
+          "round-1",
+          "--dest",
+          "/work/control/roundtrip-3jayf9db/dest"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "duration_seconds": 0.03142613200179767,
+        "stdout_sha256": "03296e466279a21110dc8a729e4bb490b7844d83cd8877e8b55a36a1722dd96c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 18,
+        "stderr_bytes": 0,
+        "result": {
+          "id": "round-1"
+        },
+        "stderr": ""
+      }
+    },
+    {
+      "name": "roundtrip_list",
+      "passed": true,
+      "inconclusive": false,
+      "info": {
+        "argv": [
+          "/opt/specorganon/.venv/bin/python",
+          "/candidate/backup.py",
+          "list",
+          "--repo",
+          "/work/control/roundtrip-3jayf9db/repo"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "duration_seconds": 0.031395621997944545,
+        "stdout_sha256": "6dab36f782175d2d1bb3d05151a815e75275dfe664e60b484714059e1681c503",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 27,
+        "stderr_bytes": 0,
+        "result": {
+          "snapshots": [
+            "round-1"
+          ]
+        },
+        "stderr": ""
+      }
+    },
+    {
+      "name": "list_empty",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "version_snapshots",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "duplicate_id_mutation",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "invalid_ids",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "nonexistent_id",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "overlap_rejected",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "symlink_source",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "symlink_dest",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "symlink_repo",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "special_files",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "snapshot_corruption",
+      "passed": true,
+      "inconclusive": false,
+      "info": {
+        "mutations": 12,
+        "detected": 12,
+        "failures": []
+      }
+    },
+    {
+      "name": "sigkill_interrupt_intact",
+      "passed": true,
+      "inconclusive": false,
+      "info": {
+        "argv": [
+          "/opt/specorganon/.venv/bin/python",
+          "/candidate/backup.py",
+          "create",
+          "--source",
+          "/work/control/crash-0xvvdo3b/source",
+          "--repo",
+          "/work/control/crash-0xvvdo3b/repo",
+          "--id",
+          "interrupted"
+        ],
+        "exit_code": -9,
+        "timed_out": false,
+        "duration_seconds": 0.053144785000768024,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 0,
+        "stderr_bytes": 0,
+        "result": null,
+        "stderr": ""
+      }
+    },
+    {
+      "name": "sigkill_recovery",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    },
+    {
+      "name": "symlink_snapshot",
+      "passed": true,
+      "inconclusive": false,
+      "info": {
+        "verify": {
+          "argv": [
+            "/opt/specorganon/.venv/bin/python",
+            "/candidate/backup.py",
+            "verify",
+            "--repo",
+            "/work/control/snapshot-links-zkwtj18h/repo",
+            "--id",
+            "linked"
+          ],
+          "exit_code": 1,
+          "timed_out": false,
+          "duration_seconds": 0.03139819199714111,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "526cfdc3102740bcd5f5fce03fbbe69897deddf1510b8685ae17fb2f3a9cd375",
+          "stdout_bytes": 0,
+          "stderr_bytes": 45,
+          "result": null,
+          "stderr": "special files and symlinks are not supported\n"
+        },
+        "restore": {
+          "argv": [
+            "/opt/specorganon/.venv/bin/python",
+            "/candidate/backup.py",
+            "restore",
+            "--repo",
+            "/work/control/snapshot-links-zkwtj18h/repo",
+            "--id",
+            "linked",
+            "--dest",
+            "/work/control/snapshot-links-zkwtj18h/dest"
+          ],
+          "exit_code": 1,
+          "timed_out": false,
+          "duration_seconds": 0.03142860300067696,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "526cfdc3102740bcd5f5fce03fbbe69897deddf1510b8685ae17fb2f3a9cd375",
+          "stdout_bytes": 0,
+          "stderr_bytes": 45,
+          "result": null,
+          "stderr": "special files and symlinks are not supported\n"
+        }
+      }
+    },
+    {
+      "name": "max_bytes_high",
+      "passed": true,
+      "inconclusive": false,
+      "info": {
+        "argv": [
+          "/opt/specorganon/.venv/bin/python",
+          "/candidate/backup.py",
+          "create",
+          "--source",
+          "/work/control/quota-__07s76a/source",
+          "--repo",
+          "/work/control/quota-__07s76a/repo",
+          "--id",
+          "high",
+          "--max-bytes",
+          "1048576"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "duration_seconds": 0.03140519199951086,
+        "stdout_sha256": "f092cc001b2987c3d58dd1e90d440cf023665a4f0c6d2cd6f76d89135ea71852",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 15,
+        "stderr_bytes": 0,
+        "result": {
+          "id": "high"
+        },
+        "stderr": ""
+      }
+    },
+    {
+      "name": "max_bytes_low",
+      "passed": true,
+      "inconclusive": false,
+      "info": {
+        "argv": [
+          "/opt/specorganon/.venv/bin/python",
+          "/candidate/backup.py",
+          "create",
+          "--source",
+          "/work/control/quota-__07s76a/source",
+          "--repo",
+          "/work/control/quota-__07s76a/repo",
+          "--id",
+          "low",
+          "--max-bytes",
+          "1"
+        ],
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_seconds": 0.03140394200090668,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "40c4e21dfff51cff63d56b3f51a826070456310268dbe319c7025c9c2d007e3f",
+        "stdout_bytes": 0,
+        "stderr_bytes": 23,
+        "result": null,
+        "stderr": "storage limit exceeded\n"
+      }
+    },
+    {
+      "name": "dest_protected",
+      "passed": true,
+      "inconclusive": false,
+      "info": null
+    }
+  ],
+  "receipts": [
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "list",
+        "--repo",
+        "/work/control/roundtrip-3jayf9db/repo"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.031398022001667414,
+      "stdout_sha256": "3e805d143830ab38523b9372faade1947076180414afb06a0cf07bc1eaa987a6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 18,
+      "stderr_bytes": 0,
+      "result": {
+        "snapshots": []
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/roundtrip-3jayf9db/source",
+        "--repo",
+        "/work/control/roundtrip-3jayf9db/repo",
+        "--id",
+        "round-1"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03137981200052309,
+      "stdout_sha256": "03296e466279a21110dc8a729e4bb490b7844d83cd8877e8b55a36a1722dd96c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 18,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "round-1"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/roundtrip-3jayf9db/repo",
+        "--id",
+        "round-1"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03139215200280887,
+      "stdout_sha256": "c6768a0d4174af127b9ded47ce2f175926e53853c41c256624b2fa863e6fad5f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 33,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "round-1",
+        "valid": true
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/roundtrip-3jayf9db/repo",
+        "--id",
+        "round-1",
+        "--dest",
+        "/work/control/roundtrip-3jayf9db/dest"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03142613200179767,
+      "stdout_sha256": "03296e466279a21110dc8a729e4bb490b7844d83cd8877e8b55a36a1722dd96c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 18,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "round-1"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "list",
+        "--repo",
+        "/work/control/roundtrip-3jayf9db/repo"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.031395621997944545,
+      "stdout_sha256": "6dab36f782175d2d1bb3d05151a815e75275dfe664e60b484714059e1681c503",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 27,
+      "stderr_bytes": 0,
+      "result": {
+        "snapshots": [
+          "round-1"
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/versions-pc1v3a60/source",
+        "--repo",
+        "/work/control/versions-pc1v3a60/repo",
+        "--id",
+        "v0"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03139681199900224,
+      "stdout_sha256": "1369dbf21eaefc9393fb5cf41a9f550e3cc44dff203c97ea5345a5ea07fd1a50",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 13,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "v0"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/versions-pc1v3a60/source",
+        "--repo",
+        "/work/control/versions-pc1v3a60/repo",
+        "--id",
+        "v1"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03138504199887393,
+      "stdout_sha256": "44a611ba818f1d43bfca1de70fa5faf140818c1318fbb90c626c3541a9c297ec",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 13,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "v1"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/versions-pc1v3a60/source",
+        "--repo",
+        "/work/control/versions-pc1v3a60/repo",
+        "--id",
+        "v2"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03138932300134911,
+      "stdout_sha256": "64784e45a0c9d2163480f9c76b09da32cef9a1c11a40ed24df221cadbc7c574b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 13,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "v2"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/versions-pc1v3a60/repo",
+        "--id",
+        "v0",
+        "--dest",
+        "/work/control/versions-pc1v3a60/dest-v0"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.031390642001497326,
+      "stdout_sha256": "1369dbf21eaefc9393fb5cf41a9f550e3cc44dff203c97ea5345a5ea07fd1a50",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 13,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "v0"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/versions-pc1v3a60/repo",
+        "--id",
+        "v1",
+        "--dest",
+        "/work/control/versions-pc1v3a60/dest-v1"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03139347199976328,
+      "stdout_sha256": "44a611ba818f1d43bfca1de70fa5faf140818c1318fbb90c626c3541a9c297ec",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 13,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "v1"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/versions-pc1v3a60/repo",
+        "--id",
+        "v2",
+        "--dest",
+        "/work/control/versions-pc1v3a60/dest-v2"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03134023099846672,
+      "stdout_sha256": "64784e45a0c9d2163480f9c76b09da32cef9a1c11a40ed24df221cadbc7c574b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 13,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "v2"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "list",
+        "--repo",
+        "/work/control/versions-pc1v3a60/repo"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03140594200158375,
+      "stdout_sha256": "57e66efa3801dba320264de7cb171a8ece3955ea52cfb26f295186f10eeaa415",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 34,
+      "stderr_bytes": 0,
+      "result": {
+        "snapshots": [
+          "v0",
+          "v1",
+          "v2"
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/rejections-nhxfgqz9/source",
+        "--repo",
+        "/work/control/rejections-nhxfgqz9/repo",
+        "--id",
+        "existing"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.031382051998662064,
+      "stdout_sha256": "577c0146d19d8def9acfaeb3165d6d381ab01fc005f973bf0f5456aa20cd72f8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 19,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "existing"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/rejections-nhxfgqz9/source",
+        "--repo",
+        "/work/control/rejections-nhxfgqz9/repo",
+        "--id",
+        "existing"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03141175199925783,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "47c6030358abe6042727334a8e877da53e62966b1fbd769e8e500269a930daa4",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot ID already exists\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/rejections-nhxfgqz9/source",
+        "--repo",
+        "/work/control/rejections-nhxfgqz9/repo",
+        "--id",
+        "-bad"
+      ],
+      "exit_code": 2,
+      "timed_out": false,
+      "duration_seconds": 0.03139088199895923,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "482cc4b237f4315c96a5e14f1bf86bcefa6cc8c940a15985b76274057c32614e",
+      "stdout_bytes": 0,
+      "stderr_bytes": 175,
+      "result": null,
+      "stderr": "usage: backup.py create [-h] --repo REPO --id ID --source SOURCE\n                        [--max-bytes MAX_BYTES]\nbackup.py create: error: argument --id: expected one argument\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/rejections-nhxfgqz9/source",
+        "--repo",
+        "/work/control/rejections-nhxfgqz9/repo",
+        "--id",
+        "../escape"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.031405752000864595,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "ede68d19d7041725bfc03f12763db32fa5e8b24bfbe8ab23ef865c58c6f1f784",
+      "stdout_bytes": 0,
+      "stderr_bytes": 20,
+      "result": null,
+      "stderr": "invalid snapshot ID\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/rejections-nhxfgqz9/source",
+        "--repo",
+        "/work/control/rejections-nhxfgqz9/repo",
+        "--id",
+        "a!b"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138235199730843,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "ede68d19d7041725bfc03f12763db32fa5e8b24bfbe8ab23ef865c58c6f1f784",
+      "stdout_bytes": 0,
+      "stderr_bytes": 20,
+      "result": null,
+      "stderr": "invalid snapshot ID\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/rejections-nhxfgqz9/source",
+        "--repo",
+        "/work/control/rejections-nhxfgqz9/repo",
+        "--id",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138326199768926,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "ede68d19d7041725bfc03f12763db32fa5e8b24bfbe8ab23ef865c58c6f1f784",
+      "stdout_bytes": 0,
+      "stderr_bytes": 20,
+      "result": null,
+      "stderr": "invalid snapshot ID\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/rejections-nhxfgqz9/source",
+        "--repo",
+        "/work/control/rejections-nhxfgqz9/repo",
+        "--id",
+        ""
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138284200031194,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "ede68d19d7041725bfc03f12763db32fa5e8b24bfbe8ab23ef865c58c6f1f784",
+      "stdout_bytes": 0,
+      "stderr_bytes": 20,
+      "result": null,
+      "stderr": "invalid snapshot ID\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/rejections-nhxfgqz9/repo",
+        "--id",
+        "missing"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.031409071998496074,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "888091dca33976ad0fc1d2a653a0d02b126609973f3634a00c2a4eb10694b399",
+      "stdout_bytes": 0,
+      "stderr_bytes": 23,
+      "result": null,
+      "stderr": "snapshot is incomplete\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/rejections-nhxfgqz9/repo",
+        "--id",
+        "missing",
+        "--dest",
+        "/work/control/rejections-nhxfgqz9/dest"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.031406271999003366,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "888091dca33976ad0fc1d2a653a0d02b126609973f3634a00c2a4eb10694b399",
+      "stdout_bytes": 0,
+      "stderr_bytes": 23,
+      "result": null,
+      "stderr": "snapshot is incomplete\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/rejections-nhxfgqz9/repo",
+        "--id",
+        "existing",
+        "--dest",
+        "/work/control/rejections-nhxfgqz9/protected"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03135970099901897,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "aa7f2eded97945d21f979a6cac5204b6dafe7d8d33a2a6e9a5805efca56c8c32",
+      "stdout_bytes": 0,
+      "stderr_bytes": 25,
+      "result": null,
+      "stderr": "destination is not empty\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/boundaries-8satlz8g/source",
+        "--repo",
+        "/work/control/boundaries-8satlz8g/source",
+        "--id",
+        "overlap"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03139118200124358,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5fcc5f1984680abf07eac8af3a48bc3174111f7974e0b2be54a0c3599cd52099",
+      "stdout_bytes": 0,
+      "stderr_bytes": 24,
+      "result": null,
+      "stderr": "source and repo overlap\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/boundaries-8satlz8g/source",
+        "--repo",
+        "/work/control/boundaries-8satlz8g/source/nested-repo",
+        "--id",
+        "overlap"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138070200293441,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5fcc5f1984680abf07eac8af3a48bc3174111f7974e0b2be54a0c3599cd52099",
+      "stdout_bytes": 0,
+      "stderr_bytes": 24,
+      "result": null,
+      "stderr": "source and repo overlap\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/boundaries-8satlz8g/source",
+        "--repo",
+        "/work/control/boundaries-8satlz8g",
+        "--id",
+        "overlap"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03139004200056661,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5fcc5f1984680abf07eac8af3a48bc3174111f7974e0b2be54a0c3599cd52099",
+      "stdout_bytes": 0,
+      "stderr_bytes": 24,
+      "result": null,
+      "stderr": "source and repo overlap\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/boundaries-8satlz8g/source",
+        "--repo",
+        "/work/control/boundaries-8satlz8g/repo",
+        "--id",
+        "linked"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03139590200225939,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "526cfdc3102740bcd5f5fce03fbbe69897deddf1510b8685ae17fb2f3a9cd375",
+      "stdout_bytes": 0,
+      "stderr_bytes": 45,
+      "result": null,
+      "stderr": "special files and symlinks are not supported\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/boundaries-8satlz8g/source",
+        "--repo",
+        "/work/control/boundaries-8satlz8g/repo-link",
+        "--id",
+        "linked"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.031390742002258776,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "a7779fb1ab5782c0fe6e49f2ef67a5d9851fb8f939dc9986ab3c82529b372d27",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "symlinks are not supported\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/boundaries-8satlz8g/source",
+        "--repo",
+        "/work/control/boundaries-8satlz8g/repo",
+        "--id",
+        "good"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03137584300202434,
+      "stdout_sha256": "a772e71396dfd92e2ac150e3042e4dc099d15ac346740c2bd2fba4caa2aa5817",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 15,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "good"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/boundaries-8satlz8g/repo",
+        "--id",
+        "good",
+        "--dest",
+        "/work/control/boundaries-8satlz8g/dest-link"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03136805199756054,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "a7779fb1ab5782c0fe6e49f2ef67a5d9851fb8f939dc9986ab3c82529b372d27",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "symlinks are not supported\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/boundaries-8satlz8g/source",
+        "--repo",
+        "/work/control/boundaries-8satlz8g/special-repo",
+        "--id",
+        "special"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138030300033279,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "526cfdc3102740bcd5f5fce03fbbe69897deddf1510b8685ae17fb2f3a9cd375",
+      "stdout_bytes": 0,
+      "stderr_bytes": 45,
+      "result": null,
+      "stderr": "special files and symlinks are not supported\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/snapshot-links-zkwtj18h/source",
+        "--repo",
+        "/work/control/snapshot-links-zkwtj18h/repo",
+        "--id",
+        "linked"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03137088199946447,
+      "stdout_sha256": "2c7a22cfb9f890d714333aa08d66f91bb339f2480cfd1708e6bc560193ea6fb3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 17,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "linked"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/snapshot-links-zkwtj18h/repo",
+        "--id",
+        "linked"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03139819199714111,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "526cfdc3102740bcd5f5fce03fbbe69897deddf1510b8685ae17fb2f3a9cd375",
+      "stdout_bytes": 0,
+      "stderr_bytes": 45,
+      "result": null,
+      "stderr": "special files and symlinks are not supported\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/snapshot-links-zkwtj18h/repo",
+        "--id",
+        "linked",
+        "--dest",
+        "/work/control/snapshot-links-zkwtj18h/dest"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03142860300067696,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "526cfdc3102740bcd5f5fce03fbbe69897deddf1510b8685ae17fb2f3a9cd375",
+      "stdout_bytes": 0,
+      "stderr_bytes": 45,
+      "result": null,
+      "stderr": "special files and symlinks are not supported\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/corruption-9vidoy12/source",
+        "--repo",
+        "/work/control/corruption-9vidoy12/repo",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03138765200128546,
+      "stdout_sha256": "396359cfb4cef600f5549bb94ce1b81494c669bdd7e5736510672f3ccd4136b7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 18,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "corrupt"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-0",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03136624200124061,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-0",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-0"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.031403442000737414,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-1",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03135971200026688,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-1",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-1"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138309200221556,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-2",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.0313799020004808,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-2",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-2"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.0313629709999077,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-3",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.0314007919987489,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-3",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-3"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03142007299902616,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-4",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.031401241998537444,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-4",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-4"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.031379241998365615,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-5",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138116199988872,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-5",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-5"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138501200010069,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-6",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03137952199904248,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-6",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-6"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138006199878873,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-7",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138699199917028,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-7",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-7"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138117200069246,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-8",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03136656199785648,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-8",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-8"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.0313930820011592,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-9",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.031463082999835024,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-9",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-9"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.031418463000591146,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "bffa82fde0cbf10187bc2fdefdd55f01c3b86e41e9bd7cf93362f1cd384da79c",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "snapshot checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-10",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.031378002000565175,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "8090b38db69992c6cf48e1961ba27d3187d44e19465aad473f5d3306c8a1d339",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "metadata checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-10",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-10"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138838199811289,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "8090b38db69992c6cf48e1961ba27d3187d44e19465aad473f5d3306c8a1d339",
+      "stdout_bytes": 0,
+      "stderr_bytes": 27,
+      "result": null,
+      "stderr": "metadata checksum mismatch\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-11",
+        "--id",
+        "corrupt"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03138502200090443,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "afb52f1ad8ef3736b2bae2e9aefdcdc6b53e3fe36283df2b1bdd79a5e419e09e",
+      "stdout_bytes": 0,
+      "stderr_bytes": 71,
+      "result": null,
+      "stderr": "'utf-8' codec can't decode byte 0x9d in position 0: invalid start byte\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/corruption-9vidoy12/copy-11",
+        "--id",
+        "corrupt",
+        "--dest",
+        "/work/control/corruption-9vidoy12/restore-11"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03133948200047598,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "afb52f1ad8ef3736b2bae2e9aefdcdc6b53e3fe36283df2b1bdd79a5e419e09e",
+      "stdout_bytes": 0,
+      "stderr_bytes": 71,
+      "result": null,
+      "stderr": "'utf-8' codec can't decode byte 0x9d in position 0: invalid start byte\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/crash-0xvvdo3b/source",
+        "--repo",
+        "/work/control/crash-0xvvdo3b/repo",
+        "--id",
+        "previous"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03137712199895759,
+      "stdout_sha256": "b07f0addec120e09ab0a60974bac12fb8d7ff1a946e48044ad0ae9a70d5ecc90",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 19,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "previous"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/crash-0xvvdo3b/source",
+        "--repo",
+        "/work/control/crash-0xvvdo3b/repo",
+        "--id",
+        "interrupted"
+      ],
+      "exit_code": -9,
+      "timed_out": false,
+      "duration_seconds": 0.053144785000768024,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "result": null,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/crash-0xvvdo3b/repo",
+        "--id",
+        "previous"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03139548199760611,
+      "stdout_sha256": "a0229f6870aa0769cc3472463468edee17fdd1f997e5bbf6c69f1a79c016aa36",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 34,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "previous",
+        "valid": true
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/crash-0xvvdo3b/repo",
+        "--id",
+        "previous",
+        "--dest",
+        "/work/control/crash-0xvvdo3b/previous-restored"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03136728199751815,
+      "stdout_sha256": "b07f0addec120e09ab0a60974bac12fb8d7ff1a946e48044ad0ae9a70d5ecc90",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 19,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "previous"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "list",
+        "--repo",
+        "/work/control/crash-0xvvdo3b/repo"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03137149099711678,
+      "stdout_sha256": "a3980a120c755b46eec0eeea2d24b28ebf4c02e309801a1c5a646095e32b156c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 28,
+      "stderr_bytes": 0,
+      "result": {
+        "snapshots": [
+          "previous"
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/crash-0xvvdo3b/source",
+        "--repo",
+        "/work/control/crash-0xvvdo3b/repo",
+        "--id",
+        "interrupted"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.1636404329983634,
+      "stdout_sha256": "0fcb00bf44c015cb406abf64df1bc72275714733aa4dd164d2c7dc12520d6006",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 22,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "interrupted"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/crash-0xvvdo3b/repo",
+        "--id",
+        "interrupted"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.11353167700144695,
+      "stdout_sha256": "d7cf6a2d5eb5b78edf34c502608836b889f46ce553c54b60947e28b3b94427cc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 37,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "interrupted",
+        "valid": true
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "restore",
+        "--repo",
+        "/work/control/crash-0xvvdo3b/repo",
+        "--id",
+        "interrupted",
+        "--dest",
+        "/work/control/crash-0xvvdo3b/retry-restored"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.16357971199977328,
+      "stdout_sha256": "0fcb00bf44c015cb406abf64df1bc72275714733aa4dd164d2c7dc12520d6006",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 22,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "interrupted"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/quota-__07s76a/source",
+        "--repo",
+        "/work/control/quota-__07s76a/repo",
+        "--id",
+        "high",
+        "--max-bytes",
+        "1048576"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03140519199951086,
+      "stdout_sha256": "f092cc001b2987c3d58dd1e90d440cf023665a4f0c6d2cd6f76d89135ea71852",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 15,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "high"
+      },
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "create",
+        "--source",
+        "/work/control/quota-__07s76a/source",
+        "--repo",
+        "/work/control/quota-__07s76a/repo",
+        "--id",
+        "low",
+        "--max-bytes",
+        "1"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_seconds": 0.03140394200090668,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "40c4e21dfff51cff63d56b3f51a826070456310268dbe319c7025c9c2d007e3f",
+      "stdout_bytes": 0,
+      "stderr_bytes": 23,
+      "result": null,
+      "stderr": "storage limit exceeded\n"
+    },
+    {
+      "argv": [
+        "/opt/specorganon/.venv/bin/python",
+        "/candidate/backup.py",
+        "verify",
+        "--repo",
+        "/work/control/quota-__07s76a/repo",
+        "--id",
+        "high"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.03141539299758733,
+      "stdout_sha256": "4ef411461eb84110245deaef6538e0871d9359c75190d07fbd35a49dbd014b93",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 30,
+      "stderr_bytes": 0,
+      "result": {
+        "id": "high",
+        "valid": true
+      },
+      "stderr": ""
+    }
+  ],
+  "workload_sha256": "0d5fbc3d37739514202976493d0c0dbb10ca072cb85a42bbb8386dead495b497",
+  "isolation": {
+    "candidate_uid": 1000,
+    "development_only": false
+  }
+}

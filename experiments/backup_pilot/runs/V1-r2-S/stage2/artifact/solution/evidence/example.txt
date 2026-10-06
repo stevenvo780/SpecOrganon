@@ -1,0 +1,36 @@
+COMMAND: ['/usr/local/bin/python3.12', 'solution/tests/example.py']
+PYTHON: 3.12.15 (main, Oct  1 2026, 21:50:06) [GCC 12.2.0]
+EXIT: 0
+STDOUT:
+$ /usr/local/bin/python3.12 /trial/solution/backup.py list --repo /trial/solution/tests/example-v1-1y8d8t5y/repo
+exit=0
+stdout: {"snapshots":[]}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py create --source /trial/solution/tests/example-v1-1y8d8t5y/fuente --repo /trial/solution/tests/example-v1-1y8d8t5y/repo --id V1-demo
+exit=0
+stdout: {"id":"V1-demo"}
+CHECK: fuente intacta
+$ /usr/local/bin/python3.12 /trial/solution/backup.py verify --repo /trial/solution/tests/example-v1-1y8d8t5y/repo --id V1-demo
+exit=0
+stdout: {"id":"V1-demo","valid":true}
+CHECK: fuente retirada antes de restaurar
+$ /usr/local/bin/python3.12 /trial/solution/backup.py restore --repo /trial/solution/tests/example-v1-1y8d8t5y/repo --id V1-demo --dest /trial/solution/tests/example-v1-1y8d8t5y/restaurado
+exit=0
+stdout: {"id":"V1-demo"}
+CHECK: árbol, directorios vacíos y bytes restaurados exactamente
+$ /usr/local/bin/python3.12 /trial/solution/backup.py list --repo /trial/solution/tests/example-v1-1y8d8t5y/repo
+exit=0
+stdout: {"snapshots":["V1-demo"]}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py restore --repo /trial/solution/tests/example-v1-1y8d8t5y/repo --id V1-demo --dest /trial/solution/tests/example-v1-1y8d8t5y/restaurado
+exit=1
+stderr: error: destination is not empty
+CHECK: destino no vacío preservado
+$ /usr/local/bin/python3.12 /trial/solution/backup.py verify --repo /trial/solution/tests/example-v1-1y8d8t5y/repo --id V1-demo
+exit=1
+stderr: error: file checksum/size mismatch: notas.txt
+$ /usr/local/bin/python3.12 /trial/solution/backup.py restore --repo /trial/solution/tests/example-v1-1y8d8t5y/repo --id V1-demo --dest /trial/solution/tests/example-v1-1y8d8t5y/rechazado
+exit=1
+stderr: error: file checksum/size mismatch: notas.txt
+CHECK: corrupción rechazada sin publicar destino
+EXAMPLE PASS
+
+STDERR:

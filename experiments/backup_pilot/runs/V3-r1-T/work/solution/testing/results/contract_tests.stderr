@@ -1,0 +1,51 @@
+test_concurrent_creates_same_id (__main__.BackupContract.test_concurrent_creates_same_id) ... ok
+test_empty_source_and_existing_empty_destination (__main__.BackupContract.test_empty_source_and_existing_empty_destination) ... ok
+test_every_regular_snapshot_file_corrupted_or_deleted (__main__.BackupContract.test_every_regular_snapshot_file_corrupted_or_deleted) ... ok
+test_existing_id_not_overwritten (__main__.BackupContract.test_existing_id_not_overwritten) ... ok
+test_ids (__main__.BackupContract.test_ids) ... 
+  test_ids (__main__.BackupContract.test_ids) (id='-a') ... ERROR
+test_long_nested_and_unusual_names (__main__.BackupContract.test_long_nested_and_unusual_names) ... ok
+test_malformed_resealed_manifest (__main__.BackupContract.test_malformed_resealed_manifest) ... ok
+test_new_repo_and_missing_ids (__main__.BackupContract.test_new_repo_and_missing_ids) ... ok
+test_overlap (__main__.BackupContract.test_overlap) ... ok
+test_protected_nonempty_destination (__main__.BackupContract.test_protected_nonempty_destination) ... ok
+test_roundtrip_autosufficient_and_source_unchanged (__main__.BackupContract.test_roundtrip_autosufficient_and_source_unchanged) ... ok
+test_sigkill_real_create_recovery (__main__.BackupContract.test_sigkill_real_create_recovery) ... ok
+test_snapshot_structure_corruption (__main__.BackupContract.test_snapshot_structure_corruption) ... ok
+test_special_files (__main__.BackupContract.test_special_files) ... ERROR
+test_symlinks_repo_dest_and_snapshot (__main__.BackupContract.test_symlinks_repo_dest_and_snapshot) ... ok
+test_symlinks_source_paths_and_ancestors (__main__.BackupContract.test_symlinks_source_paths_and_ancestors) ... ok
+test_unfinished_staging_and_incomplete_snapshot (__main__.BackupContract.test_unfinished_staging_and_incomplete_snapshot) ... ok
+test_versions_sorted_and_exact (__main__.BackupContract.test_versions_sorted_and_exact) ... ok
+
+======================================================================
+ERROR: test_ids (__main__.BackupContract.test_ids) (id='-a')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/testing/test_backup.py", line 114, in test_ids
+    self.call(cmd, bad, ok=False)
+  File "/trial/solution/testing/test_backup.py", line 65, in call
+    self.assertIn("error", json.loads(result.stderr))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+ERROR: test_special_files (__main__.BackupContract.test_special_files)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/testing/test_backup.py", line 181, in test_special_files
+    sock.bind(str(self.source / "socket"))
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 18 tests in 5.462s
+
+FAILED (errors=2)

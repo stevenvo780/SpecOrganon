@@ -1,5 +1,5 @@
 # Build docker/release/Dockerfile first. This image uses a separate, fresh profile.
-ARG SPECORGANON_IMAGE=specorganon-release:0.2.0rc2
+ARG SPECORGANON_IMAGE=specorganon-release:0.2.0rc3.dev2
 FROM node@sha256:25330af3531fb5e23318554a0aa911125b6e91b1b777edf7655501d207c067a2 AS node
 FROM ${SPECORGANON_IMAGE}
 USER root

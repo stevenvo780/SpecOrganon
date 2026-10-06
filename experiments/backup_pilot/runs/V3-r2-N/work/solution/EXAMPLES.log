@@ -1,0 +1,42 @@
+$ /usr/local/bin/python3.12 /trial/solution/backup.py list --repo /trial/backup-example-okac3w03/repo
+exit=0
+stdout: {"snapshots": []}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py create --repo /trial/backup-example-okac3w03/repo --id v1 --source /trial/backup-example-okac3w03/fuente --max-bytes 100000
+exit=0
+stdout: {"id": "v1"}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py verify --repo /trial/backup-example-okac3w03/repo --id v1
+exit=0
+stdout: {"id": "v1", "valid": true}
+Suma st_size, datos y metadata de v1: 745 bytes <= 100000
+$ /usr/local/bin/python3.12 /trial/solution/backup.py create --repo /trial/backup-example-okac3w03/repo --id v2 --source /trial/backup-example-okac3w03/fuente --max-bytes 744
+exit=1
+stderr: {"error": "El repositorio existente supera --max-bytes"}
+Rechazo: repositorio previo idéntico; sin crecimiento residual.
+$ /usr/local/bin/python3.12 /trial/solution/backup.py create --repo /trial/backup-example-okac3w03/repo --id v2 --source /trial/backup-example-okac3w03/fuente --max-bytes 100000
+exit=0
+stdout: {"id": "v2"}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py list --repo /trial/backup-example-okac3w03/repo
+exit=0
+stdout: {"snapshots": ["v1", "v2"]}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py restore --repo /trial/backup-example-okac3w03/repo --id v1 --dest /trial/backup-example-okac3w03/restaurado
+exit=0
+stdout: {"id": "v1"}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py restore --repo /trial/backup-example-okac3w03/repo --id v2 --dest '/trial/backup-example-okac3w03/segunda restauración'
+exit=0
+stdout: {"id": "v2"}
+Ambas versiones restauradas exactamente, sin la fuente original.
+$ /usr/local/bin/python3.12 /trial/solution/backup.py restore --repo /trial/backup-example-okac3w03/repo --id v2 --dest /trial/backup-example-okac3w03/restaurado
+exit=1
+stderr: {"error": "El destino preexistente no est\u00e1 vac\u00edo"}
+Destino no vacío protegido: bytes y estructura idénticos.
+$ /usr/local/bin/python3.12 /trial/solution/backup.py verify --repo /trial/backup-example-okac3w03/repo-corrupto --id v1
+exit=1
+stderr: {"error": "Manifiesto o checksum corrupto"}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py restore --repo /trial/backup-example-okac3w03/repo-corrupto --id v1 --dest /trial/backup-example-okac3w03/fallido
+exit=1
+stderr: {"error": "Manifiesto o checksum corrupto"}
+$ /usr/local/bin/python3.12 /trial/solution/backup.py list --repo /trial/backup-example-okac3w03/repo-corrupto
+exit=0
+stdout: {"snapshots": ["v2"]}
+Corrupción de metadata rechazada; ninguna restauración publicada.
+Ejemplos y comprobaciones: OK

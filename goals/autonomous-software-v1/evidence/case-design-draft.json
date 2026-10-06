@@ -1,0 +1,755 @@
+{
+  "project": {
+    "approval_policy": "local",
+    "case_id": "b9aa1128-a4ac-448b-a181-8ad316ff1d6a",
+    "created_at": "2026-10-04T23:01:05+00:00",
+    "created_by": "human:owner",
+    "domain": "desarrollo",
+    "test_gate_policy": "local_report",
+    "title": "SpecOrganon: release aut\u00f3noma reproducible para software peque\u00f1o"
+  },
+  "project_sha256": "5455b092cb5e233b6cbfe641ecdaadb24d83f8d971527f409e98f09ca6437e3b",
+  "revision": 29,
+  "approval_trust": "local_declared",
+  "approval_identity_authenticated": false,
+  "phase_review_trust": "local_declared",
+  "test_execution_trust": "local_declared",
+  "test_execution_history": [],
+  "test_observation_trust": "not_applicable",
+  "test_observation_history": [],
+  "phase_review_history": [
+    {
+      "seq": 11,
+      "phase": "frame",
+      "verdict": "accept",
+      "actor": "reviewer:codex-docker-review-01",
+      "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b",
+      "provenance": "local_declared",
+      "signature_verified": false,
+      "independent": true
+    },
+    {
+      "seq": 13,
+      "phase": "critique",
+      "verdict": "accept",
+      "actor": "reviewer:codex-docker-review-01",
+      "snapshot": "b9cdfc03682b4273694ebb7985d621ac908bbd68004e20756fc4e23bda972944",
+      "provenance": "local_declared",
+      "signature_verified": false,
+      "independent": true
+    },
+    {
+      "seq": 19,
+      "phase": "study",
+      "verdict": "accept",
+      "actor": "reviewer:gemini-docker-review-03",
+      "snapshot": "afd4fa7250218e6bf37541c1a66d1be4dfaa4f5d66f28612504445121e486f02",
+      "provenance": "local_declared",
+      "signature_verified": false,
+      "independent": true
+    }
+  ],
+  "field_attestation_trust": "not_applicable",
+  "field_attestations": [],
+  "indicator_retirement_history": [],
+  "items": {
+    "p1": {
+      "data": {},
+      "deps": {},
+      "id": "p1",
+      "kind": "problem",
+      "text": "Necesitamos una release reproducible del toolkit que permita a agentes completar el m\u00e9todo y entregar software peque\u00f1o con evidencia, documentaci\u00f3n y comparaci\u00f3n prospectiva. El piloto previo produjo buen c\u00f3digo pero no aplicaci\u00f3n completa.",
+      "version": 1,
+      "seq": 1,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "a1": {
+      "data": {},
+      "deps": {
+        "p1": 1
+      },
+      "id": "a1",
+      "kind": "actor",
+      "text": "El due\u00f1o autoriza el hito local; Codex investiga e implementa; otros agentes revisan evidencia t\u00e9cnica sin editar la soluci\u00f3n; evaluadores reservados observan la entrega. Los actores del campo alimentario quedan fuera de este hito.",
+      "version": 1,
+      "seq": 2,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "b1": {
+      "data": {},
+      "deps": {
+        "a1": 1,
+        "p1": 1
+      },
+      "id": "b1",
+      "kind": "boundary",
+      "text": "Software peque\u00f1o en este workspace, cuentas existentes y web Vercel actual. Preservar GOAL ra\u00edz, inputs congelados y entregas del piloto anterior. No contratar servicios ni fabricar aprobaci\u00f3n/campo.",
+      "version": 1,
+      "seq": 3,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "c1": {
+      "data": {},
+      "deps": {
+        "p1": 1
+      },
+      "id": "c1",
+      "kind": "concept",
+      "text": "Reproducibilidad significa fijar entorno, fuentes y procedimientos con recibos comparables; integridad significa rechazar bytes no revisados. Autonom\u00eda es trabajar dentro del mandato, no inventar autorizaci\u00f3n.",
+      "version": 1,
+      "seq": 4,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "s1": {
+      "data": {},
+      "deps": {
+        "p1": 1
+      },
+      "id": "s1",
+      "kind": "assumption",
+      "text": "Los proveedores existentes pueden permitir una comparaci\u00f3n acotada entre dos familias. Debe verificarse acceso efectivo y recursos antes del calendario; un cat\u00e1logo y una cuota no prueban una corrida.",
+      "version": 1,
+      "seq": 5,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "f1": {
+      "data": {},
+      "deps": {
+        "c1": 1,
+        "p1": 1
+      },
+      "id": "f1",
+      "kind": "frame_option",
+      "text": "Enmarcar el problema como reproducci\u00f3n estricta de la instalaci\u00f3n hist\u00f3rica: recuperar el extractor original y su entorno completo, conservando las mismas dependencias. Ventaja: correspondencia hist\u00f3rica; riesgo: disponibilidad y coste de mantener ese entorno.",
+      "version": 1,
+      "seq": 6,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "f2": {
+      "data": {},
+      "deps": {
+        "c1": 1,
+        "p1": 1
+      },
+      "id": "f2",
+      "kind": "frame_option",
+      "text": "Enmarcarlo como portabilidad revisada: separar reglas sem\u00e1nticas y perfiles de extracci\u00f3n expl\u00edcitos, validar nuevas extracciones y calificar sus diferencias. Ventaja: instalaciones actuales; riesgo: afirmar equivalencia fuera de los pasajes cotejados.",
+      "version": 1,
+      "seq": 7,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "f3": {
+      "data": {},
+      "deps": {
+        "c1": 1,
+        "p1": 1
+      },
+      "id": "f3",
+      "kind": "frame_option",
+      "text": "Enmarcarlo como entrega exclusivamente software sin PDF: aislar la funcionalidad de fuentes como opcional. Reduce dependencias pero no repara la plataforma ni cumple esta goal por s\u00ed solo.",
+      "version": 1,
+      "seq": 8,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "n1": {
+      "data": {
+        "scope": "local software release and prospective evaluation",
+        "source": "Conversaci\u00f3n del due\u00f1o, 2026-10-04: crea una goal para lograrlo"
+      },
+      "deps": {
+        "a1": 1,
+        "b1": 1,
+        "p1": 1
+      },
+      "id": "n1",
+      "kind": "norm",
+      "text": "El due\u00f1o pidi\u00f3 crear la goal para cerrar la versi\u00f3n aut\u00f3noma de software. Delega elecciones t\u00e9cnicas; exige evidencia y publicaci\u00f3n honesta, conservaci\u00f3n del piloto y separaci\u00f3n del objetivo de campo. Esta norma registra ese mandato existente, no una autorizaci\u00f3n inventada.",
+      "version": 1,
+      "seq": 9,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": true,
+      "approval_status": "local_declared",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "q1": {
+      "data": {},
+      "deps": {
+        "b1": 1,
+        "c1": 1,
+        "p1": 1
+      },
+      "id": "q1",
+      "kind": "question",
+      "text": "\u00bfUn controlador expl\u00edcito con revisi\u00f3n separada, criterios previos y recibos medidos permite cerrar un caso NUEVO de software, detectar artefactos insuficientes y reanudar sin alterar historia?",
+      "version": 1,
+      "seq": 15,
+      "author": "agent:codex",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "h1": {
+      "data": {},
+      "deps": {
+        "q1": 1,
+        "s1": 1
+      },
+      "id": "h1",
+      "kind": "hypothesis",
+      "text": "Un controlador que materialice dependencias y someta cada fase a juicio real separado puede evitar los ledgers incompletos del piloto; puede fallar por falta de evidencia, criterios vac\u00edos, revisiones superficiales o l\u00edmites de proveedor. Es una hip\u00f3tesis de factibilidad t\u00e9cnica local, no superioridad causal general.",
+      "version": 1,
+      "seq": 16,
+      "author": "agent:codex",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "pr1": {
+      "data": {
+        "comparison": "Toolkit sin controlador (estado actual/diagn\u00f3stico) frente a controlador nuevo sobre el mismo contrato local. Contrastar entrega normal, evidencia insuficiente, contradicci\u00f3n, cambio de premisa y recuperaci\u00f3n de interrupci\u00f3n. La eficacia comparativa con modelos N/S/T se medir\u00e1 despu\u00e9s, por protocolo separado; no usar el antiguo piloto como nueva evaluaci\u00f3n reservada.",
+        "measurement_start": "after accepted study review and predeclared specify criteria",
+        "method": "Antes de las mediciones nuevas, fijar requisitos, criterio y comandos. Registrar bytes, argv, salida, retorno, timeout, versiones y hashes. Revisor real en Docker con fuente RO y salida propia decide cada fase. Evaluador de controles no recibe permisos de escritura del autor. Exigir README reproducible y conservar fallos. Los 145 tests y pruebas exploratorias actuales son l\u00ednea base diagn\u00f3stica, no cumplimiento retrospectivo de este protocolo.",
+        "population": "Un caso real nuevo de release y su controlador; controles adversariales sint\u00e9ticos separados, etiquetados como tales. Ninguna intervenci\u00f3n alimentaria ni ledger del piloto backup.",
+        "status": "draft_pending_independent_study_review",
+        "stop_rule": "Cada control tiene intento y timeout fijados; un rechazo conserva la traza. No repetir una campa\u00f1a de modelos para buscar victoria. No cambiar cuenta, gastar por API ni usar resultados anteriores como nuevos.",
+        "uncertainty": "Un caso de ingenier\u00eda no estima efecto causal general. Actor local declarado no autentica identidad; revisiones pueden ser incompletas. Informar ausencia o fallos y no ajustar los criterios tras medir. Fuentes heredadas, c\u00f3digos y presupuestos se fijar\u00e1n en el protocolo comparativo antes de autor\u00edas nuevas."
+      },
+      "deps": {
+        "h1": 1,
+        "n1": 1,
+        "q1": 1
+      },
+      "id": "pr1",
+      "kind": "protocol",
+      "text": "Protocolo local prospectivo del controlador y la entrega: distinguir exploraci\u00f3n t\u00e9cnica ya observada de las mediciones nuevas posteriores a la aceptaci\u00f3n de este dise\u00f1o. La comparaci\u00f3n N/S/T requiere otro protocolo con tareas y presupuesto congelados antes de generar.",
+      "version": 1,
+      "seq": 17,
+      "author": "agent:codex",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "i1": {
+      "data": {
+        "definition": "Contar criterios prerregistrados satisfechos: recorrido real revisado, trazabilidad, prueba medida, documentaci\u00f3n, rechazo por evidencia insuficiente, contradicci\u00f3n, reapertura y recuperaci\u00f3n. Exigir veredicto separado por control; denominador 8. Una fase aceptada por etiqueta o un template no satisface el recorrido real.",
+        "metric": "local_delivery_controls_satisfied",
+        "scope": "new_local_software_controller",
+        "unit": "count"
+      },
+      "deps": {
+        "n1": 1,
+        "p1": 1,
+        "pr1": 1
+      },
+      "id": "i1",
+      "kind": "indicator",
+      "text": "Controles t\u00e9cnicos locales satisfechos, con criterio y prueba individual, sin sumarlos a una tesis general.",
+      "version": 1,
+      "seq": 18,
+      "author": "agent:codex",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "e1": {
+      "data": {
+        "date": "2026-10-05",
+        "locator": "observations[*].observation.phases; secondary-outcomes.T.{1,2}.readmes; evidence/method-diagnostic-baseline.json",
+        "method": "Inspecci\u00f3n determinista de los dos JSON persistidos y agregaci\u00f3n con denominadores; hashes registrados, sin modificar entregas.",
+        "origin": "observed",
+        "purpose": "diagnostic_baseline_not_control_fulfillment",
+        "source": "experiments/backup_pilot/analysis/method/method-report.json; analysis/secondary-outcomes.json"
+      },
+      "deps": {
+        "pr1": 1
+      },
+      "id": "e1",
+      "kind": "evidence",
+      "text": "Los doce snapshots T del piloto anterior no completaron las nueve fases; README presente 0/12. Los bloqueos observados incluyen norma sin v\u00ednculo problem/actor, indicador sin m\u00e9trica y evidencia sin origen v\u00e1lido. Son datos hist\u00f3ricos para diagnosticar la entrega, no resultados del controlador nuevo.",
+      "version": 1,
+      "seq": 21,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "inf1": {
+      "data": {
+        "classification": "hypothesis_supported_as_design_motivation_not_causal_demonstration"
+      },
+      "deps": {
+        "e1": 1,
+        "h1": 1
+      },
+      "id": "inf1",
+      "kind": "inference",
+      "text": "La disponibilidad de herramientas y artefactos no garantiz\u00f3 recorridos aceptados ni documentaci\u00f3n. Un controlador podr\u00eda hacer visibles y resolver pendientes de formato, exigir resultados medidos y entregar README; la evidencia no distingue todav\u00eda entre falta de instrucciones, l\u00edmites de tiempo, criterio sem\u00e1ntico o dificultad del modelo.",
+      "version": 1,
+      "seq": 22,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "sy1": {
+      "data": {
+        "scope": "engineering_diagnosis"
+      },
+      "deps": {
+        "e1": 1,
+        "inf1": 1,
+        "pr1": 1
+      },
+      "id": "sy1",
+      "kind": "synthesis",
+      "text": "El piloto permite localizar fallos de adherencia concretos y conservables. La imagen nueva resuelve una precondici\u00f3n t\u00e9cnica pero no prueba la intervenci\u00f3n metodol\u00f3gica. El dise\u00f1o deber\u00e1 comprobar si el circuito completo satisface criterios fijados antes de ejecutar, y preservar todo control que falle.",
+      "version": 1,
+      "seq": 23,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "u1": {
+      "data": {
+        "alternatives": [
+          "insufficient role instructions",
+          "time limits",
+          "invalid schema",
+          "semantic weakness",
+          "controller cannot correct reasoning"
+        ]
+      },
+      "deps": {
+        "e1": 1,
+        "sy1": 1
+      },
+      "id": "u1",
+      "kind": "uncertainty",
+      "text": "Un informe de doce snapshots de una sola familia no estima causalidad del nuevo dise\u00f1o. Reglas mec\u00e1nicas detectan referencias y recibos, no calidad de argumentos; identidad local no est\u00e1 autenticada; la revisi\u00f3n puede aceptar contenido insuficiente. Tiempo y tokens por soluci\u00f3n son desconocidos hasta medici\u00f3n; dinero de suscripci\u00f3n no se atribuye por tokens.",
+      "version": 1,
+      "seq": 24,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "o1": {
+      "data": {
+        "affected_actors": "author and reviewer carry sequencing/document checks",
+        "cost_measurement": "unknown",
+        "estimated_engineering_effort": "low",
+        "software_change": "none"
+      },
+      "deps": {
+        "n1": 1,
+        "sy1": 1
+      },
+      "id": "o1",
+      "kind": "option",
+      "text": "Conservar CLI/MCP y runner actuales, sin software adicional: dar instrucciones expl\u00edcitas por fase y exigir lectura de next-task, README y recibos. Menor superficie nueva y revisi\u00f3n humana/agente m\u00e1s transparente; depende de que cada agente cumpla instrucciones, el fallo documentado del piloto.",
+      "version": 1,
+      "seq": 25,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "o2": {
+      "data": {
+        "affected_actors": "author produces artifacts, separate reviewer judges, controller records evidence",
+        "cost_measurement": "unknown",
+        "estimated_engineering_effort": "medium",
+        "scope": "small trusted local software cases",
+        "software_change": "external orchestration around existing engine"
+      },
+      "deps": {
+        "n1": 1,
+        "sy1": 1
+      },
+      "id": "o2",
+      "kind": "option",
+      "text": "Controlador externo acotado: el motor conserva estado/compuertas; el controlador despacha tareas concretas, captura argv/streams/hash y entrega snapshots inmutables al revisor independiente. Publica una entrega s\u00f3lo si las nueve fases aceptadas vigentes, trazas, recibos y documentaci\u00f3n cumplen criterios previos. Reanudaci\u00f3n consume checkpoints sin repetir trabajos cerrados. El controlador no inventa veredictos ni consentimiento.",
+      "version": 1,
+      "seq": 26,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "o3": {
+      "data": {
+        "affected_actors": "all toolkit domains and existing cases",
+        "cost_measurement": "unknown",
+        "estimated_engineering_effort": "high",
+        "software_change": "core engine schema and universal release gates"
+      },
+      "deps": {
+        "n1": 1,
+        "sy1": 1
+      },
+      "id": "o3",
+      "kind": "option",
+      "text": "Ampliar el motor para imponer campos y documentaci\u00f3n de software obligatorios en toda fase: compuertas deterministas m\u00e1s fuertes pero mayor cambio del toolkit general, riesgo de rechazar casos no software y de confundir formatos con buen razonamiento. Aun requiere revisi\u00f3n externa y ejecuci\u00f3n de pruebas.",
+      "version": 1,
+      "seq": 27,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "cmp1": {
+      "data": {
+        "dimensions": [
+          "fit_to_observed_failures",
+          "role_isolation",
+          "resume_integrity",
+          "implementation_scope",
+          "effects_on_other_domains"
+        ],
+        "measurement_status": "design_reasoning_only",
+        "money": null,
+        "preferred_candidate": "o2",
+        "tokens": null
+      },
+      "deps": {
+        "o1": 1,
+        "o2": 1,
+        "o3": 1,
+        "u1": 1
+      },
+      "id": "cmp1",
+      "kind": "comparison",
+      "text": "Comparaci\u00f3n de dise\u00f1o, sin puntuaciones medidas: o1 requiere menos ingenier\u00eda pero conserva dependencia de instrucciones; o2 reutiliza compuertas comprobadas y permite aislar roles/capturar ejecuci\u00f3n, con coste de infraestructura; o3 endurece todo el motor y puede invalidar dominios existentes sin asegurar calidad sem\u00e1ntica. Preferencia t\u00e9cnica provisional o2 para software local; o1 ser\u00e1 l\u00ednea base pertinente. Esfuerzo low/medium/high es estimaci\u00f3n, no benchmark ni coste monetario.",
+      "version": 1,
+      "seq": 28,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    },
+    "risk1": {
+      "data": {
+        "residual_risk": "Semantic reviewer error and external custody remain open; no general causal thesis conclusion."
+      },
+      "deps": {
+        "cmp1": 1,
+        "o2": 1,
+        "u1": 1
+      },
+      "id": "risk1",
+      "kind": "risk",
+      "text": "El controlador puede congelar razonamiento superficial, confiar en etiquetas locales, repetir acciones tras una interrupci\u00f3n o divulgar evaluaci\u00f3n reservada. Mitigar mediante revisor real con fuente RO, recibos de proceso, rechazo ante falta de evidencia, premisas versionadas, reanudaci\u00f3n idempotente y montajes separados. Fallos del proveedor se registran inconclusos y no disparan cambio de cuenta. El caso nuevo y controles sint\u00e9ticos conservan clasificaciones distintas.",
+      "version": 1,
+      "seq": 29,
+      "author": "agent:codex-orchestrator",
+      "stale": false,
+      "contested": false,
+      "issues": [],
+      "approved": false,
+      "approval_status": "missing",
+      "retired": false,
+      "retirement_status": "none",
+      "retirement_issues": [],
+      "retirement_history": []
+    }
+  },
+  "phases": {
+    "frame": {
+      "phase": "frame",
+      "front": "philosophy",
+      "ready": true,
+      "accepted": true,
+      "reviewed": true,
+      "independent_review": true,
+      "review_signature_verified": false,
+      "review_identity_authenticated": false,
+      "review_provenance": "local_declared",
+      "blockers": [],
+      "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b",
+      "advance_seq": 12
+    },
+    "critique": {
+      "phase": "critique",
+      "front": "philosophy",
+      "ready": true,
+      "accepted": true,
+      "reviewed": true,
+      "independent_review": true,
+      "review_signature_verified": false,
+      "review_identity_authenticated": false,
+      "review_provenance": "local_declared",
+      "blockers": [],
+      "snapshot": "b9cdfc03682b4273694ebb7985d621ac908bbd68004e20756fc4e23bda972944",
+      "advance_seq": 14
+    },
+    "study": {
+      "phase": "study",
+      "front": "science",
+      "ready": true,
+      "accepted": true,
+      "reviewed": true,
+      "independent_review": true,
+      "review_signature_verified": false,
+      "review_identity_authenticated": false,
+      "review_provenance": "local_declared",
+      "blockers": [],
+      "snapshot": "afd4fa7250218e6bf37541c1a66d1be4dfaa4f5d66f28612504445121e486f02",
+      "advance_seq": 20
+    },
+    "observe": {
+      "phase": "observe",
+      "front": "science",
+      "ready": true,
+      "accepted": false,
+      "reviewed": false,
+      "independent_review": false,
+      "review_signature_verified": false,
+      "review_identity_authenticated": false,
+      "review_provenance": "none",
+      "blockers": [],
+      "snapshot": "3deb6bf127ae9b38d08d9b2328d1284c47a795bfcbdfd4e4ef905df5f711cb93",
+      "advance_seq": null
+    },
+    "explain": {
+      "phase": "explain",
+      "front": "science",
+      "ready": false,
+      "accepted": false,
+      "reviewed": false,
+      "independent_review": false,
+      "review_signature_verified": false,
+      "review_identity_authenticated": false,
+      "review_provenance": "none",
+      "blockers": [
+        "previous phase is not currently accepted"
+      ],
+      "snapshot": "44795861649257a0a04326f5fe7e9daa8d680fa9fa1078373935a95c1302b2d7",
+      "advance_seq": null
+    },
+    "compare": {
+      "phase": "compare",
+      "front": "engineering",
+      "ready": false,
+      "accepted": false,
+      "reviewed": false,
+      "independent_review": false,
+      "review_signature_verified": false,
+      "review_identity_authenticated": false,
+      "review_provenance": "none",
+      "blockers": [
+        "previous phase is not currently accepted"
+      ],
+      "snapshot": "4a96e28f20f12bb866bbb4770119aa61fe1d7eeefc97cdf7b7f5dd0a3ee01f17",
+      "advance_seq": null
+    },
+    "specify": {
+      "phase": "specify",
+      "front": "engineering",
+      "ready": false,
+      "accepted": false,
+      "reviewed": false,
+      "independent_review": false,
+      "review_signature_verified": false,
+      "review_identity_authenticated": false,
+      "review_provenance": "none",
+      "blockers": [
+        "i1 lacks a path to evidence before specification",
+        "needs 1 valid criterion; has 0",
+        "needs 1 valid decision; has 0",
+        "needs 1 valid requirement; has 0",
+        "previous phase is not currently accepted"
+      ],
+      "snapshot": "9151c1f24392cc0293c729a66b762feb5e9121b859e9a554310b9d79018a6e7d",
+      "advance_seq": null
+    },
+    "build": {
+      "phase": "build",
+      "front": "engineering",
+      "ready": false,
+      "accepted": false,
+      "reviewed": false,
+      "independent_review": false,
+      "review_signature_verified": false,
+      "review_identity_authenticated": false,
+      "review_provenance": "none",
+      "blockers": [
+        "needs 1 valid implementation; has 0",
+        "needs 1 valid test; has 0",
+        "previous phase is not currently accepted"
+      ],
+      "snapshot": "86e7e4bf767365ad64e21192a23ea93c4e968cc2c997312ff133cfe1a00f44a2",
+      "advance_seq": null
+    },
+    "validate": {
+      "phase": "validate",
+      "front": "validation",
+      "ready": false,
+      "accepted": false,
+      "reviewed": false,
+      "independent_review": false,
+      "review_signature_verified": false,
+      "review_identity_authenticated": false,
+      "review_provenance": "none",
+      "blockers": [
+        "needs 1 valid assessment; has 0",
+        "needs 1 valid baseline; has 0",
+        "needs 1 valid result; has 0",
+        "previous phase is not currently accepted"
+      ],
+      "snapshot": "279619418846b9797270c2ef9eb1564053aaab7c194af15cfa7bc3a0a5db47d4",
+      "advance_seq": null
+    }
+  },
+  "open_challenges": []
+}

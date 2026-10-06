@@ -1,0 +1,7 @@
+FROM specorganon-codex:local
+USER root
+RUN rm -rf /opt/specorganon /opt/codex-lab
+ENV PATH="/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin" ORGANON_ROOT=""
+USER codex
+WORKDIR /trial
+ENTRYPOINT ["codex"]

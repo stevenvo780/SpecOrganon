@@ -1,0 +1,100 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Protocolo propuesto del piloto autónomo · SpecOrganon</title><style>body{margin:0;background:#f7f8f3;color:#1a3025;font:17px/1.75 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:36px 24px}h1,h2,h3{line-height:1.25}a{color:#234e3a;text-underline-offset:3px}pre{padding:18px;background:#eaf0e4;overflow:auto}code{overflow-wrap:anywhere}table{display:block;overflow:auto;border-collapse:collapse}td,th{padding:10px;border:1px solid #c7d4c0;text-align:left}blockquote{border-left:3px solid #527842;padding-left:20px}nav{display:flex;gap:20px;flex-wrap:wrap;border-bottom:1px solid #dce3d7;padding-bottom:18px}img{max-width:100%}</style><main><nav><a href="/#resultados">← Presentación y resultados</a><a href="/resultados/backup/RESULTADOS.html">Informe completo</a><a href="/resultados/backup/resultados.csv">Datos CSV</a></nav><h1>Protocolo propuesto del piloto autónomo</h1>
+<p>Estado: preparado para freeze; sin resultados de las 18 corridas. No es la matriz confirmatoria de
+GOAL.md. El dueño aceptó el experimento propuesto; decisiones técnicas delegadas.</p>
+<h2>Pregunta y límites</h2>
+<p>¿El paquete SpecOrganon mejora corrección, recuperación y adaptación al cambio
+respecto a trabajo libre y SDD bajo un único modelo/esfuerzo y recursos iguales?
+La inferencia se limita a estas tareas y versiones. Dos repeticiones y tres
+variantes de un proyecto son un piloto pequeño, no prueba de generalización.
+Comparar este paquete no identifica por sí solo la causa filosófica de una mejora.</p>
+<h2>Diseño</h2>
+<p>18 corridas: tres variantes × tres brazos (N libre, S SDD, T SpecOrganon) × dos
+repeticiones. Cada una comienza con archivos y sesión de Codex nuevos, sin reutilizar
+soluciones o conversaciones. Orden balanceado por bloque variante/repetición,
+con seed fijado antes de la primera corrida. Única cuenta: sesión autenticada en
+el volumen Docker codex-home; nunca copiar auth.json o renovar perfiles duplicados.
+Modelo configurado gpt-6.1-sol, esfuerzo high, Codex CLI 0.160.0; acceso real comprobado. El proveedor no expone aquí un snapshot inmutable del modelo: no se afirma identidad exacta de pesos entre peticiones.</p>
+<p>Dos etapas por corrida. Etapa 1: contrato base. Etapa 2: cambio --max-bytes.
+Cada etapa tiene un techo de 10 minutos para autor y trabajo exclusivo del método: N/S autor 600 segundos, T autor 480 + auditor metodológico independiente 120. Todos reciben además 120 segundos de revisión funcional neutral, posterior al cierre y sin corrección dentro de esa etapa. Límite duro por proceso,
+sin reintento por una entrega desfavorable. Si una API rechaza o agota cuota, se
+conserva el intento como error de infraestructura, no como calidad medida ni cero
+uso; reanudar requiere un registro explícito, sin cambio automático de cuenta/modelo.
+Todos reciben el mismo límite y sus respectivos costes de método cuentan dentro.
+Tokens se registran cuando la CLI los informa; no hay límite de tokens efectivo
+verificado en Codex CLI, por lo que NO se declarará paridad exacta de tokens.
+La captura de artefactos limita cada archivo a 16 MiB y el árbol total a 128 MiB, conserva omisiones y no sigue symlinks; no es un control de tokens. Contenedores de generación: CPU 1, RAM 1 GiB, 128 procesos, usuario 1000 sin capabilities. Evaluación: CPU 1, RAM 768 MiB, 64 procesos, tmpfs 512 MiB de trabajo y 128 MiB temporales, techo de 600 segundos.</p>
+<p>N: instrucción neutral; puede organizar su trabajo libremente.
+S: especificación -&gt; plan -&gt; tareas -&gt; implementación -&gt; verificación; guía congelada.
+T: skill/método, CLI/MCP y ledger local, alternativas, protocolo, evidencia,
+dependencias e invalidación. No inventar aprobaciones/revisiones para pasar gates.
+Mismo servicio de revisión técnica externa de código y ejemplos públicos en ambos hitos
+para los tres brazos; sus informes y consumo cuentan por separado y su tiempo está
+incluido en el cupo común de 120 segundos. La aprobación del mandato local
+la registra el orquestador desde esta autorización; no atribuir al dueño elecciones
+arquitectónicas. La revisión deberá ser de un agente separado que lee los archivos.
+El ejecutor no obtiene aprobación por hacerse pasar por reviewer. El revisor usa
+un prompt neutral e idéntico, no recibe nombre del brazo, ledger, documentos SDD ni
+razonamiento del autor; revisa únicamente contrato, código y ejemplos públicos.
+No exige métodos ni documentos ajenos al contrato. Se oculta la asignación explícita, pero comentarios y estilo del código/README pueden permitir inferir el método: el cegamiento no es perfecto. Sus juicios funcionales no
+equivalen a aprobar las fases metodológicas de T: esas revisiones necesitan otra
+comprobación explícita del ledger y se informan como coste exclusivo del tratamiento.
+Las decisiones normativas proceden del mandato del dueño, nunca del agente revisor.</p>
+<h2>Aislamiento y evaluación</h2>
+<p>Workspace de corrida /trial, sin AGENTS/skill de SpecOrganon heredados en N o S.
+La imagen de N/S elimina físicamente /opt/specorganon y /opt/codex-lab; T conserva únicamente el toolkit del método común, sin experimentos. No montar fuentes del host, socket Docker o los tests reservados dentro del entorno
+de autor. El paquete común incluye todos los requisitos y ejemplos públicos.
+El evaluador corre fuera del contenedor de autor en otro contenedor sin red,
+con código candidato de solo lectura y archivos de prueba propios; no le entrega
+credenciales. Verifica estado final y bytes, no mensajes de autodeclaración.</p>
+<p>Antes del freeze se comprobará el evaluador contra controles de referencia buenos
+y defectuosos (verify incondicional, corrupción silenciosa, publicación parcial,
+restauración inexacta, exceso de cuota). Sus errores se corrigen en desarrollo.
+Tras el freeze no se afinan tests ni se entregan resultados reservados hasta que
+las 18 corridas hayan terminado. Los casos reservados se generan con semillas
+privadas fuera de las monturas y se registran por hash; integridad cooperativa
+local, no custodia humana externa autenticada.</p>
+<h2>Análisis y parada</h2>
+<p>Presentar cada corrida, cada fallo crítico y resultados de ambas etapas. Comparar
+pares por variante/repetición contra N y S; diferencias medias/medianas, rango y
+cambios de etapa. No tratar los muchos checks internos como réplicas independientes.
+No p-valores confirmatorios ni declaración universal de superioridad con n=6 por
+brazo. Una ventaja observada se describirá como señal de piloto con variabilidad.
+Empates, costes mayores o desventajas se conservan. Dos rondas de revisión externa del diseño antes del freeze, con reparaciones y controles de desarrollo conservados; ningún ajuste del toolkit basado en resultados del
+piloto. Producto final seleccionado por integridad y corrección, después recursos;
+si ninguno pasa los criterios, reparar un candidato fuera de la comparación y
+separar esos resultados como entrega de ingeniería.</p>
+<h2>Excepción del contenedor comprobada antes del freeze</h2>
+<p>El AppArmor docker-default y el seccomp habitual impiden iniciar Bubblewrap. Solo
+los contenedores de generación/revisión usan apparmor=unconfined y el allowlist Moby
+ampliado con clone/unshare/mount/umount2/pivot_root. No usa SYS_ADMIN ni modo
+privilegiado. Codex conserva workspace-write/read-only, con rechazo real de escritura
+fuera de /trial verificado en los tres brazos. No cambia controles del host o del
+trabajo principal. El evaluador mantiene el perfil AppArmor/seccomp habitual.
+Esta reducción de una capa de aislamiento externa es una limitación explícita.
+El home autenticado se comparte secuencialmente para usar la sesión existente, sin
+copiar tokens: sesiones ephemeral e ignore-user-config reducen herencia, pero no
+constituyen custodia externa ni aislamiento de cuentas.</p>
+<p>La inicialización del ledger de T registra problema y mandato común, con el dueño
+declarado desde la autorización existente. No da soluciones, datos reservados ni
+aceptaciones de fase. El auditor del método puede aprobar elecciones técnicas que
+ha leído dentro de la delegación existente, con motivo que lo explicite; cualquier
+cambio de frontera/valor/cuenta queda fuera del mandato y no se fabrica aprobación.
+Las revisiones de fase son otra sesión del mismo modelo, procedencia local declarada.</p>
+<p>Herramientas genéricas de modelo: shell, edición y lectura nativas de la CLI;
+web_search disabled, apps/browser deshabilitados, sin subdelegación nativa y sin
+descubrimiento de skills del host. T añade solo el toolkit y MCP del tratamiento.
+No se usa otro proveedor durante las corridas. El baseline SDD es esta guía
+operativa concreta; no representa todas las variantes posibles de SDD.</p>
+<p>Los streams de evaluación se exportan en el JSON final antes de desmontar tmpfs:
+64 KiB por stream y 8 MiB en total. Recibos conservan tamaño y SHA256 completos y
+marcan truncamiento; no se declara conservación íntegra de salidas ilimitadas.
+Los streams de generación/revisión se conservan completos en archivos JSONL.</p>
+<p>La generación aleatoria del evaluador usa streams independientes por
+(seed, variante, sección). El muestreo de archivos dependiente del formato de un
+repositorio no altera las entradas de otra sección. Los prerequisitos fallidos
+pueden dejar casos sin ejecutar: se conservan como fallos con denominador fijo.</p>
+<p>Para adaptación se separará el cambio de calidad en los 20 checks comunes de
+las dos etapas y el cumplimiento de los dos checks nuevos --max-bytes. La
+comparación principal entre brazos conserva score completo dentro de cada etapa,
+con el mismo denominador por etapa. No se confundirá el cambio de denominador
+20 a 22 con deterioro de las garantías previas.</p></main></html>

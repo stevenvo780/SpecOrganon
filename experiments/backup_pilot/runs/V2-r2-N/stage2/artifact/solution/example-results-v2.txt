@@ -1,0 +1,47 @@
+Comando: python3 solution/run_examples.py
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/.examples-work/tmp6qn25c3r/fuente con espacios' --id v1 --max-bytes 1000000 --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"id":"v1"}
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --id v1 --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"id":"v1","valid":true}
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/.examples-work/tmp6qn25c3r/fuente con espacios' --id v2 --max-bytes 1000000 --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"id":"v2"}
+Suma independiente de st_size: 710
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/.examples-work/tmp6qn25c3r/fuente con espacios' --id v3 --max-bytes 709 --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=1
+stderr: {"error": "El repositorio exceder\u00eda --max-bytes"}
+Rechazo: bytes y snapshots anteriores preservados; crecimiento=0
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"snapshots":["v1","v2"]}
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/.examples-work/tmp6qn25c3r/fuente con espacios' --id v3 --max-bytes 1000000 --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"id":"v3"}
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"snapshots":["v1","v2","v3"]}
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --id v1 --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"id":"v1","valid":true}
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --id v1 --dest /trial/solution/.examples-work/tmp6qn25c3r/restaurado-v1 --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"id":"v1"}
+v1: restauración exacta sin fuente original
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --id v2 --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"id":"v2","valid":true}
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --id v2 --dest /trial/solution/.examples-work/tmp6qn25c3r/restaurado-v2 --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"id":"v2"}
+v2: restauración exacta sin fuente original
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --id v3 --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"id":"v3","valid":true}
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --id v3 --dest /trial/solution/.examples-work/tmp6qn25c3r/restaurado-v3 --repo /trial/solution/.examples-work/tmp6qn25c3r/repo
+exit=0
+stdout: {"id":"v3"}
+v3: restauración exacta sin fuente original
+Suma final independiente de st_size: 932
+Ejemplos: OK

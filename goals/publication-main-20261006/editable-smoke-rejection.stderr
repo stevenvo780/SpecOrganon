@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/stev/.codex/worktrees/publish-main/SpecOrganon/scripts/clean_smoke.py", line 775, in <module>
+    main()
+    ~~~~^^
+  File "/home/stev/.codex/worktrees/publish-main/SpecOrganon/scripts/clean_smoke.py", line 48, in main
+    assert Path(origin.stdout.strip()).resolve().is_relative_to(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        Path(sysconfig.get_paths()["purelib"]).resolve()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ), "smoke must exercise the wheel installed in this interpreter"
+    ^
+AssertionError: smoke must exercise the wheel installed in this interpreter

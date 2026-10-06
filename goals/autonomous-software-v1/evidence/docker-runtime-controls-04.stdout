@@ -1,0 +1,212 @@
+..............FFF
+=================================== FAILURES ===================================
+_ test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-A] _
+
+bundle = PosixPath('/runs/pytest/D119-original-bundle0/bundle')
+tmp_path = PosixPath('/runs/pytest/test_original_modes_multiple_d0'), arm = 'A'
+case_id = 'D-F'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    def test_original_modes_multiple_delegations_same_budget_and_final_host_analysis(bundle, tmp_path, arm, case_id):
+        from coordinated_prototype_broker import CoordinatedPrototypeBroker
+        from local_replay_sandbox import probe_sandbox
+        capability = probe_sandbox()
+        assert capability.available, capability.reason
+        run = tmp_path / "run"
+        status = runtime.prepare_coordinated_runtime(run, bundle, run_id(bundle, arm, case_id), configuration(),
+                                                     admission_root=tmp_path / "admission")
+        fixture = SyntheticRoles(run)
+        transports = fixture.transports()
+        assert status["budget"]["request_count"] == 0
+        assert not list((tmp_path / "admission").glob("*.json"))
+        saved_claim, requests = None, []
+        for _ in range(50):
+            status = runtime.execute_coordinated_runtime_step(run, transports, expected_checkpoint=status["checkpoint_sha256"])
+            requests.append(status["budget"]["request_count"])
+            claims = sorted(path for path in (tmp_path / "admission").glob("*.json")
+                            if not path.name.endswith(".coordinated-binding.json"))
+            assert len(claims) == 1
+            if saved_claim is None:
+                saved_claim = claims[0].read_bytes()
+            assert claims[0].read_bytes() == saved_claim
+            if status["state"] != "paused":
+                break
+        assert status["state"] == "completed", status
+        assert requests == sorted(requests) and len(set(requests)) == len(requests)
+        assert status["budget"]["settled_tokens"] == 7 * requests[-1]
+        broker = CoordinatedPrototypeBroker(run, json.loads((run / "run.json").read_bytes())["broker_binding"])
+        events = broker._events()
+        activations = [row for row in events if row["kind"] == "activate"]
+        merges = [row for row in events if row["kind"] == "merge"]
+        assert len(activations) == len(merges) >= 2
+        final = broker.public_state()
+        assert final["mode"] == {"A": "sequential", "B": "graph", "C": "risk"}[arm]
+        assert final["state"]["nodes"]["E"]["status"] == "supported"
+        assert final["state"]["nodes"]["N"]["status"] == "pending"
+        assert not all(value == "accepted" for value in final["state"]["phase_status"].values())
+        fresh = broker.current_metrics("leader")
+        assert fresh is not None
+        metadata = json.loads((bundle / "assets" / case_id / "case.json").read_bytes())
+        assert fresh["metrics"]["observed_source_inventory"] == metadata["files"]
+        checked = runtime.delivery.check_delivery(bundle / "assets" / case_id, broker.leader_stage() / "work",
+                        runtime.delivery.delivery_contract_template())
+        assert checked["structural_checks_passed"] is True and checked["quality_assessed"] is False
+        review = fixture.payloads["reviewer"]
+        assert len(review) == 1 and "tools" not in review[0]
+        assert "SYNTHETIC-PRIVATE:" not in json.dumps(review)
+        assert "SYNTHETIC-PRIVATE:leader:" not in json.dumps(fixture.payloads["worker-1"])
+        if arm == "A":
+            assert not fixture.payloads["worker-2"]
+        command = [sys.executable, "-I", "-B", str(runtime.SCRIPTS / "coordinated_prototype_runtime.py"),
+                   "status", "--run-dir", str(run)]
+        reopened = subprocess.run(command, capture_output=True, text=True, timeout=60)
+>       assert reopened.returncode == 0, reopened.stdout + reopened.stderr
+E       AssertionError: {"error": "CoordinatedRuntimeError: published contract/compiler sources changed", "formal_cell_executed": false, "quality_assessed": false, "execution_authorized": false}
+E         
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['/opt/specorganon/venv/bin/python', '-I', '-B', '/workspace/SpecOrganon/scripts/coordinated_pro...urces changed", "formal_cell_executed": false, "quality_assessed": false, "execution_authorized": false}\n', stderr='').returncode
+
+tests/test_coordinated_prototype_runtime.py:173: AssertionError
+_ test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-B] _
+
+bundle = PosixPath('/runs/pytest/D119-original-bundle0/bundle')
+tmp_path = PosixPath('/runs/pytest/test_original_modes_multiple_d1'), arm = 'B'
+case_id = 'D-F'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    def test_original_modes_multiple_delegations_same_budget_and_final_host_analysis(bundle, tmp_path, arm, case_id):
+        from coordinated_prototype_broker import CoordinatedPrototypeBroker
+        from local_replay_sandbox import probe_sandbox
+        capability = probe_sandbox()
+        assert capability.available, capability.reason
+        run = tmp_path / "run"
+        status = runtime.prepare_coordinated_runtime(run, bundle, run_id(bundle, arm, case_id), configuration(),
+                                                     admission_root=tmp_path / "admission")
+        fixture = SyntheticRoles(run)
+        transports = fixture.transports()
+        assert status["budget"]["request_count"] == 0
+        assert not list((tmp_path / "admission").glob("*.json"))
+        saved_claim, requests = None, []
+        for _ in range(50):
+            status = runtime.execute_coordinated_runtime_step(run, transports, expected_checkpoint=status["checkpoint_sha256"])
+            requests.append(status["budget"]["request_count"])
+            claims = sorted(path for path in (tmp_path / "admission").glob("*.json")
+                            if not path.name.endswith(".coordinated-binding.json"))
+            assert len(claims) == 1
+            if saved_claim is None:
+                saved_claim = claims[0].read_bytes()
+            assert claims[0].read_bytes() == saved_claim
+            if status["state"] != "paused":
+                break
+        assert status["state"] == "completed", status
+        assert requests == sorted(requests) and len(set(requests)) == len(requests)
+        assert status["budget"]["settled_tokens"] == 7 * requests[-1]
+        broker = CoordinatedPrototypeBroker(run, json.loads((run / "run.json").read_bytes())["broker_binding"])
+        events = broker._events()
+        activations = [row for row in events if row["kind"] == "activate"]
+        merges = [row for row in events if row["kind"] == "merge"]
+        assert len(activations) == len(merges) >= 2
+        final = broker.public_state()
+        assert final["mode"] == {"A": "sequential", "B": "graph", "C": "risk"}[arm]
+        assert final["state"]["nodes"]["E"]["status"] == "supported"
+        assert final["state"]["nodes"]["N"]["status"] == "pending"
+        assert not all(value == "accepted" for value in final["state"]["phase_status"].values())
+        fresh = broker.current_metrics("leader")
+        assert fresh is not None
+        metadata = json.loads((bundle / "assets" / case_id / "case.json").read_bytes())
+        assert fresh["metrics"]["observed_source_inventory"] == metadata["files"]
+        checked = runtime.delivery.check_delivery(bundle / "assets" / case_id, broker.leader_stage() / "work",
+                        runtime.delivery.delivery_contract_template())
+        assert checked["structural_checks_passed"] is True and checked["quality_assessed"] is False
+        review = fixture.payloads["reviewer"]
+        assert len(review) == 1 and "tools" not in review[0]
+        assert "SYNTHETIC-PRIVATE:" not in json.dumps(review)
+        assert "SYNTHETIC-PRIVATE:leader:" not in json.dumps(fixture.payloads["worker-1"])
+        if arm == "A":
+            assert not fixture.payloads["worker-2"]
+        command = [sys.executable, "-I", "-B", str(runtime.SCRIPTS / "coordinated_prototype_runtime.py"),
+                   "status", "--run-dir", str(run)]
+        reopened = subprocess.run(command, capture_output=True, text=True, timeout=60)
+>       assert reopened.returncode == 0, reopened.stdout + reopened.stderr
+E       AssertionError: {"error": "CoordinatedRuntimeError: published contract/compiler sources changed", "formal_cell_executed": false, "quality_assessed": false, "execution_authorized": false}
+E         
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['/opt/specorganon/venv/bin/python', '-I', '-B', '/workspace/SpecOrganon/scripts/coordinated_pro...urces changed", "formal_cell_executed": false, "quality_assessed": false, "execution_authorized": false}\n', stderr='').returncode
+
+tests/test_coordinated_prototype_runtime.py:173: AssertionError
+_ test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-C] _
+
+bundle = PosixPath('/runs/pytest/D119-original-bundle0/bundle')
+tmp_path = PosixPath('/runs/pytest/test_original_modes_multiple_d2'), arm = 'C'
+case_id = 'D-F'
+
+    @pytest.mark.parametrize("arm", list("ABC"))
+    @pytest.mark.parametrize("case_id", ["D-F", "D-E"])
+    def test_original_modes_multiple_delegations_same_budget_and_final_host_analysis(bundle, tmp_path, arm, case_id):
+        from coordinated_prototype_broker import CoordinatedPrototypeBroker
+        from local_replay_sandbox import probe_sandbox
+        capability = probe_sandbox()
+        assert capability.available, capability.reason
+        run = tmp_path / "run"
+        status = runtime.prepare_coordinated_runtime(run, bundle, run_id(bundle, arm, case_id), configuration(),
+                                                     admission_root=tmp_path / "admission")
+        fixture = SyntheticRoles(run)
+        transports = fixture.transports()
+        assert status["budget"]["request_count"] == 0
+        assert not list((tmp_path / "admission").glob("*.json"))
+        saved_claim, requests = None, []
+        for _ in range(50):
+            status = runtime.execute_coordinated_runtime_step(run, transports, expected_checkpoint=status["checkpoint_sha256"])
+            requests.append(status["budget"]["request_count"])
+            claims = sorted(path for path in (tmp_path / "admission").glob("*.json")
+                            if not path.name.endswith(".coordinated-binding.json"))
+            assert len(claims) == 1
+            if saved_claim is None:
+                saved_claim = claims[0].read_bytes()
+            assert claims[0].read_bytes() == saved_claim
+            if status["state"] != "paused":
+                break
+        assert status["state"] == "completed", status
+        assert requests == sorted(requests) and len(set(requests)) == len(requests)
+        assert status["budget"]["settled_tokens"] == 7 * requests[-1]
+        broker = CoordinatedPrototypeBroker(run, json.loads((run / "run.json").read_bytes())["broker_binding"])
+        events = broker._events()
+        activations = [row for row in events if row["kind"] == "activate"]
+        merges = [row for row in events if row["kind"] == "merge"]
+        assert len(activations) == len(merges) >= 2
+        final = broker.public_state()
+        assert final["mode"] == {"A": "sequential", "B": "graph", "C": "risk"}[arm]
+        assert final["state"]["nodes"]["E"]["status"] == "supported"
+        assert final["state"]["nodes"]["N"]["status"] == "pending"
+        assert not all(value == "accepted" for value in final["state"]["phase_status"].values())
+        fresh = broker.current_metrics("leader")
+        assert fresh is not None
+        metadata = json.loads((bundle / "assets" / case_id / "case.json").read_bytes())
+        assert fresh["metrics"]["observed_source_inventory"] == metadata["files"]
+        checked = runtime.delivery.check_delivery(bundle / "assets" / case_id, broker.leader_stage() / "work",
+                        runtime.delivery.delivery_contract_template())
+        assert checked["structural_checks_passed"] is True and checked["quality_assessed"] is False
+        review = fixture.payloads["reviewer"]
+        assert len(review) == 1 and "tools" not in review[0]
+        assert "SYNTHETIC-PRIVATE:" not in json.dumps(review)
+        assert "SYNTHETIC-PRIVATE:leader:" not in json.dumps(fixture.payloads["worker-1"])
+        if arm == "A":
+            assert not fixture.payloads["worker-2"]
+        command = [sys.executable, "-I", "-B", str(runtime.SCRIPTS / "coordinated_prototype_runtime.py"),
+                   "status", "--run-dir", str(run)]
+        reopened = subprocess.run(command, capture_output=True, text=True, timeout=60)
+>       assert reopened.returncode == 0, reopened.stdout + reopened.stderr
+E       AssertionError: {"error": "CoordinatedRuntimeError: published contract/compiler sources changed", "formal_cell_executed": false, "quality_assessed": false, "execution_authorized": false}
+E         
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['/opt/specorganon/venv/bin/python', '-I', '-B', '/workspace/SpecOrganon/scripts/coordinated_pro...urces changed", "formal_cell_executed": false, "quality_assessed": false, "execution_authorized": false}\n', stderr='').returncode
+
+tests/test_coordinated_prototype_runtime.py:173: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-A]
+FAILED tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-B]
+FAILED tests/test_coordinated_prototype_runtime.py::test_original_modes_multiple_delegations_same_budget_and_final_host_analysis[D-F-C]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 3 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+3 failed, 14 passed in 403.05s (0:06:43)

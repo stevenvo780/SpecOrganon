@@ -1,0 +1,36 @@
+[
+  {
+    "image": "sha256:a1911c4ddadc0f60e7fdaba294e8eefa75c08882699c8bffc9814dcd7d3a1cee",
+    "role": "control",
+    "argv": [
+      "docker",
+      "run",
+      "--rm",
+      "--entrypoint",
+      "/bin/bash",
+      "sha256:a1911c4ddadc0f60e7fdaba294e8eefa75c08882699c8bffc9814dcd7d3a1cee",
+      "-lc",
+      "command -v python; command -v pytest || true; python --version"
+    ],
+    "exit_code": 0,
+    "stdout": "/usr/local/bin/python\nPython 3.12.15\n",
+    "stderr": ""
+  },
+  {
+    "image": "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+    "role": "method",
+    "argv": [
+      "docker",
+      "run",
+      "--rm",
+      "--entrypoint",
+      "/bin/bash",
+      "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+      "-lc",
+      "command -v python; command -v pytest || true; python --version"
+    ],
+    "exit_code": 0,
+    "stdout": "/usr/local/bin/python\nPython 3.12.15\n",
+    "stderr": ""
+  }
+]

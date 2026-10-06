@@ -1,0 +1,256 @@
+{
+  "input_identity": {
+    "ledger_sha256": "d26bc4312e81ec18ad401583ce0f2ebc7b77e876f4add0fe0d712f82d88f99fc",
+    "method_image": "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+    "inspector_sha256": "2fd725c9765175873d1a083962a269c406c6c7cb097c43cec79c5dc1eaf7b1b6"
+  },
+  "result": {
+    "id": "V1-r1-T",
+    "stage": 1,
+    "receipt": {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--name",
+        "backup-method-observer-v1-r1-t-s1",
+        "--network",
+        "none",
+        "--read-only",
+        "--user",
+        "1000:1000",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges:true",
+        "--memory",
+        "256m",
+        "--cpus",
+        "1",
+        "--pids-limit",
+        "64",
+        "--mount",
+        "type=bind,src=/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/runs/V1-r1-T/stage1/artifact,dst=/trial,readonly",
+        "--entrypoint",
+        "/opt/specorganon/.venv/bin/python",
+        "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+        "-c",
+        "\nimport hashlib,json,sys\nfrom collections import Counter\nfrom pathlib import Path\nfrom specorganon import engine\nfrom specorganon.ledger import read_project\ntry:\n    case=Path(sys.argv[1])\n    state=engine.get_state(case)\n    ledger=read_project(case)\n    phases={key:{k:value[k] for k in ('ready','accepted','reviewed','independent_review',\n             'review_signature_verified','review_identity_authenticated','review_provenance',\n             'blockers','snapshot','advance_seq')} for key,value in state['phases'].items()}\n    result={'ok':True,'revision':state['revision'],'approval_policy':state['project']['approval_policy'],\n            'approval_identity_authenticated':state['approval_identity_authenticated'],\n            'phase_review_trust':state['phase_review_trust'],\n            'test_execution_trust':state['test_execution_trust'],\n            'test_execution_records':len(state['test_execution_history']),\n            'test_observation_records':len(state['test_observation_history']),\n            'item_kind_counts':dict(Counter(item['kind'] for item in state['items'].values())),\n            'event_actor_counts':dict(Counter(event['actor'] for event in ledger['events'])),\n            'phases':phases,'accepted_phases':[key for key,value in phases.items() if value['accepted']],\n            'phase_review_history':state['phase_review_history'],\n            'ledger_sha256':hashlib.sha256((case/'organon.json').read_bytes()).hexdigest(),\n            'engine_sha256':hashlib.sha256(Path(engine.__file__).read_bytes()).hexdigest()}\nexcept Exception as error:\n    print(json.dumps({'ok':False,'error_type':type(error).__name__,'error':str(error)}))\n    raise SystemExit(1)\nprint(json.dumps(result,ensure_ascii=False))\n",
+        "/trial/case"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.21395394199498696,
+      "finished_at": "2026-10-04T05:24:35.108214+00:00",
+      "usage": [],
+      "errors": [],
+      "agent_text": [],
+      "stdout_sha256": "9512a73b05d6aa5fd31c752cc6cae547edfaf154d5b89d0b5c677291e03944cd",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "observation": {
+      "ok": true,
+      "revision": 28,
+      "approval_policy": "local",
+      "approval_identity_authenticated": false,
+      "phase_review_trust": "local_declared",
+      "test_execution_trust": "local_declared",
+      "test_execution_records": 0,
+      "test_observation_records": 0,
+      "item_kind_counts": {
+        "problem": 1,
+        "norm": 1,
+        "actor": 1,
+        "boundary": 1,
+        "concept": 1,
+        "assumption": 1,
+        "frame_option": 2,
+        "question": 1,
+        "hypothesis": 1,
+        "protocol": 1,
+        "evidence": 1,
+        "indicator": 1,
+        "inference": 1,
+        "synthesis": 1,
+        "uncertainty": 1,
+        "option": 2,
+        "comparison": 1,
+        "risk": 1,
+        "decision": 1,
+        "requirement": 1,
+        "criterion": 1
+      },
+      "event_actor_counts": {
+        "agent:orchestrator": 2,
+        "human:owner": 2,
+        "agent:author": 21,
+        "agent:method-reviewer": 3
+      },
+      "phases": {
+        "frame": {
+          "ready": true,
+          "accepted": true,
+          "reviewed": true,
+          "independent_review": true,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "local_declared",
+          "blockers": [],
+          "snapshot": "41bf97083234278508e257f100be39f3ed32f1a7da1c49e19e398ea4b460af77",
+          "advance_seq": 27
+        },
+        "critique": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": true,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "local_declared",
+          "blockers": [
+            "mandate must link problem and actor"
+          ],
+          "snapshot": "a64ab0abccab038360e8ac00a23a1f85770c5fc74bb8dda91a37d292f45fbe28",
+          "advance_seq": null
+        },
+        "study": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "indicator-v1: indicator lacks metric",
+            "needs 1 valid indicator; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "e025523951c35d3585bda6f83a3bdf83b28fe6bc82d1f5928f6e51fa745e524b",
+          "advance_seq": null
+        },
+        "observe": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "contract-evidence: evidence origin must be published, observed, derived or simulated",
+            "needs 1 valid evidence; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "b6118242f5990471e69600e2c7e3d8e5ae433e9e1f5f3c858ff632088c63b784",
+          "advance_seq": null
+        },
+        "explain": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "131d56dd86370cdde63336d0c97dd32948775bd4fd6ec3d62f228ac1d9465fb0",
+          "advance_seq": null
+        },
+        "compare": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "63da5c8266487ba3b1ff72c3346062aec66089ca306cb08d8bd7affa28e09d01",
+          "advance_seq": null
+        },
+        "specify": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "criterion-v1: criterion lacks metric",
+            "needs 1 valid criterion; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "7a4832a2a999df801554f114871ba640b2cd27d6b8165c4470c99a4e1147d20b",
+          "advance_seq": null
+        },
+        "build": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid implementation; has 0",
+            "needs 1 valid test; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "86e7e4bf767365ad64e21192a23ea93c4e968cc2c997312ff133cfe1a00f44a2",
+          "advance_seq": null
+        },
+        "validate": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid assessment; has 0",
+            "needs 1 valid baseline; has 0",
+            "needs 1 valid result; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "279619418846b9797270c2ef9eb1564053aaab7c194af15cfa7bc3a0a5db47d4",
+          "advance_seq": null
+        }
+      },
+      "accepted_phases": [
+        "frame"
+      ],
+      "phase_review_history": [
+        {
+          "seq": 26,
+          "phase": "frame",
+          "verdict": "accept",
+          "actor": "agent:method-reviewer",
+          "snapshot": "41bf97083234278508e257f100be39f3ed32f1a7da1c49e19e398ea4b460af77",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        },
+        {
+          "seq": 28,
+          "phase": "critique",
+          "verdict": "reject",
+          "actor": "agent:method-reviewer",
+          "snapshot": "a64ab0abccab038360e8ac00a23a1f85770c5fc74bb8dda91a37d292f45fbe28",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        }
+      ],
+      "ledger_sha256": "d26bc4312e81ec18ad401583ce0f2ebc7b77e876f4add0fe0d712f82d88f99fc",
+      "engine_sha256": "9c12dd21b4b7da4811bc32afce73b9be46cb31226ace179a147e309c578723f4"
+    },
+    "inspector_sha256": "2fd725c9765175873d1a083962a269c406c6c7cb097c43cec79c5dc1eaf7b1b6"
+  }
+}

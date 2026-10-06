@@ -1,0 +1,68 @@
+FFFF.                                                                    [100%]
+=================================== FAILURES ===================================
+__________ test_duplicate_factor_blocks_are_not_six_independent_pairs __________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-46/test_duplicate_factor_blocks_a0')
+
+    def test_duplicate_factor_blocks_are_not_six_independent_pairs(tmp_path):
+        schedule=make_fixture(tmp_path)
+        for row in schedule: row['variant']='V1'; row['repeat']=1
+        (tmp_path/'frozen/manifest.json').write_text(json.dumps({'schedule':schedule}))
+>       with pytest.raises(RuntimeError,match='factor|Variant|schedule'): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:15: Failed
+___ test_absent_artifact_receipt_is_missing_even_when_embedded_field_removed ___
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-46/test_absent_artifact_receipt_i0')
+
+    def test_absent_artifact_receipt_is_missing_even_when_embedded_field_removed(tmp_path):
+        make_fixture(tmp_path)
+        stage=tmp_path/'runs/V1-r1-N/stage1'
+        (stage/'artifact.receipt.json').unlink()
+        data=json.loads((stage/'complete.json').read_text());data.pop('artifact')
+        (stage/'complete.json').write_text(json.dumps(data))
+>       with pytest.raises(RuntimeError,match='artifact'): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:24: Failed
+_____________ test_all_unknown_group_times_are_never_imputed_zero ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-46/test_all_unknown_group_times_a0')
+
+    def test_all_unknown_group_times_are_never_imputed_zero(tmp_path):
+        make_fixture(tmp_path)
+        for stage in (tmp_path/'runs').glob('*/stage*'):
+            data=json.loads((stage/'complete.json').read_text())
+            for role in ['author','method','review']:
+                if data.get(role):
+                    data[role]['duration_seconds']=None
+                    (stage/f'{role}.receipt.json').write_text(json.dumps(data[role]))
+            (stage/'complete.json').write_text(json.dumps(data))
+        result=analyze(tmp_path)
+        for arm in 'NST':
+>           assert result['resource_stats'][arm]['author_method_duration']['median'] is None
+E           assert 0 is None
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:38: AssertionError
+_____________ test_nonfinite_scores_cannot_pass_consistency_check ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-46/test_nonfinite_scores_cannot_p0')
+
+    def test_nonfinite_scores_cannot_pass_consistency_check(tmp_path):
+        make_fixture(tmp_path)
+        path=tmp_path/'runs/V1-r1-N/stage1/evaluation.json'
+        data=json.loads(path.read_text());data['score']=float('nan');path.write_text(json.dumps(data))
+>       with pytest.raises(RuntimeError,match='score|finite'): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:46: Failed
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_duplicate_factor_blocks_are_not_six_independent_pairs
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_absent_artifact_receipt_is_missing_even_when_embedded_field_removed
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_all_unknown_group_times_are_never_imputed_zero
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_nonfinite_scores_cannot_pass_consistency_check
+4 failed, 1 passed in 0.12s

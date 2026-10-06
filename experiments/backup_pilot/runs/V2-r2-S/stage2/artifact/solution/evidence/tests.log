@@ -1,0 +1,48 @@
+$ /usr/local/bin/python3 -m unittest discover -s solution/tests -v
+cwd: /trial
+exit_code: 0
+stdout:
+
+stderr:
+test_c01_cli_and_json (test_backup.BackupTests.test_c01_cli_and_json) ... ok
+test_c02_arbitrary_bytes_names_empty_dirs_and_source_unchanged (test_backup.BackupTests.test_c02_arbitrary_bytes_names_empty_dirs_and_source_unchanged) ... ok
+test_c02_empty_source (test_backup.BackupTests.test_c02_empty_source) ... ok
+test_c03_three_versions_exact_and_self_contained (test_backup.BackupTests.test_c03_three_versions_exact_and_self_contained) ... ok
+test_c04_duplicate_and_unknown_ids (test_backup.BackupTests.test_c04_duplicate_and_unknown_ids) ... ok
+test_c04_invalid_ids (test_backup.BackupTests.test_c04_invalid_ids) ... ok
+test_c04_valid_boundary_ids_and_sorted_list (test_backup.BackupTests.test_c04_valid_boundary_ids_and_sorted_list) ... ok
+test_c05_new_empty_incomplete_and_corrupt_list (test_backup.BackupTests.test_c05_new_empty_incomplete_and_corrupt_list) ... ok
+test_c06_ancestor_symlinks_all_arguments_and_dotdot (test_backup.BackupTests.test_c06_ancestor_symlinks_all_arguments_and_dotdot) ... ok
+test_c06_destination_symlink_and_special_files (test_backup.BackupTests.test_c06_destination_symlink_and_special_files) ... ok
+test_c06_fifo_and_socket_source_repo_snapshots (test_backup.BackupTests.test_c06_fifo_and_socket_source_repo_snapshots) ... ok
+test_c06_missing_component_dotdot_cannot_hide_symlink (test_backup.BackupTests.test_c06_missing_component_dotdot_cannot_hide_symlink) ... ok
+test_c06_repo_symlink_and_symlink_in_abandoned_stage (test_backup.BackupTests.test_c06_repo_symlink_and_symlink_in_abandoned_stage) ... ok
+test_c06_snapshot_symlinks (test_backup.BackupTests.test_c06_snapshot_symlinks) ... ok
+test_c06_source_symlinks_files_dirs_dangling (test_backup.BackupTests.test_c06_source_symlinks_files_dirs_dangling) ... ok
+test_c07_existing_nonempty_dest_preserved (test_backup.BackupTests.test_c07_existing_nonempty_dest_preserved) ... ok
+test_c07_overlaps_both_directions_equal_and_normalized (test_backup.BackupTests.test_c07_overlaps_both_directions_equal_and_normalized) ... ok
+test_c07_regular_file_dest_preserved (test_backup.BackupTests.test_c07_regular_file_dest_preserved) ... ok
+test_c08_every_snapshot_file_altered_and_deleted (test_backup.BackupTests.test_c08_every_snapshot_file_altered_and_deleted) ... ok
+test_c08_extra_objects_and_structure (test_backup.BackupTests.test_c08_extra_objects_and_structure) ... ok
+test_c08_malformed_manifests_with_recomputed_seal (test_backup.BackupTests.test_c08_malformed_manifests_with_recomputed_seal) ... ok
+test_c09_sigkill_partial_create_then_same_id_retry (test_backup.BackupTests.test_c09_sigkill_partial_create_then_same_id_retry) ... ok
+test_c09_write_error_cleanup_and_retry (test_backup.BackupTests.test_c09_write_error_cleanup_and_retry) ... ok
+test_c10_copy_error_does_not_publish_and_can_retry (test_backup.BackupTests.test_c10_copy_error_does_not_publish_and_can_retry) ... ok
+test_c10_corruption_between_validation_and_copy (test_backup.BackupTests.test_c10_corruption_between_validation_and_copy) ... ok
+test_c10_corruption_preserves_empty_dest_and_no_parent_creation (test_backup.BackupTests.test_c10_corruption_preserves_empty_dest_and_no_parent_creation) ... ok
+test_c10_existing_empty_dest_and_missing_parents (test_backup.BackupTests.test_c10_existing_empty_dest_and_missing_parents) ... ok
+test_c11_source_permissions_not_needed_for_restore (test_backup.BackupTests.test_c11_source_permissions_not_needed_for_restore) ... ok
+test_c12_max_bytes_argument_validation_and_optional_compatibility (test_backup.BackupTests.test_c12_max_bytes_argument_validation_and_optional_compatibility) ... ok
+test_c12_max_bytes_is_create_only (test_backup.BackupTests.test_c12_max_bytes_is_create_only) ... ok
+test_c13_exact_limit_and_one_byte_short (test_backup.BackupTests.test_c13_exact_limit_and_one_byte_short) ... ok
+test_c13_metadata_counts_even_for_empty_source_and_directories (test_backup.BackupTests.test_c13_metadata_counts_even_for_empty_source_and_directories) ... ok
+test_c13_prior_snapshots_and_abandoned_files_all_count (test_backup.BackupTests.test_c13_prior_snapshots_and_abandoned_files_all_count) ... ok
+test_c14_below_existing_rejects_without_writes (test_backup.BackupTests.test_c14_below_existing_rejects_without_writes) ... ok
+test_c14_failure_in_final_accounting_cleans_stage (test_backup.BackupTests.test_c14_failure_in_final_accounting_cleans_stage) ... ok
+test_c14_repeated_rejection_leaves_no_residue_and_same_id_can_retry (test_backup.BackupTests.test_c14_repeated_rejection_leaves_no_residue_and_same_id_can_retry) ... ok
+test_c15_limited_create_preserves_ids_overlap_and_link_rejections (test_backup.BackupTests.test_c15_limited_create_preserves_ids_overlap_and_link_rejections) ... ok
+
+----------------------------------------------------------------------
+Ran 37 tests in 10.210s
+
+OK

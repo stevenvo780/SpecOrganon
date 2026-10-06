@@ -1,0 +1,36 @@
+$ /usr/local/bin/python3 solution/examples/v2.py
+cwd: /trial
+exit_code: 0
+stdout:
+$ "/usr/local/bin/python3" "/trial/solution/backup.py" "list" "--repo" "/trial/solution/examples/work/v2-bc03o0uk/repo"
+{"snapshots":[]}
+$ "/usr/local/bin/python3" "/trial/solution/backup.py" "create" "--source" "/trial/solution/examples/work/v2-bc03o0uk/fuente Unicode 日本語" "--repo" "/trial/solution/examples/work/v2-bc03o0uk/repo" "--id" "v1" "--max-bytes" "1000000"
+{"id":"v1"}
+{"regular_bytes_including_metadata": 683, "max_bytes": 1000000}
+$ "/usr/local/bin/python3" "/trial/solution/backup.py" "create" "--source" "/trial/solution/examples/work/v2-bc03o0uk/fuente Unicode 日本語" "--repo" "/trial/solution/examples/work/v2-bc03o0uk/repo" "--id" "v2" "--max-bytes" "1000000"
+{"id":"v2"}
+{"regular_bytes_including_metadata": 1131, "max_bytes": 1000000}
+$ "/usr/local/bin/python3" "/trial/solution/backup.py" "create" "--source" "/trial/solution/examples/work/v2-bc03o0uk/fuente Unicode 日本語" "--repo" "/trial/solution/examples/work/v2-bc03o0uk/repo" "--id" "v3" "--max-bytes" "1000000"
+{"id":"v3"}
+{"regular_bytes_including_metadata": 1429, "max_bytes": 1000000}
+Fuente original eliminada; las restauraciones siguientes dependen solo del repositorio.
+$ "/usr/local/bin/python3" "/trial/solution/backup.py" "list" "--repo" "/trial/solution/examples/work/v2-bc03o0uk/repo"
+{"snapshots":["v1","v2","v3"]}
+$ "/usr/local/bin/python3" "/trial/solution/backup.py" "verify" "--repo" "/trial/solution/examples/work/v2-bc03o0uk/repo" "--id" "v1"
+{"id":"v1","valid":true}
+$ "/usr/local/bin/python3" "/trial/solution/backup.py" "restore" "--repo" "/trial/solution/examples/work/v2-bc03o0uk/repo" "--id" "v1" "--dest" "/trial/solution/examples/work/v2-bc03o0uk/restauración v1"
+{"id":"v1"}
+{"exact_match": true, "inventory": {"binario": {"sha256": "40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880", "size": 256}, "documento con espacios.txt": {"sha256": "4486d631e98c4406ebb9618e84b457e3766a7900f3b80f61b0b80d98dc85b5e6", "size": 17}, "vacío": {"type": "directory"}}, "version": "v1"}
+$ "/usr/local/bin/python3" "/trial/solution/backup.py" "verify" "--repo" "/trial/solution/examples/work/v2-bc03o0uk/repo" "--id" "v2"
+{"id":"v2","valid":true}
+$ "/usr/local/bin/python3" "/trial/solution/backup.py" "restore" "--repo" "/trial/solution/examples/work/v2-bc03o0uk/repo" "--id" "v2" "--dest" "/trial/solution/examples/work/v2-bc03o0uk/restauración v2"
+{"id":"v2"}
+{"exact_match": true, "inventory": {"añadido": {"sha256": "f6c2694f6b0317be556ca11a5b811a82b4a3fa0eef568ce122e355b11736e382", "size": 7}, "documento con espacios.txt": {"sha256": "43354f065a5e48ca24f8e5791b7afd679737d975f0a863ebf218b6dbef20f836", "size": 28}, "vacío": {"type": "directory"}}, "version": "v2"}
+$ "/usr/local/bin/python3" "/trial/solution/backup.py" "verify" "--repo" "/trial/solution/examples/work/v2-bc03o0uk/repo" "--id" "v3"
+{"id":"v3","valid":true}
+$ "/usr/local/bin/python3" "/trial/solution/backup.py" "restore" "--repo" "/trial/solution/examples/work/v2-bc03o0uk/repo" "--id" "v3" "--dest" "/trial/solution/examples/work/v2-bc03o0uk/restauración v3"
+{"id":"v3"}
+{"exact_match": true, "inventory": {"nuevo vacío": {"type": "directory"}, "tercera versión": {"sha256": "e3cef10f2b90c7e582c64d934a7b950792a379d9ea9dc5256c03680bb5086c21", "size": 6}, "vacío": {"type": "directory"}}, "version": "v3"}
+Ejemplo V2: PASS (3/3 restauraciones exactas con --max-bytes).
+
+stderr:

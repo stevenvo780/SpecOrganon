@@ -1,0 +1,26 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_explicit_profile_revalidates_without_rewriting_historical_contract ____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa83dd8d810>
+candidate_host = None
+
+    def test_explicit_profile_revalidates_without_rewriting_historical_contract(monkeypatch, candidate_host):
+        # Removing profile selection would reproduce the host portability failure;
+        # dropping provenance would falsely suggest the historical binary was used.
+        monkeypatch.setenv("SPECORGANON_EXTRACTOR_PROFILE", PROFILE)
+        before = auditor.CONTRACT.read_bytes()
+        result = auditor.audit_bread_sources()
+        assert result["verified_claims"] == 17
+        assert result["verified_survey_rows"] == 7
+        assert result["extractor_selection"]["historical_binary_reproduced"] is False
+        assert result["extractor_selection"]["contract_sha256"] == HISTORICAL_PIN
+        assert result["extractor_selection"]["profile"] == PROFILE
+>       assert result["extractor_selection"]["profile_review_status"] == "candidate_pending_independent_review"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'profile_review_status'
+
+tests/test_extractor_profiles.py:48: KeyError
+=========================== short test summary info ============================
+FAILED tests/test_extractor_profiles.py::test_explicit_profile_revalidates_without_rewriting_historical_contract
+1 failed, 5 deselected in 0.21s

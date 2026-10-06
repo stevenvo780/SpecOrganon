@@ -1,0 +1,35 @@
+test_corruption_of_each_regular_snapshot_file (__main__.BackupTests.test_corruption_of_each_regular_snapshot_file) ... ok
+test_destination_with_only_empty_directory_is_nonempty (__main__.BackupTests.test_destination_with_only_empty_directory_is_nonempty) ... ok
+test_directory_corruption_and_extra_files (__main__.BackupTests.test_directory_corruption_and_extra_files) ... ok
+test_empty_repo_and_sorted_ids (__main__.BackupTests.test_empty_repo_and_sorted_ids) ... ok
+test_empty_source_and_empty_preexisting_destination (__main__.BackupTests.test_empty_source_and_empty_preexisting_destination) ... ok
+test_failure_then_retry_same_id (__main__.BackupTests.test_failure_then_retry_same_id) ... ok
+test_id_limits (__main__.BackupTests.test_id_limits) ... ok
+test_id_not_overwritten (__main__.BackupTests.test_id_not_overwritten) ... ok
+test_missing_snapshot (__main__.BackupTests.test_missing_snapshot) ... ok
+test_missing_source (__main__.BackupTests.test_missing_source) ... ok
+test_parallel_create_same_id (__main__.BackupTests.test_parallel_create_same_id) ... ok
+test_protected_destination (__main__.BackupTests.test_protected_destination) ... ok
+test_regular_file_as_managed_directory (__main__.BackupTests.test_regular_file_as_managed_directory) ... ok
+test_restore_repo_overlap (__main__.BackupTests.test_restore_repo_overlap) ... ok
+test_sigkill_create_preserves_previous_and_allows_retry (__main__.BackupTests.test_sigkill_create_preserves_previous_and_allows_retry) ... ok
+test_source_repo_overlap (__main__.BackupTests.test_source_repo_overlap) ... ok
+test_source_symlinks (__main__.BackupTests.test_source_symlinks) ... ok
+test_special_files (__main__.BackupTests.test_special_files) ... ERROR
+test_symlink_in_snapshot_or_staging (__main__.BackupTests.test_symlink_in_snapshot_or_staging) ... ok
+test_symlink_path_components_and_dotdot (__main__.BackupTests.test_symlink_path_components_and_dotdot) ... ok
+test_unsafe_manifest_rejected_even_with_matching_checksum (__main__.BackupTests.test_unsafe_manifest_rejected_even_with_matching_checksum) ... ok
+test_v2_three_exact_versions_without_source (__main__.BackupTests.test_v2_three_exact_versions_without_source) ... ok
+
+======================================================================
+ERROR: test_special_files (__main__.BackupTests.test_special_files)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 245, in test_special_files
+    sock.bind(str(self.source / "socket"))
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 22 tests in 5.421s
+
+FAILED (errors=1)

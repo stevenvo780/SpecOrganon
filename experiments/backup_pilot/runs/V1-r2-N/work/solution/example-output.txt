@@ -1,0 +1,23 @@
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/.backup-example-0kda5fal/repositorio
+exit=0
+stdout: {"snapshots": []}
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/.backup-example-0kda5fal/documentos --repo /trial/.backup-example-0kda5fal/repositorio --id ejemplo --max-bytes 10000
+exit=0
+stdout: {"id": "ejemplo"}
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/.backup-example-0kda5fal/repositorio --id ejemplo
+exit=0
+stdout: {"id": "ejemplo", "valid": true}
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/.backup-example-0kda5fal/repositorio
+exit=0
+stdout: {"snapshots": ["ejemplo"]}
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/.backup-example-0kda5fal/repositorio --id ejemplo --dest /trial/.backup-example-0kda5fal/restaurado
+exit=0
+stdout: {"id": "ejemplo"}
+Bytes regulares del repositorio (incluye metadata): 504
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/.backup-example-0kda5fal/documentos --repo /trial/.backup-example-0kda5fal/repositorio --id no_cabe --max-bytes 503
+exit=1
+stderr: {"error": "El repositorio existente excede --max-bytes"}
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/.backup-example-0kda5fal/repositorio --id ejemplo
+exit=0
+stdout: {"id": "ejemplo", "valid": true}
+OK: restauración exacta; límite bajo rechazado sin crecimiento ni cambios.

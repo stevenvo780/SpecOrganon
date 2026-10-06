@@ -1,0 +1,7 @@
+FROM specorganon-codex:local
+USER root
+COPY experiments/backup_pilot/evaluator.py /eval/evaluator.py
+RUN chmod 0700 /eval /eval/evaluator.py
+ENV BACKUP_CANDIDATE_UID=1000 PYTHONDONTWRITEBYTECODE=1
+WORKDIR /work
+ENTRYPOINT ["python", "/eval/evaluator.py"]

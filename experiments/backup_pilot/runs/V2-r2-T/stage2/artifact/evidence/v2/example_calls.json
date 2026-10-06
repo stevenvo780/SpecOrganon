@@ -1,0 +1,198 @@
+[
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/v2/examples-ocscu4om/source",
+      "--repo",
+      "/trial/evidence/v2/examples-ocscu4om/repo",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "1000000"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/v2/examples-ocscu4om/source",
+      "--repo",
+      "/trial/evidence/v2/examples-ocscu4om/repo",
+      "--id",
+      "v2",
+      "--max-bytes",
+      "1000000"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "stdout": "{\"id\":\"v2\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/v2/examples-ocscu4om/source",
+      "--repo",
+      "/trial/evidence/v2/examples-ocscu4om/repo",
+      "--id",
+      "v3",
+      "--max-bytes",
+      "1000000"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "stdout": "{\"id\":\"v3\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/v2/examples-ocscu4om/source",
+      "--repo",
+      "/trial/evidence/v2/examples-ocscu4om/repo",
+      "--id",
+      "too-small",
+      "--max-bytes",
+      "861"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n"
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/evidence/v2/examples-ocscu4om/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "stdout": "{\"snapshots\":[\"v1\",\"v2\",\"v3\"]}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/evidence/v2/examples-ocscu4om/repo",
+      "--id",
+      "v1"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "stdout": "{\"id\":\"v1\",\"valid\":true}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/evidence/v2/examples-ocscu4om/repo",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/v2/examples-ocscu4om/restore-v1"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/evidence/v2/examples-ocscu4om/repo",
+      "--id",
+      "v2"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "stdout": "{\"id\":\"v2\",\"valid\":true}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/evidence/v2/examples-ocscu4om/repo",
+      "--id",
+      "v2",
+      "--dest",
+      "/trial/evidence/v2/examples-ocscu4om/restore-v2"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "stdout": "{\"id\":\"v2\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/evidence/v2/examples-ocscu4om/repo",
+      "--id",
+      "v3"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "stdout": "{\"id\":\"v3\",\"valid\":true}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/evidence/v2/examples-ocscu4om/repo",
+      "--id",
+      "v3",
+      "--dest",
+      "/trial/evidence/v2/examples-ocscu4om/restore-v3"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "timeout_seconds": 30,
+    "stdout": "{\"id\":\"v3\"}\n",
+    "stderr": ""
+  }
+]

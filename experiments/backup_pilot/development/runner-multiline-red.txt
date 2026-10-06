@@ -1,0 +1,48 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_receipts_accept_multiline_json_with_scalar_lines _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-24/test_receipts_accept_multiline0')
+
+    def test_receipts_accept_multiline_json_with_scalar_lines(tmp_path):
+        import sys
+        r=module()
+        argv=[sys.executable,'-c','import json; print(json.dumps({"paths":["last"],"value":True},indent=2))']
+>       receipt=r.command(argv,tmp_path/'output',5)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+experiments/backup_pilot/development/tests/test_runner.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['/usr/bin/python', '-c', 'import json; print(json.dumps({"paths":["last"],"value":True},indent=2))']
+stem = PosixPath('/tmp/pytest-of-stev/pytest-24/test_receipts_accept_multiline0/output')
+timeout = 5, prompt = None, container = None
+
+    def command(argv,stem,timeout,prompt=None,container=None):
+        stem=Path(stem); stem.parent.mkdir(parents=True,exist_ok=True)
+        started=time.monotonic(); timed_out=False
+        if prompt is not None: stem.with_suffix('.prompt.txt').write_text(prompt)
+        with stem.with_suffix('.jsonl').open('wb') as out, stem.with_suffix('.stderr').open('wb') as err:
+            process=subprocess.Popen(argv,stdin=subprocess.PIPE if prompt is not None else subprocess.DEVNULL,
+                                     stdout=out,stderr=err,start_new_session=True)
+            try: process.communicate(prompt.encode() if prompt is not None else None,timeout=timeout)
+            except subprocess.TimeoutExpired:
+                timed_out=True
+                if container:
+                    subprocess.run(['docker','kill',container],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=20)
+                if process.poll() is None: process.kill()
+                process.wait(timeout=30)
+        usage=[]; errors=[]; agent_text=[]
+        with stem.with_suffix('.jsonl').open() as stream:
+            for line in stream:
+                try: event=json.loads(line)
+                except (ValueError,UnicodeError): continue
+                if 'usage' in event: usage.append(event['usage'])
+>               if event.get('type') in ('error','turn.failed'): errors.append(event)
+                   ^^^^^^^^^
+E               AttributeError: 'str' object has no attribute 'get'
+
+experiments/backup_pilot/run_pilot.py:104: AttributeError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/development/tests/test_runner.py::test_receipts_accept_multiline_json_with_scalar_lines
+1 failed, 3 deselected in 0.08s

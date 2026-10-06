@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "docker",
+    "run",
+    "--rm",
+    "--network",
+    "none",
+    "--cap-drop",
+    "ALL",
+    "--user",
+    "1000:1000",
+    "--entrypoint",
+    "python",
+    "sha256:c06f41cd6cab9de07ec70182b455788882c34d5ad820bf82914ab9f3ce668c5b",
+    "-c",
+    "import json,sys;print(json.dumps({\"executable\":sys.executable,\"version\":sys.version,\"no_site\":sys.flags.no_site}))"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"executable\": \"/opt/specorganon/.venv/bin/python\", \"version\": \"3.12.15 (main, Oct  1 2026, 21:50:06) [GCC 12.2.0]\", \"no_site\": 0}\n",
+  "stderr": ""
+}

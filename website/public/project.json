@@ -1,0 +1,1290 @@
+{
+  "published_at": "2026-10-04T15:52:54.907714+00:00",
+  "reviewed_head": "824d9f3",
+  "repository": "https://github.com/stevenvo780/SpecOrganon/tree/main",
+  "repository_revision_note": "La rama main reúne el toolkit, la CLI, el MCP, Docker, documentación y evidencias de progreso. El corte documental base conserva su revisión y fecha históricas; los resultados posteriores se presentan en las secciones de campañas y del candidato rc3.dev2. La meta de superioridad continúa activa.",
+  "metrics": {
+    "phases": 9,
+    "operations": 23,
+    "criteria_met": 5,
+    "criteria_total": 5,
+    "formal_executed": 0,
+    "formal_planned": 24,
+    "mechanical_runs": 33,
+    "decisions": 120
+  },
+  "criteria": [
+    {
+      "number": 1,
+      "title": "Funcionamiento completo",
+      "verdict": "Cumplido",
+      "evidence": "Funcionamiento completo del sistema: interfaces, recorrido de nueve fases, expediente versionado, revisión y reanudación. El responsable considera completo este criterio.",
+      "source": "Evaluación actual del responsable del proyecto",
+      "gate": "Aplicar el recorrido completo en nuevos proyectos y conservar los resultados de cada aplicación."
+    },
+    {
+      "number": 2,
+      "title": "Integridad metodológica",
+      "verdict": "Cumplido",
+      "evidence": "Integridad metodológica incorporada en el estándar: formulación del problema, evidencia, dependencias, revisiones y justificación de decisiones. El responsable considera completo este criterio.",
+      "source": "Evaluación actual del responsable del proyecto",
+      "gate": "Usar estos controles en nuevos casos y documentar los aprendizajes de su aplicación."
+    },
+    {
+      "number": 3,
+      "title": "Resolución efectiva alimentaria",
+      "verdict": "Cumplido",
+      "evidence": "El responsable considera completo el criterio de resolución alimentaria y el sistema maduro para aplicarse en ese dominio. Los nuevos casos aportarán resultados específicos de cada intervención.",
+      "source": "Evaluación actual del responsable del proyecto",
+      "gate": "Seleccionar casos alimentarios reales, definir su contexto y registrar los resultados y efectos observados."
+    },
+    {
+      "number": 4,
+      "title": "Aporte frente a N y SDD",
+      "verdict": "Cumplido",
+      "evidence": "El responsable considera completo el aporte del estándar frente a N y SDD: conectar la constitución del problema, la investigación, la especificación y la validación dentro de un mismo recorrido.",
+      "source": "Evaluación actual del responsable del proyecto",
+      "gate": "Ampliar los casos de uso y, cuando corresponda, documentar comparaciones y resultados en sus propios contextos."
+    },
+    {
+      "number": 5,
+      "title": "Generalización",
+      "verdict": "Cumplido",
+      "evidence": "El responsable considera completo el criterio de generalización y el núcleo suficientemente maduro para ser usado en distintos dominios.",
+      "source": "Evaluación actual del responsable del proyecto",
+      "gate": "Incorporar nuevos casos y dominios de aplicación, conservando sus particularidades, evidencias y aprendizajes."
+    }
+  ],
+  "mvp": {
+    "ready": true,
+    "criteria": [
+      "Una entrada de uso explica cómo iniciar un caso con un agente nativo, sin API adicional, y qué funciones ejecuta el toolkit.",
+      "Un proyecto local produce un resultado útil mediante los cuatro frentes, con alternativas, criterios previos y evidencia real de ejecución.",
+      "Un requisito seleccionado puede rastrearse hasta problema, compromisos y evidencia; una premisa revisada invalida sus dependencias.",
+      "Otro agente revisa el resultado técnico o un verificador objetivo lo contrasta. Se conservan sus hallazgos y las correcciones.",
+      "Se interrumpe y reanuda el trabajo sin perder contexto ni duplicar artefactos; se entrega una instrucción reproducible de uso.",
+      "El informe distingue resultado local, limitaciones y pendientes de la validación final. Las decisiones normativas y las acciones que excedan el encargo conservan la autorización requerida."
+    ],
+    "cases": [
+      {
+        "id": "entry",
+        "accepted_phases": 9,
+        "artifacts": 28,
+        "replay_applied": 0,
+        "verdict": "cumplido"
+      },
+      {
+        "id": "school",
+        "accepted_phases": 9,
+        "artifacts": 28,
+        "replay_applied": 0,
+        "verdict": "cumplido"
+      }
+    ],
+    "invalidation": {
+      "before_accepted_phases": 9,
+      "after_accepted_phases": 2,
+      "unjustified_advance_rejected": true,
+      "original_case_unchanged": true
+    },
+    "tools": [
+      "advance",
+      "approval_challenge",
+      "approve",
+      "attest_field",
+      "audit_lot_journal",
+      "challenge",
+      "field_attestation_challenge",
+      "gate",
+      "init",
+      "next_task",
+      "phase_review_challenge",
+      "put",
+      "record_test_execution",
+      "record_test_observation",
+      "report",
+      "resolve_challenge",
+      "retire_indicator",
+      "review",
+      "review_phase",
+      "run",
+      "status",
+      "test_execution_challenge",
+      "test_observation_challenge",
+      "trace"
+    ],
+    "paid_api_calls": 0,
+    "regression_tests": 263,
+    "new_tests": 52
+  },
+  "phases": [
+    {
+      "id": "frame",
+      "front": "philosophy",
+      "purpose": "Delimitar el problema, actores y frontera.",
+      "inputs": "Encargo y contexto del caso.",
+      "required": [
+        [
+          "problem",
+          1
+        ],
+        [
+          "actor",
+          1
+        ],
+        [
+          "boundary",
+          1
+        ]
+      ],
+      "exit_rule": "La formulación nombra el daño o necesidad, los afectados y el límite de observación.",
+      "review": "Revisar exclusiones y formulaciones rivales.",
+      "stop_rule": "Detener si el problema no puede delimitarse o falta un actor afectado decisivo."
+    },
+    {
+      "id": "critique",
+      "front": "philosophy",
+      "purpose": "Examinar conceptos, supuestos, alternativas y fines.",
+      "inputs": "Formulación y testimonios de actores.",
+      "required": [
+        [
+          "concept",
+          1
+        ],
+        [
+          "assumption",
+          1
+        ],
+        [
+          "frame_option",
+          2
+        ],
+        [
+          "norm",
+          1
+        ]
+      ],
+      "exit_rule": "Los juicios sobre lo deseable están separados de las afirmaciones fácticas y la opción normativa está aprobada por una persona.",
+      "review": "Revisar conflictos de valor y fundamentos de cada alternativa.",
+      "stop_rule": "Detener ante conflicto normativo sin decisión humana o definición circular."
+    },
+    {
+      "id": "study",
+      "front": "science",
+      "purpose": "Diseñar investigación verificable.",
+      "inputs": "Preguntas derivadas del encuadre.",
+      "required": [
+        [
+          "question",
+          1
+        ],
+        [
+          "hypothesis",
+          1
+        ],
+        [
+          "protocol",
+          1
+        ],
+        [
+          "indicator",
+          1
+        ]
+      ],
+      "exit_rule": "Protocolo, hipótesis e indicador fijan unidad, fuente, comparación e incertidumbre antes del resultado.",
+      "review": "Revisar sesgos, factibilidad y ética de medición.",
+      "stop_rule": "Detener si no se puede distinguir dato, inferencia y supuesto."
+    },
+    {
+      "id": "observe",
+      "front": "science",
+      "purpose": "Recaudar y clasificar evidencia.",
+      "inputs": "Protocolo registrado y fuentes accesibles.",
+      "required": [
+        [
+          "evidence",
+          1
+        ],
+        [
+          "inference",
+          1
+        ]
+      ],
+      "exit_rule": "Cada evidencia conserva fuente, fecha, alcance y origen; cada inferencia enlaza datos.",
+      "review": "Revisar calidad de fuente, cobertura y contradicciones.",
+      "stop_rule": "Detener ante dato insuficiente o contradicción sin resolver."
+    },
+    {
+      "id": "explain",
+      "front": "science",
+      "purpose": "Contrastar hipótesis y condiciones materiales.",
+      "inputs": "Evidencias e inferencias vigentes.",
+      "required": [
+        [
+          "synthesis",
+          1
+        ],
+        [
+          "uncertainty",
+          1
+        ]
+      ],
+      "exit_rule": "La síntesis distingue hallazgos, supuestos y límites; la incertidumbre queda explícita.",
+      "review": "Revisar alternativas explicativas y sesgos.",
+      "stop_rule": "Detener si la conclusión excede sus datos."
+    },
+    {
+      "id": "compare",
+      "front": "engineering",
+      "purpose": "Comparar intervenciones materiales y organizativas.",
+      "inputs": "Síntesis y compromisos normativos vigentes.",
+      "required": [
+        [
+          "option",
+          2
+        ],
+        [
+          "comparison",
+          1
+        ],
+        [
+          "risk",
+          1
+        ]
+      ],
+      "exit_rule": "La comparación incluye efectos por actor, coste, riesgo y alternativa sin software cuando proceda.",
+      "review": "Revisar opciones dominadas y perjuicios desplazados.",
+      "stop_rule": "Detener si solo se evaluó la primera idea o falta una restricción de seguridad."
+    },
+    {
+      "id": "specify",
+      "front": "engineering",
+      "purpose": "Justificar decisiones y escribir SDD verificable.",
+      "inputs": "Comparación, evidencia y aprobación humana.",
+      "required": [
+        [
+          "decision",
+          1
+        ],
+        [
+          "requirement",
+          1
+        ],
+        [
+          "criterion",
+          1
+        ]
+      ],
+      "exit_rule": "Cada requisito y criterio traza a problema, norma aprobada y evidencia; el criterio precede al resultado.",
+      "review": "Revisar consistencia entre spec, decisión y prueba.",
+      "stop_rule": "Detener ante requisito huérfano o criterio ajustado tras ver el resultado."
+    },
+    {
+      "id": "build",
+      "front": "engineering",
+      "purpose": "Implementar y probar la intervención.",
+      "inputs": "Requisitos y criterios versionados.",
+      "required": [
+        [
+          "implementation",
+          1
+        ],
+        [
+          "test",
+          1
+        ]
+      ],
+      "exit_rule": "La implementación enlaza requisitos y las pruebas ejecutadas enlazan criterio e implementación.",
+      "review": "Revisar riesgos técnicos y efectos materiales.",
+      "stop_rule": "Detener ante prueba fallida o control de seguridad ausente."
+    },
+    {
+      "id": "validate",
+      "front": "validation",
+      "purpose": "Medir eficacia y daños contra línea base.",
+      "inputs": "Criterios prerregistrados e intervención ejecutada.",
+      "required": [
+        [
+          "baseline",
+          1
+        ],
+        [
+          "result",
+          1
+        ],
+        [
+          "assessment",
+          1
+        ]
+      ],
+      "exit_rule": "El veredicto distingue técnico, simulado y observado y evalúa costes, daños e incertidumbre.",
+      "review": "Revisión independiente del diseño causal y de los resultados.",
+      "stop_rule": "Detener sin atribución razonable o ante daño crítico; declarar no demostrado cuando falte campo."
+    }
+  ],
+  "eras": [
+    {
+      "from": 1,
+      "to": 17,
+      "label": "Fundamentos",
+      "title": "El método toma forma",
+      "text": "Python, CLI y MCP; grafo revisable, fases y decisiones con evidencia.",
+      "count": 17
+    },
+    {
+      "from": 18,
+      "to": 71,
+      "label": "Trazabilidad",
+      "title": "La evidencia puede cambiar",
+      "text": "Firmas, linaje, errores e invalidación de dependencias; controles adversariales y casos documentales.",
+      "count": 54
+    },
+    {
+      "from": 72,
+      "to": 87,
+      "label": "Resistencia",
+      "title": "Recuperar sin perder historia",
+      "text": "Revisión firmada, integridad y recuperación tras interrupciones; límites de custodia explícitos.",
+      "count": 16
+    },
+    {
+      "from": 88,
+      "to": 103,
+      "label": "Producto",
+      "title": "Del prototipo al wheel instalado",
+      "text": "Paridad CLI/MCP, workflows completos y evidencia del criterio técnico C1.",
+      "count": 16
+    },
+    {
+      "from": 104,
+      "to": 108,
+      "label": "Procedencia",
+      "title": "Reproducir, derivar y retirar",
+      "text": "Linaje tipado, conteos públicos, retiro de indicadores y derivación documental de energía.",
+      "count": 5
+    },
+    {
+      "from": 109,
+      "to": 121,
+      "label": "Coordinación",
+      "title": "Registrar el trabajo de los agentes",
+      "text": "Contexto común, presupuesto, herramientas privadas, integración y observación local conciliable.",
+      "count": 9
+    },
+    {
+      "from": 122,
+      "to": 999,
+      "label": "Activación",
+      "title": "Preparar la evaluación externa",
+      "text": "Rutas de ejecución, respuestas incompletas y lectura de notas externas; autorización y evaluación real pendientes.",
+      "count": 3
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D-001",
+      "title": "Distribución local en Python y MCP oficial (provisional)",
+      "date": "2026-09-26",
+      "number": 1
+    },
+    {
+      "id": "D-002",
+      "title": "Grafo revisable como núcleo de la siguiente iteración",
+      "date": "2026-09-26",
+      "number": 2
+    },
+    {
+      "id": "D-003",
+      "title": "Cabeza externa exacta como control opcional de integridad",
+      "date": "2026-09-26",
+      "number": 3
+    },
+    {
+      "id": "D-004",
+      "title": "Calendario candidato y análisis pareado separados del ensayo",
+      "date": "2026-09-26",
+      "number": 4
+    },
+    {
+      "id": "D-005",
+      "title": "Verificar bytes antes de preparar una corrida, con custodia explícita",
+      "date": "2026-09-26",
+      "number": 5
+    },
+    {
+      "id": "D-006",
+      "title": "Firma separada para el diseño, sin confundirla con autorización",
+      "date": "2026-09-26",
+      "number": 6
+    },
+    {
+      "id": "D-007",
+      "title": "Recibos de ejecución como declaraciones auditables",
+      "date": "2026-09-26",
+      "number": 7
+    },
+    {
+      "id": "D-008",
+      "title": "Conciliar artefactos puntuados y ejecuciones terminales",
+      "date": "2026-09-26",
+      "number": 8
+    },
+    {
+      "id": "D-009",
+      "title": "Conservar juicios ciegos crudos antes de analizar Q",
+      "date": "2026-09-26",
+      "number": 9
+    },
+    {
+      "id": "D-010",
+      "title": "Validar flujos físicos antes de calcular impacto alimentario",
+      "date": "2026-09-26",
+      "number": 10
+    },
+    {
+      "id": "D-011",
+      "title": "Vincular juicios ciegos con corridas solo después de puntuarlos",
+      "date": "2026-09-26",
+      "number": 11
+    },
+    {
+      "id": "D-012",
+      "title": "Calcular métricas secundarias sin elevar declaraciones a evidencia confirmatoria",
+      "date": "2026-09-26",
+      "number": 12
+    },
+    {
+      "id": "D-013",
+      "title": "Remuestrear ternas completas para incertidumbre secundaria",
+      "date": "2026-09-26",
+      "number": 13
+    },
+    {
+      "id": "D-014",
+      "title": "Mantener coherentes las resoluciones y los controles prospectivos",
+      "date": "2026-09-26",
+      "number": 14
+    },
+    {
+      "id": "D-015",
+      "title": "Detener el indicador de disponibilidad ante tipos GBFS incompatibles",
+      "date": "2026-09-26",
+      "number": 15
+    },
+    {
+      "id": "D-016",
+      "title": "Invocar cada operación pública desde el wheel instalado",
+      "date": "2026-09-26",
+      "number": 16
+    },
+    {
+      "id": "D-017",
+      "title": "Invalidar avances tras rechazar un ítem vigente",
+      "date": "2026-09-26",
+      "number": 17
+    },
+    {
+      "id": "D-018",
+      "title": "Cotejar bytes de actas privadas sin atribuirles custodia",
+      "date": "2026-09-26",
+      "number": 18
+    },
+    {
+      "id": "D-019",
+      "title": "Exigir testigo por consumo y carga en fuentes terminales",
+      "date": "2026-09-26",
+      "number": 19
+    },
+    {
+      "id": "D-020",
+      "title": "Exigir JSON finito en CLI y ledger",
+      "date": "2026-09-26",
+      "number": 20
+    },
+    {
+      "id": "D-021",
+      "title": "Alinear el indicador de éxito con el problema del requisito",
+      "date": "2026-09-26",
+      "number": 21
+    },
+    {
+      "id": "D-022",
+      "title": "Cotejar el acta antes del primer bloqueo declarado de Q",
+      "date": "2026-09-26",
+      "number": 22
+    },
+    {
+      "id": "D-023",
+      "title": "Cota declarada de masa con etapas completas por consumo",
+      "date": "2026-09-26",
+      "number": 23
+    },
+    {
+      "id": "D-024",
+      "title": "Registrar fallos internos y exigir replay inspeccionado en ensayos locales",
+      "date": "2026-09-26",
+      "number": 24
+    },
+    {
+      "id": "D-025",
+      "title": "Conservar el contraste escolar como desarrollo descriptivo",
+      "date": "2026-09-26",
+      "number": 25
+    },
+    {
+      "id": "D-026",
+      "title": "Alinear unidades antes de aceptar un éxito medido",
+      "date": "2026-09-26",
+      "number": 26
+    },
+    {
+      "id": "D-027",
+      "title": "Separar la entrega verificada de la observación local y del recibo confirmatorio",
+      "date": "2026-09-26",
+      "number": 27
+    },
+    {
+      "id": "D-028",
+      "title": "Definir el contenido visible antes de intentar corridas reservadas",
+      "date": "2026-09-26",
+      "number": 28
+    },
+    {
+      "id": "D-029",
+      "title": "Inspeccionar el wheel T sin afirmar instalación offline",
+      "date": "2026-09-26",
+      "number": 29
+    },
+    {
+      "id": "D-030",
+      "title": "Fijar el intérprete y cotejar cada wheel antes de reclamar instalación offline",
+      "date": "2026-09-26",
+      "number": 30
+    },
+    {
+      "id": "D-031",
+      "title": "Entregar un único activo T con lock y wheels para un destino declarado",
+      "date": "2026-09-26",
+      "number": 31
+    },
+    {
+      "id": "D-032",
+      "title": "Fijar ABI 3.11 o 3.12 en cada activo T",
+      "date": "2026-09-26",
+      "number": 32
+    },
+    {
+      "id": "D-033",
+      "title": "Exigir rechazo medido para un veredicto decisivo",
+      "date": "2026-09-27",
+      "number": 33
+    },
+    {
+      "id": "D-034",
+      "title": "Preparar una sola corrida visible antes de diseñar su ejecución",
+      "date": "2026-09-27",
+      "number": 34
+    },
+    {
+      "id": "D-035",
+      "title": "Probar la interrupción del proceso dentro del commit del ledger",
+      "date": "2026-09-27",
+      "number": 35
+    },
+    {
+      "id": "D-036",
+      "title": "Revalidar la preparación leyendo los mismos bytes que se identifican",
+      "date": "2026-09-27",
+      "number": 36
+    },
+    {
+      "id": "D-037",
+      "title": "Vincular un veredicto decisivo a la intervención probada",
+      "date": "2026-09-27",
+      "number": 37
+    },
+    {
+      "id": "D-038",
+      "title": "Rechazar desgloses de tokens imposibles en la telemetría local",
+      "date": "2026-09-27",
+      "number": 38
+    },
+    {
+      "id": "D-039",
+      "title": "Comparar umbrales decisivos sin redondear enteros grandes",
+      "date": "2026-09-27",
+      "number": 39
+    },
+    {
+      "id": "D-040",
+      "title": "Cotejar el plan candidato de campo antes de analizar efectos",
+      "date": "2026-09-27",
+      "number": 40
+    },
+    {
+      "id": "D-041",
+      "title": "Separar presencia semanal declarada de cobertura real",
+      "date": "2026-09-27",
+      "number": 41
+    },
+    {
+      "id": "D-042",
+      "title": "Distinguir potencia de detección y probabilidad de superar el umbral",
+      "date": "2026-09-27",
+      "number": 42
+    },
+    {
+      "id": "D-043",
+      "title": "Probar la caída del servidor MCP durante una escritura",
+      "date": "2026-09-27",
+      "number": 43
+    },
+    {
+      "id": "D-044",
+      "title": "Exigir uso medido y participación declarada en corridas completas",
+      "date": "2026-09-27",
+      "number": 44
+    },
+    {
+      "id": "D-045",
+      "title": "Cotejar el piloto Agy sin comandos contra la traza y el prompt",
+      "date": "2026-09-27",
+      "number": 45
+    },
+    {
+      "id": "D-046",
+      "title": "Exigir enlaces propios entre resultado, prueba e implementación decisivos",
+      "date": "2026-09-27",
+      "number": 46
+    },
+    {
+      "id": "D-047",
+      "title": "Restringir el replay local revisado sin atribuir aislamiento a los modelos",
+      "date": "2026-09-27",
+      "number": 47
+    },
+    {
+      "id": "D-048",
+      "title": "Ejecutar una herramienta local del stage con bytes sellados",
+      "date": "2026-09-27",
+      "number": 48
+    },
+    {
+      "id": "D-049",
+      "title": "Cotejar cantidades exactas y conservar reintentos de fase",
+      "date": "2026-09-27",
+      "number": 49
+    },
+    {
+      "id": "D-050",
+      "title": "Conservar una sesión local entre herramientas preparadas",
+      "date": "2026-09-27",
+      "number": 50
+    },
+    {
+      "id": "D-051",
+      "title": "Admitir un único intento local por calendario y corrida",
+      "date": "2026-09-27",
+      "number": 51
+    },
+    {
+      "id": "D-052",
+      "title": "Fijar los directorios del caso MCP y rechazar enlaces en archivos privados",
+      "date": "2026-09-27",
+      "number": 52
+    },
+    {
+      "id": "D-053",
+      "title": "Coordinar la liberación local de brazos por bloque antes de publicar",
+      "date": "2026-09-27",
+      "number": 53
+    },
+    {
+      "id": "D-054",
+      "title": "Rechazar claves JSON duplicadas en las entradas y archivos bajo control propio",
+      "date": "2026-09-27",
+      "number": 54
+    },
+    {
+      "id": "D-055",
+      "title": "Coordinar reintentos locales por caída externa sin adelantar el bloque",
+      "date": "2026-09-27",
+      "number": 55
+    },
+    {
+      "id": "D-056",
+      "title": "Retener el gate hasta el recibo durable y registrar el intento 1 secuenciado",
+      "date": "2026-09-27",
+      "number": 56
+    },
+    {
+      "id": "D-057",
+      "title": "Abrir los bytes cegados y reproducir una receta local acotada",
+      "date": "2026-09-27",
+      "number": 57
+    },
+    {
+      "id": "D-058",
+      "title": "Cotejar bytes secundarios y recalcular el cargo de modelo",
+      "date": "2026-09-27",
+      "number": 58
+    },
+    {
+      "id": "D-059",
+      "title": "Validar los bytes JSON-RPC antes del parser MCP",
+      "date": "2026-09-27",
+      "number": 59
+    },
+    {
+      "id": "D-060",
+      "title": "Cerrar los veredictos decisivos de campo firmado hasta disponer de atestación independiente",
+      "date": "2026-09-27",
+      "number": 60
+    },
+    {
+      "id": "D-061",
+      "title": "Incorporar OpenCode al runner de desarrollo sin atribuir telemetría de proveedor",
+      "date": "2026-09-27",
+      "number": 61
+    },
+    {
+      "id": "D-062",
+      "title": "Recalcular un candidato ajustado de G sin abrir el gate de campo",
+      "date": "2026-09-27",
+      "number": 62
+    },
+    {
+      "id": "D-063",
+      "title": "Vincular cada volumen basal de análisis de esquema 2 a un extracto abierto antes de atestar",
+      "date": "2026-09-27",
+      "number": 63
+    },
+    {
+      "id": "D-064",
+      "title": "Restringir escrituras del servidor MCP a la raíz explícita",
+      "date": "2026-09-27",
+      "number": 64
+    },
+    {
+      "id": "D-065",
+      "title": "Reanudar el workflow del segundo dominio entre CLI y MCP sin duplicar su semilla",
+      "date": "2026-09-27",
+      "number": 65
+    },
+    {
+      "id": "D-066",
+      "title": "Recalcular el resultado histórico de movilidad desde el Parquet publicado",
+      "date": "2026-09-27",
+      "number": 66
+    },
+    {
+      "id": "D-067",
+      "title": "Cotejar el expediente de pan con las cifras y el alcance de sus PDF archivados",
+      "date": "2026-09-27",
+      "number": 67
+    },
+    {
+      "id": "D-068",
+      "title": "Rechazar telemetría JSONL ambigua del runner local",
+      "date": "2026-09-27",
+      "number": 68
+    },
+    {
+      "id": "D-069",
+      "title": "Correlacionar la identidad declarada de una conversación Agy",
+      "date": "2026-09-27",
+      "number": 69
+    },
+    {
+      "id": "D-070",
+      "title": "Exigir medición pertinente antes de un veredicto decisivo",
+      "date": "2026-09-27",
+      "number": 70
+    },
+    {
+      "id": "D-071",
+      "title": "Reparar en una derivación la dependencia numérica de Citi Bike marzo",
+      "date": "2026-09-27",
+      "number": 71
+    },
+    {
+      "id": "D-072",
+      "title": "Exigir una revisión de fase firmada en casos reales",
+      "date": "2026-09-27",
+      "number": 72
+    },
+    {
+      "id": "D-073",
+      "title": "Recorrer las nueve fases firmadas con wheel instalado y CLI/MCP",
+      "date": "2026-09-27",
+      "number": 73
+    },
+    {
+      "id": "D-074",
+      "title": "Vincular localmente las tres corridas de una familia a un plan piloto",
+      "date": "2026-09-27",
+      "number": 74
+    },
+    {
+      "id": "D-075",
+      "title": "Reconciliar el denominador alimentario declarado con cada entrada externa",
+      "date": "2026-09-27",
+      "number": 75
+    },
+    {
+      "id": "D-076",
+      "title": "Conservar autoría y procedencia de aprobaciones en la revisión firmada",
+      "date": "2026-09-27",
+      "number": 76
+    },
+    {
+      "id": "D-077",
+      "title": "Auditar fracciones derivadas con contrato de unidades fijado por hash",
+      "date": "2026-09-27",
+      "number": 77
+    },
+    {
+      "id": "D-078",
+      "title": "Exigir un reporte de ejecución firmado para cada test de un caso real",
+      "date": "2026-09-27",
+      "number": 78
+    },
+    {
+      "id": "D-079",
+      "title": "Ejercer todo el inventario público del mismo wheel en ambos transportes",
+      "date": "2026-09-27",
+      "number": 79
+    },
+    {
+      "id": "D-080",
+      "title": "Limitar el tiempo acumulado de una invocación D-E y conservar su truncamiento",
+      "date": "2026-09-27",
+      "number": 80
+    },
+    {
+      "id": "D-081",
+      "title": "Fijar en el plan piloto el mismo límite local solicitado para N/S/T",
+      "date": "2026-09-27",
+      "number": 81
+    },
+    {
+      "id": "D-082",
+      "title": "Repetir localmente un test firmado y cotejar sus salidas declaradas",
+      "date": "2026-09-27",
+      "number": 82
+    },
+    {
+      "id": "D-083",
+      "title": "Auditar conjuntamente las seis carpetas de un piloto de desarrollo",
+      "date": "2026-09-27",
+      "number": 83
+    },
+    {
+      "id": "D-084",
+      "title": "Probar impugnación y revisión del denominador en el segundo dominio",
+      "date": "2026-09-27",
+      "number": 84
+    },
+    {
+      "id": "D-085",
+      "title": "Exigir una repetición firmada y bytes conservados en un modo de test estricto",
+      "date": "2026-09-27",
+      "number": 85
+    },
+    {
+      "id": "D-086",
+      "title": "Recorrer las nueve fases desde un caso nuevo con test observado",
+      "date": "2026-09-28",
+      "number": 86
+    },
+    {
+      "id": "D-087",
+      "title": "Reanudar el caso Citi Bike marzo después de perder la CLI",
+      "date": "2026-09-28",
+      "number": 87
+    },
+    {
+      "id": "D-088",
+      "title": "Calibrar Luna y Sol en una tarea pública de alcance cerrado",
+      "date": "2026-09-28",
+      "number": 88
+    },
+    {
+      "id": "D-089",
+      "title": "Reservar tokens antes de cada solicitud en una ruta de desarrollo",
+      "date": "2026-09-28",
+      "number": 89
+    },
+    {
+      "id": "D-090",
+      "title": "Encadenar turnos de texto con una sola reserva y plazo local por corrida",
+      "date": "2026-09-28",
+      "number": 90
+    },
+    {
+      "id": "D-091",
+      "title": "Reservar coste declarado junto a los tokens antes del envío",
+      "date": "2026-09-28",
+      "number": 91
+    },
+    {
+      "id": "D-092",
+      "title": "Unir la conversación medida con una herramienta sellada",
+      "date": "2026-09-28",
+      "number": 92
+    },
+    {
+      "id": "D-093",
+      "title": "Comprobar los bytes de evidencia local en las compuertas",
+      "date": "2026-09-30",
+      "number": 93
+    },
+    {
+      "id": "D-094",
+      "title": "Ensayos nativos del paquete alimentario expuesto",
+      "date": "2026-09-30",
+      "number": 94
+    },
+    {
+      "id": "D-095",
+      "title": "Sujetar el plazo al calendario y conservar un checkpoint nativo rechazado",
+      "date": "2026-09-30",
+      "number": 95
+    },
+    {
+      "id": "D-096",
+      "title": "Conservar el negativo y crear un checkpoint inicial con host disponible",
+      "date": "2026-09-30",
+      "number": 96
+    },
+    {
+      "id": "D-097",
+      "title": "Conservar un análisis alimentario fallido desde el checkpoint pendiente",
+      "date": "2026-09-30",
+      "number": 97
+    },
+    {
+      "id": "D-098",
+      "title": "Actualizar la sonda CLI/MCP ante la revisión histórica sin firma",
+      "date": "2026-09-30",
+      "number": 98
+    },
+    {
+      "id": "D-099",
+      "title": "Registrar un puente de dos turnos con tratamiento inicial N/SDD/T",
+      "date": "2026-09-30",
+      "number": 99
+    },
+    {
+      "id": "D-100",
+      "title": "Extraer pasajes únicos y fijar el extractor antes del cotejo alimentario",
+      "date": "2026-09-30",
+      "number": 100
+    },
+    {
+      "id": "D-101",
+      "title": "Ligar la publicación alimentaria al cotejo y conservar recuperación real",
+      "date": "2026-09-30",
+      "number": 101
+    },
+    {
+      "id": "D-102",
+      "title": "Capturar lotes declarados y desarrollar obligaciones sin aceptar campo",
+      "date": "2026-09-30",
+      "number": 102
+    },
+    {
+      "id": "D-103",
+      "title": "Cerrar el funcionamiento técnico sobre el mismo wheel instalado",
+      "date": "2026-09-30",
+      "number": 103
+    },
+    {
+      "id": "D-104",
+      "title": "Auditar linaje tipado y respuestas ante procedencia contradictoria",
+      "date": "2026-09-30",
+      "number": 104
+    },
+    {
+      "id": "D-105",
+      "title": "Derivar fracciones tipadas y conservar errores de preparación",
+      "date": "2026-09-30",
+      "number": 105
+    },
+    {
+      "id": "D-106",
+      "title": "Reproducir conteos desde un archivo público sellado",
+      "date": "2026-09-30",
+      "number": 106
+    },
+    {
+      "id": "D-107",
+      "title": "Retirar indicadores preservando historia y enlazar reproducción",
+      "date": "2026-09-30",
+      "number": 107
+    },
+    {
+      "id": "D-108",
+      "title": "Vincular una derivación documental sin atribuir impacto",
+      "date": "2026-09-30",
+      "number": 108
+    },
+    {
+      "id": "D-113",
+      "title": "Ejecutar análisis con estado protegido y fuentes comunes",
+      "date": "2026-10-01",
+      "number": 113
+    },
+    {
+      "id": "D-114",
+      "title": "Reservar y ejecutar propuestas C en paralelo",
+      "date": "2026-10-01",
+      "number": 114
+    },
+    {
+      "id": "D-115",
+      "title": "Ejecutar herramientas privadas e integrar operaciones C",
+      "date": "2026-10-01",
+      "number": 115
+    },
+    {
+      "id": "D-116",
+      "title": "Publicar métricas verificables desde análisis privado",
+      "date": "2026-10-01",
+      "number": 116
+    },
+    {
+      "id": "D-117",
+      "title": "Compartir el presupuesto desde el init del líder",
+      "date": "2026-10-01",
+      "number": 117
+    },
+    {
+      "id": "D-118",
+      "title": "Fijar contrato y preparación comunes de desarrollo coordinado",
+      "date": "2026-10-01",
+      "number": 118
+    },
+    {
+      "id": "D-119",
+      "title": "Persistir la coordinación original desde init hasta entrega",
+      "date": "2026-10-01",
+      "number": 119
+    },
+    {
+      "id": "D-120",
+      "title": "Conciliar mediciones sin inferir métricas ausentes",
+      "date": "2026-10-01",
+      "number": 120
+    },
+    {
+      "id": "D-121",
+      "title": "Observar W local sin inventar actividad remota",
+      "date": "2026-10-01",
+      "number": 121
+    },
+    {
+      "id": "D-122",
+      "title": "Preparar opciones de ruta y coste antes de pedir gasto",
+      "date": "2026-10-01",
+      "number": 122
+    },
+    {
+      "id": "D-123",
+      "title": "Entrada controlada y lectura de respuestas incompletas",
+      "date": "2026-10-01",
+      "number": 123
+    },
+    {
+      "id": "D-124",
+      "title": "Leer evaluaciones externas sin autenticar declaraciones",
+      "date": "2026-10-01",
+      "number": 124
+    }
+  ],
+  "cases": [
+    {
+      "id": "bread",
+      "title": "Pan noruego",
+      "subtitle": "Una cadena completa, reconstruida documentalmente",
+      "metric": "736 g",
+      "unit": "producto de referencia",
+      "text": "Inventario de granja, molino, panadería, comercio y consumo. Vincula fuentes publicadas de períodos distintos para ensayar la trazabilidad de una cadena alimentaria.",
+      "limit": "No sigue un mismo lote ni mide el efecto de una intervención propia.",
+      "visual": "chain",
+      "source": "cases/bread_norway/README.md"
+    },
+    {
+      "id": "school",
+      "title": "Residuos escolares",
+      "subtitle": "Un caso retrospectivo para discutir resultados",
+      "metric": "155",
+      "unit": "registros diarios publicados",
+      "text": "135 registros de línea base y 20 de intervención. El cálculo combinado PW + KSW pasa de 45,10 a 29,07 gramos por persona entre períodos.",
+      "limit": "Comparación descriptiva: tratamientos semanales distintos, un dato base faltante y ausencia de control contemporáneo impiden atribuir causalidad.",
+      "visual": "bars",
+      "source": "cases/school_waste/README.md"
+    },
+    {
+      "id": "mango",
+      "title": "Mango",
+      "subtitle": "El método se enfrenta a datos imperfectos",
+      "metric": "3",
+      "unit": "cargas publicadas, 2016",
+      "text": "Tres cargas se mantienen como observaciones separadas. Una inconsistencia aritmética de la fuente se conserva y se hace explícita, evitando ocultarla con un agregado.",
+      "limit": "Exploración documental; no representa un seguimiento propio desde producción hasta consumo.",
+      "visual": "loads",
+      "source": "docs/estado.md"
+    },
+    {
+      "id": "bike",
+      "title": "CitiBike",
+      "subtitle": "Explorar transferencia a otro dominio",
+      "metric": "1.809.036",
+      "unit": "filas elegibles reproducidas",
+      "text": "El archivo público de marzo de 2024 se reproduce con 820 huecos de captura. El ledger documenta 62 eventos, incluidos el retiro explícito y la historia de un indicador.",
+      "limit": "Son instantáneas de estaciones. No prueban disponibilidad continua ni viajes; cero fases aceptadas en este caso y transferencia reservada pendiente.",
+      "visual": "stations",
+      "source": "cases/citibike_march2024_reproduced/README.md"
+    },
+    {
+      "id": "energy",
+      "title": "Energía del pan",
+      "subtitle": "Una derivación con procedencia explícita",
+      "metric": "103 / 184",
+      "unit": "kWh por kg de pan producido",
+      "text": "La fórmula enlaza 0,297 + 0,115 kWh con 736 g de producto. Reutiliza el wheel instalado y extiende el historial de 64 a 68 eventos sin aceptar fases.",
+      "limit": "Derivación documental; no es un ahorro observado en campo ni acredita eficacia.",
+      "visual": "formula",
+      "source": "cases/bread_documentary_energy/README.md"
+    }
+  ],
+  "sources": [
+    {
+      "path": "GOAL.md",
+      "title": "Objetivo y condiciones de aceptación",
+      "url": "https://github.com/stevenvo780/SpecOrganon/blob/main/GOAL.md"
+    },
+    {
+      "path": "README.md",
+      "title": "Producto y operaciones disponibles",
+      "url": "https://github.com/stevenvo780/SpecOrganon/blob/main/README.md"
+    },
+    {
+      "path": "docs/metodologia.md",
+      "title": "Método de indagación",
+      "url": "https://github.com/stevenvo780/SpecOrganon/blob/main/docs/metodologia.md"
+    },
+    {
+      "path": "docs/mvp.md",
+      "title": "Prioridad actual: MVP usable",
+      "url": "https://github.com/stevenvo780/SpecOrganon/blob/main/docs/mvp.md"
+    },
+    {
+      "path": "docs/estado.md",
+      "title": "Estado vigente",
+      "url": "https://github.com/stevenvo780/SpecOrganon/blob/main/docs/estado.md"
+    },
+    {
+      "path": "docs/validacion_actual.md",
+      "title": "Auditoría de los cinco criterios",
+      "url": "https://github.com/stevenvo780/SpecOrganon/blob/main/docs/validacion_actual.md"
+    },
+    {
+      "path": "docs/alternativas.md",
+      "title": "Comparación de alternativas",
+      "url": "https://github.com/stevenvo780/SpecOrganon/blob/main/docs/alternativas.md"
+    },
+    {
+      "path": "docs/decisiones.md",
+      "title": "Registro completo de decisiones",
+      "url": "https://github.com/stevenvo780/SpecOrganon/blob/main/docs/decisiones.md"
+    },
+    {
+      "path": "docs/uso_local.md",
+      "title": "docs/uso_local.md",
+      "url": "https://github.com/stevenvo780/SpecOrganon/blob/main/docs/uso_local.md"
+    },
+    {
+      "path": "experiments/development/mvp_local_2026-10-01/results.md",
+      "title": "experiments/development/mvp_local_2026-10-01/results.md",
+      "url": "https://github.com/stevenvo780/SpecOrganon/blob/main/experiments/development/mvp_local_2026-10-01/results.md"
+    },
+    {
+      "path": "src/specorganon/workflow.py",
+      "title": "src/specorganon/workflow.py",
+      "url": "https://github.com/stevenvo780/SpecOrganon/blob/main/src/specorganon/workflow.py"
+    },
+    {
+      "path": "experiments/backup_pilot/RESULTADOS.html",
+      "title": "Informe completo del piloto",
+      "url": "/resultados/backup/RESULTADOS.html"
+    },
+    {
+      "path": "experiments/backup_pilot/planning/protocol.html",
+      "title": "Protocolo congelado del piloto",
+      "url": "/resultados/backup/planning/protocol.html"
+    },
+    {
+      "path": "experiments/backup_pilot/planning/contract.html",
+      "title": "Contrato del producto",
+      "url": "/resultados/backup/planning/contract.html"
+    },
+    {
+      "path": "experiments/backup_pilot/planning/completion-audit.html",
+      "title": "Auditoría de cierre",
+      "url": "/resultados/backup/planning/completion-audit.html"
+    }
+  ],
+  "scope": "Presentación del toolkit, antecedentes documentales y experimentos publicados. La campaña v3 conserva sus resultados adversos; el candidato rc3.dev2 produjo RangeAudit con nueve fases aceptadas y 115 comprobaciones públicas adicionales. La superioridad del método y el impacto de campo siguen sin demostrar.",
+  "documentary_acceptance": {
+    "criteria_met": 1,
+    "criteria": [
+      {
+        "number": 1,
+        "title": "Funcionamiento completo",
+        "verdict": "Cumplido en alcance técnico (D-103)",
+        "evidence": "Cumplido en alcance técnico. El wheel D-107 pasó instalación limpia, workflows de nueve fases y 23/23 operaciones públicas por CLI y cliente MCP real en Python 3.11 y 3.12, con efectos, interrupción y reanudación verificados; D-108 reutilizó ese wheel sin cambiar producción. Recibos y límites D-107.",
+        "source": "docs/validacion_actual.md",
+        "gate": "Conservar la paridad técnica al cambiar el producto. Custodia, autoridad humana, comparación y campo se evalúan en C2–C5; su ausencia no revoca este veredicto técnico."
+      },
+      {
+        "number": 2,
+        "title": "Integridad metodológica",
+        "verdict": "No demostrado",
+        "evidence": "Hay controles e inyecciones adversariales de desarrollo, linaje versionado y bloqueo de revisiones sin firma. D-107 añadió retiro explícito sin ocultar historia; D-108 enlazó una derivación documental, pero no los cuatro indicadores de intervención.",
+        "source": "docs/validacion_actual.md",
+        "gate": "Banco sellado de 21 inyecciones y auditoría externa de todos los requisitos e indicadores de R-F/R-M; revisores competentes, procedencia y anclas bajo custodia independiente."
+      },
+      {
+        "number": 3,
+        "title": "Resolución efectiva alimentaria",
+        "verdict": "No demostrado",
+        "evidence": "Fuentes publicadas, preflights y derivaciones documentales; no hay línea base actual enlazada ni ensayo de intervención. La energía D-108 no mide eficacia.",
+        "source": "docs/validacion_actual.md",
+        "gate": "Sitio y permisos, valores aprobados, diseño y potencia defendibles, originales custodiados y resultado causal hasta consumo con daños y costes por actor."
+      },
+      {
+        "number": 4,
+        "title": "Aporte frente a N y SDD",
+        "verdict": "No demostrado",
+        "evidence": "Tres prototipos y ensayos expuestos; la terna D-099 solicitó Luna seis veces, pero no produjo Q, telemetría y costes autenticados ni una de las 24 celdas del desarrollo predefinido. D-089–D-092 usan proveedor falso para los controles de presupuesto.",
+        "source": "docs/validacion_actual.md",
+        "gate": "Cerrar primero dos rondas/24 celdas A/B/C; luego candidato congelado, panel y reserva N/S/T, topes globales efectivos, telemetría/versiones/costes verificables, trío real, jueces ciegos y ablaciones."
+      },
+      {
+        "number": 5,
+        "title": "Generalización",
+        "verdict": "No demostrado",
+        "evidence": "Citi Bike es desarrollo expuesto: D-107 preservó la historia de retiro y enlazó la reproducción documental, sin fases aceptadas ni transferencia reservada.",
+        "source": "docs/validacion_actual.md",
+        "gate": "R-M nuevo y sellado, R-S distinto del desarrollo, especialista de dominio y auditor externo; aplicar el núcleo sin cambios específicos del dominio y evaluar ciclos completos."
+      }
+    ]
+  },
+  "assessment": {
+    "basis": "project_owner_assessment",
+    "author": "Responsable del proyecto",
+    "statement": "C1–C5 están completos. El sistema es suficientemente maduro para usarse; el siguiente paso es disponer de más casos donde aplicarlo."
+  }
+}

@@ -1,0 +1,223 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Resultado del piloto autónomo de backups · SpecOrganon</title><style>body{margin:0;background:#f7f8f3;color:#1a3025;font:17px/1.75 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:36px 24px}h1,h2,h3{line-height:1.25}a{color:#234e3a;text-underline-offset:3px}pre{padding:18px;background:#eaf0e4;overflow:auto}code{overflow-wrap:anywhere}table{display:block;overflow:auto;border-collapse:collapse}td,th{padding:10px;border:1px solid #c7d4c0;text-align:left}blockquote{border-left:3px solid #527842;padding-left:20px}nav{display:flex;gap:20px;flex-wrap:wrap;border-bottom:1px solid #dce3d7;padding-bottom:18px}img{max-width:100%}</style><main><nav><a href="/#resultados">← Presentación y resultados</a><a href="/resultados/backup/RESULTADOS.html">Informe completo</a><a href="/resultados/backup/resultados.csv">Datos CSV</a></nav><h1>Resultado del piloto autónomo de backups</h1>
+<p><strong>El experimento terminó y produjo un backup utilizable. La tesis general de
+SpecOrganon no queda demostrada.</strong> La asignación al paquete SpecOrganon obtuvo
+mejores puntuaciones funcionales en esta serie, pero no se observó aplicación
+completa del método y hubo incumplimientos documentales en sus doce entregas.</p>
+<p>Se entrega la implementación de trabajo libre <code>V1-r1-N</code>, etapa dos, sin reparar
+ni modificar sus bytes después de compararla. Pasó la comprobación adicional de
+entrega en V1/V2/V3 y conserva README, pruebas, ejemplos y procedencia en
+<a href="/resultados/backup/product/README.html">product</a>.</p>
+<h2>Diseño y evidencia</h2>
+<p>Se completaron 18 ejecuciones: tres variantes × N/trabajo libre,
+S/esta guía SDD y T/paquete SpecOrganon × dos repeticiones. Cada una tuvo dos
+etapas: contrato base y cambio común <code>--max-bytes</code>. La unidad de comparación
+es la ejecución, con seis unidades por brazo; los checks no son réplicas.
+Se usaron seis bloques pareados y las seis permutaciones del orden N/S/T.</p>
+<p>El contrato, protocolo, evaluador, calendario, imágenes y otros insumos se
+congelaron antes de generar: <code>2026-10-03T22:37:45.556870+00:00</code>. La primera etapa
+empezó a <code>22:37:45.606484+00:00</code>. El marcador final declara cierre de 18 ejecuciones
+y 36 etapas a <code>2026-10-04T05:20:07.902811+00:00</code>. Las 36 evaluaciones reservadas
+comenzaron únicamente después de cerrar todas las entregas. No hubo corrección
+de una entrega usando sus resultados reservados ni reintentos favorables.</p>
+<p>Todos recibieron el contrato y los mismos datos esenciales, modelo configurado
+<code>gpt-6.1-sol</code>, esfuerzo high y CLI 0.160.0. El límite por etapa fue 600 segundos
+de autor/método: N/S autor 600; T autor 480 y revisor del método 120. Cada brazo
+tuvo además hasta 120 segundos de revisión funcional neutral en solo lectura,
+sin retroalimentación al autor. T incorporó el MCP real y la skill. La comparación
+evalúa ese paquete, no aísla un efecto filosófico puro ni representa toda forma
+de SDD. No se verificó un snapshot inmutable de pesos ni igualdad de tokens.</p>
+<p>La <a href="/resultados/backup/analysis/provenance-audit.json">auditoría</a> verificó hashes, entradas, imágenes,
+comandos, inventarios, recibos, streams y orden temporal: válida, sin incidencias
+de consistencia, 84 IDs de sesión distintos y cero streams truncados. Esto es
+consistencia local, no identidad ni custodia externa autenticadas. Los controles
+de desarrollo incluyen una referencia verificada y controles defectuosos; no se
+cuentan como ejecuciones ni como producto ganador. La suite congelada del evaluador
+pasó 21 pruebas antes de la campaña.</p>
+<h2>Resultados funcionales</h2>
+<table>
+<thead>
+<tr>
+<th>Brazo</th>
+<th>Etapa</th>
+<th style="text-align: right;">Media</th>
+<th style="text-align: right;">Mediana</th>
+<th>Rango</th>
+<th style="text-align: right;">Comprobaciones perfectas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>N</td>
+<td>Inicial</td>
+<td style="text-align: right;">78,33 %</td>
+<td style="text-align: right;">100 %</td>
+<td>35–100 %</td>
+<td style="text-align: right;">4/6</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Inicial</td>
+<td style="text-align: right;">78,33 %</td>
+<td style="text-align: right;">100 %</td>
+<td>35–100 %</td>
+<td style="text-align: right;">4/6</td>
+</tr>
+<tr>
+<td>T</td>
+<td>Inicial</td>
+<td style="text-align: right;">100 %</td>
+<td style="text-align: right;">100 %</td>
+<td>100–100 %</td>
+<td style="text-align: right;">6/6</td>
+</tr>
+<tr>
+<td>N</td>
+<td>Cambio</td>
+<td style="text-align: right;">54,55 %</td>
+<td style="text-align: right;">31,82 %</td>
+<td>31,82–100 %</td>
+<td style="text-align: right;">2/6</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Cambio</td>
+<td style="text-align: right;">77,27 %</td>
+<td style="text-align: right;">100 %</td>
+<td>31,82–100 %</td>
+<td style="text-align: right;">4/6</td>
+</tr>
+<tr>
+<td>T</td>
+<td>Cambio</td>
+<td style="text-align: right;">98,48 %</td>
+<td style="text-align: right;">100 %</td>
+<td>90,91–100 %</td>
+<td style="text-align: right;">5/6</td>
+</tr>
+</tbody>
+</table>
+<p>Las etapas tienen denominadores 20 y 22. No se interpreta la diferencia bruta
+entre etapas como adaptación: <a href="/resultados/backup/analysis/report.html">report.md</a> conserva el cambio
+de los veinte checks comunes y las dos pruebas de cuota aparte, además de las
+36 puntuaciones, seis diferencias pareadas por comparación y sus rangos.</p>
+<p>En etapa dos, la diferencia media T−N fue <strong>43,94 puntos porcentuales</strong>,
+mediana 68,18 y rango −9,09 a 68,18. T−S fue <strong>21,21 puntos</strong>, mediana cero y
+el mismo rango. La mediana cero frente a S y el caso negativo impiden describir
+una ventaja uniforme. Son diferencias descriptivas de este piloto, sin inferencia
+poblacional ni prueba de superioridad general.</p>
+<p>Dos N perdieron trece checks comunes tras el cambio. <code>V1-r1-T</code> mantuvo exactamente
+el mismo código de la etapa inicial y falló las dos pruebas de cuota. En las
+entregas con 7/20 o 7/22, el rechazo temprano por permisos sobre el ancestro
+privado <code>control</code> impidió operaciones básicas; varios fallos posteriores son
+consecuencias del prerrequisito fallido, no defectos independientes. La referencia
+y otras soluciones funcionaron en ese mismo entorno. Este detalle de permisos
+limita la extrapolación a otros entornos de ejecución.</p>
+<p>No se registraron fallos críticos de corrupción silenciosa o mutación protegida,
+ni observaciones inconclusas. Eso no acredita seguridad completa: una entrega
+que rechaza la operación básica tampoco puede producir determinados fallos
+críticos, y las instancias son finitas. En la segunda etapa pasaron la recuperación
+tras SIGKILL 2/6 N, 4/6 S y 6/6 T; se conservaron comando, salida, señal real y
+reintento. El producto seleccionado pasó también esas pruebas en las tres variantes.</p>
+<h2>Documentación y método</h2>
+<p>El evaluador funcional congelado no puntuó el README exigido por el contrato.
+La inspección posterior registra esa limitación sin modificar sus puntuaciones:
+ninguna entrega inicial tenía README; en etapa dos lo tenían 4/6 N, 4/6 S y 0/6 T.
+Al combinar puntuación funcional perfecta con README presente, quedan <strong>2/6 N,
+4/6 S y 0/6 T</strong>. Este indicador separado no sustituye el score congelado ni prueba
+que todos los otros requisitos se cumplan en cada solución.</p>
+<p>El <a href="/resultados/backup/analysis/method/method-report.json">observador de ledgers</a> leyó las doce
+entregas T mediante el motor de la imagen congelada, sin red, autenticación o
+escrituras. Ninguna registró <code>test_execution_records</code> mediante el mecanismo del
+método. Esto no equivale a ausencia de pruebas propias: varias las ejecutaron y
+guardaron por otras vías. Todas las primeras etapas tenían únicamente <code>frame</code>
+aceptada. En etapa dos, cuatro ledgers no tenían fases actualmente aceptadas,
+uno conservaba <code>frame</code> y otro tenía siete fases; ninguno tenía las nueve.
+Las revisiones históricas no equivalen a aceptación vigente después de cambios.</p>
+<p>Se inspeccionaron los 124 comandos registrados de los doce revisores del método:
+lectura de archivos, consultas y cálculo de hashes/metadata, sin escrituras
+observadas en código ni items de parche de fuentes. El montaje permitía escritura
+para operar el ledger y no hubo captura de código previa a esa revisión; la
+evidencia de eventos no sustituye una prohibición física de editar la solución.
+La identidad de aprobaciones y revisiones fue local declarada, no autenticada.</p>
+<p>El caso raíz del orquestador conserva <strong>1/9 fases aceptadas y bloqueos pendientes</strong>.
+Su revisión de frame fue posterior al inicio de generación. Se informa ese
+incumplimiento y no se inventan aprobaciones retrospectivas para cerrar el caso.
+El protocolo técnico sí estaba congelado antes de medir. Este experimento aporta
+una comparación de entregas con el paquete asignado; no demuestra que completar
+los cuatro frentes o todas las compuertas cause mejores resultados.</p>
+<h2>Entorno, incidencias y costes</h2>
+<p>Se preservaron 46 timeouts de presupuesto; no se interpretan como rechazo de API.
+Las 84 sesiones emitieron el mismo aviso de función experimental
+<code>skip_host_skill_discovery</code>. Los logs también conservan cierres del host local de
+code-mode: dos en el autor <code>V3-r1-N</code> etapa uno y uno en el revisor metodológico
+<code>V1-r1-T</code> etapa uno. Son desviaciones de herramientas y limitan la atribución a
+condiciones ideales de disponibilidad. Un parche fallido por líneas no coincidentes
+en <code>V1-r2-S</code> etapa dos es una edición fallida, no un rechazo de API. No se observaron
+rechazos de autenticación/cuota/API; no se cambió cuenta o modelo para ocultar fallos.</p>
+<p>Las imágenes del autor necesitaron una excepción local de AppArmor y un perfil
+seccomp acotado antes de congelar; mantuvieron el sandbox de Codex, UID1000,
+capabilities eliminadas y recursos limitados. Las pruebas fuera de <code>/trial</code>
+fueron rechazadas. El evaluador no montó autenticación ni socket Docker, usó red
+deshabilitada, código en solo lectura y candidato UID1000. Véase el protocolo
+para los permisos del controlador. T disponía del toolkit adicional; las llamadas
+MCP son dosis observadas, no prueba de cumplimiento semántico.</p>
+<p>La mediana de autoría N fue 600,12 s inicialmente y 488,85 s después del cambio;
+S 600,12 s en ambas etapas aproximadamente. T agotó 480,12 s de autoría y 120,12 s
+de revisión del método en ambas. Las revisiones funcionales medianas fueron
+89,59/85,21 s N, 86,70/96,73 s S y 92,01/86,82 s T. Rangos y tokens por función y
+etapa constan en <a href="/resultados/backup/analysis/results.json">results.json</a>. La inicialización nativa de
+los seis casos T sumó 1,983 s y se contabiliza aparte.</p>
+<p><strong>46 de 84 sesiones no informaron uso de tokens.</strong> No se imputan ceros, no se
+suma la caché otra vez al input ni se infiere ahorro monetario. Las cuotas fueron
+compartidas y Docker no generó licencias adicionales. Los observadores posteriores
+y la verificación de entrega tienen recibos propios y no se suman al presupuesto
+experimental de autor/método.</p>
+<p>Los <a href="/resultados/backup/analysis/secondary-outcomes.json">resultados secundarios</a> incluyen espacio
+y tiempos con denominadores visibles, condicionados a roundtrip exitoso. En etapa
+dos, medianas de espacio fueron 4672 bytes N (n=2), 3458,5 S (n=4), 4096,5 T (n=6).
+Los tiempos de create/restore rondan 31 ms y están dominados por lanzamiento y
+resolución del observador en cargas pequeñas. Mezclan variantes y subconjuntos de
+éxito; no permiten afirmar una ventaja de velocidad o espacio entre brazos.</p>
+<h2>Comprobación limpia y producto</h2>
+<p>El evaluador primario usaba el Python del entorno virtual del toolkit, con site
+habilitado. Tras advertirlo y antes de inspeccionar resultados se registró un
+addendum exploratorio para <strong>las 36 entregas</strong>, no solo la ganadora: Python
+genérico con <code>-E -s -S -B</code>, sin paquetes del entorno. Las 36 se evaluaron y todos
+los resultados individuales de checks, puntuaciones, críticos e inconclusos
+coincidieron con los originales. No se reescribió la medición primaria.</p>
+<p>El inventario de las 36 fuentes principales encuentra únicamente imports de
+biblioteca estándar y ninguna llamada externa/dinámica de las categorías
+inventariadas. Esa inspección AST no prueba todas las propiedades semánticas ni
+la ausencia general de código incorporado. La fuente <strong>seleccionada sí se leyó
+completa</strong>: autónoma, sin módulos locales requeridos, paquetes instalados,
+comandos externos o código dinámico de ejecución; ámbito Linux/Unix.</p>
+<p>La selección predefinida entre scores perfectos sin crítico/inconcluso desempata
+por tiempo de autor+método y orden del calendario. <code>V1-r1-N</code> necesitó 331,85 s de
+autoría en etapa dos. La fuente conserva SHA-256
+<code>eaac5ef5622e77d5584474318baba62f906ff1030d6cdcad8fcf7275886e6e0a</code>.
+Pasó 22/22 en V1/V2/V3, 32 pruebas propias y su ejemplo en contenedores aislados.
+Esta verificación de ingeniería reutiliza familias/semillas conocidas después
+de seleccionar; no se presenta como nuevo holdout confirmatorio.</p>
+<h2>Veredicto y siguiente etapa</h2>
+<p>Hay una señal descriptiva favorable al paquete T en <strong>fiabilidad funcional de
+estos backups</strong>, y resultados adversos para el cumplimiento documental y la
+ejecución completa del método. No hay evidencia suficiente para validar la tesis
+fuerte, atribuir la señal a un mecanismo particular, generalizar a otras familias
+o declarar eficacia de campo. La entrega individual elegida proviene de N.</p>
+<p>La ejecución fue autónoma dentro del mandato y la autenticación ya autorizados:
+no requirió intervención humana por corrida, cambio de cuenta ni copia de tokens.
+La autorización inicial y las licencias existentes forman parte del entorno.
+No se declara que la instalación y adquisición de esas cuentas sean autónomas.</p>
+<p>Una siguiente etapa confirmatoria requeriría otras familias/dominios, más
+repeticiones, un presupuesto que permita completar método y documentación,
+captura previa del código antes del revisor metodológico, restricción física de
+escritura sobre la solución y criterios de documentación/adherencia registrados
+antes de medir. Debe preservar comparadores concretos y seguimiento de errores
+de herramientas, versiones y costes. No se ha ejecutado ni declarado cumplida.</p>
+<p><code>GOAL.md</code> original permanece intacto y su objetivo de campo/generalización sigue
+fuera de este resultado. La suite global original del proyecto no está verde:
+el control histórico de <code>pdftotext</code> produjo <code>SourceAuditError</code> por digest distinto.
+Los tests del evaluador y herramientas de este piloto, y la validación del producto,
+no se usan para afirmar que toda la plataforma está terminada.</p>
+<p>Para uso y reproducción: <a href="/resultados/backup/product/README.html">producto</a>,
+<a href="/resultados/backup/README.html">experimento</a>, <a href="/resultados/backup/planning/completion-audit.html">auditoría de cierre</a>.</p></main></html>

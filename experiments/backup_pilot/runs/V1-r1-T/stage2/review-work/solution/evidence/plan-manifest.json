@@ -1,0 +1,442 @@
+{
+  "schema": 1,
+  "steps": [
+    {
+      "op": "put",
+      "id": "owner-context",
+      "kind": "actor",
+      "text": "Dueño del piloto local: necesita recuperar documentos autosuficientes y fija CONTRACT.md; autor agent:author decide la arquitectura por delegación. No hay intervención ni revisión independiente en esta etapa.",
+      "refs": [
+        "problem"
+      ],
+      "expected_version": 0,
+      "expected_deps": {
+        "problem": 1
+      },
+      "data": {}
+    },
+    {
+      "op": "put",
+      "id": "mandate",
+      "kind": "norm",
+      "text": "El dueño autorizó construir backups y evaluar este piloto local; decisiones técnicas delegadas dentro del contrato. Sin datos reales ni nuevas cuentas ni copias de credenciales.",
+      "refs": [
+        "problem",
+        "owner-context"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "problem": 1,
+        "owner-context": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "actors",
+      "kind": "actor",
+      "text": "El dueño necesita recuperar sus documentos sin la fuente; agent:author implementa por delegación; la revisión técnica independiente ocurre después de esta entrega.",
+      "refs": [
+        "mandate",
+        "problem"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "mandate": 2,
+        "problem": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "boundary-v1",
+      "kind": "boundary",
+      "text": "Ámbito: V1 en /trial, Python 3.12 estándar; árboles privados estables de archivos regulares y directorios vacíos, Unicode y bytes arbitrarios. Sin credenciales, internet, instalaciones, campo ni revisión durante la autoría. Etapa dos: create admite --max-bytes N; toda metadata persistente en archivos regulares cuenta por st_size.",
+      "refs": [
+        "actors",
+        "mandate",
+        "problem"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "actors": 2,
+        "mandate": 2,
+        "problem": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "concept-integrity",
+      "kind": "concept",
+      "text": "Backup verificable significa copia autosuficiente que coteja inventario y bytes antes de declarar validez. Integridad ante corrupción accidental no implica autenticidad criptográfica frente a un atacante que reescriba todos los hashes.",
+      "refs": [
+        "boundary-v1",
+        "problem"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "boundary-v1": 2,
+        "problem": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "assumptions",
+      "kind": "assumption",
+      "text": "Fuente estable durante create; almacenamiento local con rename atómico dentro del mismo filesystem. No se presupone evidencia de eficacia general ni adversarios que cambien simultáneamente rutas. Se rechazan enlaces y objetos especiales existentes.",
+      "refs": [
+        "boundary-v1",
+        "concept-integrity"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "boundary-v1": 2,
+        "concept-integrity": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "frame-copy",
+      "kind": "frame_option",
+      "text": "Encuadre rival: una copia rápida de archivos satisface disponibilidad, pero puede perder directorios vacíos y afirmar éxito con bytes incompletos.",
+      "refs": [
+        "concept-integrity",
+        "problem"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "concept-integrity": 2,
+        "problem": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "frame-verified",
+      "kind": "frame_option",
+      "text": "Encuadre elegido por delegación: recuperación exacta con comprobación previa, inventario estricto y publicación atómica; mayor lectura y espacio a cambio de detectar fallos contractuales.",
+      "refs": [
+        "concept-integrity",
+        "mandate",
+        "problem"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "concept-integrity": 2,
+        "mandate": 2,
+        "problem": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "question-v1",
+      "kind": "question",
+      "text": "¿Mantiene la implementación V1 las garantías previas y rechaza límites imposibles sin crecimiento residual, contando todos los archivos regulares y metadata persistente?",
+      "refs": [
+        "assumptions",
+        "problem"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "assumptions": 2,
+        "problem": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "hypothesis-v1",
+      "kind": "hypothesis",
+      "text": "Hipótesis técnica previa al cambio: conservar formato, usar bloqueo exclusivo, limpiar staging abandonado y sumar st_size de todo el repositorio antes de rename permite cumplir el límite y preservar snapshots previos.",
+      "refs": [
+        "problem",
+        "question-v1"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "problem": 1,
+        "question-v1": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "protocol-v1",
+      "kind": "protocol",
+      "text": "Protocolo fijado antes de medir/cambiar: ejecutar suite propia contra backup.py existente y conservar todos los resultados adversos como baseline real de esta etapa; después adaptar y ejecutar la misma suite. Comparación independiente de árbol/bytes, JSON exacto, cambios sucesivos, corrupción de cada archivo regular, enlaces/FIFO/socket y rutas protegidas; SIGKILL real durante create y reintento. Cuotas altas, exactas, inferiores a bytes existentes, límites que sólo omiten metadata, N inválido/0, conteo de .lock con contenido, ausencia de residuos y serialización de dos creates. Todos los subprocess tienen argv, timeout y streams guardados. Alcance técnico local, sin pruebas reservadas ni comparador causal de métodos.",
+      "refs": [
+        "boundary-v1",
+        "hypothesis-v1",
+        "problem",
+        "question-v1"
+      ],
+      "data": {
+        "population": "Árboles sintéticos V1 privados en /trial",
+        "method": "CLI Python 3.12 subprocess; oráculo independiente de nombres y bytes; os.walk/lstat/st_size para espacio; SIGKILL real",
+        "comparison": "Misma suite antes/después del cambio; baseline real de la implementación recibida, sin causalidad metodológica",
+        "uncertainty": "Cobertura finita en POSIX local; no eficacia de campo ni evaluación reservada"
+      },
+      "expected_version": 1,
+      "expected_deps": {
+        "boundary-v1": 2,
+        "hypothesis-v1": 2,
+        "problem": 1,
+        "question-v1": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "contract-evidence",
+      "kind": "evidence",
+      "text": "Observación documental del contrato completo actualizado: las garantías iniciales continúan; create --max-bytes N limita la suma de st_size de todos los archivos regulares del repo exitoso, incluida metadata. Rechazo conserva snapshots previos y no deja crecimiento residual permanente.",
+      "refs": [
+        "problem",
+        "protocol-v1"
+      ],
+      "data": {
+        "claim_scope": "technical",
+        "date": "2026-10-04",
+        "locator": "CONTRACT.md completo, incluido Cambio común tras la primera entrega",
+        "method": "Lectura directa local 2026-10-04 antes de modificar el código",
+        "source": "/trial/CONTRACT.md",
+        "origin": "observed"
+      },
+      "expected_version": 1,
+      "expected_deps": {
+        "problem": 1,
+        "protocol-v1": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "indicator-v1",
+      "kind": "indicator",
+      "text": "Proporción de pruebas locales contractuales aprobadas; fallo crítico de integridad o mutación protegida se informa aparte y exige rechazo.",
+      "refs": [
+        "contract-evidence",
+        "mandate",
+        "problem",
+        "protocol-v1"
+      ],
+      "data": {
+        "claim_scope": "technical",
+        "metric_key": "local_pass_fraction",
+        "unit": "fraction",
+        "metric": "local_pass_fraction"
+      },
+      "expected_version": 1,
+      "expected_deps": {
+        "contract-evidence": 2,
+        "mandate": 2,
+        "problem": 1,
+        "protocol-v1": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "inference-design",
+      "kind": "inference",
+      "text": "De la interfaz y fallos exigidos se infiere la necesidad de staging separado de snapshots publicados, hashes de todos los archivos y restauración provisional verificada antes de publicar. Para cuota: contador del árbol completo bajo flock; la publicación rename conserva esa suma. El staging se limpia tras fallos y al reintentar después de SIGKILL.",
+      "refs": [
+        "contract-evidence",
+        "hypothesis-v1",
+        "protocol-v1"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "contract-evidence": 2,
+        "hypothesis-v1": 2,
+        "protocol-v1": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "synthesis-design",
+      "kind": "synthesis",
+      "text": "El contrato puede implementarse mediante inventario explícito y publicación transaccional local. La deduplicación no es requerida. La principal incertidumbre es la correcta ejecución de controles de rutas e interrupciones, a contrastar con pruebas. Se conserva el formato de snapshots para compatibilidad; N es opcional no negativo. El límite final incluye metadata, no es un límite de pico temporal.",
+      "refs": [
+        "contract-evidence",
+        "hypothesis-v1",
+        "inference-design"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "contract-evidence": 2,
+        "hypothesis-v1": 2,
+        "inference-design": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "uncertainty-design",
+      "kind": "uncertainty",
+      "text": "No se dispone de medición de campo ni revisión externa en esta etapa. Las pruebas técnicas locales no prueban superioridad de método, resistencia a un atacante que recalcula hashes ni seguridad de rutas ante renombres hostiles concurrentes.",
+      "refs": [
+        "boundary-v1",
+        "synthesis-design"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "boundary-v1": 2,
+        "synthesis-design": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "option-tree",
+      "kind": "option",
+      "text": "Árbol de datos por snapshot + manifiesto JSON y sello SHA-256, staging y rename. Permite preservar directorios vacíos y verificar inventario; ocupa copias completas, requiere recorrido y lecturas de integridad.",
+      "refs": [
+        "mandate",
+        "synthesis-design"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "mandate": 2,
+        "synthesis-design": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "option-archive",
+      "kind": "option",
+      "text": "Archivo tar/zip con inventario adicional: menos entradas físicas, pero restauración precisa validación de nombres y metadatos del archivo y lógica extra de extracción segura; sin deduplicación, coste similar de bytes.",
+      "refs": [
+        "mandate",
+        "synthesis-design"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "mandate": 2,
+        "synthesis-design": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "comparison-options",
+      "kind": "comparison",
+      "text": "Se elige árbol explícito por menor complejidad de extracción y facilidad de inspección/corrupción controlada. Ambas alternativas requieren hashes y staging. Coste asumido por delegación: espacio de copia completa y relectura para verify/restore, sin optimización de velocidad. Para el cambio: contador completo previo al rename versus estimación antes de copiar. Se elige medición exacta final (más E/S temporal, menos riesgo de omitir metadata) con rechazo temprano si los bytes existentes ya exceden N.",
+      "refs": [
+        "contract-evidence",
+        "indicator-v1",
+        "option-archive",
+        "option-tree"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "contract-evidence": 2,
+        "indicator-v1": 2,
+        "option-archive": 2,
+        "option-tree": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "risk-paths",
+      "kind": "risk",
+      "text": "Riesgos: enlaces/specials, rutas del manifiesto que escapan, bytes corruptos, publicación incompleta, colisión de ID, destino ocupado. Mitigación: lstat en componentes y árboles, esquema cerrado y rutas relativas únicas, cotejo exacto, bloqueo y staging exclusivo, rename solo tras comprobación. Cuota: no contar sólo payload, no dejar staging rechazado, no borrar snapshots previos. Limpieza de stages sólo bajo lock exclusivo tras rechazar enlaces/especiales; comandos cooperantes serializados.",
+      "refs": [
+        "boundary-v1",
+        "comparison-options"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "boundary-v1": 2,
+        "comparison-options": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "decision-v1",
+      "kind": "decision",
+      "text": "Elección técnica de agent:author por delegación explícita del mandato: árbol, SHA-256, staging y publicación atómica. El dueño no eligió personalmente esta arquitectura. Sin cambios normativos ni afirmación de aprobación nueva. Etapa dos: misma arquitectura, cuota final exacta y limpieza de staging por elección técnica delegada de agent:author. No se afirma nueva aprobación.",
+      "refs": [
+        "comparison-options",
+        "mandate",
+        "risk-paths"
+      ],
+      "data": {
+        "delegated": true,
+        "provenance": "AGENTS.md y mandate v1; decisión técnica del autor",
+        "approval_note": "La aprobación v1 es histórica; esta revisión técnica espera el tratamiento externo correspondiente."
+      },
+      "expected_version": 1,
+      "expected_deps": {
+        "comparison-options": 2,
+        "mandate": 2,
+        "risk-paths": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "requirement-contract",
+      "kind": "requirement",
+      "text": "Implementar los cuatro comandos y respuestas exactas del contrato, validar todos los bytes e inventario; preservar fuente/destino ocupado; rechazar enlaces/especiales, IDs inválidos y solapamientos; no sobrescribir IDs, permitir create tras interrupción y restaurar sin fuente. create --max-bytes N opcional, entero no negativo: suma de st_size de todos los archivos regulares <= N después de éxito; toda metadata persistente regular incluida; rechazar sin invalidar snapshots ni dejar bytes residuales del intento.",
+      "refs": [
+        "contract-evidence",
+        "decision-v1",
+        "mandate",
+        "problem",
+        "protocol-v1"
+      ],
+      "data": {},
+      "expected_version": 1,
+      "expected_deps": {
+        "contract-evidence": 2,
+        "decision-v1": 2,
+        "mandate": 2,
+        "problem": 1,
+        "protocol-v1": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "criterion-v1",
+      "kind": "criterion",
+      "text": "Antes del resultado: todas las pruebas definidas deben pasar y cero éxitos falsos o mutaciones protegidas. Umbral local 1.0 en proporción de pruebas; un caso adverso se conserva. Sin campo, eficacia general no demostrada. La suite incluye las cuotas y exige cero crecimiento permanente por intento rechazado y preservación exacta de snapshots anteriores.",
+      "refs": [
+        "contract-evidence",
+        "indicator-v1",
+        "protocol-v1",
+        "requirement-contract"
+      ],
+      "data": {
+        "accept": "Todas las pruebas pasan; cero fallos críticos",
+        "accept_test": {
+          "operator": ">=",
+          "statistic": "estimate",
+          "value": 1
+        },
+        "claim_scope": "technical",
+        "metric_key": "local_pass_fraction",
+        "reject": "Cualquier prueba fallida o fallo crítico",
+        "reject_test": {
+          "operator": "<",
+          "statistic": "estimate",
+          "value": 1
+        },
+        "threshold": 1,
+        "unit": "fraction",
+        "metric": "local_pass_fraction"
+      },
+      "expected_version": 1,
+      "expected_deps": {
+        "contract-evidence": 2,
+        "indicator-v1": 2,
+        "protocol-v1": 2,
+        "requirement-contract": 2
+      }
+    }
+  ]
+}

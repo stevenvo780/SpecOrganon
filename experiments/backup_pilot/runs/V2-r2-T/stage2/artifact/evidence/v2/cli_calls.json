@@ -1,0 +1,2509 @@
+[
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-c7keyf3c/source",
+      "--id",
+      "base",
+      "--repo",
+      "/trial/evidence/contract-c7keyf3c/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"base\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.08901660500123398
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-c7keyf3c/source",
+      "--repo",
+      "/trial/evidence/contract-c7keyf3c/repo",
+      "--id",
+      "race",
+      "--max-bytes",
+      "67109820"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n"
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-c7keyf3c/source",
+      "--repo",
+      "/trial/evidence/contract-c7keyf3c/repo",
+      "--id",
+      "peer",
+      "--max-bytes",
+      "67109820"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"peer\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "base",
+      "--repo",
+      "/trial/evidence/contract-c7keyf3c/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"base\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03788294200057862
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "peer",
+      "--repo",
+      "/trial/evidence/contract-c7keyf3c/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"peer\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03857007899932796
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-kuzvucje/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.030187527001544368
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot header\"}\n",
+    "elapsed_seconds": 0.02108262699766783
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot header\"}\n",
+    "elapsed_seconds": 0.02103487700151163
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot header\"}\n",
+    "elapsed_seconds": 0.020128637999732746
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"Expecting value: line 1 column 1 (char 0)\"}\n",
+    "elapsed_seconds": 0.020653302999562584
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"Expecting value: line 1 column 1 (char 0)\"}\n",
+    "elapsed_seconds": 0.020677054002590012
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"Expecting value: line 1 column 1 (char 0)\"}\n",
+    "elapsed_seconds": 0.02045341199846007
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot checksum mismatch\"}\n",
+    "elapsed_seconds": 0.020567993000440765
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot checksum mismatch\"}\n",
+    "elapsed_seconds": 0.025601421999454033
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot checksum mismatch\"}\n",
+    "elapsed_seconds": 0.02088542499768664
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot checksum mismatch\"}\n",
+    "elapsed_seconds": 0.023109677000320517
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot checksum mismatch\"}\n",
+    "elapsed_seconds": 0.022278858999925433
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot checksum mismatch\"}\n",
+    "elapsed_seconds": 0.02146433099915157
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot length mismatch\"}\n",
+    "elapsed_seconds": 0.02209434800170129
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot length mismatch\"}\n",
+    "elapsed_seconds": 0.02372928399927332
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot length mismatch\"}\n",
+    "elapsed_seconds": 0.02264782200290938
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot length mismatch\"}\n",
+    "elapsed_seconds": 0.026161077003052924
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"truncated snapshot\"}\n",
+    "elapsed_seconds": 0.022620411997195333
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"truncated snapshot\"}\n",
+    "elapsed_seconds": 0.022040886000468163
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"[Errno 2] No such file or directory: '/trial/evidence/contract-kuzvucje/repo/snapshots/v1.bak'\"}\n",
+    "elapsed_seconds": 0.021715324000979308
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-kuzvucje/dest",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"[Errno 2] No such file or directory: '/trial/evidence/contract-kuzvucje/repo/snapshots/v1.bak'\"}\n",
+    "elapsed_seconds": 0.021974645998852793
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-kuzvucje/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.021597072001895867
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-t98fyezl/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-t98fyezl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.030676622001919895
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-t98fyezl/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-t98fyezl/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot ID already exists\"}\n",
+    "elapsed_seconds": 0.02206063799894764
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-t98fyezl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02286557499974151
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/evidence/contract-bttwanr_/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.024889783999242354
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/evidence/contract-bttwanr_/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02237226999932318
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-bttwanr_/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-bttwanr_/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.029286287997820182
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-bttwanr_/empty-dest",
+      "--repo",
+      "/trial/evidence/contract-bttwanr_/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.024710902998776874
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-84fi5ew6/source",
+      "--id",
+      "previous",
+      "--repo",
+      "/trial/evidence/contract-84fi5ew6/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"previous\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.027184656999452272
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-84fi5ew6/source",
+      "--repo",
+      "/trial/evidence/contract-84fi5ew6/repo",
+      "--id",
+      "interrupted"
+    ],
+    "exit_code": -9,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "",
+    "intentional_signal": "SIGKILL",
+    "partial_file_observed": true
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/evidence/contract-84fi5ew6/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[\"previous\"]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02256918200146174
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-84fi5ew6/source",
+      "--id",
+      "interrupted",
+      "--max-bytes",
+      "434",
+      "--repo",
+      "/trial/evidence/contract-84fi5ew6/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n",
+    "elapsed_seconds": 0.024887345000024652
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-84fi5ew6/source",
+      "--id",
+      "interrupted",
+      "--max-bytes",
+      "314572800",
+      "--repo",
+      "/trial/evidence/contract-84fi5ew6/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"interrupted\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.2145811499976844
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "previous",
+      "--repo",
+      "/trial/evidence/contract-84fi5ew6/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"previous\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.023614123001607368
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "interrupted",
+      "--repo",
+      "/trial/evidence/contract-84fi5ew6/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"interrupted\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.13945889100068598
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "interrupted",
+      "--dest",
+      "/trial/evidence/contract-84fi5ew6/restored",
+      "--repo",
+      "/trial/evidence/contract-84fi5ew6/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"interrupted\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.2929290609972668
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--id",
+      "",
+      "--source",
+      "/trial/evidence/contract-21hxagya/source",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.023961265997058945
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.022658042998955352
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "",
+      "--dest",
+      "/trial/evidence/contract-21hxagya/dest",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.02099783700032276
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--id",
+      "../escape",
+      "--source",
+      "/trial/evidence/contract-21hxagya/source",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.02368915300030494
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "../escape",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.022769473998778267
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "../escape",
+      "--dest",
+      "/trial/evidence/contract-21hxagya/dest",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.021601062999252463
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--id",
+      "a/b",
+      "--source",
+      "/trial/evidence/contract-21hxagya/source",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.022993096001300728
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "a/b",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.024149008000676986
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "a/b",
+      "--dest",
+      "/trial/evidence/contract-21hxagya/dest",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.022360759998264257
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--id",
+      ".",
+      "--source",
+      "/trial/evidence/contract-21hxagya/source",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.021893205997912446
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      ".",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.021577421997790225
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      ".",
+      "--dest",
+      "/trial/evidence/contract-21hxagya/dest",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.021439030999317765
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--id",
+      "-abc",
+      "--source",
+      "/trial/evidence/contract-21hxagya/source",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py create [-h] --repo REPO --id ID --source SOURCE\n                        [--max-bytes MAX_BYTES]\nbackup.py create: error: argument --id: expected one argument\n",
+    "elapsed_seconds": 0.021801114999107085
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "-abc",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py verify [-h] --repo REPO --id ID\nbackup.py verify: error: argument --id: expected one argument\n",
+    "elapsed_seconds": 0.0221342779987026
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "-abc",
+      "--dest",
+      "/trial/evidence/contract-21hxagya/dest",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py restore [-h] --repo REPO --id ID --dest DEST\nbackup.py restore: error: argument --id: expected one argument\n",
+    "elapsed_seconds": 0.02183515499928035
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--id",
+      "\u00e1",
+      "--source",
+      "/trial/evidence/contract-21hxagya/source",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.02240805000110413
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "\u00e1",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.020829115001106402
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "\u00e1",
+      "--dest",
+      "/trial/evidence/contract-21hxagya/dest",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.021283198999299202
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--id",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "--source",
+      "/trial/evidence/contract-21hxagya/source",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.02309457700175699
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.022410600999137387
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "--dest",
+      "/trial/evidence/contract-21hxagya/dest",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.0227185140029178
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--id",
+      "a\n",
+      "--source",
+      "/trial/evidence/contract-21hxagya/source",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.021324440000171307
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "a\n",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.022526761000335682
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "a\n",
+      "--dest",
+      "/trial/evidence/contract-21hxagya/dest",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.022176377999130636
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-21hxagya/source",
+      "--id",
+      "A_______________________________________________________________",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"A_______________________________________________________________\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.028383819000737276
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "missing",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"[Errno 2] No such file or directory: '/trial/evidence/contract-21hxagya/repo/snapshots/missing.bak'\"}\n",
+    "elapsed_seconds": 0.03443123900069622
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "missing",
+      "--dest",
+      "/trial/evidence/contract-21hxagya/dest",
+      "--repo",
+      "/trial/evidence/contract-21hxagya/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"[Errno 2] No such file or directory: '/trial/evidence/contract-21hxagya/repo/snapshots/missing.bak'\"}\n",
+    "elapsed_seconds": 0.026471541001228616
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-0txti01b/alias",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-0txti01b/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink in managed path\"}\n",
+    "elapsed_seconds": 0.022594752001168672
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-0txti01b/alias/../source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-0txti01b/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink in managed path\"}\n",
+    "elapsed_seconds": 0.027105715998914093
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-0txti01b/absent/../alias",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-0txti01b/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink in normalized managed path\"}\n",
+    "elapsed_seconds": 0.02271861400004127
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-0txti01b/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-0txti01b/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.026041666002129205
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/evidence/contract-0txti01b/alias"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink in managed path\"}\n",
+    "elapsed_seconds": 0.02197398700081976
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/evidence/contract-0txti01b/alias",
+      "--id",
+      "v1"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink in managed path\"}\n",
+    "elapsed_seconds": 0.023535710999567527
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-0txti01b/alias",
+      "--repo",
+      "/trial/evidence/contract-0txti01b/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink in managed path\"}\n",
+    "elapsed_seconds": 0.025820383998507168
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-0txti01b/alias/child",
+      "--repo",
+      "/trial/evidence/contract-0txti01b/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink in managed path\"}\n",
+    "elapsed_seconds": 0.023085446999175474
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-4ajv5c81/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-4ajv5c81/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.0310607749997871
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-4ajv5c81/file",
+      "--repo",
+      "/trial/evidence/contract-4ajv5c81/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"destination is not empty\"}\n",
+    "elapsed_seconds": 0.02784466400044039
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-4ajv5c81/empty-subdir",
+      "--repo",
+      "/trial/evidence/contract-4ajv5c81/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"destination is not empty\"}\n",
+    "elapsed_seconds": 0.024529960999643663
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-h9s3zxk7/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-h9s3zxk7/source"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"source and repository overlap\"}\n",
+    "elapsed_seconds": 0.02334412999698543
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-h9s3zxk7/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-h9s3zxk7/source/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"source and repository overlap\"}\n",
+    "elapsed_seconds": 0.023630853000213392
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-h9s3zxk7/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-h9s3zxk7"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"source and repository overlap\"}\n",
+    "elapsed_seconds": 0.02163101200130768
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-h9s3zxk7/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-h9s3zxk7/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.028276958000788
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-h9s3zxk7/repo",
+      "--repo",
+      "/trial/evidence/contract-h9s3zxk7/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository and destination overlap\"}\n",
+    "elapsed_seconds": 0.021980085999530274
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-h9s3zxk7/repo/dest",
+      "--repo",
+      "/trial/evidence/contract-h9s3zxk7/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository and destination overlap\"}\n",
+    "elapsed_seconds": 0.021028055998613127
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-h9s3zxk7",
+      "--repo",
+      "/trial/evidence/contract-h9s3zxk7/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository and destination overlap\"}\n",
+    "elapsed_seconds": 0.023393740000756225
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-h9s3zxk7/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.021816874002979603
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-hcyqx0hk/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "-1",
+      "--repo",
+      "/trial/evidence/contract-hcyqx0hk/repo"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py create [-h] --repo REPO --id ID --source SOURCE\n                        [--max-bytes MAX_BYTES]\nbackup.py create: error: argument --max-bytes: expected a nonnegative integer\n",
+    "elapsed_seconds": 0.022588903000723803
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-hcyqx0hk/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "1.5",
+      "--repo",
+      "/trial/evidence/contract-hcyqx0hk/repo"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py create [-h] --repo REPO --id ID --source SOURCE\n                        [--max-bytes MAX_BYTES]\nbackup.py create: error: argument --max-bytes: expected a nonnegative integer\n",
+    "elapsed_seconds": 0.022034096000425052
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-hcyqx0hk/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "abc",
+      "--repo",
+      "/trial/evidence/contract-hcyqx0hk/repo"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py create [-h] --repo REPO --id ID --source SOURCE\n                        [--max-bytes MAX_BYTES]\nbackup.py create: error: argument --max-bytes: expected a nonnegative integer\n",
+    "elapsed_seconds": 0.02148506199955591
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-hcyqx0hk/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "",
+      "--repo",
+      "/trial/evidence/contract-hcyqx0hk/repo"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py create [-h] --repo REPO --id ID --source SOURCE\n                        [--max-bytes MAX_BYTES]\nbackup.py create: error: argument --max-bytes: expected a nonnegative integer\n",
+    "elapsed_seconds": 0.022765384001104394
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-hcyqx0hk/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "1e6",
+      "--repo",
+      "/trial/evidence/contract-hcyqx0hk/repo"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py create [-h] --repo REPO --id ID --source SOURCE\n                        [--max-bytes MAX_BYTES]\nbackup.py create: error: argument --max-bytes: expected a nonnegative integer\n",
+    "elapsed_seconds": 0.02339921000020695
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-hcyqx0hk/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "+5",
+      "--repo",
+      "/trial/evidence/contract-hcyqx0hk/repo"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py create [-h] --repo REPO --id ID --source SOURCE\n                        [--max-bytes MAX_BYTES]\nbackup.py create: error: argument --max-bytes: expected a nonnegative integer\n",
+    "elapsed_seconds": 0.021849644999747397
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-hcyqx0hk/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "0001000000",
+      "--repo",
+      "/trial/evidence/contract-hcyqx0hk/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02979645300001721
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-hcyqx0hk/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.022269809000135865
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-suow6le9/source",
+      "--id",
+      "a1",
+      "--repo",
+      "/trial/evidence/contract-suow6le9/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"a1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.027196867999009555
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-suow6le9/source",
+      "--id",
+      "b2",
+      "--max-bytes",
+      "1936",
+      "--repo",
+      "/trial/evidence/contract-suow6le9/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n",
+    "elapsed_seconds": 0.024001255998882698
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-suow6le9/source",
+      "--id",
+      "b2",
+      "--max-bytes",
+      "1937",
+      "--repo",
+      "/trial/evidence/contract-suow6le9/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"b2\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02899261499987915
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-mzavyobz/source",
+      "--id",
+      "a1",
+      "--repo",
+      "/trial/evidence/contract-mzavyobz/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"a1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.025148406999505823
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-mzavyobz/source",
+      "--id",
+      "b2",
+      "--max-bytes",
+      "0",
+      "--repo",
+      "/trial/evidence/contract-mzavyobz/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n",
+    "elapsed_seconds": 0.023587752002640627
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-mzavyobz/source",
+      "--id",
+      "b2",
+      "--max-bytes",
+      "428",
+      "--repo",
+      "/trial/evidence/contract-mzavyobz/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n",
+    "elapsed_seconds": 0.022497451001981972
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-mzavyobz/source",
+      "--id",
+      "b2",
+      "--max-bytes",
+      "429",
+      "--repo",
+      "/trial/evidence/contract-mzavyobz/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n",
+    "elapsed_seconds": 0.021792474999529077
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-mzavyobz/source",
+      "--id",
+      "b2",
+      "--max-bytes",
+      "857",
+      "--repo",
+      "/trial/evidence/contract-mzavyobz/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n",
+    "elapsed_seconds": 0.02158521199817187
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-mzavyobz/source",
+      "--id",
+      "b2",
+      "--max-bytes",
+      "858",
+      "--repo",
+      "/trial/evidence/contract-mzavyobz/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"b2\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.029269938000652473
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "a1",
+      "--repo",
+      "/trial/evidence/contract-mzavyobz/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"a1\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.023223538999445736
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "b2",
+      "--repo",
+      "/trial/evidence/contract-mzavyobz/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"b2\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.022772934000386158
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-s2avehwt/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-s2avehwt/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02746360000310233
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-s2avehwt/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "1000000",
+      "--repo",
+      "/trial/evidence/contract-s2avehwt/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot ID already exists\"}\n",
+    "elapsed_seconds": 0.021804243999213213
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-ec22s3la/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "0",
+      "--repo",
+      "/trial/evidence/contract-ec22s3la/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n",
+    "elapsed_seconds": 0.022742272998584667
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-ec22s3la/source",
+      "--id",
+      "a1",
+      "--repo",
+      "/trial/evidence/contract-ec22s3la/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"a1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.027132846997119486
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-ec22s3la/source",
+      "--id",
+      "a1",
+      "--repo",
+      "/trial/evidence/contract-ec22s3la/other-repo",
+      "--max-bytes",
+      "82"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n",
+    "elapsed_seconds": 0.022481541000161087
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-ec22s3la/source",
+      "--id",
+      "a1",
+      "--repo",
+      "/trial/evidence/contract-ec22s3la/other-repo",
+      "--max-bytes",
+      "83"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"a1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.024762564000411658
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-rgjerzk6/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "0",
+      "--repo",
+      "/trial/evidence/contract-rgjerzk6/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n",
+    "elapsed_seconds": 0.021439610998641
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/evidence/contract-rgjerzk6/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02363488300034078
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-rgjerzk6/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "0",
+      "--repo",
+      "/trial/evidence/contract-rgjerzk6/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n",
+    "elapsed_seconds": 0.023245547999977134
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/evidence/contract-rgjerzk6/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.022705854000378167
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-rgjerzk6/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "0",
+      "--repo",
+      "/trial/evidence/contract-rgjerzk6/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"repository would exceed --max-bytes\"}\n",
+    "elapsed_seconds": 0.023259809000592213
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/evidence/contract-rgjerzk6/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.021561502002441557
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-rgjerzk6/source",
+      "--id",
+      "v1",
+      "--max-bytes",
+      "1000000",
+      "--repo",
+      "/trial/evidence/contract-rgjerzk6/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.029581361002783524
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-rgjerzk6/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.022655282999039628
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-qyq26p35/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-qyq26p35/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"v1\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02768228199784062
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-qyq26p35/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file in managed tree\"}\n",
+    "elapsed_seconds": 0.02138996999929077
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-qyq26p35/dest",
+      "--repo",
+      "/trial/evidence/contract-qyq26p35/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file in managed tree\"}\n",
+    "elapsed_seconds": 0.02266950300327153
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/evidence/contract-qyq26p35/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file in managed tree\"}\n",
+    "elapsed_seconds": 0.02113552700029686
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/evidence/contract-qyq26p35/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file in managed tree\"}\n",
+    "elapsed_seconds": 0.021771174000605242
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-qyq26p35/source",
+      "--id",
+      "v2",
+      "--repo",
+      "/trial/evidence/contract-qyq26p35/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file in managed tree\"}\n",
+    "elapsed_seconds": 0.021314420002454426
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "v1",
+      "--dest",
+      "/trial/evidence/contract-qyq26p35/dest",
+      "--repo",
+      "/trial/evidence/contract-qyq26p35/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file in managed tree\"}\n",
+    "elapsed_seconds": 0.020251388999895426
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-6u7k3fhe/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-6u7k3fhe/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file in managed tree\"}\n",
+    "elapsed_seconds": 0.020153229001152795
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-6u7k3fhe/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-6u7k3fhe/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file in managed tree\"}\n",
+    "elapsed_seconds": 0.021325550002075033
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-6u7k3fhe/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-6u7k3fhe/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file in managed tree\"}\n",
+    "elapsed_seconds": 0.02055991199813434
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-6u7k3fhe/source",
+      "--id",
+      "v1",
+      "--repo",
+      "/trial/evidence/contract-6u7k3fhe/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file in managed tree\"}\n",
+    "elapsed_seconds": 0.020840003999182954
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-2qwlng63/source",
+      "--id",
+      "z-first",
+      "--max-bytes",
+      "1000000",
+      "--repo",
+      "/trial/evidence/contract-2qwlng63/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"z-first\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.024643241999001475
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-2qwlng63/source",
+      "--id",
+      "a-second",
+      "--max-bytes",
+      "1000000",
+      "--repo",
+      "/trial/evidence/contract-2qwlng63/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"a-second\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.024224028002208797
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/evidence/contract-2qwlng63/source",
+      "--id",
+      "m-third",
+      "--max-bytes",
+      "1000000",
+      "--repo",
+      "/trial/evidence/contract-2qwlng63/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"m-third\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.025545450997014996
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/evidence/contract-2qwlng63/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[\"a-second\",\"m-third\",\"z-first\"]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02337233900107094
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "z-first",
+      "--repo",
+      "/trial/evidence/contract-2qwlng63/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"z-first\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.024811033999867504
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "z-first",
+      "--dest",
+      "/trial/evidence/contract-2qwlng63/restore z-first",
+      "--repo",
+      "/trial/evidence/contract-2qwlng63/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"z-first\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.026575301999400835
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "a-second",
+      "--repo",
+      "/trial/evidence/contract-2qwlng63/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"a-second\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02194498599783401
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "a-second",
+      "--dest",
+      "/trial/evidence/contract-2qwlng63/restore a-second",
+      "--repo",
+      "/trial/evidence/contract-2qwlng63/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"a-second\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.030894814000930637
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "verify",
+      "--id",
+      "m-third",
+      "--repo",
+      "/trial/evidence/contract-2qwlng63/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"m-third\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.021993146001477726
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3.12",
+      "/trial/solution/backup.py",
+      "restore",
+      "--id",
+      "m-third",
+      "--dest",
+      "/trial/evidence/contract-2qwlng63/restore m-third",
+      "--repo",
+      "/trial/evidence/contract-2qwlng63/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"m-third\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03172239200284821
+  }
+]

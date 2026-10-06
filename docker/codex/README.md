@@ -1,9 +1,9 @@
-# Codex y SpecOrganon MCP: candidato 0.2.0rc2
+# Codex y SpecOrganon MCP: candidato 0.2.0rc3.dev2
 
 Desde la carpeta del paquete fuente extraído:
 
 ```sh
-docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc2 .
+docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev2 .
 docker compose build codex
 docker compose run --rm -T codex codex --version
 docker compose run --rm -T codex python /opt/codex-lab/smoke.py
@@ -42,3 +42,11 @@ monta el socket Docker ni se cambian los permisos del trabajo principal.
 Este Docker permite pruebas nuevas. El registro privado de la campaña original
 está vinculado a sus fuentes y rutas originales. No sirve para continuar esa
 campaña desde un checkout nuevo ni para sustituir sus resultados adversos.
+
+La validación histórica de la primera integración con inferencia real está en [VALIDATION.md](VALIDATION.md). Para una prueba nueva acotada después de autenticar el volumen propio:
+
+```sh
+docker compose run --rm -T codex python /opt/codex-lab/trial.py
+```
+
+El driver usa siete herramientas MCP autorizadas para su caso técnico, sin pedir aceptación de las nueve fases. Conserva los eventos y rechaza una inferencia sin llamadas MCP verificadas. Consume cuota de la cuenta autenticada.

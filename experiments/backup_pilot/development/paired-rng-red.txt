@@ -1,0 +1,23 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_repository_layout_does_not_change_paired_crash_payload __________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-29/test_repository_layout_does_no0')
+
+    def test_repository_layout_does_not_change_paired_crash_payload(tmp_path):
+        candidate=tmp_path/'backup.py'
+        code=REF.read_text().replace("    return {'id':args.id}\n\n\nclass directory_fd:","    for index in range(40): (repo/f'aux-{index}').write_bytes(b'')\n    return {'id':args.id}\n\n\nclass directory_fd:")
+        assert code!=REF.read_text()
+        candidate.write_text(code)
+        normal=module.evaluate(REF,stage=1,seed=113)
+        auxiliary=module.evaluate(candidate,stage=1,seed=113)
+>       assert normal['workload_sha256']==auxiliary['workload_sha256']
+E       AssertionError: assert '7bc4c9c3d0b2...4fb28585307bf' == 'ac1ffc3f7121...4e22f7986bb30'
+E         
+E         - ac1ffc3f712171be00405c085252913f74747cf36aafe2218744e22f7986bb30
+E         + 7bc4c9c3d0b29d60591b36b9984d2cc2dc9a6c5e11bf63dbf494fb28585307bf
+
+experiments/backup_pilot/tests/test_evaluator_regressions.py:63: AssertionError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/tests/test_evaluator_regressions.py::test_repository_layout_does_not_change_paired_crash_payload
+1 failed, 6 deselected in 6.53s

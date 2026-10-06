@@ -1,0 +1,196 @@
+FF.E                                                                     [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_cli_profile_is_explicit_and_unknown_profile_emits_no_receipt _
+
+cls = <class '_pytest.runner.CallInfo'>
+func = <function call_and_report.<locals>.<lambda> at 0x7f334c6cf380>
+when = 'setup'
+reraise = (<class '_pytest.outcomes.Exit'>, <class 'KeyboardInterrupt'>)
+
+    @classmethod
+    def from_call(
+        cls,
+        func: Callable[[], TResult],
+        when: Literal["collect", "setup", "call", "teardown"],
+        reraise: type[BaseException] | tuple[type[BaseException], ...] | None = None,
+    ) -> CallInfo[TResult]:
+        """Call func, wrapping the result in a CallInfo.
+    
+        :param func:
+            The function to call. Called without arguments.
+        :type func: Callable[[], _pytest.runner.TResult]
+        :param when:
+            The phase in which the function is called.
+        :param reraise:
+            Exception or exceptions that shall propagate if raised by the
+            function, instead of being wrapped in the CallInfo.
+        """
+        excinfo = None
+        instant = timing.Instant()
+        try:
+>           result: TResult | None = func()
+                                     ^^^^^^
+
+.venv/lib/python3.12/site-packages/_pytest/runner.py:361: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/_pytest/runner.py:250: in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/pluggy/_hooks.py:512: in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/pluggy/_manager.py:120: in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/_pytest/logging.py:858: in pytest_runtest_setup
+    yield
+.venv/lib/python3.12/site-packages/_pytest/capture.py:895: in pytest_runtest_setup
+    return (yield)
+            ^^^^^
+.venv/lib/python3.12/site-packages/_pytest/runner.py:170: in pytest_runtest_setup
+    item.session._setupstate.setup(item)
+.venv/lib/python3.12/site-packages/_pytest/runner.py:536: in setup
+    col.setup()
+.venv/lib/python3.12/site-packages/_pytest/python.py:1710: in setup
+    self._request._fillfixtures()
+.venv/lib/python3.12/site-packages/_pytest/fixtures.py:806: in _fillfixtures
+    item.funcargs[argname] = self.getfixturevalue(argname)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/_pytest/fixtures.py:630: in getfixturevalue
+    fixturedef = self._get_active_fixturedef(argname)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/_pytest/fixtures.py:726: in _get_active_fixturedef
+    fixturedef.execute(request=subrequest)
+.venv/lib/python3.12/site-packages/_pytest/fixtures.py:1232: in execute
+    result: FixtureValue = ihook.pytest_fixture_setup(
+.venv/lib/python3.12/site-packages/pluggy/_hooks.py:512: in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/pluggy/_manager.py:120: in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/pluggy/_callers.py:53: in run_old_style_hookwrapper
+    return result.get_result()
+           ^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/pluggy/_callers.py:38: in run_old_style_hookwrapper
+    res = yield
+          ^^^^^
+.venv/lib/python3.12/site-packages/_pytest/setuponly.py:36: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+.venv/lib/python3.12/site-packages/_pytest/fixtures.py:1328: in pytest_fixture_setup
+    result = call_fixture_func(fixturefunc, request, kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/_pytest/fixtures.py:998: in call_fixture_func
+    fixture_result = next(generator)
+                     ^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/_pytest/tmpdir.py:300: in tmp_path
+    path = _mk_tmp(request, tmp_path_factory)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/_pytest/tmpdir.py:287: in _mk_tmp
+    return factory.mktemp(name, numbered=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/_pytest/tmpdir.py:136: in mktemp
+    basename = self._ensure_relative_to_basetemp(basename)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/_pytest/tmpdir.py:117: in _ensure_relative_to_basetemp
+    if (self.getbasetemp() / basename).resolve().parent != self.getbasetemp():
+        ^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/_pytest/tmpdir.py:213: in getbasetemp
+    basetemp = make_numbered_dir_with_cleanup(
+.venv/lib/python3.12/site-packages/_pytest/pathlib.py:420: in make_numbered_dir_with_cleanup
+    raise e
+.venv/lib/python3.12/site-packages/_pytest/pathlib.py:401: in make_numbered_dir_with_cleanup
+    p = make_numbered_dir(root, prefix, mode)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/tmp/pytest-of-stev'), prefix = 'pytest-', mode = 448
+
+    def make_numbered_dir(root: Path, prefix: str, mode: int = 0o700) -> Path:
+        """Create a directory with an increased number as suffix for the given prefix."""
+        for i in range(10):
+            # try up to 10 times to create the directory
+            max_existing = max(map(parse_num, find_suffixes(root, prefix)), default=-1)
+            new_number = max_existing + 1
+            new_path = root.joinpath(f"{prefix}{new_number}")
+            try:
+                new_path.mkdir(mode=mode)
+            except Exception:
+                pass
+            else:
+                _force_symlink(root, prefix + "current", new_path)
+                return new_path
+        else:
+>           raise OSError(
+                "could not create numbered dir with prefix "
+                f"{prefix} in {root} after 10 tries"
+            )
+E           OSError: could not create numbered dir with prefix pytest- in /tmp/pytest-of-stev after 10 tries
+
+.venv/lib/python3.12/site-packages/_pytest/pathlib.py:239: OSError
+=================================== FAILURES ===================================
+_______ test_unknown_profile_rejects_even_when_host_binary_is_available ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f334c6c2420>
+
+    def test_unknown_profile_rejects_even_when_host_binary_is_available(monkeypatch):
+        # A silent fallback here would turn a misspelled deployment into false success.
+        monkeypatch.setenv("SPECORGANON_EXTRACTOR_PROFILE", "not-registered")
+>       with pytest.raises(SourceAuditError, match="profile"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'profile'
+E         Actual message: 'extractor bytes differ from reviewed digest'
+
+tests/test_extractor_profiles.py:24: AssertionError
+___ test_explicit_profile_revalidates_without_rewriting_historical_contract ____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f334c6aa150>
+
+    def test_explicit_profile_revalidates_without_rewriting_historical_contract(monkeypatch):
+        # Removing profile selection would reproduce the host portability failure;
+        # dropping provenance would falsely suggest the historical binary was used.
+        monkeypatch.setenv("SPECORGANON_EXTRACTOR_PROFILE", PROFILE)
+        before = auditor.CONTRACT.read_bytes()
+>       result = auditor.audit_bread_sources()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_extractor_profiles.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/audit_bread_sources.py:125: in audit_bread_sources
+    name: read_pdf_pages(pdf_root / identity["visible_file"],
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/stev/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+=========================== short test summary info ============================
+FAILED tests/test_extractor_profiles.py::test_unknown_profile_rejects_even_when_host_binary_is_available
+FAILED tests/test_extractor_profiles.py::test_explicit_profile_revalidates_without_rewriting_historical_contract
+ERROR tests/test_extractor_profiles.py::test_cli_profile_is_explicit_and_unknown_profile_emits_no_receipt
+2 failed, 1 passed, 1 error in 0.20s

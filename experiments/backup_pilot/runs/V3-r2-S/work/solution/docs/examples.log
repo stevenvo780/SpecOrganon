@@ -1,0 +1,29 @@
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/tests/work/examples-2mbrcvyb/repo
+exit=0
+stdout: {"snapshots":[]}
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/tests/work/examples-2mbrcvyb/fuente ñ' --repo /trial/solution/tests/work/examples-2mbrcvyb/repo --id v1 --max-bytes 10000
+exit=0
+stdout: {"id":"v1"}
+Conteo independiente (datos + metadata): 531 bytes <= 10000
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/tests/work/examples-2mbrcvyb/repo --id v1
+exit=0
+stdout: {"id":"v1","valid":true}
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/tests/work/examples-2mbrcvyb/fuente ñ' --repo /trial/solution/tests/work/examples-2mbrcvyb/repo --id v2 --max-bytes 530
+exit=1
+stderr: {"error": "repo necesita 531 bytes; l\u00edmite 530"}
+Rechazo comprobado: mismos archivos/bytes; ningún .pending residual
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/tests/work/examples-2mbrcvyb/repo
+exit=0
+stdout: {"snapshots":["v1"]}
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/tests/work/examples-2mbrcvyb/repo --id v1 --dest /trial/solution/tests/work/examples-2mbrcvyb/destino
+exit=0
+stdout: {"id":"v1"}
+Restore autosuficiente: bytes y directorio vacío comprobados
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/tests/work/examples-2mbrcvyb/repo --id v1
+exit=1
+stderr: {"error": "datos corruptos o inventario diferente al manifiesto"}
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/tests/work/examples-2mbrcvyb/repo --id v1 --dest /trial/solution/tests/work/examples-2mbrcvyb/no_publicado
+exit=1
+stderr: {"error": "datos corruptos o inventario diferente al manifiesto"}
+Corrupción rechazada; destino ausente
+Ejemplos: OK

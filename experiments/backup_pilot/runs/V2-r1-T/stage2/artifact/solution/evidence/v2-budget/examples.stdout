@@ -1,0 +1,12 @@
+{"operation": "create", "result": {"id": "v1"}}
+{"operation": "create", "result": {"id": "v2"}}
+{"operation": "create", "rejected": true, "stderr": "{\"error\": \"repository already exceeds --max-bytes\"}"}
+{"operation": "create", "result": {"id": "v3"}}
+{"operation": "list", "result": {"snapshots": ["v1", "v2", "v3"]}}
+{"operation": "verify", "result": {"id": "v1", "valid": true}}
+{"operation": "restore", "result": {"id": "v1"}}
+{"operation": "verify", "result": {"id": "v2", "valid": true}}
+{"operation": "restore", "result": {"id": "v2"}}
+{"operation": "verify", "result": {"id": "v3", "valid": true}}
+{"operation": "restore", "result": {"id": "v3"}}
+{"first_repository_bytes": 283, "final_repository_bytes": 1450, "max_bytes": 100000, "exact_versions_restored_without_source": 3}

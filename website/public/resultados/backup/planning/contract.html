@@ -1,0 +1,60 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Contrato del piloto: backup verificable · SpecOrganon</title><style>body{margin:0;background:#f7f8f3;color:#1a3025;font:17px/1.75 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:36px 24px}h1,h2,h3{line-height:1.25}a{color:#234e3a;text-underline-offset:3px}pre{padding:18px;background:#eaf0e4;overflow:auto}code{overflow-wrap:anywhere}table{display:block;overflow:auto;border-collapse:collapse}td,th{padding:10px;border:1px solid #c7d4c0;text-align:left}blockquote{border-left:3px solid #527842;padding-left:20px}nav{display:flex;gap:20px;flex-wrap:wrap;border-bottom:1px solid #dce3d7;padding-bottom:18px}img{max-width:100%}</style><main><nav><a href="/#resultados">← Presentación y resultados</a><a href="/resultados/backup/RESULTADOS.html">Informe completo</a><a href="/resultados/backup/resultados.csv">Datos CSV</a></nav><h1>Contrato del piloto: backup verificable</h1>
+<p>Estado: contrato fijado antes de las corridas experimentales, tras controles de desarrollo. Piloto de ingeniería de
+software autorizado por el dueño el 2026-10-03; no modifica GOAL.md ni el protocolo
+confirmatorio histórico. Solo archivos de prueba en contenedores y directorios
+privados del experimento. No cuentas adicionales ni copias de credenciales.</p>
+<h2>Producto y formato común</h2>
+<p>Cada ejecución entrega <code>/trial/solution/backup.py</code>, ejecutable con Python 3.12 y
+biblioteca estándar, y <code>/trial/solution/README.md</code>. La implementación es libre.
+Interfaz contractual inicial:</p>
+<ul>
+<li><code>python backup.py create --source DIR --repo DIR --id ID</code></li>
+<li><code>python backup.py verify --repo DIR --id ID</code></li>
+<li><code>python backup.py restore --repo DIR --id ID --dest DIR</code></li>
+<li><code>python backup.py list --repo DIR</code></li>
+</ul>
+<p>Código 0 indica éxito y stdout contiene un único objeto JSON. Los errores retornan
+código distinto de 0 y nunca afirman éxito. <code>create</code> devuelve <code>{"id": ID}</code>;
+<code>verify</code> devuelve <code>{"id": ID, "valid": true}</code> solo tras comprobar todos los datos;
+<code>restore</code> devuelve <code>{"id": ID}</code>; <code>list</code> devuelve <code>{"snapshots": [IDs...]}</code> ordenados. <code>list</code> incluye solo snapshots completos; un repositorio nuevo vacío
+devuelve una lista vacía. Un ID inexistente se rechaza al verificar o restaurar.
+El formato privado del repositorio queda a elección del implementador.</p>
+<p>Ámbito: archivos regulares, directorios vacíos, nombres Unicode/espacios, bytes
+arbitrarios y rutas relativas dentro de una fuente. No requiere preservar UID,
+ACL, tiempos ni hardlinks. Rechazar symlinks en fuente, repo, destino y snapshots;
+no seguirlos. Rechazar IDs distintos de <code>[A-Za-z0-9][A-Za-z0-9_-]{0,63}</code>.
+No admite fuente/repositorio solapados. Rechaza archivos especiales (FIFO, sockets,
+dispositivos) en las rutas gestionadas. Fuente estable durante la operación; no
+se exige un snapshot atómico de archivos que un tercero modifica simultáneamente. El repositorio debe ser autosuficiente: restaurar sin acceso a la fuente original.
+Un destino preexistente no vacío se rechaza
+sin cambiar sus bytes. Un ID existente no se sobrescribe. No debe modificar la fuente.</p>
+<p>Una operación incompleta no puede aparecer como snapshot válido: la publicación es
+atómica; después de SIGKILL se preservan snapshots anteriores y puede repetirse
+un create incompleto con el mismo ID sin reiniciar o destruir el repositorio.
+Una corrupción detectada impide afirmar validez o publicar restauraciones como
+correctas. La recuperación requerida es repetir operaciones fallidas, no reparar
+bytes corruptos desconocidos. Controles de corrupción eligen archivos regulares
+del snapshot y alteran o eliminan bytes; deben producir rechazo, no éxito falso.</p>
+<h2>Tres variantes</h2>
+<p>V1: árboles de documentos con bytes variados y directorios vacíos.
+V2: instantáneas sucesivas con archivos añadidos, modificados y eliminados;
+restaurar cada versión exacta. No exige deduplicación.
+V3: integridad y recuperación de snapshots ante corrupción e interrupción de create.
+Todos reciben la interfaz y garantías base anteriores. La variante enfatiza la
+carga medida; ninguna recibe información esencial exclusiva.</p>
+<h2>Cambio común tras la primera entrega</h2>
+<p>En la etapa dos se añade <code>create --max-bytes N</code>: la suma de <code>st_size</code> en bytes de todos los archivos
+regulares del repositorio tras un create exitoso debe ser &lt;= N. Toda metadata
+persistente debe almacenarse en archivos regulares y cuenta en esa suma; no usar
+xattrs, nombres de directorios o archivos especiales para evadirla.
+Si no cabe, rechaza sin invalidar snapshots previos. No exige comprimir o cumplir
+límites físicamente imposibles. La evaluación usará un límite alto alcanzable y
+uno inferior a los bytes ya existentes, y comprobará rechazo sin crecimiento
+residual permanente. Los detalles de instancias reservadas no se entregan.</p>
+<h2>Criterios</h2>
+<p>Primario: proporción de comprobaciones funcionales/fallos que pasan por ejecución,
+antes y después del cambio. Una corrupción silenciosa o mutación de fuente/destino
+protegido es un fallo crítico explícito: se informa además de la proporción y no se
+compensa con velocidad. Secundarios: bytes utilizados, tiempos de create/restore,
+recuperación, tokens declarados por CLI, tiempo total y cumplimiento del límite.
+No se evalúa por páginas de documentación ni por opinión del propio ejecutor.</p></main></html>

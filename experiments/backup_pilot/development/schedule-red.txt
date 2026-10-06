@@ -1,0 +1,55 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_18_independent_runs_paired_inputs_and_balanced_positions _________
+
+    def test_18_independent_runs_paired_inputs_and_balanced_positions():
+>       plan=module().make_schedule(17863)
+             ^^^^^^^^
+
+experiments/backup_pilot/development/tests/test_schedule.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/backup_pilot/development/tests/test_schedule.py:9: in module
+    loaded=importlib.util.module_from_spec(spec); spec.loader.exec_module(loaded); return loaded
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7f9d12731df0>
+path = '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/schedule.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/schedule.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+______________ test_mcp_and_skills_do_not_leak_into_control_arms _______________
+
+    def test_mcp_and_skills_do_not_leak_into_control_arms():
+        for arm in ['N','S','T']:
+>           files=module().author_files(arm,1)
+                  ^^^^^^^^
+
+experiments/backup_pilot/development/tests/test_schedule.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/backup_pilot/development/tests/test_schedule.py:9: in module
+    loaded=importlib.util.module_from_spec(spec); spec.loader.exec_module(loaded); return loaded
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7f9d12731760>
+path = '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/schedule.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/schedule.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/development/tests/test_schedule.py::test_18_independent_runs_paired_inputs_and_balanced_positions
+FAILED experiments/backup_pilot/development/tests/test_schedule.py::test_mcp_and_skills_do_not_leak_into_control_arms
+2 failed in 0.05s

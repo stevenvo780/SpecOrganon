@@ -1,0 +1,85 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_freeze_detects_changed_input _______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-20/test_freeze_detects_changed_in0')
+
+    def test_freeze_detects_changed_input(tmp_path):
+>       r=module(); source=tmp_path/'contract.md'; source.write_text('before')
+          ^^^^^^^^
+
+experiments/backup_pilot/development/tests/test_runner.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/backup_pilot/development/tests/test_runner.py:10: in module
+    loaded=importlib.util.module_from_spec(spec); spec.loader.exec_module(loaded); return loaded
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:755: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:892: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7f6e41e51d90>
+path = '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/run_pilot.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/run_pilot.py'
+
+<frozen importlib._bootstrap_external>:950: FileNotFoundError
+_______ test_completed_and_interrupted_steps_are_never_silently_replayed _______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-20/test_completed_and_interrupted0')
+
+    def test_completed_and_interrupted_steps_are_never_silently_replayed(tmp_path):
+>       r=module(); marker=tmp_path/'receipt.json'; calls=[]
+          ^^^^^^^^
+
+experiments/backup_pilot/development/tests/test_runner.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/backup_pilot/development/tests/test_runner.py:10: in module
+    loaded=importlib.util.module_from_spec(spec); spec.loader.exec_module(loaded); return loaded
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:755: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:892: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7f6e41be0a70>
+path = '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/run_pilot.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/run_pilot.py'
+
+<frozen importlib._bootstrap_external>:950: FileNotFoundError
+________ test_snapshot_refuses_external_links_and_bounds_artifact_size _________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-20/test_snapshot_refuses_external0')
+
+    def test_snapshot_refuses_external_links_and_bounds_artifact_size(tmp_path):
+>       r=module(); source=tmp_path/'source'; source.mkdir(); (source/'code.py').write_text('print(1)')
+          ^^^^^^^^
+
+experiments/backup_pilot/development/tests/test_runner.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/backup_pilot/development/tests/test_runner.py:10: in module
+    loaded=importlib.util.module_from_spec(spec); spec.loader.exec_module(loaded); return loaded
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:755: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:892: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7f6e41be0530>
+path = '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/run_pilot.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/run_pilot.py'
+
+<frozen importlib._bootstrap_external>:950: FileNotFoundError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/development/tests/test_runner.py::test_freeze_detects_changed_input
+FAILED experiments/backup_pilot/development/tests/test_runner.py::test_completed_and_interrupted_steps_are_never_silently_replayed
+FAILED experiments/backup_pilot/development/tests/test_runner.py::test_snapshot_refuses_external_links_and_bounds_artifact_size
+3 failed in 0.06s

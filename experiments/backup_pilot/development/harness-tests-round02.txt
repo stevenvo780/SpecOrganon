@@ -1,0 +1,30 @@
+F......F....                                                             [100%]
+=================================== FAILURES ===================================
+________________ TestEvaluator.test_evaluate_missing_candidate _________________
+
+self = <test_evaluator.TestEvaluator testMethod=test_evaluate_missing_candidate>
+
+    def test_evaluate_missing_candidate(self):
+        result = evaluate(Path('/nonexistent/path/to/backup.py'), variant='V1', stage=1, seed=42)
+>       self.assertEqual(result['score'], 0)
+E       AssertionError: 0.3684210526315789 != 0
+
+experiments/backup_pilot/tests/test_evaluator.py:22: AssertionError
+_________________ test_symlink_acceptance_is_contract_failure __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-18/test_symlink_acceptance_is_con0')
+
+    def test_symlink_acceptance_is_contract_failure(tmp_path):
+        candidate=tmp_path/'backup.py'; shutil.copy(REF,candidate)
+        code=candidate.read_text().replace("if parent.is_symlink():", "if False:")
+        candidate.write_text(code)
+        result=module.evaluate(candidate,stage=1,seed=31)
+        details={d['name']:d for d in result['details']}
+>       assert details['symlink_dest']['passed'] is False
+E       assert True is False
+
+experiments/backup_pilot/tests/test_evaluator_regressions.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/tests/test_evaluator.py::TestEvaluator::test_evaluate_missing_candidate
+FAILED experiments/backup_pilot/tests/test_evaluator_regressions.py::test_symlink_acceptance_is_contract_failure
+2 failed, 10 passed in 34.70s

@@ -1,0 +1,15 @@
+{
+  "reviewed_at": "2026-10-04T05:32:39.555171+00:00",
+  "reviewer": "root Codex controller, local declared review",
+  "selected_run": "V1-r1-N",
+  "stage": 2,
+  "source_sha256": "eaac5ef5622e77d5584474318baba62f906ff1030d6cdcad8fcf7275886e6e0a",
+  "scope": "Complete backup.py and candidate README read, production imports and calls inventoried against actual Python3.12 stdlib catalog; test/example source inspected for isolated execution",
+  "conclusion": "Production implementation is self-contained Python stdlib on Linux/Unix. No imported local helper, installed package, vendored module, dynamic eval/exec or external command in backup.py. Uses fcntl and O_NOFOLLOW; no Windows portability claim.",
+  "dependency_policy_selected_source_pass": true,
+  "limitations": [
+    "Source inspection and tests are bounded engineering evidence, not a proof for every adversarial filesystem race.",
+    "Stable source and cooperative repository processes; UID/ACL/timestamps/hardlink identity excluded by contract.",
+    "Hashes detect accidental corruption; deliberate simultaneous replacement of data, manifest and seal is outside the integrity threat model."
+  ]
+}

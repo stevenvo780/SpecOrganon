@@ -1,0 +1,1262 @@
+{
+  "events": [
+    {
+      "actor": "agent:orchestrator",
+      "at": "2026-10-04T02:21:06+00:00",
+      "hash": "0e62282f22599936c48eaea2905e05f1a2a821d5d0c0acb4728c3ec156c0d33b",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "problem",
+        "kind": "problem",
+        "text": "Crear backups autosuficientes, restauración exacta, integridad y recuperación según CONTRACT.md.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:orchestrator",
+      "at": "2026-10-04T02:21:06+00:00",
+      "hash": "1870054dfaeb5774e82d913cbd2e1d153ee568ac28accd50aabcb6cdefe1c5e2",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem": 1
+        },
+        "id": "mandate",
+        "kind": "norm",
+        "text": "El dueño autorizó construir backups y evaluar este piloto local; decisiones técnicas delegadas dentro del contrato. Sin datos reales ni nuevas cuentas ni copias de credenciales.",
+        "version": 1
+      },
+      "prev_hash": "0e62282f22599936c48eaea2905e05f1a2a821d5d0c0acb4728c3ec156c0d33b",
+      "seq": 2
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-04T02:21:06+00:00",
+      "hash": "e78bcfa8a0b4334469d075cda87612b82a08884d88075281b423259cbeec10fa",
+      "kind": "approval",
+      "payload": {
+        "id": "mandate",
+        "provenance": "local_declared",
+        "reason": "Mandato existente: el dueño pidió dale asignatelo como goal; no aprobación personal de una arquitectura.",
+        "version": 1
+      },
+      "prev_hash": "1870054dfaeb5774e82d913cbd2e1d153ee568ac28accd50aabcb6cdefe1c5e2",
+      "seq": 3
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "038cfeb50600a4ae0ac28c8c0d7ea3ea2eed578aa5398ae8def939c7df4f38ff",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem": 1
+        },
+        "id": "actors",
+        "kind": "actor",
+        "text": "El dueño necesita recuperar documentos y evitar éxito falso; agent:author implementa bajo delegación; un revisor independiente evaluará después de la entrega.",
+        "version": 1
+      },
+      "prev_hash": "e78bcfa8a0b4334469d075cda87612b82a08884d88075281b423259cbeec10fa",
+      "seq": 4
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "41de78b57b78534af5afe636f4826b80ce895cd9ad258f4b95e3faf95daafe04",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "actors": 1,
+          "mandate": 1,
+          "problem": 1
+        },
+        "id": "scope",
+        "kind": "boundary",
+        "text": "V1 local en /trial: árboles estables de archivos regulares, bytes arbitrarios y directorios vacíos. No credenciales, red, dependencias, datos reales, ACL, UID, tiempos ni hardlinks. Todas las garantías base de CONTRACT.md aplican.",
+        "version": 1
+      },
+      "prev_hash": "038cfeb50600a4ae0ac28c8c0d7ea3ea2eed578aa5398ae8def939c7df4f38ff",
+      "seq": 5
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "11715defb056a95c89a887ab1040a4fccb4321058cea5b3253164afbe845a69a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem": 1,
+          "scope": 1
+        },
+        "id": "exactness",
+        "kind": "concept",
+        "text": "Backup verificable significa reconstruir el mismo conjunto de rutas, tipos y bytes sin consultar la fuente, y rechazar corrupción antes de publicar éxito.",
+        "version": 1
+      },
+      "prev_hash": "41de78b57b78534af5afe636f4826b80ce895cd9ad258f4b95e3faf95daafe04",
+      "seq": 6
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "23d8a6313afa2e3e1f0d7c81521b6c3f035736315721f091b060c97410da7a5a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "scope": 1
+        },
+        "id": "stable",
+        "kind": "assumption",
+        "text": "La fuente permanece estable durante create según contrato; repo y destino no sufren modificaciones hostiles concurrentes. SIGKILL es interrupción de proceso, no prueba de corte eléctrico.",
+        "version": 1
+      },
+      "prev_hash": "11715defb056a95c89a887ab1040a4fccb4321058cea5b3253164afbe845a69a",
+      "seq": 7
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "853ea29da59d098f5ed828455df0e6003417d3351b90b2f8de9fbdda6680878a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "exactness": 1,
+          "mandate": 1,
+          "problem": 1
+        },
+        "id": "frame_exact",
+        "kind": "frame_option",
+        "text": "Priorizar exactitud y rechazo de fallos: una copia más lenta que detecta corrupción cumple mejor el contrato que una copia silenciosamente incompleta.",
+        "version": 1
+      },
+      "prev_hash": "23d8a6313afa2e3e1f0d7c81521b6c3f035736315721f091b060c97410da7a5a",
+      "seq": 8
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "c6232a7cae9f74209d0323fcbbc1501b37cd2ffc87c807a5439547a95ecc37ff",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "exactness": 1,
+          "mandate": 1,
+          "problem": 1
+        },
+        "id": "frame_fast",
+        "kind": "frame_option",
+        "text": "Priorizar solo velocidad o copia directa podría reducir coste pero permitir publicación parcial. Se descarta ese encuadre por el criterio crítico del contrato.",
+        "version": 1
+      },
+      "prev_hash": "853ea29da59d098f5ed828455df0e6003417d3351b90b2f8de9fbdda6680878a",
+      "seq": 9
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "bf30daf85b35eb0cc408387cde735e42886d583a88c0e116f3898cfe5d6e2bc2",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem": 1,
+          "scope": 1
+        },
+        "id": "question",
+        "kind": "question",
+        "text": "¿Puede una CLI estándar conservar exactamente árboles V1 y rechazar entradas inseguras, corrupción e interrupciones sin mutar la fuente o un destino protegido?",
+        "version": 1
+      },
+      "prev_hash": "c6232a7cae9f74209d0323fcbbc1501b37cd2ffc87c807a5439547a95ecc37ff",
+      "seq": 10
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "dec7c6148e171a6cddd2b2199136125177d5c6862df62ec1d40f304bf597e73c",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem": 1,
+          "question": 1,
+          "stable": 1
+        },
+        "id": "hypothesis",
+        "kind": "hypothesis",
+        "text": "Un manifiesto de rutas/tipos/longitudes/SHA-256 y publicación por rename desde staging permite fidelidad y rechazo de corrupción bajo el alcance local.",
+        "version": 1
+      },
+      "prev_hash": "bf30daf85b35eb0cc408387cde735e42886d583a88c0e116f3898cfe5d6e2bc2",
+      "seq": 11
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "bf0beeaa6b0a28046fd3952af8d5936fd28df4050a0c91e6eae40fcc5b22871f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Contrato e inventario original; sin programa baseline previo",
+          "date": "2026-10-04",
+          "method": "subprocess y comparación independiente de inventarios byte a byte",
+          "population": "Casos locales sintéticos V1 y garantías base",
+          "uncertainty": "Muestra finita, sin campo ni adversario concurrente"
+        },
+        "deps": {
+          "hypothesis": 1,
+          "mandate": 1,
+          "problem": 1,
+          "question": 1
+        },
+        "id": "protocol",
+        "kind": "protocol",
+        "text": "Antes de construir: probar subprocess CLI con timeout, árboles vacíos, Unicode/espacios, bytes 0..255, datos aleatorios reproducibles; comparar inventarios y SHA-256 antes/después. Probar IDs inválidos/duplicados/ausentes, solapamiento, symlinks y FIFO, destino no vacío, corrupción de cada clase de archivo, SIGKILL durante staging y reintento. Registrar argv, streams, exit_code y timeout. Baseline: no implementación previa, sin medición comparable. Éxito local requiere todos los casos y cero mutaciones críticas; la muestra no demuestra eficacia general.",
+        "version": 1
+      },
+      "prev_hash": "dec7c6148e171a6cddd2b2199136125177d5c6862df62ec1d40f304bf597e73c",
+      "seq": 12
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "2df17439a98033174e046dec7e18790d5d9e868c02daf1166ea4811d7984ee0e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-04",
+          "locator": "Producto y formato común; Tres variantes; Criterios",
+          "method": "Lectura local del contrato y python3 --version",
+          "origin": "observation",
+          "source": "/trial/CONTRACT.md"
+        },
+        "deps": {
+          "problem": 1,
+          "protocol": 1
+        },
+        "id": "contract_evidence",
+        "kind": "evidence",
+        "text": "Observación documental: CONTRACT.md fija interfaz JSON, preservación de bytes, rechazo de symlinks/especiales y publicación atómica. La implementación parte de cero; Python disponible es 3.12.15. No se han medido resultados del producto aún.",
+        "version": 1
+      },
+      "prev_hash": "bf0beeaa6b0a28046fd3952af8d5936fd28df4050a0c91e6eae40fcc5b22871f",
+      "seq": 13
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "ddda0d5a04610cbf857a12a84dd79309b84b9399ba55a6aa0d0f0b22157e4428",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "direction": "maximize",
+          "metric_key": "local_pass_fraction",
+          "unit": "proportion"
+        },
+        "deps": {
+          "contract_evidence": 1,
+          "mandate": 1,
+          "problem": 1,
+          "protocol": 1
+        },
+        "id": "indicator",
+        "kind": "indicator",
+        "text": "Proporción de casos locales que cumplen su expectativa y número separado de mutaciones críticas; ni tiempo ni almacenamiento compensan un fallo crítico.",
+        "version": 1
+      },
+      "prev_hash": "2df17439a98033174e046dec7e18790d5d9e868c02daf1166ea4811d7984ee0e",
+      "seq": 14
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "9482b6070d20e8995951abf9550a5ca561612fd4c18f6f7c3566312bf65dbd74",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "contract_evidence": 1,
+          "hypothesis": 1,
+          "protocol": 1
+        },
+        "id": "inference",
+        "kind": "inference",
+        "text": "El contrato implica inventariar directorios vacíos además de archivos y validar el snapshot completo antes de restaurar; copytree directo no ofrece el límite de publicación requerido.",
+        "version": 1
+      },
+      "prev_hash": "ddda0d5a04610cbf857a12a84dd79309b84b9399ba55a6aa0d0f0b22157e4428",
+      "seq": 15
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "ea95cd9609c0d0b10d1ca84ba58e696dddb916c557559e77f63d34ce48d29ab0",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "contract_evidence": 1,
+          "inference": 1,
+          "mandate": 1
+        },
+        "id": "synthesis",
+        "kind": "synthesis",
+        "text": "Elegir un diseño que separa staging de snapshots publicados y comprueba rutas, tipos y bytes. La justificación es contractual/documental; la eficacia permanece pendiente de pruebas locales.",
+        "version": 1
+      },
+      "prev_hash": "9482b6070d20e8995951abf9550a5ca561612fd4c18f6f7c3566312bf65dbd74",
+      "seq": 16
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "a09453b7bd44127c0acc9c112e8fbe06ebd85fbfd4ac3277655cdff105cba830",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "stable": 1,
+          "synthesis": 1
+        },
+        "id": "uncertainty",
+        "kind": "uncertainty",
+        "text": "SHA-256 detecta alteraciones accidentales; no autentica frente a un atacante que reescribe datos y manifiesto coherentemente. Una suite finita no demuestra generalidad ni durabilidad ante pérdida eléctrica.",
+        "version": 1
+      },
+      "prev_hash": "ea95cd9609c0d0b10d1ca84ba58e696dddb916c557559e77f63d34ce48d29ab0",
+      "seq": 17
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "b48a956dc100fe876c495d78729ff598492a097bf23b1be082f653e5552553ea",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "mandate": 1,
+          "synthesis": 1
+        },
+        "id": "tree_option",
+        "kind": "option",
+        "text": "Copias completas en directorio por ID, manifiesto JSON sellado con SHA-256, data como árbol, staging privado y rename. Fácil inspección, sin deduplicación; coste O(bytes por snapshot) y lectura extra al verificar.",
+        "version": 1
+      },
+      "prev_hash": "a09453b7bd44127c0acc9c112e8fbe06ebd85fbfd4ac3277655cdff105cba830",
+      "seq": 18
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "7f84a05924044a753b0ccb2e189343d1b8b1f22ded846b27c0cfd6a97e04e393",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "mandate": 1,
+          "synthesis": 1
+        },
+        "id": "archive_option",
+        "kind": "option",
+        "text": "Archivo tar/zip por ID y manifiesto, publicación atómica de archivo. Menos inodos; extracción exige validar nombres y tipos y limita inspección/diagnóstico. Añade complejidad para directorios vacíos y seguridad de extracción.",
+        "version": 1
+      },
+      "prev_hash": "b48a956dc100fe876c495d78729ff598492a097bf23b1be082f653e5552553ea",
+      "seq": 19
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "dd0cd54bfdf2c6576f394dc5dd01d01681c5117917ce4bec66306d84459e30c2",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "archive_option": 1,
+          "indicator": 1,
+          "mandate": 1,
+          "tree_option": 1
+        },
+        "id": "comparison",
+        "kind": "comparison",
+        "text": "Comparadas copias completas y archivo: ambas pueden ser autosuficientes. El árbol favorece diagnóstico y exactitud V1 con stdlib; el archivo ahorra inodos pero concentra extracción y validación. Se elige árbol por simplicidad verificable, aceptando espacio sin deduplicación.",
+        "version": 1
+      },
+      "prev_hash": "7f84a05924044a753b0ccb2e189343d1b8b1f22ded846b27c0cfd6a97e04e393",
+      "seq": 20
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "b1591bd6e304868855b983aaf1995799580d7c0e653421e1ef80b2514734e654",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "comparison": 1,
+          "uncertainty": 1
+        },
+        "id": "risk",
+        "kind": "risk",
+        "text": "Fallos críticos: seguir symlinks, traversal desde manifiesto, modificar destino no vacío, publicar parciales. Mitigar con lstat/O_NOFOLLOW, validación estricta de rutas e inventario, staging y rename; flock serializa procesos cooperativos. Huérfanos de SIGKILL consumen espacio.",
+        "version": 1
+      },
+      "prev_hash": "dd0cd54bfdf2c6576f394dc5dd01d01681c5117917ce4bec66306d84459e30c2",
+      "seq": 21
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "db5c99d6b6dda4bb127d06acf0ef1c881c627fb9868d235892ab96fa263bb900",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "authority": "delegated",
+          "decision_type": "technical",
+          "normative": false
+        },
+        "deps": {
+          "comparison": 1,
+          "mandate": 1,
+          "risk": 1
+        },
+        "id": "architecture",
+        "kind": "decision",
+        "text": "Decisión técnica delegada por AGENTS.md y mandate: árbol completo, manifiesto sellado, lock POSIX y staging atómico. La elección es de agent:author; no representa una arquitectura elegida personalmente por el dueño ni un intercambio normativo nuevo.",
+        "version": 1
+      },
+      "prev_hash": "b1591bd6e304868855b983aaf1995799580d7c0e653421e1ef80b2514734e654",
+      "seq": 22
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "cf1cbc2ec4091c4b400f1bbb8dc9e61e2d52c610a84fb1376f922f74d2bc4679",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "architecture": 1,
+          "contract_evidence": 1,
+          "mandate": 1,
+          "problem": 1
+        },
+        "id": "requirements",
+        "kind": "requirement",
+        "text": "Implementar create/verify/restore/list con códigos/JSON exactos; preservar rutas, directorios vacíos y bytes, autosuficiencia; rechazar IDs inválidos, symlinks/especiales y solapamientos; nunca sobrescribir ID ni destino no vacío; verificar todos los datos; staging invisible y reintento después de SIGKILL.",
+        "version": 1
+      },
+      "prev_hash": "db5c99d6b6dda4bb127d06acf0ef1c881c627fb9868d235892ab96fa263bb900",
+      "seq": 23
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "4cd0e40e7c3d6b0125f4e400e35c37a0ee54f9d966dae73282aae0d00e9f2059",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "accept": "Todos los casos y cero fallos críticos",
+          "claim_scope": "technical",
+          "metric_key": "local_pass_fraction",
+          "reject": "Cualquier fallo funcional o crítico",
+          "reject_test": {
+            "operator": "<",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "success_test": {
+            "operator": ">=",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "target": 1,
+          "unit": "proportion"
+        },
+        "deps": {
+          "contract_evidence": 1,
+          "indicator": 1,
+          "protocol": 1,
+          "requirements": 1
+        },
+        "id": "acceptance",
+        "kind": "criterion",
+        "text": "Aceptación técnica local: todos los casos planeados cumplen expectativa y ninguna mutación crítica ni éxito falso. Rechazo: cualquier caso fallido. Los resultados no representan una comparación metodológica ni una medida de campo.",
+        "version": 1
+      },
+      "prev_hash": "cf1cbc2ec4091c4b400f1bbb8dc9e61e2d52c610a84fb1376f922f74d2bc4679",
+      "seq": 24
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:24:18+00:00",
+      "hash": "679bd7450dd2cf44634e8c38eaed525bcfa41da09ca9ee372a27379abe6f176f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "claim_scope": "technical",
+          "date": "2026-10-04",
+          "metric_key": "local_pass_fraction",
+          "source": "Observación local rg --files /trial/solution: directorio inexistente",
+          "status": "not_measured",
+          "unit": "proportion"
+        },
+        "deps": {
+          "acceptance": 1,
+          "protocol": 1
+        },
+        "id": "initial_baseline",
+        "kind": "baseline",
+        "text": "Primera versión desde cero: no había solution/backup.py al iniciar. No hay programa anterior ni proporción antes medida; no se inventa un cambio cuantitativo respecto de baseline.",
+        "version": 1
+      },
+      "prev_hash": "4cd0e40e7c3d6b0125f4e400e35c37a0ee54f9d966dae73282aae0d00e9f2059",
+      "seq": 25
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:30:07+00:00",
+      "hash": "6f1b65acd832eb5955759f83dc1fd50cd6e13af9e61888821c703799940a23bd",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Sesión independiente: leídos CONTRACT.md, AGENTS.md, contratos de metodología y problem/actors/scope v1. La necesidad de recuperación exacta sin éxito falso, el dueño afectado, autor delegado y revisión independiente están delimitados. La frontera V1 conserva explícitamente todas las garantías base y exclusiones contractuales; no cambia mandato ni atribuye arquitectura al dueño. gate(frame) listo sin bloqueos. Aceptación limitada a formulación local; no acredita implementación ni eficacia.",
+        "snapshot": "adfbe1acfb70f34dbbd4abec6192678b18bc42e34f90be9236893b48649de757",
+        "verdict": "accept"
+      },
+      "prev_hash": "679bd7450dd2cf44634e8c38eaed525bcfa41da09ca9ee372a27379abe6f176f",
+      "seq": 26
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:30:24+00:00",
+      "hash": "5159fdd087464a1a384cea3cc20031663edbfb719d98094a14a08d4d7cd26665",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 26,
+        "snapshot": "adfbe1acfb70f34dbbd4abec6192678b18bc42e34f90be9236893b48649de757"
+      },
+      "prev_hash": "6f1b65acd832eb5955759f83dc1fd50cd6e13af9e61888821c703799940a23bd",
+      "seq": 27
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:30:24+00:00",
+      "hash": "fbc6d0e09cd3d0b6dc051267029619f786e42cd3aa553469f9891f1bdeb88521",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "Leídos exactness, stable, frame_exact, frame_fast y mandate v1. Concepto y límites son coherentes con CONTRACT.md y la prioridad contra éxito falso está autorizada. Incumplimiento mecánico concreto: mandate solo refiere problem, no actors; gate exige que la norma enlace problema y actor. Los encuadres presentan exactitud frente a velocidad sola, contraste limitado que no prueba una comparación empírica. La aprobación local existente del mandato no subsana el enlace ausente. No se altera mandato ni se avanza.",
+        "snapshot": "e9bba00a128a9c47c0aba3f0e7d4822ca738fd09c531184139d6b18728d90264",
+        "verdict": "reject"
+      },
+      "prev_hash": "5159fdd087464a1a384cea3cc20031663edbfb719d98094a14a08d4d7cd26665",
+      "seq": 28
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-04T02:30:24+00:00",
+      "hash": "0da1d5bd916be015c9d69b3e701672517dca23c9d42865f871da26f35df430c9",
+      "kind": "approval",
+      "payload": {
+        "id": "architecture",
+        "provenance": "local_declared",
+        "reason": "Registro local de delegación existente leída en AGENTS.md, mandate v1 aprobado y encargo actual: decisiones técnicas dentro de CONTRACT.md están delegadas. Leídas architecture v1, comparison, opciones y risk: árbol completo, manifiesto SHA-256, lock POSIX y staging son elección técnica de agent:author dentro del contrato; no cambian propósito, cuentas, presupuesto ni frontera. No afirma elección personal del dueño ni revisión técnica satisfactoria. Procedencia local declarada, identidad no autenticada.",
+        "version": 1
+      },
+      "prev_hash": "fbc6d0e09cd3d0b6dc051267029619f786e42cd3aa553469f9891f1bdeb88521",
+      "seq": 29
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:30:59+00:00",
+      "hash": "1b580415923bc5e354354d9bb14bf865000fca53039ffd9884644792dba99a0a",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "Leídos question, hypothesis, protocol e indicator v1. Protocolo anterior a la implementación en ledger, población sintética V1, comparación contractual y ausencia honesta de baseline; la hipótesis es comprobable. Rechazo mecánico: indicator declara metric_key/unit pero carece del campo metric exigido, por lo que no hay indicador válido. Bloqueo adicional: critique no aceptada. El texto no fija cantidad concreta de casos ni denominador final, pendiente para una medición reproducible.",
+        "snapshot": "937e783a0c0f1e5d32c02666f233126c3d83549d0ee33b1499361ab6a32aacdb",
+        "verdict": "reject"
+      },
+      "prev_hash": "0da1d5bd916be015c9d69b3e701672517dca23c9d42865f871da26f35df430c9",
+      "seq": 30
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:30:59+00:00",
+      "hash": "9a4292a4f694f9ae732d70f7c9528c87673d22521d4a55c58d0d69ea957f12bc",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "observe",
+        "provenance": "local_declared",
+        "reason": "Leídos contract_evidence e inference v1 y CONTRACT.md real. La inferencia sobre directorios vacíos y publicación es razonable; la evidencia es documental, no prueba ejecutada del producto. Rechazo mecánico: origin=observation es inválido (contrato admite published/observed/derived/simulated), y no hay evidencia válida según gate. La versión Python declarada no tiene comando/salida conservados en el expediente leído; no se autentica esa observación histórica. study pendiente.",
+        "snapshot": "d99b0ab21c237c545282c4a7414817af42993e1c718d09798b0993a81e7bc572",
+        "verdict": "reject"
+      },
+      "prev_hash": "1b580415923bc5e354354d9bb14bf865000fca53039ffd9884644792dba99a0a",
+      "seq": 31
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:30:59+00:00",
+      "hash": "6baff5b33316f3673808443f3be06c348c3c5745c151004b539d26645d815dad",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "explain",
+        "provenance": "local_declared",
+        "reason": "Leídas synthesis y uncertainty v1. Semántica razonable como justificación documental: staging y verificación, límites ante reescritura coherente, muestra finita y corte eléctrico. No confunde propuesta con eficacia. Rechazo de aceptación de fase por dependencia: observe no aceptada y contract_evidence tiene procedencia estructurada inválida; una síntesis descendiente no puede publicarse como justificada con esa base pendiente. Sin defecto semántico adicional demostrado.",
+        "snapshot": "93cc75e6e7c1e8175a134b846f234a74b787d59803a835060ba8279b2ab470a9",
+        "verdict": "reject"
+      },
+      "prev_hash": "9a4292a4f694f9ae732d70f7c9528c87673d22521d4a55c58d0d69ea957f12bc",
+      "seq": 32
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:30:59+00:00",
+      "hash": "b2620a824b841383dbfeca5e47b5ec5ebfd68c6a22faabe8b57376c1686a904a",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "compare",
+        "provenance": "local_declared",
+        "reason": "Leídas tree_option, archive_option, comparison y risk v1. Dos alternativas sustanciales de formato, costes de espacio/inodos y riesgos de publicación/entradas inseguras; comparación cualitativa pertinente a este encargo de software y sin superioridad medida. Rechazo de aceptación por dependencia: explain pendiente y la ruta del indicador/evidencia sigue inválida. La preferencia por simplicidad es decisión delegada del autor, no elección personal del dueño; no demuestra costes medidos.",
+        "snapshot": "f665a079ab12ecc28cbef092d7cd3716a9fdcebf506ab38e384c195590d59ea6",
+        "verdict": "reject"
+      },
+      "prev_hash": "6baff5b33316f3673808443f3be06c348c3c5745c151004b539d26645d815dad",
+      "seq": 33
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:30:59+00:00",
+      "hash": "c7027928a081062d175ef724a7115b59efca4c242e4aa42a98c2e597d6161c23",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "specify",
+        "provenance": "local_declared",
+        "reason": "Leídos architecture, requirements y acceptance v1. Decisión técnica delegada localmente registrada; requisitos reflejan garantías contractuales y criterio textual exige todos los casos y cero fallos críticos. Rechazo mecánico: acceptance carece de metric y threshold; metric_key/target/success_test no subsanan campos exigidos por gate. compare pendiente y respaldo documental/indicador inválidos. La aprobación local de delegación no sustituye cumplimiento ni revisión técnica.",
+        "snapshot": "fe645fa5efe9049c1fdd12858c84d8d16a3d1cfabe4556134e56446b081c74ae",
+        "verdict": "reject"
+      },
+      "prev_hash": "b2620a824b841383dbfeca5e47b5ec5ebfd68c6a22faabe8b57376c1686a904a",
+      "seq": 34
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:30:59+00:00",
+      "hash": "485145cc907fd993fce2d293b13c496b7d10af184d976c86ab36a66ee578c5fb",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "build",
+        "provenance": "local_declared",
+        "reason": "Leído íntegramente /trial/solution/backup.py y listado real de solution/case. Existe código CLI con manifiesto, verificación y staging, pero faltan solution/README.md y artefactos implementation/test del ledger; no hay comandos, streams, códigos, timeout ni recibos de pruebas registrados para inspeccionar. Rechazo por entrega incompleta y ausencia de prueba ejecutada documentada, además de specify pendiente. La lectura del código no demuestra funcionamiento; no se ejecutaron ni inventaron tests y no se sustituye la revisión técnica neutral.",
+        "snapshot": "86e7e4bf767365ad64e21192a23ea93c4e968cc2c997312ff133cfe1a00f44a2",
+        "verdict": "reject"
+      },
+      "prev_hash": "c7027928a081062d175ef724a7115b59efca4c242e4aa42a98c2e597d6161c23",
+      "seq": 35
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:30:59+00:00",
+      "hash": "a3c1578e9f66f695ba5f0e69752f63d8729afa0961b8296c6791480f7b506847",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "validate",
+        "provenance": "local_declared",
+        "reason": "Leído initial_baseline v1 y expediente real. Declara honestamente baseline no medido, pero falta origin técnico/simulado exigido. No hay result ni assessment, ni pruebas registradas, costes/daños medidos o comparación antes/después. Rechazo mecánico y sustantivo: no existe evidencia de cumplimiento local ni evaluación con incertidumbre. build pendiente. Eficacia general, de campo y superioridad metodológica no demostradas; ausencia de resultados no equivale a fracaso funcional medido.",
+        "snapshot": "0ff7bcdba3173ba38c888c0ef38ef8b8ea4a1c46b4f8a1f8d0dbfcf9c8464904",
+        "verdict": "reject"
+      },
+      "prev_hash": "485145cc907fd993fce2d293b13c496b7d10af184d976c86ab36a66ee578c5fb",
+      "seq": 36
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:11+00:00",
+      "hash": "978bea1113c383ff42d5d6d6803f3aaf57e2d58853f800901d42a0c3f97a69be",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Contrato e inventario original; sin programa baseline previo",
+          "date": "2026-10-04",
+          "method": "subprocess y comparación independiente de inventarios byte a byte",
+          "population": "Casos locales sintéticos V1 y garantías base",
+          "uncertainty": "Muestra finita, sin campo ni adversario concurrente"
+        },
+        "deps": {
+          "hypothesis": 1,
+          "mandate": 1,
+          "problem": 1,
+          "question": 1
+        },
+        "id": "protocol",
+        "kind": "protocol",
+        "text": "Antes de construir: probar subprocess CLI con timeout, árboles vacíos, Unicode/espacios, bytes 0..255, datos aleatorios reproducibles; comparar inventarios y SHA-256 antes/después. Probar IDs inválidos/duplicados/ausentes, solapamiento, symlinks y FIFO, destino no vacío, corrupción de cada clase de archivo, SIGKILL durante staging y reintento. Registrar argv, streams, exit_code y timeout. Baseline: no implementación previa, sin medición comparable. Éxito local requiere todos los casos y cero mutaciones críticas; la muestra no demuestra eficacia general. Cambio de etapa dos, antes de medir: añadir límites altos, exactos, un byte por debajo del tamaño final, inferiores al repositorio existente, cero y negativos; contar independientemente st_size de cada archivo regular (manifiestos, sello, lock y staging incluidos); comparar inventario/hash/bytes anteriores tras rechazo y probar limpieza de huérfanos y reintento del mismo ID. La implementación base ya existía al iniciar esta etapa; no se afirma medición inicial comparable.",
+        "version": 2
+      },
+      "prev_hash": "a3c1578e9f66f695ba5f0e69752f63d8729afa0961b8296c6791480f7b506847",
+      "seq": 37
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "15be3566c730a2899bff4713a40f60d5cc7a08db7b7a6d3b74b6d7c75a1b8fb8",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-04",
+          "locator": "Producto y formato común; Tres variantes; Cambio común tras la primera entrega; Criterios",
+          "method": "Lectura local completa y python3 --version",
+          "origin": "observed",
+          "source": "/trial/CONTRACT.md"
+        },
+        "deps": {
+          "problem": 1,
+          "protocol": 2
+        },
+        "id": "contract_evidence",
+        "kind": "evidence",
+        "text": "Observación documental del contrato actualizado completo y del runtime Python 3.12.15: create acepta --max-bytes N; el límite suma st_size de todos los archivos regulares del repositorio y toda metadata persistente; el rechazo conserva snapshots y no deja crecimiento residual permanente. Se conservan todas las garantías base V1.",
+        "version": 2
+      },
+      "prev_hash": "978bea1113c383ff42d5d6d6803f3aaf57e2d58853f800901d42a0c3f97a69be",
+      "seq": 38
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "5642029bd233634cb24f4af307bb1740c43580222f123644142f42eed869552e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "direction": "maximize",
+          "metric": "Fracción de escenarios locales con expectativa satisfecha; mutaciones críticas se informan separadamente",
+          "metric_key": "local_pass_fraction",
+          "unit": "proportion"
+        },
+        "deps": {
+          "contract_evidence": 2,
+          "mandate": 1,
+          "problem": 1,
+          "protocol": 2
+        },
+        "id": "indicator",
+        "kind": "indicator",
+        "text": "Proporción de casos locales que cumplen su expectativa y número separado de mutaciones críticas; ni tiempo ni almacenamiento compensan un fallo crítico.",
+        "version": 2
+      },
+      "prev_hash": "15be3566c730a2899bff4713a40f60d5cc7a08db7b7a6d3b74b6d7c75a1b8fb8",
+      "seq": 39
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "b1407ce98b9197681721d1eebae6d0567eb80e68e0d1c88350e6da83b50caadb",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "contract_evidence": 2,
+          "hypothesis": 1,
+          "protocol": 2
+        },
+        "id": "inference",
+        "kind": "inference",
+        "text": "El contrato implica inventariar directorios vacíos además de archivos y validar el snapshot completo antes de restaurar; copytree directo no ofrece el límite de publicación requerido. El límite debe comprobarse bajo el mismo lock después de escribir metadata y antes del rename; contar solo payload incumpliría el cambio.",
+        "version": 2
+      },
+      "prev_hash": "5642029bd233634cb24f4af307bb1740c43580222f123644142f42eed869552e",
+      "seq": 40
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "27a737af04fd122842394caa6507e9f6f32501052bd5047204085ffb5c2fa6a0",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "contract_evidence": 2,
+          "inference": 2,
+          "mandate": 1
+        },
+        "id": "synthesis",
+        "kind": "synthesis",
+        "text": "Elegir un diseño que separa staging de snapshots publicados y comprueba rutas, tipos y bytes. La justificación es contractual/documental; la eficacia permanece pendiente de pruebas locales. Para el límite, medir el repositorio completo incluyendo staging inmediatamente antes de publicar; eliminar staging fallido y huérfanos del create anterior bajo lock.",
+        "version": 2
+      },
+      "prev_hash": "b1407ce98b9197681721d1eebae6d0567eb80e68e0d1c88350e6da83b50caadb",
+      "seq": 41
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "8474b00241ed9db3bd4aaf9d1334af942f213c5bee1a235195956010a39f5f98",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "stable": 1,
+          "synthesis": 2
+        },
+        "id": "uncertainty",
+        "kind": "uncertainty",
+        "text": "SHA-256 detecta alteraciones accidentales; no autentica frente a un atacante que reescribe datos y manifiesto coherentemente. Una suite finita no demuestra generalidad ni durabilidad ante pérdida eléctrica. El límite usa tamaño lógico st_size, no bloques físicos; no se promete compresión ni resistencia a escritores ajenos al protocolo de lock.",
+        "version": 2
+      },
+      "prev_hash": "27a737af04fd122842394caa6507e9f6f32501052bd5047204085ffb5c2fa6a0",
+      "seq": 42
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "3f2c82564a506db701434b72c865179e95671075ab13088075341a784d3eac0e",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "mandate": 1,
+          "synthesis": 2
+        },
+        "id": "tree_option",
+        "kind": "option",
+        "text": "Copias completas en directorio por ID, manifiesto JSON sellado con SHA-256, data como árbol, staging privado y rename. Fácil inspección, sin deduplicación; coste O(bytes por snapshot) y lectura extra al verificar. Contar todo el árbol tras staging es exacto respecto del límite lógico; tiene pico de almacenamiento temporal y duplica bytes entre versiones.",
+        "version": 2
+      },
+      "prev_hash": "8474b00241ed9db3bd4aaf9d1334af942f213c5bee1a235195956010a39f5f98",
+      "seq": 43
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "eaf9bcbe6f4534edab454d80c2829cfd9ba86b2b436fc543dc84f2a488b271b3",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "mandate": 1,
+          "synthesis": 2
+        },
+        "id": "archive_option",
+        "kind": "option",
+        "text": "Archivo tar/zip por ID y manifiesto, publicación atómica de archivo. Menos inodos; extracción exige validar nombres y tipos y limita inspección/diagnóstico. Añade complejidad para directorios vacíos y seguridad de extracción. Comprimir podría reducir payload, con CPU adicional y más complejidad; no es necesario para límites físicamente alcanzables.",
+        "version": 2
+      },
+      "prev_hash": "3f2c82564a506db701434b72c865179e95671075ab13088075341a784d3eac0e",
+      "seq": 44
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "e51b9c2771ad4fd9808a06c1c082ff606c0f869350015f82adcf75d6adac02c4",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "archive_option": 2,
+          "indicator": 2,
+          "mandate": 1,
+          "tree_option": 2
+        },
+        "id": "comparison",
+        "kind": "comparison",
+        "text": "Comparadas copias completas y archivo: ambas pueden ser autosuficientes. El árbol favorece diagnóstico y exactitud V1 con stdlib; el archivo ahorra inodos pero concentra extracción y validación. Se elige árbol por simplicidad verificable, aceptando espacio sin deduplicación. Se mantiene el árbol: el contrato no exige compresión; conteo integral bajo lock y limpieza permiten el límite sin cambiar el formato ni invalidar backups.",
+        "version": 2
+      },
+      "prev_hash": "eaf9bcbe6f4534edab454d80c2829cfd9ba86b2b436fc543dc84f2a488b271b3",
+      "seq": 45
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "d73392c5ccdf6b750d2ec500281a9d3eda35272ce30ff8997054e13643c36e7b",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "comparison": 2,
+          "uncertainty": 2
+        },
+        "id": "risk",
+        "kind": "risk",
+        "text": "Fallos críticos: seguir symlinks, traversal desde manifiesto, modificar destino no vacío, publicar parciales. Mitigar con lstat/O_NOFOLLOW, validación estricta de rutas e inventario, staging y rename; flock serializa procesos cooperativos. Huérfanos de SIGKILL consumen espacio. Limpiar huérfanos .pending-* solo bajo el lock y tras rechazar links/especiales. Un rechazo por cuota elimina su staging; .lock es regular, vacío al crearse, y cualquier byte suyo también cuenta.",
+        "version": 2
+      },
+      "prev_hash": "e51b9c2771ad4fd9808a06c1c082ff606c0f869350015f82adcf75d6adac02c4",
+      "seq": 46
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "6ba8c94d239dd15b104df8899230744d60d83ca63bf3a836823dc94277f759c7",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "authority": "delegated",
+          "decision_type": "technical",
+          "normative": false
+        },
+        "deps": {
+          "comparison": 2,
+          "mandate": 1,
+          "risk": 2
+        },
+        "id": "architecture",
+        "kind": "decision",
+        "text": "Decisión técnica delegada por AGENTS.md y mandate: árbol completo, manifiesto sellado, lock POSIX y staging atómico. La elección es de agent:author; no representa una arquitectura elegida personalmente por el dueño ni un intercambio normativo nuevo. Adaptación delegada: --max-bytes opcional no negativo, conteo integral previo a publicación, limpieza de huérfanos bajo lock, manteniendo el formato v1.",
+        "version": 2
+      },
+      "prev_hash": "d73392c5ccdf6b750d2ec500281a9d3eda35272ce30ff8997054e13643c36e7b",
+      "seq": 47
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "d8d66b696897b5c91cdfd91791727b4cb25fdef0b480928ec057bc0334868203",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "architecture": 2,
+          "contract_evidence": 2,
+          "mandate": 1,
+          "problem": 1
+        },
+        "id": "requirements",
+        "kind": "requirement",
+        "text": "Implementar create/verify/restore/list con códigos/JSON exactos; preservar rutas, directorios vacíos y bytes, autosuficiencia; rechazar IDs inválidos, symlinks/especiales y solapamientos; nunca sobrescribir ID ni destino no vacío; verificar todos los datos; staging invisible y reintento después de SIGKILL. create admite --max-bytes N opcional entero no negativo; tras éxito la suma st_size de todos los archivos regulares del repo (incluida toda metadata) es <= N. Si no cabe, no publica, conserva los snapshots previos y no deja staging permanente; reintenta operaciones incompletas.",
+        "version": 2
+      },
+      "prev_hash": "6ba8c94d239dd15b104df8899230744d60d83ca63bf3a836823dc94277f759c7",
+      "seq": 48
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "32def40eb5b7b4e54165429bf7a0a28c9329f8a1db4bc3cb14ee21b79236505a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "accept": "Todos los casos y cero fallos críticos",
+          "claim_scope": "technical",
+          "metric": "local_pass_fraction",
+          "metric_key": "local_pass_fraction",
+          "reject": "Cualquier fallo funcional o crítico",
+          "reject_test": {
+            "operator": "<",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "success_test": {
+            "operator": ">=",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "target": 1,
+          "threshold": 1,
+          "unit": "proportion"
+        },
+        "deps": {
+          "contract_evidence": 2,
+          "indicator": 2,
+          "protocol": 2,
+          "requirements": 2
+        },
+        "id": "acceptance",
+        "kind": "criterion",
+        "text": "Aceptación técnica local: todos los casos planeados cumplen expectativa y ninguna mutación crítica ni éxito falso. Rechazo: cualquier caso fallido. Los resultados no representan una comparación metodológica ni una medida de campo. Además, éxito implica conteo integral <= N; rechazo por límite deja los snapshots previos idénticos y sin incremento permanente de bytes regulares.",
+        "version": 2
+      },
+      "prev_hash": "d8d66b696897b5c91cdfd91791727b4cb25fdef0b480928ec057bc0334868203",
+      "seq": 49
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:35:21+00:00",
+      "hash": "e7a95928b5ec9ec7ba57cba55ce1d373bc3c5c057bf4c3768c1d704827c02f27",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "claim_scope": "technical",
+          "date": "2026-10-04",
+          "metric_key": "local_pass_fraction",
+          "origin": "technical",
+          "source": "Observación local rg --files /trial/solution: directorio inexistente",
+          "status": "not_measured",
+          "unit": "proportion"
+        },
+        "deps": {
+          "acceptance": 2,
+          "protocol": 2
+        },
+        "id": "initial_baseline",
+        "kind": "baseline",
+        "text": "Primera versión desde cero: no había solution/backup.py al iniciar. No hay programa anterior ni proporción antes medida; no se inventa un cambio cuantitativo respecto de baseline.",
+        "version": 2
+      },
+      "prev_hash": "32def40eb5b7b4e54165429bf7a0a28c9329f8a1db4bc3cb14ee21b79236505a",
+      "seq": 50
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:40:14+00:00",
+      "hash": "a7175c7af714e75ea884bc9570db2dccbd856a56eba46f20434f0057309e81f6",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "direction": "maximize",
+          "metric": "local_pass_fraction",
+          "metric_key": "local_pass_fraction",
+          "unit": "proportion"
+        },
+        "deps": {
+          "contract_evidence": 2,
+          "mandate": 1,
+          "problem": 1,
+          "protocol": 2
+        },
+        "id": "indicator",
+        "kind": "indicator",
+        "text": "Proporción de casos locales que cumplen su expectativa y número separado de mutaciones críticas; ni tiempo ni almacenamiento compensan un fallo crítico.",
+        "version": 3
+      },
+      "prev_hash": "e7a95928b5ec9ec7ba57cba55ce1d373bc3c5c057bf4c3768c1d704827c02f27",
+      "seq": 51
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:40:14+00:00",
+      "hash": "ed2240a782eaf6ff334d9c34fc447dd21bd8c8d43579db459d34bfc9a61f1f15",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "archive_option": 2,
+          "indicator": 3,
+          "mandate": 1,
+          "tree_option": 2
+        },
+        "id": "comparison",
+        "kind": "comparison",
+        "text": "Comparadas copias completas y archivo: ambas pueden ser autosuficientes. El árbol favorece diagnóstico y exactitud V1 con stdlib; el archivo ahorra inodos pero concentra extracción y validación. Se elige árbol por simplicidad verificable, aceptando espacio sin deduplicación. Se mantiene el árbol: el contrato no exige compresión; conteo integral bajo lock y limpieza permiten el límite sin cambiar el formato ni invalidar backups.",
+        "version": 3
+      },
+      "prev_hash": "a7175c7af714e75ea884bc9570db2dccbd856a56eba46f20434f0057309e81f6",
+      "seq": 52
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:40:14+00:00",
+      "hash": "bc506f5b84a5d2e7f00e12f0e9913e37554cb3c5b862e3c1c2ae384c7c5b0b74",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "comparison": 3,
+          "uncertainty": 2
+        },
+        "id": "risk",
+        "kind": "risk",
+        "text": "Fallos críticos: seguir symlinks, traversal desde manifiesto, modificar destino no vacío, publicar parciales. Mitigar con lstat/O_NOFOLLOW, validación estricta de rutas e inventario, staging y rename; flock serializa procesos cooperativos. Huérfanos de SIGKILL consumen espacio. Limpiar huérfanos .pending-* solo bajo el lock y tras rechazar links/especiales. Un rechazo por cuota elimina su staging; .lock es regular, vacío al crearse, y cualquier byte suyo también cuenta.",
+        "version": 3
+      },
+      "prev_hash": "ed2240a782eaf6ff334d9c34fc447dd21bd8c8d43579db459d34bfc9a61f1f15",
+      "seq": 53
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:40:14+00:00",
+      "hash": "4d0c14cafaaff5755970ed947988bd2c502da1e8420f65ee3c88919b796b7fd0",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "authority": "delegated",
+          "decision_type": "technical",
+          "normative": false
+        },
+        "deps": {
+          "comparison": 3,
+          "mandate": 1,
+          "risk": 3
+        },
+        "id": "architecture",
+        "kind": "decision",
+        "text": "Decisión técnica delegada por AGENTS.md y mandate: árbol completo, manifiesto sellado, lock POSIX y staging atómico. La elección es de agent:author; no representa una arquitectura elegida personalmente por el dueño ni un intercambio normativo nuevo. Adaptación delegada: --max-bytes opcional no negativo, conteo integral previo a publicación, limpieza de huérfanos bajo lock, manteniendo el formato v1.",
+        "version": 3
+      },
+      "prev_hash": "bc506f5b84a5d2e7f00e12f0e9913e37554cb3c5b862e3c1c2ae384c7c5b0b74",
+      "seq": 54
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:40:14+00:00",
+      "hash": "2f6f9dd1b0f15709c1a3d70f1b1b5db5bc1fa522459bfc618b2fcfccdd83bb95",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "architecture": 3,
+          "contract_evidence": 2,
+          "indicator": 3,
+          "mandate": 1,
+          "problem": 1
+        },
+        "id": "requirements",
+        "kind": "requirement",
+        "text": "Implementar create/verify/restore/list con códigos/JSON exactos; preservar rutas, directorios vacíos y bytes, autosuficiencia; rechazar IDs inválidos, symlinks/especiales y solapamientos; nunca sobrescribir ID ni destino no vacío; verificar todos los datos; staging invisible y reintento después de SIGKILL. create admite --max-bytes N opcional entero no negativo; tras éxito la suma st_size de todos los archivos regulares del repo (incluida toda metadata) es <= N. Si no cabe, no publica, conserva los snapshots previos y no deja staging permanente; reintenta operaciones incompletas.",
+        "version": 3
+      },
+      "prev_hash": "4d0c14cafaaff5755970ed947988bd2c502da1e8420f65ee3c88919b796b7fd0",
+      "seq": 55
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:40:14+00:00",
+      "hash": "957a3811a78ac0087da6fa0dfd43e5c9b8b752782c79cb4c9d3bb6a9cc740027",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "accept": "Todos los casos y cero fallos críticos",
+          "claim_scope": "technical",
+          "metric": "local_pass_fraction",
+          "metric_key": "local_pass_fraction",
+          "reject": "Cualquier fallo funcional o crítico",
+          "reject_test": {
+            "operator": "<",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "success_test": {
+            "operator": ">=",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "target": 1,
+          "threshold": 1,
+          "unit": "proportion"
+        },
+        "deps": {
+          "contract_evidence": 2,
+          "indicator": 3,
+          "protocol": 2,
+          "requirements": 3
+        },
+        "id": "acceptance",
+        "kind": "criterion",
+        "text": "Aceptación técnica local: todos los casos planeados cumplen expectativa y ninguna mutación crítica ni éxito falso. Rechazo: cualquier caso fallido. Los resultados no representan una comparación metodológica ni una medida de campo. Además, éxito implica conteo integral <= N; rechazo por límite deja los snapshots previos idénticos y sin incremento permanente de bytes regulares.",
+        "version": 3
+      },
+      "prev_hash": "2f6f9dd1b0f15709c1a3d70f1b1b5db5bc1fa522459bfc618b2fcfccdd83bb95",
+      "seq": 56
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T02:40:14+00:00",
+      "hash": "0cbf81e0aa60b629c51c4fb9bf6e7f12c883e8ee01487bbe46f7351dcf4f505a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "claim_scope": "technical",
+          "date": "2026-10-04",
+          "metric_key": "local_pass_fraction",
+          "origin": "technical",
+          "source": "Observación local rg --files /trial/solution: directorio inexistente",
+          "status": "not_measured",
+          "unit": "proportion"
+        },
+        "deps": {
+          "acceptance": 3,
+          "protocol": 2
+        },
+        "id": "initial_baseline",
+        "kind": "baseline",
+        "text": "Primera versión desde cero: no había solution/backup.py al iniciar. No hay programa anterior ni proporción antes medida; no se inventa un cambio cuantitativo respecto de baseline.",
+        "version": 3
+      },
+      "prev_hash": "957a3811a78ac0087da6fa0dfd43e5c9b8b752782c79cb4c9d3bb6a9cc740027",
+      "seq": 57
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-04T02:42:34+00:00",
+      "hash": "f572b7de80e36b5a57e3b0a1e66a83a4cef770910bb94b62b987734f0c415491",
+      "kind": "approval",
+      "payload": {
+        "id": "architecture",
+        "provenance": "local_declared",
+        "reason": "Aprobación local de architecture v3 por delegación técnica existente, leída en AGENTS.md y mandate v1: formato de árbol completo, manifiesto SHA-256, lock POSIX, staging y conteo integral --max-bytes dentro de CONTRACT.md. La elección es de agent:author; no se atribuye al dueño una elección personal. No cambia propósito, cuentas, presupuesto ni frontera. Procedencia local declarada, no autenticada; no certifica cumplimiento técnico ni levanta el bloqueo de critique.",
+        "version": 3
+      },
+      "prev_hash": "0cbf81e0aa60b629c51c4fb9bf6e7f12c883e8ee01487bbe46f7351dcf4f505a",
+      "seq": 58
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:42:34+00:00",
+      "hash": "243dd78db79726dd7825feb32053952cdb0ee5140a6973f3133823cafb86191f",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Sesión independiente: leídos problem v1, actors v1 y scope v1, CONTRACT.md, skill y contratos docs/metodologia.md y docs/workflow_operativo.md. Problema recuperabilidad/integridad, dueño/autor/revisor y frontera local V1 están delimitados, sin cuentas ni credenciales; garantías base y limitaciones expresas. Gate frame listo y avance histórico vigente; aceptación solo de formulación, no certificación del programa ni eficacia de campo. No se modifica artefacto alguno.",
+        "snapshot": "adfbe1acfb70f34dbbd4abec6192678b18bc42e34f90be9236893b48649de757",
+        "verdict": "accept"
+      },
+      "prev_hash": "f572b7de80e36b5a57e3b0a1e66a83a4cef770910bb94b62b987734f0c415491",
+      "seq": 59
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T02:42:34+00:00",
+      "hash": "fc72c52debd876ac87b475416127a5f8f983099553c2605635f92880116987f0",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "Leídos exactness v1, stable v1, frame_exact v1, frame_fast v1 y mandate v1. Concepto de exactitud y supuestos separan garantía contractual de eficacia; dos prioridades están expresadas y la norma tiene aprobación local vigente. Incumplimiento mecánico concreto confirmado por gate: mandate deps={problem:1} no enlaza actor actors v1, requerido por contrato de fase. No confundir este defecto de trazabilidad con falta de consentimiento ni reparar/cambiar el mandato en esta revisión. Sin avance; bloquea las fases sucesoras.",
+        "snapshot": "5a932545e475084af8263ebeee930b9cc864e7aa1ee5df4772947ffdff953745",
+        "verdict": "reject"
+      },
+      "prev_hash": "243dd78db79726dd7825feb32053952cdb0ee5140a6973f3133823cafb86191f",
+      "seq": 60
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "dff292ab-af04-44d1-9758-cfb35bd590f6",
+    "created_at": "2026-10-04T02:21:06+00:00",
+    "created_by": "human:owner",
+    "domain": "software local",
+    "test_gate_policy": "local_report",
+    "title": "Backup verificable"
+  },
+  "schema": 1
+}

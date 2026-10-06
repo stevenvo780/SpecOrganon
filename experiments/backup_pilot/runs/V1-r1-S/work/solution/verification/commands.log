@@ -1,0 +1,119 @@
+UTC: 2026-10-04T04:32:56.499155+00:00
+cwd: /trial
+
+$ /usr/local/bin/python3 --version
+exit=0; elapsed=0.001s
+stdout:
+Python 3.12.15
+
+stderr:
+
+
+$ /usr/local/bin/python3 -m py_compile solution/backup.py solution/test_backup.py solution/examples.py solution/run_checks.py
+exit=0; elapsed=0.023s
+stdout:
+
+stderr:
+
+
+$ /usr/local/bin/python3 -m unittest discover -s solution -p test_backup.py -v
+exit=0; elapsed=8.043s
+stdout:
+
+stderr:
+test_C01_C02_C03_exact_round_trip_without_source (test_backup.ContractTests.test_C01_C02_C03_exact_round_trip_without_source) ... ok
+test_C02_empty_source_and_existing_empty_destination (test_backup.ContractTests.test_C02_empty_source_and_existing_empty_destination) ... ok
+test_C02_large_multichunk_file (test_backup.ContractTests.test_C02_large_multichunk_file) ... ok
+test_C04_C07_duplicate_does_not_change_snapshot (test_backup.ContractTests.test_C04_C07_duplicate_does_not_change_snapshot) ... ok
+test_C04_invalid_ids_do_not_create_repo (test_backup.ContractTests.test_C04_invalid_ids_do_not_create_repo) ... ok
+test_C04_missing_ids (test_backup.ContractTests.test_C04_missing_ids) ... ok
+test_C04_valid_ids_and_sorted_list (test_backup.ContractTests.test_C04_valid_ids_and_sorted_list) ... ok
+test_C05_C14_limited_create_rejects_symlinks_without_following (test_backup.ContractTests.test_C05_C14_limited_create_rejects_symlinks_without_following) ... ok
+test_C05_node_classification_all_special_types (test_backup.ContractTests.test_C05_node_classification_all_special_types) ... ok
+test_C05_path_ancestor_and_destination_symlinks (test_backup.ContractTests.test_C05_path_ancestor_and_destination_symlinks) ... ok
+test_C05_repo_and_snapshot_symlinks (test_backup.ContractTests.test_C05_repo_and_snapshot_symlinks) ... ok
+test_C05_socket_source_if_environment_allows_bind (test_backup.ContractTests.test_C05_socket_source_if_environment_allows_bind) ... skipped 'sandbox prohibits AF_UNIX bind: [Errno 1] Operation not permitted'
+test_C05_source_symlinks (test_backup.ContractTests.test_C05_source_symlinks) ... ok
+test_C05_special_nodes_source_repo_snapshot_dest (test_backup.ContractTests.test_C05_special_nodes_source_repo_snapshot_dest) ... ok
+test_C06_source_repo_overlap (test_backup.ContractTests.test_C06_source_repo_overlap) ... ok
+test_C07_C09_restore_publish_failure_preserves_dest (test_backup.ContractTests.test_C07_C09_restore_publish_failure_preserves_dest) ... ok
+test_C07_protected_destinations_and_repo_overlap (test_backup.ContractTests.test_C07_protected_destinations_and_repo_overlap) ... ok
+test_C08_C11_staging_and_incomplete_snapshots_hidden (test_backup.ContractTests.test_C08_C11_staging_and_incomplete_snapshots_hidden) ... ok
+test_C08_C14_C16_SIGKILL_repeat_same_id_with_exact_budget (test_backup.ContractTests.test_C08_C14_C16_SIGKILL_repeat_same_id_with_exact_budget) ... ok
+test_C08_create_io_failure_cleanup_and_retry (test_backup.ContractTests.test_C08_create_io_failure_cleanup_and_retry) ... ok
+test_C09_C10_manifest_validation_even_with_recomputed_hash (test_backup.ContractTests.test_C09_C10_manifest_validation_even_with_recomputed_hash) ... ok
+test_C09_every_regular_snapshot_file_mutated_or_deleted (test_backup.ContractTests.test_C09_every_regular_snapshot_file_mutated_or_deleted) ... ok
+test_C09_extra_missing_directory_and_truncated_file (test_backup.ContractTests.test_C09_extra_missing_directory_and_truncated_file) ... ok
+test_C10_argument_and_wrong_path_errors (test_backup.ContractTests.test_C10_argument_and_wrong_path_errors) ... ok
+test_C11_nonexistent_repo_list_does_not_create_it (test_backup.ContractTests.test_C11_nonexistent_repo_list_does_not_create_it) ... ok
+test_C13_C14_exact_limit_and_leading_zeroes (test_backup.ContractTests.test_C13_C14_exact_limit_and_leading_zeroes) ... ok
+test_C13_invalid_limits_have_no_side_effects (test_backup.ContractTests.test_C13_invalid_limits_have_no_side_effects) ... ok
+test_C14_C15_metadata_counts_even_with_empty_source (test_backup.ContractTests.test_C14_C15_metadata_counts_even_with_empty_source) ... ok
+test_C14_C15_multiple_snapshots_share_total_budget (test_backup.ContractTests.test_C14_C15_multiple_snapshots_share_total_budget) ... ok
+test_C14_C15_one_byte_short_rejects_and_same_id_retries (test_backup.ContractTests.test_C14_C15_one_byte_short_rejects_and_same_id_retries) ... ok
+test_C14_C16_concurrent_creates_cannot_exceed_limit (test_backup.ContractTests.test_C14_C16_concurrent_creates_cannot_exceed_limit) ... ok
+test_C14_all_existing_regular_files_and_hardlinks_count (test_backup.ContractTests.test_C14_all_existing_regular_files_and_hardlinks_count) ... ok
+test_C15_duplicate_with_limit_preserves_snapshot_and_repo (test_backup.ContractTests.test_C15_duplicate_with_limit_preserves_snapshot_and_repo) ... ok
+test_C15_repeated_budget_rejections_do_not_accumulate (test_backup.ContractTests.test_C15_repeated_budget_rejections_do_not_accumulate) ... ok
+test_C16_stale_staging_cleaned_even_on_low_budget_rejection (test_backup.ContractTests.test_C16_stale_staging_cleaned_even_on_low_budget_rejection) ... ok
+test_base_successive_versions_remain_independent (test_backup.ContractTests.test_base_successive_versions_remain_independent) ... ok
+
+----------------------------------------------------------------------
+Ran 36 tests in 7.944s
+
+OK (skipped=1)
+
+
+$ /usr/local/bin/python3 solution/examples.py
+exit=0; elapsed=0.503s
+stdout:
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/example-data/empty-repo
+exit=0
+stdout: {"snapshots": []}
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/example-data/árbol fuente' --repo /trial/solution/example-data/repo --id V1 --max-bytes 1000000
+exit=0
+stdout: {"id": "V1"}
+Independent measurement: total=1636 bytes, payload=1067, metadata=569, max-bytes=1000000.
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/example-data/árbol fuente' --repo /trial/solution/example-data/repo --id too-small --max-bytes 1635
+exit=1
+stderr: {"error": "repository already exceeds max-bytes"}
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/example-data/árbol fuente' --repo /trial/solution/example-data/budget-repo --id V1 --max-bytes 1635
+exit=1
+stderr: {"error": "snapshot and repository metadata exceed max-bytes"}
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/example-data/budget-repo
+exit=0
+stdout: {"snapshots": []}
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/example-data/árbol fuente' --repo /trial/solution/example-data/budget-repo --id V1 --max-bytes 1636
+exit=0
+stdout: {"id": "V1"}
+Exact-budget retry: total=1636, max-bytes=1636; rejected create left 0 regular-file bytes.
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/example-data/budget-repo --id V1
+exit=0
+stdout: {"id": "V1", "valid": true}
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/example-data/árbol fuente' --repo /trial/solution/example-data/repo --id V1
+exit=1
+stderr: {"error": "snapshot ID already exists"}
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/example-data/repo --id V1
+exit=0
+stdout: {"id": "V1", "valid": true}
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/example-data/repo
+exit=0
+stdout: {"snapshots": ["V1"]}
+Fixture action: source deleted; subsequent restore has no source access.
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/example-data/repo --id V1 --dest /trial/solution/example-data/restored
+exit=0
+stdout: {"id": "V1"}
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/example-data/repo --id V1 --dest /trial/solution/example-data/restored
+exit=1
+stderr: {"error": "destination is not empty"}
+Fixture action: one payload byte flipped in a separate repository copy.
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/example-data/corrupt-repo --id V1
+exit=1
+stderr: {"error": "corrupt file: arbitrary.bin"}
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/example-data/corrupt-repo --id V1 --dest /trial/solution/example-data/never-published
+exit=1
+stderr: {"error": "corrupt file: arbitrary.bin"}
+PASS: 14 CLI examples; exact budgets including metadata, rejection without residual growth, source unchanged, independent restore, protected destination and corruption rejection checked.
+
+stderr:
+

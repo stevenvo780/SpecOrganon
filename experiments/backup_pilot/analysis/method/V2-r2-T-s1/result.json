@@ -1,0 +1,256 @@
+{
+  "input_identity": {
+    "ledger_sha256": "2364556d1ce4d246f3d9b7d345e71efc46dd828dc509c816b016171f295e1a3d",
+    "method_image": "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+    "inspector_sha256": "2fd725c9765175873d1a083962a269c406c6c7cb097c43cec79c5dc1eaf7b1b6"
+  },
+  "result": {
+    "id": "V2-r2-T",
+    "stage": 1,
+    "receipt": {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--name",
+        "backup-method-observer-v2-r2-t-s1",
+        "--network",
+        "none",
+        "--read-only",
+        "--user",
+        "1000:1000",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges:true",
+        "--memory",
+        "256m",
+        "--cpus",
+        "1",
+        "--pids-limit",
+        "64",
+        "--mount",
+        "type=bind,src=/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/runs/V2-r2-T/stage1/artifact,dst=/trial,readonly",
+        "--entrypoint",
+        "/opt/specorganon/.venv/bin/python",
+        "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+        "-c",
+        "\nimport hashlib,json,sys\nfrom collections import Counter\nfrom pathlib import Path\nfrom specorganon import engine\nfrom specorganon.ledger import read_project\ntry:\n    case=Path(sys.argv[1])\n    state=engine.get_state(case)\n    ledger=read_project(case)\n    phases={key:{k:value[k] for k in ('ready','accepted','reviewed','independent_review',\n             'review_signature_verified','review_identity_authenticated','review_provenance',\n             'blockers','snapshot','advance_seq')} for key,value in state['phases'].items()}\n    result={'ok':True,'revision':state['revision'],'approval_policy':state['project']['approval_policy'],\n            'approval_identity_authenticated':state['approval_identity_authenticated'],\n            'phase_review_trust':state['phase_review_trust'],\n            'test_execution_trust':state['test_execution_trust'],\n            'test_execution_records':len(state['test_execution_history']),\n            'test_observation_records':len(state['test_observation_history']),\n            'item_kind_counts':dict(Counter(item['kind'] for item in state['items'].values())),\n            'event_actor_counts':dict(Counter(event['actor'] for event in ledger['events'])),\n            'phases':phases,'accepted_phases':[key for key,value in phases.items() if value['accepted']],\n            'phase_review_history':state['phase_review_history'],\n            'ledger_sha256':hashlib.sha256((case/'organon.json').read_bytes()).hexdigest(),\n            'engine_sha256':hashlib.sha256(Path(engine.__file__).read_bytes()).hexdigest()}\nexcept Exception as error:\n    print(json.dumps({'ok':False,'error_type':type(error).__name__,'error':str(error)}))\n    raise SystemExit(1)\nprint(json.dumps(result,ensure_ascii=False))\n",
+        "/trial/case"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.2136870190006448,
+      "finished_at": "2026-10-04T05:24:32.512697+00:00",
+      "usage": [],
+      "errors": [],
+      "agent_text": [],
+      "stdout_sha256": "5c598b2b6bffc0f127c9d624fbe7783f1cba0a49a4211663d940ea8f8adbda2e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "observation": {
+      "ok": true,
+      "revision": 30,
+      "approval_policy": "local",
+      "approval_identity_authenticated": false,
+      "phase_review_trust": "local_declared",
+      "test_execution_trust": "local_declared",
+      "test_execution_records": 0,
+      "test_observation_records": 0,
+      "item_kind_counts": {
+        "problem": 1,
+        "norm": 1,
+        "actor": 1,
+        "boundary": 1,
+        "concept": 1,
+        "assumption": 1,
+        "frame_option": 2,
+        "question": 1,
+        "hypothesis": 1,
+        "indicator": 1,
+        "protocol": 1,
+        "criterion": 1,
+        "baseline": 1,
+        "evidence": 1,
+        "inference": 1,
+        "synthesis": 1,
+        "uncertainty": 1,
+        "option": 2,
+        "comparison": 1,
+        "risk": 1,
+        "decision": 1,
+        "requirement": 1,
+        "implementation": 1,
+        "test": 1
+      },
+      "event_actor_counts": {
+        "agent:orchestrator": 2,
+        "human:owner": 2,
+        "agent:author": 24,
+        "agent:method-reviewer": 2
+      },
+      "phases": {
+        "frame": {
+          "ready": true,
+          "accepted": true,
+          "reviewed": true,
+          "independent_review": true,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "local_declared",
+          "blockers": [],
+          "snapshot": "e5e16befcfa1dc6902061fae75d1357a45688f8ce9ca26808d015e608f95fcb2",
+          "advance_seq": 30
+        },
+        "critique": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "mandate must link problem and actor"
+          ],
+          "snapshot": "c82a692cbb5aeb441d77d60f9400a7bfd43c5c960fa69d8c9d06de60498bf316",
+          "advance_seq": null
+        },
+        "study": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "indicator: indicator lacks metric",
+            "needs 1 valid indicator; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "8d924187cee8f56eb1fcc168cce59f36240b5a485c4f28119babe6a2160872ec",
+          "advance_seq": null
+        },
+        "observe": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "contract_evidence: evidence origin must be published, observed, derived or simulated",
+            "needs 1 valid evidence; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "8e9f9ba968aa6fd72687c58a6d21d2baa792e77556f56f580659a2714327f65f",
+          "advance_seq": null
+        },
+        "explain": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "cb746d5288a6dec52f477240446efb0a935746f6b37403554110582e0a8e2151",
+          "advance_seq": null
+        },
+        "compare": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "5f122171af80367ee351e644d91a72c5e6a8573a39c6cb1d2a0093e39050d11f",
+          "advance_seq": null
+        },
+        "specify": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "criterion lacks a path to problem, norm, evidence or decision",
+            "criterion lacks a shared problem between norm and protocol-grounded evidence",
+            "criterion needs a linked requirement",
+            "criterion: criterion lacks metric",
+            "criterion: criterion lacks threshold",
+            "indicator lacks a path to evidence before specification",
+            "needs 1 valid criterion; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "e0f767a005d73ed2b8b6952fdbe2151fd1e3f29093d333e4f9c0d5555be53492",
+          "advance_seq": null
+        },
+        "build": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "local_test: local receipt result_sha256 differs from declared result",
+            "needs 1 valid test; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "a6d3232d85f6e22f41a6ca72a6a4736ad42c75d0626d853497d7052d9f551085",
+          "advance_seq": null
+        },
+        "validate": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "baseline: baseline lacks origin classification",
+            "baseline: local baseline and result require technical or simulation origin labels",
+            "needs 1 valid assessment; has 0",
+            "needs 1 valid baseline; has 0",
+            "needs 1 valid result; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "938e02fc3c228d6eabccfe880c042b0883b9a2fe71e9bd72c10eba37576c923b",
+          "advance_seq": null
+        }
+      },
+      "accepted_phases": [
+        "frame"
+      ],
+      "phase_review_history": [
+        {
+          "seq": 29,
+          "phase": "frame",
+          "verdict": "accept",
+          "actor": "agent:method-reviewer",
+          "snapshot": "e5e16befcfa1dc6902061fae75d1357a45688f8ce9ca26808d015e608f95fcb2",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        }
+      ],
+      "ledger_sha256": "2364556d1ce4d246f3d9b7d345e71efc46dd828dc509c816b016171f295e1a3d",
+      "engine_sha256": "9c12dd21b4b7da4811bc32afce73b9be46cb31226ace179a147e309c578723f4"
+    },
+    "inspector_sha256": "2fd725c9765175873d1a083962a269c406c6c7cb097c43cec79c5dc1eaf7b1b6"
+  }
+}

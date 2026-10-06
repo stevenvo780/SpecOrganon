@@ -1,0 +1,26 @@
+....F                                                                    [100%]
+=================================== FAILURES ===================================
+_________ test_cached_observation_must_agree_with_preserved_raw_output _________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-54/test_cached_observation_must_a0')
+
+    def test_cached_observation_must_agree_with_preserved_raw_output(tmp_path):
+        directory=tmp_path/'inspection';directory.mkdir()
+        raw=b'{"ok":true,"accepted_phases":[]}\n'
+        (directory/'inspection.jsonl').write_bytes(raw)
+        (directory/'inspection.stderr').write_bytes(b'')
+        artifact=tmp_path/'artifact';image='sha256:method';name='test-observer'
+        receipt={'exit_code':0,'timed_out':False,
+                 'argv':method_report.inspection_argv(artifact,image,name),
+                 'stdout_sha256':run_pilot.digest(directory/'inspection.jsonl'),
+                 'stderr_sha256':run_pilot.digest(directory/'inspection.stderr')}
+        saved={'result':{'receipt':receipt,'observation':{'ok':True,'accepted_phases':['frame']}}}
+        with pytest.raises(RuntimeError,match='Cached observation differs'):
+>           method_report.validate_cached(saved,directory,artifact,image,name)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'method_report' has no attribute 'validate_cached'
+
+experiments/backup_pilot/development/tests/test_method_report.py:91: AttributeError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/development/tests/test_method_report.py::test_cached_observation_must_agree_with_preserved_raw_output
+1 failed, 4 passed in 0.24s

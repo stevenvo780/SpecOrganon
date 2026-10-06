@@ -1,0 +1,19 @@
+..........F                                                              [100%]
+=================================== FAILURES ===================================
+________________ test_registered_runtime_cannot_silently_change ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-62/test_registered_runtime_cannot0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f63c77c7ec0>
+
+    def test_registered_runtime_cannot_silently_change(tmp_path,monkeypatch):
+        fixture(tmp_path);monkeypatch.setattr(clean_runtime,'check_image',lambda value:value)
+        path=tmp_path/'planning/clean-runtime-addendum.json'
+        plan=json.loads(path.read_text());plan['runtime']['image_id']='another-image';save(path,plan)
+>       with pytest.raises(RuntimeError,match='Registered runtime differs'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_clean_runtime.py:182: Failed
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/development/tests/test_clean_runtime.py::test_registered_runtime_cannot_silently_change
+1 failed, 10 passed in 17.77s

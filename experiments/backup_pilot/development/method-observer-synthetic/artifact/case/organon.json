@@ -1,0 +1,95 @@
+{
+  "events": [
+    {
+      "actor": "agent:test-author",
+      "at": "2026-10-03T23:49:51+00:00",
+      "hash": "be64050e8a1f6a1d191d4750a0c8ba3b0b984af809e78022ac62a9ddeffeae26",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "p1",
+        "kind": "problem",
+        "text": "Synthetic problem",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:test-author",
+      "at": "2026-10-03T23:49:51+00:00",
+      "hash": "74b779accbc1ea13090bb2d6f859416c5afed708b88cb27c0e7dd7b2775b55a6",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "a1",
+        "kind": "actor",
+        "text": "Synthetic actor",
+        "version": 1
+      },
+      "prev_hash": "be64050e8a1f6a1d191d4750a0c8ba3b0b984af809e78022ac62a9ddeffeae26",
+      "seq": 2
+    },
+    {
+      "actor": "agent:test-author",
+      "at": "2026-10-03T23:49:51+00:00",
+      "hash": "d57d909bd3161e514e119b8e4df322397512b24243d78d8471538c83ded5280a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "b1",
+        "kind": "boundary",
+        "text": "Synthetic boundary",
+        "version": 1
+      },
+      "prev_hash": "74b779accbc1ea13090bb2d6f859416c5afed708b88cb27c0e7dd7b2775b55a6",
+      "seq": 3
+    },
+    {
+      "actor": "agent:test-reviewer",
+      "at": "2026-10-03T23:49:51+00:00",
+      "hash": "39814972342bfac4a93cd29ea7d42e0fa7c8b9220bf11d3fa815fbcb7d43baea",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Independent synthetic control review",
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b",
+        "verdict": "accept"
+      },
+      "prev_hash": "d57d909bd3161e514e119b8e4df322397512b24243d78d8471538c83ded5280a",
+      "seq": 4
+    },
+    {
+      "actor": "agent:test-author",
+      "at": "2026-10-03T23:49:51+00:00",
+      "hash": "0794b54c2735302fe4f67cc4f5d250e17d013885bff7396145ced1a1b0b59961",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b"
+      },
+      "prev_hash": "39814972342bfac4a93cd29ea7d42e0fa7c8b9220bf11d3fa815fbcb7d43baea",
+      "seq": 5
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "82587ee0-31a5-4f25-90d8-c77493d90242",
+    "created_at": "2026-10-03T23:49:51+00:00",
+    "created_by": "human:test-owner",
+    "domain": "test data",
+    "test_gate_policy": "local_report",
+    "title": "Synthetic method observer control"
+  },
+  "schema": 1
+}

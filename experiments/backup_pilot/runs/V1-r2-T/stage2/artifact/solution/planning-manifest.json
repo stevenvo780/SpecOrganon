@@ -1,0 +1,303 @@
+{
+  "schema": 1,
+  "steps": [
+    {
+      "op": "put",
+      "id": "protocol",
+      "kind": "protocol",
+      "text": "Antes de construir: probar subprocess CLI con timeout, árboles vacíos, Unicode/espacios, bytes 0..255, datos aleatorios reproducibles; comparar inventarios y SHA-256 antes/después. Probar IDs inválidos/duplicados/ausentes, solapamiento, symlinks y FIFO, destino no vacío, corrupción de cada clase de archivo, SIGKILL durante staging y reintento. Registrar argv, streams, exit_code y timeout. Baseline: no implementación previa, sin medición comparable. Éxito local requiere todos los casos y cero mutaciones críticas; la muestra no demuestra eficacia general. Cambio de etapa dos, antes de medir: añadir límites altos, exactos, un byte por debajo del tamaño final, inferiores al repositorio existente, cero y negativos; contar independientemente st_size de cada archivo regular (manifiestos, sello, lock y staging incluidos); comparar inventario/hash/bytes anteriores tras rechazo y probar limpieza de huérfanos y reintento del mismo ID. La implementación base ya existía al iniciar esta etapa; no se afirma medición inicial comparable.",
+      "data": {
+        "comparison": "Contrato e inventario original; sin programa baseline previo",
+        "date": "2026-10-04",
+        "method": "subprocess y comparación independiente de inventarios byte a byte",
+        "population": "Casos locales sintéticos V1 y garantías base",
+        "uncertainty": "Muestra finita, sin campo ni adversario concurrente"
+      },
+      "refs": [
+        "hypothesis",
+        "mandate",
+        "problem",
+        "question"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "hypothesis": 1,
+        "mandate": 1,
+        "problem": 1,
+        "question": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "contract_evidence",
+      "kind": "evidence",
+      "text": "Observación documental del contrato actualizado completo y del runtime Python 3.12.15: create acepta --max-bytes N; el límite suma st_size de todos los archivos regulares del repositorio y toda metadata persistente; el rechazo conserva snapshots y no deja crecimiento residual permanente. Se conservan todas las garantías base V1.",
+      "data": {
+        "source": "/trial/CONTRACT.md",
+        "date": "2026-10-04",
+        "locator": "Producto y formato común; Tres variantes; Cambio común tras la primera entrega; Criterios",
+        "method": "Lectura local completa y python3 --version",
+        "origin": "observed"
+      },
+      "refs": [
+        "problem",
+        "protocol"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "problem": 1,
+        "protocol": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "indicator",
+      "kind": "indicator",
+      "text": "Proporción de casos locales que cumplen su expectativa y número separado de mutaciones críticas; ni tiempo ni almacenamiento compensan un fallo crítico.",
+      "data": {
+        "direction": "maximize",
+        "metric_key": "local_pass_fraction",
+        "unit": "proportion",
+        "metric": "Fracción de escenarios locales con expectativa satisfecha; mutaciones críticas se informan separadamente"
+      },
+      "refs": [
+        "contract_evidence",
+        "mandate",
+        "problem",
+        "protocol"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "contract_evidence": 2,
+        "mandate": 1,
+        "problem": 1,
+        "protocol": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "inference",
+      "kind": "inference",
+      "text": "El contrato implica inventariar directorios vacíos además de archivos y validar el snapshot completo antes de restaurar; copytree directo no ofrece el límite de publicación requerido. El límite debe comprobarse bajo el mismo lock después de escribir metadata y antes del rename; contar solo payload incumpliría el cambio.",
+      "data": {},
+      "refs": [
+        "contract_evidence",
+        "hypothesis",
+        "protocol"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "contract_evidence": 2,
+        "hypothesis": 1,
+        "protocol": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "synthesis",
+      "kind": "synthesis",
+      "text": "Elegir un diseño que separa staging de snapshots publicados y comprueba rutas, tipos y bytes. La justificación es contractual/documental; la eficacia permanece pendiente de pruebas locales. Para el límite, medir el repositorio completo incluyendo staging inmediatamente antes de publicar; eliminar staging fallido y huérfanos del create anterior bajo lock.",
+      "data": {},
+      "refs": [
+        "contract_evidence",
+        "inference",
+        "mandate"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "contract_evidence": 2,
+        "inference": 2,
+        "mandate": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "uncertainty",
+      "kind": "uncertainty",
+      "text": "SHA-256 detecta alteraciones accidentales; no autentica frente a un atacante que reescribe datos y manifiesto coherentemente. Una suite finita no demuestra generalidad ni durabilidad ante pérdida eléctrica. El límite usa tamaño lógico st_size, no bloques físicos; no se promete compresión ni resistencia a escritores ajenos al protocolo de lock.",
+      "data": {},
+      "refs": [
+        "stable",
+        "synthesis"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "stable": 1,
+        "synthesis": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "tree_option",
+      "kind": "option",
+      "text": "Copias completas en directorio por ID, manifiesto JSON sellado con SHA-256, data como árbol, staging privado y rename. Fácil inspección, sin deduplicación; coste O(bytes por snapshot) y lectura extra al verificar. Contar todo el árbol tras staging es exacto respecto del límite lógico; tiene pico de almacenamiento temporal y duplica bytes entre versiones.",
+      "data": {},
+      "refs": [
+        "mandate",
+        "synthesis"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "mandate": 1,
+        "synthesis": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "archive_option",
+      "kind": "option",
+      "text": "Archivo tar/zip por ID y manifiesto, publicación atómica de archivo. Menos inodos; extracción exige validar nombres y tipos y limita inspección/diagnóstico. Añade complejidad para directorios vacíos y seguridad de extracción. Comprimir podría reducir payload, con CPU adicional y más complejidad; no es necesario para límites físicamente alcanzables.",
+      "data": {},
+      "refs": [
+        "mandate",
+        "synthesis"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "mandate": 1,
+        "synthesis": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "comparison",
+      "kind": "comparison",
+      "text": "Comparadas copias completas y archivo: ambas pueden ser autosuficientes. El árbol favorece diagnóstico y exactitud V1 con stdlib; el archivo ahorra inodos pero concentra extracción y validación. Se elige árbol por simplicidad verificable, aceptando espacio sin deduplicación. Se mantiene el árbol: el contrato no exige compresión; conteo integral bajo lock y limpieza permiten el límite sin cambiar el formato ni invalidar backups.",
+      "data": {},
+      "refs": [
+        "archive_option",
+        "indicator",
+        "mandate",
+        "tree_option"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "archive_option": 2,
+        "indicator": 2,
+        "mandate": 1,
+        "tree_option": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "risk",
+      "kind": "risk",
+      "text": "Fallos críticos: seguir symlinks, traversal desde manifiesto, modificar destino no vacío, publicar parciales. Mitigar con lstat/O_NOFOLLOW, validación estricta de rutas e inventario, staging y rename; flock serializa procesos cooperativos. Huérfanos de SIGKILL consumen espacio. Limpiar huérfanos .pending-* solo bajo el lock y tras rechazar links/especiales. Un rechazo por cuota elimina su staging; .lock es regular, vacío al crearse, y cualquier byte suyo también cuenta.",
+      "data": {},
+      "refs": [
+        "comparison",
+        "uncertainty"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "comparison": 2,
+        "uncertainty": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "architecture",
+      "kind": "decision",
+      "text": "Decisión técnica delegada por AGENTS.md y mandate: árbol completo, manifiesto sellado, lock POSIX y staging atómico. La elección es de agent:author; no representa una arquitectura elegida personalmente por el dueño ni un intercambio normativo nuevo. Adaptación delegada: --max-bytes opcional no negativo, conteo integral previo a publicación, limpieza de huérfanos bajo lock, manteniendo el formato v1.",
+      "data": {
+        "authority": "delegated",
+        "decision_type": "technical",
+        "normative": false
+      },
+      "refs": [
+        "comparison",
+        "mandate",
+        "risk"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "comparison": 2,
+        "mandate": 1,
+        "risk": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "requirements",
+      "kind": "requirement",
+      "text": "Implementar create/verify/restore/list con códigos/JSON exactos; preservar rutas, directorios vacíos y bytes, autosuficiencia; rechazar IDs inválidos, symlinks/especiales y solapamientos; nunca sobrescribir ID ni destino no vacío; verificar todos los datos; staging invisible y reintento después de SIGKILL. create admite --max-bytes N opcional entero no negativo; tras éxito la suma st_size de todos los archivos regulares del repo (incluida toda metadata) es <= N. Si no cabe, no publica, conserva los snapshots previos y no deja staging permanente; reintenta operaciones incompletas.",
+      "data": {},
+      "refs": [
+        "architecture",
+        "contract_evidence",
+        "mandate",
+        "problem"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "architecture": 2,
+        "contract_evidence": 2,
+        "mandate": 1,
+        "problem": 1
+      }
+    },
+    {
+      "op": "put",
+      "id": "acceptance",
+      "kind": "criterion",
+      "text": "Aceptación técnica local: todos los casos planeados cumplen expectativa y ninguna mutación crítica ni éxito falso. Rechazo: cualquier caso fallido. Los resultados no representan una comparación metodológica ni una medida de campo. Además, éxito implica conteo integral <= N; rechazo por límite deja los snapshots previos idénticos y sin incremento permanente de bytes regulares.",
+      "data": {
+        "accept": "Todos los casos y cero fallos críticos",
+        "claim_scope": "technical",
+        "metric_key": "local_pass_fraction",
+        "reject": "Cualquier fallo funcional o crítico",
+        "reject_test": {
+          "operator": "<",
+          "statistic": "estimate",
+          "value": 1
+        },
+        "success_test": {
+          "operator": ">=",
+          "statistic": "estimate",
+          "value": 1
+        },
+        "target": 1,
+        "unit": "proportion",
+        "metric": "local_pass_fraction",
+        "threshold": 1
+      },
+      "refs": [
+        "contract_evidence",
+        "indicator",
+        "protocol",
+        "requirements"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "contract_evidence": 2,
+        "indicator": 2,
+        "protocol": 2,
+        "requirements": 2
+      }
+    },
+    {
+      "op": "put",
+      "id": "initial_baseline",
+      "kind": "baseline",
+      "text": "Primera versión desde cero: no había solution/backup.py al iniciar. No hay programa anterior ni proporción antes medida; no se inventa un cambio cuantitativo respecto de baseline.",
+      "data": {
+        "claim_scope": "technical",
+        "date": "2026-10-04",
+        "metric_key": "local_pass_fraction",
+        "source": "Observación local rg --files /trial/solution: directorio inexistente",
+        "status": "not_measured",
+        "unit": "proportion",
+        "origin": "technical"
+      },
+      "refs": [
+        "acceptance",
+        "protocol"
+      ],
+      "expected_version": 1,
+      "expected_deps": {
+        "acceptance": 2,
+        "protocol": 2
+      }
+    }
+  ]
+}

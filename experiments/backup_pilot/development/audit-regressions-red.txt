@@ -1,0 +1,75 @@
+.F.....FFF                                                               [100%]
+=================================== FAILURES ===================================
+_________ test_complete_evidence_and_unknown_usage_are_not_zero_tokens _________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-50/test_complete_evidence_and_unk0')
+
+    def test_complete_evidence_and_unknown_usage_are_not_zero_tokens(tmp_path):
+        fixture(tmp_path)
+        result = audit(tmp_path)
+>       assert result['valid'] and len(result['stages'])==36
+E       assert (False)
+
+experiments/backup_pilot/development/tests/test_audit.py:114: AssertionError
+_____ test_contract_modified_even_when_inventory_and_embedded_hashes_agree _____
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-50/test_contract_modified_even_wh0')
+
+    def test_contract_modified_even_when_inventory_and_embedded_hashes_agree(tmp_path):
+        manifest=fixture(tmp_path);stage=first_stage(tmp_path,manifest)
+        (stage/'artifact/CONTRACT.md').write_bytes(b'relaxed requirements')
+        inventory=json.loads((stage/'artifact.receipt.json').read_text())
+        old_size=len(schedule.contract(1).encode())
+        inventory['files']['CONTRACT.md']=sha(b'relaxed requirements')
+        inventory['bytes']+=len(b'relaxed requirements')-old_size
+        save(stage/'artifact.receipt.json',inventory)
+        complete=json.loads((stage/'complete.json').read_text());complete['artifact']=inventory
+        save(stage/'complete.json',complete)
+>       assert any(i['kind']=='assignment_changed' for i in audit(tmp_path)['issues'])
+E       assert False
+E        +  where False = any(<generator object test_contract_modified_even_when_inventory_and_embedded_hashes_agree.<locals>.<genexpr> at 0x7f692a76bc60>)
+
+experiments/backup_pilot/development/tests/test_audit.py:185: AssertionError
+_______ test_mcp_calls_count_completed_items_once_and_compare_raw_errors _______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-50/test_mcp_calls_count_completed0')
+
+    def test_mcp_calls_count_completed_items_once_and_compare_raw_errors(tmp_path):
+        manifest=fixture(tmp_path);stage=first_stage(tmp_path,manifest)
+        path=stage/'author.jsonl'
+        events=[{'type':'item.started','item':{'id':'tool1','type':'mcp_tool_call','server':'specorganon','tool':'status'}},
+                {'type':'item.completed','item':{'id':'tool1','type':'mcp_tool_call','server':'specorganon','tool':'status'}},
+                {'type':'turn.failed','error':{'message':'transport failure'}}]
+        content=path.read_bytes()+b''.join((json.dumps(e)+'\n').encode() for e in events)
+        path.write_bytes(content)
+        receipt=json.loads((stage/'author.receipt.json').read_text());receipt['stdout_sha256']=sha(content)
+        save(stage/'author.receipt.json',receipt)
+        complete=json.loads((stage/'complete.json').read_text());complete['author']=receipt
+        save(stage/'complete.json',complete)
+        result=audit(tmp_path)
+>       assert result['stages'][0]['roles']['author']['mcp_completed_calls']=={'specorganon/status':1}
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'mcp_completed_calls'
+
+experiments/backup_pilot/development/tests/test_audit.py:201: KeyError
+_______________ test_generation_start_before_freeze_is_detected ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-50/test_generation_start_before_f0')
+
+    def test_generation_start_before_freeze_is_detected(tmp_path):
+        manifest=fixture(tmp_path);stage=first_stage(tmp_path,manifest)
+        receipt=json.loads((stage/'author.receipt.json').read_text());receipt['duration_seconds']=80
+        save(stage/'author.receipt.json',receipt)
+        complete=json.loads((stage/'complete.json').read_text());complete['author']=receipt
+        save(stage/'complete.json',complete)
+>       assert any(i['kind']=='freeze_timing' for i in audit(tmp_path)['issues'])
+E       assert False
+E        +  where False = any(<generator object test_generation_start_before_freeze_is_detected.<locals>.<genexpr> at 0x7f692a82e5a0>)
+
+experiments/backup_pilot/development/tests/test_audit.py:211: AssertionError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/development/tests/test_audit.py::test_complete_evidence_and_unknown_usage_are_not_zero_tokens
+FAILED experiments/backup_pilot/development/tests/test_audit.py::test_contract_modified_even_when_inventory_and_embedded_hashes_agree
+FAILED experiments/backup_pilot/development/tests/test_audit.py::test_mcp_calls_count_completed_items_once_and_compare_raw_errors
+FAILED experiments/backup_pilot/development/tests/test_audit.py::test_generation_start_before_freeze_is_detected
+4 failed, 6 passed in 0.55s

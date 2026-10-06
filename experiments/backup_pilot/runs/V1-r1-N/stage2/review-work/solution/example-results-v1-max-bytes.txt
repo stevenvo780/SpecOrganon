@@ -1,0 +1,24 @@
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/backup-example-3y3zo0c9/documentos --repo /trial/backup-example-3y3zo0c9/repo --id ejemplo_V1 --max-bytes 4096
+exit=0
+stdout='{"id": "ejemplo_V1"}\n'
+stderr=''
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/backup-example-3y3zo0c9/repo --id ejemplo_V1
+exit=0
+stdout='{"id": "ejemplo_V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/backup-example-3y3zo0c9/repo
+exit=0
+stdout='{"snapshots": ["ejemplo_V1"]}\n'
+stderr=''
+Bytes regulares totales, incluida metadata: 775 <= 4096
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/backup-example-3y3zo0c9/documentos --repo /trial/backup-example-3y3zo0c9/repo --id no_cabe --max-bytes 774
+exit=1
+stdout=''
+stderr='{"error": "El repositorio existente supera --max-bytes"}\n'
+PASS: límite inferior a bytes existentes rechazado sin crecimiento.
+Fuente original eliminada antes de restaurar.
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/backup-example-3y3zo0c9/repo --id ejemplo_V1 --dest '/trial/backup-example-3y3zo0c9/restauración'
+exit=0
+stdout='{"id": "ejemplo_V1"}\n'
+stderr=''
+PASS: bytes y directorios exactos; restauración sin fuente original.

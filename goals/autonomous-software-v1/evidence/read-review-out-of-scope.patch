@@ -1,0 +1,119 @@
+diff --git a/scripts/audit_bread_sources.py b/scripts/audit_bread_sources.py
+index 68bbea6..b07ea5d 100644
+--- a/scripts/audit_bread_sources.py
++++ b/scripts/audit_bread_sources.py
+@@ -71,7 +71,8 @@ def _numeric(value: object, label: str) -> Decimal:
+ 
+ def audit_bread_sources(
+     claims_path: Path = DEFAULT_CLAIMS, table_path: Path = DEFAULT_TABLE,
+-    pdf_root: Path = DEFAULT_PDFS,
++    pdf_root: Path = DEFAULT_PDFS, extractor_path: Path | None = None,
++    extractor_hash: str | None = None,
+ ) -> dict:
+     contract, contract_pin = _load(CONTRACT)
+     claims, claims_pin = _load(claims_path)
+@@ -121,11 +122,12 @@ def audit_bread_sources(
+     if type(table["reported_total"]) is not int or table["reported_total"] <= 0:
+         raise SourceAuditError("survey total must be a positive integer")
+ 
++    exec_path = extractor_path if extractor_path is not None else Path(contract["extractor"]["path"])
++    exec_hash = extractor_hash if extractor_hash is not None else contract["extractor"]["sha256"]
+     pdfs = {
+         name: read_pdf_pages(pdf_root / identity["visible_file"],
+                              SourceSpec(identity["bytes"], identity["sha256"]),
+-                             ExtractorSpec(Path(contract["extractor"]["path"]),
+-                                           contract["extractor"]["sha256"]))
++                             ExtractorSpec(exec_path, exec_hash))
+         for name, identity in contract["sources"].items()
+     }
+     passages = {}
+@@ -218,10 +220,15 @@ def main(argv: list[str] | None = None) -> int:
+     parser.add_argument("--claims", type=Path, default=DEFAULT_CLAIMS)
+     parser.add_argument("--table", type=Path, default=DEFAULT_TABLE)
+     parser.add_argument("--pdf-root", type=Path, default=DEFAULT_PDFS)
++    parser.add_argument("--extractor-path", type=Path, help="Override execution extractor path")
++    parser.add_argument("--extractor-hash", type=str, help="Override execution extractor SHA256")
+     parser.add_argument("--output", type=Path)
+     args = parser.parse_args(argv)
+     try:
+-        result = audit_bread_sources(args.claims, args.table, args.pdf_root)
++        result = audit_bread_sources(
++            args.claims, args.table, args.pdf_root,
++            args.extractor_path, args.extractor_hash
++        )
+         rendered = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+         if args.output:
+             with args.output.open("x", encoding="utf-8") as stream:
+diff --git a/tests/test_audit_bread_sources.py b/tests/test_audit_bread_sources.py
+index 2a65163..042fc13 100644
+--- a/tests/test_audit_bread_sources.py
++++ b/tests/test_audit_bread_sources.py
+@@ -4,6 +4,7 @@ from __future__ import annotations
+ import copy
+ import hashlib
+ import json
++import os
+ import shutil
+ import subprocess
+ import sys
+@@ -13,7 +14,7 @@ from pathlib import Path
+ import pytest
+ 
+ from scripts import audit_bread_sources as auditor
+-from specorganon.source_passages import SourceAuditError, SourceSpec, read_pdf_pages
++from specorganon.source_passages import ExtractorSpec, SourceAuditError, SourceSpec, read_pdf_pages
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ CLAIMS = ROOT / "cases/bread_development/source_claims.json"
+@@ -33,7 +34,12 @@ def packet(tmp_path):
+         # must be checked against the pinned published PDF bytes.
+         claims_path.write_text(json.dumps(claims if altered_claims is None else altered_claims))
+         table_path.write_text(json.dumps(table if altered_table is None else altered_table))
+-        return auditor.audit_bread_sources(claims_path, table_path, pdf_root)
++        
++        ext_path = os.environ.get("SPECORGANON_TEST_EXTRACTOR_PATH")
++        ext_path_obj = Path(ext_path) if ext_path else None
++        ext_hash = os.environ.get("SPECORGANON_TEST_EXTRACTOR_HASH")
++        
++        return auditor.audit_bread_sources(claims_path, table_path, pdf_root, ext_path_obj, ext_hash)
+ 
+     return claims, table, run
+ 
+@@ -52,9 +58,16 @@ def test_real_archives_and_reserialized_transcriptions_are_verified(packet):
+     assert result["Q"] is None and result["global_acceptance"] == "0/5"
+     assert result["field_intervention"] is False
+     assert set(result["claims"]) == {claim["key"] for claim in claims["claims"]}
++    ext_path = os.environ.get("SPECORGANON_TEST_EXTRACTOR_PATH")
++    ext_path_obj = Path(ext_path) if ext_path else Path("/usr/bin/pdftotext")
++    ext_hash = os.environ.get("SPECORGANON_TEST_EXTRACTOR_HASH") or "0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7"
+     extracted = {}
+     for source, pin in claims["sources"].items():
+-        pdf = read_pdf_pages(PDFS / pin["visible_file"], SourceSpec(pin["bytes"], pin["sha256"]))
++        pdf = read_pdf_pages(
++            PDFS / pin["visible_file"],
++            SourceSpec(pin["bytes"], pin["sha256"]),
++            ExtractorSpec(ext_path_obj, ext_hash)
++        )
+         extracted[pin["sha256"]] = pdf
+         record = result["source_extraction"][source]
+         assert record["sha256"] == pin["sha256"] == pdf.source_sha256
+@@ -281,8 +294,17 @@ def test_pdf_alteration_remains_rejected_when_local_metadata_is_rehashed(tmp_pat
+ 
+ def test_cli_positive_creates_explicit_json_result(tmp_path):
+     output = tmp_path / "result.json"
+-    process = subprocess.run([sys.executable, str(ROOT / "scripts/audit_bread_sources.py"),
++    cmd = [sys.executable, str(ROOT / "scripts/audit_bread_sources.py"),
+         "--claims", str(CLAIMS), "--table", str(TABLE), "--pdf-root", str(PDFS),
+-        "--output", str(output)], capture_output=True, text=True, timeout=30)
++        "--output", str(output)]
++    
++    ext_path = os.environ.get("SPECORGANON_TEST_EXTRACTOR_PATH")
++    ext_hash = os.environ.get("SPECORGANON_TEST_EXTRACTOR_HASH")
++    if ext_path:
++        cmd.extend(["--extractor-path", ext_path])
++    if ext_hash:
++        cmd.extend(["--extractor-hash", ext_hash])
++        
++    process = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+     assert process.returncode == 0, process.stderr
+     assert json.loads(output.read_bytes())["passed"] is True

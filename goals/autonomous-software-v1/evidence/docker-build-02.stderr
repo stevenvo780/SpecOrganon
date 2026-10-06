@@ -1,0 +1,56 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.65kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ubuntu@sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 388B done
+#3 DONE 0.0s
+
+#4 [1/9] FROM docker.io/library/ubuntu@sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55
+#4 resolve docker.io/library/ubuntu@sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55 done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 1.47kB done
+#5 DONE 0.0s
+
+#6 [2/9] RUN apt-get update     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends        python3=3.12.3-0ubuntu2.1 python3-venv=3.12.3-0ubuntu2.1        poppler-utils=24.02.0-1ubuntu9.9 ca-certificates git libseccomp2     && rm -rf /var/lib/apt/lists/*
+#6 CACHED
+
+#7 [6/9] COPY src ./src
+#7 CACHED
+
+#8 [4/9] WORKDIR /opt/specorganon
+#8 CACHED
+
+#9 [5/9] COPY pyproject.toml uv.lock README.md ./
+#9 CACHED
+
+#10 [3/9] RUN python3 -m venv /opt/build-tools     && /opt/build-tools/bin/pip install --no-cache-dir "uv==0.12.22"
+#10 CACHED
+
+#11 [7/9] RUN uv export --frozen --extra dev --no-emit-project --format requirements-txt -o requirements.txt     && uv build --wheel --python /usr/bin/python3 --out-dir dist     && uv venv --python /usr/bin/python3 /opt/specorganon/venv     && uv pip install --python /opt/specorganon/venv/bin/python --require-hashes -r requirements.txt     && uv pip install --python /opt/specorganon/venv/bin/python --no-deps dist/*.whl     && uv pip check --python /opt/specorganon/venv/bin/python     && /opt/specorganon/venv/bin/python -c 'import os; assert hasattr(os, "memfd_create")'     && dpkg-query -W > installed-debian-packages.txt     && sha256sum /usr/bin/pdftotext dist/*.whl > installed-pins.sha256
+#11 CACHED
+
+#12 [8/9] RUN mkdir -p /runs && chown ubuntu:ubuntu /runs
+#12 DONE 0.1s
+
+#13 [9/9] WORKDIR /runs
+#13 DONE 0.0s
+
+#14 exporting to image
+#14 exporting layers
+#14 exporting layers 1.5s done
+#14 exporting manifest sha256:52eb3b88de34d6f265da94ca1034e5817c59b7c4cc39fb4cc7d760e6060c2f1d done
+#14 exporting config sha256:d74694b7eda849e12c3aadcab8412230b6117780cac20faec4de055c5bd7e0fc done
+#14 exporting attestation manifest sha256:2e4a56d36719c26a0ef2993cc9dfb33fa04124ba7dbfd388fa1cb3ca91a49d41 done
+#14 exporting manifest list sha256:a0f2199209381adba136fd06c43f6e9b1fd666d13ab529e46c1511674d254222 done
+#14 naming to docker.io/library/specorganon-release:candidate-02 done
+#14 unpacking to docker.io/library/specorganon-release:candidate-02
+#14 unpacking to docker.io/library/specorganon-release:candidate-02 1.2s done
+#14 DONE 2.7s

@@ -1,0 +1,58 @@
+FFF.                                                                     [100%]
+=================================== FAILURES ===================================
+______________ test_stdlib_own_helpers_arguments_and_pid_survive _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-56/test_stdlib_own_helpers_argume0')
+
+    def test_stdlib_own_helpers_arguments_and_pid_survive(tmp_path):
+        (tmp_path/'helper.py').write_text('VALUE="local helper"\n')
+        candidate=tmp_path/'backup.py'
+        candidate.write_text('import os,sys,json,helper\nprint(json.dumps({"pid":os.getpid(),"args":sys.argv[1:],"helper":helper.VALUE}))\n')
+        proc=launch(candidate,'create','--id','α space');out,err=proc.communicate(timeout=10)
+>       assert proc.returncode==0,err.decode()
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 1, in <module>
+E         ModuleNotFoundError: No module named 'delivery_entry'
+E         
+E       assert 1 == 0
+E        +  where 1 = <Popen: returncode: 1 args: ['/datos/workspaces/personal/SpecOrganon/.venv/b...>.returncode
+
+experiments/backup_pilot/development/tests/test_delivery_entry.py:24: AssertionError
+________________ test_ambient_pythonpath_dependency_is_rejected ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-56/test_ambient_pythonpath_depend0')
+
+    def test_ambient_pythonpath_dependency_is_rejected(tmp_path):
+        extras=tmp_path/'extras';extras.mkdir();(extras/'ambient_dependency.py').write_text('VALUE=1\n')
+        candidate=tmp_path/'backup.py';candidate.write_text('import ambient_dependency\nprint(ambient_dependency.VALUE)\n')
+        env=dict(os.environ,PYTHONPATH=str(extras))
+        normal=subprocess.run([sys.executable,str(candidate)],capture_output=True,env=env,timeout=10)
+        assert normal.returncode==0 and normal.stdout==b'1\n'
+        proc=launch(candidate,env={'PYTHONPATH':str(extras)});out,err=proc.communicate(timeout=10)
+>       assert proc.returncode!=0 and b'ambient_dependency' in err and not out
+E       assert (1 != 0 and b'ambient_dependency' in b'Traceback (most recent call last):\n  File "<string>", line 1, in <module>\nModuleNotFoundError: No module named \'delivery_entry\'\n')
+E        +  where 1 = <Popen: returncode: 1 args: ['/datos/workspaces/personal/SpecOrganon/.venv/b...>.returncode
+
+experiments/backup_pilot/development/tests/test_delivery_entry.py:35: AssertionError
+_____________________ test_site_initialization_is_disabled _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-56/test_site_initialization_is_di0')
+
+    def test_site_initialization_is_disabled(tmp_path):
+        candidate=tmp_path/'backup.py'
+        candidate.write_text('import sys,json\nprint(json.dumps({"no_site":sys.flags.no_site,"ignore_environment":sys.flags.ignore_environment,"no_user_site":sys.flags.no_user_site,"site_loaded":"site" in sys.modules}))\n')
+        proc=launch(candidate);out,err=proc.communicate(timeout=10)
+>       assert proc.returncode==0,err.decode()
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 1, in <module>
+E         ModuleNotFoundError: No module named 'delivery_entry'
+E         
+E       assert 1 == 0
+E        +  where 1 = <Popen: returncode: 1 args: ['/datos/workspaces/personal/SpecOrganon/.venv/b...>.returncode
+
+experiments/backup_pilot/development/tests/test_delivery_entry.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/development/tests/test_delivery_entry.py::test_stdlib_own_helpers_arguments_and_pid_survive
+FAILED experiments/backup_pilot/development/tests/test_delivery_entry.py::test_ambient_pythonpath_dependency_is_rejected
+FAILED experiments/backup_pilot/development/tests/test_delivery_entry.py::test_site_initialization_is_disabled
+3 failed, 1 passed in 0.10s

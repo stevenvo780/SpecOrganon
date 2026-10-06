@@ -1,0 +1,50 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_runtime_without_memfd_rejects_with_domain_error _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f9071d79940>
+candidate_host = None
+
+    def test_runtime_without_memfd_rejects_with_domain_error(monkeypatch, candidate_host):
+        # Removing capability admission would leak AttributeError to CLI consumers.
+        monkeypatch.setenv("SPECORGANON_EXTRACTOR_PROFILE", PROFILE)
+        monkeypatch.delattr(os, "memfd_create", raising=False)
+        with pytest.raises(SourceAuditError, match="sealed"):
+>           read_pdf_pages(PDF, SPEC)
+
+tests/test_extractor_profiles.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:145: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='47253257c7a7995ea6c8ad54b47b0edece8739dd4102c7bcd5a729472c386fb4')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+                raise SourceAuditError("extractor bytes differ from reviewed digest")
+>           sealed = os.memfd_create("organon-pdftotext", os.MFD_CLOEXEC | os.MFD_ALLOW_SEALING)
+                     ^^^^^^^^^^^^^^^
+E           AttributeError: module 'os' has no attribute 'memfd_create'. Did you mean: 'timerfd_create'?
+
+src/specorganon/source_passages.py:109: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_extractor_profiles.py::test_runtime_without_memfd_rejects_with_domain_error
+1 failed, 5 deselected in 0.10s

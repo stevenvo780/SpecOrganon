@@ -1,0 +1,121 @@
+F..............F...................................F                     [100%]
+=================================== FAILURES ===================================
+_______ test_real_archives_and_reserialized_transcriptions_are_verified ________
+
+packet = ({'schema': 1, 'classification': 'development_exposed_neutral_transcription', 'sources': {'lca': {'title': 'Effects of... bread wasted from household per week', 'reported_total': 1000, ...}, <function packet.<locals>.run at 0x7f1810cb9010>)
+
+    def test_real_archives_and_reserialized_transcriptions_are_verified(packet):
+        claims, table, run = packet
+>       result = run()
+                 ^^^^^
+
+tests/test_audit_bread_sources.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_audit_bread_sources.py:36: in run
+    return auditor.audit_bread_sources(claims_path, table_path, pdf_root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/audit_bread_sources.py:125: in audit_bread_sources
+    name: read_pdf_pages(pdf_root / identity["visible_file"],
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+______________ test_path_shim_cannot_change_numeric_audit_outcome ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-70/test_path_shim_cannot_change_n0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f1810e6a8b0>
+packet = ({'schema': 1, 'classification': 'development_exposed_neutral_transcription', 'sources': {'lca': {'title': 'Effects of... bread wasted from household per week', 'reported_total': 1000, ...}, <function packet.<locals>.run at 0x7f1810c96610>)
+
+    def test_path_shim_cannot_change_numeric_audit_outcome(tmp_path, monkeypatch, packet):
+        bindir = tmp_path / "bin"
+        bindir.mkdir()
+        shim = bindir / "pdftotext"
+        shim.write_text("#!/bin/sh\nexit 99\n")
+        shim.chmod(0o700)
+        monkeypatch.setenv("PATH", str(bindir))
+        claims, _, run = packet
+>       assert run()["verified_claims"] == 17
+               ^^^^^
+
+tests/test_audit_bread_sources.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_audit_bread_sources.py:36: in run
+    return auditor.audit_bread_sources(claims_path, table_path, pdf_root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/audit_bread_sources.py:125: in audit_bread_sources
+    name: read_pdf_pages(pdf_root / identity["visible_file"],
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+________________ test_cli_positive_creates_explicit_json_result ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-70/test_cli_positive_creates_expl0')
+
+    def test_cli_positive_creates_explicit_json_result(tmp_path):
+        output = tmp_path / "result.json"
+        process = subprocess.run([sys.executable, str(ROOT / "scripts/audit_bread_sources.py"),
+            "--claims", str(CLAIMS), "--table", str(TABLE), "--pdf-root", str(PDFS),
+            "--output", str(output)], capture_output=True, text=True, timeout=30)
+>       assert process.returncode == 0, process.stderr
+E       AssertionError: source audit rejected: extractor bytes differ from reviewed digest
+E         
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['/usr/bin/python', '/datos/workspaces/personal/SpecOrganon/scripts/audit_bread_sources.py', '--.../result.json'], returncode=2, stdout='', stderr='source audit rejected: extractor bytes differ from reviewed digest\n').returncode
+
+tests/test_audit_bread_sources.py:287: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_audit_bread_sources.py::test_real_archives_and_reserialized_transcriptions_are_verified
+FAILED tests/test_audit_bread_sources.py::test_path_shim_cannot_change_numeric_audit_outcome
+FAILED tests/test_audit_bread_sources.py::test_cli_positive_creates_explicit_json_result
+3 failed, 49 passed in 0.22s

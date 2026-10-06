@@ -1,0 +1,1013 @@
+Python: 3.12.15 (main, Oct  1 2026, 21:50:06) [GCC 12.2.0]
+Comando: /usr/local/bin/python3 /trial/solution/test_backup.py
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-hb4j2w47/repo --source /trial/solution/.tests-hb4j2w47/source --id v1
+exit=1
+stdout=''
+stderr='{"error": "Archivo especial rechazado: /trial/solution/.tests-hb4j2w47/source/fifo"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/solution/.tests-4xhrfibd/source --repo /trial/solution/.tests-4xhrfibd/repo --id unico
+exit=0
+stdout='{"id": "unico"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/solution/.tests-4xhrfibd/source --repo /trial/solution/.tests-4xhrfibd/repo --id unico
+exit=1
+stdout=''
+stderr='{"error": "El ID ya existe: unico"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-4xhrfibd/repo --id unico
+exit=0
+stdout='{"id": "unico", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-4xhrfibd/repo
+exit=0
+stdout='{"snapshots": ["unico"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-jb06w2qc/repo --source /trial/solution/.tests-jb06w2qc/source --id buena
+exit=0
+stdout='{"id": "buena"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-jb06w2qc/repo --source /trial/solution/.tests-jb06w2qc/source --id corruptible
+exit=0
+stdout='{"id": "corruptible"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "Snapshot incompleto o con entradas inesperadas: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "Snapshot incompleto o con entradas inesperadas: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "Snapshot incompleto o con entradas inesperadas: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "Hash del manifiesto incorrecto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "Snapshot incompleto o con entradas inesperadas: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "Snapshot incompleto o con entradas inesperadas: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "Snapshot incompleto o con entradas inesperadas: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/a"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/a"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/a"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/a"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/a"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/a"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "El \\u00e1rbol de datos no coincide con el manifiesto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "El \\u00e1rbol de datos no coincide con el manifiesto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "El \\u00e1rbol de datos no coincide con el manifiesto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/empty"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/empty"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/empty"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/empty"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/empty"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: corruptible/empty"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "El \\u00e1rbol de datos no coincide con el manifiesto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id buena
+exit=0
+stdout='{"id": "buena", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/ausente
+exit=1
+stdout=''
+stderr='{"error": "El \\u00e1rbol de datos no coincide con el manifiesto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible --dest /trial/solution/.tests-jb06w2qc/vacio
+exit=1
+stdout=''
+stderr='{"error": "El \\u00e1rbol de datos no coincide con el manifiesto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-jb06w2qc/repo
+exit=0
+stdout='{"snapshots": ["buena"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "El \\u00e1rbol de datos no coincide con el manifiesto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "El \\u00e1rbol de datos no coincide con el manifiesto: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=1
+stdout=''
+stderr='{"error": "Snapshot incompleto o con entradas inesperadas: corruptible"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-jb06w2qc/repo --id corruptible
+exit=0
+stdout='{"id": "corruptible", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-kqshwzd4/repo --source /trial/solution/.tests-kqshwzd4/source --id v1
+exit=0
+stdout='{"id": "v1"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-kqshwzd4/repo --source /trial/solution/.tests-kqshwzd4/source --id v1
+exit=1
+stdout=''
+stderr='{"error": "El ID ya existe: v1"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-kqshwzd4/repo --id v1 --dest /trial/solution/.tests-kqshwzd4/protegido
+exit=1
+stdout=''
+stderr='{"error": "El destino preexistente no est\\u00e1 vac\\u00edo: /trial/solution/.tests-kqshwzd4/protegido"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-kqshwzd4/repo --id v1 --dest /trial/solution/.tests-kqshwzd4/tambien-no-vacio
+exit=1
+stdout=''
+stderr='{"error": "El destino preexistente no est\\u00e1 vac\\u00edo: /trial/solution/.tests-kqshwzd4/tambien-no-vacio"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-kqshwzd4/repo --id v1 --dest /trial/solution/.tests-kqshwzd4/archivo
+exit=1
+stdout=''
+stderr='{"error": "Se requiere un directorio: /trial/solution/.tests-kqshwzd4/archivo"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-vhg0xp4o/repo --source /trial/solution/.tests-vhg0xp4o/source --id v1
+exit=0
+stdout='{"id": "v1"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-vhg0xp4o/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Ruta fuera del \\u00e1rbol de datos"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-vhg0xp4o/repo --id v1 --dest /trial/solution/.tests-vhg0xp4o/d
+exit=1
+stdout=''
+stderr='{"error": "Ruta fuera del \\u00e1rbol de datos"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-vhg0xp4o/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Ruta fuera del \\u00e1rbol de datos"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-vhg0xp4o/repo --id v1 --dest /trial/solution/.tests-vhg0xp4o/d
+exit=1
+stdout=''
+stderr='{"error": "Ruta fuera del \\u00e1rbol de datos"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-vhg0xp4o/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Ruta fuera del \\u00e1rbol de datos"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-vhg0xp4o/repo --id v1 --dest /trial/solution/.tests-vhg0xp4o/d
+exit=1
+stdout=''
+stderr='{"error": "Ruta fuera del \\u00e1rbol de datos"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-vhg0xp4o/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Ruta fuera del \\u00e1rbol de datos"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-vhg0xp4o/repo --id v1 --dest /trial/solution/.tests-vhg0xp4o/d
+exit=1
+stdout=''
+stderr='{"error": "Ruta fuera del \\u00e1rbol de datos"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-vhg0xp4o/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Ruta fuera del \\u00e1rbol de datos"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-vhg0xp4o/repo --id v1 --dest /trial/solution/.tests-vhg0xp4o/d
+exit=1
+stdout=''
+stderr='{"error": "Ruta fuera del \\u00e1rbol de datos"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-vhg0xp4o/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Ruta de manifiesto inv\\u00e1lida"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-vhg0xp4o/repo --id v1 --dest /trial/solution/.tests-vhg0xp4o/d
+exit=1
+stdout=''
+stderr='{"error": "Ruta de manifiesto inv\\u00e1lida"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-vhg0xp4o/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Rutas duplicadas o desordenadas en el manifiesto"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-vhg0xp4o/repo --id v1 --dest /trial/solution/.tests-vhg0xp4o/d
+exit=1
+stdout=''
+stderr='{"error": "Rutas duplicadas o desordenadas en el manifiesto"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-vhg0xp4o/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Tama\\u00f1o o hash inv\\u00e1lido en el manifiesto"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-vhg0xp4o/repo --id v1 --dest /trial/solution/.tests-vhg0xp4o/d
+exit=1
+stdout=''
+stderr='{"error": "Tama\\u00f1o o hash inv\\u00e1lido en el manifiesto"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-vhg0xp4o/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Formato del manifiesto incorrecto: v1"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-vhg0xp4o/repo --id v1 --dest /trial/solution/.tests-vhg0xp4o/d
+exit=1
+stdout=''
+stderr='{"error": "Formato del manifiesto incorrecto: v1"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-vhg0xp4o/repo --id v1
+exit=0
+stdout='{"id": "v1", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-929b82wd/repo
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-929b82wd/no-existe
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-929b82wd/repo --id missing
+exit=1
+stdout=''
+stderr='{"error": "ID inexistente: missing"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-929b82wd/repo --id missing --dest /trial/solution/.tests-929b82wd/dest
+exit=1
+stdout=''
+stderr='{"error": "ID inexistente: missing"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-929b82wd/repo --id inexistente
+exit=1
+stdout=''
+stderr='{"error": "ID inexistente: inexistente"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-929b82wd/repo --id inexistente --dest /trial/solution/.tests-929b82wd/dest
+exit=1
+stdout=''
+stderr='{"error": "ID inexistente: inexistente"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id ''
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-929b82wd/repo --id ''
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-929b82wd/repo --id '' --dest /trial/solution/.tests-929b82wd/d
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id ../x
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-929b82wd/repo --id ../x
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-929b82wd/repo --id ../x --dest /trial/solution/.tests-929b82wd/d
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id .x
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-929b82wd/repo --id .x
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-929b82wd/repo --id .x --dest /trial/solution/.tests-929b82wd/d
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id _x
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-929b82wd/repo --id _x
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-929b82wd/repo --id _x --dest /trial/solution/.tests-929b82wd/d
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id -x
+exit=1
+stdout=''
+stderr='{"error": "argument --id: expected one argument"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-929b82wd/repo --id -x
+exit=1
+stdout=''
+stderr='{"error": "argument --id: expected one argument"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-929b82wd/repo --id -x --dest /trial/solution/.tests-929b82wd/d
+exit=1
+stdout=''
+stderr='{"error": "argument --id: expected one argument"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id 'ñ'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-929b82wd/repo --id 'ñ'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-929b82wd/repo --id 'ñ' --dest /trial/solution/.tests-929b82wd/d
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id a/b
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-929b82wd/repo --id a/b
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-929b82wd/repo --id a/b --dest /trial/solution/.tests-929b82wd/d
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-929b82wd/repo --id aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-929b82wd/repo --id aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --dest /trial/solution/.tests-929b82wd/d
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id 'x
+'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-929b82wd/repo --id 'x
+'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-929b82wd/repo --id 'x
+' --dest /trial/solution/.tests-929b82wd/d
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido: se requiere [A-Za-z0-9][A-Za-z0-9_-]{0,63}"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id A
+exit=0
+stdout='{"id": "A"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id 0_az-Z
+exit=0
+stdout='{"id": "0_az-Z"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo --source /trial/solution/.tests-929b82wd/source --id aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+exit=0
+stdout='{"id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-929b82wd/repo
+exit=0
+stdout='{"snapshots": ["0_az-Z", "A", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-929b82wd/repo
+exit=1
+stdout=''
+stderr='{"error": "the following arguments are required: --id, --source"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-3xp29jb_/repo --source /trial/solution/.tests-3xp29jb_/source --id anterior
+exit=0
+stdout='{"id": "anterior"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/solution/.tests-3xp29jb_/source --repo /trial/solution/.tests-3xp29jb_/repo --id interrumpida
+exit=-9
+stdout=''
+stderr=''
+
+SIGKILL enviado al observar staging; reintento sin limpiar repositorio.
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-3xp29jb_/repo
+exit=0
+stdout='{"snapshots": ["anterior"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-3xp29jb_/repo --id interrumpida
+exit=1
+stdout=''
+stderr='{"error": "ID inexistente: interrumpida"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-3xp29jb_/repo --source /trial/solution/.tests-3xp29jb_/source --id interrumpida
+exit=0
+stdout='{"id": "interrumpida"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-3xp29jb_/repo --id interrumpida
+exit=0
+stdout='{"id": "interrumpida", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-3xp29jb_/repo --id anterior
+exit=0
+stdout='{"id": "anterior", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-3xp29jb_/repo
+exit=0
+stdout='{"snapshots": ["anterior", "interrumpida"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-vosvfmil/source --source /trial/solution/.tests-vosvfmil/source --id v1
+exit=1
+stdout=''
+stderr='{"error": "Rutas solapadas: /trial/solution/.tests-vosvfmil/source y /trial/solution/.tests-vosvfmil/source"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-vosvfmil/source/repositorio --source /trial/solution/.tests-vosvfmil/source --id v1
+exit=1
+stdout=''
+stderr='{"error": "Rutas solapadas: /trial/solution/.tests-vosvfmil/source y /trial/solution/.tests-vosvfmil/source/repositorio"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-vosvfmil/repo --source /trial/solution/.tests-vosvfmil/repo/source --id x
+exit=1
+stdout=''
+stderr='{"error": "Rutas solapadas: /trial/solution/.tests-vosvfmil/repo/source y /trial/solution/.tests-vosvfmil/repo"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-vosvfmil/repo --source /trial/solution/.tests-vosvfmil/source --id v1
+exit=0
+stdout='{"id": "v1"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-vosvfmil/repo --id v1 --dest /trial/solution/.tests-vosvfmil/repo/d
+exit=1
+stdout=''
+stderr='{"error": "Rutas solapadas: /trial/solution/.tests-vosvfmil/repo y /trial/solution/.tests-vosvfmil/repo/d"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-vosvfmil/repo --id v1 --dest /trial/solution/.tests-vosvfmil
+exit=1
+stdout=''
+stderr='{"error": "Rutas solapadas: /trial/solution/.tests-vosvfmil/repo y /trial/solution/.tests-vosvfmil"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-hxlzdrfm/repo --source /trial/solution/.tests-hxlzdrfm/source --id v1
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-hxlzdrfm/source/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-hxlzdrfm/repo --source /trial/solution/.tests-hxlzdrfm/source --id v1
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-hxlzdrfm/source/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-hxlzdrfm/repo --source /trial/solution/.tests-hxlzdrfm/source --id v1
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-hxlzdrfm/source/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-hxlzdrfm/repo --source /trial/solution/.tests-hxlzdrfm/fuente-enlace --id x
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-hxlzdrfm/fuente-enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-hxlzdrfm/repo --source /trial/solution/.tests-hxlzdrfm/padre-enlace --id x
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-hxlzdrfm/padre-enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-hxlzdrfm/padre-enlace/repositorio-ausente
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-hxlzdrfm/padre-enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-hxlzdrfm/repo-enlace
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-hxlzdrfm/repo-enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-hxlzdrfm/repo --source /trial/solution/.tests-hxlzdrfm/source --id v1
+exit=0
+stdout='{"id": "v1"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-hxlzdrfm/repo --id v1 --dest /trial/solution/.tests-hxlzdrfm/dest-enlace
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-hxlzdrfm/dest-enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-hxlzdrfm/repo --id v1 --dest /trial/solution/.tests-hxlzdrfm/padre-enlace/dest-ausente
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-hxlzdrfm/padre-enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-hxlzdrfm/repo --id v1 --dest /trial/solution/.tests-hxlzdrfm/dest
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-hxlzdrfm/dest/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-wds5mqs0/repo --source /trial/solution/.tests-wds5mqs0/source --id v1
+exit=0
+stdout='{"id": "v1"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-wds5mqs0/repo
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-wds5mqs0/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-wds5mqs0/repo --id x --source /trial/solution/.tests-wds5mqs0/source
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-wds5mqs0/repo --id v1 --dest /trial/solution/.tests-wds5mqs0/d
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-wds5mqs0/repo
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/.staging/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-wds5mqs0/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/.staging/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-wds5mqs0/repo --id x --source /trial/solution/.tests-wds5mqs0/source
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/.staging/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-wds5mqs0/repo --id v1 --dest /trial/solution/.tests-wds5mqs0/d
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/.staging/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-wds5mqs0/repo
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/snapshots/v1/data/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-wds5mqs0/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/snapshots/v1/data/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-wds5mqs0/repo --id x --source /trial/solution/.tests-wds5mqs0/source
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/snapshots/v1/data/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-wds5mqs0/repo --id v1 --dest /trial/solution/.tests-wds5mqs0/d
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/snapshots/v1/data/enlace"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-wds5mqs0/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/snapshots/v1/manifest.json"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-wds5mqs0/repo --id v1 --dest /trial/solution/.tests-wds5mqs0/d
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/snapshots/v1/manifest.json"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-wds5mqs0/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/snapshots/v1/manifest.sha256"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-wds5mqs0/repo --id v1 --dest /trial/solution/.tests-wds5mqs0/d
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/snapshots/v1/manifest.sha256"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-wds5mqs0/repo --id v1
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/snapshots/v1/data/a"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-wds5mqs0/repo --id v1 --dest /trial/solution/.tests-wds5mqs0/d
+exit=1
+stdout=''
+stderr='{"error": "Symlink rechazado: /trial/solution/.tests-wds5mqs0/repo/snapshots/v1/data/a"}\n'
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-wds5mqs0/repo --id v1
+exit=0
+stdout='{"id": "v1", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-_e93lltp/repo --source /trial/solution/.tests-_e93lltp/source --id z_version1
+exit=0
+stdout='{"id": "z_version1"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-_e93lltp/repo --source /trial/solution/.tests-_e93lltp/source --id a_version2
+exit=0
+stdout='{"id": "a_version2"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/.tests-_e93lltp/repo --source /trial/solution/.tests-_e93lltp/source --id m_vacia3
+exit=0
+stdout='{"id": "m_vacia3"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/.tests-_e93lltp/repo
+exit=0
+stdout='{"snapshots": ["a_version2", "m_vacia3", "z_version1"]}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-_e93lltp/repo --id z_version1
+exit=0
+stdout='{"id": "z_version1", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-_e93lltp/repo --id z_version1 --dest /trial/solution/.tests-_e93lltp/restauraciones/z_version1
+exit=0
+stdout='{"id": "z_version1"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-_e93lltp/repo --id a_version2
+exit=0
+stdout='{"id": "a_version2", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-_e93lltp/repo --id a_version2 --dest /trial/solution/.tests-_e93lltp/restauraciones/a_version2
+exit=0
+stdout='{"id": "a_version2"}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/.tests-_e93lltp/repo --id m_vacia3
+exit=0
+stdout='{"id": "m_vacia3", "valid": true}\n'
+stderr=''
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/.tests-_e93lltp/repo --id m_vacia3 --dest /trial/solution/.tests-_e93lltp/restauraciones/m_vacia3
+exit=0
+stdout='{"id": "m_vacia3"}\n'
+stderr=''
+

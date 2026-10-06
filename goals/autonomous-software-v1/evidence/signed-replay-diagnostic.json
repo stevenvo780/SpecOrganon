@@ -1,0 +1,50 @@
+{
+  "signature_verified": true,
+  "observed_locally": false,
+  "observed_passed": false,
+  "report_matches_observation": false,
+  "case_id": "8b41ca16-8307-4cdd-96a3-5fe09e680783",
+  "item_id": "t1",
+  "report_provenance": {
+    "seq": 2,
+    "hash": "6b681b4579bda293f6eb5e768adb52dba3e7d29e19ea507d564edff9389e0466",
+    "item_version": 1
+  },
+  "declared_argv_sha256": "8d4240fd1b71ce85b0220c04893643564ba5424179e43d617745cce8c5f54b14",
+  "declared_executable_sha256_pin": "e9db67955243120e49352dc87977cdfb96a1dc130b58cfac7a0ab5f4f74731af",
+  "sealed_executable_sha256": "e9db67955243120e49352dc87977cdfb96a1dc130b58cfac7a0ab5f4f74731af",
+  "exact_argv_reproduced": false,
+  "executed_argv0_form": "/proc/self/fd/<sealed-fd>",
+  "sandbox": {
+    "landlock_abi": 10,
+    "timed_out": false,
+    "exit_code": 0,
+    "launch_error": null
+  },
+  "checks": {
+    "exit_code": true,
+    "timed_out": true,
+    "sealed_executable": true,
+    "launch": true,
+    "stdout_sha256": true,
+    "stderr_sha256": false,
+    "artifacts": true,
+    "ledger_unchanged": true
+  },
+  "limitations": [
+    "A local repeat run does not prove the historical signed execution occurred.",
+    "The configured signer is not an independent custodian of this local observation.",
+    "Landlock and seccomp restrict one child, without namespace or aggregate filesystem quotas; same-UID path races remain possible.",
+    "Only declared artifact paths are hashed, with bounded file reads.",
+    "The sandbox's sealed exec substitutes a procfd path for argv[0] inside the child; argv[1:] is unchanged."
+  ],
+  "stdout_sha256": "995d363bf46636a72004e6de45f9079e585b242f890f6c4e0af697b7db9da965",
+  "stderr_sha256": "89ad5609e6f6d022012d1075aec5458b1ec52779a23c072d0eac910aee317a23",
+  "artifact_checks": [
+    {
+      "path": "results/output.txt",
+      "matches": true,
+      "observed_sha256": "995d363bf46636a72004e6de45f9079e585b242f890f6c4e0af697b7db9da965"
+    }
+  ]
+}

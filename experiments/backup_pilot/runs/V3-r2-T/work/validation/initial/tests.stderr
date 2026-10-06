@@ -1,0 +1,46 @@
+test_boundary_valid_ids (__main__.BackupTests.test_boundary_valid_ids) ... ok
+test_concurrent_duplicate_creation (__main__.BackupTests.test_concurrent_duplicate_creation) ... ok
+test_corrupt_every_regular_snapshot_file (__main__.BackupTests.test_corrupt_every_regular_snapshot_file) ... ok
+test_corruption_preserves_empty_and_nonempty_destinations (__main__.BackupTests.test_corruption_preserves_empty_and_nonempty_destinations) ... ok
+test_destination_symlink_and_ancestor (__main__.BackupTests.test_destination_symlink_and_ancestor) ... ok
+test_duplicate_id_no_overwrite (__main__.BackupTests.test_duplicate_id_no_overwrite) ... ok
+test_empty_source_and_existing_empty_destination (__main__.BackupTests.test_empty_source_and_existing_empty_destination) ... ok
+test_extra_snapshot_objects_and_incomplete_final (__main__.BackupTests.test_extra_snapshot_objects_and_incomplete_final) ... ok
+test_invalid_ids_all_commands (__main__.BackupTests.test_invalid_ids_all_commands) ... ok
+test_manifest_unsafe_paths_and_structure_even_if_resealed (__main__.BackupTests.test_manifest_unsafe_paths_and_structure_even_if_resealed) ... ok
+test_multiple_versions_and_sorted_list (__main__.BackupTests.test_multiple_versions_and_sorted_list) ... ok
+test_new_and_missing_repository (__main__.BackupTests.test_new_and_missing_repository) ... ok
+test_nonempty_destination_unchanged (__main__.BackupTests.test_nonempty_destination_unchanged) ... ok
+test_regular_file_destination_unchanged (__main__.BackupTests.test_regular_file_destination_unchanged) ... ok
+test_repo_symlink_and_nested_symlink (__main__.BackupTests.test_repo_symlink_and_nested_symlink) ... ok
+test_restore_repository_overlap (__main__.BackupTests.test_restore_repository_overlap) ... ok
+test_roundtrip_exact_self_contained (__main__.BackupTests.test_roundtrip_exact_self_contained) ... ok
+test_sigkill_after_publication_preserves_valid_snapshot (__main__.BackupTests.test_sigkill_after_publication_preserves_valid_snapshot) ... ok
+test_sigkill_before_publication_repeat_same_id (__main__.BackupTests.test_sigkill_before_publication_repeat_same_id) ... ok
+test_sigkill_during_data_copy_repeat_same_id (__main__.BackupTests.test_sigkill_during_data_copy_repeat_same_id) ... ok
+test_snapshot_symlinks (__main__.BackupTests.test_snapshot_symlinks) ... ok
+test_source_repository_overlap (__main__.BackupTests.test_source_repository_overlap) ... ok
+test_source_symlinks_and_ancestors (__main__.BackupTests.test_source_symlinks_and_ancestors) ... ok
+test_special_files_source_repo_dest_snapshot (__main__.BackupTests.test_special_files_source_repo_dest_snapshot) ... ERROR
+
+======================================================================
+ERROR: test_special_files_source_repo_dest_snapshot (__main__.BackupTests.test_special_files_source_repo_dest_snapshot)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/tests/test_backup.py", line 218, in test_special_files_source_repo_dest_snapshot
+    sock.bind(str(self.source / "socket"))
+PermissionError: [Errno 1] Operation not permitted
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/trial/tests/test_backup.py", line 222, in test_special_files_source_repo_dest_snapshot
+    (self.source / "socket").unlink()
+  File "/usr/local/lib/python3.12/pathlib.py", line 1342, in unlink
+    os.unlink(self)
+FileNotFoundError: [Errno 2] No such file or directory: '/trial/validation/backup-test-luw4u9tw/fuente ü con espacios/socket'
+
+----------------------------------------------------------------------
+Ran 24 tests in 4.673s
+
+FAILED (errors=1)

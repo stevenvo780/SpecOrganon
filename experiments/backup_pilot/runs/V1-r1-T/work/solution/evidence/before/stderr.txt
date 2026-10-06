@@ -1,0 +1,123 @@
+test_concurrent_creates_respect_one_shared_budget (__main__.ContractTests.test_concurrent_creates_respect_one_shared_budget) ... FAIL
+test_corrupt_or_missing_every_regular_snapshot_file (__main__.ContractTests.test_corrupt_or_missing_every_regular_snapshot_file) ... ok
+test_empty_source_and_empty_existing_destination (__main__.ContractTests.test_empty_source_and_empty_existing_destination) ... ok
+test_ids_and_no_overwrite (__main__.ContractTests.test_ids_and_no_overwrite) ... ok
+test_new_list_and_missing_id (__main__.ContractTests.test_new_list_and_missing_id) ... ok
+test_nonempty_destination_is_unchanged (__main__.ContractTests.test_nonempty_destination_is_unchanged) ... ok
+test_overlap_and_unnormalized_symlink (__main__.ContractTests.test_overlap_and_unnormalized_symlink) ... ok
+test_quota_below_existing_and_failure_without_residue (__main__.ContractTests.test_quota_below_existing_and_failure_without_residue) ... FAIL
+test_quota_counts_extra_regular_bytes_in_previous_snapshot (__main__.ContractTests.test_quota_counts_extra_regular_bytes_in_previous_snapshot) ... FAIL
+test_quota_exact_boundary_and_one_byte_less (__main__.ContractTests.test_quota_exact_boundary_and_one_byte_less) ... FAIL
+test_quota_high_preserves_previous_snapshot (__main__.ContractTests.test_quota_high_preserves_previous_snapshot) ... FAIL
+test_quota_includes_metadata_and_lock (__main__.ContractTests.test_quota_includes_metadata_and_lock) ... FAIL
+test_quota_zero_empty_tree_and_invalid_N (__main__.ContractTests.test_quota_zero_empty_tree_and_invalid_N) ... FAIL
+test_roundtrip_autosufficient_and_source_unchanged (__main__.ContractTests.test_roundtrip_autosufficient_and_source_unchanged) ... ok
+test_sigkill_retry_and_previous_snapshot (__main__.ContractTests.test_sigkill_retry_and_previous_snapshot) ... FAIL
+test_special_objects_are_rejected (__main__.ContractTests.test_special_objects_are_rejected) ... ERROR
+test_successive_snapshots_sorted_and_exact (__main__.ContractTests.test_successive_snapshots_sorted_and_exact) ... ok
+test_symlinks_in_all_managed_paths (__main__.ContractTests.test_symlinks_in_all_managed_paths) ... ok
+
+======================================================================
+ERROR: test_special_objects_are_rejected (__main__.ContractTests.test_special_objects_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 216, in test_special_objects_are_rejected
+    sock.bind(str(self.source / 'socket'))
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+FAIL: test_concurrent_creates_respect_one_shared_budget (__main__.ContractTests.test_concurrent_creates_respect_one_shared_budget)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 402, in test_concurrent_creates_respect_one_shared_budget
+    self.assertEqual(sum(code == 0 for code in codes), 1, codes)
+AssertionError: 0 != 1 : [2, 2]
+
+======================================================================
+FAIL: test_quota_below_existing_and_failure_without_residue (__main__.ContractTests.test_quota_below_existing_and_failure_without_residue)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 289, in test_quota_below_existing_and_failure_without_residue
+    self.cli('create', limit=used+100000)
+  File "/trial/solution/test_backup.py", line 96, in cli
+    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))
+AssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...
+backup.py: error: unrecognized arguments: --max-bytes 102448
+
+
+======================================================================
+FAIL: test_quota_counts_extra_regular_bytes_in_previous_snapshot (__main__.ContractTests.test_quota_counts_extra_regular_bytes_in_previous_snapshot)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 332, in test_quota_counts_extra_regular_bytes_in_previous_snapshot
+    self.cli('create', limit=used+100000)
+  File "/trial/solution/test_backup.py", line 96, in cli
+    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))
+AssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...
+backup.py: error: unrecognized arguments: --max-bytes 107448
+
+
+======================================================================
+FAIL: test_quota_exact_boundary_and_one_byte_less (__main__.ContractTests.test_quota_exact_boundary_and_one_byte_less)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 271, in test_quota_exact_boundary_and_one_byte_less
+    self.cli('create', limit=needed)
+  File "/trial/solution/test_backup.py", line 96, in cli
+    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))
+AssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...
+backup.py: error: unrecognized arguments: --max-bytes 2447
+
+
+======================================================================
+FAIL: test_quota_high_preserves_previous_snapshot (__main__.ContractTests.test_quota_high_preserves_previous_snapshot)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 255, in test_quota_high_preserves_previous_snapshot
+    self.cli('create', limit=100000)
+  File "/trial/solution/test_backup.py", line 96, in cli
+    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))
+AssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...
+backup.py: error: unrecognized arguments: --max-bytes 100000
+
+
+======================================================================
+FAIL: test_quota_includes_metadata_and_lock (__main__.ContractTests.test_quota_includes_metadata_and_lock)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 306, in test_quota_includes_metadata_and_lock
+    self.cli('create', limit=needed+locksize)
+  File "/trial/solution/test_backup.py", line 96, in cli
+    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))
+AssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...
+backup.py: error: unrecognized arguments: --max-bytes 2471
+
+
+======================================================================
+FAIL: test_quota_zero_empty_tree_and_invalid_N (__main__.ContractTests.test_quota_zero_empty_tree_and_invalid_N)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 322, in test_quota_zero_empty_tree_and_invalid_N
+    self.cli('create', limit=1000)
+  File "/trial/solution/test_backup.py", line 96, in cli
+    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))
+AssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...
+backup.py: error: unrecognized arguments: --max-bytes 1000
+
+
+======================================================================
+FAIL: test_sigkill_retry_and_previous_snapshot (__main__.ContractTests.test_sigkill_retry_and_previous_snapshot)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 372, in test_sigkill_retry_and_previous_snapshot
+    self.cli('create', identity='interrupted', limit=256*1024*1024)
+  File "/trial/solution/test_backup.py", line 96, in cli
+    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))
+AssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...
+backup.py: error: unrecognized arguments: --max-bytes 268435456
+
+
+----------------------------------------------------------------------
+Ran 18 tests in 2.767s
+
+FAILED (failures=8, errors=1)

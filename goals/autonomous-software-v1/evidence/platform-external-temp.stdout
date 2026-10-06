@@ -1,0 +1,629 @@
+.................................................................... [  1%]
+........................................................................ [  3%]
+........................................................................ [  5%]
+..............................................................F......... [  7%]
+........................................................................ [  9%]
+........................................................................ [ 10%]
+........................................................................ [ 12%]
+........................................................................ [ 14%]
+...F.....F..F......F.................................................... [ 16%]
+...............FFFFFFFFFF
+=================================== FAILURES ===================================
+___________________ test_cli_success_and_safe_failure_modes ____________________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_cli_success_and_safe_fail0')
+
+    def test_cli_success_and_safe_failure_modes(tmp_path: Path) -> None:
+        manifest, ratings = _bundle()
+        manifest_path = tmp_path / "manifest.json"
+        ratings_path = tmp_path / "ratings.json"
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        ratings_path.write_text(json.dumps(ratings), encoding="utf-8")
+    
+        success = subprocess.run([sys.executable, str(SCRIPT), str(manifest_path), str(ratings_path)],
+                                 capture_output=True, text=True, check=False)
+        assert success.returncode == 0 and success.stderr == ""
+        output = json.loads(success.stdout)
+        assert output["counts"]["primary_ratings"] == 2
+        assert sorted(path.name for path in tmp_path.iterdir()) == ["manifest.json", "ratings.json"]
+    
+        stdin_success = subprocess.run([sys.executable, str(SCRIPT), "-", str(ratings_path)],
+                                       input=json.dumps(manifest), capture_output=True, text=True, check=False)
+        assert stdin_success.returncode == 0
+        assert json.loads(stdin_success.stdout)["manifest_sha256"] == _canonical_digest(manifest)
+    
+        for raw, expected_error in (
+            ('{"schema":1,"schema":1,"artifacts":[]}', "duplicate JSON object key"),
+            ('{"schema":1,"artifacts":[NaN]}', "non-JSON numeric constant"),
+            ('{"schema":' + "9" * 5000 + ',"artifacts":[]}', "invalid JSON input:"),
+            ("[" * 10000 + "0" + "]" * 10000, "invalid JSON input:"),
+        ):
+            failure = subprocess.run([sys.executable, str(SCRIPT), "-", str(ratings_path)],
+                                     input=raw, capture_output=True, text=True, check=False)
+            assert failure.returncode == 2 and failure.stderr == ""
+>           assert expected_error in json.loads(failure.stdout)["error"]
+E           AssertionError: assert 'invalid JSON input:' in 'manifest must be an object'
+
+tests/test_audit_blind_ratings.py:512: AssertionError
+_______ test_matching_repeat_reads_input_and_hashes_artifact_and_streams _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_matching_repeat_reads_inp0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8f237850>
+capsys = <_pytest.capture.CaptureFixture object at 0x7fcc8dcafb60>
+available_sandbox = None
+
+    def test_matching_repeat_reads_input_and_hashes_artifact_and_streams(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        argv = _command()
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv))
+        run = _run_dir(tmp_path)
+        before = (case / "organon.json").read_bytes()
+        status, result = _cli(case, run, capsys)
+>       assert status == 0, result
+E       AssertionError: {'artifact_checks': [{'matches': True, 'observed_sha256': '995d363bf46636a72004e6de45f9079e585b242f890f6c4e0af697b7db9...nchanged': True, ...}, 'declared_argv_sha256': '8d4240fd1b71ce85b0220c04893643564ba5424179e43d617745cce8c5f54b14', ...}
+E       assert 1 == 0
+
+tests/test_audit_signed_test_execution.py:172: AssertionError
+_________________ test_signed_nonzero_matches_but_cannot_pass __________________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_signed_nonzero_matches_bu0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8f01d320>
+capsys = <_pytest.capture.CaptureFixture object at 0x7fcc8d8ecd10>
+available_sandbox = None
+
+    def test_signed_nonzero_matches_but_cannot_pass(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        argv = _command(exit_code=3)
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv, exit_code=3))
+        status, result = _cli(case, _run_dir(tmp_path), capsys)
+        assert status == 1
+        assert result["signature_verified"] is True
+>       assert result["observed_locally"] is True
+E       assert False is True
+
+tests/test_audit_signed_test_execution.py:274: AssertionError
+______ test_strict_repeat_emits_signable_measured_receipt_without_cli_pin ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_strict_repeat_emits_signa0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8f1f7310>
+capsys = <_pytest.capture.CaptureFixture object at 0x7fcc8d61ce50>
+available_sandbox = None
+
+    def test_strict_repeat_emits_signable_measured_receipt_without_cli_pin(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        run = _run_dir(tmp_path)
+        argv = _command()
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv),
+                            input_tree_sha256=test_observation.hash_input_tree(run / "input"))
+        before = (case / "organon.json").read_bytes()
+    
+        status, result = _cli(case, run, capsys, pin=None)
+    
+>       assert status == 0, result
+E       AssertionError: {'artifact_checks': [{'matches': True, 'observed_sha256': '995d363bf46636a72004e6de45f9079e585b242f890f6c4e0af697b7db9...tree_pin': True, ...}, 'declared_argv_sha256': '8d4240fd1b71ce85b0220c04893643564ba5424179e43d617745cce8c5f54b14', ...}
+E       assert 1 == 0
+
+tests/test_audit_signed_test_execution.py:324: AssertionError
+__________ test_strict_failed_execution_still_emits_measured_receipt ___________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_strict_failed_execution_s0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8f1f66d0>
+capsys = <_pytest.capture.CaptureFixture object at 0x7fcc8d718350>
+available_sandbox = None
+
+    def test_strict_failed_execution_still_emits_measured_receipt(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        run = _run_dir(tmp_path)
+        argv = _command(exit_code=3)
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv, exit_code=3),
+                            input_tree_sha256=test_observation.hash_input_tree(run / "input"))
+        status, result = _cli(case, run, capsys, pin=None)
+    
+        assert status == 1
+>       assert result["observed_locally"] is True
+E       assert False is True
+
+tests/test_audit_signed_test_execution.py:440: AssertionError
+____ test_prepare_and_generation_exact_outputs_without_automatic_execution _____
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_prepare_and_generation_ex0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8ed65630>
+admission = None
+
+    def test_prepare_and_generation_exact_outputs_without_automatic_execution(tmp_path, monkeypatch, admission):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:222: in prepare
+    blobs = _blobs(repo, protocol, protocol_raw)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:168: in _blobs
+    blobs, _ = _parent(repo, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:129: in _parent
+    verified = checkpoint.status(directory)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_prototype_checkpoint.py:310: in status
+    state, plan = _load(directory)
+                  ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/datos/workspaces/personal/SpecOrganon/experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt')
+
+    def _load(directory: Path) -> tuple[dict, dict]:
+        state = _json(_read(directory / "run.json"))
+        plan_raw = _read(directory / "plan.json")
+        if state.get("plan") != _record(plan_raw):
+            raise CheckpointError("plan changed")
+        plan = _json(plan_raw)
+        authority_path, authority_sha = _authority(plan.get("study_id", "D095"))
+        if (plan["protocol_path"] != str(authority_path.resolve(strict=True))
+                or plan["protocol_sha256"] != authority_sha):
+>           raise CheckpointError("runtime protocol differs from the fixed study authority")
+E           run_prototype_checkpoint.CheckpointError: runtime protocol differs from the fixed study authority
+
+scripts/run_prototype_checkpoint.py:253: CheckpointError
+_____________ test_real_reviewed_sealed_baseline_and_no_repetition _____________
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_real_reviewed_sealed_base0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8d49aba0>
+admission = None
+
+    def test_real_reviewed_sealed_baseline_and_no_repetition(tmp_path, monkeypatch, admission):
+        from scripts.local_replay_sandbox import probe_sandbox
+        if not probe_sandbox().available:
+            pytest.skip("required sandbox unavailable")
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:222: in prepare
+    blobs = _blobs(repo, protocol, protocol_raw)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:168: in _blobs
+    blobs, _ = _parent(repo, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:129: in _parent
+    verified = checkpoint.status(directory)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_prototype_checkpoint.py:310: in status
+    state, plan = _load(directory)
+                  ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/datos/workspaces/personal/SpecOrganon/experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt')
+
+    def _load(directory: Path) -> tuple[dict, dict]:
+        state = _json(_read(directory / "run.json"))
+        plan_raw = _read(directory / "plan.json")
+        if state.get("plan") != _record(plan_raw):
+            raise CheckpointError("plan changed")
+        plan = _json(plan_raw)
+        authority_path, authority_sha = _authority(plan.get("study_id", "D095"))
+        if (plan["protocol_path"] != str(authority_path.resolve(strict=True))
+                or plan["protocol_sha256"] != authority_sha):
+>           raise CheckpointError("runtime protocol differs from the fixed study authority")
+E           run_prototype_checkpoint.CheckpointError: runtime protocol differs from the fixed study authority
+
+scripts/run_prototype_checkpoint.py:253: CheckpointError
+_____ test_real_sandbox_replay_cannot_create_files_network_or_descendants ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_real_sandbox_replay_canno0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8d4e55c0>
+admission = None
+
+    def test_real_sandbox_replay_cannot_create_files_network_or_descendants(tmp_path, monkeypatch, admission):
+        from scripts.local_replay_sandbox import probe_sandbox
+        if not probe_sandbox().available:
+            pytest.skip("required sandbox unavailable")
+        script = """import json, os, socket, sys
+    from pathlib import Path
+    blocked = 0
+    for operation in (lambda: Path(sys.argv[1], 'unexpected.txt').write_text('bad'),
+                      lambda: socket.socket(socket.AF_INET, socket.SOCK_STREAM), lambda: os.fork()):
+        try:
+            operation()
+        except OSError:
+            blocked += 1
+        else:
+            raise AssertionError('restriction failed')
+    print(json.dumps({'blocked': blocked}))
+    """
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:222: in prepare
+    blobs = _blobs(repo, protocol, protocol_raw)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:168: in _blobs
+    blobs, _ = _parent(repo, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:129: in _parent
+    verified = checkpoint.status(directory)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_prototype_checkpoint.py:310: in status
+    state, plan = _load(directory)
+                  ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/datos/workspaces/personal/SpecOrganon/experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt')
+
+    def _load(directory: Path) -> tuple[dict, dict]:
+        state = _json(_read(directory / "run.json"))
+        plan_raw = _read(directory / "plan.json")
+        if state.get("plan") != _record(plan_raw):
+            raise CheckpointError("plan changed")
+        plan = _json(plan_raw)
+        authority_path, authority_sha = _authority(plan.get("study_id", "D095"))
+        if (plan["protocol_path"] != str(authority_path.resolve(strict=True))
+                or plan["protocol_sha256"] != authority_sha):
+>           raise CheckpointError("runtime protocol differs from the fixed study authority")
+E           run_prototype_checkpoint.CheckpointError: runtime protocol differs from the fixed study authority
+
+scripts/run_prototype_checkpoint.py:253: CheckpointError
+_______ test_failed_generation_retains_raw_trace_and_forbids_retry[tool] _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_failed_generation_retains0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8d464130>
+admission = None, behavior = 'tool'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:222: in prepare
+    blobs = _blobs(repo, protocol, protocol_raw)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:168: in _blobs
+    blobs, _ = _parent(repo, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:129: in _parent
+    verified = checkpoint.status(directory)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_prototype_checkpoint.py:310: in status
+    state, plan = _load(directory)
+                  ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/datos/workspaces/personal/SpecOrganon/experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt')
+
+    def _load(directory: Path) -> tuple[dict, dict]:
+        state = _json(_read(directory / "run.json"))
+        plan_raw = _read(directory / "plan.json")
+        if state.get("plan") != _record(plan_raw):
+            raise CheckpointError("plan changed")
+        plan = _json(plan_raw)
+        authority_path, authority_sha = _authority(plan.get("study_id", "D095"))
+        if (plan["protocol_path"] != str(authority_path.resolve(strict=True))
+                or plan["protocol_sha256"] != authority_sha):
+>           raise CheckpointError("runtime protocol differs from the fixed study authority")
+E           run_prototype_checkpoint.CheckpointError: runtime protocol differs from the fixed study authority
+
+scripts/run_prototype_checkpoint.py:253: CheckpointError
+___ test_failed_generation_retains_raw_trace_and_forbids_retry[unknown_item] ___
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_failed_generation_retains1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8d467b60>
+admission = None, behavior = 'unknown_item'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:222: in prepare
+    blobs = _blobs(repo, protocol, protocol_raw)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:168: in _blobs
+    blobs, _ = _parent(repo, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:129: in _parent
+    verified = checkpoint.status(directory)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_prototype_checkpoint.py:310: in status
+    state, plan = _load(directory)
+                  ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/datos/workspaces/personal/SpecOrganon/experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt')
+
+    def _load(directory: Path) -> tuple[dict, dict]:
+        state = _json(_read(directory / "run.json"))
+        plan_raw = _read(directory / "plan.json")
+        if state.get("plan") != _record(plan_raw):
+            raise CheckpointError("plan changed")
+        plan = _json(plan_raw)
+        authority_path, authority_sha = _authority(plan.get("study_id", "D095"))
+        if (plan["protocol_path"] != str(authority_path.resolve(strict=True))
+                or plan["protocol_sha256"] != authority_sha):
+>           raise CheckpointError("runtime protocol differs from the fixed study authority")
+E           run_prototype_checkpoint.CheckpointError: runtime protocol differs from the fixed study authority
+
+scripts/run_prototype_checkpoint.py:253: CheckpointError
+______ test_failed_generation_retains_raw_trace_and_forbids_retry[error] _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_failed_generation_retains2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8d464600>
+admission = None, behavior = 'error'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:222: in prepare
+    blobs = _blobs(repo, protocol, protocol_raw)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:168: in _blobs
+    blobs, _ = _parent(repo, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:129: in _parent
+    verified = checkpoint.status(directory)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_prototype_checkpoint.py:310: in status
+    state, plan = _load(directory)
+                  ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/datos/workspaces/personal/SpecOrganon/experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt')
+
+    def _load(directory: Path) -> tuple[dict, dict]:
+        state = _json(_read(directory / "run.json"))
+        plan_raw = _read(directory / "plan.json")
+        if state.get("plan") != _record(plan_raw):
+            raise CheckpointError("plan changed")
+        plan = _json(plan_raw)
+        authority_path, authority_sha = _authority(plan.get("study_id", "D095"))
+        if (plan["protocol_path"] != str(authority_path.resolve(strict=True))
+                or plan["protocol_sha256"] != authority_sha):
+>           raise CheckpointError("runtime protocol differs from the fixed study authority")
+E           run_prototype_checkpoint.CheckpointError: runtime protocol differs from the fixed study authority
+
+scripts/run_prototype_checkpoint.py:253: CheckpointError
+_______ test_failed_generation_retains_raw_trace_and_forbids_retry[zero] _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_failed_generation_retains3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8d467310>
+admission = None, behavior = 'zero'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:222: in prepare
+    blobs = _blobs(repo, protocol, protocol_raw)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:168: in _blobs
+    blobs, _ = _parent(repo, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:129: in _parent
+    verified = checkpoint.status(directory)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_prototype_checkpoint.py:310: in status
+    state, plan = _load(directory)
+                  ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/datos/workspaces/personal/SpecOrganon/experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt')
+
+    def _load(directory: Path) -> tuple[dict, dict]:
+        state = _json(_read(directory / "run.json"))
+        plan_raw = _read(directory / "plan.json")
+        if state.get("plan") != _record(plan_raw):
+            raise CheckpointError("plan changed")
+        plan = _json(plan_raw)
+        authority_path, authority_sha = _authority(plan.get("study_id", "D095"))
+        if (plan["protocol_path"] != str(authority_path.resolve(strict=True))
+                or plan["protocol_sha256"] != authority_sha):
+>           raise CheckpointError("runtime protocol differs from the fixed study authority")
+E           run_prototype_checkpoint.CheckpointError: runtime protocol differs from the fixed study authority
+
+scripts/run_prototype_checkpoint.py:253: CheckpointError
+____ test_failed_generation_retains_raw_trace_and_forbids_retry[incoherent] ____
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_failed_generation_retains4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8d4e6510>
+admission = None, behavior = 'incoherent'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:222: in prepare
+    blobs = _blobs(repo, protocol, protocol_raw)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:168: in _blobs
+    blobs, _ = _parent(repo, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:129: in _parent
+    verified = checkpoint.status(directory)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_prototype_checkpoint.py:310: in status
+    state, plan = _load(directory)
+                  ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/datos/workspaces/personal/SpecOrganon/experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt')
+
+    def _load(directory: Path) -> tuple[dict, dict]:
+        state = _json(_read(directory / "run.json"))
+        plan_raw = _read(directory / "plan.json")
+        if state.get("plan") != _record(plan_raw):
+            raise CheckpointError("plan changed")
+        plan = _json(plan_raw)
+        authority_path, authority_sha = _authority(plan.get("study_id", "D095"))
+        if (plan["protocol_path"] != str(authority_path.resolve(strict=True))
+                or plan["protocol_sha256"] != authority_sha):
+>           raise CheckpointError("runtime protocol differs from the fixed study authority")
+E           run_prototype_checkpoint.CheckpointError: runtime protocol differs from the fixed study authority
+
+scripts/run_prototype_checkpoint.py:253: CheckpointError
+_______ test_failed_generation_retains_raw_trace_and_forbids_retry[exit] _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_failed_generation_retains5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8d929320>
+admission = None, behavior = 'exit'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:222: in prepare
+    blobs = _blobs(repo, protocol, protocol_raw)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:168: in _blobs
+    blobs, _ = _parent(repo, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:129: in _parent
+    verified = checkpoint.status(directory)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_prototype_checkpoint.py:310: in status
+    state, plan = _load(directory)
+                  ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/datos/workspaces/personal/SpecOrganon/experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt')
+
+    def _load(directory: Path) -> tuple[dict, dict]:
+        state = _json(_read(directory / "run.json"))
+        plan_raw = _read(directory / "plan.json")
+        if state.get("plan") != _record(plan_raw):
+            raise CheckpointError("plan changed")
+        plan = _json(plan_raw)
+        authority_path, authority_sha = _authority(plan.get("study_id", "D095"))
+        if (plan["protocol_path"] != str(authority_path.resolve(strict=True))
+                or plan["protocol_sha256"] != authority_sha):
+>           raise CheckpointError("runtime protocol differs from the fixed study authority")
+E           run_prototype_checkpoint.CheckpointError: runtime protocol differs from the fixed study authority
+
+scripts/run_prototype_checkpoint.py:253: CheckpointError
+_____ test_failed_generation_retains_raw_trace_and_forbids_retry[api_key] ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/platform-tmp/test_failed_generation_retains6')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcc8d4e70e0>
+admission = None, behavior = 'api_key'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:222: in prepare
+    blobs = _blobs(repo, protocol, protocol_raw)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:168: in _blobs
+    blobs, _ = _parent(repo, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:129: in _parent
+    verified = checkpoint.status(directory)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_prototype_checkpoint.py:310: in status
+    state, plan = _load(directory)
+                  ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/datos/workspaces/personal/SpecOrganon/experiments/development/prototype_checkpoint_compatibility_2026-09-30/attempt')
+
+    def _load(directory: Path) -> tuple[dict, dict]:
+        state = _json(_read(directory / "run.json"))
+        plan_raw = _read(directory / "plan.json")
+        if state.get("plan") != _record(plan_raw):
+            raise CheckpointError("plan changed")
+        plan = _json(plan_raw)
+        authority_path, authority_sha = _authority(plan.get("study_id", "D095"))
+        if (plan["protocol_path"] != str(authority_path.resolve(strict=True))
+                or plan["protocol_sha256"] != authority_sha):
+>           raise CheckpointError("runtime protocol differs from the fixed study authority")
+E           run_prototype_checkpoint.CheckpointError: runtime protocol differs from the fixed study authority
+
+scripts/run_prototype_checkpoint.py:253: CheckpointError
+=============================== warnings summary ===============================
+scripts/local_replay_sandbox.py:152
+tests/test_bread_continuation.py::test_real_reviewed_sealed_baseline_and_no_repetition
+  /datos/workspaces/personal/SpecOrganon/scripts/local_replay_sandbox.py:152: DeprecationWarning: Due to '_pack_', the '_PathBeneathAttr' Structure will use memory layout compatible with MSVC (Windows). If this is intended, set _layout_ to 'ms'. The implicit default is deprecated and slated to become an error in Python 3.19.
+    class _PathBeneathAttr(ctypes.Structure):
+
+src/specorganon/server.py:47
+  /datos/workspaces/personal/SpecOrganon/src/specorganon/server.py:47: DeprecationWarning: Due to '_pack_', the '_LandlockPathBeneathAttr' Structure will use memory layout compatible with MSVC (Windows). If this is intended, set _layout_ to 'ms'. The implicit default is deprecated and slated to become an error in Python 3.19.
+    class _LandlockPathBeneathAttr(ctypes.Structure):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_audit_blind_ratings.py::test_cli_success_and_safe_failure_modes
+FAILED tests/test_audit_signed_test_execution.py::test_matching_repeat_reads_input_and_hashes_artifact_and_streams
+FAILED tests/test_audit_signed_test_execution.py::test_signed_nonzero_matches_but_cannot_pass
+FAILED tests/test_audit_signed_test_execution.py::test_strict_repeat_emits_signable_measured_receipt_without_cli_pin
+FAILED tests/test_audit_signed_test_execution.py::test_strict_failed_execution_still_emits_measured_receipt
+FAILED tests/test_bread_continuation.py::test_prepare_and_generation_exact_outputs_without_automatic_execution
+FAILED tests/test_bread_continuation.py::test_real_reviewed_sealed_baseline_and_no_repetition
+FAILED tests/test_bread_continuation.py::test_real_sandbox_replay_cannot_create_files_network_or_descendants
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[tool]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[unknown_item]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[error]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[zero]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[incoherent]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[exit]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[api_key]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 15 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+15 failed, 654 passed, 3 warnings, 13 subtests passed in 34.43s

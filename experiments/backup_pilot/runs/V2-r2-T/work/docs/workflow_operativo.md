@@ -1,0 +1,83 @@
+# Workflow operativo y reanudación
+
+El [MVP local](uso_local.md) usa el mismo runner con una política explícita
+para desarrollo de confianza. Las aprobaciones locales registran el mandato
+existente del dueño; las revisiones técnicas proceden de otro agente, sin
+firmas. `describe_task(state, roles=None)` deriva la siguiente tarea de un
+estado ya evaluado; `report` lo usa para mantener una sola snapshot. Los
+contratos de firma descritos a continuación se aplican a casos `signed`.
+
+`specorganon.runner` usa las mismas fases y compuertas que `specorganon.engine`. El caso vive en `organon.json`; sus eventos versionados son el checkpoint. Una interrupción no exige restaurar un estado paralelo: vuelve a llamar al runner con el mismo manifiesto. Para auditoría de producción, la secuencia y cabeza de cada transición autorizada deben anclarse externamente o custodiarse en almacenamiento append-only: los hashes internos no impiden borrar eventos o insertar un avance tras una revisión válida mediante escritura directa. El verificador opcional `ORGANON_LEDGER_ANCHORS_FILE` compara cada lectura con la cabeza externa exacta. En ese modo, una ejecución de `run` que escribe un evento queda detenida para la siguiente lectura hasta que un custodio independiente verifique y actualice el ancla; por ello un manifiesto de varios pasos exige esa coordinación por transición y reanudación. En casos `signed`, la firma de revisión acredita control de una clave registrada para el actor, pero ni la etiqueta ni la firma prueban su identidad personal o competencia.
+
+## Pedir la siguiente tarea
+
+```python
+from specorganon.runner import next_task
+
+task = next_task("./mi-caso", roles={
+    "analyst": "agent:analista",
+    "specialist": "agent:especialista",
+    "reviewer": "agent:revisor",
+    "human": "human:responsable",
+    "executor": "executor:pruebas",
+})
+```
+
+`next_task(path, roles=None)` es de solo lectura. Identifica la primera fase sin avance vigente y devuelve `phase`, `front`, `purpose`, `action`, `task`, `role`, `role_label` y `actor`. `actor` es `null` si no se entregó un mapeo de roles; el runner no presupone la identidad de una persona. Las acciones son `create_artifacts`, `repair_artifacts`, `resolve_contradiction`, `human_approval`, `execute_test`, `observe_test`, `review_phase`, `advance_phase` y `complete`.
+
+Desde la CLI, `organon next-task ./mi-caso --roles '{"reviewer":"agent:revisor"}'` devuelve la misma estructura. En MCP, la herramienta se llama `next_task` y recibe `path` y el objeto opcional `roles`.
+
+También entrega `inputs` de fases anteriores y `artifacts` de la fase actual. Cada ítem lleva ID, tipo, versión, referencias versionadas, texto y datos resumidos, además de señales de obsolescencia, contradicción y problemas. `missing` enumera mínimos pendientes por tipo; `approval_targets` indica versión exacta que requiere decisión humana, `test_execution_targets` los tests `signed` pendientes y `test_observation_targets` los que esperan una repetición firmada en modo estricto. `criteria` contiene salida, revisión y detención; `gate` y `blockers` provienen del motor. `phase_review_trust`, `test_execution_trust` y `test_observation_trust` indican disponibilidad del registro **para el caso**, no que los actores sugeridos en `roles` tengan claves inscritas. `gate.review_signature_verified` y `gate.review_provenance` muestran si la revisión vigente se verifica o si el historial quedó `legacy_unverified`. El contexto muestra hasta 24 ítems de entrada y 24 actuales, con recuentos `omitted`; trunca textos y datos largos. Para inspección completa usa `engine.trace(path, id)` o el registro del caso.
+
+La recomendación de rol no ejecuta una decisión. Los casos firmados se crean con `approval_policy="signed"` y un `case_id` UUID. Antes de aprobar, el operador registra UUID, ruta canónica, `project_sha256` y claves públicas de aprobadores y revisores en el archivo externo `ORGANON_APPROVERS_FILE`. Cuando `next_task` indica `human_approval`, se revisa la norma o decisión vigente, se solicita `engine.approval_challenge(path, id, reason, actor)` y se entrega su `message_base64` a la persona autorizada para firmar fuera del entorno del agente. El mensaje canónico liga ruta y metadatos del caso, cabeza previa del ledger, versión y hash del ítem, actor y motivo. Luego `engine.approve(path, id, reason, actor, signature)` comprueba la firma Ed25519 en base64 con la clave pública registrada. Cuando indica `review_phase`, un revisor distinto de los autores verifica el snapshot vigente, solicita `phase-review-challenge`, firma sus bytes canónicos fuera del agente y registra `review-phase --signature` antes de reanudar `run`. Si ocurre otro evento antes de cualquiera de las firmas, se pide un desafío nuevo. CLI y MCP exponen los mismos pasos; el [flujo seguro y el formato del archivo](interfaces.md#aprobación-firmada-de-un-caso-real) están documentados allí. Una clave ausente o revocada, un caso copiado a otra ruta o metadatos alterados vuelven no verificada la firma durante el replay y bloquean la compuerta correspondiente. La firma acredita control de la clave configurada; identidad, custodia, competencia e independencia personal requieren verificación externa.
+
+En `signed`, la independencia compara al revisor con **todos los autores de versiones** de los ítems actuales de esa fase. Si cambia la aprobación verificada de una norma o decisión en la ascendencia de una fase, el snapshot firmado anterior pierde vigencia: el operador debe obtener una revisión nueva y registrar un avance nuevo. Una aprobación inválida posterior no desplaza la última verificada; una aprobación de otro problema no reabre fases sin esa dependencia. Al actualizar desde un wheel anterior, comprueba `gate` y `status` de cada fase antes de continuar: los eventos históricos siguen legibles, pero una revisión que no cubra el snapshot vigente no mantiene la aceptación. El [control de replay](../experiments/development/signed_review_dependency_2026-09-27.json) usa solo actores y claves sintéticos.
+
+Antes de aceptar `build` en un caso `signed`, cada ítem `test` debe declarar un `argv` explícito y recibir un reporte de ejecución firmado por una clave `executor:*` distinta de aprobadores y revisores. El ejecutor corre el comando fuera del motor, coteja código de salida, timeout y digests de streams y artefactos, obtiene `test-execution-challenge`, firma sus bytes y entrega `record-test-execution`. Si `next_task` devuelve `execute_test`, aún falta ese paso o el último reporte válido falló. El motor no lanza procesos a través de CLI ni MCP; la [interfaz](interfaces.md#ejecución-firmada-de-un-test) detalla el formato y la limitación de confianza. Un reporte exitoso nuevo cambia el snapshot de la fase dependiente, por lo que hay que revisar y avanzar de nuevo. Un test `signed` histórico sin `argv` sigue legible pero requiere actualizar el ítem y ejecutar el test antes de avanzar.
+
+Para comprobar **de forma optativa** un reporte firmado vigente, [`audit_signed_test_execution.py`](../scripts/audit_signed_test_execution.py) recibe `CASE ITEM RUN_DIR --executable-sha256 HEX` en el modo legado. `RUN_DIR` debe ser nuevo, privado (modo 0700) y contener solo `input/` (también 0700) con los insumos revisados. El comando firmado usa `input/` como directorio de trabajo de solo lectura y escribe únicamente en las raíces privadas `artifacts/` y `tmp/` mediante `HOME` y `TMPDIR`; los paths de artefactos del reporte se resuelven respecto de `artifacts/`. El ejecutable indicado por `argv[0]` debe ser una ruta absoluta regular cuyos bytes correspondan al SHA-256 aportado. El auditor lo sella y ejecuta con el sandbox local; compara código, timeout, hashes de streams y artefactos declarados y emite JSON con firma, observación y aprobación separadas, sin modificar el ledger. Una salida no coincidente devuelve código distinto de cero. El sandbox sustituye `argv[0]` por una ruta `procfd` en el hijo. Esta es una repetición **actual** del test bajo restricciones locales, no una atestación de la ejecución histórica ni una autorización para ejecutar código no revisado; la compuerta `signed_report` conserva su semántica anterior.
+
+En un caso nuevo con `--test-gate-policy signed_observed`, cada test fija antes de reportar `executable_sha256` e `input_tree_sha256` en `data`. El auditor toma ese pin del ítem y produce `receipt` con los digests medidos; después de un reporte firmado, `next-task` devuelve `observe_test` hasta que un actor `observer:*` registrado, ajeno a todos los autores de ese test, firma el recibo mediante `test-observation-challenge` y `record-test-observation`. El motor relee el bundle en cada replay y mantiene bloqueado el test ante una discrepancia, pérdida del bundle, reporte nuevo o clave revocada. Una observación negativa o no verificable vuelve a ofrecer `observe_test` para una repetición nueva. Los casos anteriores permanecen en `signed_report`; la [interfaz y límites de confianza](interfaces.md#repetición-observada-optativa) describen el flujo completo.
+
+## Ejecutar un manifiesto
+
+```python
+import json
+from specorganon import engine
+from specorganon.runner import run_manifest
+
+path = "./mi-caso"
+manifest = json.load(open("./workflow.json", encoding="utf-8"))
+result = run_manifest(path, manifest, actor="agent:ejecutor")
+print(result["status"], result["reason"], result["next"])
+```
+
+El caso debe existir antes de ejecutar el manifiesto (`engine.create_case`). El esquema es JSON `{"schema": 1, "steps": [...]}`. Cada paso tiene uno de estos formatos:
+
+La CLI ejecuta `organon run ./mi-caso --manifest ./workflow.json --actor agent:ejecutor`; la herramienta MCP `run` recibe el objeto `manifest` directamente. Los dos caminos comparten los mismos checkpoints y se pueden alternar durante una reanudación.
+
+El campo `schema` admite únicamente la versión numérica JSON `1` (también escrita `1.0` o `1e0`); los booleanos como `true` no son versiones válidas.
+
+```json
+{"op":"put","id":"p1","kind":"problem","text":"Problema delimitado por el caso","refs":[],"data":{}}
+{"op":"advance","phase":"frame"}
+```
+
+`put` solo registra contenido declarado por quien entrega el manifiesto; el runner no genera hallazgos, fuentes, resultados ni veredictos. En un test `signed`, `data.command` debe ser `shlex.join(data.argv)` y `data.passed` no sustituye el reporte firmado. `refs` apunta a IDs ya presentes o a pasos anteriores del mismo manifiesto. Un paso `put` nuevo espera versión 0; para una revisión explícita se añade `"expected_version": 1` (o la versión vigente). Si una referencia ya existía **fuera** del manifiesto, el paso debe declarar `"expected_deps":{"p1":1}` con la versión de **todas** sus referencias; si todas se crearon antes dentro del mismo manifiesto, el runner infiere sus versiones declaradas. Una referencia externa sin versiones declaradas invalida el manifiesto antes de cualquier escritura. Si `p1` pasó de v1 a v2, un paso fijado a v1 se rechaza sin escribir ese paso; los anteriores pueden seguir como checkpoints. Antes de cada escritura, el runner pasa al motor la versión esperada del ítem y esas versiones de referencia; una edición directa concurrente tampoco puede convertir silenciosamente una creación en revisión. Una repetición del paso acepta únicamente la versión siguiente si tipo, texto, datos y versiones de referencias coinciden exactamente. Si el ledger diverge, `ManifestError` obliga a revisar el plan en vez de sobrescribir el trabajo ajeno. Los IDs y avances de fase no pueden repetirse dentro de un manifiesto.
+
+`advance` actúa solo cuando la compuerta está lista y existe una revisión aceptada e independiente del snapshot actual. El runner **no** admite operaciones `approve` ni `review_phase` dentro del manifiesto. Los pasos `put` pueden reparar artefactos obsoletos o preparar ramas independientes mientras otra fase tiene una objeción; se conservan como borradores y no se confunden con un avance justificado. Un `advance` se detiene con `status: "waiting"` ante aprobación humana, revisión, contradicción, artefacto inválido u obsoleto, o fase anterior sin aceptar. El resultado contiene `cursor` (índice del siguiente paso), `applied`, `skipped`, `reason` y `next`. Tras registrar la aprobación firmada y verificada o corregir el caso, ejecuta de nuevo el mismo manifiesto, incluso desde otro proceso. Los pasos ya materializados se omiten sin añadir eventos. `status: "complete"` requiere que todas las fases estén aceptadas; un manifiesto agotado antes de eso queda `waiting` con la razón pendiente, o `manifest_exhausted` si solo faltan pasos no declarados.
+
+La validación estructural del manifiesto y sus referencias adelantadas ocurre antes de cualquier escritura. Un fallo semántico en un paso posterior puede dejar pasos anteriores como checkpoint válido; nunca hay rollback implícito. El runner serializa **todas** las invocaciones de manifiestos del mismo caso mediante `.organon.runner.lock`, también si sus IDs son disjuntos; las ediciones directas con el motor no adquieren ese bloqueo y necesitan precondiciones y coordinación entre actores. Editar un manifiesto después de ejecutarlo exige una nueva revisión consciente del caso. El runner no autentica actores, no sustituye medición de campo y no convierte valores simulados en impacto observado.
+
+Cuando `next.action` es `execute_test`, `reason` distingue la política del caso:
+`local_test_execution_required` pide ejecutar y registrar un recibo local;
+`signed_test_execution_required` conserva el requisito de reporte firmado.
+La distinción se mantiene tanto al detener un `advance` como al agotar el
+manifiesto. En modo local, corrige el test mediante una nueva versión con su
+recibo medido; no solicita firma. Una ejecución exitosa sigue necesitando la
+revisión independiente de la fase antes de avanzar. El runner no ejecuta la
+prueba, crea el recibo ni concede la revisión.
+
+## Fixture reproducible
+
+[`workflows/synthetic_full.json`](../workflows/synthetic_full.json) contiene entradas **inventadas y etiquetadas como sintéticas** para probar la mecánica de las nueve fases. En el smoke de fixture, el caso se crea explícitamente con `--approval-policy fixture` y se ejecuta en una ruta no registrada, con `ORGANON_ALLOW_FIXTURES=1` en el entorno de prueba: solo `human:fixture` puede aprobar, sin firma, y esa etiqueta no representa autorización humana. Sin la variable, el ledger se lee pero sus fases y aprobaciones no satisfacen compuertas. El manifiesto incluye dos compromisos que requieren aprobación y una revisión por fase. `tests/test_runner.py` lo reanuda desde procesos nuevos, comprueba ausencia de eventos duplicados, examina artefactos persistidos y fuerza divergencia e interrupción por contradicción. `tests/test_interruption.py` mata realmente el proceso runner con `SIGKILL` después de un checkpoint y comprueba que la repetición completa los pasos sin duplicados. `scripts/clean_smoke.py` verifica las nueve fases mediante un wheel instalado fuera del repositorio y un cliente MCP real. La [sonda firmada](../scripts/probe_signed_full_workflow.py) deriva una copia temporal del manifiesto, reemplaza `t1` por un comando ejecutable y registra el reporte firmado antes de aceptar `build`; con `--test-gate-policy signed_observed` crea el caso estricto desde cero, repite ese comando bajo sandbox y registra una observación firmada antes de revisar `build`. La fixture original y su `passed:true` permanecen como datos sintéticos. Los [recibos D-086](../experiments/development/signed_observed_full_workflow_2026-09-28/) son de ejecución local con claves en un mismo proceso, sin custodia externa ni intervención real.

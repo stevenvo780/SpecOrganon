@@ -1,0 +1,18 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____ test_snapshot_symlink_following_is_rejected_even_with_identical_bytes _____
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-22/test_snapshot_symlink_followin0')
+
+    def test_snapshot_symlink_following_is_rejected_even_with_identical_bytes(tmp_path):
+        candidate=tmp_path/'backup.py'
+        candidate.write_text(REF.read_text().replace('mode=path.lstat().st_mode','mode=path.stat().st_mode'))
+        result=module.evaluate(candidate,stage=1,seed=31)
+        details={d['name']:d for d in result['details']}
+>       assert 'symlink_snapshot' in details
+E       AssertionError: assert 'symlink_snapshot' in {'roundtrip_create': {'name': 'roundtrip_create', 'passed': True, 'inconclusive': False, 'info': {'argv': ['/usr/bin/p...u1sy1j0l/repo', '--id', ...], 'exit_code': 0, 'timed_out': False, 'duration_seconds': 0.031104439000046114, ...}}, ...}
+
+experiments/backup_pilot/tests/test_evaluator_regressions.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/tests/test_evaluator_regressions.py::test_snapshot_symlink_following_is_rejected_even_with_identical_bytes
+1 failed, 4 deselected in 3.30s

@@ -1,0 +1,2691 @@
+.................................................................... [  1%]
+........................................................................ [  3%]
+.......FFF........................................FFF................... [  5%]
+..............................................................F......... [  7%]
+........................................................................ [  9%]
+........................................................................ [ 10%]
+........................................................................ [ 12%]
+........................................................................ [ 14%]
+...F.....F..F......F.................................................... [ 16%]
+.......F.......FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF....FFF.FFFFF.... [ 17%]
+....F.....F............................................
+=================================== FAILURES ===================================
+______ test_initialization_with_anchor_fails_without_side_effects[signed] ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_initialization_with_ancho0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802feb96d0>
+policy = 'signed'
+
+    @pytest.mark.parametrize("policy", ["signed", "fixture"])
+    def test_initialization_with_anchor_fails_without_side_effects(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, policy: str) -> None:
+        anchor_file = tmp_path / "anchors.json"
+        anchor_file.write_text('{"schema":1,"cases":{}}', encoding="utf-8")
+        monkeypatch.setenv("ORGANON_LEDGER_ANCHORS_FILE", str(anchor_file))
+        case = tmp_path / "not-created"
+        with pytest.raises(engine.MethodError, match="initialize a case before enabling"):
+            engine.create_case(case, "Case", "domain", "agent:operator", approval_policy=policy)
+        assert not case.exists()
+        cli_case = tmp_path / "cli-not-created"
+>       result = subprocess.run(
+            [str(Path(sys.executable).parent / "organon"), "init", str(cli_case), "--title", "Case",
+             "--domain", "domain", "--actor", "agent:operator", "--approval-policy", policy],
+            text=True, capture_output=True, env=os.environ.copy(), check=False,
+        )
+
+tests/test_anchor_integration.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/usr/lib/python3.14/subprocess.py:1875: in _execute_child
+    self._posix_spawn(args, executable, env, restore_signals, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Popen: returncode: None args: ['/datos/workspaces/personal/SpecOrganon/goal...>
+args = ['/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon', 'init', '/datos/works...onomous-software-v1/test-tmp-full/test_initialization_with_ancho0/cli-not-created', '--title', 'Case', '--domain', ...]
+executable = '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+env = {'TMPDIR': '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-temp', 'PYTHONPATH': 'src', 'SPECORGANON_EXTRACTOR_PROFILE': 'cachyos-26.08.0-x86_64-v4', 'SHELL': '/bin/fish', ...}
+restore_signals = True, close_fds = True, p2cread = -1, p2cwrite = -1
+c2pread = 11, c2pwrite = 12, errread = 13, errwrite = 14
+
+    def _posix_spawn(self, args, executable, env, restore_signals, close_fds,
+                     p2cread, p2cwrite,
+                     c2pread, c2pwrite,
+                     errread, errwrite):
+        """Execute program using os.posix_spawn()."""
+        kwargs = {}
+        if restore_signals:
+            # See _Py_RestoreSignals() in Python/pylifecycle.c
+            sigset = []
+            for signame in ('SIGPIPE', 'SIGXFZ', 'SIGXFSZ'):
+                signum = getattr(signal, signame, None)
+                if signum is not None:
+                    sigset.append(signum)
+            kwargs['setsigdef'] = sigset
+    
+        file_actions = []
+        for fd in (p2cwrite, c2pread, errread):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_CLOSE, fd))
+        for fd, fd2 in (
+            (p2cread, 0),
+            (c2pwrite, 1),
+            (errwrite, 2),
+        ):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_DUP2, fd, fd2))
+    
+        if close_fds:
+            file_actions.append((os.POSIX_SPAWN_CLOSEFROM, 3))
+    
+        if file_actions:
+            kwargs['file_actions'] = file_actions
+    
+>       self.pid = os.posix_spawn(executable, args, env, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+
+/usr/lib/python3.14/subprocess.py:1819: FileNotFoundError
+_____ test_initialization_with_anchor_fails_without_side_effects[fixture] ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_initialization_with_ancho1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8033accd70>
+policy = 'fixture'
+
+    @pytest.mark.parametrize("policy", ["signed", "fixture"])
+    def test_initialization_with_anchor_fails_without_side_effects(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, policy: str) -> None:
+        anchor_file = tmp_path / "anchors.json"
+        anchor_file.write_text('{"schema":1,"cases":{}}', encoding="utf-8")
+        monkeypatch.setenv("ORGANON_LEDGER_ANCHORS_FILE", str(anchor_file))
+        case = tmp_path / "not-created"
+        with pytest.raises(engine.MethodError, match="initialize a case before enabling"):
+            engine.create_case(case, "Case", "domain", "agent:operator", approval_policy=policy)
+        assert not case.exists()
+        cli_case = tmp_path / "cli-not-created"
+>       result = subprocess.run(
+            [str(Path(sys.executable).parent / "organon"), "init", str(cli_case), "--title", "Case",
+             "--domain", "domain", "--actor", "agent:operator", "--approval-policy", policy],
+            text=True, capture_output=True, env=os.environ.copy(), check=False,
+        )
+
+tests/test_anchor_integration.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/usr/lib/python3.14/subprocess.py:1875: in _execute_child
+    self._posix_spawn(args, executable, env, restore_signals, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Popen: returncode: None args: ['/datos/workspaces/personal/SpecOrganon/goal...>
+args = ['/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon', 'init', '/datos/works...onomous-software-v1/test-tmp-full/test_initialization_with_ancho1/cli-not-created', '--title', 'Case', '--domain', ...]
+executable = '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+env = {'TMPDIR': '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-temp', 'PYTHONPATH': 'src', 'SPECORGANON_EXTRACTOR_PROFILE': 'cachyos-26.08.0-x86_64-v4', 'SHELL': '/bin/fish', ...}
+restore_signals = True, close_fds = True, p2cread = -1, p2cwrite = -1
+c2pread = 11, c2pwrite = 12, errread = 13, errwrite = 14
+
+    def _posix_spawn(self, args, executable, env, restore_signals, close_fds,
+                     p2cread, p2cwrite,
+                     c2pread, c2pwrite,
+                     errread, errwrite):
+        """Execute program using os.posix_spawn()."""
+        kwargs = {}
+        if restore_signals:
+            # See _Py_RestoreSignals() in Python/pylifecycle.c
+            sigset = []
+            for signame in ('SIGPIPE', 'SIGXFZ', 'SIGXFSZ'):
+                signum = getattr(signal, signame, None)
+                if signum is not None:
+                    sigset.append(signum)
+            kwargs['setsigdef'] = sigset
+    
+        file_actions = []
+        for fd in (p2cwrite, c2pread, errread):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_CLOSE, fd))
+        for fd, fd2 in (
+            (p2cread, 0),
+            (c2pwrite, 1),
+            (errwrite, 2),
+        ):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_DUP2, fd, fd2))
+    
+        if close_fds:
+            file_actions.append((os.POSIX_SPAWN_CLOSEFROM, 3))
+    
+        if file_actions:
+            kwargs['file_actions'] = file_actions
+    
+>       self.pid = os.posix_spawn(executable, args, env, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+
+/usr/lib/python3.14/subprocess.py:1819: FileNotFoundError
+________________ test_stale_anchor_rejected_by_cli_and_real_mcp ________________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_stale_anchor_rejected_by_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8033c412b0>
+
+    def test_stale_anchor_rejected_by_cli_and_real_mcp(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("ORGANON_LEDGER_ANCHORS_FILE", raising=False)
+        case = tmp_path / "case"
+        engine.create_case(case, "Transport parity", "fixture", "agent:operator")
+        anchor_file = tmp_path / "anchors.json"
+        _write_anchor(anchor_file, case, ledger.read_project(case))
+        monkeypatch.setenv("ORGANON_LEDGER_ANCHORS_FILE", str(anchor_file))
+        engine.put_item(case, "p1", "problem", "Synthetic problem", [], {}, "agent:writer")
+        before = ledger.project_file(case).read_bytes()
+        bin_dir = Path(sys.executable).parent
+>       cli = subprocess.run([str(bin_dir / "organon"), "status", str(case)],
+                             text=True, capture_output=True, env=os.environ.copy(), check=False)
+
+tests/test_anchor_integration.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/usr/lib/python3.14/subprocess.py:1875: in _execute_child
+    self._posix_spawn(args, executable, env, restore_signals, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Popen: returncode: None args: ['/datos/workspaces/personal/SpecOrganon/goal...>
+args = ['/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon', 'status', '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_stale_anchor_rejected_by_0/case']
+executable = '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+env = {'TMPDIR': '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-temp', 'PYTHONPATH': 'src', 'SPECORGANON_EXTRACTOR_PROFILE': 'cachyos-26.08.0-x86_64-v4', 'SHELL': '/bin/fish', ...}
+restore_signals = True, close_fds = True, p2cread = -1, p2cwrite = -1
+c2pread = 11, c2pwrite = 12, errread = 13, errwrite = 14
+
+    def _posix_spawn(self, args, executable, env, restore_signals, close_fds,
+                     p2cread, p2cwrite,
+                     c2pread, c2pwrite,
+                     errread, errwrite):
+        """Execute program using os.posix_spawn()."""
+        kwargs = {}
+        if restore_signals:
+            # See _Py_RestoreSignals() in Python/pylifecycle.c
+            sigset = []
+            for signame in ('SIGPIPE', 'SIGXFZ', 'SIGXFSZ'):
+                signum = getattr(signal, signame, None)
+                if signum is not None:
+                    sigset.append(signum)
+            kwargs['setsigdef'] = sigset
+    
+        file_actions = []
+        for fd in (p2cwrite, c2pread, errread):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_CLOSE, fd))
+        for fd, fd2 in (
+            (p2cread, 0),
+            (c2pwrite, 1),
+            (errwrite, 2),
+        ):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_DUP2, fd, fd2))
+    
+        if close_fds:
+            file_actions.append((os.POSIX_SPAWN_CLOSEFROM, 3))
+    
+        if file_actions:
+            kwargs['file_actions'] = file_actions
+    
+>       self.pid = os.posix_spawn(executable, args, env, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+
+/usr/lib/python3.14/subprocess.py:1819: FileNotFoundError
+____________ test_signed_cli_and_mcp_share_challenge_and_rejection _____________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_signed_cli_and_mcp_share_0')
+signer = (<cryptography.hazmat.bindings._rust.openssl.ed25519.Ed25519PrivateKey object at 0x7f802f5ce2b0>, PosixPath('/datos/wo...rsonal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_signed_cli_and_mcp_share_0/trusted-approvers.json'))
+
+    def test_signed_cli_and_mcp_share_challenge_and_rejection(tmp_path, signer):
+        key, trust_file = signer
+        case = tmp_path / "interface-case"
+        path = str(case)
+>       _cli("init", path, "--title", "Interface signature control", "--domain", "test", "--actor", ACTOR)
+
+tests/test_approval_security.py:355: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_approval_security.py:146: in _cli
+    result = subprocess.run([str(CLI), *args], text=True, capture_output=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/usr/lib/python3.14/subprocess.py:1875: in _execute_child
+    self._posix_spawn(args, executable, env, restore_signals, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Popen: returncode: None args: ['/datos/workspaces/personal/SpecOrganon/goal...>
+args = ['/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon', 'init', '/datos/works...st-tmp-full/test_signed_cli_and_mcp_share_0/interface-case', '--title', 'Interface signature control', '--domain', ...]
+executable = '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+env = None, restore_signals = True, close_fds = True, p2cread = -1
+p2cwrite = -1, c2pread = 11, c2pwrite = 12, errread = 13, errwrite = 14
+
+    def _posix_spawn(self, args, executable, env, restore_signals, close_fds,
+                     p2cread, p2cwrite,
+                     c2pread, c2pwrite,
+                     errread, errwrite):
+        """Execute program using os.posix_spawn()."""
+        kwargs = {}
+        if restore_signals:
+            # See _Py_RestoreSignals() in Python/pylifecycle.c
+            sigset = []
+            for signame in ('SIGPIPE', 'SIGXFZ', 'SIGXFSZ'):
+                signum = getattr(signal, signame, None)
+                if signum is not None:
+                    sigset.append(signum)
+            kwargs['setsigdef'] = sigset
+    
+        file_actions = []
+        for fd in (p2cwrite, c2pread, errread):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_CLOSE, fd))
+        for fd, fd2 in (
+            (p2cread, 0),
+            (c2pwrite, 1),
+            (errwrite, 2),
+        ):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_DUP2, fd, fd2))
+    
+        if close_fds:
+            file_actions.append((os.POSIX_SPAWN_CLOSEFROM, 3))
+    
+        if file_actions:
+            kwargs['file_actions'] = file_actions
+    
+>       self.pid = os.posix_spawn(executable, args, env, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+
+/usr/lib/python3.14/subprocess.py:1819: FileNotFoundError
+_ test_signed_field_success_stays_blocked_with_measured_records_and_claimed_guardrails _
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_signed_field_success_stay0')
+signer = (<cryptography.hazmat.bindings._rust.openssl.ed25519.Ed25519PrivateKey object at 0x7f802f7a2fd0>, PosixPath('/datos/wo...rsonal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_signed_field_success_stay0/trusted-approvers.json'))
+
+    def test_signed_field_success_stays_blocked_with_measured_records_and_claimed_guardrails(
+        tmp_path, signer,
+    ):
+        """A signed ledger cannot turn self-declared synthetic field claims into a verdict."""
+        _, trust_file = signer
+        case, assessment = _signed_field_case(tmp_path, signer)
+    
+        def put(item_id: str, kind: str, refs=(), data=None, text: str | None = None) -> None:
+            engine.put_item(case, item_id, kind, text or item_id, list(refs), data or {}, "agent:writer")
+    
+        state = engine.get_state(case)
+        assert state["project"]["approval_policy"] == "signed"
+        assert state["approval_trust"] == "configured"
+        assert state["items"]["n1"]["approval_status"] == "signed_verified"
+        assert state["items"]["d1"]["approval_status"] == "signed_verified"
+        assert all(state["phases"][phase]["accepted"] for phase in (
+            "frame", "critique", "study", "observe", "explain", "compare", "specify", "build"
+        ))
+        blocker = (
+            "ass1 decisive field verdict needs verified field effect analysis and source custody"
+        )
+        assert engine.gate(case, "validate")["blockers"] == [blocker]
+    
+        assessment["field_guardrails"] = {
+            "approval_authenticated": True, "execution_ready": True,
+            "registry_sha256": "a" * 64,
+        }
+        put("ass1", "assessment", ["res1", "r1"], assessment)
+        gate = engine.gate(case, "validate")
+        assert gate["blockers"] == [blocker]
+        assert not gate["ready"] and not gate["accepted"]
+>       assert _cli("gate", str(case), "validate") == gate
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_approval_security.py:568: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_approval_security.py:146: in _cli
+    result = subprocess.run([str(CLI), *args], text=True, capture_output=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/usr/lib/python3.14/subprocess.py:1875: in _execute_child
+    self._posix_spawn(args, executable, env, restore_signals, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Popen: returncode: None args: ['/datos/workspaces/personal/SpecOrganon/goal...>
+args = ['/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon', 'gate', '/datos/works...SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_signed_field_success_stay0/signed-field-claim', 'validate']
+executable = '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+env = None, restore_signals = True, close_fds = True, p2cread = -1
+p2cwrite = -1, c2pread = 11, c2pwrite = 12, errread = 13, errwrite = 14
+
+    def _posix_spawn(self, args, executable, env, restore_signals, close_fds,
+                     p2cread, p2cwrite,
+                     c2pread, c2pwrite,
+                     errread, errwrite):
+        """Execute program using os.posix_spawn()."""
+        kwargs = {}
+        if restore_signals:
+            # See _Py_RestoreSignals() in Python/pylifecycle.c
+            sigset = []
+            for signame in ('SIGPIPE', 'SIGXFZ', 'SIGXFSZ'):
+                signum = getattr(signal, signame, None)
+                if signum is not None:
+                    sigset.append(signum)
+            kwargs['setsigdef'] = sigset
+    
+        file_actions = []
+        for fd in (p2cwrite, c2pread, errread):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_CLOSE, fd))
+        for fd, fd2 in (
+            (p2cread, 0),
+            (c2pwrite, 1),
+            (errwrite, 2),
+        ):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_DUP2, fd, fd2))
+    
+        if close_fds:
+            file_actions.append((os.POSIX_SPAWN_CLOSEFROM, 3))
+    
+        if file_actions:
+            kwargs['file_actions'] = file_actions
+    
+>       self.pid = os.posix_spawn(executable, args, env, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+
+/usr/lib/python3.14/subprocess.py:1819: FileNotFoundError
+_______ test_synthetic_attestation_report_cannot_authorize_field_success _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_synthetic_attestation_rep0')
+signer = (<cryptography.hazmat.bindings._rust.openssl.ed25519.Ed25519PrivateKey object at 0x7f802f7a5370>, PosixPath('/datos/wo...rsonal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_synthetic_attestation_rep0/trusted-approvers.json'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f59c8a0>
+
+    def test_synthetic_attestation_report_cannot_authorize_field_success(
+        tmp_path, signer, monkeypatch,
+    ):
+        """A synthetic report denying field attribution cannot prove a field verdict."""
+        for key in ("PYTHONPATH", "PYTHONHOME", "PYTHONUSERBASE"):
+            monkeypatch.delenv(key, raising=False)
+        monkeypatch.setenv("PYTHONNOUSERSITE", "1")
+        _, approval_registry = signer
+        case, _ = _signed_field_case(tmp_path, signer)
+        state = engine.get_state(case)
+        assert all(state["phases"][phase]["accepted"] for phase in (
+            "frame", "critique", "study", "observe", "explain", "compare", "specify", "build"
+        ))
+        assert state["items"]["n1"]["approval_status"] == "signed_verified"
+        assert state["items"]["d1"]["approval_status"] == "signed_verified"
+    
+        assessor = "assessor:independent"
+        assessor_key = Ed25519PrivateKey.generate()
+        public = assessor_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw,
+        )
+        registry_path = tmp_path / "independent-assessors.json"
+        registry_path.write_bytes(_canonical({"schema": 1, "cases": {
+            state["project"]["case_id"]: {
+                "path": str(case.resolve(strict=True)),
+                "project_sha256": state["project_sha256"],
+                "assessors": {assessor: base64.b64encode(public).decode("ascii")},
+            },
+        }}))
+        monkeypatch.setenv("ORGANON_FIELD_ASSESSORS_FILE", str(registry_path))
+        assert engine.get_state(case)["field_attestation_trust"] == "configured"
+    
+        bundle_dir = tmp_path / "synthetic-field-bundle"
+        bundle_dir.mkdir()
+        manifest_path, report_path, report = _bundle(bundle_dir, state["project"])
+        assert "no causal attribution" in report["causal_attribution"].lower()
+        assert "does not establish a real value measure" in report["value_metric"].lower()
+        assert "no person, field record" in report["limitations"].lower()
+        field_args = {
+            "path": str(case), "id": "ass1",
+            "reason": "Synthetic test signature; no real field effect established",
+            "actor": assessor, "source_manifest_path": manifest_path,
+            "report_path": report_path,
+        }
+        before = (case / "organon.json").read_bytes()
+        challenge = engine.field_attestation_challenge(**field_args)
+        cli_args = (
+            str(case), "ass1", "--reason", field_args["reason"],
+            "--actor", assessor, "--source-manifest-path", manifest_path,
+            "--report-path", report_path,
+        )
+>       assert _cli("field-attestation-challenge", *cli_args) == challenge
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_approval_security.py:659: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_approval_security.py:146: in _cli
+    result = subprocess.run([str(CLI), *args], text=True, capture_output=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/usr/lib/python3.14/subprocess.py:1875: in _execute_child
+    self._posix_spawn(args, executable, env, restore_signals, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Popen: returncode: None args: ['/datos/workspaces/personal/SpecOrganon/goal...>
+args = ['/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon', 'field-attestation-ch...tation_rep0/signed-field-claim', 'ass1', '--reason', 'Synthetic test signature; no real field effect established', ...]
+executable = '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+env = None, restore_signals = True, close_fds = True, p2cread = -1
+p2cwrite = -1, c2pread = 11, c2pwrite = 12, errread = 13, errwrite = 14
+
+    def _posix_spawn(self, args, executable, env, restore_signals, close_fds,
+                     p2cread, p2cwrite,
+                     c2pread, c2pwrite,
+                     errread, errwrite):
+        """Execute program using os.posix_spawn()."""
+        kwargs = {}
+        if restore_signals:
+            # See _Py_RestoreSignals() in Python/pylifecycle.c
+            sigset = []
+            for signame in ('SIGPIPE', 'SIGXFZ', 'SIGXFSZ'):
+                signum = getattr(signal, signame, None)
+                if signum is not None:
+                    sigset.append(signum)
+            kwargs['setsigdef'] = sigset
+    
+        file_actions = []
+        for fd in (p2cwrite, c2pread, errread):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_CLOSE, fd))
+        for fd, fd2 in (
+            (p2cread, 0),
+            (c2pwrite, 1),
+            (errwrite, 2),
+        ):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_DUP2, fd, fd2))
+    
+        if close_fds:
+            file_actions.append((os.POSIX_SPAWN_CLOSEFROM, 3))
+    
+        if file_actions:
+            kwargs['file_actions'] = file_actions
+    
+>       self.pid = os.posix_spawn(executable, args, env, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+
+/usr/lib/python3.14/subprocess.py:1819: FileNotFoundError
+___________________ test_cli_success_and_safe_failure_modes ____________________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_cli_success_and_safe_fail0')
+
+    def test_cli_success_and_safe_failure_modes(tmp_path: Path) -> None:
+        manifest, ratings = _bundle()
+        manifest_path = tmp_path / "manifest.json"
+        ratings_path = tmp_path / "ratings.json"
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        ratings_path.write_text(json.dumps(ratings), encoding="utf-8")
+    
+        success = subprocess.run([sys.executable, str(SCRIPT), str(manifest_path), str(ratings_path)],
+                                 capture_output=True, text=True, check=False)
+        assert success.returncode == 0 and success.stderr == ""
+        output = json.loads(success.stdout)
+        assert output["counts"]["primary_ratings"] == 2
+        assert sorted(path.name for path in tmp_path.iterdir()) == ["manifest.json", "ratings.json"]
+    
+        stdin_success = subprocess.run([sys.executable, str(SCRIPT), "-", str(ratings_path)],
+                                       input=json.dumps(manifest), capture_output=True, text=True, check=False)
+        assert stdin_success.returncode == 0
+        assert json.loads(stdin_success.stdout)["manifest_sha256"] == _canonical_digest(manifest)
+    
+        for raw, expected_error in (
+            ('{"schema":1,"schema":1,"artifacts":[]}', "duplicate JSON object key"),
+            ('{"schema":1,"artifacts":[NaN]}', "non-JSON numeric constant"),
+            ('{"schema":' + "9" * 5000 + ',"artifacts":[]}', "invalid JSON input:"),
+            ("[" * 10000 + "0" + "]" * 10000, "invalid JSON input:"),
+        ):
+            failure = subprocess.run([sys.executable, str(SCRIPT), "-", str(ratings_path)],
+                                     input=raw, capture_output=True, text=True, check=False)
+            assert failure.returncode == 2 and failure.stderr == ""
+>           assert expected_error in json.loads(failure.stdout)["error"]
+E           AssertionError: assert 'invalid JSON input:' in 'manifest must be an object'
+
+tests/test_audit_blind_ratings.py:512: AssertionError
+_______ test_matching_repeat_reads_input_and_hashes_artifact_and_streams _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_matching_repeat_reads_inp0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8031187930>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f802f5e86e0>
+available_sandbox = None
+
+    def test_matching_repeat_reads_input_and_hashes_artifact_and_streams(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        argv = _command()
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv))
+        run = _run_dir(tmp_path)
+        before = (case / "organon.json").read_bytes()
+        status, result = _cli(case, run, capsys)
+>       assert status == 0, result
+E       AssertionError: {'artifact_checks': [{'matches': True, 'observed_sha256': '995d363bf46636a72004e6de45f9079e585b242f890f6c4e0af697b7db9...nchanged': True, ...}, 'declared_argv_sha256': '8d4240fd1b71ce85b0220c04893643564ba5424179e43d617745cce8c5f54b14', ...}
+E       assert 1 == 0
+
+tests/test_audit_signed_test_execution.py:172: AssertionError
+_________________ test_signed_nonzero_matches_but_cannot_pass __________________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_signed_nonzero_matches_bu0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f5fe890>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f802fc5aad0>
+available_sandbox = None
+
+    def test_signed_nonzero_matches_but_cannot_pass(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        argv = _command(exit_code=3)
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv, exit_code=3))
+        status, result = _cli(case, _run_dir(tmp_path), capsys)
+        assert status == 1
+        assert result["signature_verified"] is True
+>       assert result["observed_locally"] is True
+E       assert False is True
+
+tests/test_audit_signed_test_execution.py:274: AssertionError
+______ test_strict_repeat_emits_signable_measured_receipt_without_cli_pin ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_strict_repeat_emits_signa0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8030f0df60>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f802fccec50>
+available_sandbox = None
+
+    def test_strict_repeat_emits_signable_measured_receipt_without_cli_pin(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        run = _run_dir(tmp_path)
+        argv = _command()
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv),
+                            input_tree_sha256=test_observation.hash_input_tree(run / "input"))
+        before = (case / "organon.json").read_bytes()
+    
+        status, result = _cli(case, run, capsys, pin=None)
+    
+>       assert status == 0, result
+E       AssertionError: {'artifact_checks': [{'matches': True, 'observed_sha256': '995d363bf46636a72004e6de45f9079e585b242f890f6c4e0af697b7db9...tree_pin': True, ...}, 'declared_argv_sha256': '8d4240fd1b71ce85b0220c04893643564ba5424179e43d617745cce8c5f54b14', ...}
+E       assert 1 == 0
+
+tests/test_audit_signed_test_execution.py:324: AssertionError
+__________ test_strict_failed_execution_still_emits_measured_receipt ___________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_strict_failed_execution_s0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f5fd550>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f802f5b41d0>
+available_sandbox = None
+
+    def test_strict_failed_execution_still_emits_measured_receipt(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str], available_sandbox: None,
+    ) -> None:
+        run = _run_dir(tmp_path)
+        argv = _command(exit_code=3)
+        case = _signed_case(tmp_path, monkeypatch, argv, _report(argv, exit_code=3),
+                            input_tree_sha256=test_observation.hash_input_tree(run / "input"))
+        status, result = _cli(case, run, capsys, pin=None)
+    
+        assert status == 1
+>       assert result["observed_locally"] is True
+E       assert False is True
+
+tests/test_audit_signed_test_execution.py:440: AssertionError
+______ OperatorGates.test_paid_constructor_uses_fixed_origin_after_gates _______
+
+self = <test_authorized_coordinated_runtime.OperatorGates testMethod=test_paid_constructor_uses_fixed_origin_after_gates>
+
+    def test_paid_constructor_uses_fixed_origin_after_gates(self):
+        raw = self.write()
+        with patch.object(entry, "preflight", return_value={"binding": self.binding}):
+            with patch.object(entry, "_declaration_guard", return_value=lambda: None):
+                with patch.object(entry.os, "environ", {"OPENAI_API_KEY": "PUBLIC-TEST-ONLY"}):
+                    with patch.object(entry, "OpenAIResponsesHTTP") as http, patch.object(entry, "_execute", return_value={"step_failed": False}) as execute:
+>                       result = entry.execute_authorized_step(self.parent / "run", self.parent / "obs", self.declaration,
+                                                               expected_checkpoint="a" * 64, allow_paid_request=True)
+
+tests/test_authorized_coordinated_runtime.py:117: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/authorized_coordinated_runtime.py:229: in execute_authorized_step
+    _require(path != root and root not in path.parents and path not in root.parents, "declaration_overlap")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+condition = False, code = 'declaration_overlap'
+
+    def _require(condition, code):
+        if not condition:
+>           raise AuthorizedRouteError(code)
+E           authorized_coordinated_runtime.AuthorizedRouteError: declaration_overlap
+
+scripts/authorized_coordinated_runtime.py:46: AuthorizedRouteError
+____ test_prepare_and_generation_exact_outputs_without_automatic_execution _____
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_prepare_and_generation_ex0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8030c13380>
+admission = None
+
+    def test_prepare_and_generation_exact_outputs_without_automatic_execution(tmp_path, monkeypatch, admission):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_prepare_and_generation_ex0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_____________ test_real_reviewed_sealed_baseline_and_no_repetition _____________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_real_reviewed_sealed_base0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f715710>
+admission = None
+
+    def test_real_reviewed_sealed_baseline_and_no_repetition(tmp_path, monkeypatch, admission):
+        from scripts.local_replay_sandbox import probe_sandbox
+        if not probe_sandbox().available:
+            pytest.skip("required sandbox unavailable")
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_real_reviewed_sealed_base0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_____ test_real_sandbox_replay_cannot_create_files_network_or_descendants ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_real_sandbox_replay_canno0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f57c7c0>
+admission = None
+
+    def test_real_sandbox_replay_cannot_create_files_network_or_descendants(tmp_path, monkeypatch, admission):
+        from scripts.local_replay_sandbox import probe_sandbox
+        if not probe_sandbox().available:
+            pytest.skip("required sandbox unavailable")
+        script = """import json, os, socket, sys
+    from pathlib import Path
+    blocked = 0
+    for operation in (lambda: Path(sys.argv[1], 'unexpected.txt').write_text('bad'),
+                      lambda: socket.socket(socket.AF_INET, socket.SOCK_STREAM), lambda: os.fork()):
+        try:
+            operation()
+        except OSError:
+            blocked += 1
+        else:
+            raise AssertionError('restriction failed')
+    print(json.dumps({'blocked': blocked}))
+    """
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_real_sandbox_replay_canno0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_______ test_failed_generation_retains_raw_trace_and_forbids_retry[tool] _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f57f690>
+admission = None, behavior = 'tool'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+___ test_failed_generation_retains_raw_trace_and_forbids_retry[unknown_item] ___
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f57e270>
+admission = None, behavior = 'unknown_item'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains1/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+______ test_failed_generation_retains_raw_trace_and_forbids_retry[error] _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8030f5dcc0>
+admission = None, behavior = 'error'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains2/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_______ test_failed_generation_retains_raw_trace_and_forbids_retry[zero] _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8031185860>
+admission = None, behavior = 'zero'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains3/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+____ test_failed_generation_retains_raw_trace_and_forbids_retry[incoherent] ____
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f5371c0>
+admission = None, behavior = 'incoherent'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains4/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_______ test_failed_generation_retains_raw_trace_and_forbids_retry[exit] _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f5340c0>
+admission = None, behavior = 'exit'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains5/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_____ test_failed_generation_retains_raw_trace_and_forbids_retry[api_key] ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains6')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f537af0>
+admission = None, behavior = 'api_key'
+
+    @pytest.mark.parametrize("behavior", ["tool", "unknown_item", "error", "zero", "incoherent", "exit", "api_key"])
+    def test_failed_generation_retains_raw_trace_and_forbids_retry(tmp_path, monkeypatch, admission, behavior):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_failed_generation_retains6/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+______________ test_real_model_capture_timeout_preserves_partial _______________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_real_model_capture_timeou0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8030f34c90>
+admission = None
+
+    def test_real_model_capture_timeout_preserves_partial(tmp_path, monkeypatch, admission):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_real_model_capture_timeou0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_____________ test_large_failed_stream_is_hashed_with_no_relaunch ______________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_large_failed_stream_is_ha0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f5349f0>
+admission = None
+
+    def test_large_failed_stream_is_hashed_with_no_relaunch(tmp_path, monkeypatch, admission):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:224: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_large_failed_stream_is_ha0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+______________ test_bad_proposal_not_repaired_or_published[extra] ______________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f537bd0>
+admission = None, defect = 'extra'
+
+    @pytest.mark.parametrize("defect", ["extra", "type", "sources_array", "sources_duplicate", "sources_nonfinite",
+                                      "script_large", "sources_large", "report_large"])
+    def test_bad_proposal_not_repaired_or_published(tmp_path, monkeypatch, admission, defect):
+        proposal = _proposal()
+        if defect == "extra":
+            proposal["extra"] = "unexpected"
+        elif defect == "type":
+            proposal["analysis_py"] = []
+        elif defect == "sources_array":
+            proposal["sources_json"] = "[]"
+        elif defect == "sources_duplicate":
+            proposal["sources_json"] = '{"x":1,"x":2}'
+        elif defect == "sources_nonfinite":
+            proposal["sources_json"] = '{"x":1e400}'
+        elif defect == "script_large":
+            proposal["analysis_py"] = "#" * (32 * 1024 + 1)
+        elif defect == "sources_large":
+            proposal["sources_json"] = json.dumps({"text": "x" * (32 * 1024)})
+        else:
+            proposal["report_md"] = "word " * 1201
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+______________ test_bad_proposal_not_repaired_or_published[type] _______________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f57c0c0>
+admission = None, defect = 'type'
+
+    @pytest.mark.parametrize("defect", ["extra", "type", "sources_array", "sources_duplicate", "sources_nonfinite",
+                                      "script_large", "sources_large", "report_large"])
+    def test_bad_proposal_not_repaired_or_published(tmp_path, monkeypatch, admission, defect):
+        proposal = _proposal()
+        if defect == "extra":
+            proposal["extra"] = "unexpected"
+        elif defect == "type":
+            proposal["analysis_py"] = []
+        elif defect == "sources_array":
+            proposal["sources_json"] = "[]"
+        elif defect == "sources_duplicate":
+            proposal["sources_json"] = '{"x":1,"x":2}'
+        elif defect == "sources_nonfinite":
+            proposal["sources_json"] = '{"x":1e400}'
+        elif defect == "script_large":
+            proposal["analysis_py"] = "#" * (32 * 1024 + 1)
+        elif defect == "sources_large":
+            proposal["sources_json"] = json.dumps({"text": "x" * (32 * 1024)})
+        else:
+            proposal["report_md"] = "word " * 1201
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired1/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+__________ test_bad_proposal_not_repaired_or_published[sources_array] __________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f62f7e0>
+admission = None, defect = 'sources_array'
+
+    @pytest.mark.parametrize("defect", ["extra", "type", "sources_array", "sources_duplicate", "sources_nonfinite",
+                                      "script_large", "sources_large", "report_large"])
+    def test_bad_proposal_not_repaired_or_published(tmp_path, monkeypatch, admission, defect):
+        proposal = _proposal()
+        if defect == "extra":
+            proposal["extra"] = "unexpected"
+        elif defect == "type":
+            proposal["analysis_py"] = []
+        elif defect == "sources_array":
+            proposal["sources_json"] = "[]"
+        elif defect == "sources_duplicate":
+            proposal["sources_json"] = '{"x":1,"x":2}'
+        elif defect == "sources_nonfinite":
+            proposal["sources_json"] = '{"x":1e400}'
+        elif defect == "script_large":
+            proposal["analysis_py"] = "#" * (32 * 1024 + 1)
+        elif defect == "sources_large":
+            proposal["sources_json"] = json.dumps({"text": "x" * (32 * 1024)})
+        else:
+            proposal["report_md"] = "word " * 1201
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired2/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+________ test_bad_proposal_not_repaired_or_published[sources_duplicate] ________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f62d470>
+admission = None, defect = 'sources_duplicate'
+
+    @pytest.mark.parametrize("defect", ["extra", "type", "sources_array", "sources_duplicate", "sources_nonfinite",
+                                      "script_large", "sources_large", "report_large"])
+    def test_bad_proposal_not_repaired_or_published(tmp_path, monkeypatch, admission, defect):
+        proposal = _proposal()
+        if defect == "extra":
+            proposal["extra"] = "unexpected"
+        elif defect == "type":
+            proposal["analysis_py"] = []
+        elif defect == "sources_array":
+            proposal["sources_json"] = "[]"
+        elif defect == "sources_duplicate":
+            proposal["sources_json"] = '{"x":1,"x":2}'
+        elif defect == "sources_nonfinite":
+            proposal["sources_json"] = '{"x":1e400}'
+        elif defect == "script_large":
+            proposal["analysis_py"] = "#" * (32 * 1024 + 1)
+        elif defect == "sources_large":
+            proposal["sources_json"] = json.dumps({"text": "x" * (32 * 1024)})
+        else:
+            proposal["report_md"] = "word " * 1201
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired3/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+________ test_bad_proposal_not_repaired_or_published[sources_nonfinite] ________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f62f310>
+admission = None, defect = 'sources_nonfinite'
+
+    @pytest.mark.parametrize("defect", ["extra", "type", "sources_array", "sources_duplicate", "sources_nonfinite",
+                                      "script_large", "sources_large", "report_large"])
+    def test_bad_proposal_not_repaired_or_published(tmp_path, monkeypatch, admission, defect):
+        proposal = _proposal()
+        if defect == "extra":
+            proposal["extra"] = "unexpected"
+        elif defect == "type":
+            proposal["analysis_py"] = []
+        elif defect == "sources_array":
+            proposal["sources_json"] = "[]"
+        elif defect == "sources_duplicate":
+            proposal["sources_json"] = '{"x":1,"x":2}'
+        elif defect == "sources_nonfinite":
+            proposal["sources_json"] = '{"x":1e400}'
+        elif defect == "script_large":
+            proposal["analysis_py"] = "#" * (32 * 1024 + 1)
+        elif defect == "sources_large":
+            proposal["sources_json"] = json.dumps({"text": "x" * (32 * 1024)})
+        else:
+            proposal["report_md"] = "word " * 1201
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired4/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+__________ test_bad_proposal_not_repaired_or_published[script_large] ___________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f62e430>
+admission = None, defect = 'script_large'
+
+    @pytest.mark.parametrize("defect", ["extra", "type", "sources_array", "sources_duplicate", "sources_nonfinite",
+                                      "script_large", "sources_large", "report_large"])
+    def test_bad_proposal_not_repaired_or_published(tmp_path, monkeypatch, admission, defect):
+        proposal = _proposal()
+        if defect == "extra":
+            proposal["extra"] = "unexpected"
+        elif defect == "type":
+            proposal["analysis_py"] = []
+        elif defect == "sources_array":
+            proposal["sources_json"] = "[]"
+        elif defect == "sources_duplicate":
+            proposal["sources_json"] = '{"x":1,"x":2}'
+        elif defect == "sources_nonfinite":
+            proposal["sources_json"] = '{"x":1e400}'
+        elif defect == "script_large":
+            proposal["analysis_py"] = "#" * (32 * 1024 + 1)
+        elif defect == "sources_large":
+            proposal["sources_json"] = json.dumps({"text": "x" * (32 * 1024)})
+        else:
+            proposal["report_md"] = "word " * 1201
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired5/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+__________ test_bad_proposal_not_repaired_or_published[sources_large] __________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired6')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f57e430>
+admission = None, defect = 'sources_large'
+
+    @pytest.mark.parametrize("defect", ["extra", "type", "sources_array", "sources_duplicate", "sources_nonfinite",
+                                      "script_large", "sources_large", "report_large"])
+    def test_bad_proposal_not_repaired_or_published(tmp_path, monkeypatch, admission, defect):
+        proposal = _proposal()
+        if defect == "extra":
+            proposal["extra"] = "unexpected"
+        elif defect == "type":
+            proposal["analysis_py"] = []
+        elif defect == "sources_array":
+            proposal["sources_json"] = "[]"
+        elif defect == "sources_duplicate":
+            proposal["sources_json"] = '{"x":1,"x":2}'
+        elif defect == "sources_nonfinite":
+            proposal["sources_json"] = '{"x":1e400}'
+        elif defect == "script_large":
+            proposal["analysis_py"] = "#" * (32 * 1024 + 1)
+        elif defect == "sources_large":
+            proposal["sources_json"] = json.dumps({"text": "x" * (32 * 1024)})
+        else:
+            proposal["report_md"] = "word " * 1201
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired6/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+__________ test_bad_proposal_not_repaired_or_published[report_large] ___________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f5372a0>
+admission = None, defect = 'report_large'
+
+    @pytest.mark.parametrize("defect", ["extra", "type", "sources_array", "sources_duplicate", "sources_nonfinite",
+                                      "script_large", "sources_large", "report_large"])
+    def test_bad_proposal_not_repaired_or_published(tmp_path, monkeypatch, admission, defect):
+        proposal = _proposal()
+        if defect == "extra":
+            proposal["extra"] = "unexpected"
+        elif defect == "type":
+            proposal["analysis_py"] = []
+        elif defect == "sources_array":
+            proposal["sources_json"] = "[]"
+        elif defect == "sources_duplicate":
+            proposal["sources_json"] = '{"x":1,"x":2}'
+        elif defect == "sources_nonfinite":
+            proposal["sources_json"] = '{"x":1e400}'
+        elif defect == "script_large":
+            proposal["analysis_py"] = "#" * (32 * 1024 + 1)
+        elif defect == "sources_large":
+            proposal["sources_json"] = json.dumps({"text": "x" * (32 * 1024)})
+        else:
+            proposal["report_md"] = "word " * 1201
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_bad_proposal_not_repaired7/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+___________ test_shared_protocol_admission_blocks_second_destination ___________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_shared_protocol_admission0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802fa76a50>
+admission = None
+
+    def test_shared_protocol_admission_blocks_second_destination(tmp_path, monkeypatch, admission):
+>       first = _prepare(tmp_path, name="first")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:264: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_shared_protocol_admission0/first')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+______ test_mutated_input_or_output_pin_is_rejected[input/source_lca.txt] ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802fa77d20>
+admission = None, target = 'input/source_lca.txt'
+
+    @pytest.mark.parametrize("target", ["input/source_lca.txt", "input/prototype_case.json", "prompt.txt", "schema.json",
+                                      "analysis.py", "sources.json", "report.md", "model.stdout.jsonl"])
+    def test_mutated_input_or_output_pin_is_rejected(tmp_path, monkeypatch, admission, target):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+___ test_mutated_input_or_output_pin_is_rejected[input/prototype_case.json] ____
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f535010>
+admission = None, target = 'input/prototype_case.json'
+
+    @pytest.mark.parametrize("target", ["input/source_lca.txt", "input/prototype_case.json", "prompt.txt", "schema.json",
+                                      "analysis.py", "sources.json", "report.md", "model.stdout.jsonl"])
+    def test_mutated_input_or_output_pin_is_rejected(tmp_path, monkeypatch, admission, target):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p1/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+___________ test_mutated_input_or_output_pin_is_rejected[prompt.txt] ___________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f57f3f0>
+admission = None, target = 'prompt.txt'
+
+    @pytest.mark.parametrize("target", ["input/source_lca.txt", "input/prototype_case.json", "prompt.txt", "schema.json",
+                                      "analysis.py", "sources.json", "report.md", "model.stdout.jsonl"])
+    def test_mutated_input_or_output_pin_is_rejected(tmp_path, monkeypatch, admission, target):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p2/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+__________ test_mutated_input_or_output_pin_is_rejected[schema.json] ___________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f62c830>
+admission = None, target = 'schema.json'
+
+    @pytest.mark.parametrize("target", ["input/source_lca.txt", "input/prototype_case.json", "prompt.txt", "schema.json",
+                                      "analysis.py", "sources.json", "report.md", "model.stdout.jsonl"])
+    def test_mutated_input_or_output_pin_is_rejected(tmp_path, monkeypatch, admission, target):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p3/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+__________ test_mutated_input_or_output_pin_is_rejected[analysis.py] ___________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802fa75240>
+admission = None, target = 'analysis.py'
+
+    @pytest.mark.parametrize("target", ["input/source_lca.txt", "input/prototype_case.json", "prompt.txt", "schema.json",
+                                      "analysis.py", "sources.json", "report.md", "model.stdout.jsonl"])
+    def test_mutated_input_or_output_pin_is_rejected(tmp_path, monkeypatch, admission, target):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p4/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+__________ test_mutated_input_or_output_pin_is_rejected[sources.json] __________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802fa76dd0>
+admission = None, target = 'sources.json'
+
+    @pytest.mark.parametrize("target", ["input/source_lca.txt", "input/prototype_case.json", "prompt.txt", "schema.json",
+                                      "analysis.py", "sources.json", "report.md", "model.stdout.jsonl"])
+    def test_mutated_input_or_output_pin_is_rejected(tmp_path, monkeypatch, admission, target):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p5/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+___________ test_mutated_input_or_output_pin_is_rejected[report.md] ____________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p6')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802faa6a50>
+admission = None, target = 'report.md'
+
+    @pytest.mark.parametrize("target", ["input/source_lca.txt", "input/prototype_case.json", "prompt.txt", "schema.json",
+                                      "analysis.py", "sources.json", "report.md", "model.stdout.jsonl"])
+    def test_mutated_input_or_output_pin_is_rejected(tmp_path, monkeypatch, admission, target):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p6/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_______ test_mutated_input_or_output_pin_is_rejected[model.stdout.jsonl] _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802fa74980>
+admission = None, target = 'model.stdout.jsonl'
+
+    @pytest.mark.parametrize("target", ["input/source_lca.txt", "input/prototype_case.json", "prompt.txt", "schema.json",
+                                      "analysis.py", "sources.json", "report.md", "model.stdout.jsonl"])
+    def test_mutated_input_or_output_pin_is_rejected(tmp_path, monkeypatch, admission, target):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_mutated_input_or_output_p7/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+______________ test_changed_source_rejected_before_new_directory _______________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_changed_source_rejected_b0')
+admission = None
+
+    def test_changed_source_rejected_before_new_directory(tmp_path, admission):
+        repo = _copy_repo(tmp_path)
+        protocol, _ = continuation._authority()
+        changed = repo / protocol["source_files"]["source_lca.txt"]["path"]
+        with changed.open("ab") as stream:
+            stream.write(b"\n")
+        destination = tmp_path / "invalid"
+>       with pytest.raises(continuation.ContinuationError, match="registered bytes changed"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'registered bytes changed'
+E         Actual message: 'destination must stay outside the repository and protected source/checkpoint trees'
+
+tests/test_bread_continuation.py:294: AssertionError
+____________ test_parent_changes_rejected_without_touching_original ____________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_parent_changes_rejected_w0')
+admission = None
+
+    def test_parent_changes_rejected_without_touching_original(tmp_path, admission):
+        repo = _copy_repo(tmp_path)
+>       directory = _prepare(tmp_path, repo=repo)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:301: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_parent_changes_rejected_w0/repo')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_parent_changes_rejected_w0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+____ test_coherent_runtime_plan_mutation_cannot_authorize_change[override] _____
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_coherent_runtime_plan_mut0')
+admission = None, mutation = 'override'
+
+    @pytest.mark.parametrize("mutation", ["override", "config", "remove_input_pin"])
+    def test_coherent_runtime_plan_mutation_cannot_authorize_change(tmp_path, admission, mutation):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:343: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_coherent_runtime_plan_mut0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_____ test_coherent_runtime_plan_mutation_cannot_authorize_change[config] ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_coherent_runtime_plan_mut1')
+admission = None, mutation = 'config'
+
+    @pytest.mark.parametrize("mutation", ["override", "config", "remove_input_pin"])
+    def test_coherent_runtime_plan_mutation_cannot_authorize_change(tmp_path, admission, mutation):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:343: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_coherent_runtime_plan_mut1/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_ test_coherent_runtime_plan_mutation_cannot_authorize_change[remove_input_pin] _
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_coherent_runtime_plan_mut2')
+admission = None, mutation = 'remove_input_pin'
+
+    @pytest.mark.parametrize("mutation", ["override", "config", "remove_input_pin"])
+    def test_coherent_runtime_plan_mutation_cannot_authorize_change(tmp_path, admission, mutation):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:343: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_coherent_runtime_plan_mut2/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+________ test_invalid_baseline_is_terminal_and_raw_preserved[{"x":NaN}] ________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_invalid_baseline_is_termi0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f534050>
+admission = None, baseline = '{"x":NaN}'
+
+    @pytest.mark.parametrize("baseline", ['{"x":NaN}', '{"x":1e400}', '{"x":1,"x":2}', '[]'])
+    def test_invalid_baseline_is_terminal_and_raw_preserved(tmp_path, monkeypatch, admission, baseline):
+        from scripts.local_replay_sandbox import probe_sandbox
+        if not probe_sandbox().available:
+            pytest.skip("required sandbox unavailable")
+        script = f"print({baseline!r})\n"
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:377: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_invalid_baseline_is_termi0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_______ test_invalid_baseline_is_terminal_and_raw_preserved[{"x":1e400}] _______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_invalid_baseline_is_termi1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f537150>
+admission = None, baseline = '{"x":1e400}'
+
+    @pytest.mark.parametrize("baseline", ['{"x":NaN}', '{"x":1e400}', '{"x":1,"x":2}', '[]'])
+    def test_invalid_baseline_is_terminal_and_raw_preserved(tmp_path, monkeypatch, admission, baseline):
+        from scripts.local_replay_sandbox import probe_sandbox
+        if not probe_sandbox().available:
+            pytest.skip("required sandbox unavailable")
+        script = f"print({baseline!r})\n"
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:377: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_invalid_baseline_is_termi1/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+______ test_invalid_baseline_is_terminal_and_raw_preserved[{"x":1,"x":2}] ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_invalid_baseline_is_termi2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f57e580>
+admission = None, baseline = '{"x":1,"x":2}'
+
+    @pytest.mark.parametrize("baseline", ['{"x":NaN}', '{"x":1e400}', '{"x":1,"x":2}', '[]'])
+    def test_invalid_baseline_is_terminal_and_raw_preserved(tmp_path, monkeypatch, admission, baseline):
+        from scripts.local_replay_sandbox import probe_sandbox
+        if not probe_sandbox().available:
+            pytest.skip("required sandbox unavailable")
+        script = f"print({baseline!r})\n"
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:377: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_invalid_baseline_is_termi2/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+___________ test_invalid_baseline_is_terminal_and_raw_preserved[[]] ____________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_invalid_baseline_is_termi3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802f62f0e0>
+admission = None, baseline = '[]'
+
+    @pytest.mark.parametrize("baseline", ['{"x":NaN}', '{"x":1e400}', '{"x":1,"x":2}', '[]'])
+    def test_invalid_baseline_is_terminal_and_raw_preserved(tmp_path, monkeypatch, admission, baseline):
+        from scripts.local_replay_sandbox import probe_sandbox
+        if not probe_sandbox().available:
+            pytest.skip("required sandbox unavailable")
+        script = f"print({baseline!r})\n"
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:377: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_invalid_baseline_is_termi3/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+__________ test_replaying_marker_prevents_restart_after_interruption ___________
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_replaying_marker_prevents0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f802fa74c20>
+admission = None
+
+    def test_replaying_marker_prevents_restart_after_interruption(tmp_path, monkeypatch, admission):
+>       directory = _prepare(tmp_path)
+                    ^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation.py:391: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_bread_continuation.py:86: in _prepare
+    result = continuation.prepare(continuation.ROOT if repo is None else repo, directory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/run_bread_continuation.py:221: in prepare
+    destination = _destination(repo, protocol, destination)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/datos/workspaces/personal/SpecOrganon')
+protocol = {'schema': 1, 'decision': 'D-097', 'classification': 'exposed_development_food_analysis_continuation', 'registered_at_utc': '2026-09-30T07:23:07.172592+00:00', ...}
+destination = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_replaying_marker_prevents0/run')
+
+    def _destination(repo: Path, protocol: dict, destination: Path) -> Path:
+        destination = destination.absolute()
+        if destination.exists() or destination.is_symlink():
+            raise ContinuationError("destination must be new")
+        # Resolve the real existing parent before creating anything. An external
+        # spelling through a symlink must not introduce a stage into a frozen tree.
+        destination = destination.parent.resolve(strict=True) / destination.name
+        protected = {repo, ROOT.resolve(strict=True), PLAN.parent.resolve(strict=True),
+                     (repo / _relative(protocol["parent_checkpoint"]["directory"])).resolve(strict=True)}
+        protected.update((repo / _relative(pin["path"])).parent.resolve(strict=True)
+                         for pin in protocol["source_files"].values())
+        protected.update((repo / _relative(protocol["parent_checkpoint"][kind]["path"])).parent.resolve(strict=True)
+                         for kind in ("receipt", "case", "state"))
+        if any(destination == root or destination.is_relative_to(root) for root in protected):
+>           raise ContinuationError("destination must stay outside the repository and protected source/checkpoint trees")
+E           scripts.run_bread_continuation.ContinuationError: destination must stay outside the repository and protected source/checkpoint trees
+
+scripts/run_bread_continuation.py:214: ContinuationError
+_ test_real_sandbox_rejects_false_green_negative_and_blocks_second_evaluation __
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_real_sandbox_rejects_fals0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8030cbdb70>
+
+    def test_real_sandbox_rejects_false_green_negative_and_blocks_second_evaluation(tmp_path, monkeypatch):
+        import run_bread_continuation as workflow
+    
+        monkeypatch.setattr(workflow, "status", lambda _: {"state": "replayed"})
+        stage = tmp_path / "stage"
+        stage.mkdir()
+        inputs = stage / "input"
+        inputs.mkdir()
+        plan = json.loads(workflow.PLAN.read_text())
+        for name, record in plan["source_files"].items():
+            shutil.copyfile(ROOT / record["path"], inputs / name)
+        (stage / "analysis.py").write_text('print(\'{"milling":{},"baking_energy":{},"survey":{}}\')\n')
+        (stage / "metrics.json").write_text('{}\n')
+>       result = evaluator.evaluate(stage)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_bread_continuation_evaluate.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/development/bread_continuation_2026-09-30/evaluate.py:129: in evaluate
+    write_roots=[], runtime_roots=(*default_python_runtime_roots(), Path("/usr/bin/python3.12").resolve(strict=True)),
+                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:938: in resolve
+    return self.with_segments(os.path.realpath(self, strict=strict))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+filename = '/usr/bin/python3.12', strict = True
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/usr/bin/python3.12'
+
+<frozen posixpath>:457: FileNotFoundError
+____ test_cli_mcp_probe_requires_verified_review_and_preserves_source_case _____
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-full/test_cli_mcp_probe_requires_ve0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8030cbf690>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f802f3232f0>
+
+    def test_cli_mcp_probe_requires_verified_review_and_preserves_source_case(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture,
+    ) -> None:
+        source_case = shutil.copytree(CASE, tmp_path / "source" / "bread_norway")
+        # Removing copied locks makes accidental runner writes to the source
+        # visible even if the ledger itself would remain idempotent.
+        for name in (".organon.lock", ".organon.runner.lock"):
+            (source_case / name).unlink(missing_ok=True)
+        before = bread_probe.case_file_hashes(source_case)
+        monkeypatch.setattr(bread_probe, "CASE", source_case)
+    
+>       bread_probe.main()
+
+tests/test_bread_frame.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/verify_bread_frame.py:334: in main
+    "status": cli("status", path),
+              ^^^^^^^^^^^^^^^^^^^
+scripts/verify_bread_frame.py:247: in cli
+    result = subprocess.run([str(CLI), *args], text=True, capture_output=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/usr/lib/python3.14/subprocess.py:1875: in _execute_child
+    self._posix_spawn(args, executable, env, restore_signals, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Popen: returncode: None args: ['/datos/workspaces/personal/SpecOrganon/goal...>
+args = ['/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon', 'status', '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-temp/organon-bread-frame-ihkuoss0/bread_norway']
+executable = '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+env = None, restore_signals = True, close_fds = True, p2cread = -1
+p2cwrite = -1, c2pread = 11, c2pwrite = 12, errread = 13, errwrite = 14
+
+    def _posix_spawn(self, args, executable, env, restore_signals, close_fds,
+                     p2cread, p2cwrite,
+                     c2pread, c2pwrite,
+                     errread, errwrite):
+        """Execute program using os.posix_spawn()."""
+        kwargs = {}
+        if restore_signals:
+            # See _Py_RestoreSignals() in Python/pylifecycle.c
+            sigset = []
+            for signame in ('SIGPIPE', 'SIGXFZ', 'SIGXFSZ'):
+                signum = getattr(signal, signame, None)
+                if signum is not None:
+                    sigset.append(signum)
+            kwargs['setsigdef'] = sigset
+    
+        file_actions = []
+        for fd in (p2cwrite, c2pread, errread):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_CLOSE, fd))
+        for fd, fd2 in (
+            (p2cread, 0),
+            (c2pwrite, 1),
+            (errwrite, 2),
+        ):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_DUP2, fd, fd2))
+    
+        if close_fds:
+            file_actions.append((os.POSIX_SPAWN_CLOSEFROM, 3))
+    
+        if file_actions:
+            kwargs['file_actions'] = file_actions
+    
+>       self.pid = os.posix_spawn(executable, args, env, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+
+/usr/lib/python3.14/subprocess.py:1819: FileNotFoundError
+=============================== warnings summary ===============================
+scripts/local_replay_sandbox.py:152
+tests/test_bread_continuation.py::test_real_reviewed_sealed_baseline_and_no_repetition
+  /datos/workspaces/personal/SpecOrganon/scripts/local_replay_sandbox.py:152: DeprecationWarning: Due to '_pack_', the '_PathBeneathAttr' Structure will use memory layout compatible with MSVC (Windows). If this is intended, set _layout_ to 'ms'. The implicit default is deprecated and slated to become an error in Python 3.19.
+    class _PathBeneathAttr(ctypes.Structure):
+
+src/specorganon/server.py:47
+  /datos/workspaces/personal/SpecOrganon/src/specorganon/server.py:47: DeprecationWarning: Due to '_pack_', the '_LandlockPathBeneathAttr' Structure will use memory layout compatible with MSVC (Windows). If this is intended, set _layout_ to 'ms'. The implicit default is deprecated and slated to become an error in Python 3.19.
+    class _LandlockPathBeneathAttr(ctypes.Structure):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_anchor_integration.py::test_initialization_with_anchor_fails_without_side_effects[signed]
+FAILED tests/test_anchor_integration.py::test_initialization_with_anchor_fails_without_side_effects[fixture]
+FAILED tests/test_anchor_integration.py::test_stale_anchor_rejected_by_cli_and_real_mcp
+FAILED tests/test_approval_security.py::test_signed_cli_and_mcp_share_challenge_and_rejection
+FAILED tests/test_approval_security.py::test_signed_field_success_stays_blocked_with_measured_records_and_claimed_guardrails
+FAILED tests/test_approval_security.py::test_synthetic_attestation_report_cannot_authorize_field_success
+FAILED tests/test_audit_blind_ratings.py::test_cli_success_and_safe_failure_modes
+FAILED tests/test_audit_signed_test_execution.py::test_matching_repeat_reads_input_and_hashes_artifact_and_streams
+FAILED tests/test_audit_signed_test_execution.py::test_signed_nonzero_matches_but_cannot_pass
+FAILED tests/test_audit_signed_test_execution.py::test_strict_repeat_emits_signable_measured_receipt_without_cli_pin
+FAILED tests/test_audit_signed_test_execution.py::test_strict_failed_execution_still_emits_measured_receipt
+FAILED tests/test_authorized_coordinated_runtime.py::OperatorGates::test_paid_constructor_uses_fixed_origin_after_gates
+FAILED tests/test_bread_continuation.py::test_prepare_and_generation_exact_outputs_without_automatic_execution
+FAILED tests/test_bread_continuation.py::test_real_reviewed_sealed_baseline_and_no_repetition
+FAILED tests/test_bread_continuation.py::test_real_sandbox_replay_cannot_create_files_network_or_descendants
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[tool]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[unknown_item]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[error]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[zero]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[incoherent]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[exit]
+FAILED tests/test_bread_continuation.py::test_failed_generation_retains_raw_trace_and_forbids_retry[api_key]
+FAILED tests/test_bread_continuation.py::test_real_model_capture_timeout_preserves_partial
+FAILED tests/test_bread_continuation.py::test_large_failed_stream_is_hashed_with_no_relaunch
+FAILED tests/test_bread_continuation.py::test_bad_proposal_not_repaired_or_published[extra]
+FAILED tests/test_bread_continuation.py::test_bad_proposal_not_repaired_or_published[type]
+FAILED tests/test_bread_continuation.py::test_bad_proposal_not_repaired_or_published[sources_array]
+FAILED tests/test_bread_continuation.py::test_bad_proposal_not_repaired_or_published[sources_duplicate]
+FAILED tests/test_bread_continuation.py::test_bad_proposal_not_repaired_or_published[sources_nonfinite]
+FAILED tests/test_bread_continuation.py::test_bad_proposal_not_repaired_or_published[script_large]
+FAILED tests/test_bread_continuation.py::test_bad_proposal_not_repaired_or_published[sources_large]
+FAILED tests/test_bread_continuation.py::test_bad_proposal_not_repaired_or_published[report_large]
+FAILED tests/test_bread_continuation.py::test_shared_protocol_admission_blocks_second_destination
+FAILED tests/test_bread_continuation.py::test_mutated_input_or_output_pin_is_rejected[input/source_lca.txt]
+FAILED tests/test_bread_continuation.py::test_mutated_input_or_output_pin_is_rejected[input/prototype_case.json]
+FAILED tests/test_bread_continuation.py::test_mutated_input_or_output_pin_is_rejected[prompt.txt]
+FAILED tests/test_bread_continuation.py::test_mutated_input_or_output_pin_is_rejected[schema.json]
+FAILED tests/test_bread_continuation.py::test_mutated_input_or_output_pin_is_rejected[analysis.py]
+FAILED tests/test_bread_continuation.py::test_mutated_input_or_output_pin_is_rejected[sources.json]
+FAILED tests/test_bread_continuation.py::test_mutated_input_or_output_pin_is_rejected[report.md]
+FAILED tests/test_bread_continuation.py::test_mutated_input_or_output_pin_is_rejected[model.stdout.jsonl]
+FAILED tests/test_bread_continuation.py::test_changed_source_rejected_before_new_directory
+FAILED tests/test_bread_continuation.py::test_parent_changes_rejected_without_touching_original
+FAILED tests/test_bread_continuation.py::test_coherent_runtime_plan_mutation_cannot_authorize_change[override]
+FAILED tests/test_bread_continuation.py::test_coherent_runtime_plan_mutation_cannot_authorize_change[config]
+FAILED tests/test_bread_continuation.py::test_coherent_runtime_plan_mutation_cannot_authorize_change[remove_input_pin]
+FAILED tests/test_bread_continuation.py::test_invalid_baseline_is_terminal_and_raw_preserved[{"x":NaN}]
+FAILED tests/test_bread_continuation.py::test_invalid_baseline_is_terminal_and_raw_preserved[{"x":1e400}]
+FAILED tests/test_bread_continuation.py::test_invalid_baseline_is_terminal_and_raw_preserved[{"x":1,"x":2}]
+FAILED tests/test_bread_continuation.py::test_invalid_baseline_is_terminal_and_raw_preserved[[]]
+FAILED tests/test_bread_continuation.py::test_replaying_marker_prevents_restart_after_interruption
+FAILED tests/test_bread_continuation_evaluate.py::test_real_sandbox_rejects_false_green_negative_and_blocks_second_evaluation
+FAILED tests/test_bread_frame.py::test_cli_mcp_probe_requires_verified_review_and_preserves_source_case
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/usr/lib/python3.14/selectors.py:398: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+53 failed, 709 passed, 3 warnings, 13 subtests passed in 200.29s (0:03:20)

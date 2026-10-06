@@ -1,0 +1,1129 @@
+{
+  "events": [
+    {
+      "actor": "agent:orchestrator",
+      "at": "2026-10-04T01:12:15+00:00",
+      "hash": "e45f08407f8cddb429f988624539b1df8bac4f6ecc7d00499079ba2da4ac3801",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "problem",
+        "kind": "problem",
+        "text": "Crear backups autosuficientes, restauración exacta, integridad y recuperación según CONTRACT.md.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:orchestrator",
+      "at": "2026-10-04T01:12:15+00:00",
+      "hash": "08722d10d1adc9098c00693242b250bad7f924a6df00225dc7af2c84fdd41cba",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem": 1
+        },
+        "id": "mandate",
+        "kind": "norm",
+        "text": "El dueño autorizó construir backups y evaluar este piloto local; decisiones técnicas delegadas dentro del contrato. Sin datos reales ni nuevas cuentas ni copias de credenciales.",
+        "version": 1
+      },
+      "prev_hash": "e45f08407f8cddb429f988624539b1df8bac4f6ecc7d00499079ba2da4ac3801",
+      "seq": 2
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-04T01:12:15+00:00",
+      "hash": "33fc283ecf02bfdcc798dcc88bc57871477a1d5a9a1b2a74e11a4f419fdda397",
+      "kind": "approval",
+      "payload": {
+        "id": "mandate",
+        "provenance": "local_declared",
+        "reason": "Mandato existente: el dueño pidió dale asignatelo como goal; no aprobación personal de una arquitectura.",
+        "version": 1
+      },
+      "prev_hash": "08722d10d1adc9098c00693242b250bad7f924a6df00225dc7af2c84fdd41cba",
+      "seq": 3
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:13:29+00:00",
+      "hash": "efbba3d23fd4641e71a8f81b22078ea0861176899550751374d34861d3641832",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "source": "/trial/AGENTS.md y /trial/CONTRACT.md"
+        },
+        "deps": {
+          "problem": 1
+        },
+        "id": "owner_actor",
+        "kind": "actor",
+        "text": "Dueño del piloto: necesita preservar y recuperar versiones de archivos de prueba; el autor implementa por delegación técnica y una sesión externa revisará tras la entrega.",
+        "version": 1
+      },
+      "prev_hash": "33fc283ecf02bfdcc798dcc88bc57871477a1d5a9a1b2a74e11a4f419fdda397",
+      "seq": 4
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:13:30+00:00",
+      "hash": "42149128a832881b46f47852ccd7b84370270050fe2ace82f19f6a3879b8446d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "mandate": 1,
+          "owner_actor": 1,
+          "problem": 1
+        },
+        "id": "boundary",
+        "kind": "boundary",
+        "text": "Variante V2: primera versión desde cero, Python 3.12 estándar, únicamente /trial y árboles de prueba privados. CLI create/verify/restore/list; versiones sucesivas exactas, corrupción, SIGKILL y rechazo de symlinks/especiales. No credenciales, red, dependencias, intervención humana ni evaluación de campo. El contrato permanece intacto.",
+        "version": 1
+      },
+      "prev_hash": "efbba3d23fd4641e71a8f81b22078ea0861176899550751374d34861d3641832",
+      "seq": 5
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "c2d875d57df1efbc49d8c8853c06eb7a4ad18d8d49ab9f532d8cb53957b67533",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "boundary": 1
+        },
+        "id": "snapshot_concept",
+        "kind": "concept",
+        "text": "Un snapshot válido es un árbol autosuficiente completo y verificable por manifiesto; publicación completa, integridad y restauración exacta son condiciones distintas.",
+        "version": 1
+      },
+      "prev_hash": "42149128a832881b46f47852ccd7b84370270050fe2ace82f19f6a3879b8446d",
+      "seq": 6
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "8cd0a3a982e52bac98794f9dd43214784b1ff416c98e0920e47e9381d6961a59",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "boundary": 1
+        },
+        "id": "stable_assumption",
+        "kind": "assumption",
+        "text": "La fuente permanece estable durante create según el contrato. No se atribuye autenticidad frente a un atacante capaz de reescribir datos y sus hashes; se comprueban alteraciones/eliminaciones de bytes y estructuras. La validación local no representa campo.",
+        "version": 1
+      },
+      "prev_hash": "c2d875d57df1efbc49d8c8853c06eb7a4ad18d8d49ab9f532d8cb53957b67533",
+      "seq": 7
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "2ea16f31237b00125af18deaacd303960b4985d8cfdc8d720bb888cf4966a0ea",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "boundary": 1,
+          "problem": 1
+        },
+        "id": "frame_recovery",
+        "kind": "frame_option",
+        "text": "Encuadre elegido por delegación: preservar cada versión exacta, detectar corrupción y repetir operaciones interrumpidas. La confiabilidad pesa más que ahorro de espacio.",
+        "version": 1
+      },
+      "prev_hash": "8cd0a3a982e52bac98794f9dd43214784b1ff416c98e0920e47e9381d6961a59",
+      "seq": 8
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "635de1faa20980efb1457ef5c36faa4d3c8b46323a0759e435d2da713f5ae594",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "boundary": 1,
+          "problem": 1
+        },
+        "id": "frame_efficiency",
+        "kind": "frame_option",
+        "text": "Encuadre rival: optimizar almacenamiento incremental. Ahorra bytes, pero una dependencia compartida dañada afecta varias versiones; V2 no exige deduplicación.",
+        "version": 1
+      },
+      "prev_hash": "2ea16f31237b00125af18deaacd303960b4985d8cfdc8d720bb888cf4966a0ea",
+      "seq": 9
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "b893976ce2d55dfb25daa0beac0c736dcfe11d125de961e3d8bb9a3ff2ee48aa",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem": 1,
+          "snapshot_concept": 1
+        },
+        "id": "question",
+        "kind": "question",
+        "text": "¿Snapshots completos con manifiesto SHA-256 y publicación atómica conservan versiones sucesivas exactas y rechazan fallos contractuales en pruebas locales?",
+        "version": 1
+      },
+      "prev_hash": "635de1faa20980efb1457ef5c36faa4d3c8b46323a0759e435d2da713f5ae594",
+      "seq": 10
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "847b00dd1847f930d020d5863e71ca0c5daa55b513c8b8dd7726793d8144b603",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "question": 1,
+          "stable_assumption": 1
+        },
+        "id": "hypothesis",
+        "kind": "hypothesis",
+        "text": "Cada create copia un árbol independiente y valida su manifiesto antes de publicar; debería preservar adiciones/modificaciones/eliminaciones entre versiones y detectar corrupción antes de publicar restore.",
+        "version": 1
+      },
+      "prev_hash": "b893976ce2d55dfb25daa0beac0c736dcfe11d125de961e3d8bb9a3ff2ee48aa",
+      "seq": 11
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "ddadac32f5a58d1f8535ad071147f9544b4e37bd83346c678637c4bd7b9aa10a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "direction": "maximize",
+          "metric_key": "contract_checks",
+          "unit": "fraction"
+        },
+        "deps": {
+          "mandate": 1,
+          "problem": 1
+        },
+        "id": "indicator",
+        "kind": "indicator",
+        "text": "Proporción de comprobaciones contractuales locales superadas, con fallos críticos de éxito falso y mutación protegida informados por separado; sin equivalencia con eficacia general.",
+        "version": 1
+      },
+      "prev_hash": "847b00dd1847f930d020d5863e71ca0c5daa55b513c8b8dd7726793d8144b603",
+      "seq": 12
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "4f7a9c5552427719d4e979d17d10666f75efbbf855660a151d9e601884f03172",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "árboles esperados independientes y versión previa conservada",
+          "method": "unittest, CLI subprocess y SIGKILL real",
+          "population": "Árboles sintéticos privados en /trial/solution",
+          "uncertainty": "suite finita local; no campo ni evaluación externa"
+        },
+        "deps": {
+          "boundary": 1,
+          "hypothesis": 1,
+          "indicator": 1,
+          "question": 1
+        },
+        "id": "protocol",
+        "kind": "protocol",
+        "text": "Antes de implementar: suite Python unittest sobre árboles privados; V2 con 3 versiones, restauración tras borrar fuente, JSON/códigos, límites ID, corrupción de datos/metadatos, symlinks/especiales, solapamientos, destino protegido y SIGKILL durante create. Comparación con árboles esperados byte a byte, no con salida del programa. Base: implementación inexistente, sin porcentaje premedido. Criterio: todos los casos pasan y ningún fallo crítico observado. Timeout explícito, comandos/streams/recibos guardados; límite: muestras locales y entorno Linux, sin adversario concurrente.",
+        "version": 1
+      },
+      "prev_hash": "ddadac32f5a58d1f8535ad071147f9544b4e37bd83346c678637c4bd7b9aa10a",
+      "seq": 13
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "868dcee569447b4a9d2bc352e98b136b3d826a6a576f1abcb9737fab1014ac86",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "claim_scope": "technical",
+          "date": "2026-10-04",
+          "locator": "Producto y formato común; Tres variantes; Criterios",
+          "method": "lectura directa del contrato y ejecución local python --version",
+          "source": "/trial/CONTRACT.md y salida de python --version"
+        },
+        "deps": {
+          "boundary": 1,
+          "protocol": 1
+        },
+        "id": "contract_evidence",
+        "kind": "evidence",
+        "text": "Lectura local de CONTRACT.md: V2 requiere snapshots sucesivos independientes con restauración exacta y mantiene todas las garantías base; no exige deduplicación. Python 3.12.15 observado.",
+        "version": 1
+      },
+      "prev_hash": "4f7a9c5552427719d4e979d17d10666f75efbbf855660a151d9e601884f03172",
+      "seq": 14
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "6a3fbdb032807b3e20ca722392c0ad600961f373d847cf28b7dc8b945909502e",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "contract_evidence": 1,
+          "hypothesis": 1,
+          "protocol": 1
+        },
+        "id": "inference",
+        "kind": "inference",
+        "text": "Inferencia de requisitos: snapshots completos reducen dependencias entre versiones y permiten verificar cada restore desde el repo; SHA-256 y una lista exacta de rutas detectan las corrupciones simples contractuales. Esto aún no es resultado de pruebas.",
+        "version": 1
+      },
+      "prev_hash": "868dcee569447b4a9d2bc352e98b136b3d826a6a576f1abcb9737fab1014ac86",
+      "seq": 15
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "00909b4ed933f0d7446eb36bd0299cdc39bf7e7fa5f0b1aab409202dd258e5a4",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "contract_evidence": 1,
+          "inference": 1
+        },
+        "id": "synthesis",
+        "kind": "synthesis",
+        "text": "La autosuficiencia y publicación atómica favorecen un directorio completo por ID; un manifiesto validado fija rutas, tipos, tamaños y hashes. Antes de publicar restore se verifica el árbol completo.",
+        "version": 1
+      },
+      "prev_hash": "6a3fbdb032807b3e20ca722392c0ad600961f373d847cf28b7dc8b945909502e",
+      "seq": 16
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "675023a11ba07dd30538851ab110a16e366ee9a022c5a581f17659b70aa7c55e",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "stable_assumption": 1,
+          "synthesis": 1
+        },
+        "id": "uncertainty",
+        "kind": "uncertainty",
+        "text": "No hay mediciones de campo, revisión independiente ni implementación previa ejecutada. Los hashes detectan daños, no autentican un atacante que recalcula metadatos. SIGKILL se ensayará; corte eléctrico y mutaciones concurrentes de rutas no están ensayados.",
+        "version": 1
+      },
+      "prev_hash": "00909b4ed933f0d7446eb36bd0299cdc39bf7e7fa5f0b1aab409202dd258e5a4",
+      "seq": 17
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "21be28556d76ddc1e76c553ee4c17ecfb29ae7be158fb0e13d887c532d2e6b2a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "mandate": 1,
+          "synthesis": 1
+        },
+        "id": "option_tree",
+        "kind": "option",
+        "text": "Directorios completos por ID más manifiesto/checksum. Copia O(bytes) por versión y mayor espacio; inspección simple, versiones aisladas y rename atómico en el mismo filesystem.",
+        "version": 1
+      },
+      "prev_hash": "675023a11ba07dd30538851ab110a16e366ee9a022c5a581f17659b70aa7c55e",
+      "seq": 18
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "6de65fb372a12c3c58c1579feeb9d09c7b60873d90e6661e3c07700258113bb2",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "mandate": 1,
+          "synthesis": 1
+        },
+        "id": "option_archive",
+        "kind": "option",
+        "text": "Archivo tar/zip completo por ID: menos inodos, pero añade extracción segura, comprobación de miembros duplicados/rutas y gestión de tipos. No reduce bytes necesariamente y complica restauración transparente.",
+        "version": 1
+      },
+      "prev_hash": "21be28556d76ddc1e76c553ee4c17ecfb29ae7be158fb0e13d887c532d2e6b2a",
+      "seq": 19
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "e7d690752bd278cac82e29321b8a4b2a8e4fb71ff5f491700be6b636c836ef8e",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "mandate": 1,
+          "synthesis": 1
+        },
+        "id": "option_incremental",
+        "kind": "option",
+        "text": "Objetos compartidos por hash y manifiestos por versión: ahorra duplicados, pero requiere publicación de objetos, recolección de huérfanos y dependencias compartidas. Más complejidad que V2 requiere.",
+        "version": 1
+      },
+      "prev_hash": "6de65fb372a12c3c58c1579feeb9d09c7b60873d90e6661e3c07700258113bb2",
+      "seq": 20
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "9ad1f4503deeb0ea704b9e285a241f8d2b54e6f3f82cf4590cb35364e0b23e11",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "indicator": 1,
+          "option_archive": 1,
+          "option_incremental": 1,
+          "option_tree": 1
+        },
+        "id": "comparison",
+        "kind": "comparison",
+        "text": "Se elige árbol completo: simplicidad para exactitud, integridad y repetición. Archivo puede ahorrar inodos; incremental puede ahorrar bytes; ninguno aporta garantía contractual adicional suficiente para su complejidad inicial.",
+        "version": 1
+      },
+      "prev_hash": "e7d690752bd278cac82e29321b8a4b2a8e4fb71ff5f491700be6b636c836ef8e",
+      "seq": 21
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "313cdf09fd898adf2cc6f5e36234eb37d59e60031dac1eec3fa6879add2e01b1",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "comparison": 1,
+          "uncertainty": 1
+        },
+        "id": "risk",
+        "kind": "risk",
+        "text": "Costes: copia completa por versión, hashes en verify/list/restore y temporales huérfanos tras SIGKILL. Riesgos controlados: validar rutas/tipos sin seguir symlinks, no sobrescribir IDs, staging privado y comprobación antes de rename. Concurrencia local se serializa mediante flock del directorio del repo en Linux.",
+        "version": 1
+      },
+      "prev_hash": "9ad1f4503deeb0ea704b9e285a241f8d2b54e6f3f82cf4590cb35364e0b23e11",
+      "seq": 22
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "28be50a67fa6fa737f5328c5fafadce16baca3f9f4126a1ae1b2cd926f98f76a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "claim_scope": "technical",
+          "provenance": "technical_delegation"
+        },
+        "deps": {
+          "comparison": 1,
+          "mandate": 1,
+          "risk": 1
+        },
+        "id": "architecture_decision",
+        "kind": "decision",
+        "text": "Decisión técnica tomada por agent:author bajo la delegación existente de mandate: árbol completo por ID y SHA-256, sin deduplicación, CLI JSON, staging y rename. No afirma elección personal ni nueva aprobación del dueño; queda pendiente de revisión externa.",
+        "version": 1
+      },
+      "prev_hash": "313cdf09fd898adf2cc6f5e36234eb37d59e60031dac1eec3fa6879add2e01b1",
+      "seq": 23
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "b882c6b2f7714f95f05a9894c87b18871e2d6d4b5762c3c49387248784dbb921",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "source": "/trial/CONTRACT.md"
+        },
+        "deps": {
+          "architecture_decision": 1,
+          "contract_evidence": 1,
+          "indicator": 1,
+          "mandate": 1
+        },
+        "id": "requirement",
+        "kind": "requirement",
+        "text": "Cumplir la CLI y garantías base de CONTRACT.md; preservar V2 exacta por cada ID autosuficiente, rechazar corrupción, IDs/rutas/tipos inválidos, fuente/repo solapados y destino no vacío; publicar create/restore completos y permitir repetir create tras SIGKILL sin alterar versiones previas.",
+        "version": 1
+      },
+      "prev_hash": "28be50a67fa6fa737f5328c5fafadce16baca3f9f4126a1ae1b2cd926f98f76a",
+      "seq": 24
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "0597fe6f737f80ab3a9c2f832025cd0aab105ead1a997612ba57b31bbd7d50af",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "accept": "100% de pruebas propias sin fallos críticos",
+          "claim_scope": "technical",
+          "metric_key": "contract_checks",
+          "reject": "cualquier comprobación fallida o fallo crítico",
+          "threshold": 1,
+          "unit": "fraction"
+        },
+        "deps": {
+          "contract_evidence": 1,
+          "indicator": 1,
+          "protocol": 1,
+          "requirement": 1
+        },
+        "id": "criterion",
+        "kind": "criterion",
+        "text": "Aceptación técnica local previa: todas las comprobaciones propias pasan, exactitud byte a byte en cada versión y ningún éxito falso o mutación de fuente/destino protegido observado. Rechazo si una comprobación falla. No establece eficacia general ni aceptación externa.",
+        "version": 1
+      },
+      "prev_hash": "b882c6b2f7714f95f05a9894c87b18871e2d6d4b5762c3c49387248784dbb921",
+      "seq": 25
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:14:34+00:00",
+      "hash": "6e2a7151edd1bd1add52c664fdcd51832c5dd415eff13a211ad8ef532c6c0186",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "claim_scope": "technical",
+          "date": "2026-10-04",
+          "source": "encargo actual: Construye la primera versión funcional desde cero",
+          "status": "not_measured"
+        },
+        "deps": {
+          "criterion": 1,
+          "protocol": 1
+        },
+        "id": "baseline",
+        "kind": "baseline",
+        "text": "Primera versión desde cero: no hay backup.py funcional al inicio del encargo ni prueba de línea base ejecutada. No se inventa un porcentaje antes del cambio; la comparación técnica es contra el contrato y los árboles esperados.",
+        "version": 1
+      },
+      "prev_hash": "0597fe6f737f80ab3a9c2f832025cd0aab105ead1a997612ba57b31bbd7d50af",
+      "seq": 26
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-04T01:21:23+00:00",
+      "hash": "4009b4eb167b375de7c8c6e1e9fd0a305c4c37f6a80d76a2a4aa631d5fbf091e",
+      "kind": "approval",
+      "payload": {
+        "id": "architecture_decision",
+        "provenance": "local_declared",
+        "reason": "Registro local declarado de la delegación técnica ya existente en mandate v1 y las instrucciones del dueño: he leído architecture_decision v1, comparison y risk. Árboles completos por ID, SHA-256, CLI JSON, staging y rename caben en CONTRACT.md, que deja libre la implementación y no exige deduplicación. No cambian propósito, cuentas, presupuesto ni frontera. La elección corresponde a agent:author por delegación; no se atribuye elección personal al dueño ni identidad autenticada.",
+        "version": 1
+      },
+      "prev_hash": "6e2a7151edd1bd1add52c664fdcd51832c5dd415eff13a211ad8ef532c6c0186",
+      "seq": 27
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T01:21:23+00:00",
+      "hash": "11c9cf72d9a1835aee367a7c8300cef843635dfbdc498128620fae47837cdbd2",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Sesión independiente del autor. Leídos problem v1, owner_actor v1 y boundary v1, CONTRACT.md y contratos metodológicos. Delimitan conservación y restauración de archivos de prueba, dueño afectado, autor delegado y revisión externa; V2 mantiene las garantías base, Python estándar, ámbito local y exclusiones de credenciales/red/campo. Encuadres recovery/efficiency explicitan exactitud frente a ahorro. No observo exclusión de actor decisivo para este piloto técnico local. Gate frame listo sin bloqueos. Aceptación metodológica local, no veredicto técnico neutral ni de campo; procedencia declarada no autenticada.",
+        "snapshot": "191ce0b6766c0df1ac850d32be87f1fcffe68e914f0ed2c55815fc1466a11441",
+        "verdict": "accept"
+      },
+      "prev_hash": "4009b4eb167b375de7c8c6e1e9fd0a305c4c37f6a80d76a2a4aa631d5fbf091e",
+      "seq": 28
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T01:21:24+00:00",
+      "hash": "845a227a23941430d9143e60f0934a6d512565f98c60a87dee0b00409bcf6bd7",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 28,
+        "snapshot": "191ce0b6766c0df1ac850d32be87f1fcffe68e914f0ed2c55815fc1466a11441"
+      },
+      "prev_hash": "11c9cf72d9a1835aee367a7c8300cef843635dfbdc498128620fae47837cdbd2",
+      "seq": 29
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:25:23+00:00",
+      "hash": "0864d10a86f9f98439e0735298b8d0634f6310d1df3ec917ccc40c153b13cce9",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "suite antes/después y árboles esperados byte a byte; repo previo inalterado al rechazar presupuesto",
+          "method": "subprocess con argv, timeout, códigos y streams; unittest y medición independiente st_size",
+          "population": "árboles sintéticos privados en /trial/solution/evidence",
+          "uncertainty": "pruebas locales finitas Linux; sin revisión externa en esta etapa"
+        },
+        "deps": {
+          "mandate": 1,
+          "protocol": 1,
+          "requirement": 1
+        },
+        "id": "budget_protocol",
+        "kind": "protocol",
+        "text": "Extensión premedición V2: medir baseline ejecutando la suite existente antes del cambio. Después comprobar suma independiente de st_size de todos los archivos regulares (datos y metadata), límite exacto y un byte inferior, N menor que bytes previos, N=0 y valores inválidos, versiones sucesivas con presupuesto, rollback sin crecimiento residual, limpieza de staging tras SIGKILL y serialización de creates. Mantener todas las pruebas base; ejemplos create/verify/restore/list con límite. Aceptación local: todas pasan y ningún fallo crítico observado; no se reciben resultados reservados ni se demuestra eficacia de campo.",
+        "version": 1
+      },
+      "prev_hash": "845a227a23941430d9143e60f0934a6d512565f98c60a87dee0b00409bcf6bd7",
+      "seq": 30
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "03a2320dd9c206e5388320f32426dbf613d774757b1e750cad142d4f5f162390",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem": 1,
+          "snapshot_concept": 1
+        },
+        "id": "question",
+        "kind": "question",
+        "text": "¿Snapshots completos con manifiesto SHA-256, publicación atómica y control global st_size conservan V2 exacta y rechazan fallos y presupuestos insuficientes en pruebas locales?",
+        "version": 2
+      },
+      "prev_hash": "0864d10a86f9f98439e0735298b8d0634f6310d1df3ec917ccc40c153b13cce9",
+      "seq": 31
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "21df06c4e42585e4bd9ef3f933939451440679e4069f128ae1088ff28d70c293",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "question": 2,
+          "stable_assumption": 1
+        },
+        "id": "hypothesis",
+        "kind": "hypothesis",
+        "text": "Una copia completa validada y publicada con rename preservará versiones. Medir todos los archivos regulares del repo, candidato y metadata incluidos, bajo el mismo bloqueo y antes de publicar permitirá cumplir N; eliminar staging tras rechazo evitará crecimiento residual.",
+        "version": 2
+      },
+      "prev_hash": "03a2320dd9c206e5388320f32426dbf613d774757b1e750cad142d4f5f162390",
+      "seq": 32
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "462a45249e2f01251364f69f83d516d5a89fcd530eb456c6cdef256dc4c8c3c9",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "direction": "maximize",
+          "metric": "contract_checks",
+          "metric_key": "contract_checks",
+          "unit": "fraction"
+        },
+        "deps": {
+          "mandate": 1,
+          "problem": 1
+        },
+        "id": "indicator",
+        "kind": "indicator",
+        "text": "Proporción de comprobaciones contractuales locales superadas, con fallos críticos de éxito falso y mutación protegida informados por separado; sin equivalencia con eficacia general.",
+        "version": 2
+      },
+      "prev_hash": "21df06c4e42585e4bd9ef3f933939451440679e4069f128ae1088ff28d70c293",
+      "seq": 33
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "5ef1708c4242a54cdf57fa550961739c0791834feaf7d3fa3d4e4cc42cd8c209",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "árboles esperados independientes y versión previa conservada",
+          "method": "unittest, CLI subprocess y SIGKILL real",
+          "population": "Árboles sintéticos privados en /trial/solution",
+          "uncertainty": "suite finita local; no campo ni evaluación externa"
+        },
+        "deps": {
+          "boundary": 1,
+          "hypothesis": 2,
+          "indicator": 2,
+          "question": 2
+        },
+        "id": "protocol",
+        "kind": "protocol",
+        "text": "Protocolo para cambio V2 fijado antes de editar: suite base, 3 versiones byte a byte, fuente eliminada, corrupción de cada archivo regular, rechazos de rutas/tipos/IDs y destino protegido, SIGKILL real y concurrencia. Añadir suma independiente st_size, límite exacto, un byte inferior, inferior a datos existentes, metadata de fuente vacía, argumentos inválidos y rollback sin residuos. Baseline: ejecutar suite existente antes de editar. Aceptar localmente solo comprobaciones ejecutadas exitosas y sin daño crítico; registrar omisiones ambientales explícitas. Timeout y streams conservados. Sin campo ni evaluación reservada.",
+        "version": 2
+      },
+      "prev_hash": "462a45249e2f01251364f69f83d516d5a89fcd530eb456c6cdef256dc4c8c3c9",
+      "seq": 34
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "2aa9f089c624b1dfc3b4f7a49aadf2d2992c78033cdcf49a8ee9cc83d8242f95",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "claim_scope": "technical",
+          "date": "2026-10-04",
+          "locator": "Contrato completo; Producto y formato común; Cambio común tras la primera entrega; Criterios",
+          "method": "lectura directa local de CONTRACT.md y ejecución python --version",
+          "origin": "observed",
+          "source": "/trial/CONTRACT.md; stdout Python 3.12.15"
+        },
+        "deps": {
+          "boundary": 1,
+          "protocol": 2
+        },
+        "id": "contract_evidence",
+        "kind": "evidence",
+        "text": "Lectura completa de /trial/CONTRACT.md actualizado el 2026-10-04: V2 exacta, autosuficiencia, integridad, rechazo de symlinks/especiales y recuperación siguen vigentes. El cambio exige create --max-bytes N con suma de st_size de TODOS los archivos regulares y metadata persistente; rechazo sin invalidar previos ni crecimiento residual permanente. Python 3.12.15 observado. No exige deduplicación ni límites imposibles.",
+        "version": 2
+      },
+      "prev_hash": "5ef1708c4242a54cdf57fa550961739c0791834feaf7d3fa3d4e4cc42cd8c209",
+      "seq": 35
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "c98656cfdf4f07916166d2db100bcef86e9bf34b9b1757ae1a4baadb71ccde11",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "contract_evidence": 2,
+          "hypothesis": 2,
+          "protocol": 2
+        },
+        "id": "inference",
+        "kind": "inference",
+        "text": "Inferencia, previa a resultados del cambio: árbol completo y manifiesto permiten exactitud independiente. Contar st_size del repo con staging completo antes de rename incorpora metadata y versiones previas; serialización evita dos autores gastando el mismo presupuesto. La limpieza de staging puede recuperar intentos fallidos sin borrar IDs publicados.",
+        "version": 2
+      },
+      "prev_hash": "2aa9f089c624b1dfc3b4f7a49aadf2d2992c78033cdcf49a8ee9cc83d8242f95",
+      "seq": 36
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "f58c6091d1428a7c04a6462e5642a75d4f5d12618205758e6ee89f263581bc5d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "contract_evidence": 2,
+          "inference": 2
+        },
+        "id": "synthesis",
+        "kind": "synthesis",
+        "text": "Mantener árboles completos por ID y manifiestos SHA-256. Limitar la suma lógica de archivos regulares bajo el bloqueo antes del rename; metadata solo en manifest.json y manifest.sha256, sin xattrs ni codificación adicional en nombres para evadir N. Staging no se lista como completo y se elimina en error o al siguiente create tras interrupción.",
+        "version": 2
+      },
+      "prev_hash": "c98656cfdf4f07916166d2db100bcef86e9bf34b9b1757ae1a4baadb71ccde11",
+      "seq": 37
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "e4953f0b0a123b109c19b6f721a646e15269294681f838ead7a1fc3b395626a4",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "stable_assumption": 1,
+          "synthesis": 2
+        },
+        "id": "uncertainty",
+        "kind": "uncertainty",
+        "text": "Validación técnica finita en Linux/Python 3.12, sin resultados reservados ni eficacia de campo. Baseline tuvo restricción ambiental AF_UNIX bind; se conserva el error y se declara omisión del caso socket en la suite adaptada. Hashes no autentican reescritura adversarial de datos y hashes. No se ha ensayado corte eléctrico ni adversario concurrente sobre rutas.",
+        "version": 2
+      },
+      "prev_hash": "f58c6091d1428a7c04a6462e5642a75d4f5d12618205758e6ee89f263581bc5d",
+      "seq": 38
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "c83b9dfa33413bb08556f238bfb54874a5a30d3d77b2116082ba97a13b720582",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "mandate": 1,
+          "synthesis": 2
+        },
+        "id": "option_tree",
+        "kind": "option",
+        "text": "Opción elegida técnicamente: conservar árboles completos, añadir medición global st_size y rollback de staging. Copia y almacenamiento O(bytes por versión); límite alto alcanzable sin nuevos formatos ni migración.",
+        "version": 2
+      },
+      "prev_hash": "e4953f0b0a123b109c19b6f721a646e15269294681f838ead7a1fc3b395626a4",
+      "seq": 39
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "c7395b412a60f2fb84c90ecfbaf231ad2a16641c60c32645e4440586c6cf0272",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "mandate": 1,
+          "synthesis": 2
+        },
+        "id": "option_archive",
+        "kind": "option",
+        "text": "Opción alternativa: archivo zip comprimido por snapshot y manifiesto. Puede reducir bytes, pero requiere cambiar formato, reglas seguras de extracción y detección de corrupción. No garantiza caber con bytes incomprimibles.",
+        "version": 2
+      },
+      "prev_hash": "c83b9dfa33413bb08556f238bfb54874a5a30d3d77b2116082ba97a13b720582",
+      "seq": 40
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "02ed2634e273700d9c266ce5771aada5d94ee1863493018d2ab8b63fca74b32d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "mandate": 1,
+          "synthesis": 2
+        },
+        "id": "option_incremental",
+        "kind": "option",
+        "text": "Opción alternativa: objetos compartidos por hash y manifiestos por versión. Reduce duplicados en V2, pero añade dependencias, GC y transacciones para cuota y recuperación; corrupción compartida afecta múltiples versiones.",
+        "version": 2
+      },
+      "prev_hash": "c7395b412a60f2fb84c90ecfbaf231ad2a16641c60c32645e4440586c6cf0272",
+      "seq": 41
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "93198ead2a0c85cb3842b4ec57dd5b28e75cd197e9df23910122bd78eb6dd91d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "indicator": 2,
+          "option_archive": 2,
+          "option_incremental": 2,
+          "option_tree": 2
+        },
+        "id": "comparison",
+        "kind": "comparison",
+        "text": "Por delegación técnica se conserva árbol completo con control global de cuota: el contrato no exige deduplicación ni compresión y contempla límites físicamente imposibles. Compresión o almacenamiento compartido podrían ahorrar bytes, con más cambios y riesgos de recuperación. Se prioriza verificar requisitos y mantener compatibilidad de snapshots.",
+        "version": 2
+      },
+      "prev_hash": "02ed2634e273700d9c266ce5771aada5d94ee1863493018d2ab8b63fca74b32d",
+      "seq": 42
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "b5f9f6c150f1e2e3c65a37c4ccabdf3a136321466555936206dd06ebcaa98f77",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "comparison": 2,
+          "uncertainty": 2
+        },
+        "id": "risk",
+        "kind": "risk",
+        "text": "Coste: copias completas y hashes en verify/list/restore, más una lectura de metadata para sumar st_size. Control: flock del directorio repo en Linux, sin archivo de lock persistente; limpieza exclusiva de .stage- tras inspección de tipos; chequeo de bytes antes de publicación y finally elimina candidato rechazado. SIGKILL puede dejar staging hasta siguiente create. El límite aplica al estado final exitoso, no al pico temporal.",
+        "version": 2
+      },
+      "prev_hash": "93198ead2a0c85cb3842b4ec57dd5b28e75cd197e9df23910122bd78eb6dd91d",
+      "seq": 43
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "a0bf41036093a10f72a5f449003750b77e17ff317f9d6503a7bad078a675834b",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "claim_scope": "technical",
+          "provenance": "technical_delegation"
+        },
+        "deps": {
+          "comparison": 2,
+          "mandate": 1,
+          "risk": 2
+        },
+        "id": "architecture_decision",
+        "kind": "decision",
+        "text": "Decisión técnica de agent:author bajo la delegación de mandate: conservar formato de árbol y SHA-256, añadir --max-bytes opcional no negativo, contar todo st_size regular incluido staging antes de rename y limpiar residuos en error/reintento. Sin deduplicación ni compresión. No representa elección personal del dueño ni nueva aprobación; revisión externa pendiente.",
+        "version": 2
+      },
+      "prev_hash": "b5f9f6c150f1e2e3c65a37c4ccabdf3a136321466555936206dd06ebcaa98f77",
+      "seq": 44
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "6a8c50bf42c29a198f1d7972c6b65c8e6da00b81e89c2a607d8c197f747ca3da",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "source": "/trial/CONTRACT.md"
+        },
+        "deps": {
+          "architecture_decision": 2,
+          "contract_evidence": 2,
+          "indicator": 2,
+          "mandate": 1
+        },
+        "id": "requirement",
+        "kind": "requirement",
+        "text": "Cumplir íntegramente CONTRACT.md actualizado: CLI JSON y V2 exacta autosuficiente; rechazos de corrupción, IDs/rutas/tipos inválidos, solapamientos y destino no vacío; publicación atómica y retry tras SIGKILL preservando IDs previos. create --max-bytes N debe contar todos los archivos regulares y metadata persistente, éxito <=N y rechazo sin crecimiento residual permanente ni invalidación de previos.",
+        "version": 2
+      },
+      "prev_hash": "a0bf41036093a10f72a5f449003750b77e17ff317f9d6503a7bad078a675834b",
+      "seq": 45
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "ca280660a39d7b7182b4edd6eb8457214b5a0fb7e553da98c184936571a3ff46",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "accept": "todas las comprobaciones ejecutadas pasan; omisiones explícitas",
+          "accept_test": {
+            "operator": ">=",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "claim_scope": "technical",
+          "metric": "contract_checks",
+          "metric_key": "contract_checks",
+          "reject": "cualquier comprobación fallida o fallo crítico",
+          "threshold": 1,
+          "unit": "fraction"
+        },
+        "deps": {
+          "contract_evidence": 2,
+          "indicator": 2,
+          "protocol": 2,
+          "requirement": 2
+        },
+        "id": "criterion",
+        "kind": "criterion",
+        "text": "Criterio previo al resultado del cambio: todas las comprobaciones ejecutables propias pasan, versiones exactas, suma independiente st_size <=N tras éxito y repo previo sin nuevos bytes tras rechazo. Informar omisiones y errores ambientales; no éxito falso ni mutación protegida observados. Esto no acredita eficacia general ni revisión externa.",
+        "version": 2
+      },
+      "prev_hash": "6a8c50bf42c29a198f1d7972c6b65c8e6da00b81e89c2a607d8c197f747ca3da",
+      "seq": 46
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "972acec2804f6dfcca9feec71ef80c9b69dcaab8324819a9c35e3450d9fb192b",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "claim_scope": "technical",
+          "date": "2026-10-04",
+          "environmental_errors": 1,
+          "metric": "contract_checks",
+          "metric_key": "contract_checks",
+          "origin": "technical",
+          "passed_methods": 21,
+          "source": "/trial/solution/evidence/v2-budget/baseline.json y baseline.stderr",
+          "status": "measured",
+          "total_methods": 22,
+          "unit": "fraction",
+          "value": 0.9545454545454546
+        },
+        "deps": {
+          "criterion": 2,
+          "protocol": 2
+        },
+        "id": "baseline",
+        "kind": "baseline",
+        "text": "Baseline medida inmediatamente antes del cambio, no atribuida a una entrega previa: python /trial/solution/test_backup.py, timeout 180 s, exit 1, 22 métodos: 21 OK y 1 error ambiental PermissionError al bind AF_UNIX. Streams y hashes conservados en solution/evidence/v2-budget/baseline.*. El método que falló no llegó a sus comprobaciones posteriores de FIFO/destino. No es prueba de defecto de backup ni estimación de campo.",
+        "version": 2
+      },
+      "prev_hash": "ca280660a39d7b7182b4edd6eb8457214b5a0fb7e553da98c184936571a3ff46",
+      "seq": 47
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:29:38+00:00",
+      "hash": "c38cfa69e06b32b9122442c853053c6e6f44ac41d6ed0f58c7bd371fb034594e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "suite antes/después y árboles esperados byte a byte; repo previo inalterado al rechazar presupuesto",
+          "method": "subprocess con argv, timeout, códigos y streams; unittest y medición independiente st_size",
+          "population": "árboles sintéticos privados en /trial/solution/evidence",
+          "uncertainty": "pruebas locales finitas Linux; sin revisión externa en esta etapa"
+        },
+        "deps": {
+          "mandate": 1,
+          "protocol": 2,
+          "requirement": 2
+        },
+        "id": "budget_protocol",
+        "kind": "protocol",
+        "text": "Extensión premedición V2: medir baseline ejecutando la suite existente antes del cambio. Después comprobar suma independiente de st_size de todos los archivos regulares (datos y metadata), límite exacto y un byte inferior, N menor que bytes previos, N=0 y valores inválidos, versiones sucesivas con presupuesto, rollback sin crecimiento residual, limpieza de staging tras SIGKILL y serialización de creates. Mantener todas las pruebas base; ejemplos create/verify/restore/list con límite. Aceptación local: todas pasan y ningún fallo crítico observado; no se reciben resultados reservados ni se demuestra eficacia de campo.",
+        "version": 2
+      },
+      "prev_hash": "972acec2804f6dfcca9feec71ef80c9b69dcaab8324819a9c35e3450d9fb192b",
+      "seq": 48
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:31:23+00:00",
+      "hash": "aed5710d4ba0e6b295f6d47bdbd3647cd60191b26c1fd84189ecf9dfeb98ab21",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "claim_scope": "technical",
+          "provenance": "technical_delegation",
+          "sha256": "f4fe873788bbb729932e2c14d2397ba62453e556715151bba6e7852e4dc05a55",
+          "source": "/trial/solution/backup.py"
+        },
+        "deps": {
+          "architecture_decision": 2,
+          "budget_protocol": 2,
+          "requirement": 2
+        },
+        "id": "implementation",
+        "kind": "implementation",
+        "text": "Implementado en /trial/solution/backup.py: formato anterior conservado; --max-bytes opcional no negativo, suma st_size de archivos regulares con metadata/candidato bajo flock, chequeo antes de rename, eliminación de staging en rechazo y recolección de staging abandonado antes de create. Bootstrap concurrente usa mkdir exist_ok. Python 3.12 biblioteca estándar, Linux/POSIX. La suite y ejemplos ejecutados se registran aparte; sin revisión ni aprobación nueva.",
+        "version": 1
+      },
+      "prev_hash": "c38cfa69e06b32b9122442c853053c6e6f44ac41d6ed0f58c7bd371fb034594e",
+      "seq": 49
+    },
+    {
+      "actor": "agent:author",
+      "at": "2026-10-04T01:31:47+00:00",
+      "hash": "61971242add3be2b83608f465de9001f38200688a33798ee59dd130a78954564",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/usr/local/bin/python",
+            "/trial/solution/test_backup.py"
+          ],
+          "command": "/usr/local/bin/python /trial/solution/test_backup.py",
+          "executed_methods": 29,
+          "passed": true,
+          "receipt": {
+            "argv": [
+              "/usr/local/bin/python",
+              "/trial/solution/test_backup.py"
+            ],
+            "exit_code": 0,
+            "result_sha256": "efe2b79e49c4790965674a39b11ddb4e3846e9976e878f324d86932570a81300",
+            "stderr_sha256": "0d3f7e1122723c68dc968a0583da2efa6b4d21707bd8dfff037f1d19c8f9c226",
+            "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "timed_out": false
+          },
+          "skipped_methods": 1,
+          "source": "/trial/solution/evidence/v2-budget/suite.json",
+          "timeout_seconds": 180,
+          "total_methods": 30
+        },
+        "deps": {
+          "budget_protocol": 2,
+          "criterion": 2,
+          "implementation": 1
+        },
+        "id": "suite_test",
+        "kind": "test",
+        "text": "Ejecución real de suite actual: exit 0, 30 métodos, 29 OK y 1 omitido (entorno prohíbe AF_UNIX bind). Incluye límites, rollback, V2, corrupción, SIGKILL y concurrencia. No equipara omisión a prueba ejecutada. Streams suite.stdout/suite.stderr, comandos por operación solution/evidence/commands.jsonl.",
+        "version": 1
+      },
+      "prev_hash": "aed5710d4ba0e6b295f6d47bdbd3647cd60191b26c1fd84189ecf9dfeb98ab21",
+      "seq": 50
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-04T01:33:40+00:00",
+      "hash": "a86daa71b7617400e5ac6a246293f416592329df9e8493603e54dd98b5d0a35f",
+      "kind": "approval",
+      "payload": {
+        "id": "architecture_decision",
+        "provenance": "local_declared",
+        "reason": "Aprobación local declarada de architecture_decision v2 por delegación técnica ya existente en mandate v1 y en el encargo: leí decisión, comparación, riesgos y CONTRACT.md. Mantener árboles completos/SHA-256 y medir st_size con --max-bytes y rollback se encuentra dentro del contrato, sin cambiar propósito, cuentas, presupuesto autorizado ni frontera. No afirma elección personal del dueño, autenticación de identidad ni revisión técnica neutral.",
+        "version": 2
+      },
+      "prev_hash": "61971242add3be2b83608f465de9001f38200688a33798ee59dd130a78954564",
+      "seq": 51
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T01:33:40+00:00",
+      "hash": "d7e55da99cefd3a31e3580b58bb812a5d1f5402ccb6e07b3259fba76ccc0737b",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Sesión independiente: leídos problem v1, owner_actor v1 y boundary v1, mandato existente y CONTRACT.md. Problema, actor y frontera delimitan backups exactos de árboles sintéticos en /trial, Python estándar y sin campo; las decisiones técnicas están delegadas. gate frame está listo y conserva aceptación seq29; esta revisión confirma el snapshot vigente sin repetir advance. Procedencia local declarada, sin autenticación ni sustitución de revisión técnica neutral.",
+        "snapshot": "191ce0b6766c0df1ac850d32be87f1fcffe68e914f0ed2c55815fc1466a11441",
+        "verdict": "accept"
+      },
+      "prev_hash": "a86daa71b7617400e5ac6a246293f416592329df9e8493603e54dd98b5d0a35f",
+      "seq": 52
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-04T01:33:40+00:00",
+      "hash": "158f7da207cb022aba1ba736b907fa93bf8b4afda289c5448739487f31adf607",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "Leídos concepto, supuesto, ambos encuadres y mandate v1. Calidad semántica: distingue integridad, exactitud, estabilidad de fuente y preferencia técnica por recuperación; delegación real ya aprobada. Incumplimiento mecánico concreto: mandate.deps contiene solo problem v1, no owner_actor; gate exige vínculo de la norma con problema y actor. Rechazo del avance por trazabilidad incompleta, no por ausencia de autorización ni por conflicto de valor inventado. No reparé la norma ni el mandato.",
+        "snapshot": "8dba2cb26072d291334919a3168a86e33519e3d0b6bb733c01a3b7d1ecfc5ebb",
+        "verdict": "reject"
+      },
+      "prev_hash": "d7e55da99cefd3a31e3580b58bb812a5d1f5402ccb6e07b3259fba76ccc0737b",
+      "seq": 53
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "f1b7ff01-e31b-40e0-b7f7-605e2e5bd35c",
+    "created_at": "2026-10-04T01:12:15+00:00",
+    "created_by": "human:owner",
+    "domain": "software local",
+    "test_gate_policy": "local_report",
+    "title": "Backup verificable"
+  },
+  "schema": 1
+}

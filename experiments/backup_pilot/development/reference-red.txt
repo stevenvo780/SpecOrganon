@@ -1,0 +1,34 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+___________ test_exact_restore_versions_and_quota_preserve_previous ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-14/test_exact_restore_versions_an0')
+
+    def test_exact_restore_versions_and_quota_preserve_previous(tmp_path):
+        src=tmp_path/'src'; src.mkdir(); (src/'vacío').mkdir(); (src/'α b.bin').write_bytes(bytes(range(256)))
+        repo=tmp_path/'repo'; before=inventory(src)
+>       result=run('create','--source',src,'--repo',repo,'--id','v1'); assert result.returncode==0,result.stderr
+                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: /datos/workspaces/personal/SpecOrganon/.venv/bin/python: can't open file '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/development/reference/backup.py': [Errno 2] No such file or directory
+E         
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['/datos/workspaces/personal/SpecOrganon/.venv/bin/python', '/datos/workspaces/personal/SpecOrga...personal/SpecOrganon/experiments/backup_pilot/development/reference/backup.py': [Errno 2] No such file or directory\n").returncode
+
+experiments/backup_pilot/development/tests/test_reference.py:19: AssertionError
+_______________ test_verify_rejects_corruption_and_protects_dest _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-14/test_verify_rejects_corruption0')
+
+    def test_verify_rejects_corruption_and_protects_dest(tmp_path):
+        src=tmp_path/'src'; src.mkdir(); (src/'x').write_bytes(b'correct bytes')
+>       repo=tmp_path/'repo'; assert run('create','--source',src,'--repo',repo,'--id','v1').returncode==0
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['/datos/workspaces/personal/SpecOrganon/.venv/bin/python', '/datos/workspaces/personal/SpecOrga...personal/SpecOrganon/experiments/backup_pilot/development/reference/backup.py': [Errno 2] No such file or directory\n").returncode
+E        +    where CompletedProcess(args=['/datos/workspaces/personal/SpecOrganon/.venv/bin/python', '/datos/workspaces/personal/SpecOrga...personal/SpecOrganon/experiments/backup_pilot/development/reference/backup.py': [Errno 2] No such file or directory\n") = run('create', '--source', PosixPath('/tmp/pytest-of-stev/pytest-14/test_verify_rejects_corruption0/src'), '--repo', PosixPath('/tmp/pytest-of-stev/pytest-14/test_verify_rejects_corruption0/repo'), '--id', 'v1')
+
+experiments/backup_pilot/development/tests/test_reference.py:34: AssertionError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/development/tests/test_reference.py::test_exact_restore_versions_and_quota_preserve_previous
+FAILED experiments/backup_pilot/development/tests/test_reference.py::test_verify_rejects_corruption_and_protects_dest
+2 failed, 1 passed in 0.10s

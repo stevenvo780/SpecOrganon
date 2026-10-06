@@ -1,0 +1,33 @@
+test_archivos_especiales_sin_bloquear (__main__.BackupTests.test_archivos_especiales_sin_bloquear) ... ERROR
+test_concurrencia_mismo_id (__main__.BackupTests.test_concurrencia_mismo_id) ... ok
+test_corrupcion_de_cada_archivo_del_snapshot (__main__.BackupTests.test_corrupcion_de_cada_archivo_del_snapshot) ... ok
+test_id_existente_y_destino_protegido (__main__.BackupTests.test_id_existente_y_destino_protegido) ... ok
+test_manifiestos_invalidos_aun_con_hash_recalculado (__main__.BackupTests.test_manifiestos_invalidos_aun_con_hash_recalculado) ... ok
+test_repositorio_nuevo_ids_y_errores_cli (__main__.BackupTests.test_repositorio_nuevo_ids_y_errores_cli) ... ok
+test_sigkill_create_y_reintento (__main__.BackupTests.test_sigkill_create_y_reintento) ... ok
+test_solapamientos (__main__.BackupTests.test_solapamientos) ... ok
+test_symlinks_en_fuente_raices_ancestros_y_destino (__main__.BackupTests.test_symlinks_en_fuente_raices_ancestros_y_destino) ... ok
+test_symlinks_en_repositorio_y_snapshot (__main__.BackupTests.test_symlinks_en_repositorio_y_snapshot) ... ok
+test_v2_versions_exactas_y_autosuficientes (__main__.BackupTests.test_v2_versions_exactas_y_autosuficientes) ... ok
+
+======================================================================
+ERROR: test_archivos_especiales_sin_bloquear (__main__.BackupTests.test_archivos_especiales_sin_bloquear)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 248, in test_archivos_especiales_sin_bloquear
+    sock.bind(str(self.source / "socket"))
+PermissionError: [Errno 1] Operation not permitted
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 252, in test_archivos_especiales_sin_bloquear
+    (self.source / "socket").unlink()
+  File "/usr/local/lib/python3.12/pathlib.py", line 1342, in unlink
+    os.unlink(self)
+FileNotFoundError: [Errno 2] No such file or directory: '/trial/solution/.tests-hb4j2w47/source/socket'
+
+----------------------------------------------------------------------
+Ran 11 tests in 4.912s
+
+FAILED (errors=1)

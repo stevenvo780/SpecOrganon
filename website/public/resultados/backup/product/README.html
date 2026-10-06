@@ -1,0 +1,75 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Backup verificable · SpecOrganon</title><style>body{margin:0;background:#f7f8f3;color:#1a3025;font:17px/1.75 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:36px 24px}h1,h2,h3{line-height:1.25}a{color:#234e3a;text-underline-offset:3px}pre{padding:18px;background:#eaf0e4;overflow:auto}code{overflow-wrap:anywhere}table{display:block;overflow:auto;border-collapse:collapse}td,th{padding:10px;border:1px solid #c7d4c0;text-align:left}blockquote{border-left:3px solid #527842;padding-left:20px}nav{display:flex;gap:20px;flex-wrap:wrap;border-bottom:1px solid #dce3d7;padding-bottom:18px}img{max-width:100%}</style><main><nav><a href="/#resultados">← Presentación y resultados</a><a href="/resultados/backup/RESULTADOS.html">Informe completo</a><a href="/resultados/backup/resultados.csv">Datos CSV</a></nav><h1>Backup verificable</h1>
+<p>Producto local del piloto de SpecOrganon. Requiere <strong>Python 3.12 en Linux</strong>
+y usa exclusivamente la biblioteca estándar. No necesita instalación con pip.
+La implementación es la entrega <code>V1-r1-N</code>, etapa dos, sin modificaciones.</p>
+<p>Desde esta carpeta:</p>
+<pre><code class="language-bash">python3 backup.py create --source /ruta/fuente --repo /ruta/repo --id copia_1 --max-bytes 100000000
+python3 backup.py verify --repo /ruta/repo --id copia_1
+python3 backup.py list --repo /ruta/repo
+python3 backup.py restore --repo /ruta/repo --id copia_1 --dest /ruta/restaurada
+</code></pre>
+<p>La fuente contiene archivos regulares y directorios. El destino debe ser nuevo
+o estar vacío. Los IDs admitidos son <code>[A-Za-z0-9][A-Za-z0-9_-]{0,63}</code>; una copia
+existente no se sobrescribe. Cada comando exitoso devuelve un único objeto JSON:</p>
+<pre><code class="language-json">{&quot;id&quot;: &quot;copia_1&quot;}
+{&quot;id&quot;: &quot;copia_1&quot;, &quot;valid&quot;: true}
+{&quot;snapshots&quot;: [&quot;copia_1&quot;]}
+</code></pre>
+<p>Crear y restaurar devuelven el primer formato, verificar el segundo y listar el
+tercero. Los errores retornan un código distinto de cero y diagnóstico por stderr.
+<code>list</code> requiere un directorio de repositorio existente; uno vacío devuelve una
+lista vacía. Solo lista copias completas e íntegras.</p>
+<p><code>--max-bytes</code> es opcional. Limita la suma de bytes de todos los archivos regulares
+del repositorio, incluidos snapshots anteriores, datos y metadata. Si no cabe,
+la creación se rechaza y conserva las copias anteriores. No hay compresión ni
+deduplicación. Los directorios vacíos también requieren metadata y pueden no
+caber con límite cero.</p>
+<p>La restauración funciona aunque se haya eliminado la fuente original. Conserva
+los bytes, nombres Unicode/espacios y directorios vacíos; no conserva UID, ACL,
+tiempos ni identidad de hardlinks. Rechaza symlinks, archivos especiales y el
+solapamiento de fuente/repositorio. La fuente debe permanecer estable durante
+la operación. Las operaciones de esta herramienta se serializan con <code>fcntl</code>.</p>
+<p>Una interrupción de <code>create</code> puede dejar datos sin publicar en <code>.staging</code>. Para
+recuperar, repite el mismo comando: la herramienta limpia el temporal y libera
+el bloqueo al terminar el proceso. Si ya se publicó la copia, el ID existe y
+la repetición se rechaza. No borres manualmente snapshots válidos para reintentar.
+<code>verify</code> comprueba manifiesto, tamaños y SHA-256; una corrupción impide verificar
+o restaurar como correcto. Los hashes detectan corrupción accidental, pero no
+autentican una copia frente a quien reescriba datos, manifiesto y sello juntos.</p>
+<h2>Verificación conservada</h2>
+<p>La misma fuente pasó <strong>22/22 comprobaciones en cada una de V1, V2 y V3</strong>, en
+Python 3.12.15 sin paquetes del entorno, con candidato UID1000, sin red y código
+en solo lectura. Incluye restauración exacta, versiones, corrupción, SIGKILL,
+repetición del create incompleto, destinos protegidos, IDs, symlinks, FIFO y cuota.
+Las 32 pruebas propias y el ejemplo también terminaron con código 0 en un
+contenedor aislado. El ejemplo verifica bytes y directorios después de eliminar
+la fuente, y conserva el repositorio al rechazar una cuota insuficiente.</p>
+<p>Esta comprobación posterior a la selección usa las familias y semillas ya
+evaluadas; no constituye un nuevo holdout independiente ni cambia los resultados
+del piloto. Los recibos completos están en <code>../analysis/product-verification/</code>.</p>
+<p>Para comprobar la evidencia y repetir solo tareas sin recibo previo, desde la
+raíz de SpecOrganon:</p>
+<pre><code class="language-bash">python experiments/backup_pilot/verify_product.py
+</code></pre>
+<p>Los recibos terminados se validan y reutilizan. Un marcador de tarea iniciada
+sin recibo final exige inspección y disposición explícita; no provoca una
+repetición favorable automática. Una ejecución nueva necesita un directorio
+nuevo de observaciones y debe conservar las anteriores.</p>
+<p><code>test_backup.py</code> y <code>examples.py</code> son pruebas y ejemplos conservados de la entrega;
+se ejecutaron con los comandos exactos y montajes que registra el verificador.
+El producto operativo solo necesita <code>backup.py</code>.</p>
+<h2>Procedencia y límites</h2>
+<p>SHA-256 de <code>backup.py</code>:</p>
+<pre><code class="language-text">eaac5ef5622e77d5584474318baba62f906ff1030d6cdcad8fcf7275886e6e0a
+</code></pre>
+<p><code>provenance.json</code> conserva la ruta de origen y hashes. <code>README.candidate.md</code> es
+la documentación original del autor; este README añade las instrucciones de
+entrega y los resultados verificados por el controlador.</p>
+<p>Se seleccionó una implementación de trabajo libre que pasó las pruebas y tuvo
+menor tiempo de autoría entre los candidatos elegibles. El producto no pretende
+demostrar que SpecOrganon produjo el mejor programa individual ni validar el
+GOAL.md original de campo y generalización. En el proyecto, <code>../RESULTADOS.md</code>
+contiene el veredicto y <code>../README.md</code> las instrucciones de reproducción. El
+paquete independiente del producto puede usarse sin ese proyecto; el informe
+también se distribuye en el paquete de fuentes del experimento, bajo
+<code>experiments/backup_pilot/RESULTADOS.md</code>.</p></main></html>

@@ -1,0 +1,191 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Auditoría de cierre de la goal local · SpecOrganon</title><style>body{margin:0;background:#f7f8f3;color:#1a3025;font:17px/1.75 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:36px 24px}h1,h2,h3{line-height:1.25}a{color:#234e3a;text-underline-offset:3px}pre{padding:18px;background:#eaf0e4;overflow:auto}code{overflow-wrap:anywhere}table{display:block;overflow:auto;border-collapse:collapse}td,th{padding:10px;border:1px solid #c7d4c0;text-align:left}blockquote{border-left:3px solid #527842;padding-left:20px}nav{display:flex;gap:20px;flex-wrap:wrap;border-bottom:1px solid #dce3d7;padding-bottom:18px}img{max-width:100%}</style><main><nav><a href="/#resultados">← Presentación y resultados</a><a href="/resultados/backup/RESULTADOS.html">Informe completo</a><a href="/resultados/backup/resultados.csv">Datos CSV</a></nav><h1>Auditoría de cierre de la goal local</h1>
+<p>Estado: auditoría final de evidencia local, 2026-10-04. Esta lista se deriva de la
+goal autorizada, del contrato y del protocolo congelados. Se preparó durante la
+generación y se cerró tras inspeccionar la campaña, las observaciones adicionales,
+la fuente seleccionada, sus pruebas y los paquetes de entrega. No cambia las
+condiciones del piloto. El cierre corresponde al experimento local, incluso con
+resultados adversos; no acepta las nueve fases del método ni el GOAL.md original.</p>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>Evidencia que debe inspeccionarse</th>
+<th>Criterio de cierre</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Contrato y protocolo anteriores a las comparaciones</td>
+<td><code>frozen/manifest.json</code>, hashes actuales, fechas y recibos</td>
+<td>Integridad de los 30 archivos e imágenes; límites de la congelación y revisión tardía del caso raíz declarados</td>
+</tr>
+<tr>
+<td>Evaluador separado, casos reservados y controles defectuosos</td>
+<td>Evaluador congelado, pruebas y controles de <code>development</code>, comandos/montajes reales</td>
+<td>Pruebas adversas y controles verificables; ninguna evaluación reservada entregada a los autores</td>
+</tr>
+<tr>
+<td>Docker autenticado y MCP real</td>
+<td>Recibos y eventos de las sesiones, configuración de aislamiento y llamadas MCP</td>
+<td>Uso real documentado; sin copiar credenciales ni intercambiar cuentas; errores MCP examinados</td>
+</tr>
+<tr>
+<td>Diseño completo de 18 ejecuciones y dos etapas</td>
+<td>Calendario del manifiesto, 36 marcadores y recibos, <code>runs/complete.json</code></td>
+<td>Tres variantes × tres brazos × dos repeticiones; cada etapa identificada, sin sustituciones o repeticiones favorables</td>
+</tr>
+<tr>
+<td>Condiciones y presupuestos comparables</td>
+<td>Prompts, archivos de entrada, modelo/esfuerzo, argv, imágenes, recursos y tiempos</td>
+<td>Diferencias previstas y desviaciones reales declaradas; no afirmar igualdad de tokens a partir de límites temporales</td>
+</tr>
+<tr>
+<td>Cambio de requisito común</td>
+<td>Contratos de ambas etapas y entregas archivadas</td>
+<td><code>--max-bytes</code> aplicado en la segunda etapa a todos los brazos, sin retroalimentación reservada</td>
+</tr>
+<tr>
+<td>Conservación y procedencia de la evidencia</td>
+<td><code>audit.py</code>, inventarios, hashes, JSONL, streams y recibos físicos</td>
+<td>Incidencias resueltas o acotadas; errores de infraestructura nunca convertidos en ceros de calidad; truncamientos y custodia local declarados</td>
+</tr>
+<tr>
+<td>Separación de funciones</td>
+<td>Entradas de revisión funcional y eventos de las doce revisiones del método</td>
+<td>Revisión funcional en solo lectura; inspección explícita de posibles cambios de código por el revisor del método, cuyo montaje permite escritura</td>
+</tr>
+<tr>
+<td>Calidad, recuperación y fallos</td>
+<td>Las 36 evaluaciones congeladas y sus streams</td>
+<td>Denominadores 20/22, corrupción, SIGKILL, bytes exactos y fallos críticos incluidos; ausencias e inconclusos visibles</td>
+</tr>
+<tr>
+<td>Variabilidad y costes disponibles</td>
+<td>Exportación del analizador y recibos por función/etapa</td>
+<td>Seis unidades por brazo/etapa, diferencias pareadas, media/mediana/rango; tokens desconocidos como desconocidos, sin sumar dos veces caché o razonamiento</td>
+</tr>
+<tr>
+<td>Cumplimiento del entorno de entrega</td>
+<td>Addendum y 36 observaciones de <code>clean_runtime.py</code>, revisión de fuentes</td>
+<td>Cobertura completa y no selectiva; imports, código incorporado y comandos externos examinados; diagnóstico exploratorio separado de puntuaciones primarias</td>
+</tr>
+<tr>
+<td>Uso efectivo del método</td>
+<td><code>method_report.py</code>, ledgers y eventos MCP</td>
+<td>Doce observaciones; aceptación vigente distinguida de histórica; llamadas mecánicas no presentadas como validación semántica o identidad autenticada</td>
+</tr>
+<tr>
+<td>Veredicto reproducible</td>
+<td>Informe de resultados y datos citados</td>
+<td>Ventaja, ausencia de ventaja o resultado adverso admitidos; alcance de una familia, tres variantes y dos repeticiones preservado</td>
+</tr>
+<tr>
+<td>Producto utilizable</td>
+<td>Fuente seleccionada, helpers, hashes y procedencia, validación limpia V1/V2/V3, ejemplos CLI</td>
+<td>Todas las garantías contractuales verificadas; si hace falta reparar, entrega de ingeniería separada del piloto y sin alterar sus resultados</td>
+</tr>
+<tr>
+<td>Instrucciones de uso y reproducción</td>
+<td>README del producto y del experimento, comandos comprobados</td>
+<td>Crear, verificar, listar, restaurar y cuota explicados; reproducción en resultados/checkouts nuevos, sin borrar locks vivos ni duplicar sesiones</td>
+</tr>
+<tr>
+<td>Límites y alcance original</td>
+<td>Diff de <code>GOAL.md</code>, estado de la suite original y reporte del caso raíz</td>
+<td>GOAL original intacta y no declarada cumplida; límites, pruebas pendientes y revisión tardía explícitos; otras familias/dominios como siguiente etapa</td>
+</tr>
+</tbody>
+</table>
+<p>Los informes automáticos aportan evidencia de alcance limitado. Una auditoría
+válida de hashes no prueba por sí sola calidad, cumplimiento semántico del método,
+identidad ni independencia de custodia. Ejecutar el producto sin paquetes del
+entorno tampoco prueba por sí solo la política completa de dependencias.</p>
+<h2>Evidencia inspeccionada y disposición</h2>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>Resultado verificado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fijación antes de comparar</td>
+<td>Freeze de 30 archivos a 22:37:45.556870Z, primera generación a 22:37:45.606484Z; hashes intactos. Revisión tardía del frame raíz declarada en RESULTADOS.md.</td>
+</tr>
+<tr>
+<td>Evaluador y controles</td>
+<td>Suite congelada 21/21; controles aislados V1/V2/V3 22/22 con UID1000 y controles defectuosos conservados. La referencia nunca fue seleccionada como producto.</td>
+</tr>
+<tr>
+<td>Docker/MCP auténticos</td>
+<td>84 sesiones CLI y llamadas SpecOrganon en las doce entregas T, con sesiones de autor y revisor separadas; imágenes y argv comprobados por audit.py. No acceso del evaluador a autenticación o socket Docker.</td>
+</tr>
+<tr>
+<td>Diseño y cierre</td>
+<td>Marcador final 18 corridas/36 etapas; 36 recibos de evaluación; factorial y denominadores validados por analyze.py. No reemplazos favorables.</td>
+</tr>
+<tr>
+<td>Igualdad operativa y límites</td>
+<td>Configuración de modelo/esfuerzo, datos esenciales, recursos y presupuestos verificados; extras de T y errores locales de herramientas declarados. No paridad exacta de tokens o pesos afirmada.</td>
+</tr>
+<tr>
+<td>Cambio común</td>
+<td>Las 18 etapas dos recibieron --max-bytes, sin feedback reservado; comparación de veinte checks comunes y dos nuevos separada.</td>
+</tr>
+<tr>
+<td>Integridad y procedencia</td>
+<td>provenance-audit.json válido, cero incidencias de consistencia, 84 IDs distintos, cero streams truncados. Identidad/custodia externas no acreditadas.</td>
+</tr>
+<tr>
+<td>Separación de funciones</td>
+<td>Revisión funcional en solo lectura y entradas coincidentes. Revisión manual de 124 comandos del método sin escritura de código observada; montaje RW y ausencia de captura previa declarados como límites.</td>
+</tr>
+<tr>
+<td>Calidad y recuperación</td>
+<td>36 resultados completos con checks 20/22, críticos, inconclusos, corrupción y SIGKILL reales. Fallos básicos conservados con denominador fijo y causa de permisos descrita; no tratados como defectos independientes.</td>
+</tr>
+<tr>
+<td>Variabilidad y costes</td>
+<td>Medias, medianas, rangos, seis diferencias pareadas y adaptación en report.md/results.json. 46/84 sesiones sin tokens informados; caché no duplicada, dinero desconocido, bootstrap separado.</td>
+</tr>
+<tr>
+<td>Runtime de entrega</td>
+<td>Addendum registrado antes de abrir resultados; 36 observaciones adicionales evaluadas, mismos resultados individuales de checks que los originales. Fuente seleccionada leída completa y stdlib verificada; inventario de las otras 35 acotado a AST.</td>
+</tr>
+<tr>
+<td>Aplicación del método</td>
+<td>Doce ledgers observados; aceptación vigente distinta de histórica, cero test_execution_records y ninguna aplicación completa. Incumplimiento reportado como resultado adverso, no ocultado ni aprobado retrospectivamente.</td>
+</tr>
+<tr>
+<td>Veredicto</td>
+<td>RESULTADOS.md: señal funcional descriptiva para paquete T, fallos documentales/adherencia, tesis fuerte no demostrada, una familia y n=6 por brazo. Datos completos y límites explícitos.</td>
+</tr>
+<tr>
+<td>Producto</td>
+<td>V1-r1-N etapa dos sin modificar, hash eaac5ef5622e77d5584474318baba62f906ff1030d6cdcad8fcf7275886e6e0a; 22/22 V1/V2/V3, 32 pruebas propias OK y ejemplo aislado PASS. Recibos en analysis/product-verification.</td>
+</tr>
+<tr>
+<td>Uso y reproducción</td>
+<td>README del producto/experimento, archivos tar.gz y manifiesto; fuentes extraídas con hashes coincidentes, compose config válido y 83 pruebas del piloto en extracción nueva. No se simuló una segunda campaña de modelos como ya ejecutada.</td>
+</tr>
+<tr>
+<td>Fallos y reanudación</td>
+<td>resumption-proof.json: recibo cerrado no repite callback, marcador iniciado sin recibo rechaza callback; CLI real de producto reutiliza cinco recibos con hashes intactos, cero llamadas de modelo. Campaña original no se reinició.</td>
+</tr>
+<tr>
+<td>Alcance original</td>
+<td>Diff de GOAL.md frente a HEAD vacío. Control actual tests/test_audit_bread_sources.py: 3 fallos/49 éxitos por digest del extractor; fuera del cierre local y sin reparaciones encubiertas. Caso raíz conserva 1/9 fases y bloqueos declarados.</td>
+</tr>
+</tbody>
+</table>
+<p>Los cierres de code-mode en V3-r1-N/autor etapa uno y V1-r1-T/revisor del método
+etapa uno son desviaciones locales de herramientas. Se preservan en findings.json;
+no son rechazos de API/cuota, no generaron una repetición favorable y limitan la
+atribución causal. Los fallos funcionales siguen siendo comportamiento observado
+de las entregas. Los incumplimientos de README y fases son resultados, no trabajo
+que deba alterarse retrospectivamente para mejorar la comparación.</p>
+<p>La verificación posterior del producto reutiliza familias/semillas conocidas y
+es evidencia de ingeniería, no un nuevo holdout confirmatorio. La suite fresca de
+83 pruebas cubre el harness del piloto, no toda la plataforma. Una ampliación
+confirmatoria a otras familias/dominios queda expresamente como siguiente etapa.</p></main></html>

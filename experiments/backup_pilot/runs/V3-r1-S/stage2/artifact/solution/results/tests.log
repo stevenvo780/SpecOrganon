@@ -1,0 +1,50 @@
+test_01_cli_roundtrip_versions_and_self_contained (test_backup.ContractTests.test_01_cli_roundtrip_versions_and_self_contained)
+C01,C02,C03,C11: bytes, Unicode, vacíos y versiones sin fuente. ... ok
+test_02_empty_source_and_empty_existing_destination (test_backup.ContractTests.test_02_empty_source_and_empty_existing_destination)
+C02,C03,C07: también árboles totalmente vacíos. ... ok
+test_03_ids_duplicate_missing_and_invalid_arguments (test_backup.ContractTests.test_03_ids_duplicate_missing_and_invalid_arguments)
+C01,C04,C11,C13: errores y fronteras de IDs y N. ... ok
+test_04_overlap_rejection_without_source_mutation (test_backup.ContractTests.test_04_overlap_rejection_without_source_mutation)
+C06,C11: igualdad y ambas direcciones de solapamiento. ... ok
+test_05_nonempty_destination_is_preserved (test_backup.ContractTests.test_05_nonempty_destination_is_preserved)
+C07: rechazo conserva bytes y directorios protegidos. ... ok
+test_06_symlinks_source_repo_dest_and_ancestors (test_backup.ContractTests.test_06_symlinks_source_repo_dest_and_ancestors)
+C05: raíz, ancestro, descendiente, enlace colgante y '..'. ... ok
+test_07_special_files_rejected_without_blocking (test_backup.ContractTests.test_07_special_files_rejected_without_blocking)
+C05: FIFO y socket en cada tipo de ruta gestionada. ... ERROR
+test_08_every_regular_snapshot_file_corrupted_or_deleted (test_backup.ContractTests.test_08_every_regular_snapshot_file_corrupted_or_deleted)
+C08,C09: mutación, truncamiento y eliminación de datos y metadata. ... ok
+test_09_incomplete_structure_and_invalid_manifest (test_backup.ContractTests.test_09_incomplete_structure_and_invalid_manifest)
+C08,C09: no aceptar estructura extra ni rutas inválidas aun con sello. ... ok
+test_10_high_and_exact_limits_include_all_metadata (test_backup.ContractTests.test_10_high_and_exact_limits_include_all_metadata)
+C13,C14: límite alto, luego exacto medido sin usar funciones del producto. ... ok
+test_11_insufficient_limits_leave_no_regular_residue (test_backup.ContractTests.test_11_insufficient_limits_leave_no_regular_residue)
+C14,C15: falta de espacio para datos, manifiesto o checksum. ... ok
+test_12_below_existing_limit_preserves_bytes_including_lock (test_backup.ContractTests.test_12_below_existing_limit_preserves_bytes_including_lock)
+C14,C15: contar metadata no perteneciente al snapshot y preservar previos. ... ok
+test_13_partial_copy_budget_failure_preserves_old_and_retries (test_backup.ContractTests.test_13_partial_copy_budget_failure_preserves_old_and_retries)
+C11,C15: fallar después de copiar datos y repetir el mismo ID. ... ok
+test_14_sigkill_copy_and_prepublication_recover_with_exact_budget (test_backup.ContractTests.test_14_sigkill_copy_and_prepublication_recover_with_exact_budget)
+C10,C11,C14,C16: staging ignorado y mismo ID recuperable con N exacto. ... ok
+test_15_sigkill_then_too_low_cleans_only_orphans (test_backup.ContractTests.test_15_sigkill_then_too_low_cleans_only_orphans)
+C10,C15,C16: límite bajo tras interrupción no deja crecimiento permanente. ... ok
+test_16_concurrent_creates_share_budget_and_do_not_overwrite (test_backup.ContractTests.test_16_concurrent_creates_share_budget_and_do_not_overwrite)
+C04,C14,C16: exactamente uno cabe; ID repetido no se sobrescribe. ... ok
+test_17_regular_snapshot_replacement_is_invalid (test_backup.ContractTests.test_17_regular_snapshot_replacement_is_invalid)
+C08: reemplazar el directorio del snapshot por un regular no lo completa. ... ok
+test_18_empty_tree_still_needs_persistent_metadata_budget (test_backup.ContractTests.test_18_empty_tree_still_needs_persistent_metadata_budget)
+C14,C15: ni siquiera fuente vacía elude el presupuesto de metadata. ... ok
+
+======================================================================
+ERROR: test_07_special_files_rejected_without_blocking (test_backup.ContractTests.test_07_special_files_rejected_without_blocking)
+C05: FIFO y socket en cada tipo de ruta gestionada.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/tests/test_backup.py", line 246, in test_07_special_files_rejected_without_blocking
+    sock.bind(str(sock_path))
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 18 tests in 8.025s
+
+FAILED (errors=1)

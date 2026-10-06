@@ -1,0 +1,10 @@
+# BASE_IMAGE must be a verified tag for the frozen control image ID.
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+USER root
+COPY experiments/backup_pilot/evaluator.py /eval/evaluator.py
+COPY experiments/backup_pilot/delivery_entry.py /entry/backup.py
+RUN chmod 0700 /eval /eval/evaluator.py && chmod 0755 /entry && chmod 0644 /entry/backup.py
+ENV BACKUP_CANDIDATE_UID=1000 PYTHONDONTWRITEBYTECODE=1
+WORKDIR /work
+ENTRYPOINT ["/usr/local/bin/python", "-E", "-s", "-S", "-B", "/eval/evaluator.py"]

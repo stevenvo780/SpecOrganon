@@ -1,0 +1,96 @@
+.................................................................... [  1%]
+........................................................................ [  3%]
+.......F
+=================================== FAILURES ===================================
+______ test_initialization_with_anchor_fails_without_side_effects[signed] ______
+
+tmp_path = PosixPath('/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-tmp-first-failure/test_initialization_with_ancho0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f2077c277a0>
+policy = 'signed'
+
+    @pytest.mark.parametrize("policy", ["signed", "fixture"])
+    def test_initialization_with_anchor_fails_without_side_effects(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, policy: str) -> None:
+        anchor_file = tmp_path / "anchors.json"
+        anchor_file.write_text('{"schema":1,"cases":{}}', encoding="utf-8")
+        monkeypatch.setenv("ORGANON_LEDGER_ANCHORS_FILE", str(anchor_file))
+        case = tmp_path / "not-created"
+        with pytest.raises(engine.MethodError, match="initialize a case before enabling"):
+            engine.create_case(case, "Case", "domain", "agent:operator", approval_policy=policy)
+        assert not case.exists()
+        cli_case = tmp_path / "cli-not-created"
+>       result = subprocess.run(
+            [str(Path(sys.executable).parent / "organon"), "init", str(cli_case), "--title", "Case",
+             "--domain", "domain", "--actor", "agent:operator", "--approval-policy", policy],
+            text=True, capture_output=True, env=os.environ.copy(), check=False,
+        )
+
+tests/test_anchor_integration.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/usr/lib/python3.14/subprocess.py:1875: in _execute_child
+    self._posix_spawn(args, executable, env, restore_signals, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Popen: returncode: None args: ['/datos/workspaces/personal/SpecOrganon/goal...>
+args = ['/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon', 'init', '/datos/works...oftware-v1/test-tmp-first-failure/test_initialization_with_ancho0/cli-not-created', '--title', 'Case', '--domain', ...]
+executable = '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+env = {'TMPDIR': '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/test-temp', 'PYTHONPATH': 'src', 'SPECORGANON_EXTRACTOR_PROFILE': 'cachyos-26.08.0-x86_64-v4', 'SHELL': '/bin/fish', ...}
+restore_signals = True, close_fds = True, p2cread = -1, p2cwrite = -1
+c2pread = 11, c2pwrite = 12, errread = 13, errwrite = 14
+
+    def _posix_spawn(self, args, executable, env, restore_signals, close_fds,
+                     p2cread, p2cwrite,
+                     c2pread, c2pwrite,
+                     errread, errwrite):
+        """Execute program using os.posix_spawn()."""
+        kwargs = {}
+        if restore_signals:
+            # See _Py_RestoreSignals() in Python/pylifecycle.c
+            sigset = []
+            for signame in ('SIGPIPE', 'SIGXFZ', 'SIGXFSZ'):
+                signum = getattr(signal, signame, None)
+                if signum is not None:
+                    sigset.append(signum)
+            kwargs['setsigdef'] = sigset
+    
+        file_actions = []
+        for fd in (p2cwrite, c2pread, errread):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_CLOSE, fd))
+        for fd, fd2 in (
+            (p2cread, 0),
+            (c2pwrite, 1),
+            (errwrite, 2),
+        ):
+            if fd != -1:
+                file_actions.append((os.POSIX_SPAWN_DUP2, fd, fd2))
+    
+        if close_fds:
+            file_actions.append((os.POSIX_SPAWN_CLOSEFROM, 3))
+    
+        if file_actions:
+            kwargs['file_actions'] = file_actions
+    
+>       self.pid = os.posix_spawn(executable, args, env, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/datos/workspaces/personal/SpecOrganon/goals/autonomous-software-v1/runtime-venv/bin/organon'
+
+/usr/lib/python3.14/subprocess.py:1819: FileNotFoundError
+=============================== warnings summary ===============================
+scripts/local_replay_sandbox.py:152
+  /datos/workspaces/personal/SpecOrganon/scripts/local_replay_sandbox.py:152: DeprecationWarning: Due to '_pack_', the '_PathBeneathAttr' Structure will use memory layout compatible with MSVC (Windows). If this is intended, set _layout_ to 'ms'. The implicit default is deprecated and slated to become an error in Python 3.19.
+    class _PathBeneathAttr(ctypes.Structure):
+
+src/specorganon/server.py:47
+  /datos/workspaces/personal/SpecOrganon/src/specorganon/server.py:47: DeprecationWarning: Due to '_pack_', the '_LandlockPathBeneathAttr' Structure will use memory layout compatible with MSVC (Windows). If this is intended, set _layout_ to 'ms'. The implicit default is deprecated and slated to become an error in Python 3.19.
+    class _LandlockPathBeneathAttr(ctypes.Structure):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_anchor_integration.py::test_initialization_with_anchor_fails_without_side_effects[signed]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 147 passed, 2 warnings, 4 subtests passed in 7.71s

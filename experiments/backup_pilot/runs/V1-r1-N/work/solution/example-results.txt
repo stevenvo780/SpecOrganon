@@ -1,0 +1,18 @@
+$ /usr/local/bin/python /trial/solution/backup.py create --source /trial/backup-example-g1ize38y/documentos --repo /trial/backup-example-g1ize38y/repo --id ejemplo_V1
+exit=0
+stdout='{"id": "ejemplo_V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-example-g1ize38y/repo --id ejemplo_V1
+exit=0
+stdout='{"id": "ejemplo_V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-example-g1ize38y/repo
+exit=0
+stdout='{"snapshots": ["ejemplo_V1"]}\n'
+stderr=''
+Fuente original eliminada antes de restaurar.
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-example-g1ize38y/repo --id ejemplo_V1 --dest '/trial/backup-example-g1ize38y/restauración'
+exit=0
+stdout='{"id": "ejemplo_V1"}\n'
+stderr=''
+PASS: bytes y directorios exactos; restauración sin fuente original.

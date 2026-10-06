@@ -1,0 +1,206 @@
+......FFFFFFFFFFFFF                                                      [100%]
+=================================== FAILURES ===================================
+_____ test_provider_error_never_becomes_comparative_quality[False-author] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_provider_error_never_beco0')
+role = 'author', timed_out = False
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    @pytest.mark.parametrize('timed_out',[False,True])
+    def test_provider_error_never_becomes_comparative_quality(tmp_path,role,timed_out):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,errors=[{'type':'error','message':'synthetic provider failure'}],timed_out=timed_out)
+>       with pytest.raises(RuntimeError,match='infrastructure.*'+role): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:88: Failed
+_____ test_provider_error_never_becomes_comparative_quality[False-method] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_provider_error_never_beco1')
+role = 'method', timed_out = False
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    @pytest.mark.parametrize('timed_out',[False,True])
+    def test_provider_error_never_becomes_comparative_quality(tmp_path,role,timed_out):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,errors=[{'type':'error','message':'synthetic provider failure'}],timed_out=timed_out)
+>       with pytest.raises(RuntimeError,match='infrastructure.*'+role): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:88: Failed
+_____ test_provider_error_never_becomes_comparative_quality[False-review] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_provider_error_never_beco2')
+role = 'review', timed_out = False
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    @pytest.mark.parametrize('timed_out',[False,True])
+    def test_provider_error_never_becomes_comparative_quality(tmp_path,role,timed_out):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,errors=[{'type':'error','message':'synthetic provider failure'}],timed_out=timed_out)
+>       with pytest.raises(RuntimeError,match='infrastructure.*'+role): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:88: Failed
+______ test_provider_error_never_becomes_comparative_quality[True-author] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_provider_error_never_beco3')
+role = 'author', timed_out = True
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    @pytest.mark.parametrize('timed_out',[False,True])
+    def test_provider_error_never_becomes_comparative_quality(tmp_path,role,timed_out):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,errors=[{'type':'error','message':'synthetic provider failure'}],timed_out=timed_out)
+>       with pytest.raises(RuntimeError,match='infrastructure.*'+role): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:88: Failed
+______ test_provider_error_never_becomes_comparative_quality[True-method] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_provider_error_never_beco4')
+role = 'method', timed_out = True
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    @pytest.mark.parametrize('timed_out',[False,True])
+    def test_provider_error_never_becomes_comparative_quality(tmp_path,role,timed_out):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,errors=[{'type':'error','message':'synthetic provider failure'}],timed_out=timed_out)
+>       with pytest.raises(RuntimeError,match='infrastructure.*'+role): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:88: Failed
+______ test_provider_error_never_becomes_comparative_quality[True-review] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_provider_error_never_beco5')
+role = 'review', timed_out = True
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    @pytest.mark.parametrize('timed_out',[False,True])
+    def test_provider_error_never_becomes_comparative_quality(tmp_path,role,timed_out):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,errors=[{'type':'error','message':'synthetic provider failure'}],timed_out=timed_out)
+>       with pytest.raises(RuntimeError,match='infrastructure.*'+role): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:88: Failed
+______ test_non_timeout_model_failure_refuses_comparative_quality[author] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_non_timeout_model_failure0')
+role = 'author'
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    def test_non_timeout_model_failure_refuses_comparative_quality(tmp_path,role):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,exit_code=1,timed_out=False)
+>       with pytest.raises(RuntimeError,match='infrastructure.*'+role): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:95: Failed
+______ test_non_timeout_model_failure_refuses_comparative_quality[method] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_non_timeout_model_failure1')
+role = 'method'
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    def test_non_timeout_model_failure_refuses_comparative_quality(tmp_path,role):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,exit_code=1,timed_out=False)
+>       with pytest.raises(RuntimeError,match='infrastructure.*'+role): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:95: Failed
+______ test_non_timeout_model_failure_refuses_comparative_quality[review] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_non_timeout_model_failure2')
+role = 'review'
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    def test_non_timeout_model_failure_refuses_comparative_quality(tmp_path,role):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,exit_code=1,timed_out=False)
+>       with pytest.raises(RuntimeError,match='infrastructure.*'+role): analyze(tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:95: Failed
+______ test_plain_budget_timeout_remains_a_valid_quality_outcome[author] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_plain_budget_timeout_rema0')
+role = 'author'
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    def test_plain_budget_timeout_remains_a_valid_quality_outcome(tmp_path,role):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,exit_code=124,timed_out=True,errors=[],usage=[])
+        data=analyze(tmp_path)['runs']['V1-r1-T']['stages'][1]
+>       assert data['evaluation']['score']==19/20
+E       assert 0.8 == (19 / 20)
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:103: AssertionError
+______ test_plain_budget_timeout_remains_a_valid_quality_outcome[method] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_plain_budget_timeout_rema1')
+role = 'method'
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    def test_plain_budget_timeout_remains_a_valid_quality_outcome(tmp_path,role):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,exit_code=124,timed_out=True,errors=[],usage=[])
+        data=analyze(tmp_path)['runs']['V1-r1-T']['stages'][1]
+>       assert data['evaluation']['score']==19/20
+E       assert 0.8 == (19 / 20)
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:103: AssertionError
+______ test_plain_budget_timeout_remains_a_valid_quality_outcome[review] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_plain_budget_timeout_rema2')
+role = 'review'
+
+    @pytest.mark.parametrize('role',['author','method','review'])
+    def test_plain_budget_timeout_remains_a_valid_quality_outcome(tmp_path,role):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,role,exit_code=124,timed_out=True,errors=[],usage=[])
+        data=analyze(tmp_path)['runs']['V1-r1-T']['stages'][1]
+>       assert data['evaluation']['score']==19/20
+E       assert 0.8 == (19 / 20)
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:103: AssertionError
+__________ test_cli_provider_error_does_not_export_partial_comparison __________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-64/test_cli_provider_error_does_n0')
+
+    def test_cli_provider_error_does_not_export_partial_comparison(tmp_path):
+        make_fixture(tmp_path)
+        set_model_receipt(tmp_path,'author',errors=[{'type':'turn.failed'}],timed_out=True)
+        output=tmp_path/'comparison'
+        script=Path(__file__).resolve().parents[2]/'analyze.py'
+        result=subprocess.run([sys.executable,str(script),'--base',str(tmp_path),'--output',str(output)],capture_output=True)
+>       assert result.returncode!=0 and not output.exists()
+E       AssertionError: assert (0 != 0)
+E        +  where 0 = CompletedProcess(args=['/usr/bin/python', '/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/analyze.py'...ut', '/tmp/pytest-of-stev/pytest-64/test_cli_provider_error_does_n0/comparison'], returncode=0, stdout=b'', stderr=b'').returncode
+
+experiments/backup_pilot/development/tests/test_analysis_regressions.py:113: AssertionError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_provider_error_never_becomes_comparative_quality[False-author]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_provider_error_never_becomes_comparative_quality[False-method]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_provider_error_never_becomes_comparative_quality[False-review]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_provider_error_never_becomes_comparative_quality[True-author]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_provider_error_never_becomes_comparative_quality[True-method]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_provider_error_never_becomes_comparative_quality[True-review]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_non_timeout_model_failure_refuses_comparative_quality[author]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_non_timeout_model_failure_refuses_comparative_quality[method]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_non_timeout_model_failure_refuses_comparative_quality[review]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_plain_budget_timeout_remains_a_valid_quality_outcome[author]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_plain_budget_timeout_remains_a_valid_quality_outcome[method]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_plain_budget_timeout_remains_a_valid_quality_outcome[review]
+FAILED experiments/backup_pilot/development/tests/test_analysis_regressions.py::test_cli_provider_error_does_not_export_partial_comparison
+13 failed, 6 passed in 0.79s

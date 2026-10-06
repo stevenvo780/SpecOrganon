@@ -1,0 +1,313 @@
+{
+  "input_identity": {
+    "ledger_sha256": "43892c43faaf2f8c12541d70f81e6a0952ea05577682ff09e556232d9222b829",
+    "method_image": "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+    "inspector_sha256": "2fd725c9765175873d1a083962a269c406c6c7cb097c43cec79c5dc1eaf7b1b6"
+  },
+  "result": {
+    "id": "V1-r1-T",
+    "stage": 2,
+    "receipt": {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--name",
+        "backup-method-observer-v1-r1-t-s2",
+        "--network",
+        "none",
+        "--read-only",
+        "--user",
+        "1000:1000",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges:true",
+        "--memory",
+        "256m",
+        "--cpus",
+        "1",
+        "--pids-limit",
+        "64",
+        "--mount",
+        "type=bind,src=/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/runs/V1-r1-T/stage2/artifact,dst=/trial,readonly",
+        "--entrypoint",
+        "/opt/specorganon/.venv/bin/python",
+        "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+        "-c",
+        "\nimport hashlib,json,sys\nfrom collections import Counter\nfrom pathlib import Path\nfrom specorganon import engine\nfrom specorganon.ledger import read_project\ntry:\n    case=Path(sys.argv[1])\n    state=engine.get_state(case)\n    ledger=read_project(case)\n    phases={key:{k:value[k] for k in ('ready','accepted','reviewed','independent_review',\n             'review_signature_verified','review_identity_authenticated','review_provenance',\n             'blockers','snapshot','advance_seq')} for key,value in state['phases'].items()}\n    result={'ok':True,'revision':state['revision'],'approval_policy':state['project']['approval_policy'],\n            'approval_identity_authenticated':state['approval_identity_authenticated'],\n            'phase_review_trust':state['phase_review_trust'],\n            'test_execution_trust':state['test_execution_trust'],\n            'test_execution_records':len(state['test_execution_history']),\n            'test_observation_records':len(state['test_observation_history']),\n            'item_kind_counts':dict(Counter(item['kind'] for item in state['items'].values())),\n            'event_actor_counts':dict(Counter(event['actor'] for event in ledger['events'])),\n            'phases':phases,'accepted_phases':[key for key,value in phases.items() if value['accepted']],\n            'phase_review_history':state['phase_review_history'],\n            'ledger_sha256':hashlib.sha256((case/'organon.json').read_bytes()).hexdigest(),\n            'engine_sha256':hashlib.sha256(Path(engine.__file__).read_bytes()).hexdigest()}\nexcept Exception as error:\n    print(json.dumps({'ok':False,'error_type':type(error).__name__,'error':str(error)}))\n    raise SystemExit(1)\nprint(json.dumps(result,ensure_ascii=False))\n",
+        "/trial/case"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.31416165699920384,
+      "finished_at": "2026-10-04T05:24:35.422951+00:00",
+      "usage": [],
+      "errors": [],
+      "agent_text": [],
+      "stdout_sha256": "4194f04a96f4ccd6bd8eaeba12600588ab86725b2cd9854d188651fef86bcc67",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "observation": {
+      "ok": true,
+      "revision": 67,
+      "approval_policy": "local",
+      "approval_identity_authenticated": false,
+      "phase_review_trust": "local_declared",
+      "test_execution_trust": "local_declared",
+      "test_execution_records": 0,
+      "test_observation_records": 0,
+      "item_kind_counts": {
+        "problem": 1,
+        "norm": 1,
+        "actor": 2,
+        "boundary": 1,
+        "concept": 1,
+        "assumption": 1,
+        "frame_option": 2,
+        "question": 1,
+        "hypothesis": 1,
+        "protocol": 1,
+        "evidence": 1,
+        "indicator": 1,
+        "inference": 1,
+        "synthesis": 1,
+        "uncertainty": 1,
+        "option": 2,
+        "comparison": 1,
+        "risk": 1,
+        "decision": 1,
+        "requirement": 1,
+        "criterion": 1
+      },
+      "event_actor_counts": {
+        "agent:orchestrator": 2,
+        "human:owner": 4,
+        "agent:author": 44,
+        "agent:method-reviewer": 17
+      },
+      "phases": {
+        "frame": {
+          "ready": true,
+          "accepted": true,
+          "reviewed": true,
+          "independent_review": true,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "local_declared",
+          "blockers": [],
+          "snapshot": "7680322de14cff6ed6e281cc46f7cba6a75d0858978486740e5c5d0b2c46a3b0",
+          "advance_seq": 55
+        },
+        "critique": {
+          "ready": true,
+          "accepted": true,
+          "reviewed": true,
+          "independent_review": true,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "local_declared",
+          "blockers": [],
+          "snapshot": "caf5090a7908ce894982dba0d88d5fa0bcbefdd924cd9d4014d35132a2df9c6d",
+          "advance_seq": 57
+        },
+        "study": {
+          "ready": true,
+          "accepted": true,
+          "reviewed": true,
+          "independent_review": true,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "local_declared",
+          "blockers": [],
+          "snapshot": "d5a79ce2288cfae78c0b778537f7d7805bdd070b38f4c8ac217a01112f8a8ce1",
+          "advance_seq": 59
+        },
+        "observe": {
+          "ready": true,
+          "accepted": true,
+          "reviewed": true,
+          "independent_review": true,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "local_declared",
+          "blockers": [],
+          "snapshot": "e5bbbf450075e07ba359873f6d94580e973c335b5ba2a3bd8f560beca4d7a2b1",
+          "advance_seq": 61
+        },
+        "explain": {
+          "ready": true,
+          "accepted": true,
+          "reviewed": true,
+          "independent_review": true,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "local_declared",
+          "blockers": [],
+          "snapshot": "ed46e7e86b742f1879d313da657876c3cbd3df63f970d7eec793d86cab0f5937",
+          "advance_seq": 63
+        },
+        "compare": {
+          "ready": true,
+          "accepted": true,
+          "reviewed": true,
+          "independent_review": true,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "local_declared",
+          "blockers": [],
+          "snapshot": "f0da8a68cf274e35e8d3d283191b78451607ab12cfee32f0d0078ab9595d8e4a",
+          "advance_seq": 65
+        },
+        "specify": {
+          "ready": true,
+          "accepted": true,
+          "reviewed": true,
+          "independent_review": true,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "local_declared",
+          "blockers": [],
+          "snapshot": "2d3febe7093fb7c4064a15ea6fafecd899db08a1c20e24c6e08201a248b171c1",
+          "advance_seq": 67
+        },
+        "build": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid implementation; has 0",
+            "needs 1 valid test; has 0"
+          ],
+          "snapshot": "9c5c379c19e7010a67fbe4a78c5797b54cf31554640f0bfe5fcce79939b37b9a",
+          "advance_seq": null
+        },
+        "validate": {
+          "ready": false,
+          "accepted": false,
+          "reviewed": false,
+          "independent_review": false,
+          "review_signature_verified": false,
+          "review_identity_authenticated": false,
+          "review_provenance": "none",
+          "blockers": [
+            "needs 1 valid assessment; has 0",
+            "needs 1 valid baseline; has 0",
+            "needs 1 valid result; has 0",
+            "previous phase is not currently accepted"
+          ],
+          "snapshot": "279619418846b9797270c2ef9eb1564053aaab7c194af15cfa7bc3a0a5db47d4",
+          "advance_seq": null
+        }
+      },
+      "accepted_phases": [
+        "frame",
+        "critique",
+        "study",
+        "observe",
+        "explain",
+        "compare",
+        "specify"
+      ],
+      "phase_review_history": [
+        {
+          "seq": 26,
+          "phase": "frame",
+          "verdict": "accept",
+          "actor": "agent:method-reviewer",
+          "snapshot": "41bf97083234278508e257f100be39f3ed32f1a7da1c49e19e398ea4b460af77",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        },
+        {
+          "seq": 28,
+          "phase": "critique",
+          "verdict": "reject",
+          "actor": "agent:method-reviewer",
+          "snapshot": "a64ab0abccab038360e8ac00a23a1f85770c5fc74bb8dda91a37d292f45fbe28",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        },
+        {
+          "seq": 54,
+          "phase": "frame",
+          "verdict": "accept",
+          "actor": "agent:method-reviewer",
+          "snapshot": "7680322de14cff6ed6e281cc46f7cba6a75d0858978486740e5c5d0b2c46a3b0",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        },
+        {
+          "seq": 56,
+          "phase": "critique",
+          "verdict": "accept",
+          "actor": "agent:method-reviewer",
+          "snapshot": "caf5090a7908ce894982dba0d88d5fa0bcbefdd924cd9d4014d35132a2df9c6d",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        },
+        {
+          "seq": 58,
+          "phase": "study",
+          "verdict": "accept",
+          "actor": "agent:method-reviewer",
+          "snapshot": "d5a79ce2288cfae78c0b778537f7d7805bdd070b38f4c8ac217a01112f8a8ce1",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        },
+        {
+          "seq": 60,
+          "phase": "observe",
+          "verdict": "accept",
+          "actor": "agent:method-reviewer",
+          "snapshot": "e5bbbf450075e07ba359873f6d94580e973c335b5ba2a3bd8f560beca4d7a2b1",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        },
+        {
+          "seq": 62,
+          "phase": "explain",
+          "verdict": "accept",
+          "actor": "agent:method-reviewer",
+          "snapshot": "ed46e7e86b742f1879d313da657876c3cbd3df63f970d7eec793d86cab0f5937",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        },
+        {
+          "seq": 64,
+          "phase": "compare",
+          "verdict": "accept",
+          "actor": "agent:method-reviewer",
+          "snapshot": "f0da8a68cf274e35e8d3d283191b78451607ab12cfee32f0d0078ab9595d8e4a",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        },
+        {
+          "seq": 66,
+          "phase": "specify",
+          "verdict": "accept",
+          "actor": "agent:method-reviewer",
+          "snapshot": "2d3febe7093fb7c4064a15ea6fafecd899db08a1c20e24c6e08201a248b171c1",
+          "provenance": "local_declared",
+          "signature_verified": false,
+          "independent": true
+        }
+      ],
+      "ledger_sha256": "43892c43faaf2f8c12541d70f81e6a0952ea05577682ff09e556232d9222b829",
+      "engine_sha256": "9c12dd21b4b7da4811bc32afce73b9be46cb31226ace179a147e309c578723f4"
+    },
+    "inspector_sha256": "2fd725c9765175873d1a083962a269c406c6c7cb097c43cec79c5dc1eaf7b1b6"
+  }
+}

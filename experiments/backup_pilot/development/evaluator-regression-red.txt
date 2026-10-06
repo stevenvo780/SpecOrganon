@@ -1,0 +1,56 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_________ test_fixed_denominator_and_source_critical_on_false_success __________
+
+    def test_fixed_denominator_and_source_critical_on_false_success():
+        good=module.evaluate(REF,stage=1,seed=31)
+        bad=module.evaluate(BASE/'tests/fixtures/false_success.py',stage=1,seed=31)
+>       assert good['checks_total']==bad['checks_total']
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'checks_total'
+
+experiments/backup_pilot/tests/test_evaluator_regressions.py:13: KeyError
+____________ test_verify_that_skips_payload_cannot_pass_corruption _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-17/test_verify_that_skips_payload0')
+
+    def test_verify_that_skips_payload_cannot_pass_corruption(tmp_path):
+        candidate=tmp_path/'backup.py'
+        code=REF.read_text().replace("if scan(root/'files')!=data['entries']:","if False:")
+        candidate.write_text(code)
+        result=module.evaluate(candidate,stage=1,seed=31)
+>       assert 'snapshot_corruption' in result['critical_failures']
+E       AssertionError: assert 'snapshot_corruption' in []
+
+experiments/backup_pilot/tests/test_evaluator_regressions.py:22: AssertionError
+_________________ test_symlink_acceptance_is_contract_failure __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-17/test_symlink_acceptance_is_con0')
+
+    def test_symlink_acceptance_is_contract_failure(tmp_path):
+        candidate=tmp_path/'backup.py'; shutil.copy(REF,candidate)
+        code=candidate.read_text().replace("if parent.is_symlink():", "if False:")
+        candidate.write_text(code)
+        result=module.evaluate(candidate,stage=1,seed=31)
+        details={d['name']:d for d in result['details']}
+>       assert details['symlink_dest']['passed'] is False
+               ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'symlink_dest'
+
+experiments/backup_pilot/tests/test_evaluator_regressions.py:30: KeyError
+____________________ test_seeded_workloads_are_reproducible ____________________
+
+    def test_seeded_workloads_are_reproducible():
+        a=module.evaluate(REF,stage=1,seed=113)
+        b=module.evaluate(REF,stage=1,seed=113)
+>       assert a['workload_sha256']==b['workload_sha256']
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'workload_sha256'
+
+experiments/backup_pilot/tests/test_evaluator_regressions.py:35: KeyError
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/tests/test_evaluator_regressions.py::test_fixed_denominator_and_source_critical_on_false_success
+FAILED experiments/backup_pilot/tests/test_evaluator_regressions.py::test_verify_that_skips_payload_cannot_pass_corruption
+FAILED experiments/backup_pilot/tests/test_evaluator_regressions.py::test_symlink_acceptance_is_contract_failure
+FAILED experiments/backup_pilot/tests/test_evaluator_regressions.py::test_seeded_workloads_are_reproducible
+4 failed in 3.81s

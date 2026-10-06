@@ -1,0 +1,46 @@
+.......FF.                                                               [100%]
+=================================== FAILURES ===================================
+____________ test_missing_product_has_no_fabricated_runtime_result _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-60/test_missing_product_has_no_fa0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3270dfad50>
+
+    def test_missing_product_has_no_fabricated_runtime_result(tmp_path,monkeypatch):
+        rows=fixture(tmp_path);calls=[]
+        monkeypatch.setattr(clean_runtime,'check_image',lambda value:value)
+        monkeypatch.setattr(clean_runtime,'observe',observer(calls))
+        stage=tmp_path/'runs'/rows[0]['id']/'stage1'
+        (stage/'artifact/solution/backup.py').unlink();save(stage/'artifact.receipt.json',{'files':{}})
+        result=clean_runtime.run(tmp_path,tmp_path/'output')
+        assert len(calls)==35 and result['counts']['missing_product']==1
+        assert result['observations'][0]['evaluation'] is None
+        path=tmp_path/'output'/rows[0]['id']/'stage1/result.json'
+        saved=json.loads(path.read_text());saved['entry'].update(status='evaluated',evaluation=grade(1))
+        save(path,saved)
+>       with pytest.raises(RuntimeError,match='Cached nonexecuted observation'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_clean_runtime.py:142: Failed
+___________________ test_cached_arm_reassignment_is_rejected ___________________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-60/test_cached_arm_reassignment_i0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3270d85c40>
+
+    def test_cached_arm_reassignment_is_rejected(tmp_path,monkeypatch):
+        rows=fixture(tmp_path);calls=[]
+        monkeypatch.setattr(clean_runtime,'check_image',lambda value:value)
+        monkeypatch.setattr(clean_runtime,'observe',observer(calls))
+        clean_runtime.run(tmp_path,tmp_path/'output')
+        path=tmp_path/'output'/rows[0]['id']/'stage1/result.json'
+        saved=json.loads(path.read_text());saved['entry']['arm']='N' if rows[0]['arm']!='N' else 'S'
+        save(path,saved)
+>       with pytest.raises(RuntimeError,match='Cached observation assignment'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+experiments/backup_pilot/development/tests/test_clean_runtime.py:154: Failed
+=========================== short test summary info ============================
+FAILED experiments/backup_pilot/development/tests/test_clean_runtime.py::test_missing_product_has_no_fabricated_runtime_result
+FAILED experiments/backup_pilot/development/tests/test_clean_runtime.py::test_cached_arm_reassignment_is_rejected
+2 failed, 8 passed in 0.20s

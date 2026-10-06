@@ -1,19 +1,30 @@
 # SpecOrganon
 
-Metodología operativa y toolkit para formular un problema con sus actores y valores, investigarlo, comparar intervenciones, construir una solución mediante SDD y validar sus efectos. El caso alimentario sirve para probar el método; los artefactos y comandos son reutilizables en otros dominios. [GOAL.md](GOAL.md) fija el objetivo y [metodologia.md](docs/metodologia.md) describe los contratos de las nueve fases.
+Método y toolkit para formular problemas, investigar con evidencia, comparar intervenciones, construir software mediante SDD y validar resultados. Sus nueve fases conservan artefactos, dependencias, revisiones y un ledger verificable. Incluye CLI, servidor MCP stdio, laboratorio Docker con Codex y una presentación pública.
 
-**Estado:** MVP local operativo. El funcionamiento técnico de las rutas probadas tiene evidencia en tests y en una instalación limpia; el aporte frente a otros métodos y el impacto real de una intervención permanecen sin demostrar. [Estado y veredictos](docs/estado.md).
+**Repositorio compartido:** [rama main](https://github.com/stevenvo780/SpecOrganon/tree/main). **Presentación y resultados:** [specorganon.stevenvallejo.com](https://specorganon.stevenvallejo.com). Las fuentes de la web están en [website/](website/README.md).
 
-**Prioridad actual:** aplicar el [MVP usable](docs/mvp.md) de filosofía,
-ciencia, ingeniería y validación a proyectos manejables con agentes nativos y
-los recursos presentes. La evaluación final de integridad, aporte,
-impacto y transferencia sigue pendiente.
+**Estado del código:** candidato de desarrollo **0.2.0rc3.dev2**, con transporte explícito `items-v1`: el autor aporta contenido y referencias; el toolkit construye el manifiesto y conserva la procedencia. [Contrato del autor](docs/software_author_contract.md) y [verificación de ingeniería](goals/method-superiority-v1/evidence/engineering-02-receipt.json).
 
-**Descarga:** [paquete instalable del MVP local](releases/mvp-local-20261002/specorganon-mvp-local-20261002.zip),
-[wheel](releases/mvp-local-20261002/specorganon-0.1.0-py3-none-any.whl) e
-[instrucciones y hashes](releases/mvp-local-20261002/README.md).
-Los [paquetes anteriores](releases/historical/dist-20261002/README.md) se
-conservan como archivos históricos de desarrollo.
+**Resultados y límites:** RangeAudit produjo una entrega nativa de nueve fases, con Codex como autor, Gemini como revisor y pruebas ejecutadas en Docker; pasó 115 comprobaciones públicas adicionales. Es un caso de desarrollo, sin evaluación reservada ni demostración de superioridad. La campaña comparativa v3 y el piloto anterior conservan sus resultados adversos y fuentes históricas: no se recalcularon con este código. La [meta para demostrar ventaja frente a libre y SDD](goals/method-superiority-v1/GOAL.md) sigue activa. El [GOAL original](GOAL.md) conserva el objetivo alimentario y sus límites de evidencia de campo.
+
+## Clonar y empezar
+
+```sh
+git clone --branch main https://github.com/stevenvo780/SpecOrganon.git
+cd SpecOrganon
+uv sync --frozen --extra dev
+uv run organon --help
+```
+
+Requiere Linux y Python 3.11 o superior; `uv.lock` fija las dependencias. El MCP usa Landlock ABI 5+ para confinar las rutas. Para construir y comprobar la instalación, consulta la sección de verificación y el [laboratorio Docker](docker/codex/README.md).
+
+## Entregas, campañas y reproducción
+
+- [RangeAudit](examples/rangeaudit/PROVENANCE.md): programa, README y pruebas originales sin alterar, con una guía para ejecutarlo desde este checkout. [Contrato y comprobador público](goals/method-superiority-v1/development/).
+- [Producto de backups](experiments/backup_pilot/product/README.md): implementación utilizable del piloto, elegida desde trabajo libre sin reparar sus bytes. [Resultados de 18 ejecuciones y 36 evaluaciones](experiments/backup_pilot/RESULTADOS.md).
+- [Campaña de software v3](goals/autonomous-software-v1/): resultados y reanálisis publicado separados de la generación original. Las rutas y digests registrados pertenecen a sus worktrees originales; clonar main no permite reabrir ni continuar esas campañas congeladas.
+- [Descargas verificadas](website/public/resultados/software/descargas-manifest.json): paquetes, wheel, contratos e informes publicados, con hashes. Los [paquetes anteriores](releases/historical/dist-20261002/README.md) conservan sus versiones históricas.
 
 ## Empezar un proyecto local con un agente
 
@@ -41,10 +52,12 @@ personas ni acredita impacto de campo. El modo inicial sigue siendo
 La instalación está probada en Linux con Python 3.11 y 3.12 y [`uv`](https://docs.astral.sh/uv/); el paquete declara Python 3.11 o superior. El servidor MCP usa descriptores de directorio y `/proc/self/fd`; su límite de rutas requiere una raíz bajo control del operador, sin escritores locales no confiables con el mismo UID. Desde la raíz del repositorio:
 
 ```sh
-uv sync --locked --extra dev
+uv sync --frozen --extra dev
 uv run python -m pytest -q tests
 uv build --wheel
 ```
+
+La suite completa del host tiene fallos conocidos y no se declara aprobada: en esta integración hubo 696 pruebas pasadas, 45 fallos y 43 errores antes de interrumpirla, incluidos conflictos con el digest del extractor PDF histórico. El código candidato pasó la suite específica de 186 pruebas y 46 subpruebas y un smoke CLI/MCP del wheel instalado. [Recibo y logs de integración](goals/publication-main-20261006/README.md).
 
 Para repetir una comprobación acotada en un Python ya disponible, usa
 `python3 scripts/check_python_compatibility.py --python python3.13 --output /tmp/organon-python313`.
@@ -54,11 +67,11 @@ y MCP stdio reales y comprueba el flujo local, informes, ledger y replay.
 No descarga intérpretes. Consulta [alcance y reproducción por versión](docs/python_compatibility.md);
 esta comprobación no sustituye la suite completa ni una revisión nativa.
 
-Para probar el wheel fuera del árbol de desarrollo, crea un entorno temporal, instala `dist/specorganon-0.1.0-py3-none-any.whl` y ejecuta `scripts/clean_smoke.py` con el Python de ese entorno. El script crea fixtures sintéticas, descubre las 24 herramientas MCP actuales e invoca 15 operaciones por CLI y cliente MCP stdio real; las otras rutas se ejercitan en las [pruebas de atestación](tests/test_approval_security.py), [ejecución firmada](tests/test_signed_test_execution_transport.py), [observación firmada](tests/test_test_observation_transport.py) y [sonda del diario de lotes](scripts/probe_bread_prospectus.py). El [inventario D-079](experiments/development/installed_public_interface_inventory_2026-09-27.json) registra su corte histórico de 19/19, antes de añadir la observación. El [dossier D-107](experiments/development/indicator_retirement_2026-09-30/README.md) conserva el wheel instalado y el inventario técnico de ese corte de 23/23 operaciones en Python 3.11 y 3.12. El smoke recorre las nueve fases, comprueba `organon.json`, rechaza entradas JSON no finitas y números que se perderían por subdesbordamiento sin mutar el ledger, y verifica una repetición sin duplicados. Interrumpe con `SIGKILL` un runner CLI tras un checkpoint, reanuda el mismo manifiesto por MCP y coteja estado y replay. Libera dos procesos CLI escritores con precondiciones de versión y verifica ambos ítems; la barrera no demuestra una colisión de lecturas. Además ejercita una aprobación Ed25519 **sintética** con clave generada en memoria y comprueba rechazo de firma inválida y bloqueo al retirar el registro de confianza:
+Para probar el wheel fuera del árbol de desarrollo, crea un entorno temporal, instala `dist/specorganon-0.2.0rc3.dev2-py3-none-any.whl` y ejecuta `scripts/clean_smoke.py` con el Python de ese entorno. El script crea fixtures sintéticas, descubre las 24 herramientas MCP actuales e invoca 15 operaciones por CLI y cliente MCP stdio real; las otras rutas se ejercitan en las [pruebas de atestación](tests/test_approval_security.py), [ejecución firmada](tests/test_signed_test_execution_transport.py), [observación firmada](tests/test_test_observation_transport.py) y [sonda del diario de lotes](scripts/probe_bread_prospectus.py). El [inventario D-079](experiments/development/installed_public_interface_inventory_2026-09-27.json) registra su corte histórico de 19/19, antes de añadir la observación. El [dossier D-107](experiments/development/indicator_retirement_2026-09-30/README.md) conserva el wheel instalado y el inventario técnico de ese corte de 23/23 operaciones en Python 3.11 y 3.12. El smoke recorre las nueve fases, comprueba `organon.json`, rechaza entradas JSON no finitas y números que se perderían por subdesbordamiento sin mutar el ledger, y verifica una repetición sin duplicados. Interrumpe con `SIGKILL` un runner CLI tras un checkpoint, reanuda el mismo manifiesto por MCP y coteja estado y replay. Libera dos procesos CLI escritores con precondiciones de versión y verifica ambos ítems; la barrera no demuestra una colisión de lecturas. Además ejercita una aprobación Ed25519 **sintética** con clave generada en memoria y comprueba rechazo de firma inválida y bloqueo al retirar el registro de confianza:
 
 ```sh
 uv venv /tmp/organon-check
-uv pip install --python /tmp/organon-check/bin/python dist/specorganon-0.1.0-py3-none-any.whl
+uv pip install --python /tmp/organon-check/bin/python dist/specorganon-0.2.0rc3.dev2-py3-none-any.whl
 /tmp/organon-check/bin/python scripts/clean_smoke.py "$PWD"
 ```
 

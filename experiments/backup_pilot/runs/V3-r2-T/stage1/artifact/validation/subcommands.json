@@ -1,0 +1,3096 @@
+[
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-4pdw4dpz/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-4pdw4dpz/repo",
+      "--id",
+      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.034356488002231345
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-4pdw4dpz/repo",
+      "--id",
+      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.020496293996984605
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-4pdw4dpz/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-4pdw4dpz/repo",
+      "--id",
+      "0"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"0\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02931406599964248
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-j_1m0nsi/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-j_1m0nsi/repo",
+      "--id",
+      "same"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"same\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-j_1m0nsi/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-j_1m0nsi/repo",
+      "--id",
+      "same"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot ID already exists\"}\n"
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-j_1m0nsi/repo",
+      "--id",
+      "same"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"same\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.019880406995071098
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-2y4_xkdl/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03362704100436531
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.018480503000319004
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.01874827600113349
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.018630444996233564
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.01899576800497016
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.019256120998761617
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.019260510998719838
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot layout is incomplete or has unexpected entries\"}\n",
+    "elapsed_seconds": 0.019408172003750224
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot layout is incomplete or has unexpected entries\"}\n",
+    "elapsed_seconds": 0.018955758001538925
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.018610254002851434
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.018705745998886414
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.018889656996179838
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.018599654002173338
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.018838866999431048
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.019662644997879397
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.01891082799556898
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.019740857002034318
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.0191853800060926
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.018940387999464292
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot layout is incomplete or has unexpected entries\"}\n",
+    "elapsed_seconds": 0.019137219998810906
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot layout is incomplete or has unexpected entries\"}\n",
+    "elapsed_seconds": 0.021605006004392635
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.019177989997842815
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.019484814001771156
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"manifest seal mismatch\"}\n",
+    "elapsed_seconds": 0.018711264994635712
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.019058669000514783
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000001\"}\n",
+    "elapsed_seconds": 0.0193388519983273
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000001\"}\n",
+    "elapsed_seconds": 0.020471304000238888
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.01886194699909538
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000001\"}\n",
+    "elapsed_seconds": 0.019583145003707614
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000001\"}\n",
+    "elapsed_seconds": 0.020433773002878297
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.019332342002599034
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"missing or unexpected snapshot objects\"}\n",
+    "elapsed_seconds": 0.01958362400182523
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"missing or unexpected snapshot objects\"}\n",
+    "elapsed_seconds": 0.019488892998197116
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.019096849995548837
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000001\"}\n",
+    "elapsed_seconds": 0.018762425999739207
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000001\"}\n",
+    "elapsed_seconds": 0.019169639999745414
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.019486213001073338
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000000\"}\n",
+    "elapsed_seconds": 0.019564823996915948
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000000\"}\n",
+    "elapsed_seconds": 0.018988177995197475
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.019032238000363577
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"missing or unexpected snapshot objects\"}\n",
+    "elapsed_seconds": 0.019408783002290875
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"missing or unexpected snapshot objects\"}\n",
+    "elapsed_seconds": 0.019575543999962974
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.022106650998466648
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000000\"}\n",
+    "elapsed_seconds": 0.020022518998302985
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000000\"}\n",
+    "elapsed_seconds": 0.01900793799723033
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.020025169003929477
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000002\"}\n",
+    "elapsed_seconds": 0.020589334999385756
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000002\"}\n",
+    "elapsed_seconds": 0.01959238400013419
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.018779625999741256
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000002\"}\n",
+    "elapsed_seconds": 0.019110789995465893
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000002\"}\n",
+    "elapsed_seconds": 0.020028299004479777
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02001452900003642
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"missing or unexpected snapshot objects\"}\n",
+    "elapsed_seconds": 0.020935608001309447
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"missing or unexpected snapshot objects\"}\n",
+    "elapsed_seconds": 0.021094800998980645
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.021730257001763675
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000002\"}\n",
+    "elapsed_seconds": 0.02113919099792838
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2y4_xkdl/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000002\"}\n",
+    "elapsed_seconds": 0.022074510001402814
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.022149830998387188
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2y4_xkdl/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02204152000194881
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-m6l33dyy/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-m6l33dyy/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03140949799853843
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-m6l33dyy/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-m6l33dyy/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"corrupt blob: 00000000\"}\n",
+    "elapsed_seconds": 0.02067226599319838
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-m6l33dyy/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-m6l33dyy/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"destination is not empty\"}\n",
+    "elapsed_seconds": 0.020364382995467167
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-oro6ryi6/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-oro6ryi6/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03624800900433911
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-oro6ryi6/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-oro6ryi6/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink rejected: /trial/validation/backup-test-oro6ryi6/destino\"}\n",
+    "elapsed_seconds": 0.019996169001387898
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-oro6ryi6/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-oro6ryi6/destino/child"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink rejected: /trial/validation/backup-test-oro6ryi6/destino\"}\n",
+    "elapsed_seconds": 0.02148147399566369
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-f0llaccz/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-f0llaccz/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03334796799754258
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-f0llaccz/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-f0llaccz/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot ID already exists\"}\n",
+    "elapsed_seconds": 0.01999963900016155
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-f0llaccz/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02183342799980892
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-4bsz6t2b/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-4bsz6t2b/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03699608700117096
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-4bsz6t2b/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-4bsz6t2b/destino"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02417482199962251
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-o_jjny21/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-o_jjny21/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.029241844997159205
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-o_jjny21/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"missing or unexpected snapshot objects\"}\n",
+    "elapsed_seconds": 0.02080889699573163
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-o_jjny21/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-o_jjny21/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"missing or unexpected snapshot objects\"}\n",
+    "elapsed_seconds": 0.021938530000625178
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-o_jjny21/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02140454300388228
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-o_jjny21/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-o_jjny21/repo",
+      "--id",
+      "unfinished"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot ID already exists\"}\n",
+    "elapsed_seconds": 0.020386513002449647
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "",
+      "--source",
+      "/trial/validation/backup-test-6qp9027c/fuente \u00fc con espacios"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.018763615997158922
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      ""
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.020962048998626415
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "",
+      "--dest",
+      "/trial/validation/backup-test-6qp9027c/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.020869209001830313
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "../x",
+      "--source",
+      "/trial/validation/backup-test-6qp9027c/fuente \u00fc con espacios"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.02118214099755278
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "../x"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.02066677599941613
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "../x",
+      "--dest",
+      "/trial/validation/backup-test-6qp9027c/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.020661496004322544
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "a/b",
+      "--source",
+      "/trial/validation/backup-test-6qp9027c/fuente \u00fc con espacios"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.02132994300336577
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "a/b"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.020164571003988385
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "a/b",
+      "--dest",
+      "/trial/validation/backup-test-6qp9027c/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.02014269099890953
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      ".",
+      "--source",
+      "/trial/validation/backup-test-6qp9027c/fuente \u00fc con espacios"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.018742285996268038
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "."
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.019395132003410254
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      ".",
+      "--dest",
+      "/trial/validation/backup-test-6qp9027c/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.020400224006152712
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "-foo",
+      "--source",
+      "/trial/validation/backup-test-6qp9027c/fuente \u00fc con espacios"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py create [-h] --repo REPO --id ID --source SOURCE\nbackup.py create: error: argument --id: expected one argument\n",
+    "elapsed_seconds": 0.020464793997234665
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "-foo"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py verify [-h] --repo REPO --id ID\nbackup.py verify: error: argument --id: expected one argument\n",
+    "elapsed_seconds": 0.01957818499795394
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "-foo",
+      "--dest",
+      "/trial/validation/backup-test-6qp9027c/destino"
+    ],
+    "exit_code": 2,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "usage: backup.py restore [-h] --repo REPO --id ID --dest DEST\nbackup.py restore: error: argument --id: expected one argument\n",
+    "elapsed_seconds": 0.02058323500386905
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "\u00f1",
+      "--source",
+      "/trial/validation/backup-test-6qp9027c/fuente \u00fc con espacios"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.020954059000359848
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "\u00f1"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.02063770500535611
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "\u00f1",
+      "--dest",
+      "/trial/validation/backup-test-6qp9027c/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.020648064994020388
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "--source",
+      "/trial/validation/backup-test-6qp9027c/fuente \u00fc con espacios"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.020069558995601255
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.020382942995638587
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "--dest",
+      "/trial/validation/backup-test-6qp9027c/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.021179420997214038
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "a\n",
+      "--source",
+      "/trial/validation/backup-test-6qp9027c/fuente \u00fc con espacios"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.02225810199888656
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "a\n"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.020299331998103298
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-6qp9027c/repo",
+      "--id",
+      "a\n",
+      "--dest",
+      "/trial/validation/backup-test-6qp9027c/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"invalid snapshot ID\"}\n",
+    "elapsed_seconds": 0.01970166600222001
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-kc4ulrbo/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03180593200522708
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.019927997993363533
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-kc4ulrbo/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.01941081300174119
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.019194870998035185
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-kc4ulrbo/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.019172029999026563
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.01918108999961987
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-kc4ulrbo/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.020480523999140132
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.019419792995904572
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-kc4ulrbo/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.01981210699887015
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.018857226998079568
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-kc4ulrbo/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.019371271999261808
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.020633526000892743
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-kc4ulrbo/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"unsafe manifest path\"}\n",
+    "elapsed_seconds": 0.019687135994900018
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"duplicate manifest path\"}\n",
+    "elapsed_seconds": 0.019194410000636708
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-kc4ulrbo/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"duplicate manifest path\"}\n",
+    "elapsed_seconds": 0.018984107999131083
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"missing or conflicting parent directory\"}\n",
+    "elapsed_seconds": 0.0212642520054942
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-kc4ulrbo/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-kc4ulrbo/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"missing or conflicting parent directory\"}\n",
+    "elapsed_seconds": 0.02036892300384352
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-61r2tonk/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-61r2tonk/repo",
+      "--id",
+      "z-last"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"z-last\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.039304320998780895
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-61r2tonk/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-61r2tonk/repo",
+      "--id",
+      "A_first"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"A_first\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03578453400405124
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-61r2tonk/repo",
+      "--id",
+      "z-last",
+      "--dest",
+      "/trial/validation/backup-test-61r2tonk/destino"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"z-last\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02780763000191655
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-61r2tonk/repo",
+      "--id",
+      "A_first",
+      "--dest",
+      "/trial/validation/backup-test-61r2tonk/second"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"A_first\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.028042282996466383
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-61r2tonk/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[\"A_first\",\"z-last\"]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.020980629000405315
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2esvyb42/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"[Errno 2] No such file or directory: '/trial/validation/backup-test-2esvyb42/repo'\"}\n",
+    "elapsed_seconds": 0.02056238500517793
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2esvyb42/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2esvyb42/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"[Errno 2] No such file or directory: '/trial/validation/backup-test-2esvyb42/repo'\"}\n",
+    "elapsed_seconds": 0.020898998001939617
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-2esvyb42/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.019858778003253974
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-2esvyb42/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"[Errno 2] No such file or directory: '/trial/validation/backup-test-2esvyb42/repo/snapshots/one'\"}\n",
+    "elapsed_seconds": 0.018374132007011212
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-2esvyb42/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-2esvyb42/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"[Errno 2] No such file or directory: '/trial/validation/backup-test-2esvyb42/repo/snapshots/one'\"}\n",
+    "elapsed_seconds": 0.01873971599707147
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-kl5k5_zw/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-kl5k5_zw/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03372525199665688
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-kl5k5_zw/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-kl5k5_zw/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"destination is not empty\"}\n",
+    "elapsed_seconds": 0.021096940006827936
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-3jg729v4/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-3jg729v4/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.032066064995888155
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-3jg729v4/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-3jg729v4/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"not a directory: /trial/validation/backup-test-3jg729v4/destino\"}\n",
+    "elapsed_seconds": 0.0198792679948383
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-1invizau/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-1invizau/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.031067104995599948
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-1invizau/alias"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink rejected: /trial/validation/backup-test-1invizau/alias\"}\n",
+    "elapsed_seconds": 0.018855667003663257
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-1invizau/alias",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink rejected: /trial/validation/backup-test-1invizau/alias\"}\n",
+    "elapsed_seconds": 0.018557233997853473
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-1invizau/alias",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-1invizau/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink rejected: /trial/validation/backup-test-1invizau/alias\"}\n",
+    "elapsed_seconds": 0.01897800900042057
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--repo",
+      "/trial/validation/backup-test-1invizau/alias",
+      "--id",
+      "one",
+      "--source",
+      "/trial/validation/backup-test-1invizau/fuente \u00fc con espacios"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink rejected: /trial/validation/backup-test-1invizau/alias\"}\n",
+    "elapsed_seconds": 0.019156199996359646
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-1invizau/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file rejected: /trial/validation/backup-test-1invizau/repo/.staging/unsafe\"}\n",
+    "elapsed_seconds": 0.019120359000226017
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-1invizau/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file rejected: /trial/validation/backup-test-1invizau/repo/.staging/unsafe\"}\n",
+    "elapsed_seconds": 0.01934312299999874
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-jpubvixy/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-jpubvixy/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.031044873998325784
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-jpubvixy/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-jpubvixy/repo/out"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"overlapping paths: /trial/validation/backup-test-jpubvixy/repo, /trial/validation/backup-test-jpubvixy/repo/out\"}\n",
+    "elapsed_seconds": 0.019538833999831695
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-jpubvixy/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-jpubvixy"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"overlapping paths: /trial/validation/backup-test-jpubvixy/repo, /trial/validation/backup-test-jpubvixy\"}\n",
+    "elapsed_seconds": 0.019905208006093744
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-fh_hjw6l/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-fh_hjw6l/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.030279395999968983
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-fh_hjw6l/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.019461062998743728
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-fh_hjw6l/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-fh_hjw6l/destino"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02942322799935937
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-fh_hjw6l/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[\"one\"]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.020848357999057043
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-tw0hpz90/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-tw0hpz90/repo",
+      "--id",
+      "prior"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"prior\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03139755799929844
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "-c",
+      "import importlib.util, os, signal, sys\nspec = importlib.util.spec_from_file_location('backup_under_test', sys.argv[1])\nbackup = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(backup)\nrename = backup.os.rename\ndef stopped_rename(source, dest):\n    if sys.argv[2] == 'after':\n        rename(source, dest)\n        os.kill(os.getpid(), signal.SIGSTOP)\n    else:\n        os.kill(os.getpid(), signal.SIGSTOP)\n        rename(source, dest)\nbackup.os.rename = stopped_rename\nsys.exit(backup.main(sys.argv[3:]))\n",
+      "/trial/solution/backup.py",
+      "after",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-tw0hpz90/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-tw0hpz90/repo",
+      "--id",
+      "published"
+    ],
+    "exit_code": -9,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "",
+    "signal": "SIGKILL"
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-tw0hpz90/repo",
+      "--id",
+      "prior"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"prior\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.019992378998722415
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-tw0hpz90/repo",
+      "--id",
+      "published"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"published\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.021146140003111213
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-tw0hpz90/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[\"prior\",\"published\"]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.021948719004285522
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-tw0hpz90/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-tw0hpz90/repo",
+      "--id",
+      "published"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"snapshot ID already exists\"}\n",
+    "elapsed_seconds": 0.02098170899989782
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-_7eovrry/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-_7eovrry/repo",
+      "--id",
+      "prior"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"prior\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.034990055006346665
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "-c",
+      "import importlib.util, os, signal, sys\nspec = importlib.util.spec_from_file_location('backup_under_test', sys.argv[1])\nbackup = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(backup)\nrename = backup.os.rename\ndef stopped_rename(source, dest):\n    if sys.argv[2] == 'after':\n        rename(source, dest)\n        os.kill(os.getpid(), signal.SIGSTOP)\n    else:\n        os.kill(os.getpid(), signal.SIGSTOP)\n        rename(source, dest)\nbackup.os.rename = stopped_rename\nsys.exit(backup.main(sys.argv[3:]))\n",
+      "/trial/solution/backup.py",
+      "before",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-_7eovrry/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-_7eovrry/repo",
+      "--id",
+      "interrupted"
+    ],
+    "exit_code": -9,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "",
+    "signal": "SIGKILL"
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-_7eovrry/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[\"prior\"]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.020135470003879163
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-_7eovrry/repo",
+      "--id",
+      "interrupted"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"[Errno 2] No such file or directory: '/trial/validation/backup-test-_7eovrry/repo/snapshots/interrupted'\"}\n",
+    "elapsed_seconds": 0.01964714499627007
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-_7eovrry/repo",
+      "--id",
+      "prior"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"prior\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.01950735399441328
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-_7eovrry/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-_7eovrry/repo",
+      "--id",
+      "interrupted"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"interrupted\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.034603931999299675
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-_7eovrry/repo",
+      "--id",
+      "interrupted"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"interrupted\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.022092610997788142
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-_7eovrry/repo",
+      "--id",
+      "interrupted",
+      "--dest",
+      "/trial/validation/backup-test-_7eovrry/destino"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"interrupted\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.028903022001031786
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-6x55hxcx/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-6x55hxcx/repo",
+      "--id",
+      "prior"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"prior\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.030517939005221706
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-6x55hxcx/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-6x55hxcx/repo",
+      "--id",
+      "partial"
+    ],
+    "exit_code": -9,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "",
+    "signal": "SIGKILL"
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-6x55hxcx/repo"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"snapshots\":[\"prior\"]}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.02043982299801428
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-6x55hxcx/repo",
+      "--id",
+      "prior"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"prior\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.020646276003390085
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-6x55hxcx/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-6x55hxcx/repo",
+      "--id",
+      "partial"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"partial\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.17810928999824682
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-6x55hxcx/repo",
+      "--id",
+      "partial"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"partial\",\"valid\":true}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.07379955100623192
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-6x55hxcx/repo",
+      "--id",
+      "partial",
+      "--dest",
+      "/trial/validation/backup-test-6x55hxcx/destino"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"partial\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.2855847319951863
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-ylanpj3i/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-ylanpj3i/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "stdout": "{\"id\":\"one\"}\n",
+    "stderr": "",
+    "elapsed_seconds": 0.03498451499763178
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "verify",
+      "--repo",
+      "/trial/validation/backup-test-ylanpj3i/repo",
+      "--id",
+      "one"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file rejected: /trial/validation/backup-test-ylanpj3i/repo/snapshots/one/data/00000000\"}\n",
+    "elapsed_seconds": 0.019948678003856912
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "restore",
+      "--repo",
+      "/trial/validation/backup-test-ylanpj3i/repo",
+      "--id",
+      "one",
+      "--dest",
+      "/trial/validation/backup-test-ylanpj3i/destino"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file rejected: /trial/validation/backup-test-ylanpj3i/repo/snapshots/one/data/00000000\"}\n",
+    "elapsed_seconds": 0.01949203399999533
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "list",
+      "--repo",
+      "/trial/validation/backup-test-ylanpj3i/repo"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file rejected: /trial/validation/backup-test-ylanpj3i/repo/snapshots/one/data/00000000\"}\n",
+    "elapsed_seconds": 0.01870934599719476
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-40ls_98c/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-40ls_98c/fuente \u00fc con espacios",
+      "--id",
+      "x"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"overlapping paths: /trial/validation/backup-test-40ls_98c/fuente \\u00fc con espacios, /trial/validation/backup-test-40ls_98c/fuente \\u00fc con espacios\"}\n",
+    "elapsed_seconds": 0.018893057000241242
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-40ls_98c/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-40ls_98c/fuente \u00fc con espacios/nested",
+      "--id",
+      "x"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"overlapping paths: /trial/validation/backup-test-40ls_98c/fuente \\u00fc con espacios, /trial/validation/backup-test-40ls_98c/fuente \\u00fc con espacios/nested\"}\n",
+    "elapsed_seconds": 0.018814276001648977
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-40ls_98c/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-40ls_98c",
+      "--id",
+      "x"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"overlapping paths: /trial/validation/backup-test-40ls_98c/fuente \\u00fc con espacios, /trial/validation/backup-test-40ls_98c\"}\n",
+    "elapsed_seconds": 0.018607464000524487
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-enwxtlnu/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-enwxtlnu/repo",
+      "--id",
+      "x"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file rejected: /trial/validation/backup-test-enwxtlnu/fuente \\u00fc con espacios/link\"}\n",
+    "elapsed_seconds": 0.018544673999713268
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-enwxtlnu/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-enwxtlnu/repo",
+      "--id",
+      "x"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file rejected: /trial/validation/backup-test-enwxtlnu/fuente \\u00fc con espacios/link\"}\n",
+    "elapsed_seconds": 0.019251851001172327
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-enwxtlnu/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-enwxtlnu/repo",
+      "--id",
+      "x"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file rejected: /trial/validation/backup-test-enwxtlnu/fuente \\u00fc con espacios/link\"}\n",
+    "elapsed_seconds": 0.01898062799591571
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-enwxtlnu/ancestor",
+      "--repo",
+      "/trial/validation/backup-test-enwxtlnu/repo",
+      "--id",
+      "x"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink rejected: /trial/validation/backup-test-enwxtlnu/ancestor\"}\n",
+    "elapsed_seconds": 0.018646504999196623
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-enwxtlnu/ancestor/../fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-enwxtlnu/repo",
+      "--id",
+      "x"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink rejected: /trial/validation/backup-test-enwxtlnu/ancestor\"}\n",
+    "elapsed_seconds": 0.018903917996794917
+  },
+  {
+    "argv": [
+      "/usr/local/bin/python3",
+      "/trial/solution/backup.py",
+      "create",
+      "--source",
+      "/trial/validation/backup-test-luw4u9tw/fuente \u00fc con espacios",
+      "--repo",
+      "/trial/validation/backup-test-luw4u9tw/repo",
+      "--id",
+      "x"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "stdout": "",
+    "stderr": "{\"error\": \"symlink or special file rejected: /trial/validation/backup-test-luw4u9tw/fuente \\u00fc con espacios/fifo\"}\n",
+    "elapsed_seconds": 0.019280371998320334
+  }
+]

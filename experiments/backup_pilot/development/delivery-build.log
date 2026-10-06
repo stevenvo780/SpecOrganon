@@ -1,0 +1,47 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.delivery
+#1 transferring dockerfile: 533B done
+#1 WARN: InvalidDefaultArgInFrom: Default value for ARG ${BASE_IMAGE} results in empty or invalid base image name (line 3)
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/specorganon-backup-control:frozen-a1911c4ddadc
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 388B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 739B done
+#4 DONE 0.0s
+
+#5 [1/5] FROM docker.io/library/specorganon-backup-control:frozen-a1911c4ddadc@sha256:a1911c4ddadc0f60e7fdaba294e8eefa75c08882699c8bffc9814dcd7d3a1cee
+#5 resolve docker.io/library/specorganon-backup-control:frozen-a1911c4ddadc@sha256:a1911c4ddadc0f60e7fdaba294e8eefa75c08882699c8bffc9814dcd7d3a1cee done
+#5 DONE 0.0s
+
+#6 [2/5] COPY experiments/backup_pilot/evaluator.py /eval/evaluator.py
+#6 DONE 0.0s
+
+#7 [3/5] COPY experiments/backup_pilot/delivery_entry.py /entry/backup.py
+#7 DONE 0.0s
+
+#8 [4/5] RUN chmod 0700 /eval /eval/evaluator.py && chmod 0755 /entry && chmod 0644 /entry/backup.py
+#8 DONE 0.1s
+
+#9 [5/5] WORKDIR /work
+#9 DONE 0.0s
+
+#10 exporting to image
+#10 exporting layers 0.1s done
+#10 exporting manifest sha256:13528f99669731f33a79708a765e8d4a8a7b7eaa8fa6fcd8d9b76c02155d429e done
+#10 exporting config sha256:cb94d2f1d5751f2bbde98f35f258221a7f4e91f69242706047aef7b3b918157b done
+#10 exporting attestation manifest sha256:396006ebb88f3501b97e4ce4a3f668ef4706f9d4d4d705c26eb72a6fc998757c done
+#10 exporting manifest list sha256:8cc583d5518eb0193f0f1dbf6f7c9bb41b8a8054d953fd20b49d0632848bed58 done
+#10 naming to docker.io/library/specorganon-backup-delivery:dev
+#10 naming to docker.io/library/specorganon-backup-delivery:dev done
+#10 unpacking to docker.io/library/specorganon-backup-delivery:dev 0.0s done
+#10 DONE 0.1s
+
+ [33m1 warning found (use docker --debug to expand):
+[0m - InvalidDefaultArgInFrom: Default value for ARG ${BASE_IMAGE} results in empty or invalid base image name (line 3)

@@ -1,0 +1,998 @@
+test_concurrent_create_same_id_preserves_single_complete_snapshot (__main__.BackupTests.test_concurrent_create_same_id_preserves_single_complete_snapshot) ... $ /usr/local/bin/python /trial/solution/backup.py create --source '/trial/backup-tests-fhunztz2/fuente con espacios' --repo /trial/backup-tests-fhunztz2/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "El ID ya existe: V1"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --source '/trial/backup-tests-fhunztz2/fuente con espacios' --repo /trial/backup-tests-fhunztz2/repositorio --id V1
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-fhunztz2/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-fhunztz2/repositorio
+exit=0
+stdout='{"snapshots": ["V1"]}\n'
+stderr=''
+ok
+test_destination_repository_overlap (__main__.BackupTests.test_destination_repository_overlap) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-i_n6dyzh/repositorio --id V1 --source '/trial/backup-tests-i_n6dyzh/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-i_n6dyzh/repositorio --id V1 --dest /trial/backup-tests-i_n6dyzh/repositorio/destination
+exit=1
+stdout=''
+stderr='{"error": "Destino y repositorio solapados"}\n'
+ok
+test_destination_symlinks (__main__.BackupTests.test_destination_symlinks) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-xjaqqh1g/repositorio --id V1 --source '/trial/backup-tests-xjaqqh1g/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-xjaqqh1g/repositorio --id V1 --dest /trial/backup-tests-xjaqqh1g/restaurado
+exit=1
+stdout=''
+stderr='{"error": "La ruta contiene un enlace o no es un directorio: /trial/backup-tests-xjaqqh1g/restaurado"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-xjaqqh1g/repositorio --id V1 --dest /trial/backup-tests-xjaqqh1g/restaurado
+exit=1
+stdout=''
+stderr='{"error": "La ruta contiene un enlace o no es un directorio: /trial/backup-tests-xjaqqh1g/restaurado"}\n'
+ok
+test_directory_only_destination_is_nonempty (__main__.BackupTests.test_directory_only_destination_is_nonempty) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-mk96iagb/repositorio --id V1 --source '/trial/backup-tests-mk96iagb/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-mk96iagb/repositorio --id V1 --dest /trial/backup-tests-mk96iagb/restaurado
+exit=1
+stdout=''
+stderr='{"error": "El destino preexistente no est\\u00e1 vac\\u00edo"}\n'
+ok
+test_duplicate_id_preserves_previous_snapshot (__main__.BackupTests.test_duplicate_id_preserves_previous_snapshot) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-spxi6f0x/repositorio --id V1 --source '/trial/backup-tests-spxi6f0x/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-spxi6f0x/repositorio --id V1 --source '/trial/backup-tests-spxi6f0x/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "El ID ya existe: V1"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-spxi6f0x/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-spxi6f0x/repositorio --id V1 --dest /trial/backup-tests-spxi6f0x/restaurado
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+ok
+test_empty_repo_and_unknown_ids (__main__.BackupTests.test_empty_repo_and_unknown_ids) ... $ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-9yx6rrdx/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-9yx6rrdx/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Snapshot inexistente o incompleto: V1"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-9yx6rrdx/repositorio --id V1 --dest /trial/backup-tests-9yx6rrdx/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Snapshot inexistente o incompleto: V1"}\n'
+ok
+test_empty_source_and_existing_empty_destination (__main__.BackupTests.test_empty_source_and_existing_empty_destination) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-uvf2uclw/repositorio --id V1 --source '/trial/backup-tests-uvf2uclw/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-uvf2uclw/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-uvf2uclw/repositorio --id V1 --dest /trial/backup-tests-uvf2uclw/restaurado
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+ok
+test_every_snapshot_regular_file_corruption_and_deletion (__main__.BackupTests.test_every_snapshot_regular_file_corruption_and_deletion) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --source '/trial/backup-tests-lrb1kaxu/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'cero bytes\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'cero bytes\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'cero bytes\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'literal\\\\\\\\barra\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'literal\\\\\\\\barra\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'literal\\\\\\\\barra\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'todos los bytes.bin\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'todos los bytes.bin\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'todos los bytes.bin\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'\\u65e5\\u672c\\u8a9e y espa\\u00f1ol\', \'\\ud83d\\ude80 documento.txt\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'\\u65e5\\u672c\\u8a9e y espa\\u00f1ol\', \'\\ud83d\\ude80 documento.txt\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Contenido corrupto: [\'\\u65e5\\u672c\\u8a9e y espa\\u00f1ol\', \'\\ud83d\\ude80 documento.txt\']"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Manifiesto corrupto o sello inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "Manifiesto corrupto o sello inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Manifiesto corrupto o sello inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "[Errno 2] No such file or directory: \'/trial/backup-tests-lrb1kaxu/repositorio/snapshots/V1/manifest.json\'"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "[Errno 2] No such file or directory: \'/trial/backup-tests-lrb1kaxu/repositorio/snapshots/V1/manifest.json\'"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "[Errno 2] No such file or directory: \'/trial/backup-tests-lrb1kaxu/repositorio/snapshots/V1/manifest.json\'"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Manifiesto corrupto o sello inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "Manifiesto corrupto o sello inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Manifiesto corrupto o sello inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "[Errno 2] No such file or directory: \'/trial/backup-tests-lrb1kaxu/repositorio/snapshots/V1/manifest.sha256\'"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/protected
+exit=1
+stdout=''
+stderr='{"error": "[Errno 2] No such file or directory: \'/trial/backup-tests-lrb1kaxu/repositorio/snapshots/V1/manifest.sha256\'"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1 --dest /trial/backup-tests-lrb1kaxu/restaurado
+exit=1
+stdout=''
+stderr='{"error": "[Errno 2] No such file or directory: \'/trial/backup-tests-lrb1kaxu/repositorio/snapshots/V1/manifest.sha256\'"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-lrb1kaxu/repositorio
+exit=0
+stdout='{"snapshots": []}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-lrb1kaxu/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+ok
+test_existing_incomplete_id_is_not_overwritten (__main__.BackupTests.test_existing_incomplete_id_is_not_overwritten) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-1x9c0muq/repositorio --id V1 --source '/trial/backup-tests-1x9c0muq/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "El ID ya existe: V1"}\n'
+FAIL
+test_id_validation_and_maximum_length (__main__.BackupTests.test_id_validation_and_maximum_length) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=0
+stdout='{"id": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+exit=0
+stdout='{"id": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id '' --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id ''
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-65ypqjjo/repositorio --id '' --dest /trial/backup-tests-65ypqjjo/restaurado
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id . --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id .
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-65ypqjjo/repositorio --id . --dest /trial/backup-tests-65ypqjjo/restaurado
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id .. --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id ..
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-65ypqjjo/repositorio --id .. --dest /trial/backup-tests-65ypqjjo/restaurado
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id a/b --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id a/b
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-65ypqjjo/repositorio --id a/b --dest /trial/backup-tests-65ypqjjo/restaurado
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id /absolute --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id /absolute
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-65ypqjjo/repositorio --id /absolute --dest /trial/backup-tests-65ypqjjo/restaurado
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id -bad --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=2
+stdout=''
+stderr='usage: backup.py create [-h] --source SOURCE --repo REPO --id ID\nbackup.py create: error: argument --id: expected one argument\n'
+
+  test_id_validation_and_maximum_length (__main__.BackupTests.test_id_validation_and_maximum_length) (identifier='-bad', operation='create') ... ERROR
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id -bad
+exit=2
+stdout=''
+stderr='usage: backup.py verify [-h] --repo REPO --id ID\nbackup.py verify: error: argument --id: expected one argument\n'
+  test_id_validation_and_maximum_length (__main__.BackupTests.test_id_validation_and_maximum_length) (identifier='-bad', operation='verify') ... ERROR
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-65ypqjjo/repositorio --id -bad --dest /trial/backup-tests-65ypqjjo/restaurado
+exit=2
+stdout=''
+stderr='usage: backup.py restore [-h] --repo REPO --id ID --dest DEST\nbackup.py restore: error: argument --id: expected one argument\n'
+  test_id_validation_and_maximum_length (__main__.BackupTests.test_id_validation_and_maximum_length) (identifier='-bad', operation='restore') ... ERROR
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id _bad --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id _bad
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-65ypqjjo/repositorio --id _bad --dest /trial/backup-tests-65ypqjjo/restaurado
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id 'ñ' --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id 'ñ'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-65ypqjjo/repositorio --id 'ñ' --dest /trial/backup-tests-65ypqjjo/restaurado
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id 'a b' --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id 'a b'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-65ypqjjo/repositorio --id 'a b' --dest /trial/backup-tests-65ypqjjo/restaurado
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-65ypqjjo/repositorio --id AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA --dest /trial/backup-tests-65ypqjjo/restaurado
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-65ypqjjo/repositorio --id 'a
+' --source '/trial/backup-tests-65ypqjjo/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-65ypqjjo/repositorio --id 'a
+'
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-65ypqjjo/repositorio --id 'a
+' --dest /trial/backup-tests-65ypqjjo/restaurado
+exit=1
+stdout=''
+stderr='{"error": "ID inv\\u00e1lido"}\n'
+test_incomplete_staging_never_listed_and_retry_allowed (__main__.BackupTests.test_incomplete_staging_never_listed_and_retry_allowed) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-1vuqa18s/repositorio --id previous --source '/trial/backup-tests-1vuqa18s/fuente con espacios'
+exit=0
+stdout='{"id": "previous"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-1vuqa18s/repositorio
+exit=0
+stdout='{"snapshots": ["previous"]}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-1vuqa18s/repositorio --id V1 --source '/trial/backup-tests-1vuqa18s/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-1vuqa18s/repositorio --id previous
+exit=0
+stdout='{"id": "previous", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-1vuqa18s/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+ok
+test_missing_and_extra_snapshot_entries (__main__.BackupTests.test_missing_and_extra_snapshot_entries) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-bx3_erpn/repositorio --id V1 --source '/trial/backup-tests-bx3_erpn/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-bx3_erpn/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-bx3_erpn/repositorio --id V1 --dest /trial/backup-tests-bx3_erpn/restaurado
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-bx3_erpn/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-bx3_erpn/repositorio --id V1 --dest /trial/backup-tests-bx3_erpn/restaurado
+exit=1
+stdout=''
+stderr='{"error": "El snapshot contiene entradas ausentes, adicionales o de tipo incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-bx3_erpn/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+ok
+test_missing_repository (__main__.BackupTests.test_missing_repository) ... $ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-1nse7e6w/repositorio
+exit=1
+stdout=''
+stderr='{"error": "Directorio inexistente: /trial/backup-tests-1nse7e6w/repositorio"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-1nse7e6w/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Directorio inexistente: /trial/backup-tests-1nse7e6w/repositorio"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-1nse7e6w/repositorio --id V1 --dest /trial/backup-tests-1nse7e6w/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Directorio inexistente: /trial/backup-tests-1nse7e6w/repositorio"}\n'
+ok
+test_multiple_versions_and_sorted_list (__main__.BackupTests.test_multiple_versions_and_sorted_list) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-p8b_lcmn/repositorio --id zeta --source '/trial/backup-tests-p8b_lcmn/fuente con espacios'
+exit=0
+stdout='{"id": "zeta"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-p8b_lcmn/repositorio --id Alpha_2-3 --source '/trial/backup-tests-p8b_lcmn/fuente con espacios'
+exit=0
+stdout='{"id": "Alpha_2-3"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-p8b_lcmn/repositorio
+exit=0
+stdout='{"snapshots": ["Alpha_2-3", "zeta"]}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-p8b_lcmn/repositorio --id zeta --dest /trial/backup-tests-p8b_lcmn/primero
+exit=0
+stdout='{"id": "zeta"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-p8b_lcmn/repositorio --id Alpha_2-3 --dest /trial/backup-tests-p8b_lcmn/segundo
+exit=0
+stdout='{"id": "Alpha_2-3"}\n'
+stderr=''
+ok
+test_nonempty_destination_preserved (__main__.BackupTests.test_nonempty_destination_preserved) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-f1665tmf/repositorio --id V1 --source '/trial/backup-tests-f1665tmf/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-f1665tmf/repositorio --id V1 --dest /trial/backup-tests-f1665tmf/restaurado
+exit=1
+stdout=''
+stderr='{"error": "El destino preexistente no est\\u00e1 vac\\u00edo"}\n'
+ok
+test_overlapping_source_repository (__main__.BackupTests.test_overlapping_source_repository) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo '/trial/backup-tests-bv4kv92t/fuente con espacios' --id V1 --source '/trial/backup-tests-bv4kv92t/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "Fuente y repositorio solapados"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo '/trial/backup-tests-bv4kv92t/fuente con espacios/repo' --id V1 --source '/trial/backup-tests-bv4kv92t/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "Fuente y repositorio solapados"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-bv4kv92t/repositorio --id V1 --source /trial/backup-tests-bv4kv92t/repositorio/source
+exit=1
+stdout=''
+stderr='{"error": "Fuente y repositorio solapados"}\n'
+ok
+test_repo_and_snapshot_symlinks (__main__.BackupTests.test_repo_and_snapshot_symlinks) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-wbflxhek/repositorio --id V1 --source '/trial/backup-tests-wbflxhek/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-wbflxhek/repositorio
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-wbflxhek/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-wbflxhek/repositorio --id V1 --dest /trial/backup-tests-wbflxhek/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-wbflxhek/repositorio --id V1 --source '/trial/backup-tests-wbflxhek/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-wbflxhek/repositorio
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/.staging/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-wbflxhek/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/.staging/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-wbflxhek/repositorio --id V1 --dest /trial/backup-tests-wbflxhek/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/.staging/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-wbflxhek/repositorio --id V1 --source '/trial/backup-tests-wbflxhek/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/.staging/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-wbflxhek/repositorio
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/snapshots/V1/data/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-wbflxhek/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/snapshots/V1/data/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-wbflxhek/repositorio --id V1 --dest /trial/backup-tests-wbflxhek/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/snapshots/V1/data/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-wbflxhek/repositorio --id V1 --source '/trial/backup-tests-wbflxhek/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/snapshots/V1/data/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-wbflxhek/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/snapshots/V1/data/0"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-wbflxhek/repositorio --id V1 --dest /trial/backup-tests-wbflxhek/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-wbflxhek/repositorio/snapshots/V1/data/0"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-wbflxhek/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+ok
+test_sealed_invalid_manifests_rejected_without_path_escape (__main__.BackupTests.test_sealed_invalid_manifests_rejected_without_path_escape) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --source '/trial/backup-tests-8hnso97k/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Componente de ruta inv\\u00e1lido en el manifiesto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Componente de ruta inv\\u00e1lido en el manifiesto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Componente de ruta inv\\u00e1lido en el manifiesto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Componente de ruta inv\\u00e1lido en el manifiesto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Componente de ruta inv\\u00e1lido en el manifiesto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Componente de ruta inv\\u00e1lido en el manifiesto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Falta un directorio padre en el manifiesto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Falta un directorio padre en el manifiesto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Rutas duplicadas o incompatibles"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Rutas duplicadas o incompatibles"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Rutas duplicadas o incompatibles"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Rutas duplicadas o incompatibles"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Directorio duplicado"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Directorio duplicado"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Versi\\u00f3n de manifiesto inv\\u00e1lida"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Versi\\u00f3n de manifiesto inv\\u00e1lida"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "ID del manifiesto incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "ID del manifiesto incorrecto"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Tama\\u00f1o de archivo inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Tama\\u00f1o de archivo inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Hash de archivo inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Hash de archivo inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Formato de manifiesto inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-8hnso97k/repositorio --id V1 --dest /trial/backup-tests-8hnso97k/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Formato de manifiesto inv\\u00e1lido"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-8hnso97k/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+ok
+test_self_contained_after_source_deleted (__main__.BackupTests.test_self_contained_after_source_deleted) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-bwhql_k9/repositorio --id V1 --source '/trial/backup-tests-bwhql_k9/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-bwhql_k9/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-bwhql_k9/repositorio --id V1 --dest /trial/backup-tests-bwhql_k9/padres/nuevos/destino
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+ok
+test_sigkill_create_recovery_and_previous_snapshot_preserved (__main__.BackupTests.test_sigkill_create_recovery_and_previous_snapshot_preserved) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-xg_f29gm/repositorio --id previous --source '/trial/backup-tests-xg_f29gm/fuente con espacios'
+exit=0
+stdout='{"id": "previous"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-xg_f29gm/repositorio --id interrupted0 --source '/trial/backup-tests-xg_f29gm/fuente con espacios'
+exit=-9
+stdout=''
+stderr=''
+SIGKILL enviado durante copia: True
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-xg_f29gm/repositorio
+exit=0
+stdout='{"snapshots": ["previous"]}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-xg_f29gm/repositorio --id previous
+exit=0
+stdout='{"id": "previous", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-xg_f29gm/repositorio --id interrupted0 --source '/trial/backup-tests-xg_f29gm/fuente con espacios'
+exit=0
+stdout='{"id": "interrupted0"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-xg_f29gm/repositorio --id interrupted0
+exit=0
+stdout='{"id": "interrupted0", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-xg_f29gm/repositorio --id interrupted1 --source '/trial/backup-tests-xg_f29gm/fuente con espacios'
+exit=-9
+stdout=''
+stderr=''
+SIGKILL enviado durante copia: True
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-xg_f29gm/repositorio
+exit=0
+stdout='{"snapshots": ["interrupted0", "previous"]}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-xg_f29gm/repositorio --id previous
+exit=0
+stdout='{"id": "previous", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-xg_f29gm/repositorio --id interrupted1 --source '/trial/backup-tests-xg_f29gm/fuente con espacios'
+exit=0
+stdout='{"id": "interrupted1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-xg_f29gm/repositorio --id interrupted1
+exit=0
+stdout='{"id": "interrupted1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-xg_f29gm/repositorio --id interrupted1 --dest /trial/backup-tests-xg_f29gm/restaurado
+exit=0
+stdout='{"id": "interrupted1"}\n'
+stderr=''
+ok
+test_source_symlinks_regular_directory_and_dangling (__main__.BackupTests.test_source_symlinks_regular_directory_and_dangling) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-odlnz8_7/repositorio --id V1 --source '/trial/backup-tests-odlnz8_7/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-odlnz8_7/fuente con espacios/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-odlnz8_7/repositorio --id V1 --source '/trial/backup-tests-odlnz8_7/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-odlnz8_7/fuente con espacios/link"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-odlnz8_7/repositorio --id V1 --source '/trial/backup-tests-odlnz8_7/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-odlnz8_7/fuente con espacios/link"}\n'
+ok
+test_special_files_rejected_without_hanging (__main__.BackupTests.test_special_files_rejected_without_hanging) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-zqoqc_0w/repositorio --id V1 --source '/trial/backup-tests-zqoqc_0w/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-zqoqc_0w/fuente con espacios/pipe"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-zqoqc_0w/repositorio --id V1 --source '/trial/backup-tests-zqoqc_0w/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-zqoqc_0w/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-zqoqc_0w/repositorio/.staging/pipe"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-zqoqc_0w/repositorio
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-zqoqc_0w/repositorio/.staging/pipe"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-zqoqc_0w/repositorio --id V1 --dest /trial/backup-tests-zqoqc_0w/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-zqoqc_0w/repositorio/.staging/pipe"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-zqoqc_0w/repositorio --id V1
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-zqoqc_0w/repositorio/snapshots/V1/data/pipe"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-zqoqc_0w/repositorio
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-zqoqc_0w/repositorio/snapshots/V1/data/pipe"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-zqoqc_0w/repositorio --id V1 --dest /trial/backup-tests-zqoqc_0w/restaurado
+exit=1
+stdout=''
+stderr='{"error": "Enlace o archivo especial rechazado: /trial/backup-tests-zqoqc_0w/repositorio/snapshots/V1/data/pipe"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-zqoqc_0w/repositorio --id V1 --dest /trial/backup-tests-zqoqc_0w/restaurado
+exit=1
+stdout=''
+stderr='{"error": "La ruta contiene un enlace o no es un directorio: /trial/backup-tests-zqoqc_0w/restaurado"}\n'
+ok
+test_symlink_in_path_ancestors_and_before_dotdot (__main__.BackupTests.test_symlink_in_path_ancestors_and_before_dotdot) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-2jbt_zi8/repositorio --id V1 --source /trial/backup-tests-2jbt_zi8/alias
+exit=1
+stdout=''
+stderr='{"error": "La ruta contiene un enlace o no es un directorio: /trial/backup-tests-2jbt_zi8/alias"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-2jbt_zi8/alias/repo --id V1 --source '/trial/backup-tests-2jbt_zi8/fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "La ruta contiene un enlace o no es un directorio: /trial/backup-tests-2jbt_zi8/alias"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-2jbt_zi8/repositorio --id V1 --source '/trial/backup-tests-2jbt_zi8/alias/../fuente con espacios'
+exit=1
+stdout=''
+stderr='{"error": "La ruta contiene un enlace o no es un directorio: /trial/backup-tests-2jbt_zi8/alias"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-2jbt_zi8/repositorio --id V1 --source '/trial/backup-tests-2jbt_zi8/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-2jbt_zi8/repo-alias
+exit=1
+stdout=''
+stderr='{"error": "La ruta contiene un enlace o no es un directorio: /trial/backup-tests-2jbt_zi8/repo-alias"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-2jbt_zi8/repo-alias --id V1
+exit=1
+stdout=''
+stderr='{"error": "La ruta contiene un enlace o no es un directorio: /trial/backup-tests-2jbt_zi8/repo-alias"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-2jbt_zi8/repo-alias --id V1 --dest /trial/backup-tests-2jbt_zi8/restaurado
+exit=1
+stdout=''
+stderr='{"error": "La ruta contiene un enlace o no es un directorio: /trial/backup-tests-2jbt_zi8/repo-alias"}\n'
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-2jbt_zi8/repositorio --id V1 --dest /trial/backup-tests-2jbt_zi8/alias/dest
+exit=1
+stdout=''
+stderr='{"error": "La ruta contiene un enlace o no es un directorio: /trial/backup-tests-2jbt_zi8/alias"}\n'
+ok
+test_v1_round_trip_and_source_unchanged (__main__.BackupTests.test_v1_round_trip_and_source_unchanged) ... $ /usr/local/bin/python /trial/solution/backup.py create --repo /trial/backup-tests-vpzzil25/repositorio --id V1 --source '/trial/backup-tests-vpzzil25/fuente con espacios'
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py verify --repo /trial/backup-tests-vpzzil25/repositorio --id V1
+exit=0
+stdout='{"id": "V1", "valid": true}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py restore --repo /trial/backup-tests-vpzzil25/repositorio --id V1 --dest /trial/backup-tests-vpzzil25/restaurado
+exit=0
+stdout='{"id": "V1"}\n'
+stderr=''
+$ /usr/local/bin/python /trial/solution/backup.py list --repo /trial/backup-tests-vpzzil25/repositorio
+exit=0
+stdout='{"snapshots": ["V1"]}\n'
+stderr=''
+ok
+
+======================================================================
+ERROR: test_id_validation_and_maximum_length (__main__.BackupTests.test_id_validation_and_maximum_length) (identifier='-bad', operation='create')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 152, in test_id_validation_and_maximum_length
+    self.cli(operation, identifier=identifier, success=False)
+  File "/trial/solution/test_backup.py", line 74, in cli
+    self.assertIn("error", json.loads(result.stderr))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+ERROR: test_id_validation_and_maximum_length (__main__.BackupTests.test_id_validation_and_maximum_length) (identifier='-bad', operation='verify')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 152, in test_id_validation_and_maximum_length
+    self.cli(operation, identifier=identifier, success=False)
+  File "/trial/solution/test_backup.py", line 74, in cli
+    self.assertIn("error", json.loads(result.stderr))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+ERROR: test_id_validation_and_maximum_length (__main__.BackupTests.test_id_validation_and_maximum_length) (identifier='-bad', operation='restore')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 152, in test_id_validation_and_maximum_length
+    self.cli(operation, identifier=identifier, success=False)
+  File "/trial/solution/test_backup.py", line 74, in cli
+    self.assertIn("error", json.loads(result.stderr))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+FAIL: test_existing_incomplete_id_is_not_overwritten (__main__.BackupTests.test_existing_incomplete_id_is_not_overwritten)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/test_backup.py", line 170, in test_existing_incomplete_id_is_not_overwritten
+    self.assertEqual(inventory(self.repo), before)
+AssertionError: {'.staging': None, 'snapshots': None, 'snapshots/V1': None} != {'snapshots': None, 'snapshots/V1': None}
+- {'.staging': None, 'snapshots': None, 'snapshots/V1': None}
+?  ------------------
+
++ {'snapshots': None, 'snapshots/V1': None}
+
+----------------------------------------------------------------------
+Ran 24 tests in 6.258s
+
+FAILED (failures=1, errors=3)

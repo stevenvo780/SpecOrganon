@@ -1,0 +1,17 @@
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/results/example/repo
+{"returncode": 0, "stdout": "{\"snapshots\": []}\n", "stderr": ""}
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/solution/results/example/fuente --repo /trial/solution/results/example/repo --id ejemplo --max-bytes 100000
+{"returncode": 0, "stdout": "{\"id\": \"ejemplo\"}\n", "stderr": ""}
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/results/example/repo --id ejemplo
+{"returncode": 0, "stdout": "{\"id\": \"ejemplo\", \"valid\": true}\n", "stderr": ""}
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/results/example/repo
+{"returncode": 0, "stdout": "{\"snapshots\": [\"ejemplo\"]}\n", "stderr": ""}
+Fuente eliminada antes de restore.
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/results/example/repo --id ejemplo --dest /trial/solution/results/example/restaurado
+{"returncode": 0, "stdout": "{\"id\": \"ejemplo\"}\n", "stderr": ""}
+{"repo_regular_bytes": 514}
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/solution/results/example/fuente --repo /trial/solution/results/example/repo --id no-cabe --max-bytes 513
+{"returncode": 1, "stdout": "", "stderr": "{\"error\": \"El repositorio ya supera --max-bytes\"}\n"}
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/results/example/repo --id ejemplo
+{"returncode": 0, "stdout": "{\"id\": \"ejemplo\", \"valid\": true}\n", "stderr": ""}
+Comparación exacta y rechazo sin crecimiento residual: OK

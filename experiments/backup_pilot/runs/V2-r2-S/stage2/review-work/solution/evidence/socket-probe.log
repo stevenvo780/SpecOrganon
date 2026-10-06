@@ -1,0 +1,16 @@
+$ python3 - <<'PY'
+import os
+from pathlib import Path
+import stat
+p = Path('/trial/solution/tests/work/socket-probe')
+try:
+    os.mknod(p, stat.S_IFSOCK | 0o600)
+    print('socket inode:', stat.S_ISSOCK(p.lstat().st_mode))
+finally:
+    p.unlink(missing_ok=True)
+PY
+cwd: /trial
+exit_code: 0
+stdout:
+socket inode: True
+stderr:

@@ -1,0 +1,1018 @@
+EEEEEEEEEEEEEEEEEEEEEEE...E.EE                                           [100%]
+==================================== ERRORS ====================================
+__ ERROR at setup of test_read_real_pdf_retains_page_and_extractor_provenance __
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+____ ERROR at setup of test_unique_named_match_is_bound_to_page_and_passage ____
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_only_whitespace_is_normalized_without_losing_original_page_binding _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_ambiguous_anchor_or_match_is_rejected[BEGIN 129 kWh/t_flour END BEGIN 130 kWh/t_flour END] _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_ambiguous_anchor_or_match_is_rejected[BEGIN 129 kWh/t_flour END END] _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_ambiguous_anchor_or_match_is_rejected[BEGIN BEGIN 129 kWh/t_flour END] _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_ambiguous_anchor_or_match_is_rejected[BEGIN 129 kWh/t_flour and 130 kWh/t_flour END] _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_ambiguous_anchor_or_match_is_rejected[END BEGIN 129 kWh/t_flour END] _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_missing_or_reversed_anchor_and_non_whitespace_changes_fail[129 kWh/t_flour END] _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_missing_or_reversed_anchor_and_non_whitespace_changes_fail[BEGIN 129 kWh/t_flour] _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_missing_or_reversed_anchor_and_non_whitespace_changes_fail[END 129 kWh/t_flour BEGIN] _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_missing_or_reversed_anchor_and_non_whitespace_changes_fail[BEGIN 129 KWH/t_flour END] _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_missing_or_reversed_anchor_and_non_whitespace_changes_fail[BEGIN 129 kWh/t_fl\xf3ur END] _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_required_context_cannot_be_satisfied_outside_the_passage _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+__ ERROR at setup of test_page_selection_requires_valid_one_based_integer[0] ___
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+__ ERROR at setup of test_page_selection_requires_valid_one_based_integer[-1] __
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+__ ERROR at setup of test_page_selection_requires_valid_one_based_integer[2] ___
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_page_selection_requires_valid_one_based_integer[True] _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_page_selection_requires_valid_one_based_integer[1.5] __
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_____ ERROR at setup of test_invalid_contract_patterns_fail_closed[start-] _____
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+______ ERROR at setup of test_invalid_contract_patterns_fail_closed[end-] ______
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+____ ERROR at setup of test_invalid_contract_patterns_fail_closed[pattern-] ____
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+___ ERROR at setup of test_invalid_contract_patterns_fail_closed[pattern-(] ____
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+____ ERROR at setup of test_path_shim_is_not_invoked_for_pinned_extraction _____
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_pdf_snapshot_survives_original_path_change_after_hash _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+_ ERROR at setup of test_sealed_binary_survives_extractor_path_change_after_capture _
+
+    @pytest.fixture(scope="module")
+    def source_pdf():
+>       return read_pdf_pages(PDF, SPEC)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_source_passages.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/source_passages.py:115: in read_pdf_pages
+    with _sealed_extractor(extractor) as (executable, fd), tempfile.TemporaryDirectory(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ExtractorSpec(path=PosixPath('/usr/bin/pdftotext'), sha256='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7')
+
+    @contextmanager
+    def _sealed_extractor(spec: ExtractorSpec):
+        """Execute the verified binary bytes, without a second path lookup."""
+        if (not spec.path.is_absolute()
+                or re.fullmatch(r"[0-9a-f]{64}", spec.sha256) is None):
+            raise SourceAuditError("extractor needs an absolute path and reviewed digest")
+        sealed = None
+        try:
+            fd = os.open(spec.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd, "rb") as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or not 0 < info.st_size <= 20_000_000:
+                    raise SourceAuditError("extractor is not a bounded regular file")
+                raw = stream.read(20_000_001)
+            if hashlib.sha256(raw).hexdigest() != spec.sha256:
+>               raise SourceAuditError("extractor bytes differ from reviewed digest")
+E               specorganon.source_passages.SourceAuditError: extractor bytes differ from reviewed digest
+
+src/specorganon/source_passages.py:81: SourceAuditError
+=========================== short test summary info ============================
+ERROR tests/test_source_passages.py::test_read_real_pdf_retains_page_and_extractor_provenance
+ERROR tests/test_source_passages.py::test_unique_named_match_is_bound_to_page_and_passage
+ERROR tests/test_source_passages.py::test_only_whitespace_is_normalized_without_losing_original_page_binding
+ERROR tests/test_source_passages.py::test_ambiguous_anchor_or_match_is_rejected[BEGIN 129 kWh/t_flour END BEGIN 130 kWh/t_flour END]
+ERROR tests/test_source_passages.py::test_ambiguous_anchor_or_match_is_rejected[BEGIN 129 kWh/t_flour END END]
+ERROR tests/test_source_passages.py::test_ambiguous_anchor_or_match_is_rejected[BEGIN BEGIN 129 kWh/t_flour END]
+ERROR tests/test_source_passages.py::test_ambiguous_anchor_or_match_is_rejected[BEGIN 129 kWh/t_flour and 130 kWh/t_flour END]
+ERROR tests/test_source_passages.py::test_ambiguous_anchor_or_match_is_rejected[END BEGIN 129 kWh/t_flour END]
+ERROR tests/test_source_passages.py::test_missing_or_reversed_anchor_and_non_whitespace_changes_fail[129 kWh/t_flour END]
+ERROR tests/test_source_passages.py::test_missing_or_reversed_anchor_and_non_whitespace_changes_fail[BEGIN 129 kWh/t_flour]
+ERROR tests/test_source_passages.py::test_missing_or_reversed_anchor_and_non_whitespace_changes_fail[END 129 kWh/t_flour BEGIN]
+ERROR tests/test_source_passages.py::test_missing_or_reversed_anchor_and_non_whitespace_changes_fail[BEGIN 129 KWH/t_flour END]
+ERROR tests/test_source_passages.py::test_missing_or_reversed_anchor_and_non_whitespace_changes_fail[BEGIN 129 kWh/t_fl\xf3ur END]
+ERROR tests/test_source_passages.py::test_required_context_cannot_be_satisfied_outside_the_passage
+ERROR tests/test_source_passages.py::test_page_selection_requires_valid_one_based_integer[0]
+ERROR tests/test_source_passages.py::test_page_selection_requires_valid_one_based_integer[-1]
+ERROR tests/test_source_passages.py::test_page_selection_requires_valid_one_based_integer[2]
+ERROR tests/test_source_passages.py::test_page_selection_requires_valid_one_based_integer[True]
+ERROR tests/test_source_passages.py::test_page_selection_requires_valid_one_based_integer[1.5]
+ERROR tests/test_source_passages.py::test_invalid_contract_patterns_fail_closed[start-]
+ERROR tests/test_source_passages.py::test_invalid_contract_patterns_fail_closed[end-]
+ERROR tests/test_source_passages.py::test_invalid_contract_patterns_fail_closed[pattern-]
+ERROR tests/test_source_passages.py::test_invalid_contract_patterns_fail_closed[pattern-(]
+ERROR tests/test_source_passages.py::test_path_shim_is_not_invoked_for_pinned_extraction
+ERROR tests/test_source_passages.py::test_pdf_snapshot_survives_original_path_change_after_hash
+ERROR tests/test_source_passages.py::test_sealed_binary_survives_extractor_path_change_after_capture
+4 passed, 26 errors in 0.24s

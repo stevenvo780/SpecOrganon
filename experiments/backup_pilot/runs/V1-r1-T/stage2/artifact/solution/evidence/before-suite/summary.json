@@ -1,0 +1,47 @@
+{
+  "tests_run": 18,
+  "failures": 8,
+  "errors": 1,
+  "passed": false,
+  "elapsed_seconds": 2.766683549998561,
+  "backup_sha256": "b10e934b4ad2e32de58aa653dee3a15ad3345d9b3f1ca91e8fb07a44833c8261",
+  "suite_sha256": "99b757139b669c2de361eeda94f83b6988443f3d974f1cd6d578363348387ecf",
+  "adverse_results": [
+    {
+      "test": "test_concurrent_creates_respect_one_shared_budget (__main__.ContractTests.test_concurrent_creates_respect_one_shared_budget)",
+      "traceback": "Traceback (most recent call last):\n  File \"/trial/solution/test_backup.py\", line 402, in test_concurrent_creates_respect_one_shared_budget\n    self.assertEqual(sum(code == 0 for code in codes), 1, codes)\nAssertionError: 0 != 1 : [2, 2]\n"
+    },
+    {
+      "test": "test_quota_below_existing_and_failure_without_residue (__main__.ContractTests.test_quota_below_existing_and_failure_without_residue)",
+      "traceback": "Traceback (most recent call last):\n  File \"/trial/solution/test_backup.py\", line 289, in test_quota_below_existing_and_failure_without_residue\n    self.cli('create', limit=used+100000)\n  File \"/trial/solution/test_backup.py\", line 96, in cli\n    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))\nAssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...\nbackup.py: error: unrecognized arguments: --max-bytes 102448\n\n"
+    },
+    {
+      "test": "test_quota_counts_extra_regular_bytes_in_previous_snapshot (__main__.ContractTests.test_quota_counts_extra_regular_bytes_in_previous_snapshot)",
+      "traceback": "Traceback (most recent call last):\n  File \"/trial/solution/test_backup.py\", line 332, in test_quota_counts_extra_regular_bytes_in_previous_snapshot\n    self.cli('create', limit=used+100000)\n  File \"/trial/solution/test_backup.py\", line 96, in cli\n    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))\nAssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...\nbackup.py: error: unrecognized arguments: --max-bytes 107448\n\n"
+    },
+    {
+      "test": "test_quota_exact_boundary_and_one_byte_less (__main__.ContractTests.test_quota_exact_boundary_and_one_byte_less)",
+      "traceback": "Traceback (most recent call last):\n  File \"/trial/solution/test_backup.py\", line 271, in test_quota_exact_boundary_and_one_byte_less\n    self.cli('create', limit=needed)\n  File \"/trial/solution/test_backup.py\", line 96, in cli\n    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))\nAssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...\nbackup.py: error: unrecognized arguments: --max-bytes 2447\n\n"
+    },
+    {
+      "test": "test_quota_high_preserves_previous_snapshot (__main__.ContractTests.test_quota_high_preserves_previous_snapshot)",
+      "traceback": "Traceback (most recent call last):\n  File \"/trial/solution/test_backup.py\", line 255, in test_quota_high_preserves_previous_snapshot\n    self.cli('create', limit=100000)\n  File \"/trial/solution/test_backup.py\", line 96, in cli\n    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))\nAssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...\nbackup.py: error: unrecognized arguments: --max-bytes 100000\n\n"
+    },
+    {
+      "test": "test_quota_includes_metadata_and_lock (__main__.ContractTests.test_quota_includes_metadata_and_lock)",
+      "traceback": "Traceback (most recent call last):\n  File \"/trial/solution/test_backup.py\", line 306, in test_quota_includes_metadata_and_lock\n    self.cli('create', limit=needed+locksize)\n  File \"/trial/solution/test_backup.py\", line 96, in cli\n    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))\nAssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...\nbackup.py: error: unrecognized arguments: --max-bytes 2471\n\n"
+    },
+    {
+      "test": "test_quota_zero_empty_tree_and_invalid_N (__main__.ContractTests.test_quota_zero_empty_tree_and_invalid_N)",
+      "traceback": "Traceback (most recent call last):\n  File \"/trial/solution/test_backup.py\", line 322, in test_quota_zero_empty_tree_and_invalid_N\n    self.cli('create', limit=1000)\n  File \"/trial/solution/test_backup.py\", line 96, in cli\n    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))\nAssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...\nbackup.py: error: unrecognized arguments: --max-bytes 1000\n\n"
+    },
+    {
+      "test": "test_sigkill_retry_and_previous_snapshot (__main__.ContractTests.test_sigkill_retry_and_previous_snapshot)",
+      "traceback": "Traceback (most recent call last):\n  File \"/trial/solution/test_backup.py\", line 372, in test_sigkill_retry_and_previous_snapshot\n    self.cli('create', identity='interrupted', limit=256*1024*1024)\n  File \"/trial/solution/test_backup.py\", line 96, in cli\n    self.assertEqual(p.returncode, 0, p.stderr.decode('utf-8', 'replace'))\nAssertionError: 2 != 0 : usage: backup.py [-h] {create,verify,restore,list} ...\nbackup.py: error: unrecognized arguments: --max-bytes 268435456\n\n"
+    },
+    {
+      "test": "test_special_objects_are_rejected (__main__.ContractTests.test_special_objects_are_rejected)",
+      "traceback": "Traceback (most recent call last):\n  File \"/trial/solution/test_backup.py\", line 216, in test_special_objects_are_rejected\n    sock.bind(str(self.source / 'socket'))\nPermissionError: [Errno 1] Operation not permitted\n"
+    }
+  ]
+}

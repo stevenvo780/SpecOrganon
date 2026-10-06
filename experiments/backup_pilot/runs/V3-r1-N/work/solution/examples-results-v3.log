@@ -1,0 +1,35 @@
+$ python3 solution/examples.py
+Python: 3.12.15 (main, Oct  1 2026, 21:50:06) [GCC 12.2.0]
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/example-c34cbsnb/repo
+exit=0
+stdout={"snapshots": []}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/example-c34cbsnb/documentos ü' --repo /trial/solution/example-c34cbsnb/repo --id demo --max-bytes 1000000
+exit=0
+stdout={"id": "demo"}
+stderr=
+
+Regular repository bytes, including metadata: 522
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source '/trial/solution/example-c34cbsnb/documentos ü' --repo /trial/solution/example-c34cbsnb/repo --id too-small --max-bytes 521
+exit=1
+stdout=
+stderr={"error": "El repositorio existente supera --max-bytes"}
+
+Rejected create preserved every repository file and byte.
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/example-c34cbsnb/repo --id demo
+exit=0
+stdout={"id": "demo", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/example-c34cbsnb/repo
+exit=0
+stdout={"snapshots": ["demo"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/example-c34cbsnb/repo --id demo --dest /trial/solution/example-c34cbsnb/restaurado
+exit=0
+stdout={"id": "demo"}
+stderr=
+
+Restoration matched all 259 data bytes and the empty directory after source removal.

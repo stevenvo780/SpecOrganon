@@ -1,0 +1,130 @@
+{
+  "events": [
+    {
+      "actor": "agent:orchestrator",
+      "at": "2026-10-03T21:40:25+00:00",
+      "hash": "55c9de70b15c56434f4a9c2fe6a2834821d2c15c9351a369af2b081c99a52ebf",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "p1",
+        "kind": "problem",
+        "text": "Determinar si SpecOrganon mejora fiabilidad y adaptación de pequeños backups frente a trabajo libre y SDD con recursos comparables.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:orchestrator",
+      "at": "2026-10-03T21:40:25+00:00",
+      "hash": "6f88a9ed66eff276530c3012a402dcb87bc533a60bc805fe5a1dbc0f60e978ef",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "a1",
+        "kind": "actor",
+        "text": "El dueño autoriza el propósito; Codex implementa/orquesta; un agente separado revisa; un evaluador externo verifica bytes y estados.",
+        "version": 1
+      },
+      "prev_hash": "55c9de70b15c56434f4a9c2fe6a2834821d2c15c9351a369af2b081c99a52ebf",
+      "seq": 2
+    },
+    {
+      "actor": "agent:orchestrator",
+      "at": "2026-10-03T21:40:25+00:00",
+      "hash": "1d71b842e517769742b924709c891f3607c3c49671db1f1f0c3783b2855955aa",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "p1": 1
+        },
+        "id": "b1",
+        "kind": "boundary",
+        "text": "Piloto de software en Docker, 18 corridas, solo archivos de prueba. Sin copiar credenciales, cambiar cuentas ni modificar GOAL.md; no acredita campo alimentario ni generalización.",
+        "version": 1
+      },
+      "prev_hash": "6f88a9ed66eff276530c3012a402dcb87bc533a60bc805fe5a1dbc0f60e978ef",
+      "seq": 3
+    },
+    {
+      "actor": "agent:orchestrator",
+      "at": "2026-10-03T21:40:25+00:00",
+      "hash": "f9fadf43448fdce3bf0fe8e9b52ee8a41cba69701a0c70725f04c92886ae43ee",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "scope": "local software development",
+          "source": "User conversation 2026-10-03: dale asignatelo como goal"
+        },
+        "deps": {
+          "p1": 1
+        },
+        "id": "n1",
+        "kind": "norm",
+        "text": "Mandato del dueño aceptado el 2026-10-03: construir backups verificables y probar tesis con evaluador separado y piloto18. Preservar fallos y datos de prueba; priorizar integridad sin inventar superioridad. Elecciones técnicas delegadas al orquestador.",
+        "version": 1
+      },
+      "prev_hash": "1d71b842e517769742b924709c891f3607c3c49671db1f1f0c3783b2855955aa",
+      "seq": 4
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-03T21:40:25+00:00",
+      "hash": "d6d8a957bf15fb352fa54c2bea14d1d169358aaf9a41b358d9449465fce57786",
+      "kind": "approval",
+      "payload": {
+        "id": "n1",
+        "provenance": "local_declared",
+        "reason": "Registra el mandato existente del usuario: «dale asignatelo como goal» tras la propuesta concreta de backups y piloto18; no representa firma ni decisiones arquitectónicas personales.",
+        "version": 1
+      },
+      "prev_hash": "f9fadf43448fdce3bf0fe8e9b52ee8a41cba69701a0c70725f04c92886ae43ee",
+      "seq": 5
+    },
+    {
+      "actor": "agent:gemini-pro-reviewer",
+      "at": "2026-10-03T23:13:26+00:00",
+      "hash": "634495422ebbcd406010ba78d4aca2916b619d68bc8f4c320d10f08375807337",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "El problema p1 define claramente la necesidad de evaluar el desempeño de SpecOrganon frente a alternativas (trabajo libre y SDD) manteniendo la equivalencia de recursos. El actor a1 distribuye los roles operativos adecuadamente (autorización local del dueño, orquestación y ejecución por Codex, revisión por agente separado y verificación por un evaluador externo). La frontera b1 asegura una contención clara de riesgos al limitar el contexto a contenedores Docker, establecer 18 corridas con solo archivos de prueba, prohibir el manejo de credenciales y descartar cualquier afirmación de generalización o aplicación al campo alimentario. Los tres elementos delimitan de forma coherente el alcance, afectados y exclusiones del piloto. Limitación: Esta revisión ocurrió después del inicio de generación: el registro tardío no constituye un preregistro independiente, aunque frozen/manifest.json fije los documentos antes de la primera corrida. Trabajo cloud cbff4579763a4d78a39f77dfeb27b4f9",
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b",
+        "verdict": "accept"
+      },
+      "prev_hash": "d6d8a957bf15fb352fa54c2bea14d1d169358aaf9a41b358d9449465fce57786",
+      "seq": 6
+    },
+    {
+      "actor": "agent:orchestrator",
+      "at": "2026-10-03T23:13:26+00:00",
+      "hash": "bfb00fb2438d322423004982b685c2d304171a988e9d9a0cbee0fd9db5db7a35",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 6,
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b"
+      },
+      "prev_hash": "634495422ebbcd406010ba78d4aca2916b619d68bc8f4c320d10f08375807337",
+      "seq": 7
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "0938b64d-98e4-4996-b618-ceffcb703530",
+    "created_at": "2026-10-03T21:38:00+00:00",
+    "created_by": "human:owner",
+    "domain": "ingeniería de software",
+    "test_gate_policy": "local_report",
+    "title": "Piloto autónomo: backups verificables y comparación de métodos"
+  },
+  "schema": 1
+}

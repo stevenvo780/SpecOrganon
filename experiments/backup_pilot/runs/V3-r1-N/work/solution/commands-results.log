@@ -1,0 +1,978 @@
+$ python3 solution/tests.py
+Python: 3.12.15 (main, Oct  1 2026, 21:50:06) [GCC 12.2.0]
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/solution/check-5pqdg316/source --repo /trial/solution/check-5pqdg316/repo --id first
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/solution/check-5pqdg316/other-source --repo /trial/solution/check-5pqdg316/repo --id first
+exit=1
+stdout=
+stderr={"error": "[Errno 17] File exists: '/trial/solution/check-5pqdg316/repo/.pending-vutw03vo' -> '/trial/solution/check-5pqdg316/repo/snapshots/first.snap'"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-5pqdg316/repo --id first
+exit=0
+stdout={"id": "first", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-5pqdg316/repo --id first --dest /trial/solution/check-5pqdg316/dest
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-xrjt_cmh/repo --id first --source /trial/solution/check-xrjt_cmh/source
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-xrjt_cmh/repo --id good --source /trial/solution/check-xrjt_cmh/source
+exit=0
+stdout={"id": "good"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Cabecera de snapshot inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/dest
+exit=1
+stdout=
+stderr={"error": "Cabecera de snapshot inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/not-published
+exit=1
+stdout=
+stderr={"error": "Cabecera de snapshot inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-xrjt_cmh/repo
+exit=0
+stdout={"snapshots": ["good"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id good
+exit=0
+stdout={"id": "good", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Contenido corrupto: datos \u00f1 \u65e5\u672c\u8a9e.bin"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/dest
+exit=1
+stdout=
+stderr={"error": "Contenido corrupto: datos \u00f1 \u65e5\u672c\u8a9e.bin"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/not-published
+exit=1
+stdout=
+stderr={"error": "Contenido corrupto: datos \u00f1 \u65e5\u672c\u8a9e.bin"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-xrjt_cmh/repo
+exit=0
+stdout={"snapshots": ["good"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id good
+exit=0
+stdout={"id": "good", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Formato de metadatos inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/dest
+exit=1
+stdout=
+stderr={"error": "Formato de metadatos inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/not-published
+exit=1
+stdout=
+stderr={"error": "Formato de metadatos inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-xrjt_cmh/repo
+exit=0
+stdout={"snapshots": ["good"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id good
+exit=0
+stdout={"id": "good", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Longitud de metadatos inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/dest
+exit=1
+stdout=
+stderr={"error": "Longitud de metadatos inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/not-published
+exit=1
+stdout=
+stderr={"error": "Longitud de metadatos inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-xrjt_cmh/repo
+exit=0
+stdout={"snapshots": ["good"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id good
+exit=0
+stdout={"id": "good", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Checksum del snapshot inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/dest
+exit=1
+stdout=
+stderr={"error": "Checksum del snapshot inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/not-published
+exit=1
+stdout=
+stderr={"error": "Checksum del snapshot inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-xrjt_cmh/repo
+exit=0
+stdout={"snapshots": ["good"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id good
+exit=0
+stdout={"id": "good", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Longitud de metadatos inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/dest
+exit=1
+stdout=
+stderr={"error": "Longitud de metadatos inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/not-published
+exit=1
+stdout=
+stderr={"error": "Longitud de metadatos inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-xrjt_cmh/repo
+exit=0
+stdout={"snapshots": ["good"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id good
+exit=0
+stdout={"id": "good", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Snapshot truncado"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/dest
+exit=1
+stdout=
+stderr={"error": "Snapshot truncado"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/not-published
+exit=1
+stdout=
+stderr={"error": "Snapshot truncado"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-xrjt_cmh/repo
+exit=0
+stdout={"snapshots": ["good"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id good
+exit=0
+stdout={"id": "good", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Longitud de metadatos inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/dest
+exit=1
+stdout=
+stderr={"error": "Longitud de metadatos inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/not-published
+exit=1
+stdout=
+stderr={"error": "Longitud de metadatos inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-xrjt_cmh/repo
+exit=0
+stdout={"snapshots": ["good"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id good
+exit=0
+stdout={"id": "good", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Longitud de archivo inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/dest
+exit=1
+stdout=
+stderr={"error": "Longitud de archivo inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/not-published
+exit=1
+stdout=
+stderr={"error": "Longitud de archivo inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-xrjt_cmh/repo
+exit=0
+stdout={"snapshots": ["good"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id good
+exit=0
+stdout={"id": "good", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-xrjt_cmh/repo --id first
+exit=1
+stdout=
+stderr={"error": "El ID no existe"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-xrjt_cmh/repo --id first --dest /trial/solution/check-xrjt_cmh/dest
+exit=1
+stdout=
+stderr={"error": "El ID no existe"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-ng1l3my1/repo --id first --source /trial/solution/check-ng1l3my1/source
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ng1l3my1/repo --id first --dest /trial/solution/check-ng1l3my1/dest
+exit=1
+stdout=
+stderr={"error": "Symlink rechazado: /trial/solution/check-ng1l3my1/dest"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ng1l3my1/repo --id first --dest /trial/solution/check-ng1l3my1/dest/nested
+exit=1
+stdout=
+stderr={"error": "Symlink rechazado: /trial/solution/check-ng1l3my1/dest"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ng1l3my1/repo --id first --dest /trial/solution/check-ng1l3my1/dest/../other
+exit=1
+stdout=
+stderr={"error": "Symlink rechazado: /trial/solution/check-ng1l3my1/dest"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ng1l3my1/repo --id first --dest /trial/solution/check-ng1l3my1/dest
+exit=1
+stdout=
+stderr={"error": "El destino preexistente no est\u00e1 vac\u00edo"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ng1l3my1/repo --id first --dest /trial/solution/check-ng1l3my1/protected/file
+exit=1
+stdout=
+stderr={"error": "El destino no es un directorio normal"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-wgd52rdt/repo --id first --source /trial/solution/check-wgd52rdt/source
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-wgd52rdt/repo --id first --dest /trial/solution/check-wgd52rdt/dest
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-wgd52rdt/repo --id first --dest /trial/solution/check-wgd52rdt/absent/parents/dest
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-iie4v9br/repo
+exit=0
+stdout={"snapshots": []}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-iie4v9br/repo
+exit=0
+stdout={"snapshots": []}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-iie4v9br/repo --id first --source /trial/solution/check-iie4v9br/source
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-iie4v9br/repo --id first
+exit=0
+stdout={"id": "first", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-iie4v9br/repo --id first --dest /trial/solution/check-iie4v9br/dest
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-_5yfr0xk/repo --id '' --source /trial/solution/check-_5yfr0xk/source
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-_5yfr0xk/repo --id ''
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-_5yfr0xk/repo --id '' --dest /trial/solution/check-_5yfr0xk/dest
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-_5yfr0xk/repo --id . --source /trial/solution/check-_5yfr0xk/source
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-_5yfr0xk/repo --id .
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-_5yfr0xk/repo --id . --dest /trial/solution/check-_5yfr0xk/dest
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-_5yfr0xk/repo --id ../escape --source /trial/solution/check-_5yfr0xk/source
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-_5yfr0xk/repo --id ../escape
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-_5yfr0xk/repo --id ../escape --dest /trial/solution/check-_5yfr0xk/dest
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-_5yfr0xk/repo --id a/b --source /trial/solution/check-_5yfr0xk/source
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-_5yfr0xk/repo --id a/b
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-_5yfr0xk/repo --id a/b --dest /trial/solution/check-_5yfr0xk/dest
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-_5yfr0xk/repo --id -x --source /trial/solution/check-_5yfr0xk/source
+exit=1
+stdout=
+stderr={"error": "Argumentos inv\u00e1lidos: argument --id: expected one argument"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-_5yfr0xk/repo --id -x
+exit=1
+stdout=
+stderr={"error": "Argumentos inv\u00e1lidos: argument --id: expected one argument"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-_5yfr0xk/repo --id -x --dest /trial/solution/check-_5yfr0xk/dest
+exit=1
+stdout=
+stderr={"error": "Argumentos inv\u00e1lidos: argument --id: expected one argument"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-_5yfr0xk/repo --id _x --source /trial/solution/check-_5yfr0xk/source
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-_5yfr0xk/repo --id _x
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-_5yfr0xk/repo --id _x --dest /trial/solution/check-_5yfr0xk/dest
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-_5yfr0xk/repo --id 'é' --source /trial/solution/check-_5yfr0xk/source
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-_5yfr0xk/repo --id 'é'
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-_5yfr0xk/repo --id 'é' --dest /trial/solution/check-_5yfr0xk/dest
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-_5yfr0xk/repo --id 'a
+' --source /trial/solution/check-_5yfr0xk/source
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-_5yfr0xk/repo --id 'a
+'
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-_5yfr0xk/repo --id 'a
+' --dest /trial/solution/check-_5yfr0xk/dest
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-_5yfr0xk/repo --id xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx --source /trial/solution/check-_5yfr0xk/source
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-_5yfr0xk/repo --id xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-_5yfr0xk/repo --id xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx --dest /trial/solution/check-_5yfr0xk/dest
+exit=1
+stdout=
+stderr={"error": "ID inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-_5yfr0xk/repo --id first
+exit=1
+stdout=
+stderr={"error": "El ID no existe"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-_5yfr0xk/repo --id first --dest /trial/solution/check-_5yfr0xk/dest
+exit=1
+stdout=
+stderr={"error": "El ID no existe"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-_5yfr0xk/repo --id Z______________________________________________________________9 --source /trial/solution/check-_5yfr0xk/source
+exit=0
+stdout={"id": "Z______________________________________________________________9"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-ecj2c7yw/repo --id first --source /trial/solution/check-ecj2c7yw/source
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Directorio padre ausente o inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Directorio padre ausente o inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Entrada de archivo inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Entrada de archivo inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Entrada de archivo inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Entrada de archivo inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Entrada de archivo inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Entrada de archivo inv\u00e1lida"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Contenido corrupto: datos \u00f1 \u65e5\u672c\u8a9e.bin"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Contenido corrupto: datos \u00f1 \u65e5\u672c\u8a9e.bin"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Ruta de snapshot inv\u00e1lida o duplicada"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Formato de metadatos inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Formato de metadatos inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Tipo de entrada inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-ecj2c7yw/repo --id first --dest /trial/solution/check-ecj2c7yw/dest
+exit=1
+stdout=
+stderr={"error": "Tipo de entrada inv\u00e1lido"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-ecj2c7yw/repo --id first
+exit=1
+stdout=
+stderr={"error": "Clave duplicada en los metadatos"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-x3vewo07/repo --id first --source /trial/solution/check-x3vewo07/source
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-x3vewo07/repo --id first --source /trial/solution/check-x3vewo07/source
+exit=1
+stdout=
+stderr={"error": "El ID ya existe"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-x3vewo07/repo --id first --dest /trial/solution/check-x3vewo07/dest
+exit=1
+stdout=
+stderr={"error": "El destino preexistente no est\u00e1 vac\u00edo"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-x3vewo07/repo --id first --dest /trial/solution/check-x3vewo07/dest
+exit=1
+stdout=
+stderr={"error": "El destino preexistente no est\u00e1 vac\u00edo"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo solution/check-lys13_k2/repo --id first --source solution/check-lys13_k2/source
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-lys13_k2/repo --id first --dest solution/check-lys13_k2/dest
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-6o5vifhh/repo --id first --source /trial/solution/check-6o5vifhh/source
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-6o5vifhh/repo-link
+exit=1
+stdout=
+stderr={"error": "Symlink rechazado: /trial/solution/check-6o5vifhh/repo-link"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-6o5vifhh/repo-link/../repo --id first
+exit=1
+stdout=
+stderr={"error": "Symlink rechazado: /trial/solution/check-6o5vifhh/repo-link"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-6o5vifhh/repo --id new --source /trial/solution/check-6o5vifhh/source
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/.pending-broken"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-6o5vifhh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/.pending-broken"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-6o5vifhh/repo --id first --dest /trial/solution/check-6o5vifhh/dest
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/.pending-broken"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-6o5vifhh/repo
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/.pending-broken"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-6o5vifhh/repo --id new --source /trial/solution/check-6o5vifhh/source
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/other"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-6o5vifhh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/other"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-6o5vifhh/repo --id first --dest /trial/solution/check-6o5vifhh/dest
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/other"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-6o5vifhh/repo
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/other"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-6o5vifhh/repo --id new --source /trial/solution/check-6o5vifhh/source
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/snapshots/unused.snap"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-6o5vifhh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/snapshots/unused.snap"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-6o5vifhh/repo --id first --dest /trial/solution/check-6o5vifhh/dest
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/snapshots/unused.snap"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-6o5vifhh/repo
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/snapshots/unused.snap"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-6o5vifhh/repo --id first
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/snapshots/first.snap"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-6o5vifhh/repo --id first --dest /trial/solution/check-6o5vifhh/dest
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-6o5vifhh/repo/snapshots/first.snap"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-59rzmx_4/repo --id first --source /trial/solution/check-59rzmx_4/source
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-59rzmx_4/repo --id first
+exit=0
+stdout={"id": "first", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-59rzmx_4/repo
+exit=0
+stdout={"snapshots": ["first"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-59rzmx_4/repo --id first --dest /trial/solution/check-59rzmx_4/dest
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-8lg90mj4/repo --id previous --source /trial/solution/check-8lg90mj4/source
+exit=0
+stdout={"id": "previous"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/solution/check-8lg90mj4/source --repo /trial/solution/check-8lg90mj4/repo --id interrupted
+exit=-9
+stdout=
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-8lg90mj4/repo
+exit=0
+stdout={"snapshots": ["previous"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-8lg90mj4/repo --id previous
+exit=0
+stdout={"id": "previous", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-8lg90mj4/repo --id interrupted
+exit=1
+stdout=
+stderr={"error": "El ID no existe"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --source /trial/solution/check-8lg90mj4/source --repo /trial/solution/check-8lg90mj4/repo --id interrupted
+exit=-9
+stdout=
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-8lg90mj4/repo
+exit=0
+stdout={"snapshots": ["previous"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-8lg90mj4/repo --id previous
+exit=0
+stdout={"id": "previous", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-8lg90mj4/repo --id interrupted
+exit=1
+stdout=
+stderr={"error": "El ID no existe"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-8lg90mj4/repo --id interrupted --source /trial/solution/check-8lg90mj4/source
+exit=0
+stdout={"id": "interrupted"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-8lg90mj4/repo --id interrupted
+exit=0
+stdout={"id": "interrupted", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-8lg90mj4/repo --id interrupted --dest /trial/solution/check-8lg90mj4/dest
+exit=0
+stdout={"id": "interrupted"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-8lg90mj4/repo
+exit=0
+stdout={"snapshots": ["interrupted", "previous"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-uzuhiy9_/source --id first --source /trial/solution/check-uzuhiy9_/source
+exit=1
+stdout=
+stderr={"error": "La fuente y el repositorio se solapan"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-uzuhiy9_/source/child --id first --source /trial/solution/check-uzuhiy9_/source
+exit=1
+stdout=
+stderr={"error": "La fuente y el repositorio se solapan"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-uzuhiy9_ --id first --source /trial/solution/check-uzuhiy9_/source
+exit=1
+stdout=
+stderr={"error": "La fuente y el repositorio se solapan"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-uzuhiy9_/source-more --id first --source /trial/solution/check-uzuhiy9_/source
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-3azeqmy0/repo --id first --source /trial/solution/check-3azeqmy0/source
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-3azeqmy0/source/link"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-3azeqmy0/repo --id first --source /trial/solution/check-3azeqmy0/source
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-3azeqmy0/source/link"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-3azeqmy0/repo --id first --source /trial/solution/check-3azeqmy0/source
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-3azeqmy0/source/link"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-3azeqmy0/repo --id first --source /trial/solution/check-3azeqmy0/root-link
+exit=1
+stdout=
+stderr={"error": "Symlink rechazado: /trial/solution/check-3azeqmy0/root-link"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-3azeqmy0/repo --id first --source /trial/solution/check-3azeqmy0/root-link/../source
+exit=1
+stdout=
+stderr={"error": "Symlink rechazado: /trial/solution/check-3azeqmy0/root-link"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-f284g7ah/repo --id first --source /trial/solution/check-f284g7ah/source
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-f284g7ah/source/fifo"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-f284g7ah/repo --id first --source /trial/solution/check-f284g7ah/source/fifo
+exit=1
+stdout=
+stderr={"error": "Archivo especial rechazado: /trial/solution/check-f284g7ah/source/fifo"}
+
+Socket fixture unavailable in sandbox: [Errno 1] Operation not permitted
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-f284g7ah/repo --id first --source /trial/solution/check-f284g7ah/source
+exit=0
+stdout={"id": "first"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-f284g7ah/repo --id first --source /trial/solution/check-f284g7ah/source
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-f284g7ah/repo/fifo"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-f284g7ah/repo --id first
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-f284g7ah/repo/fifo"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-f284g7ah/repo --id first --dest /trial/solution/check-f284g7ah/dest
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-f284g7ah/repo/fifo"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-f284g7ah/repo
+exit=1
+stdout=
+stderr={"error": "Symlink o archivo especial rechazado: /trial/solution/check-f284g7ah/repo/fifo"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-f284g7ah/repo --id first --dest /trial/solution/check-f284g7ah/dest
+exit=1
+stdout=
+stderr={"error": "Archivo especial rechazado: /trial/solution/check-f284g7ah/dest"}
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-2w3tzku7/repo --id z --source /trial/solution/check-2w3tzku7/source
+exit=0
+stdout={"id": "z"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-2w3tzku7/repo --id A --source /trial/solution/check-2w3tzku7/source
+exit=0
+stdout={"id": "A"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py create --repo /trial/solution/check-2w3tzku7/repo --id a --source /trial/solution/check-2w3tzku7/source
+exit=0
+stdout={"id": "a"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py list --repo /trial/solution/check-2w3tzku7/repo
+exit=0
+stdout={"snapshots": ["A", "a", "z"]}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-2w3tzku7/repo --id z
+exit=0
+stdout={"id": "z", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-2w3tzku7/repo --id z --dest /trial/solution/check-2w3tzku7/z
+exit=0
+stdout={"id": "z"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-2w3tzku7/repo --id A
+exit=0
+stdout={"id": "A", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-2w3tzku7/repo --id A --dest /trial/solution/check-2w3tzku7/A
+exit=0
+stdout={"id": "A"}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py verify --repo /trial/solution/check-2w3tzku7/repo --id a
+exit=0
+stdout={"id": "a", "valid": true}
+stderr=
+
+$ /usr/local/bin/python3 /trial/solution/backup.py restore --repo /trial/solution/check-2w3tzku7/repo --id a --dest /trial/solution/check-2w3tzku7/a
+exit=0
+stdout={"id": "a"}
+stderr=
+

@@ -1,0 +1,110 @@
+{
+  "events": [
+    {
+      "actor": "agent:orchestrator",
+      "at": "2026-10-03T22:16:36+00:00",
+      "hash": "56d7bf28f8df39ee9f431ec183f48f4b254dea527fbf38a23e5da67ef5a1e7d4",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "problem",
+        "kind": "problem",
+        "text": "Crear backups autosuficientes, restauración exacta, integridad y recuperación según CONTRACT.md.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:orchestrator",
+      "at": "2026-10-03T22:16:36+00:00",
+      "hash": "8dca2f2cac7339170cba67347678152d8f18eb1a558bbcb6bc67e378cfc94872",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem": 1
+        },
+        "id": "mandate",
+        "kind": "norm",
+        "text": "El dueño autorizó construir backups y evaluar este piloto local; decisiones técnicas delegadas dentro del contrato. Sin datos reales ni nuevas cuentas ni copias de credenciales.",
+        "version": 1
+      },
+      "prev_hash": "56d7bf28f8df39ee9f431ec183f48f4b254dea527fbf38a23e5da67ef5a1e7d4",
+      "seq": 2
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-03T22:16:36+00:00",
+      "hash": "938a2a84bc5d8a6050be50595ec0286d52e4f723d98b1436f5b13b7e77ad3c38",
+      "kind": "approval",
+      "payload": {
+        "id": "mandate",
+        "provenance": "local_declared",
+        "reason": "Mandato existente: el dueño pidió dale asignatelo como goal; no aprobación personal de una arquitectura.",
+        "version": 1
+      },
+      "prev_hash": "8dca2f2cac7339170cba67347678152d8f18eb1a558bbcb6bc67e378cfc94872",
+      "seq": 3
+    },
+    {
+      "actor": "agent:preflight",
+      "at": "2026-10-03T22:31:47+00:00",
+      "hash": "b2ef5af8ffe0d5aa98898c9d8172920eb92c5cd9cafb96d930ea0a336c9433d6",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "actor",
+        "kind": "actor",
+        "text": "Dueño del laboratorio; Codex autor y otra sesión revisora; sólo datos de prueba.",
+        "version": 1
+      },
+      "prev_hash": "938a2a84bc5d8a6050be50595ec0286d52e4f723d98b1436f5b13b7e77ad3c38",
+      "seq": 4
+    },
+    {
+      "actor": "agent:preflight",
+      "at": "2026-10-03T22:31:47+00:00",
+      "hash": "8d64835749402362670ae8230bdba0adcede3c6adb39021c43b883a27a3ae073",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "boundary",
+        "kind": "boundary",
+        "text": "Caso de infraestructura local limitado a leer el mandato y ejecutar status MCP. Sin producto, sin datos reales, sin evaluación de campo.",
+        "version": 1
+      },
+      "prev_hash": "b2ef5af8ffe0d5aa98898c9d8172920eb92c5cd9cafb96d930ea0a336c9433d6",
+      "seq": 5
+    },
+    {
+      "actor": "agent:method-reviewer",
+      "at": "2026-10-03T22:32:17+00:00",
+      "hash": "aeda5ab79fd7b272c6f61f3b22cae27e2f75d89fd45be0d0882e31eb98ac2c5b",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Revisión exclusiva de problem v1, actor v1 y boundary v1, según status y report de la revisión 5. Rechazo por incoherencia de delimitación: problem formula construir backups autosuficientes, restauración exacta, integridad y recuperación según CONTRACT.md, mientras boundary limita este preflight de infraestructura a leer el mandato y ejecutar status MCP, sin producto, datos reales ni evaluación de campo. actor identifica al dueño del laboratorio, autor y otra sesión revisora, pero esa identificación no resuelve la discrepancia entre la necesidad declarada y el límite de observación. Para este caso limitado, el problema debe expresar la comprobación de acceso y permisos de las herramientas; el snapshot leído no lo hace. Dictamen de encuadre basado en el expediente leído, sin aprobar normas ni acreditar éxito del proyecto o eficacia de campo. Revisión local declarada, sin autenticación de identidad.",
+        "snapshot": "e1e1868cdd46b1811b675c9853ad69af73b454483c95a8f901679d6aa071e630",
+        "verdict": "reject"
+      },
+      "prev_hash": "8d64835749402362670ae8230bdba0adcede3c6adb39021c43b883a27a3ae073",
+      "seq": 6
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "a24a107a-6328-4956-a3e4-01a9d26a100b",
+    "created_at": "2026-10-03T22:16:36+00:00",
+    "created_by": "human:owner",
+    "domain": "software local",
+    "test_gate_policy": "local_report",
+    "title": "Backup verificable"
+  },
+  "schema": 1
+}

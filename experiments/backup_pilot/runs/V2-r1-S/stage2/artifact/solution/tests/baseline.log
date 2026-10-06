@@ -1,0 +1,36 @@
+Comando: /usr/local/bin/python3.12 -m unittest discover -s solution/tests -v
+Python: 3.12.15 (main, Oct  1 2026, 21:50:06) [GCC 12.2.0]
+CONTRACT.md SHA256: 8adcc50d4a0b8411195837403c0f8cbc5327e1e3e8da3ac943ec4d708a0019c1
+test_cli_and_empty_repository (test_backup.BackupTests.test_cli_and_empty_repository) ... ok
+test_copy_failure_is_not_published (test_backup.BackupTests.test_copy_failure_is_not_published) ... ok
+test_corruption_of_every_snapshot_file (test_backup.BackupTests.test_corruption_of_every_snapshot_file) ... ok
+test_empty_existing_destination (test_backup.BackupTests.test_empty_existing_destination) ... ok
+test_empty_source (test_backup.BackupTests.test_empty_source) ... ok
+test_existing_id_is_preserved (test_backup.BackupTests.test_existing_id_is_preserved) ... ok
+test_extra_and_missing_entries (test_backup.BackupTests.test_extra_and_missing_entries) ... ok
+test_invalid_ids_and_missing_snapshots (test_backup.BackupTests.test_invalid_ids_and_missing_snapshots) ... ok
+test_invalid_manifests (test_backup.BackupTests.test_invalid_manifests) ... ok
+test_protected_destination (test_backup.BackupTests.test_protected_destination) ... ok
+test_restore_copy_failure_is_not_published (test_backup.BackupTests.test_restore_copy_failure_is_not_published) ... ok
+test_sigkill_and_retry (test_backup.BackupTests.test_sigkill_and_retry) ... ok
+test_source_repository_overlap (test_backup.BackupTests.test_source_repository_overlap) ... ok
+test_special_files_are_rejected (test_backup.BackupTests.test_special_files_are_rejected) ... ERROR
+test_successive_versions (test_backup.BackupTests.test_successive_versions) ... ok
+test_symlink_parent_and_dotdot (test_backup.BackupTests.test_symlink_parent_and_dotdot) ... ok
+test_symlinks_are_rejected (test_backup.BackupTests.test_symlinks_are_rejected) ... ok
+test_unpublished_staging_is_not_listed (test_backup.BackupTests.test_unpublished_staging_is_not_listed) ... ok
+
+======================================================================
+ERROR: test_special_files_are_rejected (test_backup.BackupTests.test_special_files_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/trial/solution/tests/test_backup.py", line 255, in test_special_files_are_rejected
+    sock.bind(str(self.source / "socket"))
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 18 tests in 7.696s
+
+FAILED (errors=1)
+
+Código de salida: 1

@@ -1,0 +1,92 @@
+FF.FF
+======================================================================
+FAIL: test_evaluate_missing_candidate (test_evaluator.TestEvaluator.test_evaluate_missing_candidate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/tests/test_evaluator.py", line 24, in test_evaluate_missing_candidate
+    self.assertEqual(result['score'], 0)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1.0 != 0
+
+======================================================================
+FAIL: test_false_success_candidate (test_evaluator.TestEvaluator.test_false_success_candidate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/tests/test_evaluator.py", line 30, in test_false_success_candidate
+    self.assertLess(result['score'], 1.0)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1.0 not less than 1.0
+
+======================================================================
+FAIL: test_silent_corruption_candidate (test_evaluator.TestEvaluator.test_silent_corruption_candidate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/tests/test_evaluator.py", line 36, in test_silent_corruption_candidate
+    self.assertTrue(any('corruption' in str(f).lower() or 'source intact' in str(f).lower() for f in result['critical_failures']))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_stage2_ignore_max_bytes (test_evaluator.TestEvaluator.test_stage2_ignore_max_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/tests/test_evaluator.py", line 41, in test_stage2_ignore_max_bytes
+    self.assertLess(result['score'], 1.0)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1.0 not less than 1.0
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+FAILED (failures=4)
+./datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/evaluator.py:101: ResourceWarning: unclosed file <_io.BufferedReader name=6>
+  self.check_sigkill()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/evaluator.py:101: ResourceWarning: unclosed file <_io.BufferedReader name=3>
+  self.check_sigkill()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+F./datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/evaluator.py:101: ResourceWarning: unclosed file <_io.BufferedReader name=6>
+  self.check_sigkill()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/evaluator.py:101: ResourceWarning: unclosed file <_io.BufferedReader name=3>
+  self.check_sigkill()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+F.F.
+======================================================================
+FAIL: test_false_success_candidate (test_evaluator.TestEvaluator.test_false_success_candidate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/tests/test_evaluator.py", line 31, in test_false_success_candidate
+    self.assertTrue(len(result['critical_failures']) > 0)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_silent_corruption_candidate (test_evaluator.TestEvaluator.test_silent_corruption_candidate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/tests/test_evaluator.py", line 36, in test_silent_corruption_candidate
+    self.assertTrue(any('corruption' in str(f).lower() or 'source intact' in str(f).lower() for f in result['critical_failures']))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.786s
+
+FAILED (failures=2)
+./datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/evaluator.py:101: ResourceWarning: unclosed file <_io.BufferedReader name=6>
+  self.check_sigkill()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/datos/workspaces/personal/SpecOrganon/experiments/backup_pilot/evaluator.py:101: ResourceWarning: unclosed file <_io.BufferedReader name=3>
+  self.check_sigkill()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+....
+----------------------------------------------------------------------
+Ran 5 tests in 1.827s
+
+OK
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 1.762s
+
+OK
