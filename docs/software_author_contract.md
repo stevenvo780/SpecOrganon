@@ -1,4 +1,4 @@
-# Contrato de autor: candidato 0.2.0rc3.dev2
+# Contrato de autor: candidato 0.2.0rc3.dev3
 
 Esta mejora de ingeniería declara de forma compacta la gramática de autor en
 `author-manifest-contract.json`. Los campos obligatorios/opcionales se derivan
@@ -13,7 +13,7 @@ crea contenido, acepta pruebas declaradas ni repite llamadas nativas rechazadas.
 Los diagnósticos preservan categorías del parser sin repetir valores arbitrarios
 del autor. El estado, los archivos y las salidas medidas permanecen íntegros.
 
-El controlador utiliza política 11 y las celdas básicas política 5, vinculadas
+El controlador utiliza política 12 y las celdas básicas política 5, vinculadas
 al código del contrato y del parser. Ejecuciones anteriores se rechazan en vez
 de reanudarlas bajo una política distinta. Use un run nuevo: no migre una campaña
 cerrada ni vuelva a aplicar sus paquetes rechazados.
@@ -43,7 +43,10 @@ formato. El archivo derivado distingue campos del autor de metadatos del toolkit
 y no declara aceptación. La recuperación compara ambos hashes y el snapshot;
 una modificación o enlace ausente bloquea el replay. El preview de las últimas
 tres acciones omite solamente nuevos hashes/rutas de ensamblaje; el journal y
-el estado suministrado permanecen completos. No hay reintentos nativos añadidos.
+el estado suministrado permanecen completos. El nuevo opt-in `admission_repair`
+permite una corrección redactada por el autor tras un rechazo privado por recursos:
+consume las cuotas originales y conserva ambos paquetes; no reabre runs anteriores.
+Consulte [admisión acotada y controles](../goals/method-superiority-v1/development/BOUNDED_ADMISSION.md).
 
 Los resultados de este modo se reportarán por versión/formato y no se mezclarán
 con v3. Una comparación histórica no identifica el efecto causal del ensamblaje.

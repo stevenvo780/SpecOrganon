@@ -152,7 +152,7 @@ def test_one_conditional_repair_and_no_test_identity_quota_reset(tmp_path, mutat
         measured=[entry for entry in _json(ctrl.root/'progress.json')['history'] if entry['action']=='test']
         assert [entry['passed'] for entry in measured]==[False,True]
         assert current_tests[0]['data']['test_job_ref'].endswith('test-2/receipt.json')
-        ctrl.transport.result = {'schema':1, 'verdict':'reject', 'reason':'Synthetic semantic rejection', 'findings':[]}
+        ctrl.transport.result = {'schema':1, 'tests_executed': False, 'verdict':'reject', 'reason':'Synthetic semantic rejection', 'findings':[]}
         assert ctrl.step()['verdict'] == 'reject'
         with pytest.raises(ControllerError, match='budget'): ctrl.step()
         assert len(ctrl.executor.calls) == 2

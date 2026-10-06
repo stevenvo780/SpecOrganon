@@ -25,7 +25,7 @@ class PersistentSynthetic:
         self.root = Path(root); self.store = JobStore(self.root / 'journal'); self.kill = kill_after_receipt
     def call(self, job_id, role, request):
         response = FRAME if role == 'author' else {
-            'schema': 1, 'verdict': 'accept', 'reason': 'Synthetic mechanics only, not a model review', 'findings': []}
+            'schema': 1, 'tests_executed': False, 'verdict': 'accept', 'reason': 'Synthetic mechanics only, not a model review', 'findings': []}
         counter = self.root / 'invocations.txt'
         program = ('from pathlib import Path; import json; '
                    f'p=Path({str(counter)!r}); '

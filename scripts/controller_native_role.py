@@ -99,7 +99,7 @@ def parse_gemini_stream(raw):
     return final, usage
 
 
-def parse_native(provider, raw):
+def parse_native(provider, raw, *, diagnostics=None):
     if provider == "gemini":
         value = strict(raw)
         if type(value) is not dict or value.get("status") != "SUCCESS" or value.get("denied_actions"):
@@ -108,14 +108,27 @@ def parse_native(provider, raw):
     if provider != "codex": raise NativeRoleError("unsupported provider")
     # Fail closed for this observed Codex 0.160.0 JSONL format. Future native
     # event formats require a reviewed adapter version, not silent skipping.
-    final = None; usage = None; state = "initial"; items = {}
+    final = None; usage = None; state = "initial"; items = {}; reconnects = []
     for line in raw.splitlines():
         if not line.strip(): continue
         value = strict(line)
         if type(value) is not dict: raise NativeRoleError("native Codex event must be an object")
         kind = value.get("type")
         if type(kind) is not str: raise NativeRoleError("invalid native event type")
-        if kind in {"turn.failed", "error"}: raise NativeRoleError("native Codex turn failed")
+        if kind == 'turn.failed': raise NativeRoleError('native Codex turn failed')
+        if kind == 'error':
+            # Observed 0.160.0 emits this exact progress shape during its OWN
+            # reconnection, then can close the SAME turn with one final message.
+            # Never treat an arbitrary error, terminal failure or incomplete
+            # turn as success, and never launch another process/model request.
+            message = value.get('message')
+            match = re.fullmatch(r'Reconnecting\.\.\. ([1-5])/5 \([^\r\n]+\)', message) if type(message) is str else None
+            if (state != 'turn' or final is not None or set(value) != {'type', 'message'}
+                    or not match or reconnects and int(match[1]) <= reconnects[-1]['attempt']):
+                raise NativeRoleError('native Codex turn failed')
+            reconnects.append({'attempt': int(match[1]), 'limit': 5,
+                              'message_sha256': digest(message.encode())})
+            continue
         if kind == "thread.started" and state == "initial":
             if set(value) != {"type", "thread_id"} or type(value["thread_id"]) is not str or not value["thread_id"]:
                 raise NativeRoleError("invalid native thread event")
@@ -148,7 +161,10 @@ def parse_native(provider, raw):
         else:
             raise NativeRoleError("unknown or unordered native event")
     if state != "complete": raise NativeRoleError("native Codex response is incomplete")
-    return response_json(final), usage
+    response = response_json(final)
+    if diagnostics is not None:
+        diagnostics.extend(reconnects)
+    return response, usage
 
 
 def read_request(path):
@@ -189,7 +205,8 @@ def validate_result(value, role, *, author_format='manifest-v1'):
     if type(value) is not dict or type(value.get("schema")) is not int or value.get("schema") != 1:
         raise NativeRoleError("invalid role result schema")
     if role == "review":
-        if (type(value.get("verdict")) is not str or value.get("verdict") not in {"accept", "reject", "inconclusive"}
+        if (value.get('tests_executed') is not False
+                or type(value.get("verdict")) is not str or value.get("verdict") not in {"accept", "reject", "inconclusive"}
                 or type(value.get("reason")) is not str or not value["reason"].strip()
                 or type(value.get("findings")) is not list
                 or any(type(f) is not dict or not f for f in value["findings"])):
@@ -389,8 +406,9 @@ def main(argv=None):
     if (receipt["exit_code"] != 0 or receipt["timed_out"] or receipt["truncated_streams"]
             or receipt.get("stdin_complete") is False):
         raise NativeRoleError("native process failed, timed out, truncated or could not receive full input")
+    native_reconnections = []
     response, usage = (parse_gemini_stream(job["stdout"].decode()) if options.provider == 'gemini'
-                       else parse_native(options.provider, job["stdout"].decode()))
+                       else parse_native(options.provider, job["stdout"].decode(), diagnostics=native_reconnections))
     if {k: v for k, v in metadata.items() if k != "effective_features" and k not in catalog_metadata} != execution_identity(options.provider, args[0]):
         raise NativeRoleError("provider configuration/executable changed during execution")
     if catalog_path is not None and (digest(_read(catalog_path)) != catalog_metadata["runtime_model_catalog_sha256"]
@@ -400,6 +418,7 @@ def main(argv=None):
     print(json.dumps({"schema": 1, "provider": options.provider, "model": options.model,
                       "request_sha256": digest(raw), "invocation_metadata": metadata,
                       "native_exit_code": receipt["exit_code"], "usage_reported": usage,
+                      "native_reconnections": native_reconnections,
                       "result": response}, ensure_ascii=False, allow_nan=False))
 
 

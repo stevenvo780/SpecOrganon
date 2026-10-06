@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "job_id": "d3a80630d8ed4aa1bd9a99fdd703b869",
+  "status": "succeeded",
+  "submitted_at": 1791252487.165877,
+  "finished_at": 1791252521.785305,
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "text",
+    "cwd": "/home/stev/.codex/worktrees/strong-comparators-v1/SpecOrganon",
+    "duration_s": 34.6,
+    "depth": 0
+  },
+  "text": "{\n  \"verdict\": \"reject\",\n  \"findings\": [\n    {\n      \"file\": \"scripts/controller_native_role.py\",\n      \"location\": \"validate_result(role='review'); src/specorganon/software_controller.py::_apply, rama de juicio\",\n      \"problem\": \"No se exige tests_executed=false. Una respuesta con verdict='accept' y tests_executed=true, o sin ese campo, puede superar estas validaciones y autorizar review_phase/advance. El contrato escrito no queda protegido por el parser. Es un defecto del snapshot, aunque no lo introduce este diff.\",\n      \"fix\": \"Exigir value.get('tests_executed') is False en el adaptador y response.get('tests_executed') is False en el controlador antes de cualquier aprobación o revisión aplicada. Añadir fixtures para campo ausente, true y valores de tipo incorrecto.\"\n    },\n    {\n      \"file\": \"scripts/controller_native_role.py\",\n      \"location\": \"parse_native, diagnostics.extend(reconnects) antes de response_json(final)\",\n      \"problem\": \"Los diagnósticos se publican antes de validar el JSON final. Un turno estructuralmente completo con reconexiones y respuesta final inválida modifica diagnostics y después lanza NativeRoleError. Esto deja efectos parciales en una llamada fallida; main no imprime éxito, pero la API del parser pierde la consistencia que sugieren los fixtures.\",\n      \"fix\": \"Validar primero la respuesta final, después extender diagnostics y finalmente retornar. Añadir un fixture con reconexión, turn.completed y JSON final inválido que compruebe diagnostics==[].\"\n    }\n  ],\n  \"scope\": \"Revisión estática exclusivamente del texto suministrado. La ruta nueva de rechazo conserva action='author', consume los contadores originales y exige status='closed'; no identifico en ella un reinicio de presupuesto ni adopción de un fallo durante applying. No verifiqué módulos importados, propagación posterior de warnings, SDK remoto, cohorte, hashes ni fiabilidad nativa.\",\n  \"tests_executed\": false\n}"
+}

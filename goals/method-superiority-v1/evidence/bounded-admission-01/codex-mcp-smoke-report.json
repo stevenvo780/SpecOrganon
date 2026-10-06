@@ -1,0 +1,142 @@
+{
+  "passed": true,
+  "case": "/workspace/cases/mcp-smoke-31980b98a6dc454b8b779a30cb4cb4fb",
+  "tools_discovered": [
+    "advance",
+    "approval_challenge",
+    "approve",
+    "attest_field",
+    "audit_lot_journal",
+    "challenge",
+    "field_attestation_challenge",
+    "gate",
+    "init",
+    "next_task",
+    "phase_review_challenge",
+    "put",
+    "record_test_execution",
+    "record_test_observation",
+    "report",
+    "resolve_challenge",
+    "retire_indicator",
+    "review",
+    "review_phase",
+    "run",
+    "status",
+    "test_execution_challenge",
+    "test_observation_challenge",
+    "trace"
+  ],
+  "checks": [
+    "MCP stdio initialization",
+    "24 tools",
+    "local case",
+    "linked writes",
+    "frame gate",
+    "report",
+    "next_task",
+    "stale write rejected",
+    "outside root rejected",
+    "restart persistence",
+    "CLI/MCP parity"
+  ],
+  "next_task": {
+    "status": "pending",
+    "revision": 3,
+    "phase": "frame",
+    "front": "philosophy",
+    "purpose": "Delimitar el problema, actores y frontera.",
+    "role": "reviewer",
+    "role_label": "revisor",
+    "actor": null,
+    "action": "review_phase",
+    "task": "Revisar independientemente el snapshot vigente y registrar veredicto motivado.",
+    "phase_review_trust": "local_declared",
+    "test_execution_trust": "local_declared",
+    "test_observation_trust": "not_applicable",
+    "inputs_description": "Encargo y contexto del caso.",
+    "inputs": {
+      "items": [],
+      "omitted": 0
+    },
+    "artifacts": {
+      "items": [
+        {
+          "id": "b1",
+          "kind": "boundary",
+          "version": 1,
+          "text": "Docker integration test: boundary",
+          "data": "{}",
+          "refs": {
+            "p1": 1
+          },
+          "omitted_refs": 0,
+          "stale": false,
+          "contested": false,
+          "issues": [],
+          "omitted_issues": 0,
+          "approved": null
+        },
+        {
+          "id": "a1",
+          "kind": "actor",
+          "version": 1,
+          "text": "Docker integration test: actor",
+          "data": "{}",
+          "refs": {
+            "p1": 1
+          },
+          "omitted_refs": 0,
+          "stale": false,
+          "contested": false,
+          "issues": [],
+          "omitted_issues": 0,
+          "approved": null
+        },
+        {
+          "id": "p1",
+          "kind": "problem",
+          "version": 1,
+          "text": "Docker integration test: problem",
+          "data": "{}",
+          "refs": {},
+          "omitted_refs": 0,
+          "stale": false,
+          "contested": false,
+          "issues": [],
+          "omitted_issues": 0,
+          "approved": null
+        }
+      ],
+      "omitted": 0
+    },
+    "missing": [],
+    "approval_targets": [],
+    "omitted_approval_targets": 0,
+    "test_execution_targets": [],
+    "omitted_test_execution_targets": 0,
+    "test_observation_targets": [],
+    "omitted_test_observation_targets": 0,
+    "criteria": {
+      "exit": "La formulaci\u00f3n nombra el da\u00f1o o necesidad, los afectados y el l\u00edmite de observaci\u00f3n.",
+      "review": "Revisar exclusiones y formulaciones rivales.",
+      "stop": "Detener si el problema no puede delimitarse o falta un actor afectado decisivo."
+    },
+    "gate": {
+      "ready": true,
+      "reviewed": false,
+      "independent_review": false,
+      "review_signature_verified": false,
+      "review_provenance": "none",
+      "accepted": false,
+      "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b"
+    },
+    "blockers": [],
+    "omitted_blockers": 0,
+    "open_challenges": [],
+    "omitted_challenges": 0
+  },
+  "ledger_sha256": "d91510eb4ca4293e8c97b5b46eab17c2fd1879cfdeabdc22aa9e606128956bbb",
+  "timestamp": "2026-10-06T02:18:17.928876+00:00",
+  "duration_seconds": 3.177
+}

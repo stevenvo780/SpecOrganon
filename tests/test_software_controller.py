@@ -77,7 +77,7 @@ def test_mandate_target_shape_never_coerces_an_invalid_native_judgment(tmp_path,
     import json
     from specorganon.role_jobs import _json
     from specorganon.runner import run_manifest
-    transport = SyntheticTransport({'schema': 1, 'verdict': 'accept',
+    transport = SyntheticTransport({'schema': 1, 'tests_executed': False, 'verdict': 'accept',
                                     'reason': 'Synthetic mechanics only', 'findings': []})
     ctrl = controller(tmp_path, transport)
     steps = json.loads((Path(__file__).parents[1] / 'workflows/synthetic_full.json').read_text())['steps']
@@ -93,7 +93,7 @@ def test_mandate_target_shape_never_coerces_an_invalid_native_judgment(tmp_path,
     state = engine.get_state(ctrl.case)
     request = ctrl._request(state, 'approval', {'history': []})
     assert json.loads(request['documents']['approval-target-ids.json']) == ['n1']
-    transport.result = {'schema': 1, 'verdict': 'accept', 'reason': 'Synthetic mandate fixture only',
+    transport.result = {'schema': 1, 'tests_executed': False, 'verdict': 'accept', 'reason': 'Synthetic mandate fixture only',
                         'findings': [], 'mandate_conformity': True,
                         'approval_targets': [{'id': 'n1', 'version': 1}] if target_shape == 'objects' else ['n1']}
     before = (ctrl.case / 'organon.json').read_bytes()
@@ -114,7 +114,7 @@ def test_author_puts_are_guarded_and_phase_requires_another_real_role(tmp_path):
     state = engine.get_state(ctrl.case)
     assert result['action'] == 'author' and state['revision'] == 3
     assert not state['phases']['frame']['accepted']
-    transport.result = {'schema': 1, 'verdict': 'reject', 'reason': 'Synthetic insufficient evidence', 'findings': []}
+    transport.result = {'schema': 1, 'tests_executed': False, 'verdict': 'reject', 'reason': 'Synthetic insufficient evidence', 'findings': []}
     result = ctrl.step()
     assert result['action'] == 'review' and result['verdict'] == 'reject'
     assert not engine.get_state(ctrl.case)['phases']['frame']['accepted']
@@ -165,7 +165,7 @@ def test_synthetic_transport_cannot_be_used_as_production_review(tmp_path):
 
 def test_rejected_snapshot_is_repaired_before_another_reviewer_call(tmp_path):
     transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport); ctrl.step()
-    transport.result = {'schema': 1, 'verdict': 'reject', 'reason': 'Synthetic missing actor detail', 'findings': []}; ctrl.step()
+    transport.result = {'schema': 1, 'tests_executed': False, 'verdict': 'reject', 'reason': 'Synthetic missing actor detail', 'findings': []}; ctrl.step()
     transport.result = frame_response(); transport.result['manifest']['steps'][1]['text'] = 'Repaired synthetic actor detail'
     result = ctrl.step()
     assert result['action'] == 'author' and transport.calls[-1][1] == 'author'
@@ -174,7 +174,7 @@ def test_rejected_snapshot_is_repaired_before_another_reviewer_call(tmp_path):
 
 def test_no_replacement_review_when_author_changes_nothing_after_rejection(tmp_path):
     transport = SyntheticTransport(frame_response()); ctrl = controller(tmp_path, transport); ctrl.step()
-    transport.result = {'schema': 1, 'verdict': 'reject', 'reason': 'Synthetic failure retained', 'findings': []}; ctrl.step()
+    transport.result = {'schema': 1, 'tests_executed': False, 'verdict': 'reject', 'reason': 'Synthetic failure retained', 'findings': []}; ctrl.step()
     transport.result = frame_response()
     with pytest.raises(ControllerError, match='material'): ctrl.step()
     assert [role for _, role in transport.calls] == ['author', 'review', 'author']

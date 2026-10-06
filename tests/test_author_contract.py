@@ -61,7 +61,7 @@ def test_known_native_failure_shapes_still_reject_without_rewriting_packet_or_le
 def test_schema9_cannot_be_resumed_under_new_contract_even_with_no_work(tmp_path):
     ctrl = controller(tmp_path, SyntheticTransport(frame_response()))
     policy = _json(ctrl.root / 'controller.json')
-    assert policy['schema'] == 11
+    assert policy['schema'] == 12
     assert policy['author_manifest_contract_source_sha256'] == digest(
         _read(__import__('specorganon.author_contract', fromlist=['x']).__file__, 128000))
     policy['schema'] = 9

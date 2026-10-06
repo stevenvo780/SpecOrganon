@@ -125,7 +125,7 @@ def test_bounded_request_reader_rejects_large_files_and_symlinks(tmp_path):
 
 def test_requested_review_result_contract_is_checked():
     from scripts.controller_native_role import validate_result
-    assert validate_result({"schema": 1, "verdict": "reject", "reason": "actual finding", "findings": []}, "review")["verdict"] == "reject"
+    assert validate_result({"schema": 1, "verdict": "reject", "reason": "actual finding", "findings": [], "tests_executed": False}, "review")["verdict"] == "reject"
     for value in [{}, {"schema": 1, "verdict": "accept", "reason": "", "findings": []},
                   {"schema": 1, "verdict": "magic", "reason": "finding", "findings": []},
                   {"schema": 1, "verdict": "accept", "reason": "finding", "findings": "missing"},

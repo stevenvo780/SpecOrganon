@@ -1,0 +1,18 @@
+........................................................................ [ 39%]
+........................................................................ [ 78%]
+...........F............................                                 [100%]
+=================================== FAILURES ===================================
+_____ test_schema9_cannot_be_resumed_under_new_contract_even_with_no_work ______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-302/test_schema9_cannot_be_resumed0')
+
+    def test_schema9_cannot_be_resumed_under_new_contract_even_with_no_work(tmp_path):
+        ctrl = controller(tmp_path, SyntheticTransport(frame_response()))
+        policy = _json(ctrl.root / 'controller.json')
+>       assert policy['schema'] == 11
+E       assert 12 == 11
+
+tests/test_author_contract.py:64: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_author_contract.py::test_schema9_cannot_be_resumed_under_new_contract_even_with_no_work
+1 failed, 183 passed in 8.25s
