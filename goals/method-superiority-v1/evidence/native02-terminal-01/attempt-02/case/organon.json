@@ -1,0 +1,654 @@
+{
+  "events": [
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:13:49+00:00",
+      "hash": "0d72f9c2fc09f6e60020b0273015b6c85c0d9d506f54b8c74ce28c6ca5f47201",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Identificar como afectados a los usuarios que entregan movimientos por stdin y consumen balances por stdout.",
+            "Acotar la delegación a construir y probar el producto técnico solicitado."
+          ]
+        },
+        "deps": {},
+        "id": "lf_actor",
+        "kind": "actor",
+        "text": "Los usuarios de la CLI LedgerFold necesitan consolidar movimientos por cuenta y distinguir un lote válido de uno inválido. El mandato suministrado delega al agente las decisiones técnicas de este desarrollo; no documenta elecciones de algoritmo del operador.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:13:49+00:00",
+      "hash": "79a3f77296b50ad3779d35a825f18e686dc40bde4d8b613c4103897cc349a042",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Delimitar la necesidad como cumplimiento del contrato público de entrada, consolidación y salida.",
+            "Vincular la validación completa del lote con la necesidad de evitar resultados parciales ante entradas inválidas."
+          ]
+        },
+        "deps": {
+          "lf_actor": 1
+        },
+        "id": "lf_problem",
+        "kind": "problem",
+        "text": "La necesidad es construir una CLI Python estándar que consolide movimientos enteros con exactitud, conserve las cuentas cuyo saldo sea cero y valide todo el lote antes de emitir salida. Una petición inválida debe impedir cualquier salida parcial. Estos son requisitos del encargo, no fallos observados de una implementación existente.",
+        "version": 1
+      },
+      "prev_hash": "0d72f9c2fc09f6e60020b0273015b6c85c0d9d506f54b8c74ce28c6ca5f47201",
+      "seq": 2
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:13:49+00:00",
+      "hash": "fc90e068263edb4cb328ad5dec9c630403fd51f43d1f3ae513a98707bc17f77d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md",
+            "state.json",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Acotar el producto y los límites de entrada al contrato suministrado.",
+            "Separar los ejemplos documentales de cualquier ejecución o medición.",
+            "Mantener fuera de esta formulación las afirmaciones de beneficio de campo o superioridad."
+          ]
+        },
+        "deps": {
+          "lf_actor": 1,
+          "lf_problem": 1
+        },
+        "id": "lf_boundary",
+        "kind": "boundary",
+        "text": "El alcance es ledger_fold.py, su README y las pruebas de entrega, usando solo biblioteca estándar y stdin, sin red ni archivos externos. El contrato limita stdin a 131072 bytes, cada petición a 2000 movimientos y cada delta entero a valor absoluto de 10^12; la suma no tiene ese límite. Exige UTF-8, estructura exacta, cuentas ASCII válidas y rechazo de líneas vacías, claves duplicadas, JSON inválido, constantes no finitas y tipos indebidos. La entrada completamente vacía representa cero peticiones. La observación disponible se limita al encargo, mandato y estado suministrados: no hay implementación ni registros de pruebas. Los ejemplos son especificación pública, no mediciones. Se excluyen efectos de campo, superioridad frente a alternativas y evaluación reservada futura.",
+        "version": 1
+      },
+      "prev_hash": "79a3f77296b50ad3779d35a825f18e686dc40bde4d8b613c4103897cc349a042",
+      "seq": 3
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:14:03+00:00",
+      "hash": "82b05194c583a936f2f115cd6cc3adfdf17861cc54cdf1a0c7fc79c764b3daa1",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Los artefactos lf_actor, lf_problem y lf_boundary delimitan adecuadamente los afectados, la necesidad técnica y la frontera de observación conforme a contract.md y existing-mandate.md. La trazabilidad de dependencias es consistente, se respetan los límites de recursos de la fase frame y no se incorporan afirmaciones indebidas sobre ejecución de pruebas, elecciones del operador ni superioridad en campo. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-02/transport/host-journal/role-02-frame-review/receipt.json]",
+        "snapshot": "84dfa4e5b54483a362766ee390e586f76f2746f967ac3a1548af963a4cd96653",
+        "verdict": "accept"
+      },
+      "prev_hash": "fc90e068263edb4cb328ad5dec9c630403fd51f43d1f3ae513a98707bc17f77d",
+      "seq": 4
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:14:03+00:00",
+      "hash": "7b16c0390dc2c29dd4e4b848000b8ab9369bbc2f92ea9ea70935583db8e301da",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "84dfa4e5b54483a362766ee390e586f76f2746f967ac3a1548af963a4cd96653"
+      },
+      "prev_hash": "82b05194c583a936f2f115cd6cc3adfdf17861cc54cdf1a0c7fc79c764b3daa1",
+      "seq": 5
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:14:30+00:00",
+      "hash": "e7f31195cbb72f0dc3b2c79a04f6f0cc90e816e7005a76a9ffb025d0a7d51b2a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Distinguir exactitud, presencia de cuentas y atomicidad como obligaciones diferentes.",
+            "Separar el límite por movimiento del valor acumulado y la definición contractual de cualquier beneficio externo."
+          ]
+        },
+        "deps": {
+          "lf_boundary": 1,
+          "lf_problem": 1
+        },
+        "id": "lf_concept",
+        "kind": "concept",
+        "text": "Fiabilidad contractual significa exactitud de saldos enteros, conservación de cuentas con saldo cero y respuesta atómica del lote: cualquier petición inválida impide toda salida. Es una definición verificable por comportamientos especificados, no sinónimo de utilidad general, rapidez o superioridad. Un saldo cero no equivale a una cuenta ausente; una suma mayor que 10^12 no equivale a un movimiento inválido.",
+        "version": 1
+      },
+      "prev_hash": "7b16c0390dc2c29dd4e4b848000b8ab9369bbc2f92ea9ea70935583db8e301da",
+      "seq": 6
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:14:30+00:00",
+      "hash": "c02461744630ab8066fc1f57b4e01f60b44ad91dcb384f49ccc53a02a4b8d97e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Explicitar la referencia documental que guía el desarrollo.",
+            "Distinguir la cota de entrada de propiedades de ejecución todavía no observadas."
+          ]
+        },
+        "deps": {
+          "lf_boundary": 1,
+          "lf_concept": 1,
+          "lf_problem": 1
+        },
+        "id": "lf_assumption",
+        "kind": "assumption",
+        "text": "Se toma el contrato público como referencia suficiente para orientar este desarrollo técnico. Su límite de 131072 bytes permite considerar la retención del lote antes de emitir, pero no demuestra consumo de memoria, rendimiento ni compatibilidad de una implementación. La suficiencia del contrato es un supuesto de trabajo: una ambigüedad material requeriría aclaración, sin resolverla atribuyendo preferencias al operador.",
+        "version": 1
+      },
+      "prev_hash": "e7f31195cbb72f0dc3b2c79a04f6f0cc90e816e7005a76a9ffb025d0a7d51b2a",
+      "seq": 7
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:14:30+00:00",
+      "hash": "7ed461ff768b86f54c63c8e84906454b37ac8d325f81fb469d9a3866e1e3b798",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Formular la integridad del lote como prioridad normativa técnica.",
+            "Identificar el coste de posponer la salida y su fundamento contractual."
+          ]
+        },
+        "deps": {
+          "lf_actor": 1,
+          "lf_boundary": 1,
+          "lf_concept": 1,
+          "lf_problem": 1
+        },
+        "id": "lf_frame_atomic",
+        "kind": "frame_option",
+        "text": "Priorizar integridad contractual: validar el lote completo y emitir únicamente cuando todas las peticiones sean válidas. Favorece exactitud y ausencia de resultados parciales; renuncia a entregar respuestas tempranas y a rescatar peticiones válidas de un lote inválido. Su fundamento es la obligación explícita de stdout vacío ante cualquier error, no una medición de ventajas para usuarios.",
+        "version": 1
+      },
+      "prev_hash": "c02461744630ab8066fc1f57b4e01f60b44ad91dcb384f49ccc53a02a4b8d97e",
+      "seq": 8
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:14:30+00:00",
+      "hash": "80725da775df691f18311ac3fab8529f0d3114398e98bb1daf0d689a1061e7b2",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Examinar la disponibilidad parcial como un fin distinto de la integridad del lote.",
+            "Explicitar su conflicto con la regla de salida vacía y la carga interpretativa que introduce."
+          ]
+        },
+        "deps": {
+          "lf_actor": 1,
+          "lf_boundary": 1,
+          "lf_concept": 1,
+          "lf_problem": 1
+        },
+        "id": "lf_frame_salvage",
+        "kind": "frame_option",
+        "text": "Priorizar disponibilidad parcial: emitir cada petición válida y omitir o señalar las inválidas. Esta alternativa valora la obtención temprana de información y el rescate de trabajo válido, pero permite salida parcial y obliga al consumidor a interpretar un lote incompleto. Es una rival sustantiva de la atomicidad; contradice el contrato actual y no constituye una opción implementable dentro de este encargo.",
+        "version": 1
+      },
+      "prev_hash": "7ed461ff768b86f54c63c8e84906454b37ac8d325f81fb469d9a3866e1e3b798",
+      "seq": 9
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:14:30+00:00",
+      "hash": "9ef9951cab6699351afff6ebdfc01d6f9cde28efabb7f2220220d4584c18118a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Resolver el conflicto entre integridad y disponibilidad parcial mediante la obligación contractual vigente.",
+            "Acotar la prescripción al desarrollo delegado y separar el deber técnico de cualquier afirmación de cumplimiento."
+          ]
+        },
+        "deps": {
+          "lf_actor": 1,
+          "lf_assumption": 1,
+          "lf_boundary": 1,
+          "lf_concept": 1,
+          "lf_frame_atomic": 1,
+          "lf_frame_salvage": 1,
+          "lf_problem": 1
+        },
+        "id": "lf_norm",
+        "kind": "norm",
+        "text": "Dentro de la delegación técnica, debe regir la integridad contractual de lf_frame_atomic: exactitud entera, presencia de todas las cuentas mencionadas y ausencia de salida ante cualquier petición inválida. La disponibilidad parcial cede porque vulneraría una obligación expresa del encargo. Este juicio prescribe cómo construir LedgerFold; no afirma que el producto ya cumpla ni que produzca beneficios de campo. Una modificación de esos fines excedería esta elección técnica.",
+        "version": 1
+      },
+      "prev_hash": "80725da775df691f18311ac3fab8529f0d3114398e98bb1daf0d689a1061e7b2",
+      "seq": 10
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-06T03:14:53+00:00",
+      "hash": "42b76d03cbf4d59ace7f110a7c041c7e56f7b23bf7b86f47608aa3b8abee24d5",
+      "kind": "approval",
+      "payload": {
+        "id": "lf_norm",
+        "provenance": "local_declared",
+        "reason": "Existing local owner mandate; technical conformity judged separately by reviewer:gemini-isolated-review (/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-02/transport/host-journal/role-04-critique-approval/receipt.json): El artefacto lf_norm se ajusta plenamente a las directrices de existing-mandate.md y al encargo técnico de contract.md. Resuelve de forma rigurosa y justificada el conflicto normativo entre integridad atómica del lote y disponibilidad parcial a favor de lf_frame_atomic, respetando la obligación contractual de no emitir salidas ante peticiones inválidas. Mantiene una clara separación entre juicios de valor y afirmaciones fácticas, no atribuye elecciones indebidas al operador ni reclama beneficios de campo o ejecuciones de pruebas no realizadas.",
+        "version": 1
+      },
+      "prev_hash": "9ef9951cab6699351afff6ebdfc01d6f9cde28efabb7f2220220d4584c18118a",
+      "seq": 11
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:15:06+00:00",
+      "hash": "441874b7176501f33661328824173d77483dcae8c36c886795a2bfbef82adca5",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "La fase critique cumple rigurosamente con los requisitos del contrato de fase y el mandato: se han definido el concepto clave (lf_concept), el supuesto de partida (lf_assumption), dos opciones de marco rivales sustantivas (lf_frame_atomic y lf_frame_salvage) y la norma técnica rectora (lf_norm). Los juicios de valor se mantienen estrictamente separados de las afirmaciones fácticas, fundamentando adecuadamente la priorización de la integridad atómica contractual sobre la disponibilidad parcial conforme a contract.md. Las dependencias y versiones son consistentes, no se introducen definiciones circulares ni reclamos indebidos de beneficios de campo o pruebas no ejecutadas, y la opción normativa cuenta con la aprobación requerida respetando los límites de recursos de la fase. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-02/transport/host-journal/role-05-critique-review/receipt.json]",
+        "snapshot": "ce980bfaffbd1543ec2f483bfb9a58a4970681f9f50f9905e0429acc1cea35fc",
+        "verdict": "accept"
+      },
+      "prev_hash": "42b76d03cbf4d59ace7f110a7c041c7e56f7b23bf7b86f47608aa3b8abee24d5",
+      "seq": 12
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:15:06+00:00",
+      "hash": "3b5c7381ad9d585af1d1e6c54f88ed43350458fabfa6768de006ee938c77d1c7",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "critique",
+        "review_seq": 12,
+        "snapshot": "ce980bfaffbd1543ec2f483bfb9a58a4970681f9f50f9905e0429acc1cea35fc"
+      },
+      "prev_hash": "441874b7176501f33661328824173d77483dcae8c36c886795a2bfbef82adca5",
+      "seq": 13
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:15:40+00:00",
+      "hash": "a77349a81090e79c8b18ca7b2098acdbb37b1d9912e9b768cc2fc341d8c5a4c9",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Derivar la pregunta de las obligaciones contractuales.",
+            "Acotar la investigación a conformidad técnica observable."
+          ]
+        },
+        "deps": {
+          "lf_concept": 1,
+          "lf_norm": 1,
+          "lf_problem": 1
+        },
+        "id": "lf_question",
+        "kind": "question",
+        "text": "¿Puede LedgerFold satisfacer la exactitud entera, la conservación de cuentas y la atomicidad del lote exigidas por el contrato en un corpus público que cubra entradas válidas, inválidas y límites?",
+        "version": 1
+      },
+      "prev_hash": "3b5c7381ad9d585af1d1e6c54f88ed43350458fabfa6768de006ee938c77d1c7",
+      "seq": 14
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:15:40+00:00",
+      "hash": "d6ecd78a630ac275fdc37b11c8d167bc27cdfac25efbd6ec053ef9c8969b58ab",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Formular una predicción refutable por caso.",
+            "Limitar su alcance al corpus y separar predicción de resultado."
+          ]
+        },
+        "deps": {
+          "lf_assumption": 1,
+          "lf_norm": 1,
+          "lf_question": 1
+        },
+        "id": "lf_hypothesis",
+        "kind": "hypothesis",
+        "text": "Hipótesis por contrastar: la futura implementación no presentará discrepancias contractuales en el corpus prespecificado. Una discrepancia en salida, stderr o código de terminación la contradice para ese corpus; su ausencia no demuestra conformidad universal ni superioridad.",
+        "version": 1
+      },
+      "prev_hash": "a77349a81090e79c8b18ca7b2098acdbb37b1d9912e9b768cc2fc341d8c5a4c9",
+      "seq": 15
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:15:40+00:00",
+      "hash": "c8f93e16745222697c12cdf1eb58d24c412796c3187bafbd1625265aa4385380",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Referencias derivadas del contrato: para lotes válidos, comparar objetos JSON por estructura y valores, número de líneas, newline final, exit 0 y stderr vacío; para inválidos, stdout vacío, stderr exacto ledger-fold: invalid input seguido de newline y exit 2.",
+          "method": "Diseño previo, sin ejecución aquí: incluir los tres ejemplos, entrada vacía, múltiples peticiones, duplicados de movimientos, negativos, ceros y cancelación; cuentas y tamaños en sus límites y fuera de ellos; bool, float, constantes no finitas, claves duplicadas incluso anidadas, estructura y campos incorrectos, JSON y UTF-8 inválidos, líneas vacías y error posterior a una petición válida. Cubrir 2000/2001 movimientos y 131072/131073 bytes con fixtures cuya longitud se documente.",
+          "population": "Corpus público finito de lotes sintéticos contractuales; unidad: un lote enviado por stdin.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Fijar unidad, cobertura y referencia antes de obtener resultados.",
+            "Separar discrepancias observables de extrapolaciones y supuestos."
+          ],
+          "uncertainty": "No hay mediciones disponibles. Corpus dirigido, sin muestreo aleatorio ni intervalos poblacionales; cobertura limitada y posible error del oráculo. Las referencias deberán justificarse desde el contrato, sin reutilizar la implementación para calcularlas. Usar datos sintéticos sin información personal."
+        },
+        "deps": {
+          "lf_hypothesis": 1,
+          "lf_norm": 1,
+          "lf_problem": 1,
+          "lf_question": 1
+        },
+        "id": "lf_protocol",
+        "kind": "protocol",
+        "text": "Prespecificar casos y respuestas esperadas desde el contrato antes de observar la implementación. Cada caso será un lote completo de bytes; comparar su salida, stderr y terminación con la referencia contractual. Conservar entradas y discrepancias completas; resumir los logs dentro del límite de transporte suministrado.",
+        "version": 1
+      },
+      "prev_hash": "d6ecd78a630ac275fdc37b11c8d167bc27cdfac25efbd6ec053ef9c8969b58ab",
+      "seq": 16
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:15:40+00:00",
+      "hash": "2c6efc320c5e0034e6b967dbeaad69c9e7f2613d16026e2d79edbc395021cf17",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "Sin fecha documental declarada",
+          "locator": "contract.md: Ejemplos; párrafo Si cualquier petición es inválida; reglas de entrada y salida",
+          "origin": "published",
+          "source": "contract.md, contrato público suministrado en la solicitud",
+          "steps": [
+            "Identificar las reglas y ejemplos explícitos de la fuente suministrada.",
+            "Usarlos como fundamento documental, sin convertirlos en observaciones de ejecución."
+          ]
+        },
+        "deps": {
+          "lf_norm": 1,
+          "lf_problem": 1,
+          "lf_protocol": 1
+        },
+        "id": "lf_contract_evidence",
+        "kind": "evidence",
+        "text": "El contrato suministrado define respuestas exactas para tres ejemplos y exige rechazo atómico de cualquier lote inválido. Es evidencia documental para definir la comparación; no acredita ejecución del producto, medición de otros métodos ni beneficio de campo.",
+        "version": 1
+      },
+      "prev_hash": "c8f93e16745222697c12cdf1eb58d24c412796c3187bafbd1625265aa4385380",
+      "seq": 17
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:15:40+00:00",
+      "hash": "614e865474c9620d0d0a716f3a9738c42c543bdac120a8e4acb1ae2e872b0c74",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "definition": "Número de lotes cuya salida, stderr o terminación difiera de la referencia contractual definida en lf_protocol.",
+          "metric": "contract_mismatches",
+          "scope": "Únicamente el corpus público prespecificado; ningún alcance poblacional o de campo.",
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Fundar la métrica en las obligaciones documentadas y la unidad del protocolo.",
+            "Fijar el conteo por lote antes de cualquier medición."
+          ],
+          "unit": "lotes"
+        },
+        "deps": {
+          "lf_contract_evidence": 1,
+          "lf_norm": 1,
+          "lf_problem": 1,
+          "lf_protocol": 1
+        },
+        "id": "lf_indicator",
+        "kind": "indicator",
+        "text": "Contar los lotes del corpus con al menos una discrepancia respecto del contrato. Un lote cuenta una sola vez aunque tenga varios errores; informar también el número de lotes examinados y las discrepancias identificadas. El indicador queda prespecificado, sin valor observado.",
+        "version": 1
+      },
+      "prev_hash": "2c6efc320c5e0034e6b967dbeaad69c9e7f2613d16026e2d79edbc395021cf17",
+      "seq": 18
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:16:03+00:00",
+      "hash": "680d39c40c4755caaf224fa5976bbd4c2ef9004a2423ed9be120a52017e2039c",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "La fase study cumple rigurosamente con los requisitos del contrato de fase y los criterios de revisión. Los artefactos lf_question, lf_hypothesis, lf_protocol y lf_indicator, respaldados documentalmente por lf_contract_evidence, establecen una investigación técnica verificable y falsable sin incurrir en circularidad ni extrapolar beneficios de campo. El protocolo define con claridad la unidad de observación, el método de contraste y la población sintética finita, señalando explícitamente sus límites e incertidumbre. El indicador contract_mismatches prespecifica su métrica y unidad ('lotes') sin adjudicar resultados empíricos previos ni ejecuciones no realizadas, distinguiendo con rigor entre datos documentales, inferencias y supuestos. Se respetan íntegramente las dependencias y los límites de recursos de la fase. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-02/transport/host-journal/role-07-study-review/receipt.json]",
+        "snapshot": "417b6bbddb8cc9759d0fc24e41cb4fd8e496f71f994be2d21fa69c588593ad80",
+        "verdict": "accept"
+      },
+      "prev_hash": "614e865474c9620d0d0a716f3a9738c42c543bdac120a8e4acb1ae2e872b0c74",
+      "seq": 19
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:16:03+00:00",
+      "hash": "e6d8793860d560d6bfe0573f41f16afcd36fa0386d51c209e9f22b8941dba0d5",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "study",
+        "review_seq": 19,
+        "snapshot": "417b6bbddb8cc9759d0fc24e41cb4fd8e496f71f994be2d21fa69c588593ad80"
+      },
+      "prev_hash": "680d39c40c4755caaf224fa5976bbd4c2ef9004a2423ed9be120a52017e2039c",
+      "seq": 20
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:16:16+00:00",
+      "hash": "6fd9044ecd2b56506d195a7d1687dc47ff7ae957c5729dd933a6219de868e582",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "scope": "Inferencia sobre las obligaciones del contrato público; sin mediciones del producto.",
+          "sources": [
+            "contract.md",
+            "state.json",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Relacionar la regla de rechazo atómico de lf_contract_evidence con el caso de error posterior a una petición válida incluido en lf_protocol.",
+            "Deducir que la emisión debe esperar a la validación completa del lote.",
+            "Distinguir esta consecuencia documental de un resultado empírico, ausente en los registros suministrados."
+          ]
+        },
+        "deps": {
+          "lf_contract_evidence": 1,
+          "lf_hypothesis": 1,
+          "lf_indicator": 1,
+          "lf_problem": 1,
+          "lf_protocol": 1
+        },
+        "id": "lf_atomic_inference",
+        "kind": "inference",
+        "text": "De la obligación documental de stdout vacío cuando cualquier petición sea inválida se infiere que una petición válida inicial no basta para autorizar su emisión: una petición inválida posterior exige conservar la salida vacía para todo el lote. Esta consecuencia fundamenta la validación completa previa a emitir, conforme al problema y al protocolo registrados. Los ejemplos contractuales definen respuestas esperadas; no acreditan que una implementación las produzca. No hay datos de ejecución para confirmar o refutar lf_hypothesis ni asignar un valor observado al indicador.",
+        "version": 1
+      },
+      "prev_hash": "e6d8793860d560d6bfe0573f41f16afcd36fa0386d51c209e9f22b8941dba0d5",
+      "seq": 21
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:16:35+00:00",
+      "hash": "68e02273d19e910f79f96fc10a82c97f47036baf610f76ece977cf2c903479e6",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "observe",
+        "provenance": "local_declared",
+        "reason": "La fase observe cumple cabalmente con las especificaciones del contrato de fase y los criterios de revisión. Los artefactos lf_contract_evidence y lf_atomic_inference satisfacen los requisitos de entrada y salida, preservando origen documental publicado, localizador y trazabilidad completa hacia los artefactos precedentes (problema, protocolo, norma, hipótesis e indicador). Se elogia la estricta delimitación epistémica que distingue las obligaciones contractuales y deducciones normativas de cualquier ejecución o resultado empírico no realizado, sin atribuir beneficios de campo, suposiciones indebidas ni violar los límites de recursos. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-02/transport/host-journal/role-09-observe-review/receipt.json]",
+        "snapshot": "6bb474928cf8af4a28dd969190fab715ec9030c9aae4150f77d3cb634148fc4d",
+        "verdict": "accept"
+      },
+      "prev_hash": "6fd9044ecd2b56506d195a7d1687dc47ff7ae957c5729dd933a6219de868e582",
+      "seq": 22
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:16:35+00:00",
+      "hash": "da36fef1b0f0712e695f05e5bc7def0feb0c0bd6292dbb3f138d4986fac1a406",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "observe",
+        "review_seq": 22,
+        "snapshot": "6bb474928cf8af4a28dd969190fab715ec9030c9aae4150f77d3cb634148fc4d"
+      },
+      "prev_hash": "68e02273d19e910f79f96fc10a82c97f47036baf610f76ece977cf2c903479e6",
+      "seq": 23
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:16:53+00:00",
+      "hash": "011ff940cab3f0cdcdeacdbc1e247f1dae47e410c31272a3c751178eed66e385",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "state.json",
+            "delivery-files.json",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Separar las obligaciones documentadas de la inferencia sobre emisión atómica.",
+            "Considerar distintas estrategias internas compatibles y el conflicto contractual de la emisión temprana.",
+            "Distinguir el supuesto de suficiencia del contrato de la hipótesis aún sin datos."
+          ]
+        },
+        "deps": {
+          "lf_assumption": 1,
+          "lf_atomic_inference": 1,
+          "lf_contract_evidence": 1,
+          "lf_hypothesis": 1,
+          "lf_protocol": 1
+        },
+        "id": "lf_synthesis",
+        "kind": "synthesis",
+        "text": "Hallazgo documental: el contrato exige exactitud entera, conservación de cuentas con saldo cero y stdout vacío si cualquier petición es inválida. La inferencia de atomicidad implica posponer la emisión hasta validar todo el lote; no determina una única estrategia interna de almacenamiento. Emitir respuestas antes de terminar la validación entra en conflicto con el caso de una petición inválida posterior. Supuesto de trabajo: el contrato constituye una referencia suficiente para diseñar el contraste. La hipótesis de ausencia de discrepancias sigue sin contrastar: los ejemplos especifican respuestas esperadas y el protocolo define casos, pero los registros suministrados no contienen implementación ni mediciones. La evidencia fundamenta obligaciones técnicas, sin demostrar cumplimiento, rendimiento ni superioridad.",
+        "version": 1
+      },
+      "prev_hash": "da36fef1b0f0712e695f05e5bc7def0feb0c0bd6292dbb3f138d4986fac1a406",
+      "seq": 24
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:16:53+00:00",
+      "hash": "e47b8b94571f506ca8ced345945502a71c8677b7b42fa2ac9c92c01f26f090f7",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "state.json",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Delimitar las conclusiones por la ausencia de mediciones suministradas.",
+            "Identificar cobertura dirigida, error del oráculo y sesgo por interpretación compartida.",
+            "Mantener indeterminados el cumplimiento y las propiedades no observadas."
+          ]
+        },
+        "deps": {
+          "lf_hypothesis": 1,
+          "lf_indicator": 1,
+          "lf_protocol": 1,
+          "lf_synthesis": 1
+        },
+        "id": "lf_uncertainty",
+        "kind": "uncertainty",
+        "text": "La síntesis permite concluir qué comportamiento exige el contrato, pero no si LedgerFold lo realiza. No hay observaciones para asignar un valor al indicador ni confirmar o refutar la hipótesis. El corpus dirigido del protocolo tiene cobertura limitada: aun una eventual ausencia de discrepancias no demostraría conformidad universal. Un oráculo equivocado o una interpretación compartida entre implementación y referencias podría ocultar errores; las expectativas requieren fundamento contractual independiente. Tampoco hay datos sobre memoria, rendimiento, otros métodos o efectos de campo. La atomicidad es una obligación documental, no evidencia de que una estrategia concreta sea suficiente o preferible por sus resultados. Cualquier conclusión empírica queda pendiente de mediciones reales.",
+        "version": 1
+      },
+      "prev_hash": "011ff940cab3f0cdcdeacdbc1e247f1dae47e410c31272a3c751178eed66e385",
+      "seq": 25
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:17:08+00:00",
+      "hash": "c7f890b9def02c6f3afb5b8abaf9bd199e6f8ab408e75962e8f737c838795619",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "explain",
+        "provenance": "local_declared",
+        "reason": "La fase explain cumple rigurosamente con el contrato de fase y las reglas metodológicas. Los artefactos lf_synthesis y lf_uncertainty satisfacen cabalmente los criterios de salida y revisión: la síntesis distingue con precisión los hallazgos documentales, los supuestos de trabajo y la ausencia de datos empíricos respecto de la hipótesis prespecificada; por su parte, la incertidumbre explicita con sobriedad los límites epistémicos derivados de la falta de mediciones reales, el riesgo de sesgo por interpretación compartida o fallo de oráculo en un corpus dirigido, y la total ausencia de afirmaciones injustificadas sobre rendimiento o beneficios de campo. Se elogian la impecable trazabilidad hacia las dependencias vigentes, la preservación de la neutralidad frente a alternativas de almacenamiento y el respeto estricto a las cuotas de recursos. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-02/transport/host-journal/role-11-explain-review/receipt.json]",
+        "snapshot": "95d91f668a227763b8274df0563531b2a5436a2205d548590fecd692676fa1d0",
+        "verdict": "accept"
+      },
+      "prev_hash": "e47b8b94571f506ca8ced345945502a71c8677b7b42fa2ac9c92c01f26f090f7",
+      "seq": 26
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:17:08+00:00",
+      "hash": "e24948dce37bd1273f58ccbaaaed9cc279dccd831f031dc25b237903831133ae",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "explain",
+        "review_seq": 26,
+        "snapshot": "95d91f668a227763b8274df0563531b2a5436a2205d548590fecd692676fa1d0"
+      },
+      "prev_hash": "c7f890b9def02c6f3afb5b8abaf9bd199e6f8ab408e75962e8f737c838795619",
+      "seq": 27
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "72f71f3d-e7db-4821-96b7-85c7c3bd25f5",
+    "created_at": "2026-10-06T03:13:02+00:00",
+    "created_by": "human:owner",
+    "domain": "development",
+    "test_gate_policy": "local_report",
+    "title": "Native reliability attempt-02 ledgerfold"
+  },
+  "schema": 1
+}

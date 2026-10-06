@@ -1,0 +1,520 @@
+{
+  "events": [
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:10:08+00:00",
+      "hash": "4f97c3f374705520260a6becb4242c7f360b976717ee96d8d260a3c3af0dd7b4",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "existing-mandate.md",
+            "contract.md"
+          ],
+          "steps": [
+            "Identificar al operador como solicitante y a los consumidores de la CLI como afectados previstos.",
+            "Delimitar la delegación a decisiones técnicas del desarrollo."
+          ]
+        },
+        "deps": {},
+        "id": "ra_actor",
+        "kind": "actor",
+        "text": "El operador encarga RangeAudit bajo la meta de mejorar SpecOrganon. Los usuarios previstos son quienes necesitan normalizar intervalos mediante una CLI NDJSON. El agente tiene delegadas las decisiones técnicas de este desarrollo público; no se aportan observaciones de uso real.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:10:08+00:00",
+      "hash": "e578ac040fa372241a077ef070b2429fa6d82902e7b6f2c770c5e73f7443e511",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Formular la necesidad como cumplimiento del contrato de transformación y validación de lotes.",
+            "Distinguir la necesidad documentada de daños o fallos empíricos no suministrados."
+          ]
+        },
+        "deps": {
+          "ra_actor": 1
+        },
+        "id": "ra_problem",
+        "kind": "problem",
+        "text": "El encargo requiere una CLI Python que convierta intervalos enteros semiabiertos en una unión ordenada, cobertura exacta, extensión y huecos. La necesidad es obtener resultados deterministas y rechazar íntegramente cualquier lote inválido sin emitir resultados parciales. El contrato define esta necesidad; los documentos no aportan mediciones de fallos ni resultados de una implementación existente.",
+        "version": 1
+      },
+      "prev_hash": "4f97c3f374705520260a6becb4242c7f360b976717ee96d8d260a3c3af0dd7b4",
+      "seq": 2
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:10:08+00:00",
+      "hash": "47c192ed09ac43c05f5f63527b6fe5308059029a66a6713750dd6d7378f411e0",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Fijar los límites de entrada, ejecución y observación técnica.",
+            "Separar el desarrollo público de las evaluaciones reservadas y de afirmaciones sobre efectos de campo."
+          ]
+        },
+        "deps": {
+          "ra_actor": 1,
+          "ra_problem": 1
+        },
+        "id": "ra_boundary",
+        "kind": "boundary",
+        "text": "El alcance es RangeAudit como desarrollo técnico público: CLI Python de biblioteca estándar, entrada por stdin y salida por stdout/stderr, sin red, archivos externos ni modificación del entorno. El contrato limita stdin a 131072 bytes, cada lista a 2000 pares y los extremos enteros a valor absoluto de 10^12; exige UTF-8, validación estricta y rechazo atómico del lote. La futura comprobación se limita al comportamiento técnico frente al contrato. Se excluyen efectos de campo, superioridad, uso comercial y evaluación reservada; cualquier control público se identificará como tal, sin atribuirlo a resultados nativos del producto.",
+        "version": 1
+      },
+      "prev_hash": "e578ac040fa372241a077ef070b2429fa6d82902e7b6f2c770c5e73f7443e511",
+      "seq": 3
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:10:41+00:00",
+      "hash": "274b8f2abf7a7bdfb5f5484de15519d87282cd9a940ed3dd80adcfa00b75494b",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Los artefactos de la fase frame delimitan de forma rigurosa y suficiente el problema, los actores y las fronteras de observación de RangeAudit conforme al contrato y al mandato vigente. ra_actor identifica correctamente al operador solicitante, a los usuarios previstos y el ámbito de las decisiones técnicas delegadas. ra_problem formula la necesidad operativa de procesamiento determinista y rechazo atómico de lotes inválidos sin inventar daños o fallos empíricos no acreditados. ra_boundary define con precisión los límites técnicos y excluye efectos de campo, superioridad y evaluaciones reservadas, manteniendo un trazado íntegro de dependencias dentro de los límites de recursos. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-01/transport/host-journal/role-02-frame-review/receipt.json]",
+        "snapshot": "f19c3963bf95a193a90112cae68243b346835c1f1296fa77a3c15a54f2046bd0",
+        "verdict": "accept"
+      },
+      "prev_hash": "47c192ed09ac43c05f5f63527b6fe5308059029a66a6713750dd6d7378f411e0",
+      "seq": 4
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:10:41+00:00",
+      "hash": "c333efaaaf8f91cd169d362119524b8713a0cb678c4755beb2dce34bd696f768",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "f19c3963bf95a193a90112cae68243b346835c1f1296fa77a3c15a54f2046bd0"
+      },
+      "prev_hash": "274b8f2abf7a7bdfb5f5484de15519d87282cd9a940ed3dd80adcfa00b75494b",
+      "seq": 5
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:11:06+00:00",
+      "hash": "3626fbdcd5c36ce31323b865f5d07a0a04586536a4dec4b8ceadb3a7c864dfc7",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Definir corrección por las reglas externas del contrato, sin circularidad.",
+            "Separar conformidad técnica de utilidad empírica."
+          ]
+        },
+        "deps": {
+          "ra_boundary": 1,
+          "ra_problem": 1
+        },
+        "id": "ra_concept",
+        "kind": "concept",
+        "text": "Corrección contractual significa satisfacer la transformación exacta y el rechazo atómico definidos para RangeAudit. Es una propiedad técnica distinta de utilidad en uso real o mejora de SpecOrganon: el encargo expresa ese fin, pero no aporta mediciones que vinculen ambas cosas.",
+        "version": 1
+      },
+      "prev_hash": "c333efaaaf8f91cd169d362119524b8713a0cb678c4755beb2dce34bd696f768",
+      "seq": 6
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:11:06+00:00",
+      "hash": "cb221b50a01a679c93ae5ba0f708c394fe10ff101db8938629507425cc3a0ea9",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Identificar el supuesto que conecta encargo y necesidad.",
+            "Limitar su alcance a la especificación documental."
+          ]
+        },
+        "deps": {
+          "ra_actor": 1,
+          "ra_concept": 1,
+          "ra_problem": 1
+        },
+        "id": "ra_assumption",
+        "kind": "assumption",
+        "text": "Se toma el contrato como especificación de la necesidad para este desarrollo público. Suponer que esa especificación representa necesidades de usuarios reales exigiría evidencia adicional; no hay testimonios de uso ni mediciones suministrados. Este supuesto permite delimitar el trabajo técnico, pero no justificar beneficios de campo.",
+        "version": 1
+      },
+      "prev_hash": "3626fbdcd5c36ce31323b865f5d07a0a04586536a4dec4b8ceadb3a7c864dfc7",
+      "seq": 7
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:11:06+00:00",
+      "hash": "166558a5c9da89c7d18c5ebd0f1e2bd00856fe1f7d842ac3cb24e23e98a90176",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Explicitar la integridad como fin técnico.",
+            "Identificar el coste de renunciar al procesamiento parcial."
+          ]
+        },
+        "deps": {
+          "ra_boundary": 1,
+          "ra_concept": 1,
+          "ra_problem": 1
+        },
+        "id": "ra_frame_contract",
+        "kind": "frame_option",
+        "text": "Marco de integridad del lote: priorizar resultados exactos y ausencia de salidas parciales ante cualquier entrada inválida. Su fundamento es el contrato y su valor es preservar una respuesta coherente por lote. Sacrifica la recuperación de peticiones válidas mezcladas con inválidas; esa recuperación requeriría otro contrato.",
+        "version": 1
+      },
+      "prev_hash": "cb221b50a01a679c93ae5ba0f708c394fe10ff101db8938629507425cc3a0ea9",
+      "seq": 8
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:11:06+00:00",
+      "hash": "85d7cc2cd0a0660a125f29796246c3760484efdc0f96372f8eae0f0709944c88",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Formular el diagnóstico como fin distinto de la integridad.",
+            "Delimitar su conflicto con la interfaz de error prescrita."
+          ]
+        },
+        "deps": {
+          "ra_actor": 1,
+          "ra_assumption": 1,
+          "ra_boundary": 1,
+          "ra_problem": 1
+        },
+        "id": "ra_frame_audit",
+        "kind": "frame_option",
+        "text": "Marco de explicabilidad del fallo: priorizar que el consumidor pueda localizar y corregir entradas inválidas. Su fundamento es facilitar el diagnóstico, como preferencia de diseño y no como beneficio medido. Entra en tensión con el stderr fijo y sin detalles exigido por el contrato; dentro del alcance sólo puede expresarse en documentación de reglas y ejemplos.",
+        "version": 1
+      },
+      "prev_hash": "166558a5c9da89c7d18c5ebd0f1e2bd00856fe1f7d842ac3cb24e23e98a90176",
+      "seq": 9
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:11:06+00:00",
+      "hash": "48decab6a5923fc30a7acc9d91c1eff4ad793f0e79aa0a23cac85892c07c8c71",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Resolver la tensión entre integridad y diagnóstico dentro del contrato.",
+            "Acotar la norma a las decisiones técnicas delegadas."
+          ]
+        },
+        "deps": {
+          "ra_actor": 1,
+          "ra_assumption": 1,
+          "ra_boundary": 1,
+          "ra_concept": 1,
+          "ra_frame_audit": 1,
+          "ra_frame_contract": 1,
+          "ra_problem": 1
+        },
+        "id": "ra_norm",
+        "kind": "norm",
+        "text": "Para este desarrollo delegado, adoptar la integridad contractual del lote como prioridad. Atender el diagnóstico mediante documentación, conservando el error fijo y el rechazo total prescritos. Esta elección técnica se funda en el encargo explícito; no atribuye preferencias adicionales al operador ni demuestra utilidad, superioridad o mejora de SpecOrganon.",
+        "version": 1
+      },
+      "prev_hash": "85d7cc2cd0a0660a125f29796246c3760484efdc0f96372f8eae0f0709944c88",
+      "seq": 10
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-06T03:11:14+00:00",
+      "hash": "da87edd891ad3fb1a1dc04db3cb9a524836c33aad35c9b77437344dd2cef3785",
+      "kind": "approval",
+      "payload": {
+        "id": "ra_norm",
+        "provenance": "local_declared",
+        "reason": "Existing local owner mandate; technical conformity judged separately by reviewer:gemini-isolated-review (/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-01/transport/host-journal/role-04-critique-approval/receipt.json): La norma ra_norm se ajusta estrictamente al mandato del operador y a la delegación técnica para este desarrollo público. Dirime la tensión de diseño entre la explicabilidad diagnóstica (ra_frame_audit) y la integridad atómica del lote (ra_frame_contract), optando por priorizar el cumplimiento estricto del contrato prescrito sin arrogarse preferencias ni decisiones adicionales no autorizadas. Separa adecuadamente los juicios de valor de afirmaciones empíricas o atribuciones de beneficio en campo, respetando las dependencias trazadas desde el problema y los actores.",
+        "version": 1
+      },
+      "prev_hash": "48decab6a5923fc30a7acc9d91c1eff4ad793f0e79aa0a23cac85892c07c8c71",
+      "seq": 11
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:11:32+00:00",
+      "hash": "f6f345d96730ab408117d684412b512089aac71bc9397e457d454e645dabc2e8",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "La fase critique cumple rigurosamente con los requisitos sustantivos y formales de su contrato. Separa con claridad los juicios de valor de las afirmaciones fácticas y empíricas. Los conceptos y supuestos (ra_concept, ra_assumption) delimitan adecuadamente la corrección contractual sin incurrir en definiciones circulares ni atribuir beneficios de campo no verificados. Las alternativas examinadas (ra_frame_audit y ra_frame_contract) plantean un conflicto legítimo y sustancial entre explicabilidad diagnóstica e integridad atómica del lote. La norma ra_norm resuelve coherentemente dicha disyuntiva priorizando la integridad contractual requerida por el encargo, cuenta con aprobación previa válida y mantiene una completa trazabilidad de dependencias hacia los artefactos de la fase frame, respetando plenamente los límites del mandato y de recursos. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-01/transport/host-journal/role-05-critique-review/receipt.json]",
+        "snapshot": "857fb03fb749bc2defb7cfe600ff6d9821897d1d317969e7e863db2652dc1024",
+        "verdict": "accept"
+      },
+      "prev_hash": "da87edd891ad3fb1a1dc04db3cb9a524836c33aad35c9b77437344dd2cef3785",
+      "seq": 12
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:11:32+00:00",
+      "hash": "4b58aa3dd2b833ad6caf3deb297204e3f9eaef8df2586a59ef22104c73854e8f",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "critique",
+        "review_seq": 12,
+        "snapshot": "857fb03fb749bc2defb7cfe600ff6d9821897d1d317969e7e863db2652dc1024"
+      },
+      "prev_hash": "f6f345d96730ab408117d684412b512089aac71bc9397e457d454e645dabc2e8",
+      "seq": 13
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:12:05+00:00",
+      "hash": "e6a7612bafde58b258c26ac7c4a21c94c5e0191ab4fffb120b765a39d0f575bd",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Derivar la pregunta de la necesidad contractual.",
+            "Limitarla a comportamiento técnico observable."
+          ]
+        },
+        "deps": {
+          "ra_assumption": 1,
+          "ra_concept": 1,
+          "ra_norm": 1,
+          "ra_problem": 1
+        },
+        "id": "ra_question",
+        "kind": "question",
+        "text": "¿Puede RangeAudit satisfacer la transformación exacta de intervalos y el rechazo atómico de lotes definidos en contract.md, incluidos sus límites y entradas inválidas?",
+        "version": 1
+      },
+      "prev_hash": "4b58aa3dd2b833ad6caf3deb297204e3f9eaef8df2586a59ef22104c73854e8f",
+      "seq": 14
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:12:05+00:00",
+      "hash": "d877fbef25ae26e3e864edbcba5265c9fe19a7229b067364e1d8da972b29b101",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "steps": [
+            "Formular una predicción contrastable contra el contrato.",
+            "Identificar una discordancia como contraejemplo."
+          ]
+        },
+        "deps": {
+          "ra_problem": 1,
+          "ra_question": 1
+        },
+        "id": "ra_hypothesis",
+        "kind": "hypothesis",
+        "text": "La futura implementación producirá las salidas exactas prescritas para cada lote válido y rechazará íntegramente cada lote inválido del corpus fijado. Un lote discordante refutaría esta hipótesis para ese corpus; no hay mediciones suministradas.",
+        "version": 1
+      },
+      "prev_hash": "e6a7612bafde58b258c26ac7c4a21c94c5e0191ab4fffb120b765a39d0f575bd",
+      "seq": 15
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:12:05+00:00",
+      "hash": "fb9547e6fb75636f1e187497392ddf2c60b55c6b05ba92856f6a83533fb2bfaa",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Expectativas contractuales fijadas, con cálculo de la unión por segmentación de extremos y suma de segmentos cubiertos; los cuatro ejemplos sirven de controles públicos.",
+          "method": "Antes de medir, enumerar los lotes y fijar expectativas desde contract.md. Comparar JSON por estructura y enteros exactos; comprobar newline, stderr y salida de proceso. Para inválidos exigir stdout vacío, stderr literal y exit2; para válidos exit0 y stderr vacío. Incluir un lote válido seguido de uno inválido para comprobar atomicidad.",
+          "population": "Corpus técnico finito: ejemplos del contrato; intervalos vacíos, negativos, duplicados, desordenados, solapados y adyacentes; lotes múltiples; stdin vacío; errores JSON, claves duplicadas o extra, tipos inválidos, líneas vacías y UTF-8 inválido; límites y excesos de bytes, pares y extremos.",
+          "steps": [
+            "Fijar corpus y oráculo antes de medir.",
+            "Registrar discrepancias sin sustituir intentos fallidos.",
+            "Mantener separados documentos, predicciones y observaciones."
+          ],
+          "uncertainty": "Corpus finito: cero discordancias no demuestra corrección universal ni beneficio de campo. El oráculo puede contener errores; cotejar sus expectativas con el contrato antes de medir. No se dispone de ejecuciones ni valores observados. No se usan datos personales."
+        },
+        "deps": {
+          "ra_hypothesis": 1,
+          "ra_norm": 1,
+          "ra_problem": 1,
+          "ra_question": 1
+        },
+        "id": "ra_protocol",
+        "kind": "protocol",
+        "text": "Contrastar la CLI con controles públicos de contrato. Fijar entradas y expectativas antes de ejecutar; conservar cada entrada y sus streams y código de salida. La unidad es el lote completo de stdin.",
+        "version": 1
+      },
+      "prev_hash": "d877fbef25ae26e3e864edbcba5265c9fe19a7229b067364e1d8da972b29b101",
+      "seq": 16
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:12:05+00:00",
+      "hash": "0032ddb19e68b6270ea7c7367d801c2085170e8abff6dc30ba300b37ca8344ff",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "Sin fecha indicada en el documento",
+          "locator": "Entrada; Salida por petición; Si cualquier petición del lote es inválida; Ejemplos",
+          "origin": "published",
+          "source": "contract.md suministrado en la solicitud",
+          "steps": [
+            "Extraer las reglas documentales que fundamentan la comparación.",
+            "Distinguir ejemplos prescritos de mediciones reales."
+          ]
+        },
+        "deps": {
+          "ra_norm": 1,
+          "ra_problem": 1,
+          "ra_protocol": 1
+        },
+        "id": "ra_contract_evidence",
+        "kind": "evidence",
+        "text": "El documento suministrado prescribe transformación exacta, límites de entrada y rechazo atómico, y aporta cuatro ejemplos normativos. Es evidencia documental de los requisitos y controles públicos de contrato, sin observaciones de ejecución.",
+        "version": 1
+      },
+      "prev_hash": "fb9547e6fb75636f1e187497392ddf2c60b55c6b05ba92856f6a83533fb2bfaa",
+      "seq": 17
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:12:05+00:00",
+      "hash": "34b41485ae399bbb39b85d7821d6b4448522fab977b2e7375fbc5a4caaf5acae",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Salida observada frente a expectativa contractual; stdout y stderr vacíos o literales según corresponda, JSON estructural exacto y código de salida.",
+          "metric": "lotes_discordantes",
+          "source": "Entradas, expectativas y registros de ejecución futuros del corpus definido por ra_protocol.",
+          "steps": [
+            "Definir discordancia a partir de las reglas documentadas.",
+            "Contar cada lote discordante una sola vez sin inferir resultados."
+          ],
+          "uncertainty": "No hay valor observado. El conteo depende del corpus y de la corrección del oráculo; no estima efectos de campo.",
+          "unit": "lote"
+        },
+        "deps": {
+          "ra_contract_evidence": 1,
+          "ra_norm": 1,
+          "ra_problem": 1,
+          "ra_protocol": 1
+        },
+        "id": "ra_indicator",
+        "kind": "indicator",
+        "text": "Contar lotes discordantes: cada lote cuenta una vez si incumple cualquier expectativa contractual de salida o código de proceso. El valor queda pendiente de medición; el indicador sólo describe conformidad en el corpus técnico fijado.",
+        "version": 1
+      },
+      "prev_hash": "0032ddb19e68b6270ea7c7367d801c2085170e8abff6dc30ba300b37ca8344ff",
+      "seq": 18
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:12:28+00:00",
+      "hash": "d7d53770ef07d9f2576321490f316a31f9302a8cd91d9d71748d1a02af046392",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "La fase study cumple rigurosamente con los requisitos formales y sustantivos del contrato de fase y el mandato delegado. La pregunta (ra_question) surge coherentemente del encuadre y la norma técnica aprobada. La hipótesis (ra_hypothesis) plantea una predicción refutable y comprobable sin anticipar resultados de ejecución ni arrogarse beneficios de campo. El protocolo (ra_protocol) especifica claramente la población de prueba sobre un corpus finito exhaustivo, el método de verificación determinista de entradas y salidas (incluyendo el comportamiento atómico de lote y códigos de terminación), y analiza con lucidez las fuentes de incertidumbre y los límites del oráculo. El indicador (ra_indicator) define adecuadamente la métrica y unidad ('lote') con soporte en evidencia documental pública (ra_contract_evidence), distinguiendo escrupulosamente entre hechos, inferencias y supuestos. No se detectan sesgos, riesgos éticos ni conflictos con los límites de recursos establecidos. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-01/transport/host-journal/role-07-study-review/receipt.json]",
+        "snapshot": "315d0b2ed798a80ec68bfe07158971682d8ea5ba7fe91330230d059ddab86a9d",
+        "verdict": "accept"
+      },
+      "prev_hash": "34b41485ae399bbb39b85d7821d6b4448522fab977b2e7375fbc5a4caaf5acae",
+      "seq": 19
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:12:28+00:00",
+      "hash": "ccf541ef2ace3beaa7ac43c783025721573bd5617c228a293809eb5710f9d1fc",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "study",
+        "review_seq": 19,
+        "snapshot": "315d0b2ed798a80ec68bfe07158971682d8ea5ba7fe91330230d059ddab86a9d"
+      },
+      "prev_hash": "d7d53770ef07d9f2576321490f316a31f9302a8cd91d9d71748d1a02af046392",
+      "seq": 20
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:12:42+00:00",
+      "hash": "55962af6b99c62df905d303282f75653c04d047188e32ee9ff1d3795067f326e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "scope": "Inferencia documental sobre controles públicos del contrato; sin observaciones de ejecución ni efectos de campo.",
+          "sources": [
+            "contract.md",
+            "state.json/items/ra_contract_evidence",
+            "state.json/items/ra_protocol",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Relacionar las reglas y ejemplos documentales con la comparación definida en el protocolo para el mismo problema.",
+            "Delimitar la conclusión a expectativas contractuales, manteniendo pendientes la contrastación de la hipótesis y el valor del indicador."
+          ],
+          "uncertainty": "La conformidad de una implementación permanece sin demostrar; los ejemplos no cubren por sí solos toda la población definida en el protocolo."
+        },
+        "deps": {
+          "ra_contract_evidence": 1,
+          "ra_hypothesis": 1,
+          "ra_indicator": 1,
+          "ra_problem": 1,
+          "ra_protocol": 1
+        },
+        "id": "ra_inference",
+        "kind": "inference",
+        "text": "De ra_contract_evidence y ra_protocol se infiere que el contrato permite formular expectativas técnicas para comparar la transformación de intervalos y el rechazo atómico de lotes. Los cuatro ejemplos son controles públicos de contrato, no observaciones de RangeAudit. La evidencia documental fundamenta qué comprobar, pero no permite determinar si la hipótesis se cumple ni asignar un valor a lotes_discordantes: no se suministran mediciones ni registros de ejecución.",
+        "version": 1
+      },
+      "prev_hash": "ccf541ef2ace3beaa7ac43c783025721573bd5617c228a293809eb5710f9d1fc",
+      "seq": 21
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "f43fd892-c089-4a6b-8c1c-51b383a5b7ed",
+    "created_at": "2026-10-06T03:09:31+00:00",
+    "created_by": "human:owner",
+    "domain": "development",
+    "test_gate_policy": "local_report",
+    "title": "Native reliability attempt-01 rangeaudit"
+  },
+  "schema": 1
+}
