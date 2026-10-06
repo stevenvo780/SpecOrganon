@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "scope": "Observed offline Python entrypoint preflight, zero provider calls; same bridge path tested",
+  "entrypoint": "/opt/specorganon/.venv/bin/python",
+  "observations": [
+    {
+      "image": "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+      "exit_code": 0,
+      "stdout": "Python 3.12.15\n"
+    },
+    {
+      "image": "sha256:7fcab03a56d635c74772587830a0d7196cad1fb252e613ae64fd5aa977892c71",
+      "exit_code": 1,
+      "stdout": ""
+    }
+  ],
+  "correction": "Native bridge path alias added to Dockerfile; new image independently inspected, historical image receipt preserved"
+}

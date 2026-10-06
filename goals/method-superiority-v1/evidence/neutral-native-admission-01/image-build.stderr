@@ -1,0 +1,69 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.27kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node@sha256:25330af3531fb5e23318554a0aa911125b6e91b1b777edf7655501d207c067a2
+#2 DONE 0.1s
+
+#3 [internal] load metadata for docker.io/library/specorganon-release:0.2.0rc3.dev7
+#3 DONE 0.1s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 195B done
+#4 DONE 0.0s
+
+#5 [node 1/1] FROM docker.io/library/node@sha256:25330af3531fb5e23318554a0aa911125b6e91b1b777edf7655501d207c067a2
+#5 resolve docker.io/library/node@sha256:25330af3531fb5e23318554a0aa911125b6e91b1b777edf7655501d207c067a2 0.0s done
+#5 DONE 0.0s
+
+#6 [stage-1  1/11] FROM docker.io/library/specorganon-release:0.2.0rc3.dev7@sha256:5357232868157b9dce5a7783076f865c2fb6736232434b61300023d7d0ea1325
+#6 resolve docker.io/library/specorganon-release:0.2.0rc3.dev7@sha256:5357232868157b9dce5a7783076f865c2fb6736232434b61300023d7d0ea1325 0.0s done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 11.70kB done
+#7 DONE 0.0s
+
+#8 [stage-1  4/11] RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm     && npm install -g "@openai/codex@0.160.0"     && npm cache clean --force     && usermod -l codex -d /home/codex -m ubuntu     && groupmod -n codex ubuntu     && mkdir -p /workspace /home/codex/.codex     && chown -R codex:codex /workspace /home/codex
+#8 CACHED
+
+#9 [stage-1  5/11] COPY scripts /opt/specorganon/scripts
+#9 CACHED
+
+#10 [stage-1  3/11] COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+#10 CACHED
+
+#11 [stage-1  6/11] COPY workflows /opt/specorganon/workflows
+#11 CACHED
+
+#12 [stage-1  2/11] COPY --from=node /usr/local/bin/node /usr/local/bin/node
+#12 CACHED
+
+#13 [stage-1  7/11] COPY docs /opt/specorganon/docs
+#13 CACHED
+
+#14 [stage-1  8/11] COPY .agents /opt/specorganon/.agents
+#14 CACHED
+
+#15 [stage-1  9/11] COPY docker/codex /opt/codex-lab
+#15 DONE 0.1s
+
+#16 [stage-1 10/11] RUN ln -s /opt/specorganon/venv /opt/specorganon/.venv     && chmod -R a+rX /opt/specorganon /opt/codex-lab     && chmod +x /opt/codex-lab/entrypoint.sh
+#16 DONE 0.8s
+
+#17 [stage-1 11/11] WORKDIR /workspace
+#17 DONE 0.1s
+
+#18 exporting to image
+#18 exporting layers
+#18 exporting layers 0.3s done
+#18 exporting manifest sha256:0cf1e8d6f6872e19e3763c31121cd4df7511da6411fb6bf1f81645296785aee0 0.0s done
+#18 exporting config sha256:d94734381f6d34bb4a939dc7bc3d422fde1c996f36440433a676f57012007f9b 0.0s done
+#18 exporting attestation manifest sha256:63faae3202e3274e8c0cb95d5d489ab05aa631ca8515815e74b3173a3dc5ca40 0.0s done
+#18 exporting manifest list sha256:982382c95f1254d6e31d97f268c5069c9747cd21a2e0943b496093f4d6c00a22 0.0s done
+#18 naming to docker.io/library/specorganon-codex:0.2.0rc3.dev7
+#18 naming to docker.io/library/specorganon-codex:0.2.0rc3.dev7 done
+#18 unpacking to docker.io/library/specorganon-codex:0.2.0rc3.dev7 0.1s done
+#18 DONE 0.5s
