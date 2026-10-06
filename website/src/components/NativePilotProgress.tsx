@@ -1,26 +1,29 @@
 export default function NativePilotProgress(){
  const repo='https://github.com/stevenvo780/SpecOrganon';
- const evidence=repo+'/blob/main/goals/method-superiority-v1/evidence/neutral-native-pilot-dev7-01/';
+ const evidence=repo+'/blob/main/goals/method-superiority-v1/evidence/neutral-native-pilot-dev7-final-01/';
+ const previous=repo+'/blob/main/goals/method-superiority-v1/evidence/neutral-native-pilot-dev7-01/';
+ const rows=[['01','N','RangeAudit','115/115'],['02','S','RangeAudit','115/115'],['03','N','LedgerFold','104/104'],['04','S','LedgerFold','104/104'],['05','N','TopoPlan','105/105'],['06','S','TopoPlan','105/105']];
  return <section aria-labelledby="piloto-dev7">
- <h5 id="piloto-dev7">Piloto público dev7: corte parcial de dos cierres</h5>
- <p><strong>Corte documental parcial report-01: 2 cierres de 6 posiciones fijadas; las otras 4 no tienen resultado terminal en este corte.</strong> El piloto está en curso según el checkpoint de este corte; esta página no es un monitor en vivo. Se conserva el plan original N/S, tres tipos, sin reemplazos ni reparaciones de intentos cerrados.</p>
- <div style={{overflowX:'auto'}}><table><thead><tr><th>Posición</th><th>Método / tarea</th><th>Gate</th><th>Prueba pública</th><th>Recursos cobrados</th></tr></thead><tbody>
- <tr><td>01</td><td>N / RangeAudit</td><td>FAILED: solicitud excede presupuesto</td><td>115/115</td><td>2 autores, 1 feedback, 1 medida propia</td></tr>
- <tr><td>02</td><td>S / RangeAudit</td><td>FAILED: solicitud excede presupuesto</td><td>115/115</td><td>1 plan, 1 revisión de plan, 1 programa; 0 medidas propias</td></tr>
- </tbody></table></div>
- <p><strong>Ambos fallaron y no acreditan auditoría D/G final ni paquete común completo.</strong> Los programas pasaron 115/115 comprobaciones públicas de desarrollo cada uno; eso no convierte los intentos en completos, no es F reservado ni demuestra competencia o superioridad. El denominador permanece seis y los pendientes quedan aparte; no hay ranking entre N y S.</p>
- <p>El diagnóstico offline del primer pedido reconstruyó <strong>131968 bytes frente al límite 110000</strong>. Archivos actuales 14924 bytes y documentos 5768 están dentro de sus límites. El historial incorpora 89938 bytes antes de escapar JSON externo: paquetes de rol 30947 y capturas 58708, además de estructura; repite contenido ya presente en archivos/documentos. Esta serialización compartida explica la parada observada, sin concluir eficacia causal del método.</p>
- <p>El diagnóstico midió en un proceso aparte las cuatro generaciones cerradas, omitiendo el guard solo en memoria para contar bytes. <strong>No hubo retry, dispatch ni modificación de fuentes, driver, registros o cuotas.</strong> No se ejecutó el programa generado. Los 504 archivos sellados originales y su índice SHA conservan outcomes, closures, recibos y errores; los logs mutables posteriores no forman parte de este corte.</p>
- <p>La corrección futura debe deduplicar pedidos de N/S conservando información útil y originales físicos, verificar recuperación y usar otra versión y registro prospectivo. <strong>No ampliar este presupuesto ni sustituir estas posiciones.</strong> Competencia, integración T común, F externo, freeze completo, calificación T propia y comparación reservada con réplica siguen pendientes. La meta permanece activa. Wheel e imágenes locales, último wheel público dev5 y 94 descargas históricas intactas.</p>
+ <h5 id="piloto-dev7">Piloto público dev7 cerrado: seis gates fallidos</h5>
+ <p><strong>Cierre original del 6 de octubre de 2026 a las 08:56:26 UTC: 6 cierres de 6 posiciones fijadas, 6 gates fallidos y 0/6 gates completos.</strong> N/S en tres tipos, sin reemplazos ni cambios de fuentes o presupuestos. El driver terminó exit0 porque produjo el informe terminal; ese exit0 no significa entregas completas. Esta página publica el cierre verificado, sin reabrir intentos.</p>
+ <div style={{overflowX:'auto'}}><table><thead><tr><th>Posición</th><th>Método</th><th>Tarea</th><th>Gate</th><th>Comprobaciones públicas</th></tr></thead><tbody>{rows.map(([id,method,task,checks])=><tr key={id}><td>{id}</td><td>{method}</td><td>{task}</td><td>FAILED: exact canonical request exceeds budget</td><td>{checks}</td></tr>)}</tbody></table></div>
+ <p><strong>648/648 comprobaciones públicas descriptivas aprobadas</strong>: RangeAudit115 por brazo, LedgerFold104 y TopoPlan105. La unidad sigue siendo seis intentos; no son 648 sujetos ni tamaño inferencial. <strong>Los seis carecen de auditoría D/G final y paquete común acreditado.</strong> common_complete y F externo siguen sin evidencia (null), sin imputar éxito. No demuestra competencia, superioridad ni ranking entre N y S: el fallo compartido de transporte impide esa interpretación.</p>
+ <p>Los tiempos whole_attempt suman <strong>1830,455 segundos</strong>, una suma observada sin ratio comparativo ni costo monetario/tokens comparables. Los recibos distinguen <strong>19 lanzamientos nativos de roles: 13 autores y 6 revisores</strong>, más 3 mediciones propias. Los 22 contenedores de controlador quedaron exited, ninguno running, retenidos según protocolo; no se hizo cleanup ni reinicio para esta publicación.</p>
+ <p>El <strong>corte parcial report-01 de 2/6 permanece inmutable e histórico</strong>. Sus 504 archivos originales sellados se enlazan con los 1080 nuevos de posiciones03–06 (22.311.295 bytes); el índice final fija los seis, outcomes, closures y hashes. El manifiesto final conserva 1087 entradas. Los fallos y RAW mantienen sus bytes; las comprobaciones públicas posteriores no retornaron al autor.</p>
+ <p>El diagnóstico previo del primer pedido reconstruyó <strong>131968 bytes frente al límite 110000</strong>: historial89938 antes de escapar JSON externo, paquetes de rol30947 y capturas58708; archivos14924 y documentos5768 dentro de sus límites. Fue diagnóstico offline, no retry ni dispatch, sin cambiar fuentes/cuotas. <strong>No ampliar el presupuesto, sustituir o reparar estas posiciones.</strong> La deduplicación lossless es desarrollo futuro en otra versión y registro; no altera este cierre.</p>
+ <p>Competencia de controles, integración T común, F independiente, freeze completo, calificación T propia y comparación reservada con réplica siguen pendientes. La meta permanece activa, cero sujetos reservados y sin superioridad demostrada. Wheel e imágenes locales; último wheel público dev5 y 94 descargas históricas intactas.</p>
  <div className="software-lab-downloads">
  <a className="text-link" href={repo+'/tree/main'}>Repositorio actual en main</a>
- <a className="text-link" href={evidence+'README.md'}>Corte parcial y límites</a>
- <a className="text-link" href={evidence+'report-01.stdout'}>Informe original de dos cierres</a>
- <a className="text-link" href={evidence+'first-request-diagnostic.json'}>Diagnóstico offline de bytes</a>
- <a className="text-link" href={evidence+'closed-raw-index-01.json'}>Índice SHA de originales sellados</a>
- <a className="text-link" href={repo+'/tree/main/goals/method-superiority-v1/evidence/neutral-native-pilot-dev7-01/closed-raw'}>Archivos originales de los dos cierres</a>
- <a className="text-link" href={repo+'/blob/main/goals/method-superiority-v1/evidence/neutral-native-admission-01/pilot-plan.json'}>Plan prospectivo original</a>
- <a className="text-link" href={repo+'/blob/main/goals/method-superiority-v1/evidence/neutral-native-admission-01/admission-review.json'}>Admisión acotada a seis posiciones</a>
+ <a className="text-link" href={evidence+'summary.json'}>Informe terminal de seis posiciones</a>
+ <a className="text-link" href={evidence+'README.md'}>Cierre, fallos y límites</a>
+ <a className="text-link" href={evidence+'closed-raw-index.json'}>Índice SHA final de originales</a>
+ <a className="text-link" href={repo+'/tree/main/goals/method-superiority-v1/evidence/neutral-native-pilot-dev7-final-01/closed-raw'}>Originales sellados de posiciones03–06</a>
+ <a className="text-link" href={evidence+'terminal-containers.json'}>Roles, mediciones y contenedores terminales</a>
+ <a className="text-link" href={evidence+'SHA256SUMS'}>SHA-256 del archivo final</a>
+ <a className="text-link" href={previous+'report-01.stdout'}>Corte parcial report-01 inmutable:2/6</a>
+ <a className="text-link" href={previous+'first-request-diagnostic.json'}>Diagnóstico offline original de bytes</a>
+ <a className="text-link" href={repo+'/blob/main/goals/method-superiority-v1/evidence/neutral-native-admission-01/pilot-plan.json'}>Plan original sin cambios</a>
+ <a className="text-link" href={repo+'/blob/main/goals/method-superiority-v1/evidence/neutral-native-admission-01/admission-review.json'}>Admisión acotada a las seis posiciones</a>
  </div>
  </section>;
 }

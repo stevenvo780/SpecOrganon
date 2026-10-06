@@ -158,3 +158,7 @@ La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wh
 ## Piloto dev7: corte parcial report-01
 
 `#piloto-dev7` muestra2 cierres failed de6 y4 sin resultado en ese corte, no estado live. Ambos RangeAudit N/S pasaron115/115 pero sinD/Gfinal/paquetecomún; fallo compartido exactrequestbudget. Diagnóstico offline131968>110000bytes sin retry/dispatch:history89938 antesouterescaping,rolepackets30947,captures58708.504originales sellados e índiceSHA,511entradas de evidencia. No aumentarcuotas/reemplazar intentos; versión/registro futuros prospectivos. Último wheel público dev5,94descargas anteriores exactas,no ranking/competencia/superioridad. Corte dev7ingeniería previo separado.
+
+## Piloto dev7 terminal, informe final separado
+
+`#piloto-dev7` presenta cierre original08:56:26UTC:6/6failed exactrequestbudget,0/6gatecomplete,648/648checks públicos descriptivos (115/104/105 cada brazo),sinD/Gfinal/common_complete/F externo ni competencia/superioridad/ranking. Report01de2/6queda histórico inmutable. Nuevos1080originales22311295bytes+504anteriores,manifiesto1087.19rolesnativos13author6review+3ownmeasures,22controllercontainers exitedretained/nocleanup;wholeattemptsum1830.455sec,no ratioscomparativos.94descargas históricas intactas/no nueva release. Futurocodec/versionseparados,nopublicadosenestehito.
