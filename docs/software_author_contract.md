@@ -1,4 +1,4 @@
-# Contrato de autor: candidato 0.2.0rc3.dev3
+# Contrato de autor: candidato 0.2.0rc3.dev4
 
 Esta mejora de ingeniería declara de forma compacta la gramática de autor en
 `author-manifest-contract.json`. Los campos obligatorios/opcionales se derivan
@@ -50,3 +50,11 @@ Consulte [admisión acotada y controles](../goals/method-superiority-v1/developm
 
 Los resultados de este modo se reportarán por versión/formato y no se mezclarán
 con v3. Una comparación histórica no identifica el efecto causal del ensamblaje.
+
+Dev4 añade una guía JSON completa por rol y una validación local con JSON Schema.
+La guía no impone el juicio ni crea recibos: acepta tanto rechazo como aceptación
+y ambas respuestas sobre el mandato. No usa el flag de esquema de AGY, porque
+en el diagnóstico produjo errores o pasos adicionales. La respuesta debe seguir
+siendo un único objeto JSON del turno original, sin herramientas ni Markdown.
+El transporte schema4 fija por hash el puente y todos los módulos Python copiados;
+un cambio requiere un run nuevo y se copian los mismos bytes comprobados.

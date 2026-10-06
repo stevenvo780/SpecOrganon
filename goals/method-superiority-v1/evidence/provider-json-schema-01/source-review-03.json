@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "job_id": "221cee3e62fc4375abef9b47140553a8",
+  "status": "succeeded",
+  "provider": "codex",
+  "model": "codex/gpt-6.1-sol",
+  "account": "principal",
+  "machine": "Kratos",
+  "duration_s": 21.1,
+  "access": "text",
+  "review": {
+    "schema": 1,
+    "verdict": "reject",
+    "reason": "Los dos hallazgos previos están corregidos en las instantáneas suministradas: registro leído y validado desde los mismos bytes, y cierre terminal con invalidación de éxitos ante cambios de fuentes. Persiste una violación concreta del parsing exacto. Revisión exclusivamente estática; sin revisar dependencias ni afirmar eficacia nativa.",
+    "findings": [
+      {
+        "file": "scripts/controller_native_role.py",
+        "line": 48,
+        "problem": "response_json ejecuta text.strip() antes del parser estricto. Esto modifica la respuesta y puede aceptar JSON originalmente inválido: por ejemplo, un objeto rodeado de U+00A0, que Python elimina pero JSON no admite como espacio. Contradice la garantía de ausencia de trimming y validación de la respuesta nativa intacta para ambos proveedores.",
+        "correction": "Eliminar la asignación text = text.strip() y pasar el texto original a strict(text). Puede conservarse strip() únicamente para comprobar si la respuesta está vacía, sin modificar los bytes/texto que se validan."
+      }
+    ],
+    "tests_executed": false
+  },
+  "scope": "Static source snapshot03 only; no tests/native efficacy"
+}

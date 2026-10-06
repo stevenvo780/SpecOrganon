@@ -15,7 +15,6 @@ import os
 from pathlib import Path
 import re
 import selectors
-import shutil
 import signal
 import subprocess
 import time
@@ -36,7 +35,7 @@ class DockerRoles:
                  reviewer_provider='gemini', reviewer_model='gemini-3.1-pro-high',
                  codex_volume='specorganon-lab_codex-home', gemini_profile='/home/stev/.gemini',
                  gemini_executable='/home/stev/.local/bin/agy', seccomp=None, test_timeout_seconds=120,
-                 codex_reasoning_effort='low'):
+                 codex_reasoning_effort='low', source_bindings=None):
         self.root = _safe(root); self.root.mkdir(parents=True, mode=0o700, exist_ok=True)
         self.source = _safe(source_root); self.catalog = _safe(public_catalog)
         self.images = {'native': self._image(native_image), 'test': self._image(test_image)}
@@ -56,17 +55,33 @@ class DockerRoles:
             raise DockerRoleError('test timeout must be 1..120 seconds')
         self.test_timeout = test_timeout_seconds
         self.store = JobStore(self.root / 'host-journal', max_jobs=80, max_elapsed_seconds=6000)
-        policy = {'schema': 3, 'images': self.images, 'routes': self.routes, 'test_timeout_seconds': self.test_timeout,
-                  'source_root': str(self.source), 'public_catalog_sha256': digest(_read(self.catalog)),
+        self.source_bindings = dict(source_bindings) if source_bindings is not None else None
+        sources = self._native_source_bytes()
+        inputs = {'public-models.json': _read(self.catalog)}
+        if self.seccomp:
+            inputs['seccomp.json'] = _read(self.seccomp)
+        if self.source_bindings is not None:
+            registered = dict(sources)
+            registered[str(self.catalog.relative_to(self.source))] = inputs['public-models.json']
+            if self.seccomp:
+                registered[str(self.seccomp.relative_to(self.source))] = inputs['seccomp.json']
+            if any(self.source_bindings.get(name) != digest(raw) for name,raw in registered.items()):
+                raise DockerRoleError('transport input differs from registered source binding')
+        self.native_sources = {name:digest(raw) for name,raw in sources.items()}
+        self.launch_input_sha256 = {name:digest(raw) for name,raw in inputs.items()}
+        policy = {'schema': 4, 'images': self.images, 'routes': self.routes, 'test_timeout_seconds': self.test_timeout,
+                  'source_root': str(self.source), 'public_catalog_sha256': self.launch_input_sha256['public-models.json'],
+                  'native_source_sha256': self.native_sources,
+                  'registered_source_bindings_sha256': digest(canonical(self.source_bindings)) if self.source_bindings is not None else None,
                   'codex_original_volume': self.volume, 'gemini_original_profile': str(self.gemini_profile),
                   'gemini_executable_sha256': digest(_read(self.gemini_executable, 536870912)),
                   'codex_reasoning_effort': self.codex_reasoning_effort,
-                  'seccomp_sha256': digest(_read(self.seccomp)) if self.seccomp else None}
+                  'seccomp_sha256': self.launch_input_sha256.get('seccomp.json')}
         path = self.root / 'transport-policy.json'
         if path.exists():
             existing = _json(path)
-            if type(existing) is not dict or existing.get('schema') != 3:
-                raise DockerRoleError('transport schema3 required; previous schema cannot resume silently')
+            if type(existing) is not dict or existing.get('schema') != 4:
+                raise DockerRoleError('transport schema4 required; previous schema cannot resume silently')
             if existing != strict_json_loads(canonical(policy).decode()):
                 raise DockerRoleError('transport policy changed; use an explicitly versioned run')
         else: _write(path, policy)
@@ -120,12 +135,31 @@ class DockerRoles:
         return {str(p.relative_to(path)): digest(_read(p, 2097152))
                 for p in sorted(path.rglob('*')) if p.is_file()}
 
+    def _native_source_bytes(self):
+        paths=[self.source/'scripts/controller_native_role.py',
+               *sorted((self.source/'src/specorganon').glob('*.py'))]
+        if self.source/'src/specorganon/__init__.py' not in paths:
+            raise DockerRoleError('native library sources missing')
+        return {str(p.relative_to(self.source)):_read(p) for p in paths}
+
+    def _bound_native_source_bytes(self):
+        raw=self._native_source_bytes()
+        if {name:digest(value) for name,value in raw.items()} != self.native_sources:
+            raise DockerRoleError('native source changed; use a versioned run')
+        return raw
+
     def _prepare(self, job_id, role, request, files=None):
         if type(job_id) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}', job_id) is None:
             raise DockerRoleError('invalid persistent job ID')
         folder = self.root / 'jobs' / job_id
         request_raw = canonical(request)
         if len(request_raw) > 128000: raise DockerRoleError('native request exceeds input limit')
+        sources = self._bound_native_source_bytes()
+        launch_inputs = {'public-models.json': _read(self.catalog)}
+        if self.seccomp:
+            launch_inputs['seccomp.json'] = _read(self.seccomp)
+        if {name:digest(raw) for name,raw in launch_inputs.items()} != self.launch_input_sha256:
+            raise DockerRoleError('registered launch input changed before preparation')
         plan_path = folder / 'launch.json'
         if folder.exists():
             if not plan_path.exists(): raise UncertainJob('job preparation interrupted; inspect, do not replace')
@@ -142,9 +176,15 @@ class DockerRoles:
         provider = None; model = None
         if role != 'test':
             provider, model = self.routes[role]
-            shutil.copy2(self.source / 'scripts/controller_native_role.py', inp / 'bridge.py')
-            shutil.copytree(self.source / 'src/specorganon', inp / 'library/specorganon', ignore=shutil.ignore_patterns('__pycache__'))
-            if provider == 'codex': shutil.copy2(self.catalog, inp / 'public-models.json')
+            # Copy the SAME bytes whose hashes were checked, not a second
+            # filesystem read after validation. No credentials/profile data.
+            (inp / 'bridge.py').write_bytes(sources['scripts/controller_native_role.py'])
+            package=inp/'library/specorganon';package.mkdir(parents=True)
+            for name,raw in sources.items():
+                if name.startswith('src/specorganon/'):
+                    (package/Path(name).name).write_bytes(raw)
+            if provider == 'codex': (inp / 'public-models.json').write_bytes(launch_inputs['public-models.json'])
+            if self.seccomp: (inp / 'seccomp.json').write_bytes(launch_inputs['seccomp.json'])
         else:
             from .software_controller import safe_file
             for name, text in files.items():
@@ -159,7 +199,7 @@ class DockerRoles:
         if role == 'test':
             args += ['--network', 'none', '-e', 'HOME=/output', '-w', '/input/delivery', '--entrypoint', '', image, *request['argv']]
         else:
-            if self.seccomp: args += ['--security-opt', 'seccomp=' + str(self.seccomp)]
+            if self.seccomp: args += ['--security-opt', 'seccomp=' + str(inp / 'seccomp.json')]
             if provider == 'codex': args += ['--mount', f'type=volume,src={self.volume},dst=/home/codex/.codex']
             else:
                 args += ['--mount', f'type=bind,src={self.gemini_profile},dst=/home/stev/.gemini',

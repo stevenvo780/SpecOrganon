@@ -1,0 +1,36 @@
+{
+  "job_id": "a713544e026d4f2c81bf9d5e21fae5eb",
+  "status": "succeeded",
+  "submitted_at": 1791255622.7309961,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "codex/gpt-6.1-sol",
+  "access": "text",
+  "codex_account": "principal",
+  "started_at": 1791255622.7321692,
+  "finished_at": 1791255667.096347,
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "text",
+    "cwd": "/home/stev/.codex/worktrees/strong-comparators-v1/SpecOrganon",
+    "duration_s": 44.4,
+    "depth": 0
+  },
+  "review": {
+    "schema": 1,
+    "verdict": "reject",
+    "reason": "Los tres hallazgos anteriores quedan corregidos en el código aportado: contrato/mandato usan los mismos bytes verificados, los módulos se compilan desde snapshots vinculados sin reutilizar pyc y schema2 exige helper y bootstrap. Persiste una brecha material en los insumos registrados del transporte: pueden cambiar después de la verificación y consumirse antes de detectar la divergencia. Revisión exclusivamente estática; no se verificaron los hashes declarados ni se ejecutaron tests.",
+    "findings": [
+      {
+        "file": "src/specorganon/docker_roles.py",
+        "issue": "DockerRoles.__init__ verifica el catálogo y seccomp, pero _prepare vuelve a consumirlos mediante shutil.copy2(self.catalog, ...) y el argumento seccomp=<ruta>. Una modificación entre load_plan y esos consumos permite despachar con bytes distintos de los registrados. La siguiente validación puede detectar el cambio, pero la llamada externa ya ocurrió. El bootstrap de módulos no cubre estos consumos posteriores.",
+        "fix": "Entregar al transporte los bindings registrados y capturar cada insumo en bytes, verificando su hash contra el registro. Escribir exactamente esos bytes en snapshots privados por ejecución; usar el snapshot del catálogo y la ruta del snapshot de seccomp al crear el contenedor, conservando sus hashes en el manifiesto de lanzamiento."
+      }
+    ],
+    "tests_executed": false
+  }
+}

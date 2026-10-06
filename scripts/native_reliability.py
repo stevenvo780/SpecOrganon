@@ -14,10 +14,13 @@ import fcntl
 import json
 import math
 import os
+import sys
 from pathlib import Path
 import time
 
 from specorganon import engine
+from specorganon import __version__
+from specorganon.ledger import strict_json_loads
 from specorganon.docker_roles import DockerRoles
 from specorganon.report import case_report
 from specorganon.role_jobs import _json, _read, _safe, _write, canonical, digest
@@ -45,12 +48,28 @@ def load_plan(path, expected):
     raw = _read(path)
     if digest(raw) != expected:
         raise CohortError('registration digest differs')
-    r = _json(path)
-    if (type(r) is not dict or type(r.get('schema')) is not int or r.get('schema') != 1
+    try:
+        r = strict_json_loads(raw.decode())
+    except (ValueError, UnicodeError) as exc:
+        raise CohortError('invalid exact registration JSON') from exc
+    if (type(r) is not dict or type(r.get('schema')) is not int or r.get('schema') not in {1, 2}
             or r.get('classification') != 'prospective public development reliability'
             or r.get('fixture_mode') is not False or r.get('automatic_replacement') is not False
             or r.get('max_actions_per_attempt') != 60 or len(r.get('attempts', [])) != 10):
         raise CohortError('requires fixed ten-attempt native development policy')
+    if r['schema'] == 2:
+        expected_limits = {'roles': 40, 'authors_per_phase': 2, 'build_authors': 3,
+                           'phase_reviews': 2, 'mandate_checks': 2, 'tests_per_id': 2,
+                           'items_per_phase': 6, 'phase_encoded_bytes': 6000,
+                           'delivery_encoded_bytes': 20000, 'test_stream_encoded_bytes': 4000,
+                           'transport_wall_seconds': 6000}
+        if (r.get('candidate_version') != __version__ or r.get('admission_repair') is not True
+                or r.get('author_format') != 'items-v1'
+                or r.get('controller_limits') != expected_limits
+                or any(type(v) is not int for v in r['controller_limits'].values())):
+            raise CohortError('versioned cohort requires explicit unchanged limits and opt-in')
+    elif 'admission_repair' in r and r['admission_repair'] is not False:
+        raise CohortError('legacy cohort cannot acquire a new opt-in')
     ids = [a['id'] for a in r['attempts']]
     if len(set(ids)) != 10 or any(i != f'attempt-{n:02d}' for n, i in enumerate(ids, 1)):
         raise CohortError('attempt identities/order differ')
@@ -71,7 +90,29 @@ def load_plan(path, expected):
         required.update([task['contract'], task['checker']])
     if not required <= r['source_sha256'].keys():
         raise CohortError('missing required source bindings')
+    if r['schema'] == 2:
+        extra = {'scripts/run_registered_native.py',
+                 'goals/method-superiority-v1/development/register_native_cohort.py'}
+        if not extra <= r['source_sha256'].keys():
+            raise CohortError('missing versioned bootstrap/helper bindings')
+        verify_runtime_sources(r)
     return r
+
+
+def verify_runtime_sources(r):
+    proof = globals().get('__registered_runtime__')
+    root = Path(r['source_root']).resolve()
+    if (type(proof) is not dict or proof.get('source_root') != str(root)
+            or proof.get('driver_sha256') != r['source_sha256']['scripts/native_reliability.py']):
+        raise CohortError('versioned cohort requires fresh registered bootstrap')
+    for name, module in tuple(sys.modules.items()):
+        if name == 'specorganon' or name.startswith('specorganon.'):
+            filename = '__init__.py' if name == 'specorganon' else name.split('.')[1] + '.py'
+            rel = 'src/specorganon/' + filename
+            if (r['source_sha256'].get(rel) is None
+                    or getattr(module, '__registered_source_sha256__', None) != r['source_sha256'][rel]
+                    or Path(module.__file__).resolve() != root / rel):
+                raise CohortError('executed package source differs: ' + name)
 
 
 def transport(r, root):
@@ -83,17 +124,35 @@ def transport(r, root):
                        codex_volume=r['author']['original_volume'],
                        gemini_profile=r['reviewer']['original_profile'],
                        gemini_executable=r['reviewer']['executable'],
-                       seccomp=source / r['seccomp'], codex_reasoning_effort=r['author']['effort'])
+                       seccomp=source / r['seccomp'], codex_reasoning_effort=r['author']['effort'],
+                       source_bindings=r['source_sha256'] if r['schema'] == 2 else None)
 
 
 def controller(r, a, folder):
     t = transport(r, folder / 'transport')
     source = Path(r['source_root'])
     task = r['tasks'][a['task']]
-    return Controller(folder / 'case', folder / 'controller', t,
-                      contract=_read(source / task['contract']).decode(),
-                      mandate=_read(source / r['mandate']).decode(), executor=t,
-                      author_format='items-v1')
+    ctrl = Controller(folder / 'case', folder / 'controller', t,
+                      contract=bound_source(r, task['contract']).decode(),
+                      mandate=bound_source(r, r['mandate']).decode(), executor=t,
+                      author_format='items-v1', admission_repair=r.get('admission_repair', False))
+    if r['schema'] == 2:
+        check_effective_limits(r, ctrl, t)
+    return ctrl
+
+
+def check_effective_limits(r, ctrl, transport):
+    policy = _json(ctrl.root / 'controller.json')
+    mapping = {'roles':'max_role_calls','authors_per_phase':'max_author_per_phase',
+               'build_authors':'max_build_authors','phase_reviews':'max_review_per_phase',
+               'mandate_checks':'max_approval_per_phase','items_per_phase':'max_phase_items',
+               'phase_encoded_bytes':'max_phase_encoded_bytes',
+               'delivery_encoded_bytes':'max_files_encoded_bytes',
+               'test_stream_encoded_bytes':'max_test_stream_encoded_bytes'}
+    if (any(policy.get(field) != r['controller_limits'][key] for key,field in mapping.items())
+            or policy.get('admission_repair') is not True or policy.get('author_format') != 'items-v1'
+            or transport.store.policy['max_elapsed_seconds'] != r['controller_limits']['transport_wall_seconds']):
+        raise CohortError('effective controller/transport limits differ before dispatch')
 
 
 def bound_source(r, name):

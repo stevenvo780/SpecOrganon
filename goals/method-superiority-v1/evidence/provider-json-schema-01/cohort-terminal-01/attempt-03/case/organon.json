@@ -1,0 +1,267 @@
+{
+  "events": [
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:56:23+00:00",
+      "hash": "4b2fbef558b46b4d724d710a697b503f0f654fb0a66ec2a651aaf311f6537059",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "existing-mandate.md",
+            "contract.md"
+          ],
+          "steps": [
+            "Identificar al operador como solicitante y al agente como responsable técnico delegado.",
+            "Delimitar al destinatario funcional por el uso descrito de la CLI, sin atribuirle experiencias observadas."
+          ]
+        },
+        "deps": {},
+        "id": "actor_topoplan",
+        "kind": "actor",
+        "text": "El operador solicita el desarrollo público de TopoPlan para mejorar la fiabilidad de SpecOrganon. El agente tiene delegadas las decisiones técnicas dentro del mandato. El destinatario funcional es quien consume la CLI para planificar grafos; el encargo no aporta observaciones de usuarios reales ni de efectos en campo.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:56:23+00:00",
+      "hash": "984df176518d6abc46d7ecb56f8886f23242f1d480e849d2384ae3eabd1d6c32",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Formular la necesidad como conformidad de entrada, planificación y salida de la CLI.",
+            "Vincular esa necesidad al destinatario funcional y a la responsabilidad técnica delegada."
+          ]
+        },
+        "deps": {
+          "actor_topoplan": 1
+        },
+        "id": "problem_topoplan",
+        "kind": "problem",
+        "text": "Se necesita construir una CLI Python estándar que convierta peticiones NDJSON de grafos dirigidos acíclicos en order, layers y roots conforme al contrato. La necesidad de fiabilidad comprende distinguir el orden topológico lexicográfico global de las rondas, tratar las aristas duplicadas una sola vez y rechazar íntegramente un lote con alguna petición inválida antes de emitir salida. Estos son requisitos del encargo, no fallos medidos de una implementación existente.",
+        "version": 1
+      },
+      "prev_hash": "4b2fbef558b46b4d724d710a697b503f0f654fb0a66ec2a651aaf311f6537059",
+      "seq": 2
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:56:23+00:00",
+      "hash": "4c7738ee7cda70242810a2d5171181cb367ef1cf40cde0328b4c4be76fecf75a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Fijar los límites de producto, entrada y comportamiento observable establecidos por el contrato.",
+            "Separar el desarrollo público de las evaluaciones y efectos excluidos por el mandato.",
+            "Mantener los ejemplos documentales separados de resultados de ejecución."
+          ]
+        },
+        "deps": {
+          "actor_topoplan": 1,
+          "problem_topoplan": 1
+        },
+        "id": "boundary_topoplan",
+        "kind": "boundary",
+        "text": "El alcance es topo_plan.py, su README y las pruebas de entrega previstas, usando solo biblioteca estándar y stdin, sin red ni archivos externos. Cada petición contiene exactamente nodes y edges: hasta 120 nombres ASCII distintos con patrón [a-z][a-z0-9_]{0,15}, hasta 2000 pares y un máximo total de entrada de 131072 bytes. La frontera de observación es el comportamiento de la CLI: JSON de salida, stderr y código de salida ante entradas del contrato. El programa y README deben sellarse antes de escribir las pruebas. Se preservan las nueve fases. Se excluyen la evaluación reservada futura, las campañas cerradas, el uso comercial y cualquier conclusión de superioridad o beneficio en campo. No hay registros de pruebas ejecutadas en los documentos suministrados; los ejemplos son controles públicos.",
+        "version": 1
+      },
+      "prev_hash": "984df176518d6abc46d7ecb56f8886f23242f1d480e849d2384ae3eabd1d6c32",
+      "seq": 3
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T01:56:40+00:00",
+      "hash": "d240e0b5b7e57bc7f54154e11b6f0b611208a6389fcfced67c32975e8095625d",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Los artefactos de la fase frame delimitan con rigor y fidelidad la necesidad técnica, los actores involucrados y la frontera de observación conforme a contract.md y existing-mandate.md. Se reconoce la excelente formulación de las restricciones de entrada NDJSON, el cálculo independiente de orden lexicográfico global y rondas, las exclusiones explícitas de evaluaciones reservadas y la ausencia estricta de afirmaciones sobre pruebas no ejecutadas o beneficios de campo no medidos. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-03/transport/host-journal/role-02-frame-review/receipt.json]",
+        "snapshot": "b71704cb496e4f6e40a9885733089da1a9d4b998bb10e83cae2b169482777744",
+        "verdict": "accept"
+      },
+      "prev_hash": "4c7738ee7cda70242810a2d5171181cb367ef1cf40cde0328b4c4be76fecf75a",
+      "seq": 4
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T01:56:40+00:00",
+      "hash": "39a5417756f51288b109c711ec55ac4fa98dd392421d324d757add13e68caa37",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "b71704cb496e4f6e40a9885733089da1a9d4b998bb10e83cae2b169482777744"
+      },
+      "prev_hash": "d240e0b5b7e57bc7f54154e11b6f0b611208a6389fcfced67c32975e8095625d",
+      "seq": 5
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:57:06+00:00",
+      "hash": "42664ee7ac459eeea11ad26c29b48b6effc4fae9833007fdc505e9bdac60fe1e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Distinguir el objetivo contractual de los efectos que exigirían mediciones externas."
+          ]
+        },
+        "deps": {
+          "boundary_topoplan": 1,
+          "problem_topoplan": 1
+        },
+        "id": "concept_conformance",
+        "kind": "concept",
+        "text": "La fiabilidad se entiende aquí como conformidad observable con contract.md: validación del lote completo, orden lexicográfico global y rondas calculadas independientemente. Es una definición del objetivo técnico, no una medición. La conformidad no demuestra utilidad para usuarios ni superioridad de un método de desarrollo.",
+        "version": 1
+      },
+      "prev_hash": "39a5417756f51288b109c711ec55ac4fa98dd392421d324d757add13e68caa37",
+      "seq": 6
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:57:06+00:00",
+      "hash": "87d2660275d196c3b9055e91446745be3687e50977afedbc2494d36e6a115f63",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Explicitar el supuesto documental y sus límites ante la ausencia de mediciones suministradas."
+          ]
+        },
+        "deps": {
+          "boundary_topoplan": 1,
+          "concept_conformance": 1,
+          "problem_topoplan": 1
+        },
+        "id": "assumption_contract",
+        "kind": "assumption",
+        "text": "Se toma el contrato como referencia suficiente para delimitar este desarrollo público. El supuesto permite formular requisitos técnicos, pero no establece que los ejemplos cubran todos los errores posibles ni que representen necesidades observadas de usuarios. Su alcance termina en la conducta especificada de la CLI.",
+        "version": 1
+      },
+      "prev_hash": "42664ee7ac459eeea11ad26c29b48b6effc4fae9833007fdc505e9bdac60fe1e",
+      "seq": 7
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:57:06+00:00",
+      "hash": "958062caafa1586b14494d0067b3c48ad7552508644749e16ed8cd3fdbb651b9",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Identificar la prioridad de fidelidad y su tensión con la entrega parcial."
+          ]
+        },
+        "deps": {
+          "actor_topoplan": 1,
+          "assumption_contract": 1,
+          "concept_conformance": 1,
+          "problem_topoplan": 1
+        },
+        "id": "frame_contract",
+        "kind": "frame_option",
+        "text": "Encuadre de fidelidad contractual: dar prioridad a resultados deterministas y al rechazo íntegro de lotes inválidos. Su fundamento es el comportamiento exigido por el encargo. Sacrifica la disponibilidad de respuestas parciales cuando una petición del lote falla; este coste deriva de la regla normativa, sin cuantificar efectos sobre usuarios.",
+        "version": 1
+      },
+      "prev_hash": "87d2660275d196c3b9055e91446745be3687e50977afedbc2494d36e6a115f63",
+      "seq": 8
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:57:06+00:00",
+      "hash": "5149863c664fcbcdadbc219b50ff066edde48583fa85d4932bfea4468657143d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Contraponer la disponibilidad parcial a la integridad del lote e identificar la incompatibilidad contractual."
+          ]
+        },
+        "deps": {
+          "actor_topoplan": 1,
+          "boundary_topoplan": 1,
+          "concept_conformance": 1,
+          "problem_topoplan": 1
+        },
+        "id": "frame_partial",
+        "kind": "frame_option",
+        "text": "Encuadre rival de disponibilidad parcial: conservar respuestas de peticiones válidas aunque otra petición falle. Privilegia recuperar trabajo utilizable, pero contradice stdout vacío ante cualquier petición inválida y cambia la semántica del lote. Es una alternativa conceptual discutida; implementarla excedería el contrato actual y no tiene beneficios medidos en la evidencia aportada.",
+        "version": 1
+      },
+      "prev_hash": "958062caafa1586b14494d0067b3c48ad7552508644749e16ed8cd3fdbb651b9",
+      "seq": 9
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:57:06+00:00",
+      "hash": "547651d356da58bcd4c0a09d0a83bd7aa54daaaf89e2a2fdf48766d65cc95c07",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Fundar la norma en el mandato técnico y explicitar el conflicto entre las alternativas."
+          ]
+        },
+        "deps": {
+          "actor_topoplan": 1,
+          "boundary_topoplan": 1,
+          "frame_contract": 1,
+          "frame_partial": 1,
+          "problem_topoplan": 1
+        },
+        "id": "norm_conformance",
+        "kind": "norm",
+        "text": "Dentro de la delegación técnica, se propone priorizar la fidelidad contractual: validar todo el lote antes de emitir, mantener separados order y layers y limitar las conclusiones a evidencia disponible. La preferencia por integridad sobre disponibilidad parcial es un juicio normativo fundado en el encargo, no un efecto observado ni una elección de algoritmo atribuida al operador.",
+        "version": 1
+      },
+      "prev_hash": "5149863c664fcbcdadbc219b50ff066edde48583fa85d4932bfea4468657143d",
+      "seq": 10
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "e795a4de-f308-4186-9fb7-db6d9fbc6925",
+    "created_at": "2026-10-06T01:56:00+00:00",
+    "created_by": "human:owner",
+    "domain": "development",
+    "test_gate_policy": "local_report",
+    "title": "Native reliability attempt-03 topoplan"
+  },
+  "schema": 1
+}
