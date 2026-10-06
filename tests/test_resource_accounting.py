@@ -80,7 +80,7 @@ def test_new_policy_binds_its_guidance_source_and_preserves_limits(tmp_path):
     from specorganon.role_jobs import digest
     ctrl = controller(tmp_path, SyntheticTransport(frame_response()))
     policy = _json(ctrl.root / 'controller.json')
-    assert policy['schema'] == 9 and policy['resource_hint_schema'] == 1
+    assert policy['schema'] == 12 and policy['resource_hint_schema'] == 1
     assert policy['resource_guidance_source_sha256'] == digest(Path(software_controller.__file__).read_bytes())
     assert policy['max_role_calls'] == 40 and policy['max_phase_items'] == 6
     assert policy['max_phase_encoded_bytes'] == 6000 and policy['max_files_encoded_bytes'] == 20000

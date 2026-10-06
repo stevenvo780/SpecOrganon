@@ -1,0 +1,506 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collected 8 items
+
+tests/test_neutral_docker_controls.py FFFFFFFF                           [100%]
+
+=================================== FAILURES ===================================
+_ test_real_test_with_synthetic_roles_never_claims_native_and_replay_never_reexecutes[N] _
+
+tmp_path = PosixPath('/tmp/specorganon-staged-docker-06/test_real_test_with_synthetic_0')
+method = 'N'
+
+    @pytest.mark.parametrize('method',['N','S'])
+    def test_real_test_with_synthetic_roles_never_claims_native_and_replay_never_reexecutes(tmp_path,method):
+        c=make_actual_controller(tmp_path/'run',method)
+        try:
+>           report=c.run();assert report['status']=='review_ready',report
+                   ^^^^^^^
+
+tests/test_neutral_docker_controls.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/neutral_controller.py:547: in run
+    report=self.step()
+           ^^^^^^^^^^^
+src/specorganon/neutral_controller.py:503: in step
+    measured=t.measure(pending['job_id'],pending['request']['argv'],pending['request']['files'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/docker_roles.py:473: in measure
+    folder, plan, job = self._execute(job_id, 'test', request, files)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/docker_roles.py:373: in _execute
+    record = self._inspect(plan)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f80ec641a90>
+plan = {'schema': 2, 'job_id': 'neutral-0004-measure', 'role': 'test', 'provider': None, ...}
+
+    def _inspect(self, plan):
+        target=plan.get('container_id') or plan['name']
+        result = self._cli(['inspect', target], allow_failure=True)
+        if result.returncode:
+            error=result.stderr.decode(errors='replace').strip()
+            if error in ('Error: No such object: '+target,'Error response from daemon: No such container: '+target):return None
+>           raise PendingCleanupError('Docker inspection cannot establish the owned execution state')
+E           specorganon.docker_roles.PendingCleanupError: Docker inspection cannot establish the owned execution state
+
+src/specorganon/docker_roles.py:289: PendingCleanupError
+_ test_real_test_with_synthetic_roles_never_claims_native_and_replay_never_reexecutes[S] _
+
+tmp_path = PosixPath('/tmp/specorganon-staged-docker-06/test_real_test_with_synthetic_1')
+method = 'S'
+
+    @pytest.mark.parametrize('method',['N','S'])
+    def test_real_test_with_synthetic_roles_never_claims_native_and_replay_never_reexecutes(tmp_path,method):
+        c=make_actual_controller(tmp_path/'run',method)
+        try:
+>           report=c.run();assert report['status']=='review_ready',report
+                   ^^^^^^^
+
+tests/test_neutral_docker_controls.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/neutral_controller.py:547: in run
+    report=self.step()
+           ^^^^^^^^^^^
+src/specorganon/neutral_controller.py:503: in step
+    measured=t.measure(pending['job_id'],pending['request']['argv'],pending['request']['files'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/docker_roles.py:473: in measure
+    folder, plan, job = self._execute(job_id, 'test', request, files)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/docker_roles.py:373: in _execute
+    record = self._inspect(plan)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f80ec4bc910>
+plan = {'schema': 2, 'job_id': 'neutral-0005-measure', 'role': 'test', 'provider': None, ...}
+
+    def _inspect(self, plan):
+        target=plan.get('container_id') or plan['name']
+        result = self._cli(['inspect', target], allow_failure=True)
+        if result.returncode:
+            error=result.stderr.decode(errors='replace').strip()
+            if error in ('Error: No such object: '+target,'Error response from daemon: No such container: '+target):return None
+>           raise PendingCleanupError('Docker inspection cannot establish the owned execution state')
+E           specorganon.docker_roles.PendingCleanupError: Docker inspection cannot establish the owned execution state
+
+src/specorganon/docker_roles.py:289: PendingCleanupError
+___ test_real_closed_measure_crash_before_generation_reuses_receipt_not_run ____
+
+tmp_path = PosixPath('/tmp/specorganon-staged-docker-06/test_real_closed_measure_crash0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f80ec5af360>
+
+    def test_real_closed_measure_crash_before_generation_reuses_receipt_not_run(tmp_path,monkeypatch):
+        c=make_actual_controller(tmp_path/'run')
+        try:
+            for _ in range(3):assert c.step()['status']=='running'
+            original=c._apply
+            def crash(state,reservation,result,past):
+                if reservation['stage']=='measure':
+                    raise KeyboardInterrupt('injected controller crash after closed Docker measurement')
+                return original(state,reservation,result,past)
+            monkeypatch.setattr(c,'_apply',crash)
+>           with pytest.raises(KeyboardInterrupt):c.step()
+                                                  ^^^^^^^^
+
+tests/test_neutral_docker_controls.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/neutral_controller.py:503: in step
+    measured=t.measure(pending['job_id'],pending['request']['argv'],pending['request']['files'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/docker_roles.py:473: in measure
+    folder, plan, job = self._execute(job_id, 'test', request, files)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/docker_roles.py:373: in _execute
+    record = self._inspect(plan)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f80ec4bd1d0>
+plan = {'schema': 2, 'job_id': 'neutral-0004-measure', 'role': 'test', 'provider': None, ...}
+
+    def _inspect(self, plan):
+        target=plan.get('container_id') or plan['name']
+        result = self._cli(['inspect', target], allow_failure=True)
+        if result.returncode:
+            error=result.stderr.decode(errors='replace').strip()
+            if error in ('Error: No such object: '+target,'Error response from daemon: No such container: '+target):return None
+>           raise PendingCleanupError('Docker inspection cannot establish the owned execution state')
+E           specorganon.docker_roles.PendingCleanupError: Docker inspection cannot establish the owned execution state
+
+src/specorganon/docker_roles.py:289: PendingCleanupError
+________ test_R3_real_failed_test_cannot_promote_fabricated_passed_true ________
+
+tmp_path = PosixPath('/tmp/specorganon-staged-docker-06/test_R3_real_failed_test_canno0')
+
+    def test_R3_real_failed_test_cannot_promote_fabricated_passed_true(tmp_path):
+        c=make_actual_controller(tmp_path/'run')
+        try:
+            c.step()
+            c.transport.responses['program']={'schema':1,'files':{'program.py':'def result(): return 0\n','README.md':'Known failing mechanical fixture'},'documents':{},'reason':'Synthetic defect'}
+>           c.step();c.step();report=c.step()
+                                     ^^^^^^^^
+
+tests/test_neutral_docker_controls.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/neutral_controller.py:503: in step
+    measured=t.measure(pending['job_id'],pending['request']['argv'],pending['request']['files'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/docker_roles.py:473: in measure
+    folder, plan, job = self._execute(job_id, 'test', request, files)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/docker_roles.py:373: in _execute
+    record = self._inspect(plan)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f80ec5af950>
+plan = {'schema': 2, 'job_id': 'neutral-0004-measure', 'role': 'test', 'provider': None, ...}
+
+    def _inspect(self, plan):
+        target=plan.get('container_id') or plan['name']
+        result = self._cli(['inspect', target], allow_failure=True)
+        if result.returncode:
+            error=result.stderr.decode(errors='replace').strip()
+            if error in ('Error: No such object: '+target,'Error response from daemon: No such container: '+target):return None
+>           raise PendingCleanupError('Docker inspection cannot establish the owned execution state')
+E           specorganon.docker_roles.PendingCleanupError: Docker inspection cannot establish the owned execution state
+
+src/specorganon/docker_roles.py:289: PendingCleanupError
+_ test_real_SIGKILL_during_measure_closes_uncertain_and_preserves_one_execution[False] _
+
+tmp_path = PosixPath('/tmp/specorganon-staged-docker-06/test_real_SIGKILL_during_measu0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f80ec514050>
+late = False
+
+    @pytest.mark.parametrize('late',[False,True])
+    def test_real_SIGKILL_during_measure_closes_uncertain_and_preserves_one_execution(tmp_path,monkeypatch,late):
+        root=tmp_path/'run'
+        source=('import sys\n'+f'sys.path.insert(0,{str(SOURCE/"tests")!r})\n'
+                'from test_neutral_docker_controls import make_actual_controller\n'+
+                f'c=make_actual_controller({str(root)!r},hold=True)\nc.run()\n')
+        child=subprocess.Popen([sys.executable,'-c',source],stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,start_new_session=True)
+        c=None
+        try:
+            marker=root/'transport/actual-tests/jobs/neutral-0004-measure/output/own-runs.txt'
+            deadline=time.monotonic()+30
+            while not marker.exists() and child.poll() is None and time.monotonic()<deadline:time.sleep(.05)
+>           assert marker.exists(),'mechanical test must actually start before SIGKILL'
+E           AssertionError: mechanical test must actually start before SIGKILL
+E           assert False
+E            +  where False = exists()
+E            +    where exists = PosixPath('/tmp/specorganon-staged-docker-06/test_real_SIGKILL_during_measu0/run/transport/actual-tests/jobs/neutral-0004-measure/output/own-runs.txt').exists
+
+tests/test_neutral_docker_controls.py:133: AssertionError
+_ test_real_SIGKILL_during_measure_closes_uncertain_and_preserves_one_execution[True] _
+
+tmp_path = PosixPath('/tmp/specorganon-staged-docker-06/test_real_SIGKILL_during_measu1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f80ec500a70>
+late = True
+
+    @pytest.mark.parametrize('late',[False,True])
+    def test_real_SIGKILL_during_measure_closes_uncertain_and_preserves_one_execution(tmp_path,monkeypatch,late):
+        root=tmp_path/'run'
+        source=('import sys\n'+f'sys.path.insert(0,{str(SOURCE/"tests")!r})\n'
+                'from test_neutral_docker_controls import make_actual_controller\n'+
+                f'c=make_actual_controller({str(root)!r},hold=True)\nc.run()\n')
+        child=subprocess.Popen([sys.executable,'-c',source],stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,start_new_session=True)
+        c=None
+        try:
+            marker=root/'transport/actual-tests/jobs/neutral-0004-measure/output/own-runs.txt'
+            deadline=time.monotonic()+30
+            while not marker.exists() and child.poll() is None and time.monotonic()<deadline:time.sleep(.05)
+>           assert marker.exists(),'mechanical test must actually start before SIGKILL'
+E           AssertionError: mechanical test must actually start before SIGKILL
+E           assert False
+E            +  where False = exists()
+E            +    where exists = PosixPath('/tmp/specorganon-staged-docker-06/test_real_SIGKILL_during_measu1/run/transport/actual-tests/jobs/neutral-0004-measure/output/own-runs.txt').exists
+
+tests/test_neutral_docker_controls.py:133: AssertionError
+______ test_R11_real_closed_measure_without_summary_recovers_after_cutoff ______
+
+tmp_path = PosixPath('/tmp/specorganon-staged-docker-06/test_R11_real_closed_measure_w0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f80ec45a7a0>
+
+    def test_R11_real_closed_measure_without_summary_recovers_after_cutoff(tmp_path,monkeypatch):
+        import copy
+        import specorganon.neutral_controller as module
+        c=make_actual_controller(tmp_path/'run')
+        try:
+            for _ in range(3):c.step()
+            t=c.transport.actual;original=t.measure
+            def closed_without_summary(job,argv,files):
+                result=original(job,argv,files)
+                (t.root/'jobs'/job/'measured-test.json').unlink()
+                raise KeyboardInterrupt('after native receipt/terminal before derived summary or controller result')
+            c.transport.measure=closed_without_summary
+>           with pytest.raises(KeyboardInterrupt):c.step()
+                                                  ^^^^^^^^
+
+tests/test_neutral_docker_controls.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/neutral_controller.py:503: in step
+    measured=t.measure(pending['job_id'],pending['request']['argv'],pending['request']['files'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_neutral_docker_controls.py:164: in closed_without_summary
+    result=original(job,argv,files)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/docker_roles.py:473: in measure
+    folder, plan, job = self._execute(job_id, 'test', request, files)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/docker_roles.py:373: in _execute
+    record = self._inspect(plan)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f80ec5149d0>
+plan = {'schema': 2, 'job_id': 'neutral-0004-measure', 'role': 'test', 'provider': None, ...}
+
+    def _inspect(self, plan):
+        target=plan.get('container_id') or plan['name']
+        result = self._cli(['inspect', target], allow_failure=True)
+        if result.returncode:
+            error=result.stderr.decode(errors='replace').strip()
+            if error in ('Error: No such object: '+target,'Error response from daemon: No such container: '+target):return None
+>           raise PendingCleanupError('Docker inspection cannot establish the owned execution state')
+E           specorganon.docker_roles.PendingCleanupError: Docker inspection cannot establish the owned execution state
+
+src/specorganon/docker_roles.py:289: PendingCleanupError
+___ test_R10_real_bridge_closed_empty_body_classified_without_accepted_role ____
+
+tmp_path = PosixPath('/tmp/specorganon-staged-docker-06/test_R10_real_bridge_closed_em0')
+
+    def test_R10_real_bridge_closed_empty_body_classified_without_accepted_role(tmp_path):
+        from specorganon.docker_roles import ClosedResponseContractError
+        # An explicit simulator replaces the provider executable; no existing session
+        # or account is mounted. Real Docker/bridge/inner JobStore, zero model calls.
+        simulator=tmp_path/'simulated-agy'
+        simulator.write_text('''#!/opt/specorganon/.venv/bin/python
+    import json,sys
+    sys.stdin.buffer.read()
+    text=json.dumps({"schema":1,"files":{},"documents":{},"reason":"Closed empty body fixture"})
+    c="synthetic-native-stream"
+    for event in [
+     {"event":"init","conversation_id":c,"init":{}},
+     {"event":"step_update","step_update":{"conversation_id":c,"step_index":0,"state":"DONE","step_type":"user_input"}},
+     {"event":"step_update","step_update":{"conversation_id":c,"step_index":1,"state":"DONE","step_type":"agent_response","text_delta":text}},
+     {"event":"result","result":{"conversation_id":c,"status":"SUCCESS","num_turns":1,"response":text,"usage":{"fixture":True}}}]:
+     print(json.dumps(event))
+    ''');simulator.chmod(0o755)
+        profile=tmp_path/'empty-synthetic-profile';profile.mkdir()
+        names=[SOURCE/'scripts/controller_native_role.py',*sorted((SOURCE/'src/specorganon').glob('*.py')),CATALOG]
+        pins={str(p.relative_to(SOURCE)):digest(p.read_bytes()) for p in names}
+        t=DockerRoles(tmp_path/'actual-simulated-role',**{**OPTIONS,'author_provider':'gemini','author_model':'fixture-model',
+            'gemini_profile':profile,'gemini_executable':simulator},source_bindings=pins)
+        request={'schema':1,'role':'author','role_instructions':'Author simulator: emit the declared fixture body, never tools.',
+            'documents':{'action.txt':'author','author-response-format.json':canonical({'schema':1,'format':'files-v1'}).decode()}}
+        try:
+>           with pytest.raises(ClosedResponseContractError) as caught:t.call('empty-body-control','author',request)
+                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_neutral_docker_controls.py:202: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/docker_roles.py:453: in call
+    folder, plan, job = self._execute(job_id, role, request)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/specorganon/docker_roles.py:373: in _execute
+    record = self._inspect(plan)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f80ec501370>
+plan = {'schema': 2, 'job_id': 'empty-body-control', 'role': 'author', 'provider': 'gemini', ...}
+
+    def _inspect(self, plan):
+        target=plan.get('container_id') or plan['name']
+        result = self._cli(['inspect', target], allow_failure=True)
+        if result.returncode:
+            error=result.stderr.decode(errors='replace').strip()
+            if error in ('Error: No such object: '+target,'Error response from daemon: No such container: '+target):return None
+>           raise PendingCleanupError('Docker inspection cannot establish the owned execution state')
+E           specorganon.docker_roles.PendingCleanupError: Docker inspection cannot establish the owned execution state
+
+src/specorganon/docker_roles.py:289: PendingCleanupError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/specorganon-staged-docker-06/test_R10_real_bridge_closed_em0')
+
+    def test_R10_real_bridge_closed_empty_body_classified_without_accepted_role(tmp_path):
+        from specorganon.docker_roles import ClosedResponseContractError
+        # An explicit simulator replaces the provider executable; no existing session
+        # or account is mounted. Real Docker/bridge/inner JobStore, zero model calls.
+        simulator=tmp_path/'simulated-agy'
+        simulator.write_text('''#!/opt/specorganon/.venv/bin/python
+    import json,sys
+    sys.stdin.buffer.read()
+    text=json.dumps({"schema":1,"files":{},"documents":{},"reason":"Closed empty body fixture"})
+    c="synthetic-native-stream"
+    for event in [
+     {"event":"init","conversation_id":c,"init":{}},
+     {"event":"step_update","step_update":{"conversation_id":c,"step_index":0,"state":"DONE","step_type":"user_input"}},
+     {"event":"step_update","step_update":{"conversation_id":c,"step_index":1,"state":"DONE","step_type":"agent_response","text_delta":text}},
+     {"event":"result","result":{"conversation_id":c,"status":"SUCCESS","num_turns":1,"response":text,"usage":{"fixture":True}}}]:
+     print(json.dumps(event))
+    ''');simulator.chmod(0o755)
+        profile=tmp_path/'empty-synthetic-profile';profile.mkdir()
+        names=[SOURCE/'scripts/controller_native_role.py',*sorted((SOURCE/'src/specorganon').glob('*.py')),CATALOG]
+        pins={str(p.relative_to(SOURCE)):digest(p.read_bytes()) for p in names}
+        t=DockerRoles(tmp_path/'actual-simulated-role',**{**OPTIONS,'author_provider':'gemini','author_model':'fixture-model',
+            'gemini_profile':profile,'gemini_executable':simulator},source_bindings=pins)
+        request={'schema':1,'role':'author','role_instructions':'Author simulator: emit the declared fixture body, never tools.',
+            'documents':{'action.txt':'author','author-response-format.json':canonical({'schema':1,'format':'files-v1'}).decode()}}
+        try:
+            with pytest.raises(ClosedResponseContractError) as caught:t.call('empty-body-control','author',request)
+            proof=caught.value.proof
+            assert proof['provenance']=='closed_native_invalid_response' and proof['result']['files']==proof['result']['documents']=={}
+            assert t.verify_response_failure(proof,'empty-body-control','author',request)
+            plan=_json(t.root/'jobs/empty-body-control/launch.json');observed=t._inspect(plan)
+            assert observed['State']['ExitCode']==2
+            assert all(m.get('Name')!='specorganon-lab_codex-home' for m in observed['Mounts'])
+            assert not any(profile.iterdir()),'simulator must never create auth/session state'
+        finally:
+            path=t.root/'jobs/empty-body-control/launch.json'
+>           if path.exists():t._cli(['rm','--force',_json(path)['container_id']],allow_failure=True)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_neutral_docker_controls.py:212: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/docker_roles.py:120: in _cli
+    process = subprocess.Popen(command, stdin=subprocess.DEVNULL,
+/home/stev/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Popen: returncode: None args: ['/usr/bin/docker', 'rm', '--force', None]>
+args = ['/usr/bin/docker', 'rm', '--force', None]
+executable = b'/usr/bin/docker', preexec_fn = None, close_fds = True
+pass_fds = (), cwd = None, env = None, startupinfo = None, creationflags = 0
+shell = False, p2cread = 12, p2cwrite = -1, c2pread = 18, c2pwrite = 19
+errread = 20, errwrite = 21, restore_signals = True, gid = None, gids = None
+uid = None, umask = -1, start_new_session = True, process_group = -1
+
+    def _execute_child(self, args, executable, preexec_fn, close_fds,
+                       pass_fds, cwd, env,
+                       startupinfo, creationflags, shell,
+                       p2cread, p2cwrite,
+                       c2pread, c2pwrite,
+                       errread, errwrite,
+                       restore_signals,
+                       gid, gids, uid, umask,
+                       start_new_session, process_group):
+        """Execute program (POSIX version)"""
+    
+        if isinstance(args, (str, bytes)):
+            args = [args]
+        elif isinstance(args, os.PathLike):
+            if shell:
+                raise TypeError('path-like args is not allowed when '
+                                'shell is true')
+            args = [args]
+        else:
+            args = list(args)
+    
+        if shell:
+            # On Android the default shell is at '/system/bin/sh'.
+            unix_shell = ('/system/bin/sh' if
+                      hasattr(sys, 'getandroidapilevel') else '/bin/sh')
+            args = [unix_shell, "-c"] + args
+            if executable:
+                args[0] = executable
+    
+        if executable is None:
+            executable = args[0]
+    
+        sys.audit("subprocess.Popen", executable, args, cwd, env)
+    
+        if (_USE_POSIX_SPAWN
+                and os.path.dirname(executable)
+                and preexec_fn is None
+                and (not close_fds or _HAVE_POSIX_SPAWN_CLOSEFROM)
+                and not pass_fds
+                and cwd is None
+                and (p2cread == -1 or p2cread > 2)
+                and (c2pwrite == -1 or c2pwrite > 2)
+                and (errwrite == -1 or errwrite > 2)
+                and not start_new_session
+                and process_group == -1
+                and gid is None
+                and gids is None
+                and uid is None
+                and umask < 0):
+            self._posix_spawn(args, executable, env, restore_signals, close_fds,
+                              p2cread, p2cwrite,
+                              c2pread, c2pwrite,
+                              errread, errwrite)
+            return
+    
+        orig_executable = executable
+    
+        # For transferring possible exec failure from child to parent.
+        # Data format: "exception name:hex errno:description"
+        # Pickle is not used; it is complex and involves memory allocation.
+        errpipe_read, errpipe_write = os.pipe()
+        # errpipe_write must not be in the standard io 0, 1, or 2 fd range.
+        low_fds_to_close = []
+        while errpipe_write < 3:
+            low_fds_to_close.append(errpipe_write)
+            errpipe_write = os.dup(errpipe_write)
+        for low_fd in low_fds_to_close:
+            os.close(low_fd)
+        try:
+            try:
+                # We must avoid complex work that could involve
+                # malloc or free in the child process to avoid
+                # potential deadlocks, thus we do all this here.
+                # and pass it to fork_exec()
+    
+                if env is not None:
+                    env_list = []
+                    for k, v in env.items():
+                        k = os.fsencode(k)
+                        if b'=' in k:
+                            raise ValueError("illegal environment variable name")
+                        env_list.append(k + b'=' + os.fsencode(v))
+                else:
+                    env_list = None  # Use execv instead of execve.
+                executable = os.fsencode(executable)
+                if os.path.dirname(executable):
+                    executable_list = (executable,)
+                else:
+                    # This matches the behavior of os._execvpe().
+                    executable_list = tuple(
+                        os.path.join(os.fsencode(dir), executable)
+                        for dir in os.get_exec_path(env))
+                fds_to_keep = set(pass_fds)
+                fds_to_keep.add(errpipe_write)
+>               self.pid = _fork_exec(
+                        args, executable_list,
+                        close_fds, tuple(sorted(map(int, fds_to_keep))),
+                        cwd, env_list,
+                        p2cread, p2cwrite, c2pread, c2pwrite,
+                        errread, errwrite,
+                        errpipe_read, errpipe_write,
+                        restore_signals, start_new_session,
+                        process_group, gid, gids, uid, umask,
+                        preexec_fn, _USE_VFORK)
+E                       TypeError: expected str, bytes or os.PathLike object, not NoneType
+
+/home/stev/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/subprocess.py:1921: TypeError
+=========================== short test summary info ============================
+FAILED tests/test_neutral_docker_controls.py::test_real_test_with_synthetic_roles_never_claims_native_and_replay_never_reexecutes[N]
+FAILED tests/test_neutral_docker_controls.py::test_real_test_with_synthetic_roles_never_claims_native_and_replay_never_reexecutes[S]
+FAILED tests/test_neutral_docker_controls.py::test_real_closed_measure_crash_before_generation_reuses_receipt_not_run
+FAILED tests/test_neutral_docker_controls.py::test_R3_real_failed_test_cannot_promote_fabricated_passed_true
+FAILED tests/test_neutral_docker_controls.py::test_real_SIGKILL_during_measure_closes_uncertain_and_preserves_one_execution[False]
+FAILED tests/test_neutral_docker_controls.py::test_real_SIGKILL_during_measure_closes_uncertain_and_preserves_one_execution[True]
+FAILED tests/test_neutral_docker_controls.py::test_R11_real_closed_measure_without_summary_recovers_after_cutoff
+FAILED tests/test_neutral_docker_controls.py::test_R10_real_bridge_closed_empty_body_classified_without_accepted_role
+============================== 8 failed in 3.94s ===============================

@@ -1,0 +1,84 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collected 94 items
+
+tests/test_staged_review_regressions.py ................................ [ 34%]
+..............F.                                                         [ 51%]
+tests/test_neutral_controller.py ..............                          [ 65%]
+tests/test_docker_create_recovery.py ................................    [100%]
+
+=================================== FAILURES ===================================
+_ test_R15_unknown_or_unsafe_debris_rejected[.0001.json.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/hardlink] _
+
+path = PosixPath('/tmp/pytest-of-stev/pytest-369/test_R15_unknown_or_unsafe_deb6/run/initial.json')
+dir_fd = None
+
+    def _json(path, *, dir_fd=None):
+        try:
+>           return strict_json_loads(_read(path, dir_fd=dir_fd).decode())
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+src/specorganon/role_jobs.py:99: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-stev/pytest-369/test_R15_unknown_or_unsafe_deb6/run/initial.json')
+limit = 2097152, dir_fd = None
+
+    def _read(path, limit=2_097_152, *, dir_fd=None):
+        parent_fd = None
+        try:
+            parent_fd, name = _parent(path, dir_fd)
+            fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=parent_fd)
+            with os.fdopen(fd, "rb") as file:
+                before = os.fstat(file.fileno())
+                if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1 or before.st_size > limit:
+>                   raise JobError("job record must be bounded, singly linked regular data")
+E                   specorganon.role_jobs.JobError: job record must be bounded, singly linked regular data
+
+src/specorganon/role_jobs.py:85: JobError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-369/test_R15_unknown_or_unsafe_deb6')
+bad = '.0001.json.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/hardlink'
+
+    @pytest.mark.parametrize('bad',['.0001.json.bad','.0000.json.'+'a'*32,'.0081.json.'+'a'*32,
+     '0001Xjson','.0001.json.'+'a'*32+'/directory','.0001.json.'+'a'*32+'/symlink','.0001.json.'+'a'*32+'/hardlink'])
+    def test_R15_unknown_or_unsafe_debris_rejected(tmp_path,bad):
+        c=controller(tmp_path/'run');parts=bad.split('/');p=c.root/'results'/parts[0]
+        if len(parts)==1:p.write_bytes(b'not an admitted record')
+        elif parts[1]=='directory':p.mkdir()
+        elif parts[1]=='symlink':p.symlink_to(c.root/'initial.json')
+        else:
+            import os
+            os.link(c.root/'initial.json',p)
+>       with pytest.raises(NeutralControllerError,match='unexpected controller journal entry'):c.step()
+                                                                                               ^^^^^^^^
+
+tests/test_staged_review_regressions.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/neutral_controller.py:482: in step
+    state,past,previous,pending=self._load()
+                                ^^^^^^^^^^^^
+src/specorganon/neutral_controller.py:156: in _load
+    if canonical(_json(self.root/'initial.json'))!=canonical(self.initial):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-stev/pytest-369/test_R15_unknown_or_unsafe_deb6/run/initial.json')
+dir_fd = None
+
+    def _json(path, *, dir_fd=None):
+        try:
+            return strict_json_loads(_read(path, dir_fd=dir_fd).decode())
+        except (ValueError, UnicodeError) as exc:
+>           raise JobError(f"invalid job JSON {Path(path).name}") from exc
+E           specorganon.role_jobs.JobError: invalid job JSON initial.json
+
+src/specorganon/role_jobs.py:101: JobError
+=========================== short test summary info ============================
+FAILED tests/test_staged_review_regressions.py::test_R15_unknown_or_unsafe_debris_rejected[.0001.json.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/hardlink]
+========================= 1 failed, 93 passed in 0.92s =========================

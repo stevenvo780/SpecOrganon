@@ -1,0 +1,61 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collected 615 items
+
+tests/test_common_evidence.py ............................               [  4%]
+tests/test_common_review.py ..................................           [ 10%]
+tests/test_neutral_author.py ...........................                 [ 14%]
+tests/test_neutral_controller.py ..............                          [ 16%]
+tests/test_closed_native_role.py ......................                  [ 20%]
+tests/test_native_invocation_consistency.py ......                       [ 21%]
+tests/test_neutral_snapshot_guards.py ..........                         [ 22%]
+tests/test_staged_review_regressions.py ..............................   [ 27%]
+tests/test_neutral_docker_controls.py ssssssss                           [ 29%]
+tests/test_docker_create_recovery.py ................................    [ 34%]
+tests/test_docker_roles.py sss                                           [ 34%]
+tests/test_native_source_custody.py ..........                           [ 36%]
+tests/test_native_response_contract.py ................................. [ 41%]
+....................                                                     [ 45%]
+tests/test_controller_native_role.py ................................... [ 50%]
+.........................                                                [ 54%]
+tests/test_native_reconnection.py ................                       [ 57%]
+tests/test_controller_recovery.py ......                                 [ 58%]
+tests/test_native_reliability.py .........................               [ 62%]
+tests/test_native_reliability_versioned.py .................             [ 65%]
+tests/test_role_jobs.py .....................                            [ 68%]
+tests/test_bounded_author_admission.py ............                      [ 70%]
+tests/test_provider_schema_diagnostics.py .....                          [ 71%]
+tests/test_typed_author_content.py ...................                   [ 74%]
+tests/test_author_contract.py ..........                                 [ 76%]
+tests/test_software_controller.py ................                       [ 78%]
+tests/test_software_controller_resources.py ......................       [ 82%]
+tests/test_reasoning_policy.py ...............                           [ 84%]
+tests/test_resource_accounting.py ...F                                   [ 85%]
+tests/test_text_only_judgment.py .......                                 [ 86%]
+tests/test_local_interfaces.py ......                                    [ 87%]
+tests/test_interfaces.py ................                                [ 90%]
+tests/test_local_workflow.py .........................................   [ 96%]
+tests/test_runner.py ..............                                      [ 99%]
+tests/test_runner_manifest_schema.py ......                              [100%]
+
+=================================== FAILURES ===================================
+________ test_new_policy_binds_its_guidance_source_and_preserves_limits ________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-367/test_new_policy_binds_its_guid0')
+
+    def test_new_policy_binds_its_guidance_source_and_preserves_limits(tmp_path):
+        from pathlib import Path
+        from specorganon import software_controller
+        from specorganon.role_jobs import digest
+        ctrl = controller(tmp_path, SyntheticTransport(frame_response()))
+        policy = _json(ctrl.root / 'controller.json')
+>       assert policy['schema'] == 9 and policy['resource_hint_schema'] == 1
+E       assert (12 == 9)
+
+tests/test_resource_accounting.py:83: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_resource_accounting.py::test_new_policy_binds_its_guidance_source_and_preserves_limits
+================== 1 failed, 603 passed, 11 skipped in 32.42s ==================
