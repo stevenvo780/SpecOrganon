@@ -1,0 +1,1 @@
+Fixture criterion: result seven, not semantic validation.

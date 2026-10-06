@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "at": "2026-10-06T07:58:49.877839+00:00",
+  "version": "0.2.0rc3.dev7",
+  "scope": "Implemented durable autonomous N v2 controller and installed prospective N/S driver; verified partial engineering only",
+  "controller": {
+    "implemented": true,
+    "N": "free sequencing with charged technical decision, no mandatory SDD pipeline",
+    "author_max": 5,
+    "reviewer_max": 4,
+    "role_max_effective": 9,
+    "own_test_max": 2,
+    "sealed_original_battery": true,
+    "changed_delivery_invalidates_measurement": true,
+    "durable_closed_job_recovery": true,
+    "S": "existing staged control with current/remaining resource budgets"
+  },
+  "tests": {
+    "tests_01": {
+      "passed": 56,
+      "failed": 1,
+      "failure": "Fixture injected crash during prior free result reconstruction; corrected stage-specific injection, original log retained"
+    },
+    "tests_02": {
+      "passed": 186,
+      "failed": 0,
+      "scope": "Eight affected files, selected suite; totals not additive"
+    },
+    "docker_01": {
+      "passed": 19,
+      "failed": 1,
+      "unaffected_other_cases_passed": 17,
+      "failure": "Counter executed after deliberate failed assertion; instrumentation corrected only"
+    },
+    "docker_02": {
+      "passed": 3,
+      "failed": 0,
+      "scope": "Only three affected new autonomy controls rerun; synthetic authors/reviewers, real offline measurements"
+    },
+    "raw_archives": [
+      "docker-01-archive.json",
+      "docker-02-archive.json"
+    ]
+  },
+  "installation": {
+    "modules_byte_equal": 40,
+    "wheel_sha256": "fc2042e98cb4017f1731746f695fd3ef0f245b5f8caa6ae69ad4fcc495dd1f9c",
+    "console_guards": 5,
+    "host_MCP_tools": 24,
+    "release_image_id": "sha256:5357232868157b9dce5a7783076f865c2fb6736232434b61300023d7d0ea1325",
+    "codex_image_id": "sha256:7fcab03a56d635c74772587830a0d7196cad1fb252e613ae64fd5aa977892c71",
+    "codex_CLI_version": "codex-cli 0.160.0",
+    "image_MCP_tools": 24,
+    "wheel_and_images_local_only": true,
+    "public_release_or_registry_push": false,
+    "profile_copy_or_login": false
+  },
+  "independent_review": {
+    "job_id": "380838baeec748cbaf5652505f28f7f7",
+    "provider": "gemini",
+    "model": "gemini/3.8-flash",
+    "machine": "Kratos",
+    "account": "Existing default configured profile; exact account not returned by job metadata",
+    "duration_seconds": 395.6,
+    "verdict": "accept",
+    "scope": "Static engineering only; 12 unchanged reviewed files and one later test-counter instrumentation correction",
+    "reviewer_executed_tests": false,
+    "native_admission": false
+  },
+  "new_experimental_generations": 0,
+  "reserved_subjects": 0,
+  "empirical_competence": false,
+  "F": null,
+  "common_complete": null,
+  "full_version_frozen": false,
+  "goal_achieved": false,
+  "pending": [
+    "Prospective fixed six native public N/S pilots without replacement after pinned registration and admission",
+    "T common D/G integration and external F evaluation",
+    "Freeze complete installed version; its own fixed ten T qualification >=9/10 and required types",
+    "Reserved primary plus independent same-version replica with simultaneous uncertainty and comparable resources"
+  ]
+}

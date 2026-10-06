@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "--frozen",
+    "--extra",
+    "dev",
+    "python",
+    "-m",
+    "pytest",
+    "tests/test_neutral_autonomy_docker.py",
+    "tests/test_neutral_docker_controls.py",
+    "tests/test_neutral_pilot_docker.py",
+    "-q"
+  ],
+  "env_overrides": {
+    "SPECORGANON_AUTONOMY_DOCKER": "1",
+    "SPECORGANON_NEUTRAL_DOCKER_CONTROLS": "1",
+    "SPECORGANON_NEUTRAL_PILOT_DOCKER": "1"
+  },
+  "cwd": "/home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon",
+  "exit_code": 1,
+  "scope": "Actual offline Docker mechanics, synthetic roles; zero experimental model calls; existing pinned dev4 image not a new installed dev7 release"
+}

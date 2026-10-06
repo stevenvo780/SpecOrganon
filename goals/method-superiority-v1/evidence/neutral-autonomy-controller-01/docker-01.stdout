@@ -1,0 +1,51 @@
+.F..................                                                     [100%]
+=================================== FAILURES ===================================
+__ test_actual_failed_autonomous_measure_repair_keeps_original_battery_bytes ___
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-391/test_actual_failed_autonomous_0')
+
+    def test_actual_failed_autonomous_measure_repair_keeps_original_battery_bytes(tmp_path):
+        c = actual(tmp_path / 'run', repair=True)
+        try:
+            r = c.run(); assert r['status'] == 'review_ready' and r['counts']['test_runs'] == 2
+            folders = sorted((c.transport.actual.root / 'jobs').iterdir()); assert len(folders) == 2
+            values = [_json(folder / 'measured-test.json') for folder in folders]
+            assert [v['passed'] for v in values] == [False, True]
+            reservations = [_json(p) for p in sorted((c.root / 'reservations').iterdir()) if _json(p)['stage'] == 'measure']
+            for n in PARTITION['test_files']:
+                assert reservations[0]['request']['files'][n] == reservations[1]['request']['files'][n]
+>           assert all((folder / 'output/own-runs.txt').read_text() == '1' for folder in folders)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_neutral_autonomy_docker.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_neutral_autonomy_docker.py:80: in <genexpr>
+    assert all((folder / 'output/own-runs.txt').read_text() == '1' for folder in folders)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/stev/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/pathlib/_local.py:546: in read_text
+    return PathBase.read_text(self, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/stev/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/pathlib/_abc.py:632: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-stev/pytest-391/test_actual_failed_autonomous_0/run/transport/actual-tests/jobs/neutral-0002-measure/output/own-runs.txt')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-stev/pytest-391/test_actual_failed_autonomous_0/run/transport/actual-tests/jobs/neutral-0002-measure/output/own-runs.txt'
+
+/home/stev/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+=========================== short test summary info ============================
+FAILED tests/test_neutral_autonomy_docker.py::test_actual_failed_autonomous_measure_repair_keeps_original_battery_bytes
+1 failed, 19 passed in 26.91s
