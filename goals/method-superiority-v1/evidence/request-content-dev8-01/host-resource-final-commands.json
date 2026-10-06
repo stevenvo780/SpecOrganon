@@ -1,0 +1,60 @@
+[
+  {
+    "argv": [
+      "uv",
+      "pip",
+      "install",
+      "--python",
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/venv/bin/python",
+      "--require-hashes",
+      "-r",
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/requirements.txt"
+    ],
+    "exit_code": 0,
+    "seconds": 0.014758904027985409
+  },
+  {
+    "argv": [
+      "uv",
+      "pip",
+      "install",
+      "--reinstall",
+      "--python",
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/venv/bin/python",
+      "--no-deps",
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/specorganon-0.2.0rc3.dev8-py3-none-any.whl"
+    ],
+    "exit_code": 0,
+    "seconds": 0.10653241100953892
+  },
+  {
+    "argv": [
+      "uv",
+      "pip",
+      "check",
+      "--python",
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/venv/bin/python"
+    ],
+    "exit_code": 0,
+    "seconds": 0.01957122900057584
+  },
+  {
+    "argv": [
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/venv/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "import pathlib,hashlib,json,specorganon;p=pathlib.Path(specorganon.__file__).parent;print(json.dumps({\"version\":specorganon.__version__,\"module_sha256\":{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in p.glob(\"*.py\")}}))"
+    ],
+    "exit_code": 0,
+    "seconds": 0.058341582014691085
+  },
+  {
+    "argv": [
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/venv/bin/organon-controls",
+      "--help"
+    ],
+    "exit_code": 0,
+    "seconds": 0.04781917599029839
+  }
+]

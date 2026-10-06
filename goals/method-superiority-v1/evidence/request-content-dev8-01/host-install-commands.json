@@ -1,0 +1,82 @@
+[
+  {
+    "argv": [
+      "uv",
+      "export",
+      "--frozen",
+      "--extra",
+      "dev",
+      "--no-emit-project",
+      "--format",
+      "requirements-txt"
+    ],
+    "exit_code": 0,
+    "seconds": 0.018003797013079748
+  },
+  {
+    "argv": [
+      "uv",
+      "venv",
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/venv"
+    ],
+    "exit_code": 0,
+    "seconds": 0.00823599100112915
+  },
+  {
+    "argv": [
+      "uv",
+      "pip",
+      "install",
+      "--python",
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/venv/bin/python",
+      "--require-hashes",
+      "-r",
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/requirements.txt"
+    ],
+    "exit_code": 0,
+    "seconds": 0.21022598800482228
+  },
+  {
+    "argv": [
+      "uv",
+      "pip",
+      "install",
+      "--python",
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/venv/bin/python",
+      "--no-deps",
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/specorganon-0.2.0rc3.dev8-py3-none-any.whl"
+    ],
+    "exit_code": 0,
+    "seconds": 0.031097047991352156
+  },
+  {
+    "argv": [
+      "uv",
+      "pip",
+      "check",
+      "--python",
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/venv/bin/python"
+    ],
+    "exit_code": 0,
+    "seconds": 0.012546793994260952
+  },
+  {
+    "argv": [
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/venv/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "import pathlib,hashlib,json,specorganon;p=pathlib.Path(specorganon.__file__).parent;print(json.dumps({\"version\":specorganon.__version__,\"module_sha256\":{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in p.glob(\"*.py\")}}))"
+    ],
+    "exit_code": 0,
+    "seconds": 0.026288860011845827
+  },
+  {
+    "argv": [
+      "goals/method-superiority-v1/evidence/request-content-dev8-01/local-install/venv/bin/organon-controls",
+      "--help"
+    ],
+    "exit_code": 0,
+    "seconds": 0.03531696897698566
+  }
+]

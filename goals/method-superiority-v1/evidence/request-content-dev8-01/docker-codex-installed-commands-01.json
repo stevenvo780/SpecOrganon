@@ -36,14 +36,14 @@
       "/tmp:rw,nosuid,nodev",
       "--entrypoint",
       "/opt/specorganon/venv/bin/python",
-      "sha256:2d52dda1ad313e4816ac2904740e1abc760baf8610c85f5dc1501e7cbeef4e28",
+      "sha256:79462fb575e55c574c60e95256406443339fd0aebddbaddec572b8d1b632ae39",
       "-I",
       "-B",
       "-c",
       "import pathlib,hashlib,json,sys,specorganon; p=pathlib.Path(specorganon.__file__).parent; actual={f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in p.glob(\"*.py\")}; expected=json.load(sys.stdin); assert actual==expected; print(json.dumps({\"version\":specorganon.__version__,\"module_count\":len(actual),\"modules_sha256\":actual}))"
     ],
     "exit_code": 0,
-    "stdin_sha256": "fd5360802adfdc301f8cc42935b73da8564babac9d1494186971e8d8d397b9cb"
+    "stdin_sha256": "dd8252a68ac32bb5850ac4ed4718fc46477743e3f6f81c4af6f950ce001e609f"
   },
   {
     "argv": [
@@ -70,7 +70,7 @@
       "/tmp:rw,nosuid,nodev",
       "--entrypoint",
       "/opt/specorganon/venv/bin/organon",
-      "sha256:2d52dda1ad313e4816ac2904740e1abc760baf8610c85f5dc1501e7cbeef4e28",
+      "sha256:79462fb575e55c574c60e95256406443339fd0aebddbaddec572b8d1b632ae39",
       "--help"
     ],
     "exit_code": 0,
@@ -105,7 +105,7 @@
       "type=bind,src=/home/stev/.codex/worktrees/request-content-v1/SpecOrganon/docker/codex/smoke.py,dst=/smoke.py,readonly",
       "--entrypoint",
       "/opt/specorganon/venv/bin/python",
-      "sha256:2d52dda1ad313e4816ac2904740e1abc760baf8610c85f5dc1501e7cbeef4e28",
+      "sha256:79462fb575e55c574c60e95256406443339fd0aebddbaddec572b8d1b632ae39",
       "-I",
       "-B",
       "/smoke.py"
@@ -138,7 +138,7 @@
       "/tmp:rw,nosuid,nodev",
       "--entrypoint",
       "/usr/local/bin/codex",
-      "sha256:2d52dda1ad313e4816ac2904740e1abc760baf8610c85f5dc1501e7cbeef4e28",
+      "sha256:79462fb575e55c574c60e95256406443339fd0aebddbaddec572b8d1b632ae39",
       "--version"
     ],
     "exit_code": 0,

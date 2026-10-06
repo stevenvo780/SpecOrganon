@@ -393,3 +393,44 @@ def test_roundtrip_at_expanded_depth_boundary_with_envelope_overhead():
         data = [data]
     envelope = encode_content(data)
     assert canonical_json(decode_content(envelope)) == canonical_json(data)
+
+
+@pytest.mark.parametrize('as_key', [False, True])
+def test_excessive_strings_rejected_without_full_utf8_buffer(as_key):
+    import tracemalloc
+    text = 'A' * (4 * 1024 * 1024)
+    value = {text: 0} if as_key else {'x': text}
+    tracemalloc.start()
+    try:
+        with pytest.raises(RequestContentLimitError):
+            encode_content(value)
+        _, peak = tracemalloc.get_traced_memory()
+    finally:
+        tracemalloc.stop()
+    assert peak < 512000  # Input already exists; rejection must not copy 4 MiB.
+
+
+@pytest.mark.parametrize('limits', [{'max_nodes': 5}, {'max_depth': 1}, {'max_bytes': 20}])
+def test_caller_bounds_checked_before_any_deepcopy(monkeypatch, limits):
+    import specorganon.request_content as codec
+    envelope = encode_content({'items': [0] * 100})
+    monkeypatch.setattr(codec.copy, 'deepcopy', lambda *_: pytest.fail('copied before caller limits'))
+    with pytest.raises(RequestContentLimitError):
+        decode_content(envelope, **limits)
+
+
+def test_reference_expansion_checked_before_copy(monkeypatch):
+    import specorganon.request_content as codec
+    envelope = encode_content({'a': 'large string' * 100, 'b': 'large string' * 100})
+    monkeypatch.setattr(codec.copy, 'deepcopy', lambda *_: pytest.fail('copied before expanded size bound'))
+    with pytest.raises(RequestContentLimitError):
+        decode_content(envelope, max_bytes=1500)
+
+
+def test_exact_canonical_byte_boundary_including_json_escaping():
+    value = {'ñ\\"\n': ['\0' * 100, True, False, -0.0]}
+    envelope = encode_content(value)
+    size = len(canonical_json(value))
+    assert canonical_json(decode_content(envelope, max_bytes=size)) == canonical_json(value)
+    with pytest.raises(RequestContentLimitError):
+        decode_content(envelope, max_bytes=size-1)

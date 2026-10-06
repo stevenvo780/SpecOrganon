@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "provider": "codex",
+  "agent": "/root/publish_main",
+  "machine": "Kratos",
+  "account": "Same original desktop account; credits available, no account change",
+  "verdict": "accept",
+  "scope": "Static narrow verification of two codec resource corrections only; not native admission or full freeze",
+  "findings": [],
+  "verification": {
+    "before_at": "2026-10-06T09:36:23.087497+00:00",
+    "after_at": "2026-10-06T09:36:46.902323+00:00",
+    "count": 12,
+    "before_matches_pins": true,
+    "after_matches_pins": true,
+    "before_equals_after": true,
+    "current_sha256": {
+      "src/specorganon/request_content.py": "1a75c071030a26d33419f997672294dfef253d24ba50b9464f8c1ee0257a84e2",
+      "src/specorganon/neutral_controller.py": "525eea2e1fcd37991b130c9f8270dc1fdde3299f759b5623b4095c006194263a",
+      "src/specorganon/neutral_autonomy.py": "7b0cb5cb8727877534fc78d025777c7cbd3621dee6256828492618b559bb6b57",
+      "src/specorganon/native_response_contract.py": "162d83ac697094761eb28667a130f34330fe3e28711530a27ba3aba7caedd60a",
+      "src/specorganon/common_evidence.py": "87d265bf2ac01d51b0f97f03f671a95a4502dd3e495f74fe3d051d37eb4bcc27",
+      "tests/test_request_content.py": "1a8335aa9265eb2a9e626246c9038b47d5d0a6a53cf4c668984225319a57bd05",
+      "tests/test_request_context.py": "1596cefbf1cbe71be3ae32e391b1096a2c5aa4e043ade9e1d7ac1e480118aa72",
+      "goals/method-superiority-v1/development/REQUEST_CONTENT_V1.md": "6cfed51868b5729a5f9ac59973bee65dfe570cb7f581d36bc6de06087cdee467",
+      "goals/method-superiority-v1/development/neutral-autonomy-v2/PROTOCOL.md": "e32d962852e3943b6a83c74b6c5f6f46352fb1db295a996ac396199ce948749b",
+      "pyproject.toml": "9889a501cac64eef095037fa116c488350be1c26ac58fdc49a914e3885e48577",
+      "uv.lock": "f24903130543fa12c993793e98ac5c14df73f8ef79de0b0926ee62bf8b5ac2b3",
+      "src/specorganon/__init__.py": "ff9356792f266ff8696cf98f4f82d9baecff774370e60defd2df35f2bf10ad7e"
+    }
+  },
+  "corrections_verified": [
+    "Bounded canonical JSON string sizing and UTF8 hashing for values and keys before full buffer allocation",
+    "Caller limits including virtual reference expansion before deepcopy"
+  ],
+  "historical_review": {
+    "verdict": "reject",
+    "scope": "REJECT limitado a las garantías de recursos del codec",
+    "source_sha256": "eaa12e3f336b29f380923abf39a15bdc4f1040820b84937c130335f2f5eb4178",
+    "verified_at": "2026-10-06T09:29:04.658673+00:00",
+    "findings": [
+      {
+        "id": "P2-1",
+        "severity": "P2",
+        "title": "La comprobación de tamaño asigna la cadena UTF-8 completa antes de rechazarla",
+        "description": "len(val.encode(\"utf-8\")) y la operación equivalente para claves asignaban todos los bytes antes de comparar con max_bytes. El revisor propuso 100 MB, sin ejecutar esa reproducción ni medir memoria."
+      },
+      {
+        "id": "P2-2",
+        "severity": "P2",
+        "title": "Los límites particulares del decodificador se aplican después de copiar el árbol",
+        "description": "deepcopy precedía a los max_nodes, max_depth y max_bytes particulares. Reproducción propuesta con 50000 elementos y max_nodes=5 no ejecutada por el revisor."
+      }
+    ]
+  },
+  "tests_reviewed_not_executed": [
+    "tracemalloc values/keys",
+    "monkeypatch caller limits before deepcopy",
+    "reference expansion before copy",
+    "exact canonical JSON byte boundary"
+  ],
+  "tests_independently_executed": false,
+  "docker_independently_executed": false,
+  "native_generations": 0,
+  "source_writes": false,
+  "goal_achieved": false,
+  "recorded_by_parent_at": "2026-10-06T09:37:50.735903+00:00"
+}

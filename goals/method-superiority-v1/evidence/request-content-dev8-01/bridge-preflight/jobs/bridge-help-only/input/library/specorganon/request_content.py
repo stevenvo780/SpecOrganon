@@ -222,6 +222,28 @@ def compact_content(
         return copy.deepcopy(value), False
 
 
+def _bounded_json_string_size(text, remaining):
+    """Count exact canonical string bytes without creating an unbounded buffer."""
+    if len(text) + 2 > remaining:
+        raise RequestContentLimitError("Maximum expanded bytes estimate exceeded")
+    size = 2
+    for start in range(0, len(text), 4096):
+        chunk = json.dumps(text[start:start + 4096], ensure_ascii=False,
+                           separators=(",", ":")).encode("utf-8")
+        size += len(chunk) - 2
+        if size > remaining:
+            raise RequestContentLimitError("Maximum expanded bytes estimate exceeded")
+    return size
+
+
+def _raw_text_digest(text):
+    """SHA of original UTF8, using bounded temporary chunks."""
+    value = hashlib.sha256()
+    for start in range(0, len(text), 4096):
+        value.update(text[start:start + 4096].encode("utf-8"))
+    return value.hexdigest()
+
+
 def _check_and_count_nodes(
     val: Any,
     current_depth: int,
@@ -231,8 +253,12 @@ def _check_and_count_nodes(
     byte_count: List[int],
     max_bytes: int,
     seen_ids: Set[int],
+    replacements=None,
+    path=(),
 ) -> None:
     """Count nodes and depth in value clone, checking against decoder bounds."""
+    if replacements is not None and path in replacements:
+        val = replacements[path]
     if current_depth > max_depth:
         raise RequestContentLimitError(f"Maximum depth exceeded: {current_depth} > {max_depth}")
 
@@ -259,16 +285,24 @@ def _check_and_count_nodes(
                 raise RequestContentValidationError("Non-finite float in decoded value")
             byte_count[0] += len(str(val))
         elif type(val) is str:
-            byte_count[0] += len(val.encode("utf-8"))
+            byte_count[0] += _bounded_json_string_size(val, max_bytes - byte_count[0])
         elif type(val) is list:
-            for item in val:
-                _check_and_count_nodes(item, current_depth + 1, max_depth, max_nodes, node_count, byte_count, max_bytes, seen_ids)
+            byte_count[0] += 2 + max(0, len(val) - 1)
+            if byte_count[0] > max_bytes:
+                raise RequestContentLimitError("Maximum expanded bytes estimate exceeded")
+            for index, item in enumerate(val):
+                _check_and_count_nodes(item, current_depth + 1, max_depth, max_nodes,
+                    node_count, byte_count, max_bytes, seen_ids, replacements, path + (index,))
         elif type(val) is dict:
+            byte_count[0] += 2 + len(val) + max(0, len(val) - 1)
+            if byte_count[0] > max_bytes:
+                raise RequestContentLimitError("Maximum expanded bytes estimate exceeded")
             for k, v in val.items():
                 if type(k) is not str:
                     raise RequestContentValidationError("Dictionary key must be string")
-                byte_count[0] += len(k.encode("utf-8"))
-                _check_and_count_nodes(v, current_depth + 1, max_depth, max_nodes, node_count, byte_count, max_bytes, seen_ids)
+                byte_count[0] += _bounded_json_string_size(k, max_bytes - byte_count[0])
+                _check_and_count_nodes(v, current_depth + 1, max_depth, max_nodes,
+                    node_count, byte_count, max_bytes, seen_ids, replacements, path + (k,))
         else:
             raise RequestContentValidationError(f"Invalid JSON type: {type(val).__name__}")
     finally:
@@ -324,7 +358,7 @@ def decode_content(
             raise RequestContentValidationError(f"Invalid sha256 key in content_by_sha256: {sha}")
         if type(text) is not str:
             raise RequestContentValidationError(f"Content for sha256 {sha} must be a str, got {type(text).__name__}")
-        actual_sha = sha256_hex(text.encode("utf-8"))
+        actual_sha = _raw_text_digest(text)
         if actual_sha != sha:
             raise RequestContentValidationError(f"Hash mismatch for content_by_sha256 key {sha}: calculated {actual_sha}")
 
@@ -334,7 +368,7 @@ def decode_content(
 
     # Deep copy value to avoid mutating the envelope
     _validate_json_types(envelope["value"])
-    decoded = copy.deepcopy(envelope["value"])
+    decoded = envelope["value"]
 
     # Track used hashes and paths to reject duplicate, overlapping, or unused content
     used_hashes: Set[str] = set()
@@ -399,7 +433,7 @@ def decode_content(
             raise RequestContentValidationError(f"Reference sha256 {ref_sha} missing in content_by_sha256")
         used_hashes.add(ref_sha)
 
-    # Pass 2: Traverse and replace NULL placeholders
+    # Pass 2: Validate target paths on the original tree without modifying it.
     for ref in string_references:
         ref_path = ref["path"]
         ref_sha = ref["sha256"]
@@ -423,14 +457,14 @@ def decode_content(
             placeholder = curr[last_seg]
             if placeholder is not None:
                 raise RequestContentValidationError(f"Placeholder at path {ref_path} must be None/null, got {type(placeholder).__name__}")
-            curr[last_seg] = content_by_sha256[ref_sha]
+
         elif type(curr) is list:
             if type(last_seg) is not int or last_seg >= len(curr):
                 raise RequestContentValidationError(f"Final path index {last_seg} out of bounds")
             placeholder = curr[last_seg]
             if placeholder is not None:
                 raise RequestContentValidationError(f"Placeholder at path {ref_path} must be None/null, got {type(placeholder).__name__}")
-            curr[last_seg] = content_by_sha256[ref_sha]
+
         else:
             raise RequestContentValidationError(f"Final target container at {ref_path[:-1]} is not dict or list")
 
@@ -439,7 +473,20 @@ def decode_content(
     if unused:
         raise RequestContentValidationError(f"Unused content entries in content_by_sha256: {unused}")
 
-    # Enforce decoder limits on the restored object
+    # Account for the exact caller-specific expanded JSON before copying even
+    # one container. References resolve virtually here; no result is allocated.
+    replacements = {tuple(ref["path"]): content_by_sha256[ref["sha256"]]
+                    for ref in string_references}
+    _check_and_count_nodes(decoded, 1, max_depth, max_nodes, [0], [0], max_bytes,
+                           set(), replacements)
+    decoded = copy.deepcopy(decoded)
+    for ref in string_references:
+        curr = decoded
+        for segment in ref["path"][:-1]:
+            curr = curr[segment]
+        curr[ref["path"][-1]] = content_by_sha256[ref["sha256"]]
+
+    # Defense in depth on the restored object, using identical exact counters.
     node_count = [0]
     byte_count = [0]
     seen_ids: Set[int] = set()

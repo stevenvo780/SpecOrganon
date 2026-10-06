@@ -1,0 +1,9 @@
+# Dev8: referencias compartidas sin pérdida
+
+Avance de ingeniería parcial verificado. 156 pruebas pasan en las siete suites indicadas por tests-resource-final-command.json. Las seis solicitudes reales rechazadas del piloto dev7 se reconstruyen íntegramente fuera de línea: 58663–84841 bytes frente al límite original de 110000. Tres contextos hipotéticos de auditoría conservan todos los localizadores físicos y criterios originales: 78620, 83870 y 105480 bytes. No se enviaron a modelos.
+
+Las imágenes release/native reconstruidas y el driver privado instalado coinciden byte por byte con los 41 módulos actuales. CLI y MCP stdio descubren 24 herramientas y completan un caso sintético. El puente Docker usa el intérprete real y la medición mecánica/replay evita una segunda ejecución. Ninguna prueba de instalación monta credenciales. La wheel privada está excluida y no constituye un nuevo lanzamiento público.
+
+Se conservan el timeout inicial Gemini, su aceptación del corte anterior y el rechazo Codex de dos protecciones de recursos. Las correcciones cuentan cadenas por bloques y comprueban los límites particulares antes de deepcopy; Codex verifica los 12 hashes finales y acepta esas correcciones estáticamente. El revisor no ejecutó independientemente las 156 pruebas. before-resource-fix conserva las verificaciones instaladas anteriores; los recibos actuales apuntan al corte corregido.
+
+El piloto dev7 conserva seis fallos originales y 648/648 comprobaciones públicas descriptivas. No hay nuevos intentos nativos, auditorías semánticas aceptadas, F externo, competencia demostrada, versión completa congelada ni superioridad. Siguiente paso: registro y admisión de un nuevo piloto prospectivo; integración T común D/G; cualificación propia, comparación reservada y réplica independiente.
