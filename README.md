@@ -8,7 +8,15 @@ Método y toolkit para formular problemas, investigar con evidencia, comparar in
 
 **Resultados y límites:** RangeAudit produjo una entrega nativa de nueve fases, con Codex como autor, Gemini como revisor y pruebas ejecutadas en Docker; pasó 115 comprobaciones públicas adicionales. Es un caso de desarrollo, sin evaluación reservada ni demostración de superioridad. La campaña comparativa v3 y el piloto anterior conservan sus resultados adversos y fuentes históricas: no se recalcularon con este código. La [meta para demostrar ventaja frente a libre y SDD](goals/method-superiority-v1/GOAL.md) sigue activa. El [GOAL original](GOAL.md) conserva el objetivo alimentario y sus límites de evidencia de campo.
 
-**Cohorte de fiabilidad cerrada, versión dev2 congelada:** los diez intentos fijados terminaron: tres entregas completas (30%) y siete fallos, sin reemplazos. RangeAudit completó dos intentos con 115/115 comprobaciones públicas cada uno y LedgerFold uno con 104/104. El [informe terminal verificado](goals/method-superiority-v1/evidence/provider-json-schema-01/cohort-terminal-01/summary.json) conserva los fallos y un intervalo Wilson descriptivo de aproximadamente 10.8–60.3%; no cumple el 90%. Ninguna comparación reservada. Dev4 tiene una nueva cohorte registrada prospectivamente; ya está en ejecución y aún no se publican sus resultados finales. [Protocolo y límites](goals/method-superiority-v1/development/NATIVE_COHORT.md).
+**Cohorte de fiabilidad cerrada, versión dev2 congelada:** los diez intentos fijados terminaron: tres entregas completas (30%) y siete fallos, sin reemplazos. RangeAudit completó dos intentos con 115/115 comprobaciones públicas cada uno y LedgerFold uno con 104/104. El [informe terminal verificado](goals/method-superiority-v1/evidence/provider-json-schema-01/cohort-terminal-01/summary.json) conserva los fallos y un intervalo Wilson descriptivo de aproximadamente 10.8–60.3%; no cumple el 90%. Ninguna comparación reservada. [Protocolo y límites](goals/method-superiority-v1/development/NATIVE_COHORT.md).
+
+**Cohorte dev4 02 cerrada:** cinco entregas completas de diez (50%), tres tipos
+con nueve fases y 543/543 controles públicos sobre las cinco entregas. Los cinco
+fallos se conservan, sin reemplazos: tres controles Docker, uno por admisión/cuota
+de autores de compare y otro por JSON inválido. Wilson descriptivo23.66–76.34%;
+no cumple 9/10 ni demuestra ventaja frente a libre o SDD. El driver original y
+las 45 fuentes congeladas verificaron el cierre sin llamadas o tests nuevos.
+[Informe terminal, fuentes y recibos](goals/method-superiority-v1/evidence/native02-terminal-01/README.md).
 
 Las fuentes actuales son dev6 en desarrollo; la última wheel publicada es dev5.
 Las cohortes dev2 y dev4 conservan sus checkouts y fuentes congeladas: un clon de
@@ -25,7 +33,7 @@ la máquina de etapas N/S, contabilidad integrada, compuerta común y registro
 estadístico; no hay generaciones dev6 ni superioridad medida.
 [Fuentes, pruebas y límites](goals/method-superiority-v1/evidence/neutral-controls-01/README.md).
 
-**Dev4 publicado como candidato de desarrollo:** guía JSON compartida entre proveedores, validación estricta local y transporte schema4 vinculado a hashes del puente y los módulos Python. El diagnóstico conserva nueve llamadas: seis fallos de formato y tres respuestas válidas de un solo turno; no son entregas de software ni demuestran eficacia. Pasan 296 controles acotados del host y la revisión independiente estática; el wheel final instalado pasó los mismos 296 controles y el smoke CLI/MCP con 24 herramientas. El driver versionado pasó 45 controles en host y Docker. La [cohorte dev4 02](goals/method-superiority-v1/development/registration-native-cohort-02.json) está registrada antes de generar, con diez intentos y 45 fuentes vinculadas; no se publican aún resultados de eficacia. [Fuentes y recibos](goals/method-superiority-v1/evidence/provider-json-schema-01/README.md).
+**Dev4 publicado como candidato de desarrollo:** guía JSON compartida entre proveedores, validación estricta local y transporte schema4 vinculado a hashes del puente y los módulos Python. El diagnóstico conserva nueve llamadas: seis fallos de formato y tres respuestas válidas de un solo turno; no son entregas de software ni demuestran eficacia. Pasan 296 controles acotados del host y la revisión independiente estática; el wheel final instalado pasó los mismos 296 controles y el smoke CLI/MCP con 24 herramientas. El driver versionado pasó 45 controles en host y Docker. La [cohorte dev4 02](goals/method-superiority-v1/development/registration-native-cohort-02.json) se registró antes de generar, con diez intentos y 45 fuentes vinculadas; su cierre es desarrollo público, sin comparación reservada. [Fuentes y recibos](goals/method-superiority-v1/evidence/provider-json-schema-01/README.md).
 
 ## Clonar y empezar
 

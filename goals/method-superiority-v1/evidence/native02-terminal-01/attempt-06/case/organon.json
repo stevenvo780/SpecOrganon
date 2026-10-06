@@ -1,0 +1,1396 @@
+{
+  "events": [
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:32:44+00:00",
+      "hash": "c89594cd5df75a759e73897633e0af734808f1d5d29e94d87f41a85eba29522e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Identificar al operador como mandante y a los usuarios previstos de la CLI como destinatarios.",
+            "Delimitar la delegación a decisiones técnicas del desarrollo público."
+          ]
+        },
+        "deps": {},
+        "id": "actor_topoplan",
+        "kind": "actor",
+        "text": "El operador encarga el desarrollo de TopoPlan; los destinatarios previstos son quienes necesitan planificar grafos dirigidos mediante una CLI. El agente tiene delegadas las decisiones técnicas de este desarrollo acotado.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:32:44+00:00",
+      "hash": "bdbb7abaf7b4d28f8bab4e954ee1a21a8ce47f84428a7d7036ae2d99b50b709f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "need": "Obtener el orden topológico lexicográfico global y las rondas de disponibilidad calculados independientemente, deduplicando aristas y validando íntegramente la entrada antes de emitir salida.",
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Delimitar la necesidad mediante las reglas de entrada, planificación y salida del contrato.",
+            "Distinguir la necesidad especificada de cualquier daño o beneficio medido."
+          ]
+        },
+        "deps": {
+          "actor_topoplan": 1
+        },
+        "id": "problem_topoplan",
+        "kind": "problem",
+        "text": "Se necesita construir una CLI Python estándar que transforme peticiones NDJSON de grafos válidos en order, layers y roots con semánticas deterministas distintas. Debe rechazar entradas inválidas de forma atómica para todo el lote. El encargo establece esta necesidad de fiabilidad; no aporta fallos observados ni mediciones de impacto sobre usuarios.",
+        "version": 1
+      },
+      "prev_hash": "c89594cd5df75a759e73897633e0af734808f1d5d29e94d87f41a85eba29522e",
+      "seq": 2
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:32:44+00:00",
+      "hash": "26549df2f73356e673f61925aaafe2e08bf3e024a7e80c3c10e1658eadaed398",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "limits": {
+            "dependencies": "Solo biblioteca estándar; sin red ni lectura o escritura de archivos externos.",
+            "edges_per_request": 2000,
+            "invalid_batch": "stdout vacío, stderr exactamente topo-plan: invalid input seguido de newline, exit 2.",
+            "nodes_per_request": 120,
+            "stdin_bytes": 131072,
+            "valid_batch": "Un objeto JSON por petición seguido de newline, stderr vacío, exit 0; entrada completamente vacía equivale a cero peticiones."
+          },
+          "sources": [
+            "contract.md",
+            "existing-mandate.md",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Acotar la unidad de observación a peticiones y lotes NDJSON de la CLI.",
+            "Mantener separados el desarrollo público, la evaluación reservada y las afirmaciones de impacto externo."
+          ]
+        },
+        "deps": {
+          "actor_topoplan": 1,
+          "problem_topoplan": 1
+        },
+        "id": "boundary_topoplan",
+        "kind": "boundary",
+        "text": "El alcance es el desarrollo técnico público de topo_plan.py, su README y sus pruebas posteriores al sellado del programa y README. La observación se limita al comportamiento contractual de la CLI sobre stdin y sus salidas y código de terminación. Se excluyen efectos de campo, superioridad frente a alternativas, uso comercial y evaluación reservada futura. Los ejemplos suministrados son controles públicos, sin resultados de ejecución aportados.",
+        "version": 1
+      },
+      "prev_hash": "bdbb7abaf7b4d28f8bab4e954ee1a21a8ce47f84428a7d7036ae2d99b50b709f",
+      "seq": 3
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:33:22+00:00",
+      "hash": "37a52b557ae728538eca84c6e7078b15dea0e9d07204177caeb97ee2ae669faa",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "La formulación de la fase frame delimita adecuadamente a los actores (el operador mandante y los destinatarios de la CLI), la necesidad operativa concreta (transformación determinista de grafos NDJSON en order, layers y roots con validación atómica del lote) y la frontera de observación restringida a la interfaz contractual de la CLI, excluyendo explícitamente efectos de campo y evaluaciones reservadas de acuerdo con el contrato y el mandato vigente. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/role-02-frame-review/receipt.json]",
+        "snapshot": "b71704cb496e4f6e40a9885733089da1a9d4b998bb10e83cae2b169482777744",
+        "verdict": "accept"
+      },
+      "prev_hash": "26549df2f73356e673f61925aaafe2e08bf3e024a7e80c3c10e1658eadaed398",
+      "seq": 4
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:33:22+00:00",
+      "hash": "b994ac9db3f7265d71a196da1bb1bdf8e81e6afd98670ed378bd8823ca439d3b",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "b71704cb496e4f6e40a9885733089da1a9d4b998bb10e83cae2b169482777744"
+      },
+      "prev_hash": "37a52b557ae728538eca84c6e7078b15dea0e9d07204177caeb97ee2ae669faa",
+      "seq": 5
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:33:48+00:00",
+      "hash": "56d32c17ba366b5ff9c9e54103bf1a8dfc377c98ad71bde68b0de8604d734038",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Precisar la conformidad mediante comportamientos externos especificados.",
+            "Separar las dos semanticas de planificacion y los efectos externos no medidos."
+          ]
+        },
+        "deps": {
+          "boundary_topoplan": 1,
+          "problem_topoplan": 1
+        },
+        "id": "concept_reliability",
+        "kind": "concept",
+        "text": "Fiabilidad contractual significa conformidad de la CLI con las reglas explicitas de entrada, salida y rechazo del lote. Determinismo exige distinguir order, que elige el menor nodo disponible en cada paso, de layers, que agrupa rondas completas. Esta definicion no equivale a utilidad de campo ni superioridad frente a otros metodos.",
+        "version": 1
+      },
+      "prev_hash": "b994ac9db3f7265d71a196da1bb1bdf8e81e6afd98670ed378bd8823ca439d3b",
+      "seq": 6
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:33:48+00:00",
+      "hash": "0ee5e6953c6861c7e0e93d8d297449a50eb55dd1bdcf4fc7489d1e114f84f714",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Relacionar el alcance contractual con la delegacion tecnica.",
+            "Identificar la ausencia de datos de uso y el limite ante ambiguedades."
+          ]
+        },
+        "deps": {
+          "actor_topoplan": 1,
+          "boundary_topoplan": 1,
+          "problem_topoplan": 1
+        },
+        "id": "assumption_scope",
+        "kind": "assumption",
+        "text": "Se adopta provisionalmente que el contrato suministrado basta para delimitar este desarrollo publico. Su fundamento es la delegacion tecnica y la interfaz detallada; su limite es que no aporta testimonios de uso ni mediciones de impacto. Una ambiguedad contractual debe hacerse explicita antes de convertirla en una exigencia adicional.",
+        "version": 1
+      },
+      "prev_hash": "56d32c17ba366b5ff9c9e54103bf1a8dfc377c98ad71bde68b0de8604d734038",
+      "seq": 7
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:33:48+00:00",
+      "hash": "f03a072121e2b59f8b3f84f12da1a23a9c3acee42868624f269a9319925e4bbc",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Definir las obligaciones externas como eje del desarrollo.",
+            "Exponer el limite de centrarse en salidas y ejemplos."
+          ]
+        },
+        "deps": {
+          "assumption_scope": 1,
+          "concept_reliability": 1
+        },
+        "id": "frame_conformance",
+        "kind": "frame_option",
+        "text": "Alternativa A: organizar el desarrollo alrededor de obligaciones observables de la CLI. Valora la fidelidad al encargo y la trazabilidad de cada regla; admite que la claridad interna quede como apoyo. Su tension es que una comprobacion centrada en salidas puede dejar poco explicado el razonamiento del programa. Los ejemplos publicos no bastan para sostener conformidad general.",
+        "version": 1
+      },
+      "prev_hash": "0ee5e6953c6861c7e0e93d8d297449a50eb55dd1bdcf4fc7489d1e114f84f714",
+      "seq": 8
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:33:48+00:00",
+      "hash": "92d25f75bd2716d3cda139be99ad2e23731b5948c2e3689f574f6d9d3c3166b1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Definir la comprension del mecanismo como eje alternativo.",
+            "Distinguir explicacion, obligacion contractual y evidencia de funcionamiento."
+          ]
+        },
+        "deps": {
+          "assumption_scope": 1,
+          "concept_reliability": 1
+        },
+        "id": "frame_explainability",
+        "kind": "frame_option",
+        "text": "Alternativa B: organizar el desarrollo alrededor de invariantes explicitos y documentacion de las decisiones tecnicas, conservando toda la interfaz contractual. Valora que un lector pueda seguir la validacion atomica y los dos calculos independientes. Su tension es que una explicacion convincente puede confundirse con evidencia de funcionamiento; requiere contrastacion posterior y puede consumir mas espacio documental.",
+        "version": 1
+      },
+      "prev_hash": "f03a072121e2b59f8b3f84f12da1a23a9c3acee42868624f269a9319925e4bbc",
+      "seq": 9
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:33:48+00:00",
+      "hash": "ca57ea643fbdd30c22d615fce52d2f1f48fb3d448dd5ae1b9ecc4245f8986703",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Ponderar fidelidad al encargo y comprension del mecanismo.",
+            "Formular una prioridad tecnica acotada al mandato y separada de afirmaciones facticas."
+          ]
+        },
+        "deps": {
+          "actor_topoplan": 1,
+          "frame_conformance": 1,
+          "frame_explainability": 1,
+          "problem_topoplan": 1
+        },
+        "id": "norm_contract_priority",
+        "kind": "norm",
+        "text": "Dentro de la delegacion tecnica, se propone priorizar la conformidad observable de la alternativa A y usar las explicaciones de B como apoyo. Es un juicio sobre el fin del desarrollo: no permite sustituir evidencia por claridad narrativa ni flexibilizar reglas de entrada, errores o limites. No establece beneficios de campo ni atribuye esta prioridad al operador.",
+        "version": 1
+      },
+      "prev_hash": "92d25f75bd2716d3cda139be99ad2e23731b5948c2e3689f574f6d9d3c3166b1",
+      "seq": 10
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-06T03:34:02+00:00",
+      "hash": "650a447a146df5f05a92f357e8ef49c224cf481f521d22153bad0833b4baf551",
+      "kind": "approval",
+      "payload": {
+        "id": "norm_contract_priority",
+        "provenance": "local_declared",
+        "reason": "Existing local owner mandate; technical conformity judged separately by reviewer:gemini-isolated-review (/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/role-04-critique-approval/receipt.json): La norma norm_contract_priority se atiene plenamente a los límites del mandato vigente: resuelve el conflicto de valor de la fase critique priorizando la conformidad observable sin atribuir elecciones al operador, sin postular beneficios de campo ni superioridad técnica no medida, y manteniendo la trazabilidad con los supuestos y alternativas analizados.",
+        "version": 1
+      },
+      "prev_hash": "ca57ea643fbdd30c22d615fce52d2f1f48fb3d448dd5ae1b9ecc4245f8986703",
+      "seq": 11
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:34:18+00:00",
+      "hash": "239ba7be4a0edb97b12daa35ed8921c6e519baddaa47d44787bd3ec4c45832ae",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "La fase critique satisface plenamente las reglas del contrato y los criterios de revisión sustantiva: define con precisión el concepto de fiabilidad contractual distinguiendo con rigor las semánticas independientes de order y layers sin asumir beneficios de campo no verificados; explicita el supuesto operativo de suficiencia contractual y sus límites ante la ausencia de mediciones de uso; formula dos alternativas genuinas y rivales (priorización de la conformidad observable frente a la explicabilidad documental de invariantes internos); y establece una norma coherente que pondera ambas opciones priorizando la fidelidad a los requisitos contractuales observables, la cual cuenta con aprobación válida y mantiene estrictamente separados los juicios de valor de las aseveraciones fácticas, con trazabilidad íntegra respecto a los problemas y actores delimitados. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/role-05-critique-review/receipt.json]",
+        "snapshot": "49461097c28767985e6f8b6136e23a362fc72883244a748663611e6cc41f84f5",
+        "verdict": "accept"
+      },
+      "prev_hash": "650a447a146df5f05a92f357e8ef49c224cf481f521d22153bad0833b4baf551",
+      "seq": 12
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:34:18+00:00",
+      "hash": "2b3ebc200a377fb496bd973ddbc6d3de762c83c07bf17684a8c94c19bd3fc540",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "critique",
+        "review_seq": 12,
+        "snapshot": "49461097c28767985e6f8b6136e23a362fc72883244a748663611e6cc41f84f5"
+      },
+      "prev_hash": "239ba7be4a0edb97b12daa35ed8921c6e519baddaa47d44787bd3ec4c45832ae",
+      "seq": 13
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:34:54+00:00",
+      "hash": "076a33ab4b19748f8b6325a66d427a56ffaad2691ba74745745ddfe476dd9965",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Derivar la pregunta de la necesidad contractual.",
+            "Acotar la respuesta al corpus, sin extrapolar a uso real."
+          ]
+        },
+        "deps": {
+          "assumption_scope": 1,
+          "concept_reliability": 1,
+          "problem_topoplan": 1
+        },
+        "id": "question_conformance",
+        "kind": "question",
+        "text": "¿La CLI satisface las reglas de planificación y rechazo atómico del contrato en un corpus público finito que distingue order de layers?",
+        "version": 1
+      },
+      "prev_hash": "2b3ebc200a377fb496bd973ddbc6d3de762c83c07bf17684a8c94c19bd3fc540",
+      "seq": 14
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:34:54+00:00",
+      "hash": "c19a9bdb6d5024f48f5909a4655b54f49727a4c918f7ed2493c3f99b537621a4",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Comportamiento esperado derivado del contrato frente al comportamiento registrado posteriormente.",
+          "source": "contract.md",
+          "steps": [
+            "Formular una predicción falsable por lote.",
+            "Separar la predicción de resultados inexistentes."
+          ],
+          "uncertainty": "La conformidad de un corpus finito no demuestra corrección universal.",
+          "unit": "lote NDJSON"
+        },
+        "deps": {
+          "problem_topoplan": 1,
+          "question_conformance": 1
+        },
+        "id": "hypothesis_conformance",
+        "kind": "hypothesis",
+        "text": "Se plantea que cada lote del corpus tendrá salidas, stderr y código de terminación conformes al contrato. Un solo lote discrepante refutaría esta hipótesis para el corpus; aún no hay observaciones.",
+        "version": 1
+      },
+      "prev_hash": "076a33ab4b19748f8b6325a66d427a56ffaad2691ba74745745ddfe476dd9965",
+      "seq": 15
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:34:54+00:00",
+      "hash": "a8ccf339eec3b0addf3d31409a814c55b4c641dd20987dc3bbf646a130bec0e8",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Expectativas del contrato, incluidos rechazo sin stdout y separación entre order y layers; no comparación con otros productos.",
+          "method": "Fijar bytes de entrada y expectativas por caso. Para DAG pequeños, enumerar órdenes topológicos y elegir el menor lexicográfico; obtener rondas desde conjuntos de predecesores, sin reutilizar el cálculo de order. Registrar posteriormente stdout, stderr y exit por lote. Comparar JSON estructuralmente en lotes válidos y bytes exactos en rechazo; contar cada lote una vez.",
+          "population": "Lotes públicos: tres ejemplos; todos los DAG sobre subconjuntos de {a,b,c,d}; variantes con aristas duplicadas y listas reordenadas; entrada vacía; casos por cada regla de rechazo; límites de 120 nodos, 2000 aristas y 131072 bytes y sus excesos; lotes mixtos con petición inválida al inicio, medio y final.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Definir corpus y oráculos antes de medir.",
+            "Mantener logs breves e íntegros dentro del límite de transporte.",
+            "Usar entradas sintéticas sin datos personales."
+          ],
+          "uncertainty": "Cobertura finita y posibles errores del oráculo. Conservar su derivación y casos que distinguen ambos cálculos; no inferir impacto de campo. Detener el contraste de un caso ambiguo hasta aclarar su expectativa."
+        },
+        "deps": {
+          "hypothesis_conformance": 1,
+          "norm_contract_priority": 1,
+          "problem_topoplan": 1,
+          "question_conformance": 1
+        },
+        "id": "protocol_conformance",
+        "kind": "protocol",
+        "text": "Diseño prospectivo de contraste contractual; no registra ejecución. Congelar el corpus y sus expectativas antes de recoger salidas, conservando íntegros los casos y las discrepancias.",
+        "version": 1
+      },
+      "prev_hash": "c19a9bdb6d5024f48f5909a4655b54f49727a4c918f7ed2493c3f99b537621a4",
+      "seq": 16
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:34:54+00:00",
+      "hash": "5b2890fb495c5a7915ab7e348c684ca9c89a8746b2bbecdd280e19d83a6f5bd2",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "No indicada en el documento suministrado",
+          "locator": "Entrada NDJSON; Salida por petición; Ejemplos; Si cualquier petición es inválida",
+          "origin": "published",
+          "source": "contract.md, contrato público suministrado",
+          "steps": [
+            "Identificar las obligaciones observables en el documento.",
+            "Distinguir ejemplos prescritos de observaciones del programa."
+          ]
+        },
+        "deps": {
+          "norm_contract_priority": 1,
+          "problem_topoplan": 1,
+          "protocol_conformance": 1
+        },
+        "id": "evidence_contract",
+        "kind": "evidence",
+        "text": "El contrato suministrado define salidas válidas y rechazo de lotes, y aporta tres ejemplos públicos. Es fundamento documental de la métrica, sin mediciones de la CLI.",
+        "version": 1
+      },
+      "prev_hash": "a8ccf339eec3b0addf3d31409a814c55b4c641dd20987dc3bbf646a130bec0e8",
+      "seq": 17
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:34:54+00:00",
+      "hash": "4f1fc3d78e1ade441e99e763dfda3a83b072bb8cc2aba797d3978a47fbca612f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Conformidad completa equivale a 1 en el corpus; cualquier discrepancia reduce la proporción.",
+          "metric": "proporcion_lotes_conformes",
+          "source": "Registros futuros del ejecutor para el corpus fijado; contract.md fundamenta las expectativas.",
+          "steps": [
+            "Contar como conforme solo un lote que satisface todas las expectativas.",
+            "Conservar numerador, denominador y discrepancias para trazabilidad."
+          ],
+          "uncertainty": "Sin registros o con denominador cero, no calculable. Es descriptiva del corpus, sin intervalo poblacional ni extrapolación.",
+          "unit": "proporción"
+        },
+        "deps": {
+          "evidence_contract": 1,
+          "norm_contract_priority": 1,
+          "problem_topoplan": 1,
+          "protocol_conformance": 1
+        },
+        "id": "indicator_conformance",
+        "kind": "indicator",
+        "text": "Proporción de lotes conformes del corpus fijado: lotes que cumplen todas sus expectativas divididos por lotes contrastados. No se asigna valor antes de disponer de registros reales.",
+        "version": 1
+      },
+      "prev_hash": "5b2890fb495c5a7915ab7e348c684ca9c89a8746b2bbecdd280e19d83a6f5bd2",
+      "seq": 18
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:35:15+00:00",
+      "hash": "b1e207c9d3525546d5abf9586afba9a62f3b45129bb73fce17bab4f4fa3e8da1",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "La fase study satisface plenamente las reglas contractuales y los criterios de revisión metodológica: la pregunta de investigación, la hipótesis falsable, el protocolo prospectivo y el indicador formal definen con precisión unidad, fuente, oráculo de comparación e incertidumbre sin postular mediciones inexistentes ni resultados anticipados. El protocolo delimita una población finita y reproducible de casos sintéticos y límites de transporte que mitigan sesgos de selección, preservan la ética de datos y garantizan la contrastación independiente y simétrica de las dos semánticas contractuales (order y layers), fundamentando el indicador en evidencia documental trazable al contrato y a la norma aprobada sin invocar beneficios de campo ni superioridad técnica externa. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/role-07-study-review/receipt.json]",
+        "snapshot": "3e55594e7304e338a0b3905503f5b7873e8aa57473dd990692fc729f81f5742b",
+        "verdict": "accept"
+      },
+      "prev_hash": "4f1fc3d78e1ade441e99e763dfda3a83b072bb8cc2aba797d3978a47fbca612f",
+      "seq": 19
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:35:15+00:00",
+      "hash": "0bbc6c884431641cf9101ba15c5525c8640bab380c7748ca428a9a84c61a7bb9",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "study",
+        "review_seq": 19,
+        "snapshot": "3e55594e7304e338a0b3905503f5b7873e8aa57473dd990692fc729f81f5742b"
+      },
+      "prev_hash": "b1e207c9d3525546d5abf9586afba9a62f3b45129bb73fce17bab4f4fa3e8da1",
+      "seq": 20
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:35:33+00:00",
+      "hash": "bafe60ab5e0e04d1c50cad7aaa0e6823bfd5ea703cd9e7af9119253694ce2ff8",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "scope": "Expectativas del contrato público; no observaciones de ejecución.",
+          "sources": [
+            "contract.md, primer ejemplo",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Comparar el order prescrito con la concatenación de las layers del primer ejemplo.",
+            "Relacionar la diferencia con los oráculos separados del protocolo.",
+            "Constatar que el registro suministrado no contiene mediciones y limitar la inferencia al documento."
+          ],
+          "uncertainty": "La fuente prescribe comportamiento; no acredita funcionamiento, cobertura ejecutada ni beneficios de campo. Sin registros reales no se calcula el indicador ni se contrasta empíricamente la hipótesis."
+        },
+        "deps": {
+          "evidence_contract": 1,
+          "hypothesis_conformance": 1,
+          "indicator_conformance": 1,
+          "problem_topoplan": 1,
+          "protocol_conformance": 1
+        },
+        "id": "inference_contract",
+        "kind": "inference",
+        "text": "El primer ejemplo contractual exige order=[a,b,z] y layers=[[a,z],[b]]: concatenar las rondas produciría [a,z,b], distinto del orden exigido. Por tanto, ese control documental distingue ambas semánticas y fundamenta su contraste separado en el protocolo. No demuestra que una implementación las satisfaga. Los registros de pruebas suministrados están vacíos; la hipótesis y la proporción de lotes conformes permanecen sin soporte empírico.",
+        "version": 1
+      },
+      "prev_hash": "0bbc6c884431641cf9101ba15c5525c8640bab380c7748ca428a9a84c61a7bb9",
+      "seq": 21
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:35:49+00:00",
+      "hash": "5887a1bdc01ece7f4b7543e40a21874a53ebe1d08de8bab442b309c8257821bb",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "observe",
+        "provenance": "local_declared",
+        "reason": "La fase observe cumple satisfactoriamente con los requisitos contractuales y de diseño metodológico: evidencia_contract consigna con precisión fuente, fecha, localizador y origen documental publicado sin inventar mediciones ni ejecuciones previas; e inference_contract enlaza rigurosamente los datos del contrato y los registros vacíos con la hipótesis, el protocolo y el indicador, fundamentando la distinción formal entre order y layers a partir del primer ejemplo público y declarando con total fidelidad la falta de soporte empírico antes de la ejecución real. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/role-09-observe-review/receipt.json]",
+        "snapshot": "88132ead634f1dfbcb76382f8f89077867b167e6c2ee0efd69cced690afca864",
+        "verdict": "accept"
+      },
+      "prev_hash": "bafe60ab5e0e04d1c50cad7aaa0e6823bfd5ea703cd9e7af9119253694ce2ff8",
+      "seq": 22
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:35:49+00:00",
+      "hash": "b94504ff1394844bd84ac89def35f465403cc7cd72542a3d45f22d86fb0e40e5",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "observe",
+        "review_seq": 22,
+        "snapshot": "88132ead634f1dfbcb76382f8f89077867b167e6c2ee0efd69cced690afca864"
+      },
+      "prev_hash": "5887a1bdc01ece7f4b7543e40a21874a53ebe1d08de8bab442b309c8257821bb",
+      "seq": 23
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:36:11+00:00",
+      "hash": "e37d5f6ad8b5caf91c7b8b33de4bbd97347b2aa6314f1b6498156185ef16bd9d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "alternatives": "La distinción del ejemplo puede explicarse íntegramente por las reglas prescritas, sin información sobre una implementación. Una futura coincidencia podría reflejar conformidad de los casos seleccionados o errores compartidos entre implementación y oráculo.",
+          "biases": "Centrarse en los tres ejemplos favorecería cobertura selectiva; derivar implementación y oráculo del mismo razonamiento puede ocultar errores comunes.",
+          "limits": "Sin registros reales no se calcula la proporción de lotes conformes ni se concluye corrección general, impacto de campo o superioridad.",
+          "sources": [
+            "contract.md, primer ejemplo",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Relacionar la distinción documental entre order y layers con la inferencia vigente.",
+            "Separar el hallazgo prescriptivo, el supuesto de alcance y la hipótesis pendiente de observaciones.",
+            "Considerar explicaciones alternativas y sesgos sin atribuir resultados."
+          ]
+        },
+        "deps": {
+          "assumption_scope": 1,
+          "evidence_contract": 1,
+          "hypothesis_conformance": 1,
+          "inference_contract": 1,
+          "protocol_conformance": 1
+        },
+        "id": "synthesis_conformance",
+        "kind": "synthesis",
+        "text": "El hallazgo documental es que order y layers tienen semánticas distintas: el primer ejemplo exige order=[a,b,z], mientras concatenar sus rondas daría [a,z,b]. Esto fundamenta contrastes separados, pero no demuestra funcionamiento de una CLI. La hipótesis de conformidad del corpus sigue sin contraste empírico: los registros suministrados están vacíos. Se mantiene como supuesto provisional que el contrato delimita suficientemente este desarrollo. El protocolo describe cómo obtener evidencia posterior; no constituye evidencia de ejecución.",
+        "version": 1
+      },
+      "prev_hash": "b94504ff1394844bd84ac89def35f465403cc7cd72542a3d45f22d86fb0e40e5",
+      "seq": 24
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:36:11+00:00",
+      "hash": "6efd987ccf1201088c9c4f85b6ad35465e3775051292f9e6ea9ff27108e96a45",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "empirical_gap": "measured-test-records.json contiene un objeto vacío; no aporta mediciones.",
+          "method_limits": "La enumeración de DAG pequeños y los casos de límites previstos no abarcan todas las entradas posibles. Los oráculos separados reducen dependencia entre cálculos, pero su diseño no acredita que estén libres de errores.",
+          "scope": "Conclusiones documentales sobre el contrato público; sin extrapolación a uso real.",
+          "steps": [
+            "Identificar la ausencia de registros que impide contrastar la hipótesis y calcular el indicador.",
+            "Delimitar la incertidumbre de cobertura y de construcción del oráculo.",
+            "Aplicar el límite de no extender conclusiones más allá de sus fuentes."
+          ],
+          "stop_condition": "Si una expectativa contractual es ambigua o una conclusión requiere mediciones ausentes, suspender esa conclusión hasta disponer del soporte correspondiente."
+        },
+        "deps": {
+          "indicator_conformance": 1,
+          "inference_contract": 1,
+          "protocol_conformance": 1,
+          "synthesis_conformance": 1
+        },
+        "id": "uncertainty_conformance",
+        "kind": "uncertainty",
+        "text": "La conformidad de TopoPlan permanece no demostrada con la documentación disponible. Faltan observaciones de stdout, stderr y terminación; el indicador no tiene valor calculable. Incluso un contraste posterior de un corpus finito quedaría limitado por su cobertura y por posibles errores del oráculo. La conclusión actual se restringe a la distinción contractual entre order y layers y al carácter prospectivo del protocolo.",
+        "version": 1
+      },
+      "prev_hash": "e37d5f6ad8b5caf91c7b8b33de4bbd97347b2aa6314f1b6498156185ef16bd9d",
+      "seq": 25
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:36:31+00:00",
+      "hash": "5ec86f2d86848a60e3b0a98bc7a562ccf54ffc8fceb934fed1cf810c7c0d409d",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "explain",
+        "provenance": "local_declared",
+        "reason": "La fase explain satisface plenamente las condiciones del contrato de fase y las directrices metodológicas del mandato. La síntesis diferencia con rigor los hallazgos documentales (en particular la distinción prescriptiva entre order y layers evidenciada en el primer ejemplo) respecto a los supuestos provisionales y las hipótesis aún no contrastadas empíricamente, incorporando un análisis pertinente de alternativas explicativas y sesgos potenciales como la cobertura selectiva o fallos comunes entre implementación y oráculo. A su vez, la incertidumbre formula con precisión los límites metodológicos, la ausencia de registros de ejecución y una regla de parada efectiva que restringe las conclusiones estrictamente a la evidencia documental disponible sin extrapolar resultados ni atribuir ejecuciones ficticias, respetando de forma ejemplar las dependencias y presupuestos del proyecto. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/role-11-explain-review/receipt.json]",
+        "snapshot": "b28e016b56d15f93c1dbee63e06f8f87696e230c627ee6b1fa75a546447efe3e",
+        "verdict": "accept"
+      },
+      "prev_hash": "6efd987ccf1201088c9c4f85b6ad35465e3775051292f9e6ea9ff27108e96a45",
+      "seq": 26
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:36:31+00:00",
+      "hash": "93e432eb1ba842a742823a3fdaed267f3f95ced90851afac66b3ef9a8adfe322",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "explain",
+        "review_seq": 26,
+        "snapshot": "b28e016b56d15f93c1dbee63e06f8f87696e230c627ee6b1fa75a546447efe3e"
+      },
+      "prev_hash": "5ec86f2d86848a60e3b0a98bc7a562ccf54ffc8fceb934fed1cf810c7c0d409d",
+      "seq": 27
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:37:36+00:00",
+      "hash": "0e069e0fdccc5c3dec199b0165518ed017986637700717f00948356a90251c43",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "actor_effects": "Los usuarios previstos dispondrían de la interfaz NDJSON exigida, condicionada a su funcionamiento; asumirían preparar entradas y atender errores.",
+          "constraints": "Solo biblioteca estándar, stdin, sin red ni archivos externos; programa y README sellados antes de las pruebas.",
+          "cost": "El agente debe implementar, documentar y mantener; el operador debe dedicar atención al seguimiento. No hay estimación temporal suministrada.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Derivar la intervención de las dos semánticas prescritas.",
+            "Identificar costes y límites sin atribuir resultados."
+          ]
+        },
+        "deps": {
+          "norm_contract_priority": 1,
+          "synthesis_conformance": 1
+        },
+        "id": "option_cli",
+        "kind": "option",
+        "text": "Construir la CLI contractual con validación completa del lote, aristas deduplicadas y dos cálculos independientes: selección lexicográfica global para order y eliminación por rondas para layers. Conservar el grafo original. Esta opción entrega el programa requerido; su conformidad sigue sin demostrar.",
+        "version": 1
+      },
+      "prev_hash": "93e432eb1ba842a742823a3fdaed267f3f95ced90851afac66b3ef9a8adfe322",
+      "seq": 28
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:37:36+00:00",
+      "hash": "b6c938c319bb77df6076240e36f828b704ad29cfdd8f3dad96f73a869bb03c5f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "actor_effects": "Los usuarios prepararían y transcribirían las listas; el operador necesitaría otra entrega para disponer de la interfaz requerida.",
+          "constraints": "Mantener las dos copias y no entregar planes parciales ante una entrada inválida. El tratamiento manual de bytes, UTF-8 y límites requiere comprobaciones específicas y es incierto.",
+          "cost": "El planificador repite validación y cálculo por lote; un segundo lector puede contrastar el trabajo. No se aportan costes medidos.",
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Construir una alternativa organizativa con las mismas reglas de planificación.",
+            "Explicitar su alcance y la obligación que no satisface."
+          ]
+        },
+        "deps": {
+          "norm_contract_priority": 1,
+          "synthesis_conformance": 1
+        },
+        "id": "option_manual",
+        "kind": "option",
+        "text": "Alternativa sin software nuevo: trabajar sobre papel con listas de nodos y predecesores, deduplicar aristas y validar el lote entero antes de entregar una planificación. Usar copias separadas para elegir el menor nodo disponible en cada paso y para retirar rondas completas. Es realizable para grafos pequeños, pero no entrega la CLI ni sustituye el encargo.",
+        "version": 1
+      },
+      "prev_hash": "0e069e0fdccc5c3dec199b0165518ed017986637700717f00948356a90251c43",
+      "seq": 29
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:37:36+00:00",
+      "hash": "1cb4265ddf43a2655152072bd77c9b55e27fe44ff917f77ee7bae2f5ffd4240a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "scope": "Comparación documental dentro del desarrollo público; no elección atribuida al operador ni superioridad medida.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Comparar entrega, actores, costes y riesgos de ambas opciones.",
+            "Distinguir insuficiencia contractual de dominancia para otros objetivos."
+          ],
+          "tradeoffs": "La CLI introduce riesgos de validación y errores comunes entre cálculos; la alternativa manual introduce omisiones, transcripción y repetición. Ambas requieren distinguir order de layers."
+        },
+        "deps": {
+          "norm_contract_priority": 1,
+          "option_cli": 1,
+          "option_manual": 1,
+          "synthesis_conformance": 1,
+          "uncertainty_conformance": 1
+        },
+        "id": "comparison_options",
+        "kind": "comparison",
+        "text": "La CLI aborda la entrega automatizada exigida y concentra esfuerzo inicial y mantenimiento en el agente. El procedimiento manual evita desarrollar software nuevo, pero desplaza trabajo repetido y transcripción a usuarios y planificadores, y deja pendiente la entrega contractual. Para pocos nodos permite inspeccionar los pasos; cerca de los límites su carga y exactitud son inciertas. No está dominado para el objetivo acotado de explicar un grafo pequeño, aunque resulta insuficiente como entrega. No hay datos para ordenar ambas opciones por tiempo, exactitud o beneficio.",
+        "version": 1
+      },
+      "prev_hash": "b6c938c319bb77df6076240e36f828b704ad29cfdd8f3dad96f73a869bb03c5f",
+      "seq": 30
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:37:36+00:00",
+      "hash": "2a392a0b47f99a3a99b65ce8b4d0f5bc52006b6337af18a0e3d562fe22584ce5",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "controls": "CLI: limitar stdin a 131072 bytes, rechazar formatos inválidos, validar todo antes de emitir y separar los cálculos. Manual: conservar listas y copias independientes, comprobar cada regla y retener toda entrega si el lote es inválido. No introducir red, dependencias externas ni datos personales.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Identificar fallos posibles y quién soportaría sus consecuencias.",
+            "Fijar restricciones y condiciones para suspender conclusiones."
+          ],
+          "stop": "Ante una expectativa ambigua, suspender su interpretación; sin registros reales, mantener sin demostrar la conformidad y los costes comparativos."
+        },
+        "deps": {
+          "norm_contract_priority": 1,
+          "option_cli": 1,
+          "option_manual": 1,
+          "uncertainty_conformance": 1
+        },
+        "id": "risk_options",
+        "kind": "risk",
+        "text": "En la CLI, emitir antes de validar todo el lote violaría el rechazo atómico; reutilizar un grafo mutado podría confundir order y layers. En el procedimiento manual, transcripción y comprobaciones omitidas pueden desplazar errores a los usuarios, especialmente al acercarse a los límites. Son riesgos prospectivos, sin frecuencia observada.",
+        "version": 1
+      },
+      "prev_hash": "1cb4265ddf43a2655152072bd77c9b55e27fe44ff917f77ee7bae2f5ffd4240a",
+      "seq": 31
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:37:49+00:00",
+      "hash": "22e7477209549bbb8b5cc2e39521b13a15ca6e039291d40f38d322b4c31e86ce",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "compare",
+        "provenance": "local_declared",
+        "reason": "La fase compare cumple plenamente los requisitos del contrato de fase y el mandato vigente. Presenta dos opciones sustantivas bien delimitadas (la implementación CLI requerida y una alternativa organizativa manual viable sin software adicional), analizando con rigor los costes, limitaciones y efectos sobre los actores. La comparación evalúa de forma equilibrada los compromisos y perjuicios desplazados sin asumir superioridades infundadas ni invocar elecciones del operador, mientras que el análisis de riesgos identifica adecuadamente controles prospectivos, riesgos de fallo atómico y condiciones de parada, manteniendo una trazabilidad exhaustiva con las fases previas y respetando estrictamente los presupuestos de recursos. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/role-14-compare-review/receipt.json]",
+        "snapshot": "94d3bdad489a7448d76f9c41eb0536006cb58e7e4dd1e5d988414a4a49fbaeda",
+        "verdict": "accept"
+      },
+      "prev_hash": "2a392a0b47f99a3a99b65ce8b4d0f5bc52006b6337af18a0e3d562fe22584ce5",
+      "seq": 32
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:37:49+00:00",
+      "hash": "188e7f9a1e60852dcdac8b2a8d407cf0652c659c46a83e7d75575a263a7c4232",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "compare",
+        "review_seq": 32,
+        "snapshot": "94d3bdad489a7448d76f9c41eb0536006cb58e7e4dd1e5d988414a4a49fbaeda"
+      },
+      "prev_hash": "22e7477209549bbb8b5cc2e39521b13a15ca6e039291d40f38d322b4c31e86ce",
+      "seq": 33
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:38:19+00:00",
+      "hash": "d35d2d8458472fe8d294f0c22aa54fe47b2ea2ed66f4ee47e774cb8e4f40452c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "design": "Usar selección del mínimo disponible para order y retirada simultánea de rondas para layers, con estados de grados de entrada separados.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Contrastar las opciones con la obligación de entregar una CLI.",
+            "Elegir la opción contractual y conservar los controles frente a emisión parcial y mutación compartida."
+          ]
+        },
+        "deps": {
+          "comparison_options": 1,
+          "evidence_contract": 1,
+          "norm_contract_priority": 1,
+          "option_cli": 1,
+          "option_manual": 1,
+          "problem_topoplan": 1,
+          "risk_options": 1
+        },
+        "id": "decision_topoplan",
+        "kind": "decision",
+        "text": "Elegir option_cli para satisfacer la entrega contractual. La alternativa manual permite explicar grafos pequeños, pero deja pendiente la CLI. Implementar validación atómica del lote, deduplicación de aristas y cálculos independientes de order y layers sobre el mismo grafo original. Esta elección técnica no establece superioridad ni costes medidos.",
+        "version": 1
+      },
+      "prev_hash": "188e7f9a1e60852dcdac8b2a8d407cf0652c659c46a83e7d75575a263a7c4232",
+      "seq": 34
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:38:19+00:00",
+      "hash": "2f3e13bdb8fb7c3520c3661043bad3ce9780cd0551c9e46c59cdf35df0e1c02c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "delivery": "La ejecución futura de pruebas debe comenzar con /opt/specorganon/venv/bin/python y ejecutar /input/delivery/test_topo_plan.py; sus streams íntegros deben respetar el límite de transporte de 4000 bytes codificados en JSON por stream.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Traducir las reglas de entrada, planificación y salida en obligaciones verificables.",
+            "Conservar límites, rechazo atómico y separación temporal entre programa y pruebas."
+          ]
+        },
+        "deps": {
+          "decision_topoplan": 1,
+          "evidence_contract": 1,
+          "norm_contract_priority": 1,
+          "problem_topoplan": 1,
+          "protocol_conformance": 1
+        },
+        "id": "requirement_topoplan",
+        "kind": "requirement",
+        "text": "Entregar topo_plan.py con biblioteca estándar y stdin, sin red ni archivos externos. Procesar NDJSON UTF-8 con objetos de claves exactamente nodes y edges; máximo 131072 bytes por lote, 120 nodos distintos por petición y 2000 pares de aristas antes de deduplicar. Los nombres deben satisfacer [a-z][a-z0-9_]{0,15}. Cada arista debe ser una lista de dos nombres presentes; rechazar tipos incorrectos, nodos repetidos, desconocidos, bucles y ciclos. Rechazar líneas vacías, JSON mal formado, constantes no finitas, claves duplicadas, campos extra y UTF-8 inválido. Entrada completamente vacía significa cero peticiones. Validar todo el lote antes de emitir. Para cada petición válida emitir exactamente order, layers y roots en un objeto JSON seguido de newline: order elige el menor nombre de todos los disponibles en cada paso; layers retira rondas completas ordenadas; roots es la primera ronda o []. Calcular ambos planes independientemente sin modificar el grafo original. Lote válido: exit 0 y stderr vacío. Cualquier petición inválida: stdout vacío, stderr exactamente topo-plan: invalid input seguido de newline y exit 2. Entregar README con instalación, entrada, ejemplos, errores y límites; sellar programa y README antes de escribir test_topo_plan.py.",
+        "version": 1
+      },
+      "prev_hash": "d35d2d8458472fe8d294f0c22aa54fe47b2ea2ed66f4ee47e774cb8e4f40452c",
+      "seq": 35
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:38:19+00:00",
+      "hash": "c9f89723fa1df27bc84da23e28d98666c8fd87a534771dd434614629b33ca979",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "coverage": "Tres ejemplos públicos; DAG sobre subconjuntos de {a,b,c,d}; duplicados y permutaciones; entrada vacía; cada regla de rechazo; límites y excesos; lotes mixtos inválidos al inicio, medio y final, conforme al protocolo vigente.",
+          "metric": "proporcion_lotes_conformes",
+          "oracle": "Órdenes topológicos enumerados para DAG pequeños y rondas derivadas de conjuntos de predecesores, separados del cálculo de order.",
+          "reject": "Rechazar la conformidad del corpus si al menos un lote registrado discrepa de sus expectativas preregistradas.",
+          "reject_test": {
+            "condition": "Existe al menos un lote contrastado con discrepancia en stdout, stderr o código de terminación.",
+            "minimum_discrepant_batches": 1,
+            "missing_support": "Sin registros o sin lotes contrastados: no_demostrado."
+          },
+          "steps": [
+            "Fijar corpus, bytes y expectativas antes de medir.",
+            "Contar cada lote una vez y conservar numerador, denominador y discrepancias.",
+            "Aplicar el umbral únicamente a registros reales del corpus fijado."
+          ],
+          "threshold": {
+            "operator": ">=",
+            "statistic": "estimate",
+            "value": 1
+          },
+          "unit": "proporción"
+        },
+        "deps": {
+          "decision_topoplan": 1,
+          "evidence_contract": 1,
+          "indicator_conformance": 1,
+          "norm_contract_priority": 1,
+          "problem_topoplan": 1,
+          "protocol_conformance": 1,
+          "requirement_topoplan": 1
+        },
+        "id": "criterion_topoplan",
+        "kind": "criterion",
+        "text": "Fijar antes de recoger resultados una proporción de lotes conformes igual a 1 para el corpus de protocol_conformance. Un lote cuenta como conforme únicamente si todas sus salidas y su terminación coinciden con las expectativas contractuales: JSON estructural y newline por petición válida, stderr y exit correspondientes, o rechazo atómico con bytes exactos. Una discrepancia basta para rechazar la conformidad del corpus. Sin registros reales o con denominador cero, la conformidad permanece no demostrada. El criterio no acredita corrección universal ni efectos de campo.",
+        "version": 1
+      },
+      "prev_hash": "2f3e13bdb8fb7c3520c3661043bad3ce9780cd0551c9e46c59cdf35df0e1c02c",
+      "seq": 36
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-06T03:38:32+00:00",
+      "hash": "0ac0fbf6b5a1cc51f02990b21e9ac3bbf0cc323c5a2a0bf72a2cf1c48da4865d",
+      "kind": "approval",
+      "payload": {
+        "id": "decision_topoplan",
+        "provenance": "local_declared",
+        "reason": "Existing local owner mandate; technical conformity judged separately by reviewer:gemini-isolated-review (/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/role-16-specify-approval/receipt.json): La decisión decision_topoplan se adhiere rigurosamente al mandato delegado y a las restricciones contractuales vigentes. Selecciona de manera fundada la opción option_cli para cumplir con el encargo de desarrollo técnico público sin atribuir elecciones algorítmicas al operador ni arrogarse superioridad empírica o beneficios de campo no medidos. Asimismo, respeta la exclusividad de la biblioteca estándar, la entrada vía stdin, la validación atómica completa del lote antes de la emisión y la estricta separación e independencia entre el orden topológico global y la determinación de rondas, manteniendo una trazabilidad exhaustiva con las normas, comparaciones y evidencias registradas.",
+        "version": 1
+      },
+      "prev_hash": "c9f89723fa1df27bc84da23e28d98666c8fd87a534771dd434614629b33ca979",
+      "seq": 37
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:38:47+00:00",
+      "hash": "62271e3932820169c6db48dc6248e019f298561efbb03a869fa11d04e8021d1d",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "specify",
+        "provenance": "local_declared",
+        "reason": "La fase specify cumple rigurosamente con el contrato de fase, los límites presupuestarios y las normas de gobernanza vigentes. Contiene la decisión técnica aprobada (decision_topoplan), la especificación exhaustiva de requisitos (requirement_topoplan) y el criterio de aceptación preregistrado (criterion_topoplan). Todos los elementos trazan coherentemente hacia el problema original (problem_topoplan), la norma aprobada (norm_contract_priority), la evidencia documental (evidence_contract) y el protocolo metodológico (protocol_conformance), vinculando el indicador correspondiente (indicator_conformance). No se formulan afirmaciones infundadas de superioridad o beneficios de campo, no se anticipan resultados de ejecución no contrastados y se respeta la precedencia estricta de los criterios respecto a las pruebas. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/role-17-specify-review/receipt.json]",
+        "snapshot": "e510359916b55603892c983a2810c56b6581ad6901ccd5f398814eb13899643a",
+        "verdict": "accept"
+      },
+      "prev_hash": "0ac0fbf6b5a1cc51f02990b21e9ac3bbf0cc323c5a2a0bf72a2cf1c48da4865d",
+      "seq": 38
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:38:47+00:00",
+      "hash": "e213129268698e9ea1056815e0662da2b12429c7bbd24bc4eda4b23ccc6e82c9",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "specify",
+        "review_seq": 38,
+        "snapshot": "e510359916b55603892c983a2810c56b6581ad6901ccd5f398814eb13899643a"
+      },
+      "prev_hash": "62271e3932820169c6db48dc6248e019f298561efbb03a869fa11d04e8021d1d",
+      "seq": 39
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:39:31+00:00",
+      "hash": "d336759c2cbdb6d9f67adc2e5ef6d7e4eea93dfb5519ae311fa14a0e427fc29f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "delivery_tree_sha256": "20335bbeecd935c787ac42589a8f7c3695be3e67af2fffe56b0eefc8f974f1a2",
+          "files": [
+            "topo_plan.py",
+            "README.md"
+          ],
+          "steps": [
+            "Definir validación estricta de objetos, nombres, aristas y límites antes de emitir el lote.",
+            "Calcular order mediante selección lexicográfica global y layers mediante rondas sobre copias independientes de grados.",
+            "Documentar ejecución, expectativas públicas y errores sin atribuir resultados de ejecución."
+          ]
+        },
+        "deps": {
+          "decision_topoplan": 1,
+          "requirement_topoplan": 1
+        },
+        "id": "implementation_topoplan",
+        "kind": "implementation",
+        "text": "Implementación de TopoPlan con lectura acotada, validación atómica de NDJSON, deduplicación de aristas y cálculos independientes de order y layers. Se aporta README de instalación, interfaz, ejemplos, errores y límites. No se aportan pruebas ni resultados en esta etapa program.",
+        "version": 1
+      },
+      "prev_hash": "e213129268698e9ea1056815e0662da2b12429c7bbd24bc4eda4b23ccc6e82c9",
+      "seq": 40
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:40:44+00:00",
+      "hash": "837530ca5c17e28a0e5d2dfb5f4755a3852cb24613b02fd4e99ab6872841daa6",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "delivery_tree_sha256": "d13a61f33992c42cc2b398ce7fb6dfee9739372375c57c7250f84a33f713572a",
+          "files": [
+            "topo_plan.py",
+            "README.md",
+            "test_topo_plan.py"
+          ],
+          "steps": [
+            "Conservar programa y README del checkpoint sin modificaciones.",
+            "Añadir corpus contractual y comprobación externa de la CLI."
+          ]
+        },
+        "deps": {
+          "decision_topoplan": 1,
+          "requirement_topoplan": 1
+        },
+        "id": "implementation_topoplan",
+        "kind": "implementation",
+        "text": "Se conserva la implementación sellada y su README; se añade test_topo_plan.py como entrega de la etapa tests. Los oráculos enumeran órdenes y derivan rondas por predecesores, sin importar el programa.",
+        "version": 2
+      },
+      "prev_hash": "d336759c2cbdb6d9f67adc2e5ef6d7e4eea93dfb5519ae311fa14a0e427fc29f",
+      "seq": 41
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:40:44+00:00",
+      "hash": "d3d3ba548f0e1930d146b45e37e47d839835960a129d574502667d49820458c6",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/opt/specorganon/venv/bin/python",
+            "/input/delivery/test_topo_plan.py"
+          ],
+          "command": "/opt/specorganon/venv/bin/python /input/delivery/test_topo_plan.py",
+          "scope": "Corpus público finito; sin inferencia de corrección universal ni efectos de campo.",
+          "steps": [
+            "Construir el corpus completo y sus expectativas independientes antes de ejecutar.",
+            "Contrastar cada lote y detenerse en la primera discrepancia con diagnóstico breve."
+          ]
+        },
+        "deps": {
+          "criterion_topoplan": 1,
+          "implementation_topoplan": 2,
+          "requirement_topoplan": 1
+        },
+        "id": "test_topoplan",
+        "kind": "test",
+        "text": "Borrador ejecutable de contraste contractual: ejemplos, todos los DAG sobre subconjuntos de cuatro nodos, permutaciones y duplicados, límites, rechazos y lotes mixtos. Congela entradas y expectativas antes de lanzar el producto; comprueba JSON, newline, stderr y terminación. No aporta resultados.",
+        "version": 1
+      },
+      "prev_hash": "837530ca5c17e28a0e5d2dfb5f4755a3852cb24613b02fd4e99ab6872841daa6",
+      "seq": 42
+    },
+    {
+      "actor": "executor:isolated-software-controller",
+      "at": "2026-10-06T03:40:49+00:00",
+      "hash": "a0eebdce38b056df8a46a1b907068788a15c9100b9425b33ed89624545a6112f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/opt/specorganon/venv/bin/python",
+            "/input/delivery/test_topo_plan.py"
+          ],
+          "command": "/opt/specorganon/venv/bin/python /input/delivery/test_topo_plan.py",
+          "delivery_tree_sha256": "d13a61f33992c42cc2b398ce7fb6dfee9739372375c57c7250f84a33f713572a",
+          "passed": true,
+          "receipt": {
+            "argv": [
+              "/opt/specorganon/venv/bin/python",
+              "/input/delivery/test_topo_plan.py"
+            ],
+            "exit_code": 0,
+            "result_sha256": "73e454d0a0484f931dfcc3d7df9521932a781289b50f11d5085be063da0f910d",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_sha256": "c9bb51f0040a0ab29429dd249c39ce0e65d1a4ffabc8a89556fefb04aca7686a",
+            "timed_out": false
+          },
+          "scope": "Corpus público finito; sin inferencia de corrección universal ni efectos de campo.",
+          "steps": [
+            "Construir el corpus completo y sus expectativas independientes antes de ejecutar.",
+            "Contrastar cada lote y detenerse en la primera discrepancia con diagnóstico breve."
+          ],
+          "test_job_ref": "/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/test-40e9bae6886e34bd9c36f7ab/receipt.json"
+        },
+        "deps": {
+          "criterion_topoplan": 1,
+          "implementation_topoplan": 2,
+          "requirement_topoplan": 1
+        },
+        "id": "test_topoplan",
+        "kind": "test",
+        "text": "Borrador ejecutable de contraste contractual: ejemplos, todos los DAG sobre subconjuntos de cuatro nodos, permutaciones y duplicados, límites, rechazos y lotes mixtos. Congela entradas y expectativas antes de lanzar el producto; comprueba JSON, newline, stderr y terminación. No aporta resultados.",
+        "version": 2
+      },
+      "prev_hash": "d3d3ba548f0e1930d146b45e37e47d839835960a129d574502667d49820458c6",
+      "seq": 43
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:41:06+00:00",
+      "hash": "de8a11e795a066b43e41b2c0501b2d7f626a7719fc7c56aa8897a610fda93598",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "build",
+        "provenance": "local_declared",
+        "reason": "La fase build cumple plenamente los criterios contractuales y técnicos: implementation_topoplan enlaza con requirement_topoplan y decision_topoplan; test_topoplan enlaza con criterion_topoplan, implementation_topoplan y requirement_topoplan. El programa topo_plan.py y README.md se mantuvieron íntegros y sellados, las pruebas test_topo_plan.py cubren exhaustivamente las reglas de orden topológico, capas, validación atómica y límites de NDJSON/bytes, y el registro de ejecución aislado test-40e9bae6886e34bd9c36f7ab certifica la superación total de los 289 lotes con código 0 y flujos conformes dentro de las cuotas de transporte. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/role-20-build-review/receipt.json]",
+        "snapshot": "78232705efb51ccafc69ed870ae3526738d6cac599267850ad46a5102b57e031",
+        "verdict": "accept"
+      },
+      "prev_hash": "a0eebdce38b056df8a46a1b907068788a15c9100b9425b33ed89624545a6112f",
+      "seq": 44
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:41:06+00:00",
+      "hash": "b4bdc5eac65454af1fe8b4f11a222532ae3afbd307bf928734460339469590a0",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "build",
+        "review_seq": 44,
+        "snapshot": "78232705efb51ccafc69ed870ae3526738d6cac599267850ad46a5102b57e031"
+      },
+      "prev_hash": "de8a11e795a066b43e41b2c0501b2d7f626a7719fc7c56aa8897a610fda93598",
+      "seq": 45
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:41:38+00:00",
+      "hash": "4d12ae68170595e5c51f79f1ebcd85b108aa640fe3bca5c1445af720faef5c29",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "No indicada para la publicación del criterio suministrado",
+          "metric": "proporcion_lotes_conformes",
+          "origin": "published",
+          "scope": "Corpus público definido por criterion_topoplan; referencia normativa, sin comparador empírico.",
+          "source": "state.json/items/criterion_topoplan/data/threshold",
+          "steps": [
+            "Identificar el umbral explícito del criterio vigente.",
+            "Separar el objetivo contractual de una línea base empírica ausente."
+          ],
+          "unit": "proporción",
+          "value": 1
+        },
+        "deps": {
+          "criterion_topoplan": 1,
+          "indicator_conformance": 1
+        },
+        "id": "baseline_topoplan",
+        "kind": "baseline",
+        "text": "La referencia publicada exige una proporción de lotes conformes de 1. Es un objetivo contractual prerregistrado, no una medición previa de TopoPlan ni de una alternativa; no permite estimar mejora causal.",
+        "version": 1
+      },
+      "prev_hash": "b4bdc5eac65454af1fe8b4f11a222532ae3afbd307bf928734460339469590a0",
+      "seq": 46
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:41:38+00:00",
+      "hash": "8c4da6c3c66d9ad6291788979f6e43ba2b215ca7e3bdf648518f0e0c7a7182d4",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "finished_epoch=1791258048.765013",
+          "denominator": 289,
+          "duration_seconds": 3.96490544299013,
+          "exit_code": 0,
+          "locator": "streams/stdout/text; receipt/exit_code; receipt/metadata/input_manifest",
+          "method": "El harness suministrado congela entradas y expectativas, ejecuta la CLI por subprocess y compara salida, stderr y terminación por lote; su resumen conservado informa los conteos.",
+          "metric": "proporcion_lotes_conformes",
+          "numerator": 289,
+          "origin": "technical",
+          "scope": "289 lotes del corpus contractual ejecutado sobre la entrega actual según el registro suministrado.",
+          "source": "measured-test-records.json/test_topoplan",
+          "stderr": "",
+          "stdout": "OK conforming_batches=289 total_batches=289\n",
+          "steps": [
+            "Extraer numerador y denominador del stdout completo suministrado.",
+            "Calcular 289/289 y comprobar su concordancia con el código y los streams registrados.",
+            "Limitar el resultado a la entrega y al corpus identificados."
+          ],
+          "uncertainty": "Resumen agregado sin salidas individuales; procedencia declarada localmente y firma no verificada. No se estima un intervalo poblacional.",
+          "unit": "proporción",
+          "value": 1
+        },
+        "deps": {
+          "criterion_topoplan": 1,
+          "implementation_topoplan": 2,
+          "indicator_conformance": 1,
+          "test_topoplan": 2
+        },
+        "id": "result_topoplan",
+        "kind": "result",
+        "text": "El registro suministrado para la entrega actual informa 289 lotes conformes de 289 contrastados: proporción 1. El proceso terminó con código 0, stderr vacío y stdout completo de 44 bytes. Es un resultado técnico del corpus, sin mediciones de campo ni comparación con alternativas.",
+        "version": 1
+      },
+      "prev_hash": "4d12ae68170595e5c51f79f1ebcd85b108aa640fe3bca5c1445af720faef5c29",
+      "seq": 47
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:41:39+00:00",
+      "hash": "07bdd9eec53e5c458a323c5fc9cb753e23f7f0bb6fd12267f2d4f9f1dec67127",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": "Desconocidos: no se suministran observaciones de daños o consecuencias sobre usuarios.",
+          "cost": {
+            "comparative": "Desconocido",
+            "development": "Desconocido",
+            "operation": "Desconocido",
+            "recorded_test_duration_seconds": 3.96490544299013
+          },
+          "effect": "No estimable con las fuentes suministradas; no se atribuye un intervalo ni una mejora causal.",
+          "scope": "Eficacia comparativa y efectos de campo; el contraste técnico se limita al corpus suministrado.",
+          "steps": [
+            "Contrastar la proporción registrada con el umbral prerregistrado.",
+            "Distinguir conformidad técnica del corpus de eficacia causal y efectos externos.",
+            "Examinar riesgos, costes y daños, declarando desconocido lo no medido."
+          ],
+          "technical_comparison": {
+            "discrepant_batches_reported": 0,
+            "estimate": 1,
+            "operator": ">=",
+            "threshold": 1
+          },
+          "uncertainty": "Cobertura finita, posibles errores compartidos del oráculo y procedencia local no autenticada. Los textos prospectivos anteriores no sustituyen este registro ni aportan un comparador medido.",
+          "verdict": "no_demostrado"
+        },
+        "deps": {
+          "baseline_topoplan": 1,
+          "criterion_topoplan": 1,
+          "result_topoplan": 1,
+          "risk_options": 1
+        },
+        "id": "assessment_topoplan",
+        "kind": "assessment",
+        "text": "La proporción técnica registrada coincide con el umbral contractual de 1 para este corpus. La eficacia comparativa permanece no demostrada: la referencia es normativa y faltan una línea base empírica, mediciones de campo y soporte para un efecto con intervalo. No se infieren corrección universal, reducción de daños ni superioridad.",
+        "version": 1
+      },
+      "prev_hash": "8c4da6c3c66d9ad6291788979f6e43ba2b215ca7e3bdf648518f0e0c7a7182d4",
+      "seq": 48
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:42:05+00:00",
+      "hash": "97fbe1219b6f1dc4f6f1e142a38467b2fddc2c405f3bf1e79f71f0470e8a6269",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "Fecha de fijación no suministrada",
+          "metric": "proporcion_lotes_conformes",
+          "origin": "technical",
+          "scope": "Referencia normativa para el corpus contractual; comparador empírico ausente.",
+          "source": "state.json/items/criterion_topoplan/data/threshold",
+          "steps": [
+            "Identificar el umbral del criterio vigente.",
+            "Distinguir referencia contractual de línea base medida."
+          ],
+          "unit": "proporción",
+          "value": 1
+        },
+        "deps": {
+          "criterion_topoplan": 1,
+          "indicator_conformance": 1
+        },
+        "id": "baseline_topoplan",
+        "kind": "baseline",
+        "text": "Referencia técnica contractual: proporción exigida de lotes conformes igual a 1. Es un objetivo prerregistrado, no una medición previa del producto ni de una alternativa; no permite estimar mejora causal.",
+        "version": 2
+      },
+      "prev_hash": "07bdd9eec53e5c458a323c5fc9cb753e23f7f0bb6fd12267f2d4f9f1dec67127",
+      "seq": 49
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:42:05+00:00",
+      "hash": "ce6b06ff571df2c31136c7b6c5e59696d39d59bdb19be535b81f7f2c89368008",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "finished_epoch=1791258048.765013",
+          "denominator": 289,
+          "duration_seconds": 3.96490544299013,
+          "exit_code": 0,
+          "locator": "streams/stdout/text; receipt/exit_code; receipt/metadata/input_manifest",
+          "method": "El harness fija entradas y expectativas antes de ejecutar la CLI por subprocess y contrasta stdout, stderr y terminación; el resumen suministrado informa los conteos.",
+          "metric": "proporcion_lotes_conformes",
+          "numerator": 289,
+          "origin": "technical",
+          "scope": "289 lotes del corpus contractual sobre la entrega actual, según el registro suministrado.",
+          "source": "measured-test-records.json/test_topoplan",
+          "stderr": "",
+          "stdout": "OK conforming_batches=289 total_batches=289\n",
+          "steps": [
+            "Extraer los conteos del resumen suministrado y calcular 289/289.",
+            "Relacionar el resultado con la referencia normativa y el criterio.",
+            "Conservar el alcance de la entrega y del corpus identificados."
+          ],
+          "uncertainty": "Resumen agregado sin salidas individuales; procedencia local declarada, sin autenticación verificada. Sin intervalo poblacional ni extrapolación.",
+          "unit": "proporción",
+          "value": 1
+        },
+        "deps": {
+          "baseline_topoplan": 2,
+          "criterion_topoplan": 1,
+          "implementation_topoplan": 2,
+          "indicator_conformance": 1,
+          "test_topoplan": 2
+        },
+        "id": "result_topoplan",
+        "kind": "result",
+        "text": "El registro suministrado para la entrega actual informa 289 lotes conformes de 289 contrastados, proporción 1, código 0 y stderr vacío. Coincide numéricamente con la referencia contractual; no mide mejora respecto de una ejecución anterior ni efectos de campo.",
+        "version": 2
+      },
+      "prev_hash": "97fbe1219b6f1dc4f6f1e142a38467b2fddc2c405f3bf1e79f71f0470e8a6269",
+      "seq": 50
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T03:42:05+00:00",
+      "hash": "6bee66ec41780cb472976b27168a5fdd5d36320eb68f96d1818733849ab31a8f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": "Desconocidos: no se suministran observaciones de consecuencias sobre usuarios; los riesgos enlazados son prospectivos.",
+          "claim_scope": "technical",
+          "cost": {
+            "comparative": "Desconocido",
+            "development": "Desconocido",
+            "operation": "Desconocido",
+            "recorded_test_duration_seconds": 3.96490544299013
+          },
+          "effect": "No estimable: la referencia es normativa, no un comparador medido; no se asigna efecto ni intervalo.",
+          "scope": "Contraste descriptivo del corpus contractual; sin atribución causal ni extrapolación a campo.",
+          "steps": [
+            "Contrastar el resultado suministrado con el umbral vigente.",
+            "Reconsiderar la evaluación tras corregir la referencia y su enlace al resultado.",
+            "Separar coincidencia técnica de eficacia causal y declarar costes y daños no medidos."
+          ],
+          "technical_comparison": {
+            "discrepant_batches_reported": 0,
+            "estimate": 1,
+            "operator": ">=",
+            "threshold": 1
+          },
+          "uncertainty": "Corpus finito, posibles errores compartidos del oráculo y procedencia local no autenticada. Los textos prospectivos anteriores no aportan un comparador medido.",
+          "verdict": "no_demostrado"
+        },
+        "deps": {
+          "baseline_topoplan": 2,
+          "criterion_topoplan": 1,
+          "result_topoplan": 2,
+          "risk_options": 1
+        },
+        "id": "assessment_topoplan",
+        "kind": "assessment",
+        "text": "La proporción técnica registrada, 1, coincide con el umbral contractual del corpus. La eficacia comparativa permanece no demostrada: falta una línea base empírica y soporte para un efecto con intervalo. No se infieren corrección universal, superioridad ni efectos de campo.",
+        "version": 2
+      },
+      "prev_hash": "ce6b06ff571df2c31136c7b6c5e59696d39d59bdb19be535b81f7f2c89368008",
+      "seq": 51
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T03:42:23+00:00",
+      "hash": "035dbd57de7d49b53c7844b295efd97d69a55442a5b94e9e3213cb210d20a35d",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "validate",
+        "provenance": "local_declared",
+        "reason": "La fase validate cumple rigurosamente con los requisitos contractuales y de diseño metodológico: baseline_topoplan, result_topoplan y assessment_topoplan están correctamente vinculados a sus antecedentes y dependencias en sus versiones vigentes (sin elementos obsoletos ni desajustes de versiones). El resultado refleja de forma trazable las mediciones técnicas del registro aislado (289/289 lotes conformes, valor 1), mientras que la línea base delimita con precisión la referencia normativa técnica sin inventar mediciones previas ni extrapolaciones empíricas. Conforme a las reglas de parada y contratos de la fase, assessment_topoplan emite un veredicto de 'no_demostrado' para la eficacia comparativa/causal, separando la conformidad técnica del corpus finito de cualquier beneficio de campo no observado, y documenta explícitamente la incertidumbre metodológica, costes y daños adversos no observados. No se atribuyen decisiones indebidas al operador ni se violan cuotas o sellados. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-06/transport/host-journal/role-23-validate-review/receipt.json]",
+        "snapshot": "e0cbbfb9a70bb8623143f42bcc11df28b62958d4750b479dacb80fadf43eb81e",
+        "verdict": "accept"
+      },
+      "prev_hash": "6bee66ec41780cb472976b27168a5fdd5d36320eb68f96d1818733849ab31a8f",
+      "seq": 52
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T03:42:23+00:00",
+      "hash": "170a9cc45350bf63572ee1cffcfc9fd9cd4c5cbfd22e09fa008a8ab166dfdbd8",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "validate",
+        "review_seq": 52,
+        "snapshot": "e0cbbfb9a70bb8623143f42bcc11df28b62958d4750b479dacb80fadf43eb81e"
+      },
+      "prev_hash": "035dbd57de7d49b53c7844b295efd97d69a55442a5b94e9e3213cb210d20a35d",
+      "seq": 53
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "92a72a0f-78d7-47d0-a28b-d933a241ebb5",
+    "created_at": "2026-10-06T03:32:24+00:00",
+    "created_by": "human:owner",
+    "domain": "development",
+    "test_gate_policy": "local_report",
+    "title": "Native reliability attempt-06 topoplan"
+  },
+  "schema": 1
+}

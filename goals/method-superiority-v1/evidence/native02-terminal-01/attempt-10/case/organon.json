@@ -1,0 +1,1345 @@
+{
+  "events": [
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:12:41+00:00",
+      "hash": "c29ed2f497f9f9e7ec9b7a1f540ed2459115404234c9857374af860a33d07ee1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md: entrada, salida y entrega",
+            "existing-mandate.md: autorización y delegación técnica"
+          ],
+          "steps": [
+            "Identificar al operador como actor del encargo y a los usuarios previstos de la CLI como afectados por su corrección."
+          ]
+        },
+        "deps": {},
+        "id": "range_actor",
+        "kind": "actor",
+        "text": "El operador encarga el desarrollo técnico de RangeAudit; los usuarios previstos de su CLI necesitan normalizar intervalos mediante stdin y obtener respuestas exactas y errores inequívocos. El agente tiene delegadas las decisiones técnicas dentro del mandato.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:12:41+00:00",
+      "hash": "9de3a29f7c264f703df2832ae003b08c485a917be8f04e01a0b878e929ed47b2",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md: especificación de RangeAudit y validación del lote"
+          ],
+          "steps": [
+            "Delimitar la necesidad como corrección técnica respecto del contrato público de entrada y salida."
+          ]
+        },
+        "deps": {
+          "range_actor": 1
+        },
+        "id": "range_problem",
+        "kind": "problem",
+        "text": "La necesidad contractual es construir una CLI Python estándar que normalice intervalos enteros semiabiertos, calcule cobertura, extensión y huecos, y rechace íntegramente un lote inválido antes de emitir resultados. Una respuesta incorrecta o parcial incumpliría ese encargo; los documentos no demuestran que tal fallo ya haya ocurrido.",
+        "version": 1
+      },
+      "prev_hash": "c29ed2f497f9f9e7ec9b7a1f540ed2459115404234c9857374af860a33d07ee1",
+      "seq": 2
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:12:41+00:00",
+      "hash": "7aa2e72f717d026bbcc91cdbb7cb88fb7bae6fb0d5ffb8dc3d362a54426e86c3",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md: límites, entrega y carácter público del desarrollo",
+            "existing-mandate.md: separación de desarrollo y evaluación"
+          ],
+          "steps": [
+            "Separar la formulación técnica verificable de la meta general de mejorar SpecOrganon.",
+            "Limitar cualquier conclusión posterior a las observaciones efectivamente obtenidas y conservar las nueve fases."
+          ]
+        },
+        "deps": {
+          "range_actor": 1,
+          "range_problem": 1
+        },
+        "id": "range_boundary",
+        "kind": "boundary",
+        "text": "El alcance comprende la CLI range_audit.py, su README y pruebas posteriores, usando sólo biblioteca estándar y stdin, sin red, ficheros externos ni modificación del entorno. El contrato limita stdin a 131072 bytes y cada petición a 2000 intervalos con extremos enteros de valor absoluto hasta 10^12. La observación queda limitada al contrato suministrado y a futuras ejecuciones reales de desarrollo público. Mejorar SpecOrganon es la meta del mandato, pero este caso no demuestra beneficios de campo ni superioridad frente a alternativas; la evaluación reservada futura y las campañas cerradas quedan fuera.",
+        "version": 1
+      },
+      "prev_hash": "9de3a29f7c264f703df2832ae003b08c485a917be8f04e01a0b878e929ed47b2",
+      "seq": 3
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T04:12:56+00:00",
+      "hash": "b50897ae339b478b73856bdbaa7123cb80af45f413011909dfce1c981971a75b",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "La formulación de la fase frame delimita con precisión el problema contractual, identifica adecuadamente a los actores involucrados (el operador y los usuarios de la CLI) y establece una frontera rigurosa conforme al contrato y al mandato existente. Se respeta escrupulosamente la separación entre el desarrollo técnico público y las evaluaciones reservadas, sin incurrir en alegaciones infundadas de superioridad o beneficios de campo. Las dependencias entre los elementos están correctamente estructuradas y el contenido se ajusta a las restricciones presupuestarias y normativas. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/role-02-frame-review/receipt.json]",
+        "snapshot": "e2f83c73a8462838de469495d9f2aa6846d7d55efe4bcde0b1d5915b7cb57054",
+        "verdict": "accept"
+      },
+      "prev_hash": "7aa2e72f717d026bbcc91cdbb7cb88fb7bae6fb0d5ffb8dc3d362a54426e86c3",
+      "seq": 4
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T04:12:56+00:00",
+      "hash": "e5fd19173b6fa5b4d334c0536dd28a75dfa9b74012de2882dad816acd4aa6ec9",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "e2f83c73a8462838de469495d9f2aa6846d7d55efe4bcde0b1d5915b7cb57054"
+      },
+      "prev_hash": "b50897ae339b478b73856bdbaa7123cb80af45f413011909dfce1c981971a75b",
+      "seq": 5
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:13:22+00:00",
+      "hash": "2f13e902261f2e3baaac64639b292a0dd9a4a369a8f19b4f0e6b7151bc3387ed",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md: entrada, salida y rechazo del lote"
+          ],
+          "steps": [
+            "Separar la corrección verificable de las metas generales del mandato."
+          ]
+        },
+        "deps": {
+          "range_boundary": 1,
+          "range_problem": 1
+        },
+        "id": "range_concept",
+        "kind": "concept",
+        "text": "Corrección contractual significa transformar exactamente cada petición válida y rechazar todo lote que contenga una petición inválida sin emitir stdout. Los intervalos son semiabiertos: la adyacencia permite fusionarlos sin añadir cobertura. Esta definición permite contrastar entradas y salidas; no define mejora de SpecOrganon ni utilidad de campo por el mero cumplimiento.",
+        "version": 1
+      },
+      "prev_hash": "e5fd19173b6fa5b4d334c0536dd28a75dfa9b74012de2882dad816acd4aa6ec9",
+      "seq": 6
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:13:22+00:00",
+      "hash": "af9e7348d8ea2eaf9e1e69268209aae752c1f1bd4ac921ac241fa5c5445ab1de",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md: reglas y ejemplos",
+            "existing-mandate.md: alcance del desarrollo público"
+          ],
+          "steps": [
+            "Examinar la suficiencia del encargo sin convertirla en una afirmación sobre usuarios reales."
+          ]
+        },
+        "deps": {
+          "range_actor": 1,
+          "range_concept": 1,
+          "range_problem": 1
+        },
+        "id": "range_assumption",
+        "kind": "assumption",
+        "text": "Se supone que el contrato proporciona una base suficiente para delimitar este desarrollo técnico. Sus ejemplos ilustran las reglas, pero no constituyen una comprobación exhaustiva ni evidencia de ejecución. La suficiencia para necesidades reales de usuarios queda sin demostrar; cualquier ambigüedad que cambie el comportamiento exigido debe explicitarse antes de implementar.",
+        "version": 1
+      },
+      "prev_hash": "2f13e902261f2e3baaac64639b292a0dd9a4a369a8f19b4f0e6b7151bc3387ed",
+      "seq": 7
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:13:22+00:00",
+      "hash": "268a047f398edf9fb87092aa607741edce9d768fd255ec645ad8a63b8b5e0415",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md: exactitud y validación del lote"
+          ],
+          "steps": [
+            "Identificar la fidelidad contractual como prioridad y delimitar lo que no permite concluir."
+          ]
+        },
+        "deps": {
+          "range_actor": 1,
+          "range_assumption": 1,
+          "range_concept": 1,
+          "range_problem": 1
+        },
+        "id": "range_frame_exact",
+        "kind": "frame_option",
+        "text": "Enmarcar el trabajo como fidelidad al contrato: priorizar exactitud entera, validación completa y ausencia de salida parcial. Su fundamento es la obligación explícita de rechazo atómico. Favorece una evaluación técnica delimitada, aunque por sí solo deja fuera la facilidad de aprendizaje y no demuestra que el producto sea útil en campo.",
+        "version": 1
+      },
+      "prev_hash": "af9e7348d8ea2eaf9e1e69268209aae752c1f1bd4ac921ac241fa5c5445ab1de",
+      "seq": 8
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:13:22+00:00",
+      "hash": "4ec8400f9a54e4cd389ada83dd7345f4a022edf404b4d06134f157c08e0a08cb",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md: README y comportamiento de errores"
+          ],
+          "steps": [
+            "Considerar la comprensión del uso como fin distinto y señalar su tensión con la prioridad de exactitud."
+          ]
+        },
+        "deps": {
+          "range_actor": 1,
+          "range_assumption": 1,
+          "range_boundary": 1,
+          "range_concept": 1,
+          "range_problem": 1
+        },
+        "id": "range_frame_use",
+        "kind": "frame_option",
+        "text": "Enmarcar el trabajo como comprensión del uso: priorizar en el README ejemplos, límites y explicación del rechazo de lotes para orientar al usuario previsto. Su fundamento es la entrega de documentación útil exigida. Compite con el primer enfoque por atención de diseño; mantiene idéntica semántica de la CLI y el stderr fijo. La claridad documental no sustituye la corrección ni está medida en los documentos aportados.",
+        "version": 1
+      },
+      "prev_hash": "268a047f398edf9fb87092aa607741edce9d768fd255ec645ad8a63b8b5e0415",
+      "seq": 9
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:13:22+00:00",
+      "hash": "09efc3be968a848d1e17104a45804cdb0ea753e5e20ae2e77d469114aa02aeae",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "existing-mandate.md: delegación de decisiones técnicas",
+            "contract.md: rechazo atómico y entrega documental"
+          ],
+          "steps": [
+            "Ponderar ambos fines y limitar la prioridad técnica al mandato existente."
+          ]
+        },
+        "deps": {
+          "range_actor": 1,
+          "range_boundary": 1,
+          "range_frame_exact": 1,
+          "range_frame_use": 1,
+          "range_problem": 1
+        },
+        "id": "range_norm",
+        "kind": "norm",
+        "text": "Dentro de la delegación técnica, se adopta como prioridad la fidelidad contractual y se incorpora la comprensión del uso mediante el README requerido. Ante tensión entre comodidad y rechazo atómico, prevalece el comportamiento especificado. Es un juicio de diseño fundado en el encargo, no una elección atribuida al operador ni una afirmación de beneficio. Un conflicto que exija alterar el contrato queda fuera de esta elección delegada.",
+        "version": 1
+      },
+      "prev_hash": "4ec8400f9a54e4cd389ada83dd7345f4a022edf404b4d06134f157c08e0a08cb",
+      "seq": 10
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-06T04:13:37+00:00",
+      "hash": "67c10426f5851ddb3d4389c2c0de45c63efd388cc82ac5e726dad9fae742e185",
+      "kind": "approval",
+      "payload": {
+        "id": "range_norm",
+        "provenance": "local_declared",
+        "reason": "Existing local owner mandate; technical conformity judged separately by reviewer:gemini-isolated-review (/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/role-04-critique-approval/receipt.json): La norma range_norm cumple estrictamente con el mandato y la delegación técnica otorgada: prioriza la fidelidad a los requisitos contractuales y el rechazo atómico especificado, integrando la comprensión del uso mediante la documentación requerida sin atribuir decisiones arbitrarias al operador ni formular afirmaciones indebidas de superioridad o beneficios de campo. Separa adecuadamente los juicios de valor de los hechos empíricos conforme a los criterios de salida de la fase critique.",
+        "version": 1
+      },
+      "prev_hash": "09efc3be968a848d1e17104a45804cdb0ea753e5e20ae2e77d469114aa02aeae",
+      "seq": 11
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T04:13:54+00:00",
+      "hash": "54bc5a3e4608cde3bceda8383d7c9e08f4f3b6e1ba4f60a4419fb772f19f9d53",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "La fase critique cumple rigurosamente con los criterios de salida y el contrato aplicable. Se articulan adecuadamente el concepto (range_concept) y el supuesto (range_assumption), delimitando la suficiencia contractual frente a afirmaciones de utilidad empírica no demostradas. Asimismo, se formulan dos alternativas de marco sustantivas y contrastadas (range_frame_exact y range_frame_use), y se fundamenta la norma técnica (range_norm) dentro de la delegación conferida por el mandato, separando con nitidez los juicios sobre lo deseable de los hechos verificables. La norma cuenta con aprobación humana previa registrada, las dependencias son coherentes y el uso de recursos se mantiene dentro de los límites establecidos. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/role-05-critique-review/receipt.json]",
+        "snapshot": "802d1ac9b593a036abb3bd5bf4609e0051ffcaccf1a4f9a26b23976d10afc632",
+        "verdict": "accept"
+      },
+      "prev_hash": "67c10426f5851ddb3d4389c2c0de45c63efd388cc82ac5e726dad9fae742e185",
+      "seq": 12
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T04:13:54+00:00",
+      "hash": "e746c090f0402848469a0eab9ec6b91606b3670cb332ca1d424cc366485206cc",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "critique",
+        "review_seq": 12,
+        "snapshot": "802d1ac9b593a036abb3bd5bf4609e0051ffcaccf1a4f9a26b23976d10afc632"
+      },
+      "prev_hash": "54bc5a3e4608cde3bceda8383d7c9e08f4f3b6e1ba4f60a4419fb772f19f9d53",
+      "seq": 13
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:14:27+00:00",
+      "hash": "ea1a3d6b512c7a79fd28f78182172d278ca682b64a389ee8b70ec0573a3d7abd",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Delimitar la pregunta a corrección contractual verificable, sin inferir utilidad de campo."
+          ]
+        },
+        "deps": {
+          "range_assumption": 1,
+          "range_concept": 1,
+          "range_norm": 1,
+          "range_problem": 1
+        },
+        "id": "range_question",
+        "kind": "question",
+        "text": "¿La futura CLI satisface la normalización exacta y el rechazo atómico del contrato en controles públicos válidos, inválidos y de frontera?",
+        "version": 1
+      },
+      "prev_hash": "e746c090f0402848469a0eab9ec6b91606b3670cb332ca1d424cc366485206cc",
+      "seq": 14
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:14:27+00:00",
+      "hash": "db171c4a5d0cf2c5571a6bb440d5434c686cc9afb5773dc6e63ea59bad9f20ae",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "steps": [
+            "Definir como refutación cualquier discrepancia en un caso; cero discrepancias sólo sustenta el conjunto examinado."
+          ]
+        },
+        "deps": {
+          "range_question": 1
+        },
+        "id": "range_hypothesis",
+        "kind": "hypothesis",
+        "text": "Hipótesis por contrastar: ningún caso del conjunto prefijado presenta discrepancias respecto del contrato, incluidos stdout, stderr y código de salida. No hay observaciones de ejecución suministradas.",
+        "version": 1
+      },
+      "prev_hash": "ea1a3d6b512c7a79fd28f78182172d278ca682b64a389ee8b70ec0573a3d7abd",
+      "seq": 15
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:14:27+00:00",
+      "hash": "a5b13b17d4e25c028ab940714383e8314c0a4c9b004281bafff87607cb7855c5",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Expectativas derivadas del contrato: ejemplos explícitos; unión de celdas enteras en dominios pequeños para comprobar cobertura, span, huecos y fusión; cálculo manual de extremos grandes. Comparar estructuras JSON con tipos enteros exactos y claves exactas; comprobar newline por respuesta. Lotes inválidos: stdout vacío, stderr exacto y exit2; válidos: stderr vacío y exit0.",
+          "method": "Preparar controles de 2000 y 2001 pares, extremos ±10^12 y fuera de rango, y stdin de 131072 y 131073 bytes. Incluir bool, float, pares incorrectos, inicio>=fin, claves extra o duplicadas, JSON mal formado, UTF-8 inválido y líneas vacías. Situar una petición inválida al principio, medio y final de lotes. En ejecución posterior capturar bytes de ambos streams y código de salida por caso; contar cada caso discrepante una sola vez.",
+          "population": "Casos sintéticos de desarrollo público: cuatro ejemplos del contrato; stdin vacío; intervalos negativos, duplicados, desordenados, anidados, adyacentes y separados; lotes múltiples; límites y entradas inválidas.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Prefijar casos y expectativas sin depender de salidas de la implementación.",
+            "Conservar posteriormente observaciones completas con identificación de casos y versión ejecutada; detener la interpretación si falta trazabilidad."
+          ],
+          "uncertainty": "Conjunto finito sin inferencia estadística sobre todas las entradas ni usuarios. El oráculo puede contener errores: contrastar expectativas geométricas con reglas y ejemplos. UTF-8 inválido se prepara como bytes. No usar datos personales ni red; distinguir expectativas documentales de futuras observaciones."
+        },
+        "deps": {
+          "range_hypothesis": 1,
+          "range_norm": 1,
+          "range_problem": 1,
+          "range_question": 1
+        },
+        "id": "range_protocol",
+        "kind": "protocol",
+        "text": "Protocolo prospectivo de controles públicos de contrato. Fijar entradas y expectativas antes de ejecutar; conservar también errores y discrepancias.",
+        "version": 1
+      },
+      "prev_hash": "db171c4a5d0cf2c5571a6bb440d5434c686cc9afb5773dc6e63ea59bad9f20ae",
+      "seq": 16
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:14:27+00:00",
+      "hash": "eece5225cf4f83eb08dcb097878186ed90fbf31eec06b8ac0e8f5c936de94e8a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "Sin fecha documental indicada",
+          "locator": "contract.md: Entrada, Salida, rechazo del lote y Ejemplos",
+          "origin": "published",
+          "source": "contract.md, documento suministrado",
+          "steps": [
+            "Identificar las reglas documentales que fundamentan el indicador sin atribuirles ejecución ni recolección empírica."
+          ]
+        },
+        "deps": {
+          "range_problem": 1,
+          "range_protocol": 1
+        },
+        "id": "range_contract_evidence",
+        "kind": "evidence",
+        "text": "El documento suministrado exige resultados enteros exactos y rechazo íntegro de cualquier lote inválido. Sus cuatro ejemplos son controles públicos de contrato, no mediciones ni resultados de RangeAudit.",
+        "version": 1
+      },
+      "prev_hash": "a5b13b17d4e25c028ab940714383e8314c0a4c9b004281bafff87607cb7855c5",
+      "seq": 17
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:14:27+00:00",
+      "hash": "cd1ceb4a31719c41319f20e5469ec5c5ac8150a5a716d652aa5927bbe1ea628f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Hipótesis de cero casos discrepantes; cualquier discrepancia la contradice en el conjunto examinado.",
+          "metric": "contract_discrepant_cases",
+          "source": "Futuras capturas por caso de stdout, stderr y código de salida, comparadas con expectativas prefijadas.",
+          "steps": [
+            "Vincular el conteo a la fidelidad contractual y registrar denominador y casos faltantes junto al eventual valor."
+          ],
+          "uncertainty": "El conteo describe únicamente los casos efectivamente ejecutados; faltantes o capturas incompletas impiden concluir sobre ellos.",
+          "unit": "casos"
+        },
+        "deps": {
+          "range_contract_evidence": 1,
+          "range_norm": 1,
+          "range_problem": 1,
+          "range_protocol": 1
+        },
+        "id": "range_indicator",
+        "kind": "indicator",
+        "text": "Número de casos con alguna discrepancia contractual en el conjunto prefijado. Cuenta cada caso una vez aunque falle varias comprobaciones; se informará también el total de casos ejecutados. No existe valor medido disponible.",
+        "version": 1
+      },
+      "prev_hash": "eece5225cf4f83eb08dcb097878186ed90fbf31eec06b8ac0e8f5c936de94e8a",
+      "seq": 18
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T04:14:45+00:00",
+      "hash": "5d26005c4e999e42d91f52d275ea252b3cd380cfcea4e6da4d9d37b4e39c6a85",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "La fase study cumple rigurosamente con todos los criterios de salida del contrato y las reglas de diseño experimental. Se formulan con precisión metodológica la pregunta (range_question), la hipótesis refutable (range_hypothesis), el protocolo estructurado (range_protocol) y el indicador verificable (range_indicator). El protocolo define exhaustivamente población, método, comparación e incertidumbre con controles de frontera y de rechazo atómico sin asumir ejecuciones previas ni extrapolar superioridad técnica o beneficios de campo. El indicador establece con exactitud su métrica, unidad, fuente e incertidumbre antes de cualquier resultado, distinguiendo nítidamente entre datos documentales, inferencias y supuestos. Las dependencias son coherentes, el consumo de recursos se mantiene dentro de los límites y no existen afirmaciones indebidas ni ejecuciones no realizadas. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/role-07-study-review/receipt.json]",
+        "snapshot": "a3a87259783c56039dff2a1755b5d8818e5dd5c2f948542298b4e81c89ca17f5",
+        "verdict": "accept"
+      },
+      "prev_hash": "cd1ceb4a31719c41319f20e5469ec5c5ac8150a5a716d652aa5927bbe1ea628f",
+      "seq": 19
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T04:14:45+00:00",
+      "hash": "9886870bdb3bc34f170b7c80ea437edee84478a385477125d6fc49b56168b447",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "study",
+        "review_seq": 19,
+        "snapshot": "a3a87259783c56039dff2a1755b5d8818e5dd5c2f948542298b4e81c89ca17f5"
+      },
+      "prev_hash": "5d26005c4e999e42d91f52d275ea252b3cd380cfcea4e6da4d9d37b4e39c6a85",
+      "seq": 20
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:14:58+00:00",
+      "hash": "f32a30b09aeb12c9bab03469d46f57e9ad64c64b1c8739665f1ddb10e054fae7",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "scope": "Inferencia documental sobre cobertura del protocolo para el problema contractual de RangeAudit.",
+          "sources": [
+            "contract.md: Entrada, Salida, rechazo del lote y Ejemplos",
+            "measured-test-records.json: objeto vacío"
+          ],
+          "steps": [
+            "Relacionar las obligaciones documentadas con la población y comparación del protocolo.",
+            "Distinguir expectativas contractuales de mediciones: no se suministran registros de ejecución."
+          ],
+          "uncertainty": "No permite determinar discrepancias de una implementación, conformidad técnica ni beneficios de campo."
+        },
+        "deps": {
+          "range_contract_evidence": 1,
+          "range_problem": 1,
+          "range_protocol": 1
+        },
+        "id": "range_contract_inference",
+        "kind": "inference",
+        "text": "La evidencia documental distingue dos obligaciones comprobables: normalización exacta de peticiones válidas y rechazo íntegro de lotes inválidos. Por ello, los cuatro ejemplos contractuales sólo cubren parte del alcance del protocolo: no bastan para establecer conformidad respecto de entradas inválidas y límites. Son controles públicos de contrato, sin resultados de ejecución aportados. La hipótesis y el valor del indicador permanecen sin demostrar.",
+        "version": 1
+      },
+      "prev_hash": "9886870bdb3bc34f170b7c80ea437edee84478a385477125d6fc49b56168b447",
+      "seq": 21
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T04:15:14+00:00",
+      "hash": "a92f9e4244e760e792e6fcd32af0012993533f721cf4f9e3362132dcd5ec890f",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "observe",
+        "provenance": "local_declared",
+        "reason": "La fase observe cumple plenamente con los criterios de salida del contrato de fase y las directrices metodológicas. El elemento de evidencia (range_contract_evidence) conserva explícitamente fuente, fecha, localizador y origen ('published') sin inventar mediciones ni atribuir resultados empíricos a controles puramente documentales. La inferencia (range_contract_inference) enlaza rigurosamente los datos disponibles del protocolo y el contrato, evaluando con sobriedad la cobertura documental frente a la necesidad técnica y dejando asentado de forma transparente que la hipótesis y el indicador permanecen sin demostrar al no existir ejecuciones. La trazabilidad de dependencias es exacta, no se invaden mandatos ni se realizan afirmaciones indebidas de superioridad o beneficio de campo, y el uso de recursos se encuentra holgadamente dentro de los límites estipulados. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/role-09-observe-review/receipt.json]",
+        "snapshot": "619eb826da02da7c4efbfa0a4d3c6b570f5fa52005f294cacb6e3a4a08f1e2b0",
+        "verdict": "accept"
+      },
+      "prev_hash": "f32a30b09aeb12c9bab03469d46f57e9ad64c64b1c8739665f1ddb10e054fae7",
+      "seq": 22
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T04:15:14+00:00",
+      "hash": "470515ee62228b65a3ed0e819056b1405a759f5bf54799fa60cc72d079b3984e",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "observe",
+        "review_seq": 22,
+        "snapshot": "619eb826da02da7c4efbfa0a4d3c6b570f5fa52005f294cacb6e3a4a08f1e2b0"
+      },
+      "prev_hash": "a92f9e4244e760e792e6fcd32af0012993533f721cf4f9e3362132dcd5ec890f",
+      "seq": 23
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:15:30+00:00",
+      "hash": "52b52ca712699b02249d83b0638307b5f47c3196643c018531a2d1bad485c4b1",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "alternatives": "La ausencia de registros es compatible tanto con una implementación correcta como con una defectuosa; no discrimina entre ellas. La amplitud del protocolo tampoco garantiza que sus expectativas sean correctas.",
+          "sources": [
+            "contract.md: reglas y ejemplos",
+            "measured-test-records.json: objeto vacío"
+          ],
+          "steps": [
+            "Integrar evidencia documental e inferencia, distinguiendo obligaciones de resultados observados.",
+            "Separar el supuesto de suficiencia contractual de la hipótesis todavía sin contrastar."
+          ]
+        },
+        "deps": {
+          "range_assumption": 1,
+          "range_contract_evidence": 1,
+          "range_contract_inference": 1,
+          "range_hypothesis": 1,
+          "range_protocol": 1
+        },
+        "id": "range_synthesis",
+        "kind": "synthesis",
+        "text": "Hallazgo documental: el contrato exige normalización exacta y rechazo íntegro de lotes inválidos; sus cuatro ejemplos son controles públicos de contrato. La inferencia vigente identifica que esos ejemplos no cubren por sí solos entradas inválidas ni límites. El protocolo contempla ambos aspectos, pero es prospectivo: no se aportan mediciones. Se mantiene como supuesto la suficiencia del contrato para delimitar el desarrollo técnico. La hipótesis de ausencia de discrepancias permanece sin demostrar; la cobertura descrita del protocolo no establece corrección de una implementación ni beneficio de campo.",
+        "version": 1
+      },
+      "prev_hash": "470515ee62228b65a3ed0e819056b1405a759f5bf54799fa60cc72d079b3984e",
+      "seq": 24
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:15:30+00:00",
+      "hash": "7d2b81b2e55b313b0ce55d690fc24623e633c250195a911e82811eaacb5eaee9",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "scope": "Desarrollo técnico público de RangeAudit; sin extrapolación a campo ni a alternativas.",
+          "sources": [
+            "measured-test-records.json: objeto vacío",
+            "range_protocol: población, comparación e incertidumbre"
+          ],
+          "steps": [
+            "Identificar ausencia de mediciones, selección de ejemplos y posibles errores del oráculo como límites distintos.",
+            "Acotar la conclusión al soporte documental disponible y mantener la hipótesis sin demostrar."
+          ]
+        },
+        "deps": {
+          "range_contract_evidence": 1,
+          "range_hypothesis": 1,
+          "range_protocol": 1,
+          "range_synthesis": 1
+        },
+        "id": "range_uncertainty",
+        "kind": "uncertainty",
+        "text": "No se dispone de observaciones de ejecución para estimar discrepancias ni determinar conformidad. Los ejemplos pueden favorecer una impresión de corrección al mostrar sólo entradas válidas. El protocolo reduce esa limitación documental al contemplar rechazo y fronteras, pero sus expectativas podrían contener errores compartidos con la interpretación del contrato. Incluso futuros resultados sin discrepancias quedarían limitados a los casos efectivamente examinados; no establecerían corrección universal, utilidad para usuarios ni superioridad. La conclusión actual se detiene en la caracterización documental del problema y del contraste propuesto.",
+        "version": 1
+      },
+      "prev_hash": "52b52ca712699b02249d83b0638307b5f47c3196643c018531a2d1bad485c4b1",
+      "seq": 25
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T04:15:45+00:00",
+      "hash": "ad1e0f930c753dbbf0252505256d0dc0d67c49a29bb9838b4885ef3541159067",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "explain",
+        "provenance": "local_declared",
+        "reason": "La fase explain cumple plenamente con los requisitos contractuales y metodológicos. El elemento range_synthesis distingue con precisión hallazgos documentales, supuestos de suficiencia y límites del alcance, considerando explicaciones alternativas respecto a la ausencia de ejecuciones. El elemento range_uncertainty explicita rigurosamente las limitaciones del soporte empírico actual, señalando los sesgos inherentes a la muestra contractual y acotando las conclusiones al ámbito documental sin atribuir conformidad no demostrada ni beneficios de campo. La trazabilidad de dependencias hacia observe, study y fases previas es íntegra y el consumo de recursos se mantiene holgadamente dentro de los límites. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/role-11-explain-review/receipt.json]",
+        "snapshot": "902f7be4cd340c12e56cd15d258a29ac7e3aef57c6f4912b31ccc5864c27eb0e",
+        "verdict": "accept"
+      },
+      "prev_hash": "7d2b81b2e55b313b0ce55d690fc24623e633c250195a911e82811eaacb5eaee9",
+      "seq": 26
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T04:15:45+00:00",
+      "hash": "9d4450f246abd2b4e483d3e11ae013f29cadc2b5670680ec75f5b2bcd7175d67",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "explain",
+        "review_seq": 26,
+        "snapshot": "902f7be4cd340c12e56cd15d258a29ac7e3aef57c6f4912b31ccc5864c27eb0e"
+      },
+      "prev_hash": "ad1e0f930c753dbbf0252505256d0dc0d67c49a29bb9838b4885ef3541159067",
+      "seq": 27
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:16:17+00:00",
+      "hash": "223f0e1e1e874b9b34db578e973ed3d40a4b195f28c440231ef873623ef47a5e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "actors": "El agente asume la implementación; el operador recibe una entrega técnica; los usuarios previstos deben preparar NDJSON válido.",
+          "cost": "Requiere desarrollo, documentación, pruebas y mantenimiento; no hay estimación medida.",
+          "sources": [
+            "contract.md: entrada, salida y entrega"
+          ],
+          "steps": [
+            "Derivar la intervención material del contrato y mantener el rechazo atómico como restricción."
+          ]
+        },
+        "deps": {
+          "range_norm": 1,
+          "range_synthesis": 1
+        },
+        "id": "range_option_cli",
+        "kind": "option",
+        "text": "Construir la CLI requerida: validar todo stdin antes de emitir, ordenar intervalos y fusionar solapamientos o adyacencias; calcular cobertura, extensión y huecos con enteros exactos. Incluir el README y, después del sellado, las pruebas exigidas. Es una propuesta de implementación, sin conformidad demostrada.",
+        "version": 1
+      },
+      "prev_hash": "9d4450f246abd2b4e483d3e11ae013f29cadc2b5670680ec75f5b2bcd7175d67",
+      "seq": 28
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:16:17+00:00",
+      "hash": "18081f6b279becf678e89b520e0218f1eb6a0c1b84f02fa8990ce028e5e1ee2f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "actors": "El operador tendría que asignar ejecución y comprobación; quien calcule asume la carga de transcripción. No se afirma que esos recursos estén disponibles.",
+          "cost": "Requiere preparación documental y trabajo humano por petición; no hay tiempos medidos.",
+          "sources": [
+            "contract.md: reglas y ejemplos"
+          ],
+          "steps": [
+            "Formular una intervención organizativa distinta y explicitar su alcance limitado."
+          ]
+        },
+        "deps": {
+          "range_norm": 1,
+          "range_synthesis": 1
+        },
+        "id": "range_option_manual",
+        "kind": "option",
+        "text": "Alternativa sin software nuevo: aplicar una hoja de procedimiento documental a listas pequeñas, ordenar pares manualmente, unir intervalos adyacentes o solapados y calcular longitudes y huecos, con una segunda comprobación humana. Es factible como control manual acotado; no sustituye la CLI ni satisface la entrega automatizada del contrato.",
+        "version": 1
+      },
+      "prev_hash": "223f0e1e1e874b9b34db578e973ed3d40a4b195f28c440231ef873623ef47a5e",
+      "seq": 29
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:16:17+00:00",
+      "hash": "8976762e0cfc29c9f8b669f28442a41babc849766d60541938d973ad2f94ec10",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "cost": "Sin cifras disponibles: desarrollo y mantenimiento frente a trabajo por petición y comprobación humana.",
+          "displaced_harms": "El rechazo íntegro obliga al usuario a corregir y reenviar el lote; la alternativa manual desplaza la detección de errores a quienes calculan y comprueban.",
+          "risk": "La CLI puede compartir errores con su oráculo; el procedimiento manual puede omitir duplicados, adyacencias o límites.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Comparar alcance, cargas por actor, costes y riesgos de ambas opciones.",
+            "Distinguir insuficiencia contractual de dominancia y mantener abierta la elección técnica."
+          ]
+        },
+        "deps": {
+          "range_norm": 1,
+          "range_option_cli": 1,
+          "range_option_manual": 1,
+          "range_uncertainty": 1
+        },
+        "id": "range_comparison",
+        "kind": "comparison",
+        "text": "La CLI aborda la entrega exigida y la validación de lotes; el procedimiento manual permite contrastar casos pequeños sin desarrollo nuevo, pero no cubre esa entrega. Para el agente, la primera concentra trabajo en código y mantenimiento; la segunda en instrucciones y comprobación. Para el operador y usuarios previstos, la primera exige preparar stdin y comprender el rechazo íntegro; la segunda exige trabajo humano repetido. Son cargas previstas, no efectos observados. No se establece superioridad medida ni dominancia general: la alternativa manual conserva un uso acotado como contraste, aunque es insuficiente como sustituto contractual.",
+        "version": 1
+      },
+      "prev_hash": "18081f6b279becf678e89b520e0218f1eb6a0c1b84f02fa8990ce028e5e1ee2f",
+      "seq": 30
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:16:17+00:00",
+      "hash": "1a58932f372c33258e746e8d1a90b19ae1225fa4d4e5a077bd71f3244de34916",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "constraints": "Sólo biblioteca estándar y stdin en el producto; sin red, ficheros externos ni modificación del entorno. Respetar 131072 bytes, 2000 pares y extremos de valor absoluto hasta 10^12.",
+          "mitigation": "Diseñar validación completa previa a la salida y contrastes con expectativas independientes; en controles manuales, documentar cálculos y segunda comprobación.",
+          "sources": [
+            "contract.md: rechazo y límites",
+            "existing-mandate.md: restricciones"
+          ],
+          "steps": [
+            "Identificar mecanismos de fallo y restricciones para ambas opciones.",
+            "Mantener las conclusiones limitadas al soporte documental."
+          ],
+          "stop": "Detener la comparación si falta una restricción de seguridad o sólo se considera una opción; no alterar el contrato para acomodar una alternativa."
+        },
+        "deps": {
+          "range_comparison": 1,
+          "range_norm": 1,
+          "range_option_cli": 1,
+          "range_option_manual": 1
+        },
+        "id": "range_option_risk",
+        "kind": "risk",
+        "text": "En la CLI, emitir antes de completar la validación produciría salida parcial prohibida; aceptar bool, float, claves duplicadas o bytes inválidos alteraría el contrato. En el procedimiento manual, errores de transcripción y una comprobación basada en la misma interpretación pueden ocultar discrepancias. Ninguno de estos fallos se ha observado en los documentos suministrados. La alternativa manual debe limitarse a controles pequeños, sin presentarla como sustituto de la entrega.",
+        "version": 1
+      },
+      "prev_hash": "8976762e0cfc29c9f8b669f28442a41babc849766d60541938d973ad2f94ec10",
+      "seq": 31
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T04:16:30+00:00",
+      "hash": "3d8947a28711b0768d5ab16224f0dc83c80697e93ff556cbf64f6942aff07191",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "compare",
+        "provenance": "local_declared",
+        "reason": "La fase compare cumple plenamente las exigencias del contrato y de la metodología. Se formulan dos opciones substantivamente distintas (la CLI automatizada y un procedimiento manual de comprobación sin nuevo software), trazadas directamente desde la norma delegada y la síntesis previa. El elemento range_comparison analiza con rigor los efectos diferenciados por actor, la estructura de costes y riesgos, y los perjuicios desplazados (como el coste de reenvío por rechazo íntegro o la carga de cálculo humano repetido), evitando declarar dominancia o superioridad no medida. Asimismo, range_option_risk integra con precisión las restricciones de contorno, los mecanismos de fallo y los criterios de parada sin invocar resultados empíricos inexistentes. La red de dependencias es íntegra y el snapshot se ajusta a los límites de capacidad establecidos. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/role-13-compare-review/receipt.json]",
+        "snapshot": "cf657f7385f3a7449eee93dc6a91121ffea3231e06abb1aaf747785017a26140",
+        "verdict": "accept"
+      },
+      "prev_hash": "1a58932f372c33258e746e8d1a90b19ae1225fa4d4e5a077bd71f3244de34916",
+      "seq": 32
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T04:16:30+00:00",
+      "hash": "51d1d63a4b9674f4cee035461ab8975c190955d36c7e930c26f9ed490be42e8d",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "compare",
+        "review_seq": 32,
+        "snapshot": "cf657f7385f3a7449eee93dc6a91121ffea3231e06abb1aaf747785017a26140"
+      },
+      "prev_hash": "3d8947a28711b0768d5ab16224f0dc83c80697e93ff556cbf64f6942aff07191",
+      "seq": 33
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:17:04+00:00",
+      "hash": "a9d100d6aeba0f23ac714cfde33b194aada2871c2cc789e7a07a2347e8e72701",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md: entrada, salida y entrega",
+            "existing-mandate.md: delegación técnica"
+          ],
+          "steps": [
+            "Contrastar las opciones con la entrega contractual y adoptar la CLI bajo la prioridad de fidelidad contractual."
+          ]
+        },
+        "deps": {
+          "range_comparison": 1,
+          "range_contract_evidence": 1,
+          "range_norm": 1,
+          "range_option_cli": 1,
+          "range_option_manual": 1,
+          "range_problem": 1
+        },
+        "id": "range_decision",
+        "kind": "decision",
+        "text": "Elegir range_option_cli dentro de la delegación técnica: validar el lote completo, ordenar los pares y fusionar solapamientos y adyacencias antes de calcular las salidas. La comparación documenta que el procedimiento manual no satisface la entrega exigida; conservarlo como contraste acotado. Esta elección no establece superioridad medida ni se atribuye al operador.",
+        "version": 1
+      },
+      "prev_hash": "51d1d63a4b9674f4cee035461ab8975c190955d36c7e930c26f9ed490be42e8d",
+      "seq": 34
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:17:04+00:00",
+      "hash": "32580647f6396660f76470480db713d1a493a79573a4de7275298c31c63f1e82",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md: especificación y entrega",
+            "existing-mandate.md: restricciones"
+          ],
+          "steps": [
+            "Traducir las obligaciones de entrada, transformación, rechazo atómico y entrega en un requisito verificable sin modificar el contrato."
+          ]
+        },
+        "deps": {
+          "range_contract_evidence": 1,
+          "range_decision": 1,
+          "range_norm": 1,
+          "range_problem": 1,
+          "range_protocol": 1
+        },
+        "id": "range_requirement",
+        "kind": "requirement",
+        "text": "Entregar range_audit.py con biblioteca estándar, stdin como entrada y sin red, ficheros externos ni modificación del entorno. Admitir stdin completamente vacío como cero peticiones. Para cualquier otro lote exigir UTF-8 y NDJSON sin líneas vacías; cada objeto tendrá exactamente intervals, sin claves duplicadas, con hasta 2000 pares de enteros JSON, excluidos bool y float, extremos de valor absoluto <=10^12 e inicio<fin. Admitir orden arbitrario y duplicados; limitar todo stdin a 131072 bytes. Validar todo el lote antes de emitir. Ante cualquier petición inválida, stdout vacío, stderr exactamente 'range-audit: invalid input\\n' y exit2. En lotes válidos, exit0 y stderr vacío; por petición emitir una línea JSON UTF-8 terminada en newline con exactamente merged, covered, span y gaps: unión ordenada por solapamiento o adyacencia, suma exacta de longitudes, extremos exteriores o null para lista vacía, y huecos interiores ordenados. Mantener enteros exactos. Incluir README útil con instalación, NDJSON, ejemplos, errores, límites y comando de pruebas. Sellar programa y README antes de escribir test_range_audit.py; la ejecución posterior usará /opt/specorganon/venv/bin/python y /input/delivery/test_range_audit.py.",
+        "version": 1
+      },
+      "prev_hash": "a9d100d6aeba0f23ac714cfde33b194aada2871c2cc789e7a07a2347e8e72701",
+      "seq": 35
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:17:04+00:00",
+      "hash": "03a41e3755c70f7e141b8690d3f2c58d310900a9b53db9ff7d4d1a3bb8ca9fcf",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "contract_discrepant_cases",
+          "reject": "Al menos un caso con discrepancia contractual; soporte ausente o incompleto no equivale a una discrepancia medida.",
+          "reject_test": {
+            "metric": "contract_discrepant_cases",
+            "operator": ">",
+            "scope": "Casos efectivamente ejecutados del conjunto prefijado en range_protocol",
+            "statistic": "estimate",
+            "unit": "casos",
+            "value": 0
+          },
+          "sources": [
+            "contract.md: reglas y ejemplos",
+            "range_protocol: población, comparación y método"
+          ],
+          "steps": [
+            "Fijar métrica, umbral y condición de rechazo antes de cualquier resultado, vinculándolos al indicador y al requisito.",
+            "Separar el contraste prospectivo de las observaciones, que aún no se han suministrado."
+          ],
+          "threshold": {
+            "operator": "<=",
+            "statistic": "estimate",
+            "value": 0
+          },
+          "unit": "casos"
+        },
+        "deps": {
+          "range_contract_evidence": 1,
+          "range_decision": 1,
+          "range_indicator": 1,
+          "range_norm": 1,
+          "range_problem": 1,
+          "range_protocol": 1,
+          "range_requirement": 1
+        },
+        "id": "range_criterion",
+        "kind": "criterion",
+        "text": "Prefijar cero casos discrepantes para el conjunto público descrito en range_protocol. Cada caso cuenta una vez si difiere cualquier estructura, tipo numérico, clave, byte de terminación, stream o código de salida exigido. Incluir los cuatro ejemplos contractuales, lista y stdin vacíos, geometrías variadas, lotes múltiples, límites y entradas inválidas; comprobar rechazo sin salida parcial con la petición inválida al principio, medio y final. Las expectativas proceden del contrato, de unión de celdas en dominios pequeños y de cálculo manual para extremos grandes, sin ajustarlas a salidas de la implementación. Cualquier discrepancia contradice el criterio en ese conjunto; ausencia de ejecución, casos faltantes o capturas incompletas deja su cumplimiento no demostrado. Cero discrepancias sólo sustentaría los casos efectivamente examinados, no corrección universal ni beneficio de campo. Comprobar además las obligaciones documentales y la secuencia de sellado del requisito; el conteo numérico por sí solo no acredita la entrega completa.",
+        "version": 1
+      },
+      "prev_hash": "32580647f6396660f76470480db713d1a493a79573a4de7275298c31c63f1e82",
+      "seq": 36
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-06T04:17:21+00:00",
+      "hash": "1e2caae9bb868ec09de393536cbe19d31ca69e7c6d641308702d8efb28129505",
+      "kind": "approval",
+      "payload": {
+        "id": "range_decision",
+        "provenance": "local_declared",
+        "reason": "Existing local owner mandate; technical conformity judged separately by reviewer:gemini-isolated-review (/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/role-15-specify-approval/receipt.json): Se aprueba range_decision conforme a las facultades y límites del mandato. La decisión adopta coherentemente la implementación range_option_cli para satisfacer los requisitos contractuales de normalización de intervalos semiabiertos por stdin y rechazo atómico de lotes con biblioteca estándar, manteniendo la opción manual como contraste acotado y evitando atribuir elecciones al operador o alegar superioridad no medida en campo. Las dependencias hacia comparación, norma y evidencia están completas y rigurosamente justificadas.",
+        "version": 1
+      },
+      "prev_hash": "03a41e3755c70f7e141b8690d3f2c58d310900a9b53db9ff7d4d1a3bb8ca9fcf",
+      "seq": 37
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T04:17:38+00:00",
+      "hash": "744ce7272e1c2fb46c15a942aebf96db3f2f6517191d033ec91f430f3b40c195",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "specify",
+        "provenance": "local_declared",
+        "reason": "La fase specify cumple rigurosamente con los requisitos del contrato de fase y los límites metodológicos. Los artefactos incorporados (range_decision, range_requirement y range_criterion) trazan de forma íntegra y bidireccional hacia el problema, la norma aprobada (range_norm), la evidencia documental (range_contract_evidence) y el protocolo de prueba (range_protocol). La decisión range_decision justifica la adopción técnica de range_option_cli preservando la opción manual como contraste acotado y sin atribuir elecciones indebidas al operador ni clamar superioridad no observada. El requisito range_requirement define con exactitud las interfaces de entrada/salida (NDJSON, validación atómica, códigos de salida, stderr exacto y restricciones de tipos y tamaños) y la secuencia de sellado documental previa a las pruebas. El criterio range_criterion prefija formalmente el umbral y la condición de rechazo sobre la métrica contract_discrepant_cases vinculado al indicador range_indicator, antecediendo a la ejecución real sin inventar resultados. La contabilidad de recursos y la red de dependencias se mantienen en estado válido y consistente. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/role-16-specify-review/receipt.json]",
+        "snapshot": "a81c7d466faf79318fc05c7873107abfcc1fc6478b3909d5a7cc01640ee5e339",
+        "verdict": "accept"
+      },
+      "prev_hash": "1e2caae9bb868ec09de393536cbe19d31ca69e7c6d641308702d8efb28129505",
+      "seq": 38
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T04:17:38+00:00",
+      "hash": "4affb33b680c38b1dea991682362e7d07c45af2b9f45efa2e55db99dde6c7285",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "specify",
+        "review_seq": 38,
+        "snapshot": "a81c7d466faf79318fc05c7873107abfcc1fc6478b3909d5a7cc01640ee5e339"
+      },
+      "prev_hash": "744ce7272e1c2fb46c15a942aebf96db3f2f6517191d033ec91f430f3b40c195",
+      "seq": 39
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:18:19+00:00",
+      "hash": "706f40e8c82afdc08900cbdc239d08709718d9bb9bc171fc71ff1c5e9c1660d7",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "delivery_tree_sha256": "a6a6c7de7ed4c4ab052febbe5c81d2f396b2073b682fecb4653b963efaeda5d8",
+          "files": [
+            "range_audit.py",
+            "README.md"
+          ],
+          "sources": [
+            "contract.md",
+            "build-stage.json"
+          ],
+          "steps": [
+            "Definir lectura acotada, decodificación UTF-8 y rechazo de claves duplicadas y entradas fuera del contrato.",
+            "Separar la validación completa del lote de la normalización y emisión de respuestas.",
+            "Documentar uso, ejemplos contractuales, límites, errores y comando posterior de pruebas."
+          ]
+        },
+        "deps": {
+          "range_decision": 1,
+          "range_requirement": 1
+        },
+        "id": "range_implementation",
+        "kind": "implementation",
+        "text": "Implementación de RangeAudit y documentación de uso para la etapa program. Valida el lote antes de emitir, ordena y fusiona intervalos, y calcula cobertura, extensión y huecos con enteros. No se aporta ejecución.",
+        "version": 1
+      },
+      "prev_hash": "4affb33b680c38b1dea991682362e7d07c45af2b9f45efa2e55db99dde6c7285",
+      "seq": 40
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:19:24+00:00",
+      "hash": "f2e56ed85c12aaf35cce1c773d3cc9343b487be35d987d2064400f3c252fd36e",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "delivery_tree_sha256": "5e59f4a1ae97d6bfd2cb1594732f8428feb459595d51ef96ca376e2c7f76d27d",
+          "files": [
+            "range_audit.py",
+            "README.md",
+            "test_range_audit.py"
+          ],
+          "sources": [
+            "contract.md",
+            "build-stage.json",
+            "delivery-files.json"
+          ],
+          "steps": [
+            "Conservar el programa y README sellados y aportar únicamente test_range_audit.py.",
+            "Actualizar la descripción de la entrega sin atribuir conformidad."
+          ]
+        },
+        "deps": {
+          "range_decision": 1,
+          "range_requirement": 1
+        },
+        "id": "range_implementation",
+        "kind": "implementation",
+        "text": "Entrega de RangeAudit con pruebas posteriores al sellado del programa y README. Esta actualización incorpora el archivo de pruebas; no aporta observaciones de ejecución.",
+        "version": 2
+      },
+      "prev_hash": "706f40e8c82afdc08900cbdc239d08709718d9bb9bc171fc71ff1c5e9c1660d7",
+      "seq": 41
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:19:24+00:00",
+      "hash": "fbc91a506222b2d14227308dd37d2198f5eab2454b2f4cfc8bfc4545a139e206",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/opt/specorganon/venv/bin/python",
+            "/input/delivery/test_range_audit.py"
+          ],
+          "command": "/opt/specorganon/venv/bin/python /input/delivery/test_range_audit.py",
+          "scope": "Conjunto finito de desarrollo público, sin inferencia de corrección universal ni efectos de campo.",
+          "sources": [
+            "contract.md",
+            "range_protocol"
+          ],
+          "steps": [
+            "Definir expectativas documentales, unión independiente de celdas y cálculos explícitos para extremos grandes.",
+            "Comparar estructuras, tipos, terminación de líneas, streams y códigos; registrar nombres de discrepancias con salida breve."
+          ]
+        },
+        "deps": {
+          "range_criterion": 1,
+          "range_implementation": 2,
+          "range_protocol": 1,
+          "range_requirement": 1
+        },
+        "id": "range_test",
+        "kind": "test",
+        "text": "Borrador ejecutable de controles públicos de contrato: ejemplos, geometrías con oráculo de celdas, permutaciones, lotes, tipos exactos, fronteras y rechazo atómico. Las expectativas se fijan sin consultar salidas del programa; no hay resultado de ejecución aportado.",
+        "version": 1
+      },
+      "prev_hash": "f2e56ed85c12aaf35cce1c773d3cc9343b487be35d987d2064400f3c252fd36e",
+      "seq": 42
+    },
+    {
+      "actor": "executor:isolated-software-controller",
+      "at": "2026-10-06T04:19:31+00:00",
+      "hash": "7030b1d2b14ac8ae4bbf75687025023b7385d92a888c0df2d0210b05cfe9e4ca",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/opt/specorganon/venv/bin/python",
+            "/input/delivery/test_range_audit.py"
+          ],
+          "command": "/opt/specorganon/venv/bin/python /input/delivery/test_range_audit.py",
+          "delivery_tree_sha256": "5e59f4a1ae97d6bfd2cb1594732f8428feb459595d51ef96ca376e2c7f76d27d",
+          "passed": true,
+          "receipt": {
+            "argv": [
+              "/opt/specorganon/venv/bin/python",
+              "/input/delivery/test_range_audit.py"
+            ],
+            "exit_code": 0,
+            "result_sha256": "359179729260aaf25a5f3f0f55a9aba9c766d8eb4cb3f19e4bfb06e134ab8597",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_sha256": "c643fa4030401722ed5b17ecc16a97a892426b1d6582f27b93b633302628c9a4",
+            "timed_out": false
+          },
+          "scope": "Conjunto finito de desarrollo público, sin inferencia de corrección universal ni efectos de campo.",
+          "sources": [
+            "contract.md",
+            "range_protocol"
+          ],
+          "steps": [
+            "Definir expectativas documentales, unión independiente de celdas y cálculos explícitos para extremos grandes.",
+            "Comparar estructuras, tipos, terminación de líneas, streams y códigos; registrar nombres de discrepancias con salida breve."
+          ],
+          "test_job_ref": "/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/test-315512b871d2e82bad3ee994/receipt.json"
+        },
+        "deps": {
+          "range_criterion": 1,
+          "range_implementation": 2,
+          "range_protocol": 1,
+          "range_requirement": 1
+        },
+        "id": "range_test",
+        "kind": "test",
+        "text": "Borrador ejecutable de controles públicos de contrato: ejemplos, geometrías con oráculo de celdas, permutaciones, lotes, tipos exactos, fronteras y rechazo atómico. Las expectativas se fijan sin consultar salidas del programa; no hay resultado de ejecución aportado.",
+        "version": 2
+      },
+      "prev_hash": "fbc91a506222b2d14227308dd37d2198f5eab2454b2f4cfc8bfc4545a139e206",
+      "seq": 43
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T04:19:54+00:00",
+      "hash": "dc13f11567c68df9f2a8160921501260798e62864e8a9663a2491d05c23126b8",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "build",
+        "provenance": "local_declared",
+        "reason": "Aceptación de la fase build: la implementación range_implementation enlaza adecuadamente range_requirement y range_decision, manteniendo la solución estrictamente en la biblioteca estándar con lectura por stdin, validación completa por lotes y salida de error atómica sin emisión parcial. El programa range_audit.py y README.md respetan el sellado de la etapa y los límites documentales. El artefacto range_test referencia range_criterion y la versión actual de la implementación, con una suite independiente en test_range_audit.py que cubre 143 casos exhaustivos de contrato (ejemplos, límites de 131072 bytes y 2000 pares, tipos enteros exactos, geometrías y rechazo íntegro). El registro medido confirma ejecución exitosa con 0 discrepancias y código de salida 0. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/role-19-build-review/receipt.json]",
+        "snapshot": "95161feb78d70c8789e022605b47d95311bc1f5cfdbd814f988d11aa90362e57",
+        "verdict": "accept"
+      },
+      "prev_hash": "7030b1d2b14ac8ae4bbf75687025023b7385d92a888c0df2d0210b05cfe9e4ca",
+      "seq": 44
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T04:19:54+00:00",
+      "hash": "163d1177d2ed072bd6fe413e94cf5516abd6cf95d3b63386e70b6fff5e1879f2",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "build",
+        "review_seq": 44,
+        "snapshot": "95161feb78d70c8789e022605b47d95311bc1f5cfdbd814f988d11aa90362e57"
+      },
+      "prev_hash": "dc13f11567c68df9f2a8160921501260798e62864e8a9663a2491d05c23126b8",
+      "seq": 45
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:20:24+00:00",
+      "hash": "7a0906b0095476c91cf7407715d5bb2a1fc6dd39ec299f74fb73985b1cd8211c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "Sin fecha documental indicada",
+          "metric": "contract_discrepant_cases",
+          "origin": "published",
+          "scope": "Referencia normativa para los controles públicos de contrato definidos en range_protocol.",
+          "source": "state.json/items/range_criterion/data/threshold",
+          "steps": [
+            "Identificar el valor explícito del umbral y distinguirlo de una línea base empírica."
+          ],
+          "unit": "casos",
+          "value": 0
+        },
+        "deps": {
+          "range_criterion": 1
+        },
+        "id": "range_baseline",
+        "kind": "baseline",
+        "text": "La referencia contractual es cero casos discrepantes, según el umbral prerregistrado. Es una expectativa documental, no una medición anterior ni una línea base de usuarios o de otra implementación.",
+        "version": 1
+      },
+      "prev_hash": "163d1177d2ed072bd6fe413e94cf5516abd6cf95d3b63386e70b6fff5e1879f2",
+      "seq": 46
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:20:24+00:00",
+      "hash": "aa8790796d03cbc600c1a95ad99b78452da5f1c180c746e92fde0838a8211c9a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "cases_executed": 143,
+          "date": "2026-10-06",
+          "delivery_tree_sha256": "5e59f4a1ae97d6bfd2cb1594732f8428feb459595d51ef96ca376e2c7f76d27d",
+          "exit_code": 0,
+          "locator": "range_test/streams y range_test/receipt/metadata/input_manifest",
+          "metric": "contract_discrepant_cases",
+          "origin": "technical",
+          "scope": "Los 143 controles de test_range_audit.py sobre la entrega actual identificada en el registro suministrado.",
+          "source": "measured-test-records.json",
+          "stderr": "",
+          "stdout": "cases=143 discrepancies=0\n",
+          "steps": [
+            "Relacionar el registro suministrado con range_test y la implementación actual.",
+            "Extraer el conteo y las condiciones de terminación sin declarar una ejecución propia."
+          ],
+          "uncertainty": "Resumen agregado suministrado; no contiene capturas individuales de los 143 casos. No permite extrapolar a todas las entradas ni estimar efectos de campo.",
+          "unit": "casos",
+          "value": 0
+        },
+        "deps": {
+          "range_criterion": 1,
+          "range_implementation": 2,
+          "range_test": 2
+        },
+        "id": "range_result",
+        "kind": "result",
+        "text": "El registro suministrado para la entrega actual informa 143 casos y cero discrepancias, código de salida 0, stderr vacío y stdout completo de 26 bytes. Son controles públicos de contrato con entradas sintéticas; no observaciones de uso en campo.",
+        "version": 1
+      },
+      "prev_hash": "7a0906b0095476c91cf7407715d5bb2a1fc6dd39ec299f74fb73985b1cd8211c",
+      "seq": 47
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:20:24+00:00",
+      "hash": "52afabdd4e187211bbe6f490d14d5af825e3971b4488bade3e139f02a405ba72",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": "No medidos. El conteo de discrepancias no mide daños; persisten los riesgos de interpretación compartida con el oráculo y de fallos fuera del conjunto examinado.",
+          "cost": "Duración suministrada del trabajo aislado: 5.434334032004699 segundos. Costes de desarrollo, mantenimiento y uso desconocidos; esa duración no estima latencia por petición.",
+          "scope": "Eficacia y daños; soporte técnico limitado al conjunto público ejecutado.",
+          "steps": [
+            "Contrastar el conteo suministrado con el umbral prerregistrado.",
+            "Distinguir controles sintéticos ejecutados de simulaciones de eficacia y observaciones de campo.",
+            "Examinar límites, riesgos y costes sin inventar una línea base empírica ni precisión estadística."
+          ],
+          "technical_observation": "0 discrepancias entre 143 casos; satisface numéricamente el umbral <=0 en ese conjunto.",
+          "uncertainty": "No hay línea base empírica, mediciones de usuarios, comparación ejecutada con alternativas ni intervalo de efecto sustentado. La procedencia de la ejecución está declarada localmente y no autenticada; las observaciones individuales no están suministradas.",
+          "verdict": "no_demostrado"
+        },
+        "deps": {
+          "range_baseline": 1,
+          "range_criterion": 1,
+          "range_option_risk": 1,
+          "range_result": 1
+        },
+        "id": "range_assessment",
+        "kind": "assessment",
+        "text": "El conteo técnico suministrado coincide con el umbral de cero discrepancias para los 143 controles ejecutados. Este contraste finito no acredita corrección universal ni constituye una estimación causal: la referencia es normativa, no empírica. La eficacia de campo y la superioridad frente a alternativas permanecen no demostradas.",
+        "version": 1
+      },
+      "prev_hash": "aa8790796d03cbc600c1a95ad99b78452da5f1c180c746e92fde0838a8211c9a",
+      "seq": 48
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:20:50+00:00",
+      "hash": "5bf28462ecea23c43daf72e8e18351083165ccb3bc33f0660ae8925d1fbc2d98",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "Sin fecha documental indicada",
+          "metric": "contract_discrepant_cases",
+          "origin": "technical",
+          "scope": "Expectativa contractual para los controles públicos del protocolo; sin población empírica medida.",
+          "source": "state.json/items/range_criterion/data/threshold",
+          "steps": [
+            "Reconsiderar la referencia como expectativa técnica documental, conservando el valor explícito del criterio sin atribuirle medición."
+          ],
+          "unit": "casos",
+          "value": 0
+        },
+        "deps": {
+          "range_criterion": 1
+        },
+        "id": "range_baseline",
+        "kind": "baseline",
+        "text": "Referencia técnica normativa de cero casos discrepantes tomada del umbral prerregistrado; no es una medición previa ni una línea base empírica.",
+        "version": 2
+      },
+      "prev_hash": "52afabdd4e187211bbe6f490d14d5af825e3971b4488bade3e139f02a405ba72",
+      "seq": 49
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:20:50+00:00",
+      "hash": "9f976067177955a5ab3387e49570c6f9b93423288f43722903ac88525b496329",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "cases_executed": 143,
+          "date": "2026-10-06",
+          "delivery_tree_sha256": "5e59f4a1ae97d6bfd2cb1594732f8428feb459595d51ef96ca376e2c7f76d27d",
+          "exit_code": 0,
+          "locator": "range_test/streams y range_test/receipt/metadata/input_manifest",
+          "metric": "contract_discrepant_cases",
+          "origin": "technical",
+          "scope": "143 casos de test_range_audit.py sobre la entrega actual identificada por el registro suministrado.",
+          "source": "measured-test-records.json",
+          "stderr": "",
+          "stdout": "cases=143 discrepancies=0\n",
+          "steps": [
+            "Reconsiderar el resultado frente a la referencia normativa corregida y el criterio, conservando su vínculo con el test y la implementación actuales.",
+            "Extraer únicamente el conteo y la terminación suministrados, sin atribuir ejecución propia."
+          ],
+          "uncertainty": "Resumen agregado suministrado, sin capturas individuales; procedencia declarada localmente y no autenticada. No permite extrapolación ni estimación causal.",
+          "unit": "casos",
+          "value": 0
+        },
+        "deps": {
+          "range_baseline": 2,
+          "range_criterion": 1,
+          "range_implementation": 2,
+          "range_test": 2
+        },
+        "id": "range_result",
+        "kind": "result",
+        "text": "El registro suministrado de la entrega actual informa 143 controles públicos de contrato y cero discrepancias, exit_code 0 y stderr vacío. No son observaciones de campo.",
+        "version": 2
+      },
+      "prev_hash": "5bf28462ecea23c43daf72e8e18351083165ccb3bc33f0660ae8925d1fbc2d98",
+      "seq": 50
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T04:20:50+00:00",
+      "hash": "156ea391f5570cd88a58b8690f7164601365af9132d42ea88ee32a4923aa1ab5",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": "No medidos. Persisten los riesgos de errores compartidos con el oráculo y fallos fuera del conjunto examinado; el conteo no mide daños.",
+          "claim_scope": "technical",
+          "cost": "Duración suministrada del trabajo aislado: 5.434334032004699 segundos; no estima latencia por petición. Costes de desarrollo, mantenimiento y uso desconocidos.",
+          "steps": [
+            "Reconsiderar la valoración con la referencia técnica corregida y el resultado nuevamente vinculado.",
+            "Distinguir el contraste contractual finito de una estimación causal y conservar la incertidumbre sobre eficacia, daños y costes."
+          ],
+          "technical_observation": "0 discrepancias entre 143 controles públicos de contrato; coincidencia numérica con el umbral <=0 limitada a ese conjunto.",
+          "uncertainty": "Sin línea base empírica, intervalo de efecto sustentado, mediciones de usuarios ni comparación ejecutada con alternativas. El resumen carece de capturas individuales y su procedencia no está autenticada.",
+          "verdict": "no_demostrado"
+        },
+        "deps": {
+          "range_baseline": 2,
+          "range_criterion": 1,
+          "range_option_risk": 1,
+          "range_result": 2
+        },
+        "id": "range_assessment",
+        "kind": "assessment",
+        "text": "El conteo suministrado coincide numéricamente con el umbral de cero discrepancias en los 143 controles ejecutados. La referencia es normativa: este contraste no estima un efecto causal ni demuestra corrección universal. La eficacia de campo y la superioridad permanecen no demostradas.",
+        "version": 2
+      },
+      "prev_hash": "9f976067177955a5ab3387e49570c6f9b93423288f43722903ac88525b496329",
+      "seq": 51
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T04:21:18+00:00",
+      "hash": "3db3a374d60f7d0fa5ab7950e73cbfc7d49d44091dbfc4f080b3982570126d6b",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "validate",
+        "provenance": "local_declared",
+        "reason": "Aceptación de la fase validate: los artefactos range_baseline, range_result y range_assessment completan los requisitos de la fase con rigurosa trazabilidad causal y metodológica. La línea base range_baseline delimita correctamente la referencia como expectativa técnica contractual derivada de range_criterion, sin inventar mediciones empíricas previas. El resultado range_result enlaza con precisión la versión actual de la implementación, el test ejecutado y el registro medido (143 casos ejecutados, 0 discrepancias, salida limpia y código de salida 0). La valoración range_assessment acata escrupulosamente las reglas de salida y detención del contrato de fase: califica el alcance como estrictamente técnico, evalúa costes e incertidumbres, declara los daños adversos no medidos y concluye con el veredicto 'no_demostrado' respecto a eficacia de campo o superioridad frente a alternativas, evitando cualquier extrapolación injustificada. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-02/attempt-10/transport/host-journal/role-22-validate-review/receipt.json]",
+        "snapshot": "ea89ddf42b37dc62dfa672c88be0a335ad7371dc23a48ad99f95184531c891ee",
+        "verdict": "accept"
+      },
+      "prev_hash": "156ea391f5570cd88a58b8690f7164601365af9132d42ea88ee32a4923aa1ab5",
+      "seq": 52
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T04:21:19+00:00",
+      "hash": "5c4a015ca2f2125321f84b9665c1c46640f75cbe8d940201a20d734792fac8c1",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "validate",
+        "review_seq": 52,
+        "snapshot": "ea89ddf42b37dc62dfa672c88be0a335ad7371dc23a48ad99f95184531c891ee"
+      },
+      "prev_hash": "3db3a374d60f7d0fa5ab7950e73cbfc7d49d44091dbfc4f080b3982570126d6b",
+      "seq": 53
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "26a7b392-a479-45b3-a278-2c5f6fca7b98",
+    "created_at": "2026-10-06T04:12:23+00:00",
+    "created_by": "human:owner",
+    "domain": "development",
+    "test_gate_policy": "local_report",
+    "title": "Native reliability attempt-10 rangeaudit"
+  },
+  "schema": 1
+}
