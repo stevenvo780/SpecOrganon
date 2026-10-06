@@ -126,3 +126,7 @@ Informe sin JavaScript: /resultados/backup/RESULTADOS.html
 ## Cohorte nativa en curso
 
 La sección `#cohorte-nativa` publica una foto fechada de diez intentos fijos, sus contratos y su primer fallo, sin mezclar la entrega RangeAudit anterior con el denominador. Las fuentes del registro y del driver están en main. La foto no es un monitor en vivo ni acredita fiabilidad o superioridad; los resultados posteriores se publican como nuevos hitos. Las 32 descargas históricas permanecen intactas.
+
+## Candidato dev3 y snapshot 02
+
+La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wheel y límites del candidato schema12; no afirma eficacia nativa. `#cohorte-nativa` muestra el snapshot 02 dev2 de cinco cierres, cuatro fallos y una entrega. Los enlaces del snapshot 01 y las 38 descargas anteriores permanecen intactos. Las fuentes del frontend y sus JSON permiten reconstruir esta foto; no es un monitor en vivo.

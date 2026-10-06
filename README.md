@@ -10,6 +10,8 @@ Método y toolkit para formular problemas, investigar con evidencia, comparar in
 
 **Cohorte de fiabilidad en ejecución, versión dev2 congelada:** diez intentos fijados antes de generar. El [snapshot de 2026-10-06 02:15 UTC](goals/method-superiority-v1/evidence/bounded-admission-01/cohort-snapshot-02/progress-snapshot.json) conserva cinco cierres: cuatro fallos y una entrega RangeAudit de nueve fases con 115/115 comprobaciones públicas; TopoPlan continúa. Este conjunto ya no puede satisfacer el 90% requerido. Se terminarán sus diez intentos sin reemplazos. El candidato dev3 todavía no tiene una nueva cohorte ni eficacia comparativa medida. El caso anterior de desarrollo queda fuera del denominador. [Protocolo y límites](goals/method-superiority-v1/development/NATIVE_COHORT.md).
 
+La rama main contiene dev3. La cohorte activa conserva su checkout dev2 y sus 43 hashes registrados: un clon de main no puede reanudar ese registro ni migrar sus runs schema11. Las pruebas nuevas de dev3 requieren otra ruta y otro registro.
+
 ## Clonar y empezar
 
 ```sh
