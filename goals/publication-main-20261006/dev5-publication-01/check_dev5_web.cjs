@@ -14,6 +14,7 @@ const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
    await page.route('**/*',r=>r.request().url().startsWith(origin+'/')?r.continue():r.abort());
    const response=await page.goto(origin+'/#cohorte-nativa',{waitUntil:'networkidle'});if(response.status()!==200)throw Error('Page not 200');
    const section=page.locator('section[aria-labelledby="cohorte-nativa"]');
+   await section.locator('tbody tr').first().waitFor({state:'attached'});
    if(await section.locator('tbody tr').count()!==10)throw Error('Fixed cohort rows missing');
    const text=await section.innerText();
    const dev5=page.locator('section[aria-labelledby="avance-dev5"]');const dev5text=await dev5.innerText();
