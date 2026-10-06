@@ -1,0 +1,51 @@
+usage: organon [-h]
+               {init,put,status,report,review,retire-indicator,approve,approval-challenge,test-execution-challenge,record-test-execution,test-observation-challenge,record-test-observation,field-attestation-challenge,attest-field,challenge,resolve-challenge,gate,review-phase,phase-review-challenge,advance,trace,next-task,run,audit-lot-journal}
+               ...
+
+Evidence-linked case workflow. Results are JSON; report also supports
+Markdown.
+
+positional arguments:
+  {init,put,status,report,review,retire-indicator,approve,approval-challenge,test-execution-challenge,record-test-execution,test-observation-challenge,record-test-observation,field-attestation-challenge,attest-field,challenge,resolve-challenge,gate,review-phase,phase-review-challenge,advance,trace,next-task,run,audit-lot-journal}
+    init                Create a case
+    put                 Add or revise a case item
+    status              Read the current case state
+    report              Read a case summary, next task and evidence limits
+    review              Review an item
+    retire-indicator    Retire a rejected unused indicator with versioned
+                        replacements; no human approval
+    approve             Record human approval of an item
+    approval-challenge  Prepare exact bytes for offline human signing
+    test-execution-challenge
+                        Prepare exact bytes for offline signing of an external
+                        test report
+    record-test-execution
+                        Record a signed external test execution report
+    test-observation-challenge
+                        Prepare exact bytes for offline signing of a test
+                        observation receipt
+    record-test-observation
+                        Record a signed observation of an external test
+                        execution
+    field-attestation-challenge
+                        Prepare case and source hashes for an assessor
+                        signature
+    attest-field        Record a signed assessor statement; field verdict
+                        stays blocked
+    challenge           Record a contradiction between items
+    resolve-challenge   Resolve a recorded contradiction
+    gate                Evaluate a phase gate without advancing
+    review-phase        Review a phase
+    phase-review-challenge
+                        Prepare exact phase snapshot bytes for offline
+                        reviewer signing
+    advance             Advance a phase after its gate passes
+    trace               Show an item's dependency trail
+    next-task           Get bounded instructions for the next phase task
+    run                 Apply a resumable workflow manifest until a gate needs
+                        a decision
+    audit-lot-journal   Audit declared incremental material records; does not
+                        certify field observations
+
+options:
+  -h, --help            show this help message and exit

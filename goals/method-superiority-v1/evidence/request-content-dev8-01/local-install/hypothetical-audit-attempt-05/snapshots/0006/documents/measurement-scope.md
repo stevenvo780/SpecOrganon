@@ -1,0 +1,9 @@
+# Criterios y alcance antes de medir
+
+Siguen vigentes C1-C6 de criteria.md. La evidencia suministrada contiene feedback neutral-0002-feedback: accept, tests_executed false. También registra el rechazo de neutral-0003-free por exceder el presupuesto común de bytes; sus archivos no aparecen en current-files.json. No hay medidas suministradas. Este parche reduce el tamaño de la propuesta, conserva topo_plan.py y aporta la batería separada.
+
+Aceptación propia solicitada: todos los asserts de test_topo_plan.py deben pasar bajo el argv fijado. Se comprueban código, stderr, framing, claves y resultados de lotes válidos; para inválidos, código 2, stdout vacío y stderr exacto, también tras una petición válida. La referencia calcula disponibilidad desde conjuntos de predecesores, sin heap ni grados. La enumeración cubre los 4096 grafos sin bucles sobre cuatro nodos, exige 543 DAGs y 3553 ciclos; compara los DAGs y prueba rechazo de ciclos mediante process. Todos los DAGs enumerados pasan además por la CLI en lotes. Otros casos cubren permutaciones, duplicados, límites, nombres, formas, JSON, codificación y profundidad.
+
+El script carga el objetivo por ruta absoluta con runpy y ejecuta la CLI usando sys.executable, -I y -B. Sus datos y referencias están contenidos en el propio script; no lee README ni documentos para obtener expectativas. topo_plan.py es el objetivo mutable, no un fixture o referencia. La partición cubre los tres archivos de entrega; no existen auxiliares de pruebas declarados. Se solicita fijar script y partición desde esta primera medida.
+
+No se afirma ejecución previa, aceptación semántica G, auditoría final F ni superioridad. La exhaustividad se limita a cuatro nodos; los casos mayores son seleccionados. No se miden costes ni fallos del sistema operativo. Un recibo de captura del host no demuestra por sí solo pertinencia de las pruebas.

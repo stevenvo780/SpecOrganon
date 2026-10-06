@@ -187,3 +187,15 @@ Controles mínimos de implementación:
    inválido y adulteración de historia no disparan otra operación ni reinician cupos.
 10. Report instalado sin Docker/dispatch; oráculo público y recuperación con programa
     deliberadamente roto, denominadores completos y ninguna inferencia confirmatoria.
+
+## Enmienda prospectiva de transporte dev8: referencias lossless
+
+La versión nueva incorpora `lossless-package-context-v1` según
+`../REQUEST_CONTENT_V1.md`. El contrato funcional, todos los resultados anteriores,
+los criterios originales, capturas, metadatos, orden y recibos siguen disponibles;
+solo se representa una vez cada string repetido mediante posiciones y referencias
+con contenido presente en la misma solicitud. Los presupuestos 110000/128000 y
+los límites de entrega no cambian. La identidad canónica tras reconstrucción se
+verifica antes de enviar. La auditoría mantiene sus localizadores y bytes originales.
+Esta enmienda no altera ni reabre el registro dev7 y por sí sola no admite otro
+piloto, prueba competencia ni congela una versión completa.

@@ -1,9 +1,9 @@
-# Build experimental de fuentes dev7 y laboratorio Codex/MCP
+# Build experimental de fuentes dev8 y laboratorio Codex/MCP
 
 Desde la carpeta del paquete fuente extraído:
 
 ```sh
-docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev7 .
+docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev8 .
 docker compose build codex
 docker compose run --rm -T codex codex --version
 docker compose run --rm -T codex python /opt/codex-lab/smoke.py
@@ -72,3 +72,13 @@ La imagen no está publicada en un registry ni constituye freeze completo, calif
 T o admisión de los seis pilotos. Las nueve fases, T/común y evaluación independiente
 F reservada siguen siendo requisitos de la meta. No inferir superioridad de los controles
 Docker con roles sintéticos ni de una instalación correcta.
+
+
+## Candidata dev8: referencias de contexto
+
+El build actual contiene el contexto lossless compartido N/S. Las comprobaciones
+offline de solicitudes fallidas se registran separadamente; no son nuevas
+generaciones, prueba de competencia ni una versión completa congelada. El piloto
+dev7 original sigue cerrado con sus seis fallos por presupuesto de solicitud.
+Los límites request/prompt permanecen110000/128000bytes.
+[Diseño y límites de la corrección](../../goals/method-superiority-v1/development/REQUEST_CONTENT_V1.md).
