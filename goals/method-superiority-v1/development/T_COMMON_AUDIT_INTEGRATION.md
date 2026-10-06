@@ -1,8 +1,26 @@
 # Integración pendiente de T con la auditoría común
 
-Estado: diseño de ingeniería derivado de lectura del código actual, no implementado
-ni admitido. No cambia las fuentes fijadas por el plan público N/S dev7 ni las
-cohortes cerradas. Implementarlo exige otra versión completa y nuevos registros.
+Estado: base de custodia implementada parcialmente en la candidata dev9;
+adaptador y auditoría común todavía pendientes, sin admisión T. No cambia las
+fuentes fijadas por los planes públicos N/S dev7/dev8 ni las cohortes cerradas.
+La versión completa futura exige instalación, revisión y nuevos registros.
+
+## Base de custodia dev9
+
+`t_measurement_custody` guarda criterios completos de `specify`, ancestros,
+estado, archivos, batería y argv originales, ledger binario y reloj antes de
+invocar la primera medida. La recuperación conserva la misma reserva y reloj;
+las reparaciones conservan nombres y bytes de la batería y el argv originales.
+El controlador archiva requests y fuentes antes del dispatch y exige
+`transport.verify_role` para autorizar packets nativos. La etiqueta `native`
+por sí sola no acredita ejecución. Estas guardas tienen pruebas sintéticas,
+sin resultados nativos de T ni afirmaciones D/G/H.
+
+Quedan pendientes las capturas completas de cada transición, la exportación del
+snapshot común, la auditoría separada y cobrada, verificación de todos los
+receipts/streams originales y el reloj que incluya preparación desde antes del
+transporte. El reloj del sello previo sólo fecha ese sello; no mide el intento
+entero. La auditoría no puede añadirse al contenido que ella misma auditó.
 
 ## Brecha actual comprobada
 
@@ -19,7 +37,7 @@ no una medición del paquete común. No derivar D/G pass de esos campos.
 1. Registrar contrato funcional común y política comparable antes de generar.
    El mandato T y sus H se conservan aparte. Cada nueva versión debe fijar módulo
    adaptador, engine, driver, bridge, imágenes, perfiles y presupuestos.
-2. Capturar de manera durable criterios de operationalize y sus ancestros antes
+2. Capturar de manera durable criterios de `specify` y sus ancestros antes
    de la primera medida propia. Capturar también cada versión previa de la
    entrega y los documentos; no reconstruir supuestos criterios originales a
    partir del ledger final ni usar notas posteriores como evidencia previa.

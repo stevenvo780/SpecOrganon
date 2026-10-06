@@ -129,7 +129,7 @@ def test_cannot_measure_unsealed_injected_test(tmp_path):
 def repair(ctrl, files=None, argv=None, test_id='t1'):
     ctrl.transport.result = response([put('impl1','implementation',['req1']),
         put(test_id,'test',['impl1','crit1'], {'argv': argv or ['/usr/bin/python3','-B','/input/delivery/test_count.py']})],
-        files or {'test_count.py':'import count\nassert True\n'})
+        files or {'count.py':'print(11)\n'})
     return ctrl.step()
 
 

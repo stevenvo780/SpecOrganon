@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "observed_utc": "2026-10-06T10:21:28.376961+00:00",
+  "candidate_version": "0.2.0rc3.dev9",
+  "image_id": "sha256:c1fa04d7865da5c403724a77f139c657ab2dc915e8434a16120cc29d0bf2a77b",
+  "installed_modules": 42,
+  "all_installed_module_bytes_equal": true,
+  "commands": [
+    {
+      "name": "modules",
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--tmpfs",
+        "/workspace:uid=1000,gid=1000,mode=700",
+        "--tmpfs",
+        "/home/codex/.codex:uid=1000,gid=1000,mode=700",
+        "sha256:c1fa04d7865da5c403724a77f139c657ab2dc915e8434a16120cc29d0bf2a77b",
+        "python",
+        "-I",
+        "-B",
+        "-c",
+        "import specorganon,hashlib,json;from pathlib import Path;p=Path(specorganon.__file__).parent;print(json.dumps({'version':specorganon.__version__,'modules':{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(p.glob('*.py'))}}))"
+      ],
+      "started_utc": "2026-10-06T10:21:24.402209+00:00",
+      "finished_utc": "2026-10-06T10:21:24.724211+00:00",
+      "exit_code": 0,
+      "stdout_sha256": "4f21519579e85e7357d4557a52bd0c07cc5c48d9f8cdea2399d0a12d4523147e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "cli-help",
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--tmpfs",
+        "/workspace:uid=1000,gid=1000,mode=700",
+        "--tmpfs",
+        "/home/codex/.codex:uid=1000,gid=1000,mode=700",
+        "sha256:c1fa04d7865da5c403724a77f139c657ab2dc915e8434a16120cc29d0bf2a77b",
+        "organon",
+        "--help"
+      ],
+      "started_utc": "2026-10-06T10:21:24.724256+00:00",
+      "finished_utc": "2026-10-06T10:21:25.036516+00:00",
+      "exit_code": 0,
+      "stdout_sha256": "634b19952f93d5da805668d3b39a12c52737d4b119df2c100a01cf387fa46ff4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "codex-version",
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--tmpfs",
+        "/workspace:uid=1000,gid=1000,mode=700",
+        "--tmpfs",
+        "/home/codex/.codex:uid=1000,gid=1000,mode=700",
+        "sha256:c1fa04d7865da5c403724a77f139c657ab2dc915e8434a16120cc29d0bf2a77b",
+        "codex",
+        "--version"
+      ],
+      "started_utc": "2026-10-06T10:21:25.036552+00:00",
+      "finished_utc": "2026-10-06T10:21:25.335505+00:00",
+      "exit_code": 0,
+      "stdout_sha256": "f6464b8cc67af75deb2589fe1dbcde152fc15ffb76a91de1cf0686b4623afb1e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mcp-smoke",
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--tmpfs",
+        "/workspace:uid=1000,gid=1000,mode=700",
+        "--tmpfs",
+        "/home/codex/.codex:uid=1000,gid=1000,mode=700",
+        "sha256:c1fa04d7865da5c403724a77f139c657ab2dc915e8434a16120cc29d0bf2a77b",
+        "python",
+        "/opt/codex-lab/smoke.py"
+      ],
+      "started_utc": "2026-10-06T10:21:25.335536+00:00",
+      "finished_utc": "2026-10-06T10:21:28.375920+00:00",
+      "exit_code": 0,
+      "stdout_sha256": "432cef164a2a44fba5d05073391cc0edd418c69071e754841fe9189bf1863063",
+      "stderr_sha256": "e9d5c981211ecab018121d7487c098fd969843ad888d87677daaa0e08826fa5a"
+    }
+  ],
+  "auth_mounts": false,
+  "network": "none",
+  "native_model_calls": 0,
+  "scope": "Installed local dev9 partial engineering CLI/Codex-version/MCP synthetic smoke; no native T qualification/common D/G/H/superiority"
+}
