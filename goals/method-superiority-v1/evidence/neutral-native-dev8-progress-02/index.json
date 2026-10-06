@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "observed_utc": "2026-10-06T10:23:33.166757+00:00",
+  "classification": "Cumulative partial public development observations;3 original closures of6; no reserved comparison",
+  "plan_sha256": "30dd4cf8a4050198f2604057099c3c6f9715b197d474527cc3d75801f49c4215",
+  "source_bindings_verified": 56,
+  "registered_original_generations": 6,
+  "closed_in_this_cut": 3,
+  "failed": 2,
+  "review_ready": 1,
+  "not_evaluated_in_this_cut": 3,
+  "original_replacements": 0,
+  "driver_session": 14349,
+  "driver_pid": 2457956,
+  "driver_alive_at_cut": true,
+  "copied_new_raw_files": 412,
+  "observations": [
+    {
+      "position": 1,
+      "attempt": {
+        "id": "attempt-01",
+        "method": "N",
+        "task": "rangeaudit"
+      },
+      "status": "failed",
+      "stage": "audit",
+      "failure": "DockerRoleError: native role failed/inconclusive; preserve without replacement",
+      "native_ready": false,
+      "method_review_ready": false,
+      "common_review_ready": false,
+      "common_complete": null,
+      "external_F": null,
+      "counts": {
+        "authors": 4,
+        "reviewers": 2,
+        "roles": 6,
+        "test_runs": 2
+      },
+      "public_cases": 115,
+      "public_passed": 115,
+      "whole_attempt_seconds": 385.763715351,
+      "raw_archive": "neutral-native-dev8-progress-01"
+    },
+    {
+      "position": 2,
+      "attempt": {
+        "id": "attempt-02",
+        "method": "S",
+        "task": "rangeaudit"
+      },
+      "status": "failed",
+      "stage": "tests",
+      "failure": "author admission failed and accumulated budget exhausted",
+      "native_ready": false,
+      "method_review_ready": false,
+      "common_review_ready": false,
+      "common_complete": null,
+      "external_F": null,
+      "counts": {
+        "build_authors": 3,
+        "roles": 5,
+        "stages": {
+          "plan": 1,
+          "plan-review": 1,
+          "program": 1,
+          "tests": 2
+        },
+        "test_runs": 0
+      },
+      "public_cases": 115,
+      "public_passed": 115,
+      "whole_attempt_seconds": 443.746344197,
+      "raw_archive": "neutral-native-dev8-progress-01"
+    },
+    {
+      "position": 3,
+      "attempt": {
+        "id": "attempt-03",
+        "method": "N",
+        "task": "ledgerfold"
+      },
+      "status": "review_ready",
+      "stage": "audit",
+      "failure": null,
+      "native_ready": true,
+      "method_review_ready": true,
+      "common_review_ready": true,
+      "common_complete": null,
+      "external_F": null,
+      "counts": {
+        "authors": 3,
+        "reviewers": 2,
+        "roles": 5,
+        "test_runs": 1
+      },
+      "public_cases": 104,
+      "public_passed": 104,
+      "whole_attempt_seconds": 332.609859356,
+      "raw_archive": "neutral-native-dev8-progress-02"
+    }
+  ],
+  "goal_achieved": false,
+  "method_qualification": false
+}
