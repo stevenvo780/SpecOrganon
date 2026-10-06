@@ -85,7 +85,7 @@ def test_expected_transport_policy_is_derived_without_Docker_or_clock(tmp_path, 
     r = plan(tmp_path)
     monkeypatch.setattr(pilot, 'transport', lambda *a: pytest.fail('must not inspect Docker'))
     p = pilot.transport_policy(r)
-    assert p['schema'] == 5 and p['registered_source_bindings_sha256'] == digest(canonical(r['source_sha256']))
+    assert p['schema'] == 6 and p['registered_source_bindings_sha256'] == digest(canonical(r['source_sha256']))
     assert p['routes'] == {'author': ['codex', 'gpt-6.1-sol'], 'review': ['gemini', 'Gemini 3.8 Flash (Medium)']}
     assert set(p['native_source_sha256']) == {n for n in r['source_sha256']
         if n == 'scripts/controller_native_role.py' or n.startswith('src/specorganon/')}
@@ -132,7 +132,7 @@ def test_public_checker_requires_strict_closed_result_and_keeps_failure_or_unkno
     elif mode == 'nonfinite': result = b'{"passed":NaN}'
     elif mode == 'wrong_exit': code = 1
     t = PublicFixture(folder / 'public-check', result, exit_code=code, pending=mode == 'pending')
-    monkeypatch.setattr(pilot, 'transport', lambda *a: t)
+    monkeypatch.setattr(pilot, 'transport', lambda *a,**kw: t)
     files = {'range_audit.py': '# fixture only\n'}
     if mode == 'pending':
         with pytest.raises(PendingCleanupError): pilot._public(r, a, folder, files, True)
@@ -285,7 +285,7 @@ def test_R02_R03_public_result_identity_and_failed_case_schema_reject_without_sc
         code = 1
     folder = tmp_path / 'attempt'; folder.mkdir(mode=0o700)
     t = PublicFixture(folder / 'public-check', result, exit_code=code)
-    monkeypatch.setattr(pilot, 'transport', lambda *args: t)
+    monkeypatch.setattr(pilot, 'transport', lambda *args, **kwargs: t)
     value = pilot._public(r, a, folder, {'program.py': '# synthetic fixture only'}, True)
     assert value['status'] == 'failed' and value['score'] is None and value['failure']
     assert pilot._public(r, a, folder, {'program.py': '# synthetic fixture only'}, False) == value and t.calls == 1
@@ -299,7 +299,39 @@ def test_real_checker_JSONDecodeError_shape_remains_an_observed_functional_failu
               'observations_sha256': 'a' * 64}
     folder = tmp_path / 'attempt'; folder.mkdir(mode=0o700)
     t = PublicFixture(folder / 'public-check', result, exit_code=1)
-    monkeypatch.setattr(pilot, 'transport', lambda *args: t)
+    monkeypatch.setattr(pilot, 'transport', lambda *args, **kwargs: t)
     value = pilot._public(r, a, folder, {'ledger_fold.py': '# parser fixture only'}, True)
     assert value['status'] == 'observed' and value['score'] == 103 / 104
     assert value['result']['failed'][0]['error'] == 'JSONDecodeError'
+
+
+def test_public_real_transport_factory_binds_original_measurement_clock_before_dispatch(tmp_path, monkeypatch):
+    """Real pilot/DockerRoles signature and policy; no daemon or provider execution."""
+    from specorganon.docker_roles import DockerRoles
+    r = plan(tmp_path); folder = tmp_path / 'attempt'; folder.mkdir()
+    images = []
+    def image(ref, **options):
+        intent = _read(folder / 'public-check-intent.json')
+        assert options['attempt_budget'].initial_sha256 == digest(intent)
+        assert options['attempt_budget'].start == json.loads(intent)['measurement_clock']
+        images.append(ref); return ref
+    monkeypatch.setattr(DockerRoles, '_image', staticmethod(image))
+    monkeypatch.setattr(DockerRoles, 'recover_test', lambda *args: None)
+    def stop_before_dispatch(*args):
+        raise PendingCleanupError('synthetic stop before Docker/test execution')
+    monkeypatch.setattr(DockerRoles, 'measure', stop_before_dispatch)
+    monkeypatch.setattr(DockerRoles, '_cli', staticmethod(lambda *args, **kwargs:
+        pytest.fail('factory integration must not control Docker')))
+    with pytest.raises(PendingCleanupError, match='synthetic stop'):
+        pilot._public(r, pilot.ATTEMPTS[0], folder, {'range_audit.py': '# fixture\n'}, True)
+    intent = _read(folder / 'public-check-intent.json'); request = json.loads(intent)
+    binding = json.loads((folder / 'public-check/attempt-deadline.json').read_bytes())
+    assert binding['clock'] == request['measurement_clock'] and binding['initial_sha256'] == digest(intent)
+    assert request['clock_scope'] == 'independent-public-observation-not-a-generation'
+    assert len(images) == 2
+    assert json.loads((folder / 'public-check/transport-policy.json').read_bytes())['schema'] == 6
+    assert not (folder / 'public-check/jobs').exists()
+    # Reopening the same intent keeps the original clock and never re-probes images.
+    with pytest.raises(PendingCleanupError, match='synthetic stop'):
+        pilot._public(r, pilot.ATTEMPTS[0], folder, {'range_audit.py': '# fixture\n'}, True)
+    assert _read(folder / 'public-check-intent.json') == intent and len(images) == 2

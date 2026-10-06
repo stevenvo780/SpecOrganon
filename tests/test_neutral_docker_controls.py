@@ -261,3 +261,101 @@ def test_R15_real_measure_SIGKILL_during_atomic_controller_write_recovers_no_new
         report=c.step();assert report['status']=='review_ready' and report['counts']['test_runs']==1
         assert (folders[0]/'output/own-runs.txt').read_text()=='1'
     finally:cleanup(c)
+
+
+@pytest.mark.parametrize('provider_exit',[1,37])
+def test_real_failed_bridge_closed_before_controller_capture_recovers_negative_without_provider_retry(tmp_path,provider_exit):
+    from specorganon.docker_roles import ClosedNativeExecutionError
+    # Actual Docker and measured inner Python process. Provider is an explicit
+    # simulator with an empty disposable profile; zero accounts/model calls.
+    simulator = tmp_path/'simulated-failing-agy'
+    simulator.write_text('''#!/opt/specorganon/.venv/bin/python
+import sys
+from pathlib import Path
+sys.stdin.buffer.read()
+p=Path('/output/provider-fixture-count.txt')
+p.write_text(str(int(p.read_text())+1) if p.exists() else '1')
+print('synthetic provider failure without a parseable accepted response',file=sys.stderr)
+sys.exit('''+str(provider_exit)+''')
+''');simulator.chmod(0o755)
+    profile = tmp_path/'empty-simulator-profile';profile.mkdir()
+    names = [SOURCE/'scripts/controller_native_role.py',*sorted((SOURCE/'src/specorganon').glob('*.py')),CATALOG]
+    pins = {str(p.relative_to(SOURCE)):digest(p.read_bytes()) for p in names}
+    t = DockerRoles(tmp_path/'actual-failed-role',**{**OPTIONS,'author_provider':'gemini',
+        'author_model':'fixture-model','gemini_profile':profile,'gemini_executable':simulator},source_bindings=pins)
+    request = {'schema':1,'role':'author','role_instructions':'Explicit failure simulator only.',
+        'documents':{'action.txt':'author','author-response-format.json':canonical({'schema':1,'format':'files-v1'}).decode()}}
+    job = 'failed-role-control'
+    try:
+        with pytest.raises(ClosedNativeExecutionError) as caught: t.call(job,'author',request)
+        proof = caught.value.proof
+        folder = t.root/'jobs'/job; plan = _json(folder/'launch.json')
+        assert proof['receipt']['exit_code'] == 2 and proof['acceptance'] is False
+        assert proof['native_invocation_established'] is False and 'result' not in proof
+        assert _json(folder/'output/native/call/receipt.json')['exit_code'] == provider_exit
+        marker = folder/'output/provider-fixture-count.txt'
+        assert marker.read_text() == '1'
+        observed = t._inspect(plan)
+        assert not observed['State']['Running']
+        assert all(m.get('Name') != 'specorganon-lab_codex-home' for m in observed['Mounts'])
+        original_cli = t._cli
+        t._cli = lambda *a,**k: (_ for _ in ()).throw(AssertionError('recovery must be pure, no daemon control'))
+        try:
+            for _ in range(2):
+                with pytest.raises(ClosedNativeExecutionError) as recovered: t.recover_role(job,'author',request)
+                assert recovered.value.proof == proof
+                assert t.verify_execution_failure(proof,job,'author',request) is True
+        finally: t._cli = original_cli
+        assert marker.read_text() == '1' and not any(profile.iterdir())
+    finally:
+        path = t.root/'jobs'/job/'launch.json'
+        if path.exists() and _json(path)['container_id']:
+            t._cli(['rm','--force',_json(path)['container_id']],allow_failure=True)
+
+
+def test_real_bound_attempt_cutoff_stops_one_test_and_recovers_same_closed_result(tmp_path,monkeypatch):
+    import copy
+    import threading
+    from specorganon import attempt_deadline as deadline
+    start = deadline.clock(); now = copy.deepcopy(start)
+    now['boottime_ns'] += 5900*10**9  # Explicit simulated clock:100s remain.
+    monkeypatch.setattr(deadline,'clock',lambda:copy.deepcopy(now))
+    t = DockerRoles(tmp_path/'bounded-actual-test',**OPTIONS,attempt_clock=start,attempt_initial_sha256='a'*64)
+    files = {'probe.py':'''from pathlib import Path
+import time
+p=Path('/output/attempt-cutoff-count.txt');p.write_text(str(int(p.read_text())+1) if p.exists() else '1')
+print('actual single isolated measurement, simulated attempt clock',flush=True)
+time.sleep(30)
+'''}
+    argv = ['/opt/specorganon/venv/bin/python','-I','-B','/input/delivery/probe.py']
+    marker = t.root/'jobs/attempt-cutoff/output/attempt-cutoff-count.txt'
+    stopped = threading.Event()
+    def expire_after_dispatch():
+        end = time.monotonic()+10
+        while not stopped.is_set() and not marker.exists() and time.monotonic()<end:
+            stopped.wait(.01)
+        if marker.exists(): now['boottime_ns'] += 41*10**9  #59s remain: payload must stop, cleanup reserve begins.
+    watcher = threading.Thread(target=expire_after_dispatch);watcher.start()
+    try:
+        measured = t.measure('attempt-cutoff',argv,files)
+        assert marker.read_text() == '1' and measured['passed'] is False and measured['timed_out'] is True
+        plan = _json(t.root/'jobs/attempt-cutoff/launch.json')
+        with t._cleanup_controls(): observed = t._inspect(plan)
+        assert observed['State']['Running'] is False and observed['HostConfig']['NetworkMode'] == 'none'
+        assert not any(m['Destination'] in {'/home/codex/.codex','/home/stev/.gemini','/var/run/docker.sock'} for m in observed['Mounts'])
+        assert _json(t.root/'transport-policy.json')['schema'] == 6
+        assert t.store.policy['schema'] == 4
+        now['boottime_ns'] += 100*10**9  # Even after expiry, recovery is pure.
+        original_cli = t._cli
+        t._cli = lambda *a,**k:(_ for _ in ()).throw(AssertionError('closed measurement must not control Docker'))
+        try:
+            assert t.measure('attempt-cutoff',argv,files) == measured
+            assert t.recover_test('attempt-cutoff',argv,files) == measured
+            assert t.verify_test({'argv':argv,'test_job_ref':measured['test_job_ref']},files,require_passed=False)
+        finally:t._cli = original_cli
+        assert marker.read_text() == '1'
+    finally:
+        stopped.set();watcher.join(timeout=3)
+        path=t.root/'jobs/attempt-cutoff/launch.json'
+        if path.exists() and _json(path)['container_id']:
+            t._cli(['rm','--force',_json(path)['container_id']],allow_failure=True)

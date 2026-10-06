@@ -1,9 +1,9 @@
-# Build experimental de fuentes dev9 y laboratorio Codex/MCP
+# Build experimental de fuentes dev11 y laboratorio Codex/MCP
 
 Desde la carpeta del paquete fuente extraído:
 
 ```sh
-docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev10 .
+docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev11 .
 docker compose build codex
 docker compose run --rm -T codex codex --version
 docker compose run --rm -T codex python /opt/codex-lab/smoke.py
@@ -52,7 +52,7 @@ docker compose run --rm -T codex python /opt/codex-lab/trial.py
 El driver usa siete herramientas MCP autorizadas para su caso técnico, sin pedir aceptación de las nueve fases. Conserva los eventos y rechaza una inferencia sin llamadas MCP verificadas. Consume cuota de la cuenta autenticada.
 
 El nombre Compose `specorganon-main-dev2` se mantiene para conservar los volúmenes
-existentes del laboratorio main; la etiqueta del build experimental es dev7. La cohorte histórica
+existentes del laboratorio main; la etiqueta del build experimental es dev11. La cohorte histórica
 sigue en su checkout, imagen y volumen registrados. Dev3 conserva un smoke del wheel
 instalado en Docker; su corrección opt-in no ha sido evaluada en una cohorte nativa
 nueva. [Recibos y límites](../../goals/method-superiority-v1/development/BOUNDED_ADMISSION.md).
@@ -63,7 +63,7 @@ El hito histórico dev6 conserva su probe de wheel local con CLI y MCP stdio en
 el host; ese recibo no acreditaba MCP instalado en una imagen dev6. No se reetiqueta
 como prueba dev7. [Controles N/S por etapas y límites](../../goals/method-superiority-v1/development/STAGED_CONTROLS_V1.md).
 
-La candidata dev7 integra N con decisiones autónomas y S con su proceso por etapas,
+La candidata histórica dev7 integra N con decisiones autónomas y S con su proceso por etapas,
 con presupuesto común de cinco autores, cuatro revisores y dos medidas. Su imagen
 local y wheel se comprueban con 40 módulos iguales a las fuentes, CLI y MCP stdio
 offline (caso sintético, 24 herramientas); los recibos se conservan en
@@ -76,9 +76,27 @@ Docker con roles sintéticos ni de una instalación correcta.
 
 ## Candidata dev8: referencias de contexto
 
-El build actual contiene el contexto lossless compartido N/S. Las comprobaciones
+El corte histórico dev8 contiene el contexto lossless compartido N/S. Las comprobaciones
 offline de solicitudes fallidas se registran separadamente; no son nuevas
 generaciones, prueba de competencia ni una versión completa congelada. El piloto
 dev7 original sigue cerrado con sus seis fallos por presupuesto de solicitud.
 Los límites request/prompt permanecen110000/128000bytes.
 [Diseño y límites de la corrección](../../goals/method-superiority-v1/development/REQUEST_CONTENT_V1.md).
+
+
+## Corte corriente dev11: ingeniería parcial
+
+Los probes del corte corregido acreditan 46 módulos idénticos en las imágenes
+locales, CLI y MCP stdio de 24 herramientas, Codex 0.160.0, sin inferencias ni
+montajes de credenciales. La recuperación conserva fallos negativos cerrados y
+el reloj original de CLOCK_BOOTTIME. La revisión del primer corte rechazó ocho
+hallazgos; la revisión independiente del corte corregido rechazó tres hallazgos nuevos pendientes: recibo del auditor en el primer cierre, ciclo de vida Docker normal incierto y consumo de streams del score público. Las reproducciones son propuestas estáticas todavía no ejecutadas.
+No hay admisión T, freeze completo, calificación ni superioridad. Los recibos
+anteriores no acreditan bytes posteriores y los probes no acreditan la igualdad
+de esta documentación de uso corregida después del build.
+[Informe y recibos](../../goals/method-superiority-v1/evidence/whole-attempt-recovery-dev11-01/README.md).
+
+Ejecuta los comandos iniciales desde la raíz del clon de main. La imagen release
+`specorganon-release:0.2.0rc3.dev11` debe construirse antes de `docker compose build codex`.
+El nombre Compose `specorganon-main-dev2`, sus volúmenes, permisos y políticas
+se conservan. Las imágenes dev11 permanecen locales, sin registry ni wheel público.

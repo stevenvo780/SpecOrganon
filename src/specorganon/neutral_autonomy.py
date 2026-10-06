@@ -18,6 +18,7 @@ from .ledger import strict_json_loads
 from .native_response_contract import render_prompt, response_schema, validate_response_schema
 from .neutral_controller import LIMITS, NeutralController, NeutralControllerError, _fingerprint, _context_document
 from .request_content import decode_content
+from .request_tree import decode_tree
 from .role_jobs import _read, canonical, digest
 from .software_controller import encoded_contribution, safe_file
 
@@ -125,7 +126,8 @@ class AutonomousNeutralController(NeutralController):
         # the captured package/evidence; the complete journals remain unchanged.
         name = 'evidence-context.json' if stage == 'audit' else 'package-context.json'
         document = strict_json_loads(req['documents'][name])
-        context = (decode_content(document['context']) if document['encoding'] == 'content-refs-v1'
+        context = (decode_tree(document['context']) if document['encoding'] == 'tree-refs-v1'
+                   else decode_content(document['context']) if document['encoding'] == 'content-refs-v1'
                    else document['context'])
         context['controller_context'] = controller_context
         req['documents'][name] = _context_document(context)
@@ -162,7 +164,7 @@ class AutonomousNeutralController(NeutralController):
         return self._checkpoint(s, reservation, 'planning' if reservation['stage'] == 'free' else 'review')
 
     def _apply_valid(self, state, r, result, past):
-        if r['halt'] is not None or result['kind'] == 'error':
+        if r['halt'] is not None or result['kind'] in ('error', 'execution_error'):
             return super()._apply_valid(state, r, result, past)
         if result['kind'] == 'response_error':
             if r['stage'] == 'measure':

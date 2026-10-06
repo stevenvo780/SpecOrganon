@@ -5,10 +5,13 @@ for their native role. A created container's handle is persisted before start;
 an interrupted attachment without a host receipt remains uncertain and is never
 restarted. Reconciliation kills that exact owned container, retaining its files.
 The trusted operator owns the journals and Docker daemon; hashes do not attest it.
-Control calls each have a 15-second deadline. JobStore checks its 6000-second
-elapsed admission budget (including prior preparation) before payload dispatch;
-it does not reserve Docker preparation or impose a hard end-to-end deadline.
-Denied payload admission can leave an owned never-started container for diagnosis.
+Bound schema6 preserves the controller's original6000-second CLOCK_BOOTTIME
+budget before image/factory preparation and reserves60seconds for bounded safety
+cleanup. No expired payload is admitted or restarted; closed recovery reads only
+original custody. Each control call is bounded by15seconds and remaining payload
+time. Safety cleanup can still run after expiry, which cannot confer readiness.
+An OS/daemon hang or killed owner can prevent confirmed closure; keep uncertainty.
+Standalone schema5 component journals do not qualify native N/S/T attempts.
 Full cohort wall time, rather than receipt-duration sums, measures efficiency.
 """
 from __future__ import annotations
@@ -17,6 +20,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 import fcntl
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -28,6 +32,7 @@ import uuid
 
 from .ledger import strict_json_loads, _open_regular_file
 from .role_jobs import JobStore, JobError, UncertainJob, canonical, digest, _read, _json, _write, _safe
+from .attempt_deadline import AttemptBudget, DEADLINE_POLICY
 
 
 class DockerRoleError(ValueError):
@@ -39,6 +44,13 @@ class ClosedResponseContractError(DockerRoleError):
     def __init__(self,proof):
         self.proof=proof
         super().__init__('closed native response violates the bound body contract')
+
+
+class ClosedNativeExecutionError(DockerRoleError):
+    """Verified stopped original execution failed; no accepted native packet."""
+    def __init__(self, proof):
+        self.proof = proof
+        super().__init__('closed native execution failed; preserve original measured outcome')
 
 
 class PendingCleanupError(DockerRoleError):
@@ -61,10 +73,22 @@ class DockerRoles:
                  reviewer_provider='gemini', reviewer_model='gemini-3.1-pro-high',
                  codex_volume='specorganon-lab_codex-home', gemini_profile='/home/stev/.gemini',
                  gemini_executable='/home/stev/.local/bin/agy', seccomp=None, test_timeout_seconds=120,
-                 codex_reasoning_effort='low', source_bindings=None):
+                 codex_reasoning_effort='low', source_bindings=None,
+                 attempt_clock=None, attempt_initial_sha256=None):
+        if (attempt_clock is None) != (attempt_initial_sha256 is None):
+            raise DockerRoleError('original attempt clock/SHA must be supplied together')
+        self.attempt_budget = AttemptBudget(attempt_clock,attempt_initial_sha256) if attempt_clock is not None else None
+        self._cleanup_active = False
+        resuming = (_safe(root)/'transport-policy.json').exists()
+        if self.attempt_budget is not None and not resuming:
+            self.attempt_budget.admit(reserve=DEADLINE_POLICY['preparation_minimum_seconds'])
         self.root = _safe(root); self.root.mkdir(parents=True, mode=0o700, exist_ok=True)
         self.source = _safe(source_root); self.catalog = _safe(public_catalog)
-        self.images = {'native': self._image(native_image), 'test': self._image(test_image)}
+        self.images = {name:(ref if resuming and self.attempt_budget is not None
+                            else self._image(ref,attempt_budget=self.attempt_budget) if self.attempt_budget is not None else self._image(ref))
+                       for name,ref in [('native',native_image),('test',test_image)]}
+        if any(type(ref) is not str or re.fullmatch(r'sha256:[0-9a-f]{64}',ref) is None for ref in self.images.values()):
+            raise DockerRoleError('immutable image identities required')
         self.routes = {'author': (author_provider, author_model), 'review': (reviewer_provider, reviewer_model)}
         if any(provider not in {'codex', 'gemini'} or type(model) is not str or not model for provider, model in self.routes.values()):
             raise DockerRoleError('unsupported explicit native route')
@@ -80,7 +104,7 @@ class DockerRoles:
         if type(test_timeout_seconds) is not int or not 1 <= test_timeout_seconds <= 120:
             raise DockerRoleError('test timeout must be 1..120 seconds')
         self.test_timeout = test_timeout_seconds
-        self.store = JobStore(self.root / 'host-journal', max_jobs=80, max_elapsed_seconds=6000)
+        self.store = JobStore(self.root / 'host-journal', max_jobs=80, max_elapsed_seconds=6000,attempt_budget=self.attempt_budget)
         self.source_bindings = dict(source_bindings) if source_bindings is not None else None
         sources = self._native_source_bytes()
         inputs = {'public-models.json': _read(self.catalog)}
@@ -95,7 +119,7 @@ class DockerRoles:
                 raise DockerRoleError('transport input differs from registered source binding')
         self.native_sources = {name:digest(raw) for name,raw in sources.items()}
         self.launch_input_sha256 = {name:digest(raw) for name,raw in inputs.items()}
-        policy = {'schema': 5, 'create_recovery': 'owned-never-started-after-create-deadline-v1',
+        policy = {'schema': 6 if self.attempt_budget is not None else 5, 'create_recovery': 'owned-never-started-after-create-deadline-v1',
                   'images': self.images, 'routes': self.routes, 'test_timeout_seconds': self.test_timeout,
                   'source_root': str(self.source), 'public_catalog_sha256': self.launch_input_sha256['public-models.json'],
                   'native_source_sha256': self.native_sources,
@@ -105,28 +129,45 @@ class DockerRoles:
                   'codex_reasoning_effort': self.codex_reasoning_effort,
                   'seccomp_sha256': self.launch_input_sha256.get('seccomp.json')}
         self.gemini_executable_sha256=policy['gemini_executable_sha256']
+        if self.attempt_budget is not None:
+            policy['whole_attempt_budget'] = DEADLINE_POLICY
+            binding = self.root/'attempt-deadline.json'
+            if binding.exists():
+                if _json(binding) != self.attempt_budget.binding:
+                    raise DockerRoleError('original attempt deadline binding changed')
+            elif resuming:
+                raise DockerRoleError('original attempt deadline binding missing; never reconstruct it silently')
+            else: _write(binding,self.attempt_budget.binding)
         path = self.root / 'transport-policy.json'
         if path.exists():
             existing = _json(path)
-            if type(existing) is not dict or existing.get('schema') != 5:
-                raise DockerRoleError('transport schema5 required; previous schema cannot resume silently')
+            if type(existing) is not dict or existing.get('schema') != policy['schema']:
+                raise DockerRoleError(f'transport schema{policy["schema"]} required; previous schema cannot resume silently')
             if existing != strict_json_loads(canonical(policy).decode()):
                 raise DockerRoleError('transport policy changed; use an explicitly versioned run')
         else: _write(path, policy)
 
     @staticmethod
-    def _cli(argv, *, allow_failure=False):
+    def _cli(argv, *, allow_failure=False, timeout_seconds=15, boottime_deadline_ns=None):
+        if (type(timeout_seconds) not in (int,float) or not math.isfinite(timeout_seconds) or timeout_seconds <= 0
+                or boottime_deadline_ns is not None and (type(boottime_deadline_ns) is not int or boottime_deadline_ns < 0)):
+            raise DockerRoleError('finite positive control timeout and exact boottime deadline required')
+        if boottime_deadline_ns is not None and boottime_deadline_ns <= time.clock_gettime_ns(time.CLOCK_BOOTTIME):
+            raise DockerControlDeadlineError(argv[0])
+        call_deadline_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME) + int(min(15,timeout_seconds)*10**9)
+        if boottime_deadline_ns is not None: call_deadline_ns = min(call_deadline_ns,boottime_deadline_ns)
         command = ['/usr/bin/docker', *argv]
         process = subprocess.Popen(command, stdin=subprocess.DEVNULL,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
         streams = {'stdout': bytearray(), 'stderr': bytearray()}; selector = selectors.DefaultSelector()
-        deadline = time.monotonic() + 15
+        deadline = time.monotonic() + min(15,timeout_seconds)
         try:
             for name in streams:
                 pipe = getattr(process, name); os.set_blocking(pipe.fileno(), False)
                 selector.register(pipe, selectors.EVENT_READ, name)
             while selector.get_map() or process.poll() is None:
                 remaining = deadline - time.monotonic()
+                remaining = min(remaining,(call_deadline_ns-time.clock_gettime_ns(time.CLOCK_BOOTTIME))/1e9)
                 if remaining <= 0: raise DockerControlDeadlineError(argv[0])
                 for key, _ in selector.select(min(remaining, .05)):
                     raw = os.read(key.fd, 65536)
@@ -145,12 +186,30 @@ class DockerRoles:
         return result
 
     @classmethod
-    def _image(cls, ref):
+    def _image(cls, ref, *, attempt_budget=None):
         if type(ref) is not str or re.fullmatch(r'sha256:[0-9a-f]{64}', ref) is None:
             raise DockerRoleError('inspect and pin immutable image ID before constructing transport')
-        actual = cls._cli(['image', 'inspect', ref, '--format', '{{.Id}}']).stdout.decode().strip()
+        kwargs = {}
+        if attempt_budget is not None:
+            kwargs = {'timeout_seconds':attempt_budget.admit(reserve=DEADLINE_POLICY['cleanup_reserve_seconds']),
+                      'boottime_deadline_ns':attempt_budget.deadline_ns-DEADLINE_POLICY['cleanup_reserve_seconds']*10**9}
+        actual = cls._cli(['image', 'inspect', ref, '--format', '{{.Id}}'],**kwargs).stdout.decode().strip()
         if actual != ref: raise DockerRoleError('inspected image identity diverged')
         return ref
+
+    def _control(self, argv, *, allow_failure=False):
+        budget = getattr(self,'attempt_budget',None)
+        if budget is None or getattr(self,'_cleanup_active',False):
+            return self._cli(argv,allow_failure=allow_failure)
+        return self._cli(argv,allow_failure=allow_failure,
+            timeout_seconds=budget.admit(reserve=DEADLINE_POLICY['cleanup_reserve_seconds']),
+            boottime_deadline_ns=budget.deadline_ns-DEADLINE_POLICY['cleanup_reserve_seconds']*10**9)
+
+    @contextmanager
+    def _cleanup_controls(self):
+        prior = getattr(self,'_cleanup_active',False); self._cleanup_active = True
+        try: yield
+        finally: self._cleanup_active = prior
 
     @contextmanager
     def _lock(self):
@@ -182,6 +241,10 @@ class DockerRoles:
         if digest(_read(self.gemini_executable,536870912)) != self.gemini_executable_sha256:
             raise DockerRoleError('pinned Gemini executable changed before preparation')
         folder = self.root / 'jobs' / job_id
+        if getattr(self,'attempt_budget',None) is not None:
+            self._verify_attempt_binding()
+            self.attempt_budget.admit(reserve=DEADLINE_POLICY['preparation_minimum_seconds'])
+            self._image(self.images['test' if role == 'test' else 'native'],attempt_budget=self.attempt_budget)
         request_raw = canonical(request)
         if len(request_raw) > 128000: raise DockerRoleError('native request exceeds input limit')
         sources = self._bound_native_source_bytes()
@@ -285,7 +348,7 @@ class DockerRoles:
 
     def _inspect(self, plan):
         target=plan.get('container_id') or plan['name']
-        try:result = self._cli(['inspect', target], allow_failure=True)
+        try:result = self._control(['inspect', target], allow_failure=True)
         except DockerControlDeadlineError as exc:
             raise PendingCleanupError('Docker inspection deadline cannot establish the owned execution state') from exc
         if result.returncode:
@@ -385,9 +448,11 @@ class DockerRoles:
                     raise UncertainJob('creation previously attempted; missing handle must never be recreated')
                 # A crash immediately after this write still consumes the one
                 # creation opportunity. Missing proof cannot authorize a retry.
+                if getattr(self,'attempt_budget',None) is not None:
+                    self.attempt_budget.admit(reserve=DEADLINE_POLICY['cleanup_reserve_seconds']+15)
                 _write(attempt, self._creation_attempt(plan))
                 try:
-                    created = self._cli(plan['create_argv']).stdout.decode().strip()
+                    created = self._control(plan['create_argv']).stdout.decode().strip()
                 except DockerControlDeadlineError as exc:
                     created = self._recover_created(job_id, folder, plan, exc)
                 if re.fullmatch(r'[0-9a-f]{64}', created) is None: raise DockerRoleError('invalid created container handle')
@@ -422,7 +487,7 @@ class DockerRoles:
             raise
         if self._inventory(folder / 'input') != plan['input_manifest']:
             raise DockerRoleError('role/test input changed after dispatch')
-        observed = self._inspect(plan)
+        with self._cleanup_controls(): observed = self._inspect(plan)
         if observed is None: raise UncertainJob('terminal container handle disappeared; no outcome promotion')
         if observed['State']['Running']:
             self.reconcile(job_id); raise UncertainJob('owned container still live after attachment; no terminal promotion')
@@ -435,7 +500,8 @@ class DockerRoles:
         return folder, plan, result
 
     def reconcile(self, job_id):
-        try:return self._reconcile_observed(job_id)
+        try:
+            with self._cleanup_controls(): return self._reconcile_observed(job_id)
         except (DockerRoleError,UncertainJob) as exc:
             raise PendingCleanupError('owned execution stop is not confirmed; retain its reservation') from exc
 
@@ -443,26 +509,45 @@ class DockerRoles:
         folder = self.root / 'jobs' / job_id; plan = _json(folder / 'launch.json'); value = self._inspect(plan)
         if value is not None and plan.get('container_id') is not None and value['Id']!=plan['container_id']:
             raise UncertainJob('owned name no longer identifies the recorded container; never kill replacement')
-        if value is None: outcome = 'handle_missing_uncertain'
-        elif value['State']['Running']:
-            self._cli(['kill', value['Id']], allow_failure=True)
+        if value is None:
+            _write(folder / 'reconciliation.json', {'schema':1,'outcome':'handle_missing_uncertain',
+                'name':plan['name'],'native_restarted':False,'acceptance':False,'cleanup_confirmed':False})
+            raise PendingCleanupError('owned creation/container absent but execution stop is not confirmed')
+        if type(value['State']['Running']) is not bool:
+            raise PendingCleanupError('owned execution running state is not confirmed')
+        if value['State']['Running']:
+            self._control(['kill', value['Id']], allow_failure=True)
             value = self._inspect(plan)
-            if value is not None and value['State']['Running']: raise DockerRoleError('owned container could not be stopped')
+            if (value is None or type(value['State']['Running']) is not bool or value['State']['Running']
+                    or value['State'].get('Status') not in ('exited','created')):
+                raise PendingCleanupError('owned container stop could not be confirmed after kill')
             outcome = 'owned_container_killed_execution_uncertain'
-        else: outcome = 'owned_container_stopped_execution_uncertain'
+        elif value['State'].get('Status') in ('exited','created'):
+            outcome = 'owned_container_stopped_execution_uncertain'
+        else:
+            raise PendingCleanupError('owned container terminal lifecycle state is uncertain')
         _write(folder / 'reconciliation.json', {'schema': 1, 'outcome': outcome, 'name': plan['name'],
                                                'native_restarted': False, 'acceptance': False})
         return outcome
 
     def call(self, job_id, role, request):
         with self._lock():
-            folder, plan, job = self._execute(job_id, role, request)
+            closed = self.recover_role(job_id,role,request)
+            if closed is not None: return closed
+            try:
+                folder, plan, job = self._execute(job_id, role, request)
+            except DockerRoleError:
+                proof = self.recover_execution_failure(job_id, role, request)
+                if proof is not None: raise ClosedNativeExecutionError(proof)
+                raise
             receipt = job['receipt']
             if receipt['exit_code'] or receipt['timed_out'] or receipt['truncated_streams']:
                 if receipt['exit_code']==2 and not receipt['timed_out'] and not receipt['truncated_streams']:
                     try:proof=self.recover_response_failure(job_id,role,request)
                     except ValueError:proof=None
                     if proof is not None:raise ClosedResponseContractError(proof)
+                proof = self.recover_execution_failure(job_id, role, request)
+                if proof is not None: raise ClosedNativeExecutionError(proof)
                 raise DockerRoleError('native role failed/inconclusive; preserve without replacement')
             packet = strict_json_loads(job['stdout'].decode())
             if packet.get('request_sha256') != plan['request_sha256'] or packet.get('provider') != plan['provider'] or packet.get('model') != plan['model']:
@@ -476,6 +561,8 @@ class DockerRoles:
             raise DockerRoleError('test needs bounded explicit absolute argv')
         request = {'schema': 1, 'argv': argv, 'delivery_tree_sha256': digest(canonical(files))}
         with self._lock():
+            closed = self.recover_test(job_id,argv,files)
+            if closed is not None: return closed
             folder, plan, job = self._execute(job_id, 'test', request, files)
             measured = job['receipt']; result = {**measured, 'subject_argv': argv,
                 'attachment_exit_code': measured['exit_code'],
@@ -496,13 +583,16 @@ class DockerRoles:
         """
         return self._verify_role_record(packet,job_id,role,request,failed_body=False)
 
-    def _verify_role_record(self,packet,job_id,role,request,*,failed_body):
-        expected_exit=2 if failed_body else 0
-        provenance='closed_native_invalid_response' if failed_body else 'native'
+    def _closed_role_transport(self, job_id, role, request):
+        """Read exact stopped outer execution custody, without parsing a body.
+
+        This proves the trusted host's transport outcome only. A failed bridge
+        need not have reached a provider invocation or produced an inner journal.
+        Never inspect/start/kill Docker here, even during recovery.
+        """
         if type(role) is not str or role not in ('author','review') or type(job_id) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}',job_id) is None:
             raise DockerRoleError('invalid role verification target')
-        if type(packet) is not dict or packet.get('provenance') != provenance:
-            raise DockerRoleError('native role provenance required')
+        self._verify_attempt_binding()
         sources=self._bound_native_source_bytes()
         folder=self.root/'jobs'/job_id
         plan=_json(folder/'launch.json')
@@ -532,20 +622,42 @@ class DockerRoles:
                 or canonical(admitted['metadata']) != canonical(metadata) or digest(canonical(admitted)) != receipt['request_sha256']
                 or receipt['argv'] != ['/usr/bin/docker','start','--attach',plan['container_id']]
                 or admitted['argv'] != receipt['argv'] or admitted['cwd'] != str(self.root)
-                or receipt['cwd'] != str(self.root) or receipt['exit_code'] != expected_exit
-                or receipt['timed_out'] or receipt['truncated_streams']):
-            raise DockerRoleError('closed role measured admission/receipt diverged or failed')
+                or receipt['cwd'] != str(self.root)):
+            raise DockerRoleError('closed role measured admission/receipt diverged')
+        streams = {}
         for name in ('stdout','stderr'):
             raw=_read(path/(name+'.bin'))
             if digest(raw) != receipt[name+'_sha256'] or len(raw) != receipt[name+'_bytes']:
                 raise DockerRoleError('closed role measured stream changed')
+            streams[name] = raw
         terminal=_json(folder/'terminal-container.json')
+        if (type(terminal) is not dict or set(terminal) != {'id','exit_code','image_id','oom_killed'}
+                or terminal['id'] != plan['container_id'] or terminal['image_id'] != plan['image_id']
+                or type(terminal['exit_code']) is not int or type(terminal['oom_killed']) is not bool):
+            raise DockerRoleError('closed role terminal container identity/outcome invalid')
+        return folder, plan, receipt, terminal, streams
+
+    def _verify_attempt_binding(self):
+        budget = getattr(self,'attempt_budget',None)
+        if budget is not None and _json(self.root/'attempt-deadline.json') != budget.binding:
+            raise DockerRoleError('original whole attempt clock binding changed')
+
+    def _verify_role_record(self,packet,job_id,role,request,*,failed_body):
+        expected_exit=2 if failed_body else 0
+        provenance='closed_native_invalid_response' if failed_body else 'native'
+        if type(packet) is not dict or packet.get('provenance') != provenance:
+            raise DockerRoleError('native role provenance required')
+        folder, plan, receipt, terminal, streams = self._closed_role_transport(job_id, role, request)
+        provider, model = self.routes[role]
+        path = self.store.root/job_id
+        if receipt['exit_code'] != expected_exit or receipt['timed_out'] or receipt['truncated_streams']:
+            raise DockerRoleError('closed role measured admission/receipt failed')
         if canonical(terminal) != canonical({'id':plan['container_id'],'exit_code':expected_exit,'image_id':plan['image_id'],'oom_killed':False}):
             raise DockerRoleError('closed role terminal container diverged or failed')
         if failed_body:
-            if _read(path/'stdout.bin')!=b'':raise DockerRoleError('failed response bridge must not emit an accepted packet')
+            if streams['stdout']!=b'':raise DockerRoleError('failed response bridge must not emit an accepted packet')
             actual=self._failed_response_packet(folder,provider,model,request)
-        else:actual=strict_json_loads(_read(path/'stdout.bin').decode())
+        else:actual=strict_json_loads(streams['stdout'].decode())
         if (type(actual) is not dict or type(actual.get('schema')) is not int or actual['schema'] != 1
                 or type(actual.get('native_exit_code')) is not int):
             raise DockerRoleError('invalid exact native bridge packet schema')
@@ -556,6 +668,40 @@ class DockerRoles:
                 or actual.get('native_exit_code') != 0):
             raise DockerRoleError('supplied role packet differs from actual closed stdout')
         self._verify_invocation(folder,actual,request,provider,model,failed_body=failed_body)
+        return True
+
+    def recover_execution_failure(self, job_id, role, request):
+        """Recover verified failure of the SAME closed execution, never retry it.
+
+        No native body/usage/invocation is inferred from the transport failure.
+        Successful outer execution cannot be converted into this negative proof.
+        Missing or altered custody remains an error, not a fabricated closure.
+        """
+        if (type(role) is not str or role not in ('author','review') or type(job_id) is not str
+                or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}',job_id) is None):
+            raise DockerRoleError('invalid execution failure verification target')
+        path = self.store.root/job_id
+        folder = self.root/'jobs'/job_id
+        if not (path/'receipt.json').exists() or not (folder/'terminal-container.json').exists():
+            return None
+        _, plan, receipt, terminal, _ = self._closed_role_transport(job_id, role, request)
+        reasons = []
+        if receipt['exit_code'] != 0: reasons.append('attachment_nonzero')
+        if receipt['timed_out']: reasons.append('attachment_timed_out')
+        if receipt['truncated_streams']: reasons.append('attachment_truncated')
+        if terminal['exit_code'] != 0: reasons.append('container_nonzero')
+        if terminal['oom_killed']: reasons.append('container_oom_killed')
+        if not reasons: return None
+        return {'schema': 1, 'provenance': 'closed_native_execution_failure',
+                'job_id': job_id, 'role': role, 'provider': plan['provider'], 'model': plan['model'],
+                'request_sha256': plan['request_sha256'], 'receipt_ref': str(path/'receipt.json'),
+                'receipt': receipt, 'terminal_container': terminal, 'failure_reasons': reasons,
+                'acceptance': False, 'native_invocation_established': False}
+
+    def verify_execution_failure(self, proof, job_id, role, request):
+        original = self.recover_execution_failure(job_id, role, request)
+        if original is None or type(proof) is not dict or canonical(proof) != canonical(original):
+            raise DockerRoleError('execution failure differs from original stopped host journal')
         return True
 
     def _failed_response_packet(self,folder,provider,model,request):
@@ -597,11 +743,13 @@ class DockerRoles:
                     or envelope['cwd']!=receipt['cwd'] or receipt['exit_code']!=0
                     or receipt['timed_out'] or receipt['truncated_streams'] or receipt['stdin_complete'] is not True):
                 raise DockerRoleError('native inner admission/closing record diverged or failed')
+            streams = {}
             for stream in ('stdout','stderr'):
                 raw=store._read(path/(stream+'.bin'))
                 if digest(raw)!=receipt[stream+'_sha256'] or len(raw)!=receipt[stream+'_bytes']:
                     raise DockerRoleError('native inner measured stream changed')
-            return envelope,receipt,{name:store._read(path/(name+'.bin')) for name in ('stdout','stderr')}
+                streams[stream] = raw
+            return envelope,receipt,streams
         finally:os.close(store._root_fd);store._root_fd=None
 
     def _verify_invocation(self,folder,actual,request,provider,model,*,failed_body=False):
@@ -710,8 +858,11 @@ class DockerRoles:
         if not (path/'receipt.json').exists():return None
         if not (self.root/'jobs'/job_id/'terminal-container.json').exists():return None
         if _json(path/'receipt.json')['exit_code']==2:
-            proof=self.recover_response_failure(job_id,role,request)
+            try: proof=self.recover_response_failure(job_id,role,request)
+            except ValueError: proof=None
             if proof is not None:raise ClosedResponseContractError(proof)
+        proof = self.recover_execution_failure(job_id,role,request)
+        if proof is not None: raise ClosedNativeExecutionError(proof)
         actual=strict_json_loads(_read(path/'stdout.bin').decode())
         if type(actual) is not dict:raise DockerRoleError('invalid closed bridge stdout')
         provider,_=self.routes[role]
@@ -732,6 +883,7 @@ class DockerRoles:
         return True
 
     def _closed_test_result(self,data,files,*,require_passed=True,require_current=True):
+        self._verify_attempt_binding()
         path=_safe(data['test_job_ref'])
         if path.parent.parent!=self.store.root or path.name!='receipt.json':
             raise DockerRoleError('test receipt lies outside this private journal')

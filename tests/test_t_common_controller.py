@@ -352,7 +352,11 @@ def test_changed_completed_package_cannot_dispatch_common_auditor(tmp_path):
 
 
 def test_late_terminal_closure_cannot_confer_readiness(tmp_path, monkeypatch):
-    ctrl, holders = make(tmp_path); ctrl.step()
+    ctrl, holders = make(tmp_path)
+    for _ in range(40):
+        ctrl.step(); closed, _, _ = ctrl._commands()
+        if closed[-1][2]['result']['action'] == 'complete': break
+    else: pytest.fail('synthetic nine-phase controller did not complete')
     old = M._clock; start = ctrl.initial['clock']
     def late():
         value = old(); value['boottime_ns'] = start['boottime_ns'] + 6001 * 10**9; return value

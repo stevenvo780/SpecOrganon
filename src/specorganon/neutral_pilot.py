@@ -244,11 +244,12 @@ def validate_public_result(r, a, result, measured, stderr):
 
 
 def transport_policy(r):
-    """Derive schema5 without factory/image inspection before the attempt clock."""
+    """Derive prospective schema6 without inspecting images before attempt clock."""
+    from .attempt_deadline import DEADLINE_POLICY
     t = r['transport']; pins = r['source_sha256']
     native = {n: p for n, p in pins.items()
               if n == 'scripts/controller_native_role.py' or Path(n).parent == Path('src/specorganon')}
-    return {'schema': 5, 'create_recovery': 'owned-never-started-after-create-deadline-v1',
+    return {'schema': 6, 'whole_attempt_budget':dict(DEADLINE_POLICY), 'create_recovery': 'owned-never-started-after-create-deadline-v1',
             'images': {'native': t['native_image'], 'test': t['test_image']},
             'routes': {target: [t[role]['provider'], t[role]['model']]
                        for target, role in [('author', 'author'), ('review', 'reviewer')]},
@@ -260,7 +261,7 @@ def transport_policy(r):
             'codex_reasoning_effort': t['codex_reasoning_effort'], 'seccomp_sha256': pins[r['seccomp']]}
 
 
-def transport(r, root):
+def transport(r, root, *, attempt_clock, attempt_initial_sha256):
     t = r['transport']; source = Path(r['source_root'])
     return DockerRoles(root, native_image=t['native_image'], test_image=t['test_image'],
         source_root=source, public_catalog=source / r['public_catalog'],
@@ -269,7 +270,7 @@ def transport(r, root):
         codex_volume=t['codex_volume'], gemini_profile=t['gemini_profile'],
         gemini_executable=t['gemini_executable'], seccomp=source / r['seccomp'],
         test_timeout_seconds=t['test_timeout_seconds'], codex_reasoning_effort=t['codex_reasoning_effort'],
-        source_bindings=r['source_sha256'])
+        source_bindings=r['source_sha256'],attempt_clock=attempt_clock,attempt_initial_sha256=attempt_initial_sha256)
 
 
 def controller(r, a, folder):
@@ -279,7 +280,7 @@ def controller(r, a, folder):
         contract=bound_source(r, task['contract']).decode(), mandate=bound_source(r, r['mandate']).decode(),
         argv=['/opt/specorganon/venv/bin/python', '-I', '-B', '/input/delivery/' + task['test_file']],
         test_file=task['test_file'], transport_policy=transport_policy(r),
-        transport_factory=lambda root: transport(r, root), fixture_mode=False)
+        transport_factory=lambda root,**budget: transport(r, root,**budget), fixture_mode=False)
 
 
 def _public(r, a, folder, files, run):
@@ -294,12 +295,20 @@ def _public(r, a, folder, files, run):
                'files_sha256': digest(canonical(evaluated)), 'delivery_sha256': digest(canonical(files)),
                'checker_sha256': r['source_sha256'][task['checker']], 'test_image': r['transport']['test_image']}
     intent = folder / 'public-check-intent.json'
+    # This independently measured observation is outside the candidate's native
+    # generation. It cannot renew that generation's original clock or readiness.
+    # Keep its own original pre-factory timestamp for recovery; subject timeout
+    # remains the same registered <=120s and driver total time includes this work.
+    original_clock = _json(intent)['measurement_clock'] if intent.exists() else _clock()
+    request.update(measurement_clock=original_clock,
+                   clock_scope='independent-public-observation-not-a-generation')
     if run:
         immutable(intent, request)
     elif not intent.exists() or _json(intent) != request:
         raise PilotError('public checker intent binding differs')
     observed = folder / 'public-check-outcome.json'
-    t = transport(r, folder / 'public-check')
+    t = transport(r, folder / 'public-check',attempt_clock=original_clock,
+                  attempt_initial_sha256=digest(_read(intent)))
     job = 'independent-public-check'
     measured = t.recover_test(job, argv, evaluated)
     if measured is None:

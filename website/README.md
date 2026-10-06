@@ -184,3 +184,13 @@ sigue siendo dev5.
 [Web: avance dev10](https://specorganon.stevenvallejo.com/#avance-dev10) ·
 [Informe y evidencias en main](https://github.com/stevenvo780/SpecOrganon/blob/main/goals/method-superiority-v1/evidence/t-common-controller-dev10-01/README.md) ·
 [Repositorio compartible](https://github.com/stevenvo780/SpecOrganon/tree/main).
+
+
+Dev11 es ingeniería parcial prospectiva: recuperación negativa de fallos cerrados
+y reloj original completo, 425 controles seleccionados,16 mecánicos Docker y70
+instalados, recuentos solapados;46 módulos iguales en imágenes locales. La revisión
+corregida terminó con rechazo: ocho correcciones estáticas reconocidas y tres
+hallazgos nuevos F9–F11 pendientes, reproducciones todavía no ejecutadas. No hay admisión T, freeze completo, calificación ni
+superioridad. Mantiene los originales dev8 y las 99 descargas anteriores.
+[Hito dev11](https://specorganon.stevenvallejo.com/#avance-dev11) y
+[fuentes main](https://github.com/stevenvo780/SpecOrganon/blob/main/goals/method-superiority-v1/evidence/whole-attempt-recovery-dev11-01/README.md).

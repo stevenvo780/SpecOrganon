@@ -22,7 +22,8 @@ import uuid
 
 from .common_evidence import read_snapshot, validate_bound_audit
 from .common_review import checklist
-from .docker_roles import DockerRoles,ClosedResponseContractError,PendingCleanupError
+from .docker_roles import DockerRoles,ClosedResponseContractError,ClosedNativeExecutionError,PendingCleanupError
+from .attempt_deadline import AttemptBudget, DEADLINE_POLICY
 from .native_response_contract import render_prompt, response_schema, validate_response_schema
 from .neutral_author import neutral_author_content
 from .role_jobs import JobStore, _safe, _read, _json, _write, _parent, canonical, digest
@@ -107,6 +108,7 @@ def _elapsed(start,end):
 class NeutralController:
     def __init__(self,root,*,attempt_id,method,contract,mandate,argv,test_file,
                  transport_policy,transport_factory,fixture_mode=False):
+        start = _clock()
         if (type(attempt_id) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}',attempt_id) is None
                 or type(method) is not str or method not in ('N','S') or type(fixture_mode) is not bool
                 or any(type(v) is not str or not v.strip() for v in (contract,mandate))
@@ -118,7 +120,7 @@ class NeutralController:
         safe_file(test_file)
         if argv!=['/opt/specorganon/venv/bin/python','-I','-B','/input/delivery/'+test_file]:
             raise NeutralControllerError('fixed argv must be isolated Python -I -B with the original test script')
-        if not fixture_mode and (transport_policy.get('schema')!=5
+        if not fixture_mode and (transport_policy.get('schema')!=6 or transport_policy.get('whole_attempt_budget') != DEADLINE_POLICY
                 or not transport_policy.get('registered_source_bindings_sha256')):
             raise NeutralControllerError('native transport needs explicitly registered sources')
         self.root=_safe(root);self.factory=transport_factory;self.transport=None
@@ -145,7 +147,7 @@ class NeutralController:
             else:
                 if set(p.name for p in self.root.iterdir())!={'.neutral.lock'}:
                     raise NeutralControllerError('initialization uncertain; existing attempt cannot reset')
-                self.initial={'schema':1,'policy':self.policy,'clock':_clock()}
+                self.initial={'schema':1,'policy':self.policy,'clock':start}
                 _write(initial,self.initial)
             for name in ('reservations','results','generations','snapshots'):
                 (self.root/name).mkdir(exist_ok=True,mode=0o700)
@@ -169,11 +171,16 @@ class NeutralController:
 
     def _get_transport(self):
         if self.transport is None:
-            t=self.factory(self.root/'transport')
+            kwargs = {} if self.fixture_mode else {'attempt_clock':copy.deepcopy(self.initial['clock']),
+                'attempt_initial_sha256':digest(_read(self.root/'initial.json'))}
+            t=self.factory(self.root/'transport',**kwargs)
             if _safe(t.root)!=self.root/'transport':
                 raise NeutralControllerError('transport journal must belong to this exact attempt root')
             if not self.fixture_mode and type(t) is not DockerRoles:
                 raise NeutralControllerError('native controller requires the guarded Docker transport')
+            if not self.fixture_mode and (t.attempt_budget is None or t.attempt_budget.binding !=
+                    AttemptBudget(kwargs['attempt_clock'],kwargs['attempt_initial_sha256']).binding):
+                raise NeutralControllerError('transport must retain original whole attempt clock before preparation')
             if canonical(_json(t.root/'transport-policy.json'))!=canonical(self.policy['transport_policy']):
                 raise NeutralControllerError('actual transport differs from frozen attempt policy')
             self.transport=t
@@ -407,7 +414,10 @@ class NeutralController:
     def _verify_result(self,r,result,state):
         if result['kind']=='error':return
         t=self._get_transport()
-        if result['kind']=='response_error':
+        if result['kind']=='execution_error':
+            if t.verify_execution_failure(result['value'],r['job_id'],r['request']['role'],r['request']) is not True:
+                raise NeutralControllerError('original stopped native execution failure proof required')
+        elif result['kind']=='response_error':
             if self.fixture_mode:
                 if (result['value'].get('provenance')!='fixture_closed_invalid_response'
                         or result['value'].get('request_sha256')!=_fingerprint(r['request'])):
@@ -434,7 +444,7 @@ class NeutralController:
     def _apply(self,state,r,result,past):
         if (type(result) is not dict or set(result)!={'schema','kind','value'}
                 or type(result['schema']) is not int or result['schema']!=1
-                or result['kind'] not in ('role','test','response_error','error')):
+                or result['kind'] not in ('role','test','response_error','execution_error','error')):
             raise NeutralControllerError('invalid closed result record')
         try:return self._apply_valid(state,r,result,past)
         except (ValueError,OSError) as exc:
@@ -443,6 +453,9 @@ class NeutralController:
 
     def _apply_valid(self,state,r,result,past):
         s=copy.deepcopy(state);s['counts']=copy.deepcopy(r['counts']);stage=r['stage']
+        if result['kind']=='execution_error':
+            self._verify_result(r,result,state)
+            return self._failure(s,'verified original stopped native execution failed; no replacement')
         if result['kind']=='response_error':
             self._verify_result(r,result,state)
             if self.policy['method']=='S' and stage in ('plan','plan-review') and state['original_criteria'] is not None:
@@ -609,6 +622,8 @@ class NeutralController:
                     raise # No terminal generation/cost while owned execution may still be live.
                 except ClosedResponseContractError as exc:
                     result={'schema':1,'kind':'response_error','value':exc.proof}
+                except ClosedNativeExecutionError as exc:
+                    result={'schema':1,'kind':'execution_error','value':exc.proof}
                 except (ValueError,OSError) as exc:
                     if self._has_pending_launch(pending):
                         if self.transport is None:
@@ -636,13 +651,14 @@ class NeutralController:
         else:
             try:cost=_elapsed(self.initial['clock'],_clock())
             except ValueError as exc:clock_error=str(exc)
+        late = terminal and (cost is None or cost >= LIMITS['elapsed_admission_seconds'])
         return {'schema':1,'attempt_id':self.policy['attempt_id'],'method':self.policy['method'],
             'scope':'Public development controller; independent F and comparative completion not evaluated',
-            'status':state['status'],'stage':state['stage'],'counts':copy.deepcopy(state['counts']),
-            'common_review_ready':state['common_review_ready'] and clock_error is None,
-            'method_review_ready':state['method_review_ready'] and clock_error is None,
-            'native_ready':not self.fixture_mode and state['common_review_ready'] and clock_error is None,
-            'fixture_mode':self.fixture_mode,'failure':state['failure'],'clock_error':clock_error,
+            'status':'failed' if late else state['status'],'stage':state['stage'],'counts':copy.deepcopy(state['counts']),
+            'common_review_ready':state['common_review_ready'] and clock_error is None and not late,
+            'method_review_ready':state['method_review_ready'] and clock_error is None and not late,
+            'native_ready':not self.fixture_mode and state['common_review_ready'] and clock_error is None and not late,
+            'fixture_mode':self.fixture_mode,'failure':state['failure'] or ('whole attempt closure exceeded original6000s budget' if late else None),'clock_error':clock_error,
             'whole_attempt_seconds':cost,'monetary_cost':None,'token_cost_comparability':'unknown',
             'external_F':None,'common_complete':None,'goal_achieved':False}
 

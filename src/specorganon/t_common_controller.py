@@ -22,7 +22,8 @@ import shlex
 from . import engine
 from .common_evidence import read_snapshot, validate_bound_audit
 from .common_review import checklist, declaration
-from .docker_roles import DockerRoles, ClosedResponseContractError, PendingCleanupError
+from .docker_roles import DockerRoles, ClosedResponseContractError, ClosedNativeExecutionError, PendingCleanupError
+from .attempt_deadline import AttemptBudget, DEADLINE_POLICY
 from .ledger import strict_json_loads
 from .native_response_contract import render_prompt, native_stdin_payload
 from .neutral_controller import LIMITS, _clock, _elapsed, _context_document, CONTEXT_FORMAT, AUDIT_CONTEXT_FORMAT
@@ -50,7 +51,7 @@ class TCommonController:
                 or type(fixture_mode) is not bool or type(transport_policy) is not dict
                 or not callable(transport_factory) or author_format not in ('manifest-v1', 'items-v1')):
             raise TCommonError('explicit versioned T attempt policy required')
-        if not fixture_mode and (transport_policy.get('schema') != 5
+        if not fixture_mode and (transport_policy.get('schema') != 6 or transport_policy.get('whole_attempt_budget') != DEADLINE_POLICY
                 or not transport_policy.get('registered_source_bindings_sha256')):
             raise TCommonError('native T requires a registered source-bound transport')
         self.root = _safe(root); self.factory = transport_factory
@@ -132,11 +133,16 @@ class TCommonController:
         if (current['project'] != original['project'] or current['schema'] != original['schema']
                 or current['events'][:len(original['events'])] != original['events']):
             raise TCommonError('case no longer extends its original initial ledger')
-        t = self.factory(self.root / 'transport')
+        kwargs = {} if self.fixture_mode else {'attempt_clock':copy.deepcopy(self.initial['clock']),
+            'attempt_initial_sha256':digest(_read(self.root/'initial.json'))}
+        t = self.factory(self.root / 'transport',**kwargs)
         if _safe(t.root) != self.root / 'transport':
             raise TCommonError('T transport must belong to this original attempt')
         if not self.fixture_mode and type(t) is not DockerRoles:
             raise TCommonError('native T requires the guarded Docker transport')
+        if not self.fixture_mode and (t.attempt_budget is None or t.attempt_budget.binding !=
+                AttemptBudget(kwargs['attempt_clock'],kwargs['attempt_initial_sha256']).binding):
+            raise TCommonError('T transport must retain original whole attempt clock before preparation')
         if canonical(_json(t.root / 'transport-policy.json')) != canonical(self.policy['transport_policy']):
             raise TCommonError('actual T transport policy differs from registration')
         self.transport = t
@@ -258,6 +264,8 @@ class TCommonController:
                 value = t.recover_role(p['job_id'], p['request']['role'], p['request']); kind = 'role'
             except ClosedResponseContractError as exc:
                 value = exc.proof; kind = 'response_error'
+            except ClosedNativeExecutionError as exc:
+                value = exc.proof; kind = 'execution_error'
         return None if value is None else {'kind': kind, 'value': value}
 
     def _verify_closed(self, folder, captured):
@@ -272,6 +280,8 @@ class TCommonController:
             verified = t.verify_test(data, p['source_files'], require_passed=False, require_current=True)
         elif captured['kind'] == 'response_error':
             verified = t.verify_response_failure(captured['value'], p['job_id'], p['request']['role'], p['request'])
+        elif captured['kind'] == 'execution_error':
+            verified = t.verify_execution_failure(captured['value'], p['job_id'], p['request']['role'], p['request'])
         else:
             verified = t.verify_role(captured['value'], p['job_id'], p['request']['role'], p['request'])
         if verified is not True:
@@ -559,13 +569,26 @@ class TCommonController:
                 or reservation['method_gate'] is not method_gate):
             raise TCommonError('audit reservation no longer belongs to this exact T package')
         result_path = self.root / 'audit/result-0001.json'
+        failure_path = self.root / 'audit/failure-0001.json'
+        if failure_path.exists():
+            failed = _json(failure_path)
+            self._verify_audit_failure(failed, reservation)
+            error = ClosedNativeExecutionError if failed['kind'] == 'execution_error' else ClosedResponseContractError
+            raise error(failed['value'])
         if result_path.exists():
             packet = _json(result_path)
         else:
-            packet = self.transport.recover_role(reservation['job_id'], 'review', reservation['request'])
-            if packet is None:
-                self._time_admission()
-                packet = self.transport.call(reservation['job_id'], 'review', reservation['request'])
+            try:
+                packet = self.transport.recover_role(reservation['job_id'], 'review', reservation['request'])
+                if packet is None:
+                    self._time_admission()
+                    packet = self.transport.call(reservation['job_id'], 'review', reservation['request'])
+            except (ClosedNativeExecutionError, ClosedResponseContractError) as exc:
+                failed = {'kind': 'execution_error' if isinstance(exc, ClosedNativeExecutionError) else 'response_error',
+                          'value': exc.proof}
+                self._verify_audit_failure(failed, reservation)
+                _put(failure_path, canonical(failed))
+                raise
             _put(result_path, canonical(packet))
         if self.transport.verify_role(packet, reservation['job_id'], 'review', reservation['request']) is not True:
             raise TCommonError('common auditor has no verified independent original invocation')
@@ -600,6 +623,16 @@ class TCommonController:
             failure=None if dg else 'common D/G audit did not pass', method_failure=method_failure,
             audit_reservation_sha256=digest(_read(path)), snapshot=reservation['snapshot'])
 
+    def _verify_audit_failure(self, failed, reservation):
+        if type(failed) is not dict or set(failed) != {'kind','value'}:
+            raise TCommonError('invalid closed common auditor failure record')
+        if failed['kind'] == 'execution_error': verifier = self.transport.verify_execution_failure
+        elif failed['kind'] == 'response_error': verifier = self.transport.verify_response_failure
+        else: raise TCommonError('unknown common auditor failure kind')
+        if verifier(failed['value'], reservation['job_id'], 'review', reservation['request']) is not True:
+            raise TCommonError('original stopped common auditor failure does not verify')
+        return True
+
     def _terminal(self, status, *, common_ready=False, method_ready=False, method_gate=False,
                   failure=None, method_failure=None, audit_reservation_sha256=None, snapshot=None):
         path = self.root / 'terminal.json'
@@ -609,25 +642,46 @@ class TCommonController:
             'native_ready': not self.fixture_mode and common_ready and method_ready,
             'failure': failure, 'method_failure': method_failure,
             'audit_reservation_sha256': audit_reservation_sha256, 'snapshot': snapshot,
-            'clock': _clock(), 'external_F': None, 'common_complete': None, 'goal_achieved': False,
+            'external_F': None, 'common_complete': None, 'goal_achieved': False,
             'monetary_cost': None, 'token_cost_comparability': 'unknown'}
         intent = self.root / 'terminal-intent.json'
         if intent.exists():
             return self._read_terminal()
+        state = self._capture(None, None)
+        closed, pending, last = self._commands()
+        if pending is not None:
+            raise TCommonError('cannot close T with an unfinished original command')
+        if common_ready or method_ready:
+            if not closed or canonical(state) != canonical(closed[-1][2]['capture']):
+                raise TCommonError('first terminal readiness differs from original closed capture')
+            if method_ready and self.controller.package_gate() is not True:
+                raise TCommonError('first terminal method gate no longer verifies')
+        for folder, _, after in closed:
+            if after['closed_result'] is not None: self._verify_closed(folder, after['closed_result'])
+        _put(self.root / 'terminal-state.json', canonical(state))
+        record.update(terminal_state_sha256=digest(canonical(state)),
+                      last_command_sha256=last,
+                      audit_result_sha256=digest(_read(self.root / 'audit/result-0001.json'))
+                          if (self.root / 'audit/result-0001.json').exists() else None,
+                      audit_failure_sha256=digest(_read(self.root / 'audit/failure-0001.json'))
+                          if (self.root / 'audit/failure-0001.json').exists() else None)
+        if record['audit_failure_sha256'] is not None:
+            if record['audit_result_sha256'] is not None or common_ready or method_ready:
+                raise TCommonError('failed auditor cannot confer common/method readiness')
+            reservation = self.root / 'audit/0001.json'
+            record['audit_reservation_sha256'] = digest(_read(reservation))
+            record['snapshot'] = _json(reservation)['snapshot']
+            self._verify_audit_failure(_json(self.root / 'audit/failure-0001.json'), _json(reservation))
+        if canonical(self._capture(None, None)) != canonical(state):
+            raise TCommonError('T state changed during original terminal closure')
+        # Take the endpoint AFTER custody/gate/receipt verification and capture.
+        # A timestamp from entry cannot exclude work done during the closure.
+        record['clock'] = _clock()
         try:
             record['whole_attempt_seconds'] = _elapsed(self.initial['clock'], record['clock']); record['clock_error'] = None
         except ValueError as exc:
             record.update(whole_attempt_seconds=None, clock_error=str(exc), native_ready=False,
-                          common_review_ready=False, method_review_ready=False)
-        state = self._capture(None, None)
-        _put(self.root / 'terminal-state.json', canonical(state))
-        closed, pending, last = self._commands()
-        if pending is not None:
-            raise TCommonError('cannot close T with an unfinished original command')
-        record.update(terminal_state_sha256=digest(canonical(state)),
-                      last_command_sha256=last,
-                      audit_result_sha256=digest(_read(self.root / 'audit/result-0001.json'))
-                          if (self.root / 'audit/result-0001.json').exists() else None)
+                          common_review_ready=False, method_review_ready=False, status='failed')
         if record['whole_attempt_seconds'] is not None and record['whole_attempt_seconds'] >= LIMITS['elapsed_admission_seconds']:
             record.update(native_ready=False, common_review_ready=False, method_review_ready=False,
                           status='failed', failure='whole T attempt closure exceeded original 6000-second budget')
@@ -657,6 +711,18 @@ class TCommonController:
             if after['closed_result'] is not None:
                 self._verify_closed(folder, after['closed_result'])
         audit_result = self.root / 'audit/result-0001.json'
+        failure_path = self.root / 'audit/failure-0001.json'
+        failure_pin = record['audit_failure_sha256']
+        if failure_pin is None:
+            if failure_path.exists(): raise TCommonError('unregistered auditor failure appeared after terminal closure')
+        else:
+            if (record['audit_result_sha256'] is not None or record['common_review_ready'] or record['method_review_ready']
+                    or digest(_read(failure_path)) != failure_pin):
+                raise TCommonError('terminal original common auditor failure changed')
+            reservation_path = self.root / 'audit/0001.json'
+            if digest(_read(reservation_path)) != record['audit_reservation_sha256']:
+                raise TCommonError('terminal failed auditor reservation changed')
+            self._verify_audit_failure(_json(failure_path), _json(reservation_path))
         pin = record['audit_result_sha256']
         if pin is None:
             if audit_result.exists():
@@ -700,7 +766,8 @@ class TCommonController:
                     except (ValueError, OSError) as exc:
                         # No false closure while a reserved audit may still run.
                         audit = self.root / 'audit/0001.json'
-                        if audit.exists() and not (self.root / 'audit/result-0001.json').exists():
+                        if (audit.exists() and not (self.root / 'audit/result-0001.json').exists()
+                                and not (self.root / 'audit/failure-0001.json').exists()):
                             r = _json(audit)
                             confirmed = self.transport.reconcile_pending(r['job_id'], 'review', r['request'])
                             if (self.root / 'transport/jobs' / r['job_id'] / 'create-attempt.json').exists() and confirmed is not True:
@@ -731,6 +798,10 @@ class TCommonController:
             try:
                 result = self._completed_inner(folder, before)
                 if result is None:
+                    recovered_failure = self._recover_closed(folder)
+                    if recovered_failure is not None and recovered_failure['kind'] in ('execution_error','response_error'):
+                        error = ClosedNativeExecutionError if recovered_failure['kind'] == 'execution_error' else ClosedResponseContractError
+                        raise error(recovered_failure['value'])
                     result = c.step()
                     recovered = self._completed_inner(folder, before)
                     if recovered is not None:

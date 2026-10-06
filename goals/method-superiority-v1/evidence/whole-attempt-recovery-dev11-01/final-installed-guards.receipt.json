@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "docker",
+    "run",
+    "--rm",
+    "--network=none",
+    "--read-only",
+    "--tmpfs",
+    "/tmp:rw,mode=1777",
+    "--mount",
+    "type=bind,src=/home/stev/.codex/worktrees/t-common-audit-v2/SpecOrganon/tests,dst=/validation/tests,readonly",
+    "--mount",
+    "type=bind,src=/home/stev/.codex/worktrees/t-common-audit-v2/SpecOrganon/workflows,dst=/validation/workflows,readonly",
+    "specorganon-release:0.2.0rc3.dev11",
+    "python",
+    "-I",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp=/tmp/installed-guards",
+    "/validation/tests/test_attempt_deadline.py",
+    "/validation/tests/test_closed_execution_failure.py",
+    "/validation/tests/test_closed_native_role.py"
+  ],
+  "exit_code": 0,
+  "scope": "installed components only; no native attempts",
+  "at_utc": "2026-10-06T12:46:34.469212+00:00"
+}

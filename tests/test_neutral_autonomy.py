@@ -3,10 +3,15 @@ import copy
 
 import pytest
 
+from specorganon.docker_roles import ClosedNativeExecutionError
 from specorganon.free_control_policy import NEXT_DOCUMENT
+from specorganon.ledger import strict_json_loads
 from specorganon.neutral_autonomy import AutonomousNeutralController, BATTERY_DOCUMENT
-from specorganon.neutral_controller import NeutralControllerError
+from specorganon.neutral_controller import NeutralController, NeutralControllerError
+from specorganon.request_content import decode_content
+from specorganon.request_tree import decode_tree
 from specorganon.role_jobs import _json, _write, canonical, digest
+from test_closed_execution_failure import negative_fixture
 from test_neutral_controller import ARGV, POLICY, PROGRAM, TEST, FixtureTransport
 
 
@@ -183,3 +188,222 @@ def test_policy_and_original_sources_cannot_silently_change_on_resume(tmp_path):
     c = controller(tmp_path / 'run'); c.step(); path = c.root / 'initial.json'; value = _json(path)
     value['policy']['effective_caps']['authors'] = 99; _write(path, value)
     with pytest.raises(NeutralControllerError): controller(c.root)
+
+
+def test_repetitive_context_guarantees_compact_tree_winner_and_lossless_roundtrip(tmp_path):
+    # Mechanical test: 30 modules with repetitive function template (<256 bytes)
+    # guaranteeing that compact_tree compresses while compact_content does not,
+    # so tree-refs-v1 wins in super()._request and in AutonomousNeutralController._request.
+    snippet = '# Standard repetitive module template for mechanical testing\ndef calculate():\n    return 100\n'
+    files = {f'mod_{i:02d}.py': snippet for i in range(30)}
+    c = controller(tmp_path / 'run', [choice('continue', files=files), choice('continue')])
+    c.step()  # step 1: free, author introduces files
+    state, past, prev, pending = c._load()
+    assert state['files'] == files
+
+    # Verify NeutralController._request produces tree-refs-v1
+    adapted = copy.deepcopy(state)
+    adapted['stage'] = 'program'
+    base_req, _ = NeutralController._request(c, adapted, past, 2)
+    base_doc = strict_json_loads(base_req['documents']['package-context.json'])
+    assert base_doc['encoding'] == 'tree-refs-v1'
+
+    # Verify AutonomousNeutralController._request correctly decodes tree-refs-v1,
+    # adds controller_context, and re-serializes losslessly.
+    req, _ = c._request(state, past, 2)
+    final_doc = strict_json_loads(req['documents']['package-context.json'])
+    assert final_doc['encoding'] == 'tree-refs-v1'
+
+    decoded = decode_tree(final_doc['context'])
+    assert set(decoded.keys()) == {'files', 'documents', 'history', 'controller_context'}
+    assert decoded['files'] == files
+    assert decoded['documents'] == {}
+    assert decoded['controller_context'] == {'control_history': state['control_history']}
+    assert len(decoded['history']) == 1
+    assert decoded['history'][0]['stage'] == 'free'
+    assert decoded['history'][0]['capture']['files'] == files
+
+    # Exact canonical roundtrip check
+    expected = {
+        'files': files,
+        'documents': {},
+        'history': [{'stage': i['reservation']['stage'], 'job_id': i['reservation']['job_id'],
+                     'result': i['result'],
+                     'capture': {'files': i['state']['files'], 'documents': i['state']['documents']}}
+                    for i in past],
+        'controller_context': {'control_history': state['control_history']},
+    }
+    assert canonical(decoded) == canonical(expected)
+
+
+def test_repeated_content_guarantees_compact_content_winner_and_lossless_roundtrip(tmp_path):
+    # Mechanical test: 100 unique small files + 2 files with 4000-char string,
+    # where compact_content compresses with less overhead than compact_tree DAG,
+    # guaranteeing content-refs-v1 wins.
+    rep = 'A' * 4000
+    files = {f'file_{i:03d}.txt': f'content_data_unique_{i:04d}' for i in range(100)}
+    files['r1.txt'] = rep
+    files['r2.txt'] = rep
+    c = controller(tmp_path / 'run')
+    state = c._initial_state()
+    state['files'] = files
+    state['control_history'] = [{'job_id': 'job-01', 'admitted': True, 'action': 'continue'}]
+
+    # Base request produces content-refs-v1
+    adapted = copy.deepcopy(state)
+    adapted['stage'] = 'program'
+    base_req, _ = NeutralController._request(c, adapted, [], 1)
+    base_doc = strict_json_loads(base_req['documents']['package-context.json'])
+    assert base_doc['encoding'] == 'content-refs-v1'
+
+    # AutonomousNeutralController._request decodes content-refs-v1 and re-serializes
+    req, _ = c._request(state, [], 1)
+    final_doc = strict_json_loads(req['documents']['package-context.json'])
+    assert final_doc['encoding'] == 'content-refs-v1'
+
+    decoded = decode_content(final_doc['context'])
+    assert set(decoded.keys()) == {'files', 'documents', 'history', 'controller_context'}
+    assert decoded['files'] == files
+    assert decoded['documents'] == {}
+    assert decoded['history'] == []
+    assert decoded['controller_context'] == {'control_history': state['control_history']}
+
+    expected = {
+        'files': files,
+        'documents': {},
+        'history': [],
+        'controller_context': {'control_history': state['control_history']},
+    }
+    assert canonical(decoded) == canonical(expected)
+
+
+def test_audit_stage_evidence_context_roundtrip_with_controller_context(tmp_path):
+    # Autonomous package through measure to audit
+    c = controller(tmp_path / 'run')
+    c.step()  # free -> measure
+    c.step()  # measure -> free
+    c.step()  # free -> audit
+    state, past, prev, pending = c._load()
+    assert state['stage'] == 'audit'
+    req, _ = c._request(state, past, 4)
+    doc = strict_json_loads(req['documents']['evidence-context.json'])
+
+    # Decode evidence-context using either tree-refs-v1 or content-refs-v1 or plain
+    if doc['encoding'] == 'tree-refs-v1':
+        decoded = decode_tree(doc['context'])
+    elif doc['encoding'] == 'content-refs-v1':
+        decoded = decode_content(doc['context'])
+    else:
+        decoded = doc['context']
+
+    assert set(decoded.keys()) == {'locator_index', 'content_by_sha256', 'controller_context'}
+    assert 'battery_partition' in decoded['controller_context']
+    assert decoded['controller_context']['battery_partition']['test_files'] == sorted(PARTITION['test_files'])
+    assert decoded['controller_context']['prior_measurement_binding']['passed'] is True
+    assert decoded['controller_context']['prior_measurement_binding']['job_id'] == state['measure_job']
+    assert isinstance(decoded['locator_index'], dict)
+    assert isinstance(decoded['content_by_sha256'], dict)
+    for sha, entry in decoded['content_by_sha256'].items():
+        assert entry['encoding'] in ('canonical-json', 'utf8-text')
+        assert 'value' in entry
+
+
+@pytest.mark.parametrize('stage_under_test', ['free', 'feedback'])
+def test_closed_execution_failure_crash_recovery_and_replay_in_free_and_feedback(tmp_path, monkeypatch, stage_under_test):
+    import specorganon.neutral_controller as module
+    if stage_under_test == 'free':
+        c = controller(tmp_path / 'run')
+        seq = 1
+        expected_roles = 1
+        expected_authors = 1
+        expected_reviewers = 0
+    else:
+        c = controller(tmp_path / 'run', [choice('review', files={'program.py': PROGRAM})])
+        rep1 = c.step()
+        assert rep1['stage'] == 'feedback'
+        seq = 2
+        expected_roles = 2
+        expected_authors = 1
+        expected_reviewers = 1
+
+    t = c._get_transport()
+    failed_call, original_call, dispatched, proofs = negative_fixture(t)
+    verified = []
+    original_verify = t.verify_execution_failure
+    def verify(proof, job, role, request):
+        verified.append(job)
+        return original_verify(proof, job, role, request)
+    t.verify_execution_failure = verify
+    t.call = failed_call
+    write = module._write
+    def crash(path, value, **kwargs):
+        if path == c.root / f'results/{seq:04d}.json':
+            raise KeyboardInterrupt('cut after failure before capture')
+        return write(path, value, **kwargs)
+    monkeypatch.setattr(module, '_write', crash)
+    with pytest.raises(KeyboardInterrupt):
+        c.step()
+    assert len(dispatched) == 1
+    monkeypatch.setattr(module, '_write', write)
+
+    t.call = lambda *a: pytest.fail('must recover exact failed journal without second call')
+    report = c.step()
+    assert report['status'] == 'failed'
+    assert report['counts']['roles'] == expected_roles
+    assert report['counts']['authors'] == expected_authors
+    assert report['counts']['reviewers'] == expected_reviewers
+    assert report['failure'] == 'verified original stopped native execution failed; no replacement'
+    assert (c.root / f'results/{seq:04d}.json').exists()
+    assert _json(c.root / f'results/{seq:04d}.json')['kind'] == 'execution_error'
+    before = len(verified)
+    assert c.step() == report
+    assert len(dispatched) == 1 and len(verified) > before
+    assert set(verified) == set(dispatched)
+    # The terminal read must revalidate the same stored original proof.
+    original_verify_before_mutation = t.verify_execution_failure
+    t.verify_execution_failure = lambda *args: False
+    with pytest.raises(NeutralControllerError): c.step()
+    t.verify_execution_failure = original_verify_before_mutation
+
+
+def test_altered_negative_proof_rejected_when_validator_false_or_raises(tmp_path):
+    # Subtest 1: validator returns False -> rejected
+    c1 = controller(tmp_path / 'false_val')
+    t1 = c1._get_transport()
+    failed_call1, _, _, _ = negative_fixture(t1)
+    t1.call = failed_call1
+    t1.verify_execution_failure = lambda proof, job, role, req: False
+    rep1 = c1.step()
+    assert rep1['status'] == 'failed'
+    assert rep1['failure'] != 'verified original stopped native execution failed; no replacement'
+    assert 'original stopped native execution failure proof required' in rep1['failure']
+
+    # Subtest 2: validator raises ValueError -> rejected
+    c2 = controller(tmp_path / 'raising_val')
+    t2 = c2._get_transport()
+    failed_call2, _, _, _ = negative_fixture(t2)
+    t2.call = failed_call2
+    def raising_verify(proof, job, role, req):
+        raise ValueError('tampered negative proof')
+    t2.verify_execution_failure = raising_verify
+    rep2 = c2.step()
+    assert rep2['status'] == 'failed'
+    assert rep2['failure'] != 'verified original stopped native execution failed; no replacement'
+    assert 'tampered negative proof' in rep2['failure']
+
+    # Subtest 3: proof data altered before error raised -> rejected
+    c3 = controller(tmp_path / 'altered_proof')
+    t3 = c3._get_transport()
+    failed_call3, _, _, _ = negative_fixture(t3)
+    def tampered_call(job, role, request):
+        try:
+            failed_call3(job, role, request)
+        except ClosedNativeExecutionError as exc:
+            exc.proof['acceptance'] = True
+            raise
+    t3.call = tampered_call
+    rep3 = c3.step()
+    assert rep3['status'] == 'failed'
+    assert rep3['failure'] != 'verified original stopped native execution failed; no replacement'
+    assert 'original stopped native execution failure proof required' in rep3['failure']
+

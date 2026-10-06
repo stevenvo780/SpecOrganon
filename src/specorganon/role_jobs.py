@@ -26,6 +26,7 @@ import time
 import uuid
 
 from .ledger import strict_json_loads
+from .attempt_deadline import AttemptBudget, DEADLINE_POLICY
 
 
 class JobError(ValueError):
@@ -132,7 +133,10 @@ def _positive(value, upper, name):
 
 class JobStore:
     def __init__(self, root, *, max_jobs=40, max_elapsed_seconds=6000,
-                 max_stream_bytes=2_097_152, max_request_bytes=128_000):
+                 max_stream_bytes=2_097_152, max_request_bytes=128_000, attempt_budget=None):
+        if attempt_budget is not None and type(attempt_budget) is not AttemptBudget:
+            raise JobError('original guarded attempt budget required')
+        self.attempt_budget = attempt_budget
         self.root = _safe(root)
         self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
         if not self.root.is_dir(): raise JobError("job root must be a directory")
@@ -143,12 +147,16 @@ class JobStore:
         if info.st_uid != os.geteuid() or info.st_mode & 0o022:
             raise JobError("journal root must be owned and not writable by other users")
         self.policy = {
-            "schema": 3,
+            "schema": 4 if attempt_budget is not None else 3,
             "max_jobs": _positive(max_jobs, 1000, "job budget"),
             "max_elapsed_seconds": _positive(max_elapsed_seconds, 6000, "elapsed"),
             "max_stream_bytes": _positive(max_stream_bytes, 2_097_152, "stream"),
             "max_request_bytes": _positive(max_request_bytes, 128_000, "request"),
         }
+        if attempt_budget is not None:
+            if max_elapsed_seconds != DEADLINE_POLICY['elapsed_seconds']:
+                raise JobError('whole-attempt bound job budget must retain original6000s')
+            self.policy['whole_attempt_binding'] = attempt_budget.binding
         with self._lock():
             path = self.root / "policy.json"
             if path.exists():
@@ -256,16 +264,22 @@ class JobStore:
             elapsed = time.monotonic() - policy["created_monotonic"]
             if elapsed < 0: raise JobError("invalid admission clock")
             remaining = self.policy["max_elapsed_seconds"] - elapsed
+            reserve = 10
+            if self.attempt_budget is not None:
+                # The original controller timestamp precedes image/factory
+                # preparation. A fresh JobStore never buys a fresh6000s window.
+                remaining = min(remaining, self.attempt_budget.remaining())
+                reserve = DEADLINE_POLICY['cleanup_reserve_seconds']
             # Reserve bounded cleanup before dispatch. This is a process budget,
             # not a guarantee against OS hangs or hostile journal writers.
-            if count >= self.policy["max_jobs"] or remaining <= 10:
+            if count >= self.policy["max_jobs"] or remaining <= reserve:
                 raise JobError("job budget exhausted")
             os.mkdir(job_id, mode=0o700, dir_fd=self._root_fd)
             self._write(path / "request.json", envelope)
             started = {"schema": 1, "request_sha256": fingerprint, "started_epoch": time.time(),
                        "pid": None, "metadata": metadata}
             self._write(path / "started.json", started)
-            receipt = self._run(path, argv, cwd, effective_env, min(timeout_seconds, remaining - 10), cancel_argv, started, stdin_bytes)
+            receipt = self._run(path, argv, cwd, effective_env, min(timeout_seconds, remaining - reserve), cancel_argv, started, stdin_bytes)
             receipt.update(schema=1, job_id=job_id, request_sha256=fingerprint,
                            argv=argv, cwd=str(cwd), metadata=metadata)
             receipt.setdefault("stdin_bytes_sent", 0)
@@ -311,7 +325,8 @@ class JobStore:
 
     def _run(self, path, argv, cwd, env, timeout, cancel_argv, started, stdin_bytes):
         streams = {}; process = None; selector = None
-        began = time.monotonic(); sizes = {"stdout": 0, "stderr": 0}
+        began = time.monotonic(); began_boottime_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+        sizes = {"stdout": 0, "stderr": 0}
         timed_out = False; truncated = []; cancel_exit = None; sent = 0
         stopped_at = None
         try:
@@ -346,7 +361,10 @@ class JobStore:
             # descendant retaining pipes cannot extend the admitted deadline.
             while selector.get_map() or process.poll() is None:
                 now = time.monotonic()
-                if stopped_at is None and now - began >= timeout:
+                whole_expired = (self.attempt_budget is not None
+                    and self.attempt_budget.remaining(reserve=DEADLINE_POLICY['cleanup_reserve_seconds']) <= 0)
+                call_expired = (time.clock_gettime_ns(time.CLOCK_BOOTTIME)-began_boottime_ns)/1e9 >= timeout
+                if stopped_at is None and (now - began >= timeout or call_expired or whole_expired):
                     timed_out = True; stopped_at = now; self._terminate(process)
                 if stopped_at is not None and cancel_argv is not None and cancel_exit is None:
                     cancel_exit = self._cancel(cancel_argv, cwd, env)
