@@ -4,7 +4,7 @@ Método y toolkit para formular problemas, investigar con evidencia, comparar in
 
 **Repositorio compartido:** [rama main](https://github.com/stevenvo780/SpecOrganon/tree/main). **Presentación y resultados:** [specorganon.stevenvallejo.com](https://specorganon.stevenvallejo.com). Las fuentes de la web están en [website/](website/README.md).
 
-**Estado del código:** candidata en desarrollo **0.2.0rc3.dev6**, con transporte explícito `items-v1`: el autor aporta contenido y referencias; el toolkit construye el manifiesto y conserva la procedencia. [Contrato del autor](docs/software_author_contract.md) y [verificación de dev3](goals/method-superiority-v1/evidence/bounded-admission-01/engineering-receipt.json). La política schema12 añade una [corrección de admisión opt-in](goals/method-superiority-v1/development/BOUNDED_ADMISSION.md) dentro de las cuotas originales y conserva avisos de reconexión del mismo turno; exige juicios de texto sin ejecución de tests. No migra runs anteriores.
+**Estado del código:** candidata en desarrollo **0.2.0rc3.dev7**, con transporte explícito `items-v1`: el autor aporta contenido y referencias; el toolkit construye el manifiesto y conserva la procedencia. [Contrato del autor](docs/software_author_contract.md) y [verificación de dev3](goals/method-superiority-v1/evidence/bounded-admission-01/engineering-receipt.json). La política schema12 añade una [corrección de admisión opt-in](goals/method-superiority-v1/development/BOUNDED_ADMISSION.md) dentro de las cuotas originales y conserva avisos de reconexión del mismo turno; exige juicios de texto sin ejecución de tests. No migra runs anteriores.
 
 **Resultados y límites:** RangeAudit produjo una entrega nativa de nueve fases, con Codex como autor, Gemini como revisor y pruebas ejecutadas en Docker; pasó 115 comprobaciones públicas adicionales. Es un caso de desarrollo, sin evaluación reservada ni demostración de superioridad. La campaña comparativa v3 y el piloto anterior conservan sus resultados adversos y fuentes históricas: no se recalcularon con este código. La [meta para demostrar ventaja frente a libre y SDD](goals/method-superiority-v1/GOAL.md) sigue activa. El [GOAL original](GOAL.md) conserva el objetivo alimentario y sus límites de evidencia de campo.
 
@@ -18,22 +18,24 @@ no cumple 9/10 ni demuestra ventaja frente a libre o SDD. El driver original y
 las 45 fuentes congeladas verificaron el cierre sin llamadas o tests nuevos.
 [Informe terminal, fuentes y recibos](goals/method-superiority-v1/evidence/native02-terminal-01/README.md).
 
-Las fuentes actuales son dev6 en desarrollo; la última wheel publicada es dev5.
+Las fuentes actuales son dev7 en desarrollo; la última wheel publicada es dev5.
 Las cohortes dev2 y dev4 conservan sus checkouts y fuentes congeladas: un clon de
 main no puede reanudar esos registros ni migrar sus runs. Las pruebas de una
 versión distinta requieren otra ruta y otro registro.
 
-**Dev6, infraestructura parcial para controles competentes:** formato explícito
+**Corte histórico dev6, infraestructura parcial para controles competentes:** formato explícito
 de archivos/documentos N/S, auditoría D/G común con H separada, y captura física
 de snapshots sin promover veredictos o archivos de recibo a ejecuciones. Pasan
 389 pruebas acotadas y tres quedan omitidas; wheel local con sus 34 módulos
 verificados y CLI exit0. La revisión independiente rechazó un defecto de tipado,
-corregido y aceptado en una revisión posterior limitada a estos helpers. Faltan
+corregido y aceptado en una revisión posterior limitada a estos helpers. En ese corte faltaban
 la máquina de etapas N/S, contabilidad integrada, compuerta común y registro
 estadístico; no hay generaciones dev6 ni superioridad medida.
 [Fuentes, pruebas y límites](goals/method-superiority-v1/evidence/neutral-controls-01/README.md).
 
 **Dev4 publicado como candidato de desarrollo:** guía JSON compartida entre proveedores, validación estricta local y transporte schema4 vinculado a hashes del puente y los módulos Python. El diagnóstico conserva nueve llamadas: seis fallos de formato y tres respuestas válidas de un solo turno; no son entregas de software ni demuestran eficacia. Pasan 296 controles acotados del host y la revisión independiente estática; el wheel final instalado pasó los mismos 296 controles y el smoke CLI/MCP con 24 herramientas. El driver versionado pasó 45 controles en host y Docker. La [cohorte dev4 02](goals/method-superiority-v1/development/registration-native-cohort-02.json) se registró antes de generar, con diez intentos y 45 fuentes vinculadas; su cierre es desarrollo público, sin comparación reservada. [Fuentes y recibos](goals/method-superiority-v1/evidence/provider-json-schema-01/README.md).
+
+**Dev7, ingeniería instalada:** controlador N libre durable v2 y driver N/S schema2; 186 pruebas seleccionadas aprobadas. El primer lote Docker conserva19pass1fallo de contador; las tres pruebas nuevas afectadas corregidas pasaron y los otros17 no se repitieron. Wheel e imágenes locales verifican40 módulos idénticos, CLI0.160 yMCP24; no hay nueva release pública/registry. Revisión Gemini estática limitada, sin admisión nativa. Cero generaciones/reservados, competencia/F/comparación pendientes y meta activa. [Informe y fallos](goals/method-superiority-v1/evidence/neutral-autonomy-controller-01/engineering-receipt.json), [estado y pendientes](goals/method-superiority-v1/development/neutral-autonomy-v2/IMPLEMENTATION_STATUS.md), [hito en la web](https://specorganon.stevenvallejo.com/#avance-dev7).
 
 ## Clonar y empezar
 

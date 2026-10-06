@@ -150,3 +150,7 @@ La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wh
 ## Controladores dev6 por etapas, todavía parciales
 
 `#controles-dev6` conserva 627 pruebas seleccionadas aprobadas,16 omitidas y13 controles Docker mecánicos reales ejecutados aparte, con fixtures y un Gemini CLI simulado, cero modelos. El wheel local verificó36 módulos,CLIexit0 yMCP host24; no se libera ni acredita imagen dev6 instalada. Revisión final limitada R17/R14–R16 sin runtime del revisor. Cero nativos/reservados; F/common_complete desconocidos; pendiente competencia N/S, integración T/común, evaluación independiente, registro y congelación. Ocho descargas nuevas tienen manifiesto propio y fuente69f64d; las86 anteriores permanecen intactas. Los ZIP fuente parcial/evidencia se extraen en la misma raíz para `verify_archive.py --check-source`; no constituyen una release completa o una campaña ejecutable.
+
+## Dev7 instalado, ingeniería parcial
+
+`#avance-dev7` documenta controlador N libre durable v2 y driver instalado schema2: 186 pruebas seleccionadas, primer lote Docker19pass1fixturefail conservado, tres pruebas nuevas afectadas corregidas3pass (otros17 no repetidos), 40 módulos iguales en wheel/imágenes locales, CLI0.160 yMCP24. Revisión Gemini estática limitada; cero nativos/reservados ysin competencia ni superioridad. No release/registry nuevo; último wheel público dev5. Se conservan94 descargas exactas. Los cortes dev6 anteriores se presentan como históricos.
