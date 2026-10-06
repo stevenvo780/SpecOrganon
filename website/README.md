@@ -146,3 +146,7 @@ La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wh
 ## Cierre terminal de la cohorte dev4
 
 `#cohorte-dev4-cierre` publica el informe original del 6 de octubre a las 04:23:28 UTC: diez intentos cerrados, cinco entregas y cinco fallos sin reemplazos. Cinco entregas pasaron 543/543 comprobaciones públicas en conjunto; el denominador de fiabilidad sigue siendo diez. Resultado50%, Wilson descriptivo23,66–76,34%, criterio9/10 incumplido. El archivo conserva fuentes45 y recibos seleccionados, con paths históricos; no permite reanudar runs desde main. Se añaden cinco descargas terminales a las ocho de dev6, manteniendo las73 anteriores intactas. Total86.
+
+## Controladores dev6 por etapas, todavía parciales
+
+`#controles-dev6` conserva 627 pruebas seleccionadas aprobadas,16 omitidas y13 controles Docker mecánicos reales ejecutados aparte, con fixtures y un Gemini CLI simulado, cero modelos. El wheel local verificó36 módulos,CLIexit0 yMCP host24; no se libera ni acredita imagen dev6 instalada. Revisión final limitada R17/R14–R16 sin runtime del revisor. Cero nativos/reservados; F/common_complete desconocidos; pendiente competencia N/S, integración T/común, evaluación independiente, registro y congelación. Ocho descargas nuevas tienen manifiesto propio y fuente69f64d; las86 anteriores permanecen intactas. Los ZIP fuente parcial/evidencia se extraen en la misma raíz para `verify_archive.py --check-source`; no constituyen una release completa o una campaña ejecutable.

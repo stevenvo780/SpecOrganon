@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "at": "2026-10-06T06:08:08.075284+00:00",
+  "version": "0.2.0rc3.dev6",
+  "classification": "Mutable partial engineering of N/S controllers, not a frozen complete method or superiority evidence",
+  "source_sha256": {
+    "src/specorganon/neutral_controller.py": "db02746644cb2776289befc6b1628a9fcff587d039fcba16ec102f358afa3226",
+    "src/specorganon/common_evidence.py": "87d265bf2ac01d51b0f97f03f671a95a4502dd3e495f74fe3d051d37eb4bcc27",
+    "src/specorganon/docker_roles.py": "3519946f3f82947f8937695e748a1d39a73f0466a517e9d907eb425d21ebca43",
+    "src/specorganon/native_response_contract.py": "162d83ac697094761eb28667a130f34330fe3e28711530a27ba3aba7caedd60a",
+    "src/specorganon/native_transcript.py": "3cda790c54e05e50467c2b108304194c7a87f0d5f17a8eceeceedcfcc747f7a3",
+    "scripts/controller_native_role.py": "72a9b36c63c77cbb1ef23b5850b5944c1d821f613847dfa0c7222b07215ac272",
+    "tests/test_neutral_controller.py": "a9ee94510a596fa4137b89e4192a6bb4221b7adfcc5204076599797a22e2ab78",
+    "tests/test_closed_native_role.py": "39682322a1996b15be2b436cfc97b398fe336877b89164a31535fea8da70b4e5",
+    "tests/test_staged_review_regressions.py": "a2262c18610d28db3525ec548b886942790aef2c266c3018a8513511bf6d9e99",
+    "tests/test_native_invocation_consistency.py": "06b692e452704a8a1fecb2c6710b9b89c006f611ea7286611429cd349c76b058",
+    "tests/test_neutral_docker_controls.py": "f3d53ae038748a0c57d0c224b9802f0b515ad3615ff07667c85a212936eca0cb",
+    "tests/test_neutral_snapshot_guards.py": "5736027c283165dccfcdfa1878099960f42b59cac8bdafa88e02b163105ed852",
+    "tests/test_resource_accounting.py": "7146501a82d154513c855da9dbda7f8ad0861249579da73b98ab928d5ea98449"
+  },
+  "targeted_tests": {
+    "passed": 627,
+    "skipped": 16,
+    "command": "targeted-tests-09-command.json",
+    "stdout": "targeted-tests-09.stdout",
+    "stderr": "targeted-tests-09.stderr",
+    "full_suite_passed": false,
+    "skipped_scope": "Three old Docker components plus thirteen new neutral Docker opt-ins; thirteen new controls run separately"
+  },
+  "docker_mechanical_controls": {
+    "passed": 13,
+    "stdout": "docker-controls-11.stdout",
+    "stderr": "docker-controls-11.stderr",
+    "archive": "docker-controls-11-archive.json",
+    "archive_files": 605,
+    "archive_bytes": 1376178,
+    "provider_calls": 0,
+    "existing_test_image": "sha256:6d196a4a021b872e2ea7d799e1797834e23b570e635bd640095f4521cca04ce2",
+    "existing_native_bridge_image": "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+    "author_review_scope": "Synthetic fixtures; one explicit Gemini CLI simulator with empty profile. Actual Docker/test/bridge/inner JobStore, no LLM/account calls.",
+    "dev6_installed_image_verified": false
+  },
+  "local_installation": {
+    "wheel_sha256": "42c4c5f02fe30102121fa106b4336da56468630a6bf67580a6a3379bc1b34faf",
+    "receipt": "installed-receipt-05.json",
+    "module_bytes_equal": 36,
+    "CLI_help_exit_code": 0,
+    "actual_host_MCP_stdio_passed": true,
+    "MCP_tools": 24,
+    "wheel_published": false,
+    "native_provider_roles_executed": false
+  },
+  "historical_integrity": {
+    "native02_archive": "native02-custody-01.stdout",
+    "sources": 45,
+    "closures": 10,
+    "host_receipts": 175,
+    "food_goal_preserved": true
+  },
+  "independent_review": {
+    "job_id": "623d84b55e6240d18afd330dec8e4912",
+    "account": "principal",
+    "provider": "codex",
+    "model": "gpt-6.1-sol",
+    "machine": "Kratos",
+    "access": "read",
+    "status": "succeeded",
+    "tests_executed_by_reviewer": false,
+    "source_pins": "source-review-06.json",
+    "verdict": "accept",
+    "result": "code-review-06.json",
+    "scope": "Focused R17 closure and neighboring R14-R16. Earlier reviews identify preceding corrections; no independent runtime tests or efficacy claim."
+  },
+  "earlier_failed_checks": [
+    "docker-controls-01.stdout",
+    "targeted-tests-04.stderr (bad test path, exit4)",
+    "targeted-tests-05.stdout (schema9 historical test vs current12)",
+    "docker-controls-06.stdout (strict missing-message case rejected current Docker spelling)",
+    "recovery-regressions-04.stdout (hardlink fixture modified initial nlink; guard rejected earlier than named assert, fixture corrected to independent linked file)",
+    "recovery-regressions-06.stdout (synthetic started fixture incorrectly treated as physical dispatch, classified explicitly)",
+    "docker-controls-10.stdout (one missing-launch before-cutoff path escaped Pending, fixed at native _prepare boundary; exact owned fixture container cleaned)"
+  ],
+  "engineering_review_invocations": [
+    {
+      "job_id": "c7c9cd6e19c243428b87ea6170d8edf3",
+      "verdict": "reject",
+      "result": "design-review-01.json",
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "account": "principal",
+      "machine": "Kratos"
+    },
+    {
+      "job_id": "dd9f8456fc374ce79d2555a5e2d1b189",
+      "verdict": "reject",
+      "result": "code-review-01.json",
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "account": "principal",
+      "machine": "Kratos"
+    },
+    {
+      "job_id": "a85e417d36d048378cf63cb0925d005c",
+      "verdict": "reject",
+      "result": "code-review-02.json",
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "account": "principal",
+      "machine": "Kratos"
+    },
+    {
+      "job_id": "dfc733cd507f474eb9d646e282a98dbe",
+      "verdict": null,
+      "status": "cancelled_by_parent_after_source_regression",
+      "result": "code-review-03-cancelled.json",
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "account": "principal",
+      "machine": "Kratos"
+    },
+    {
+      "job_id": "7f66fc24ff824055b865bb71c2c3c12e",
+      "verdict": "reject",
+      "status": "succeeded",
+      "result": "code-review-04.json",
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "account": "principal",
+      "machine": "Kratos"
+    },
+    {
+      "job_id": "430fd590ecab483fadb3b2ad094bf107",
+      "verdict": "reject",
+      "status": "succeeded",
+      "result": "code-review-05.json",
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "account": "principal",
+      "machine": "Kratos"
+    },
+    {
+      "job_id": "623d84b55e6240d18afd330dec8e4912",
+      "verdict": "accept",
+      "status": "succeeded",
+      "result": "code-review-06.json",
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "account": "principal",
+      "machine": "Kratos"
+    }
+  ],
+  "native_dev6_subjects": 0,
+  "reserved_subjects": 0,
+  "new_experimental_author_or_review_calls": 0,
+  "external_F": null,
+  "common_complete": null,
+  "monetary_cost": null,
+  "comparative_time_ratio": null,
+  "goal_achieved": false,
+  "pending": [
+    "Prospective installed N/S driver, competent control definition and native public pilots",
+    "T integration with identical common D/G/evidence and independent F evaluator",
+    "Statistical primary and replica preregistration with simultaneous uncertainty, sample size and stopping",
+    "Freeze complete candidate and its own fixed >=10 T qualification >=9/10, three types and >=2 with nine phases",
+    "Actual installed dev6 Docker image verification before qualification",
+    "Reserved comparison and independent replica of same version"
+  ]
+}
