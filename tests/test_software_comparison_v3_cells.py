@@ -53,7 +53,7 @@ class FixtureTransport:
 
 
 def cell(root,method='N',fail=False):
-    t=FixtureTransport(fail);c=BasicCell(root,t,method=method,task='fractionmix',contract='Synthetic mechanics only',sdd_guide='Synthetic SDD guide',protocol_sha256='a'*64,fixture_mode=True,mandate='Synthetic mandate fixture only')
+    t=FixtureTransport(fail);c=BasicCell(root,t,method=method,task='fractionmix',contract='Synthetic mechanics only',sdd_guide='Synthetic SDD guide',protocol_sha256='a'*64,fixture_mode=True,mandate='Synthetic mandate fixture only',author_format='manifest-v1')
     return c,t
 
 

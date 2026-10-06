@@ -63,14 +63,17 @@ def common_request(role, contract, documents, instructions):
 class BasicCell:
     """N/S/A routes, with common sealed code/tests and one final review."""
     def __init__(self, root, transport, *, method, task, contract, sdd_guide,
-                 protocol_sha256, fixture_mode=False, rubric='', mandate=''):
+                 protocol_sha256, fixture_mode=False, rubric='', mandate='', author_format=None):
         if method not in {'N','S','A'} or task not in set(TASK_FILES):
             raise StudyHarnessError('unsupported basic route')
         self.root = _safe(root); self.root.mkdir(parents=True, mode=0o700, exist_ok=True)
         self.transport = transport; self.method = method; self.task = task
         self.contract = contract; self.sdd = sdd_guide; self.fixture = fixture_mode
         self.rubric=rubric; self.mandate=mandate
-        policy = {'schema':4,'method':method,'task':task,'contract_sha256':digest(contract.encode()),
+        self.author_format = author_format if author_format is not None else ('items-v1' if method == 'A' else 'manifest-v1')
+        if type(self.author_format) is not str or self.author_format not in {'items-v1', 'manifest-v1'} or method != 'A' and self.author_format != 'manifest-v1':
+            raise StudyHarnessError('invalid route author format')
+        policy = {'schema':5,'author_format':self.author_format,'method':method,'task':task,'contract_sha256':digest(contract.encode()),
                   'author_manifest_contract_source_sha256':digest(_read(Path(__file__).parents[2]/'src/specorganon/author_contract.py',128000)),
                   'author_manifest_parser_source_sha256':digest(_read(Path(__file__).parents[2]/'src/specorganon/runner.py',128000)),
                   'sdd_sha256':digest(sdd_guide.encode()),'protocol_sha256':protocol_sha256,
@@ -178,7 +181,9 @@ class BasicCell:
         phase='build' if stage in {'program','tests','repair'} else stage
         docs['state.json']=canonical({'items':state['candidate_items']}).decode()
         docs['artifact-data-contract.json']=canonical(data_contract()).decode()
-        docs['author-manifest-contract.json']=canonical(author_manifest_contract(phase)).decode()
+        docs['author-manifest-contract.json']=canonical(author_manifest_contract(phase,self.author_format)).decode()
+        if self.author_format == 'items-v1':
+            docs['author-response-format.json']=canonical({'schema':1,'format':'items-v1'}).decode()
         docs['artifact-format-guidance.txt']=phase_guidance(phase)
         docs['phase-contract.json']=canonical(next(p.__dict__ for p in PHASES if p.id==phase)).decode()
         docs['existing-mandate.md']=self.mandate
@@ -199,13 +204,31 @@ class BasicCell:
             instructions+='Actual first test failed: only SAME implementation/test IDs; COMPLETE changed delivery map and changed executable bytes/argv. No third execution. Original candidate history remains.'
         else:
             instructions+='Only current phase puts; no delivery files. Use supplied actual public measurements for validation; documentary/assumed evidence must be labeled accurately.'
+        if self.author_format == 'items-v1':
+            instructions=instructions.replace('Return schema=1, manifest={schema:1,steps:[puts only]}, files={relative_path:complete_text}, reason. ',
+                'Return schema=1, items=[content objects], files={relative_path:complete_text}, reason. ')
+            instructions=instructions.replace('Each put has op=put,id,kind,text,refs:[existing current IDs],data, optional expected_version/expected_deps. ',
+                'Each item has id,kind,text,refs:[existing current IDs],data only; no op/version guards. ')
         return docs,instructions
 
     def _apply_candidate(self,state,stage,packet,response):
         phase='build' if stage in {'program','tests','repair'} else stage
         pending={'source_state':{'items':state['candidate_items']},'source_files':state['files'],
-                 'phase':phase,'repair_after_rejection':stage=='repair'}
+                 'phase':phase,'repair_after_rejection':stage=='repair','author_format':self.author_format}
         manifest=Controller._author_manifest(None,pending,response)
+        job_id='step-'+str(state['index']+1).zfill(2)+'-'+stage
+        derived={'schema':1,'scope':'derived candidate, not acceptance','author_format':self.author_format,
+                 'raw_packet_sha256':digest(canonical(packet)),
+                 'source_fingerprint':digest(canonical({'items':state['candidate_items'],'files':state['files']})),
+                 'author_generated_fields':['items','files','reason'] if self.author_format=='items-v1' else ['manifest','files','reason'],
+                 'controller_assembled_fields':['schema','op','version_guards','delivery_tree_sha256','rendered_command']
+                     if self.author_format=='items-v1' else ['version_guards_when_omitted','delivery_tree_sha256','rendered_command'],
+                 'manifest':manifest}
+        archive=self.root/(job_id+'-manifest.json')
+        if archive.exists() and _json(archive)!=derived:raise StudyHarnessError('derived A manifest changed')
+        if not archive.exists():_write(archive,derived)
+        state.setdefault('derivations',{})[job_id]={'format':self.author_format,
+            'raw_packet_sha256':derived['raw_packet_sha256'],'derived_manifest_sha256':digest(canonical(manifest))}
         steps=manifest['steps']; files=response['files']; items=copy.deepcopy(state['candidate_items'])
         if stage=='program':
             if (len(steps)!=1 or steps[0]['kind']!='implementation' or steps[0]['id'] in items
@@ -249,7 +272,7 @@ class BasicCell:
     def _apply(self, state, stage, packet):
         if packet.get('provenance') != ('synthetic' if self.fixture else 'native'):
             raise StudyHarnessError('actual isolated role provenance required')
-        response = validate_result(packet['result'], 'review' if stage=='final-review' else 'author')
+        response = validate_result(packet['result'], 'review' if stage=='final-review' else 'author', author_format=self.author_format)
         if stage == 'final-review':
             audit=validate_response(response.get('audit'),self.method,self._audit_binding(state))
             _write(self.root/'assessment.json',audit)
@@ -335,7 +358,9 @@ class BasicCell:
                 packet = self.transport.call(job_id,request['role'],request)
                 if packet.get('request_sha256') != digest(canonical(request)):
                     raise StudyHarnessError('role request binding diverged')
-                _write(self.root/(job_id+'-packet.json'),packet)
+                packet_path=self.root/(job_id+'-packet.json')
+                if packet_path.exists() and _json(packet_path)!=packet:raise StudyHarnessError('immutable raw role packet changed')
+                if not packet_path.exists():_write(packet_path,packet)
                 self._apply(state,stage,packet); packet_sha=digest(canonical(packet))
             state['history'].append({'stage':stage,'job_id':job_id,'packet_sha256':packet_sha})
             state['index']+=1
@@ -375,14 +400,16 @@ class BasicCell:
 
 class ToolkitCell:
     """Real T engine/controller route plus the same one-time final review."""
-    def __init__(self, root, transport, *, task, contract, mandate, protocol_sha256, rubric=''):
+    def __init__(self, root, transport, *, task, contract, mandate, protocol_sha256, rubric='', author_format='items-v1'):
+        if type(author_format) is not str or author_format not in {'items-v1', 'manifest-v1'}:
+            raise StudyHarnessError('unsupported toolkit author format')
         if (task not in set(TASK_FILES) or type(protocol_sha256) is not str
                 or re.fullmatch('[0-9a-f]{64}',protocol_sha256) is None):
             raise StudyHarnessError('explicit toolkit cell identity required')
         self.root=_safe(root); self.root.mkdir(parents=True,mode=0o700,exist_ok=True)
         self.transport=transport; self.contract=contract; self.mandate=mandate
         self.rubric=rubric
-        policy={'schema':3,'task':task,'protocol_sha256':protocol_sha256,
+        policy={'schema':4,'author_format':author_format,'task':task,'protocol_sha256':protocol_sha256,
                 'rubric_sha256':digest(rubric.encode()),
                 'contract_sha256':digest(contract.encode()),'mandate_sha256':digest(mandate.encode())}
         path=self.root/'toolkit-policy.json'
@@ -399,7 +426,7 @@ class ToolkitCell:
         _write(self.root/'last-read-report.json',case_report(self.case))
         _write(self.root/'last-read-next-task.json',describe_task(state))
         self.controller=Controller(self.case,self.root/'controller',transport,
-                                   contract=contract,mandate=mandate,executor=transport)
+                                   contract=contract,mandate=mandate,executor=transport,author_format=author_format)
 
     def _step(self):
         path=self.root/'common-final-review.json'

@@ -1,16 +1,20 @@
 """Compact machine-readable author grammar; never repairs native content."""
 from __future__ import annotations
 import re
+import copy
 from .engine import ITEM_ID
 from .workflow import KIND_TO_PHASE, PHASE_BY_ID
 from .runner import PUT_REQUIRED_FIELDS, PUT_OPTIONAL_FIELDS, MANIFEST_FIELDS
 
 
-def author_manifest_contract(phase):
+AUTHOR_FORMATS = frozenset({'manifest-v1', 'items-v1'})
+
+
+def author_manifest_contract(phase, author_format='manifest-v1'):
     """Declare strict syntax; controller/engine remain authoritative."""
-    if phase not in PHASE_BY_ID:
+    if phase not in PHASE_BY_ID or author_format not in AUTHOR_FORMATS:
         raise ValueError("unknown author phase")
-    return {
+    contract = {
         "schema": 1, "advisory": True,
         "response_fields": ["schema", "manifest", "files", "reason"],
         "manifest_fields": sorted(MANIFEST_FIELDS),
@@ -23,6 +27,30 @@ def author_manifest_contract(phase):
         "types": {"text": "nonblank str", "refs": "distinct IDs", "data": "object",
                   "expected_version": "int>=0", "expected_deps": "exact refs->int>=1"},
     }
+    if author_format == 'items-v1':
+        contract['response_fields'] = ['schema', 'items', 'files', 'reason']
+        contract['items_required'] = sorted(PUT_REQUIRED_FIELDS - {'op'})
+        contract['items_count'] = contract.pop('steps_count')
+        for key in ('manifest_fields', 'put_required', 'put_optional', 'op'):
+            contract.pop(key)
+        contract['types'].pop('expected_version')
+        contract['types'].pop('expected_deps')
+        contract['assembly'] = 'Toolkit: op/schema/versions only.'
+    return contract
+
+
+def typed_author_manifest(response):
+    """Assemble only declared mechanics; leave all native content unchanged."""
+    if (type(response) is not dict or set(response) != {'schema', 'items', 'files', 'reason'}
+            or type(response['schema']) is not int or response['schema'] != 1
+            or type(response['items']) is not list or not 1 <= len(response['items']) <= 32
+            or type(response['files']) is not dict
+            or any(type(k) is not str or type(v) is not str for k, v in response['files'].items())
+            or type(response['reason']) is not str or not response['reason'].strip()
+            or any(type(item) is not dict or set(item) != PUT_REQUIRED_FIELDS - {'op'}
+                   for item in response['items'])):
+        raise ValueError('invalid typed author content contract')
+    return {'schema': 1, 'steps': [{'op': 'put', **copy.deepcopy(item)} for item in response['items']]}
 
 
 def manifest_error_detail(error):
