@@ -1,3 +1,5 @@
+import TCustodyEngineering from './TCustodyEngineering';
+import NativeDev8Progress from './NativeDev8Progress';
 import RequestContentEngineering from './RequestContentEngineering';
 import data from '../software-engineering-02.json';
 import NativeCohortProgress from './NativeCohortProgress';
@@ -30,6 +32,8 @@ export default function SoftwareEngineering(){
     <AutonomousControl/>
     <NativePilotProgress/>
     <RequestContentEngineering/>
+    <NativeDev8Progress/>
+    <TCustodyEngineering/>
     <Dev4Closure/>
     <h5 id="meta-mejor-metodo">Meta activa: demostrar que mejora la entrega</h5>
     <p>Codex tiene asignada la mejora y su validación. Para cerrar la meta, el candidato deberá satisfacer criterios fijados antes de las nuevas evaluaciones:</p>
