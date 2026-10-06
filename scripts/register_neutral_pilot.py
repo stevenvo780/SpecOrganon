@@ -9,7 +9,8 @@ from pathlib import Path
 import subprocess
 
 from specorganon import __version__
-from specorganon.neutral_pilot import ATTEMPTS, CLASSIFICATION, LIMITS, POLICY_DEFINITION, TEST_FILES, CASE_INDEX
+from specorganon.neutral_pilot import (ATTEMPTS, CLASSIFICATION, PLAN_LIMITS, POLICY_DEFINITION,
+                                     TEST_FILES, CASE_INDEX, CONTROL_PROTOCOL, CONTROL_MANDATE)
 from specorganon.role_jobs import _read, _safe, canonical, digest
 
 
@@ -26,21 +27,22 @@ def prepare(source, runtime, pilot_id, native_image, test_image):
                        'checker_args': [] if name == 'rangeaudit' else [name]}
     catalog = 'experiments/software_comparison_v3/public-models.json'
     seccomp = 'docker/codex/seccomp-codex.json'
-    mandate = base + 'neutral-public-v1/mandate.md'
+    mandate = CONTROL_MANDATE
     paths = {'pyproject.toml', 'uv.lock', 'scripts/controller_native_role.py', 'scripts/register_neutral_pilot.py',
              'scripts/index_neutral_public_cases.py',
-             catalog, seccomp, mandate}
+             catalog, seccomp, mandate, CONTROL_PROTOCOL}
     paths.update(str(p.relative_to(source)) for p in (source / 'src/specorganon').glob('*.py'))
     for task in tasks.values():
         paths.update([task['contract'], task['checker'], task['case_index']])
     bindings = {p: digest(_read(source / p)) for p in sorted(paths)}
     executable = '/home/stev/.local/bin/agy'
-    return {'schema': 1, 'classification': CLASSIFICATION, 'id': pilot_id,
+    return {'schema': 2, 'classification': CLASSIFICATION, 'id': pilot_id,
             'registered_at': datetime.now(timezone.utc).isoformat(), 'candidate_version': __version__,
             'source_root': str(source), 'source_commit': subprocess.check_output(
                 ['git', 'rev-parse', 'HEAD'], cwd=source, text=True).strip(), 'source_sha256': bindings,
             'run_root': str(runtime), 'fixture_mode': False, 'automatic_replacement': False,
-            'controller_limits': LIMITS, 'control_definition': POLICY_DEFINITION,
+            'controller_limits': PLAN_LIMITS, 'control_definition': POLICY_DEFINITION,
+            'control_protocol': CONTROL_PROTOCOL,
             'public_catalog': catalog, 'seccomp': seccomp, 'mandate': mandate, 'tasks': tasks,
             'attempts': ATTEMPTS, 'scope': {'reserved': False, 'T_qualification': False,
                 'competence_established': False, 'superiority_evaluated': False, 'external_F': None, 'common_complete': None},

@@ -1,0 +1,34 @@
+...................F.....................................                [100%]
+=================================== FAILURES ===================================
+___ test_closed_measure_crash_preserves_actual_outcome_and_no_second_measure ___
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-389/test_closed_measure_crash_pres0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f60ca45ba80>
+
+    def test_closed_measure_crash_preserves_actual_outcome_and_no_second_measure(tmp_path, monkeypatch):
+        c = controller(tmp_path / 'run'); c.step(); original = c._apply
+        monkeypatch.setattr(c, '_apply', lambda *a: (_ for _ in ()).throw(KeyboardInterrupt()))
+        with pytest.raises(KeyboardInterrupt): c.step()
+        calls = len(c.transport.dispatched)
+        monkeypatch.setattr(c, '_apply', original)
+        monkeypatch.setattr(c.transport, 'measure', lambda *a: pytest.fail('must recover closed measurement'))
+>       report = c.step(); assert report['counts']['test_runs'] == 1 and len(c.transport.dispatched) == calls
+                 ^^^^^^^^
+
+tests/test_neutral_autonomy.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/neutral_controller.py:531: in step
+    measured=t.measure(pending['job_id'],pending['request']['argv'],pending['request']['files'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = ('neutral-0002-measure', ['/opt/specorganon/venv/bin/python', '-I', '-B', '/input/delivery/test_program.py'], {'README...\nassert runpy.run_path(str(Path(__file__).with_name("program.py")))["result"]()==7\nprint("guard control passed")\n'})
+
+>   monkeypatch.setattr(c.transport, 'measure', lambda *a: pytest.fail('must recover closed measurement'))
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: must recover closed measurement
+
+tests/test_neutral_autonomy.py:168: Failed
+=========================== short test summary info ============================
+FAILED tests/test_neutral_autonomy.py::test_closed_measure_crash_preserves_actual_outcome_and_no_second_measure
+1 failed, 56 passed in 0.98s

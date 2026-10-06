@@ -1,0 +1,50 @@
+[
+  {
+    "argv": [
+      "docker",
+      "build",
+      "-f",
+      "docker/release/Dockerfile",
+      "-t",
+      "specorganon-release:0.2.0rc3.dev7",
+      "--iidfile",
+      "goals/method-superiority-v1/evidence/neutral-autonomy-controller-01/release-image-id.txt",
+      "."
+    ],
+    "exit_code": 0,
+    "log": "docker-release-build-01",
+    "iid": "sha256:5357232868157b9dce5a7783076f865c2fb6736232434b61300023d7d0ea1325"
+  },
+  {
+    "argv": [
+      "docker",
+      "build",
+      "-f",
+      "docker/codex/Dockerfile",
+      "-t",
+      "specorganon-codex:0.2.0rc3.dev7",
+      "--iidfile",
+      "goals/method-superiority-v1/evidence/neutral-autonomy-controller-01/codex-image-id.txt",
+      "."
+    ],
+    "exit_code": 0,
+    "log": "docker-codex-build-01",
+    "iid": "sha256:887411a967c1dfa1bce6d2d81c966b877fa84a5b30eadb0c25daee5fa27a797b"
+  },
+  {
+    "argv": [
+      "docker",
+      "build",
+      "-f",
+      "docker/codex/Dockerfile",
+      "-t",
+      "specorganon-codex:0.2.0rc3.dev7",
+      "--iidfile",
+      "goals/method-superiority-v1/evidence/neutral-autonomy-controller-01/codex-image-id-02.txt",
+      "."
+    ],
+    "exit_code": 0,
+    "log": "docker-codex-build-02",
+    "iid": "sha256:7fcab03a56d635c74772587830a0d7196cad1fb252e613ae64fd5aa977892c71"
+  }
+]

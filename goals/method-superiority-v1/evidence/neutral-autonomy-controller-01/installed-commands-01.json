@@ -1,0 +1,40 @@
+[
+  {
+    "argv": [
+      "uv",
+      "run",
+      "--frozen",
+      "python",
+      "scripts/register_neutral_pilot.py",
+      "goals/method-superiority-v1/evidence/neutral-autonomy-controller-01/local-install/plan.json",
+      "--source-root",
+      "/home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon",
+      "--run-root",
+      "/datos/workspaces/personal/specorganon-validation/method-superiority-v1/dev7-report-only-never-run-01",
+      "--pilot-id",
+      "dev7-report-only-01",
+      "--native-image",
+      "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+      "--test-image",
+      "sha256:5357232868157b9dce5a7783076f865c2fb6736232434b61300023d7d0ea1325"
+    ],
+    "exit_code": 0,
+    "scope": "Local installed/report-only probe; no experimental native generation"
+  },
+  {
+    "argv": [
+      "goals/method-superiority-v1/evidence/neutral-autonomy-controller-01/local-install/venv/bin/python",
+      "goals/method-superiority-v1/evidence/neutral-autonomy-controller-01/probe_installed.py"
+    ],
+    "exit_code": 0,
+    "scope": "Local installed/report-only probe; no experimental native generation"
+  },
+  {
+    "argv": [
+      "goals/method-superiority-v1/evidence/neutral-autonomy-controller-01/local-install/venv/bin/python",
+      "goals/method-superiority-v1/evidence/neutral-autonomy-controller-01/probe_mcp.py"
+    ],
+    "exit_code": 0,
+    "scope": "Local installed/report-only probe; no experimental native generation"
+  }
+]

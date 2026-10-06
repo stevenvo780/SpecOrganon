@@ -1,0 +1,16 @@
+usage: organon-controls [-h] --plan-sha256 PLAN_SHA256 {run,report} plan
+
+Installed, trusted stdlib bootstrap for byte-bound public N/S pilots. The
+interpreter, package initializer, this entry point and dependencies are the
+trusted boundary. All remaining package modules compile the exact installed
+bytes pinned in the plan; cached pyc and modules imported before launch cannot
+substitute for them. No Docker invocation, account lookup or generation
+happens in this bootstrap.
+
+positional arguments:
+  {run,report}
+  plan
+
+options:
+  -h, --help            show this help message and exit
+  --plan-sha256 PLAN_SHA256

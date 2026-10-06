@@ -1,40 +1,42 @@
 # Estado de implementación de autonomía N v2
 
-El contrato PROTOCOL.md y la política pura corregida recibieron aceptación limitada
-de Gemini en `evidence/neutral-autonomy-design-01/code-and-design-review-02.json`.
-El contrato resuelve F06 a nivel de diseño; no hay admisión para pilotos.
-El módulo `src/specorganon/free_control_policy.py` implementa únicamente:
+La candidata mutable `0.2.0rc3.dev7` implementa el contrato PROTOCOL.md en
+`src/specorganon/neutral_autonomy.py`. El driver instalado `organon-controls`
+selecciona ese controlador para N y conserva el controlador staged para S.
+Los registros nuevos usan schema 2 y fijan protocolo, mandato, límites e
+inventario completo de 40 módulos. Los registros antiguos no se reinterpretan.
 
-- extracción estricta de `controller-next.json` sin admitirlo como sustancia;
-- rechazo de JSON ambiguo, decisiones inválidas, colisión con entrega y tamaño;
-- contadores exactos con cinco autores y cuatro revisores compartidos;
-- cobro separado de dos medidas, sin director gratis ni reembolso por parser;
-- ruta de última actualización medida→auditoría o fallo, según cupos y outcome.
-- rechazo previo al parche de continue/review en el quinto turno, y de acciones
-  sin recursos para su medida/revisión final.
+N puede escribir código, documentación y batería juntos, decidir continuar,
+pedir feedback, medir o auditar. Cada decisión consume un turno de autor; no
+hay director gratuito. Se conservan cinco autores, cuatro revisores compartidos
+y dos medidas propias. La primera medida sella la partición exhaustiva y los
+bytes de la batería original; cambios posteriores de entrega invalidan el
+resultado anterior. Journal y snapshots conservan reservas y recuperación de
+trabajos cerrados. Las solicitudes N y S muestran consumo y recursos restantes.
+La pertinencia semántica de la batería necesita auditoría independiente.
 
-Las funciones son puras. No persisten reservas, hacen dispatch ni verifican medidas;
-reciben el estado que el futuro controlador deberá autenticar por su journal.
-`following_measure(passed=True)` expresa una transición de política, nunca verifica
-una ejecución. No devuelve éxito, entrega completa, F o superioridad.
+La evidencia de ingeniería está en
+`evidence/neutral-autonomy-controller-01/engineering-receipt.json`:
 
-La prueba seleccionada registrada en `evidence/neutral-autonomy-design-01/tests-01.*`
-incluye estos controles y los del controlador/driver existentes: 69 passed en
-el primer snapshot, luego 73 passed en el corregido (`tests-02.*`). No se suman.
-No se suma al total de 143 de otro snapshot ni equivale a prueba del ejecutor v2.
-No hubo Docker, nuevos sujetos experimentales ni comprobación instalada en esta
-prueba. Las invocaciones de revisión de ingeniería se cuentan por separado.
+- 186 pruebas seleccionadas aprobadas en ocho archivos afectados.
+- Tres controles nuevos con medidas Docker reales aprobados tras corregir la
+  instrumentación de un contador. Autores y revisores son sintéticos.
+- Wheel local, imagen de release y laboratorio Codex con los mismos 40 módulos
+  que las fuentes; CLI y MCP stdio verificados, 24 herramientas descubiertas.
+- Codex CLI 0.160.0 verificado sin login ni copia de perfiles.
+- Aceptación estática de ingeniería de Gemini 3.8 Flash. Después se movió solo
+  el contador de un test antes de la aserción deliberadamente fallida; se
+  ejecutaron de nuevo sus tres controles. Las fuentes de producción revisadas
+  siguen idénticas.
 
-**Pendiente:** resolución del contrato tras revisión, controlador autónomo durable,
-clasificación/custodia de batería, historia compatible con D/G, presupuesto exacto
-en requests, agotamiento y todas las rutas de crash/reconciliación, integración al
-driver instalado con identidad/versión nueva, CLI/MCP/Docker, revisión independiente
-de implementación y luego seis pilotos nativos fijos sin reemplazos.
+Los primeros fallos de fixtures, logs y archivos originales se conservan.
+No se suman snapshots ni se presenta una corrida de 20/20 inexistente.
+Los controles mecánicos usaron la imagen histórica fijada en sus fixtures;
+las pruebas instaladas de ambas imágenes dev7 se registran por separado.
 
-El driver `organon-controls` publicado sigue usando exclusivamente el controlador
-staged v1 y su definición provisional; no importa este módulo para ejecutar N.
-Una fuente adicional cambia el inventario de paquete: las instalaciones anteriores
-de 38 módulos son recibos históricos, no evidencia de instalación de esta candidata.
-No adaptar registros antiguos ni atribuir a su wheel este código nuevo.
-F06 no está resuelto a nivel de ejecución ni hay competencia empírica demostrada.
-La calificación T ≥9/10, evaluación reservada y réplica de la meta siguen pendientes.
+Esta aceptación no admite una cohorte nativa ni congela la versión completa.
+No se ejecutaron nuevos sujetos experimentales. Quedan seis pilotos públicos
+N/S fijos con registro prospectivo y admisión, integración T con D/G comunes y
+F externo, freeze completo, su propia calificación T >=9/10, comparación
+reservada y réplica independiente. La meta sigue activa y no hay superioridad
+demostrada. Wheel e imágenes son locales, sin publicación en un registro.
