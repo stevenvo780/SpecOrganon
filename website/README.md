@@ -134,3 +134,7 @@ La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wh
 ## Dev4 y cierre terminal de dev2
 
 `#avance-dev4` publica 296 controles del host y 296 del wheel instalado, CLI/MCP24 y nueve diagnósticos de sintaxis (seis fallos, tres válidos); no son generaciones de software. `#cohorte-nativa` muestra el cierre dev2: diez intentos, tres entregas y siete fallos, sin reemplazos. Se incumple el 90%; no hay superioridad demostrada. La cohorte dev4 02 está registrada prospectivamente con 45 fuentes, y está en ejecución; todavía no se publican resultados finales. Los 54 archivos descargables anteriores y sus manifiestos conservan sus bytes. Siete descargas nuevas se añaden en `avance-dev4/`, con hashes separados.
+
+## Dev5 y observación de cohorte dev4
+
+`#avance-dev5` publica 328 controles del host y 328 del wheel instalado, CLI/MCP24 y tres controles Docker reales con pérdida de respuesta inyectada. No reproduce el timeout natural ni acredita fiabilidad nativa. La observación separada de dev4, fechada 03:43:23 UTC, conserva seis cierres, dos entregas y cuatro fallos; la cohorte sigue en sus fuentes congeladas. Dev5 no tiene cohorte nativa; libre/SDD sólidos son un diseño pendiente. Se conservan las 61 descargas anteriores y se añaden 12 en `avance-dev5/` con hashes separados.

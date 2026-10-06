@@ -1,0 +1,37 @@
+name: specorganon-main-dev2
+services:
+  codex:
+    cap_drop:
+      - ALL
+    environment:
+      TERM: xterm-256color
+    image: specorganon-codex:0.2.0rc3.dev5
+    init: true
+    networks:
+      default: null
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:./docker/codex/seccomp-codex.json
+      - apparmor:unconfined
+    volumes:
+      - type: volume
+        source: workspace
+        target: /workspace
+        volume: {}
+      - type: volume
+        source: codex-home
+        target: /home/codex/.codex
+        volume: {}
+    build:
+      context: /home/stev/.codex/worktrees/publish-main/SpecOrganon
+      dockerfile: docker/codex/Dockerfile
+    stdin_open: true
+    tty: true
+networks:
+  default:
+    name: specorganon-main-dev2_default
+volumes:
+  codex-home:
+    name: specorganon-main-dev2_codex-home
+  workspace:
+    name: specorganon-main-dev2_workspace

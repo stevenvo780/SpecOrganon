@@ -1,9 +1,9 @@
-# Codex y SpecOrganon MCP: candidato 0.2.0rc3.dev4
+# Codex y SpecOrganon MCP: candidato 0.2.0rc3.dev5
 
 Desde la carpeta del paquete fuente extraído:
 
 ```sh
-docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev4 .
+docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev5 .
 docker compose build codex
 docker compose run --rm -T codex codex --version
 docker compose run --rm -T codex python /opt/codex-lab/smoke.py
@@ -52,7 +52,9 @@ docker compose run --rm -T codex python /opt/codex-lab/trial.py
 El driver usa siete herramientas MCP autorizadas para su caso técnico, sin pedir aceptación de las nueve fases. Conserva los eventos y rechaza una inferencia sin llamadas MCP verificadas. Consume cuota de la cuenta autenticada.
 
 El nombre Compose `specorganon-main-dev2` se mantiene para conservar los volúmenes
-existentes del laboratorio main; la imagen candidata es dev4. La cohorte histórica
+existentes del laboratorio main; la imagen candidata es dev5. La cohorte histórica
 sigue en su checkout, imagen y volumen registrados. Dev3 conserva un smoke del wheel
 instalado en Docker; su corrección opt-in no ha sido evaluada en una cohorte nativa
 nueva. [Recibos y límites](../../goals/method-superiority-v1/development/BOUNDED_ADMISSION.md).
+
+Dev5 verifica el wheel instalado y tres controles Docker de recuperación sin modelos, con pérdida de respuesta inyectada; no reproduce el timeout natural ni cuenta como una cohorte nativa. La imagen del recibo es local y no se afirma publicada en un registry. Las fuentes, rechazos y [recibo final](../../goals/method-superiority-v1/evidence/docker-create-recovery-01/engineering-receipt.json) se conservan.
