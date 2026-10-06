@@ -142,3 +142,7 @@ La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wh
 ## Dev6 parcial, sin wheel liberado
 
 `#avance-dev6` publica formatos neutrales y helpers de evidencia común, 389 pruebas acotadas aprobadas y tres omitidas; las revisiones son estáticas y la aceptación se limita a helpers. El wheel dev6 sólo se probó localmente, con 34 módulos iguales y CLI exit0: no se descarga ni se presenta como versión completa. No hay smoke MCP nuevo, generación dev6 o comparación ejecutada. El último wheel público es dev5. Ocho descargas nuevas conservan protocolo pendiente, recibo, revisiones, logs y snapshot dev4 fechado; las 73 anteriores permanecen intactas.
+
+## Cierre terminal de la cohorte dev4
+
+`#cohorte-dev4-cierre` publica el informe original del 6 de octubre a las 04:23:28 UTC: diez intentos cerrados, cinco entregas y cinco fallos sin reemplazos. Cinco entregas pasaron 543/543 comprobaciones públicas en conjunto; el denominador de fiabilidad sigue siendo diez. Resultado50%, Wilson descriptivo23,66–76,34%, criterio9/10 incumplido. El archivo conserva fuentes45 y recibos seleccionados, con paths históricos; no permite reanudar runs desde main. Se añaden cinco descargas terminales a las ocho de dev6, manteniendo las73 anteriores intactas. Total86.

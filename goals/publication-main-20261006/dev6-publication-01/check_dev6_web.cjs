@@ -17,6 +17,9 @@ const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
    await section.locator('tbody tr').first().waitFor({state:'attached'});
    if(await section.locator('tbody tr').count()!==10)throw Error('Fixed cohort rows missing');
    const text=await section.innerText();
+   const terminal=page.locator('section[aria-labelledby="cohorte-dev4-cierre"]');await terminal.locator('tbody tr').first().waitFor({state:'attached'});
+   if(await terminal.locator('tbody tr').count()!==10)throw Error('Terminal dev4 rows missing');
+   for(const value of ['10 intentos cerrados, 5 entregas completas, 10 intentos fijados','543/543 comprobaciones públicas','50% (5/10); el criterio de 9/10 se incumplió.','no un run reubicado'])if(!(await terminal.innerText()).includes(value))throw Error('Missing terminaldev4 '+value);
    const dev6=page.locator('section[aria-labelledby="avance-dev6"]');const dev6text=await dev6.innerText();
    for(const value of ['389 pruebas acotadas pasaron y 3 quedaron omitidas','El wheel dev6 es local y no se libera; el último wheel público es dev5.','No hay smoke MCP nuevo','aceptación posterior se limita a los helpers','infraestructura no concede un ganador','Cero sujetos reservados'])if(!dev6text.includes(value))throw Error('Missing dev6 limit '+value);
    const dev5=page.locator('section[aria-labelledby="avance-dev5"]');const dev5text=await dev5.innerText();
@@ -35,7 +38,7 @@ const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
    const links=await page.locator('a[href*="github.com/stevenvo780/SpecOrganon"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));
    if(links.some(h=>!h.startsWith(repo)&&!h.startsWith('https://github.com/stevenvo780/SpecOrganon/blob/main/')))throw Error('Relevant repository link is not main');
    if(viewport==='desktop'){
-    for(const [prefix,manifestPath] of [['',path.join(publicRoot,'descargas-manifest.json')],['cohorte-nativa-01/',path.join(publicRoot,'cohorte-nativa-01/descargas-sha256.json')],['cohorte-nativa-02/',path.join(publicRoot,'cohorte-nativa-02/descargas-sha256.json')],['avance-dev3/',path.join(publicRoot,'avance-dev3/descargas-sha256.json')],['avance-dev4/',path.join(publicRoot,'avance-dev4/descargas-sha256.json')],['avance-dev5/',path.join(publicRoot,'avance-dev5/descargas-sha256.json')],['avance-dev6/',path.join(publicRoot,'avance-dev6/descargas-sha256.json')]]){
+    for(const [prefix,manifestPath] of [['',path.join(publicRoot,'descargas-manifest.json')],['cohorte-nativa-01/',path.join(publicRoot,'cohorte-nativa-01/descargas-sha256.json')],['cohorte-nativa-02/',path.join(publicRoot,'cohorte-nativa-02/descargas-sha256.json')],['avance-dev3/',path.join(publicRoot,'avance-dev3/descargas-sha256.json')],['avance-dev4/',path.join(publicRoot,'avance-dev4/descargas-sha256.json')],['avance-dev5/',path.join(publicRoot,'avance-dev5/descargas-sha256.json')],['avance-dev6/',path.join(publicRoot,'avance-dev6/descargas-sha256.json')],['cohorte-dev4-terminal/',path.join(publicRoot,'cohorte-dev4-terminal/descargas-sha256.json')]]){
      const manifest=JSON.parse(fs.readFileSync(manifestPath));
      if(prefix==='avance-dev6/'&&Object.keys(manifest.files).some(n=>n.endsWith('.whl')))throw Error('Local dev6 wheel must not be released');
      if(!prefix&&Object.keys(manifest.files).length!==32)throw Error('Historical download count altered');
@@ -49,7 +52,8 @@ const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
    const bodyWidth=await page.locator('body').evaluate(el=>el.scrollWidth);if(bodyWidth>width+2||errors.length)throw Error('Layout/runtime failure '+JSON.stringify({bodyWidth,errors}));
    await section.screenshot({path:path.join(base,label+'-'+viewport+'.png')});
    await dev6.screenshot({path:path.join(base,label+'-dev6-'+viewport+'.png')});
-   checks.push({viewport,width,height,bodyWidth,cohort_rows:10,closed:10,completed:3,dev4_snapshot_closed:6,dev4_snapshot_complete:2,dev5_targeted_tests:328,main_links:await page.locator('a[href="'+repo+'"]').count(),repository_links_checked:links.length,guide_sha256:hash(Buffer.from(guide)),page_errors:errors});
+   await terminal.screenshot({path:path.join(base,label+'-terminal-dev4-'+viewport+'.png')});
+   checks.push({viewport,width,height,bodyWidth,cohort_rows:10,closed:10,completed:3,dev4_snapshot_closed:6,dev4_snapshot_complete:2,dev5_targeted_tests:328,dev6_targeted_tests:389,dev6_skipped:3,dev4_terminal_closed:10,dev4_terminal_complete:5,main_links:await page.locator('a[href="'+repo+'"]').count(),repository_links_checked:links.length,guide_sha256:hash(Buffer.from(guide)),page_errors:errors});
    await context.close();
   }
  }finally{await browser.close()}

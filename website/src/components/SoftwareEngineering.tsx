@@ -4,6 +4,7 @@ import BoundedAdmission from './BoundedAdmission';
 import NativeSyntax from './NativeSyntax';
 import DockerRecovery from './DockerRecovery';
 import NeutralControls from './NeutralControls';
+import Dev4Closure from './Dev4Closure';
 
 export default function SoftwareEngineering(){
   const native=data.native_development;
@@ -21,6 +22,7 @@ export default function SoftwareEngineering(){
     <NativeSyntax/>
     <DockerRecovery/>
     <NeutralControls/>
+    <Dev4Closure/>
     <h5 id="meta-mejor-metodo">Meta activa: demostrar que mejora la entrega</h5>
     <p>Codex tiene asignada la mejora y su validación. Para cerrar la meta, el candidato deberá satisfacer criterios fijados antes de las nuevas evaluaciones:</p>
     <ul>
@@ -29,7 +31,7 @@ export default function SoftwareEngineering(){
       <li>Funcionalidad no inferior, con margen máximo de cinco puntos porcentuales; tiempo medio total no mayor que el doble de cada alternativa.</li>
       <li>Tareas reservadas, incertidumbre simultánea del 95% y una réplica independiente de la misma versión.</li>
     </ul>
-    <p>El progreso incluye ingeniería verificada, una entrega anterior completa y la cohorte dev2 cerrada con tres entregas y siete fallos, y la cohorte dev4 en ejecución, separada de los controles de ingeniería dev5. La cohorte cerrada incumplió el criterio de fiabilidad. La superioridad continúa sin demostrar. La campaña v3, sus 42 celdas y sus puntajes permanecen cerrados.</p>
+    <p>El progreso incluye ingeniería verificada, una entrega anterior completa y la cohorte dev2 cerrada con tres entregas y siete fallos, y la cohorte dev4 cerrada con cinco entregas de diez, separada de los controles de ingeniería dev5 y los helpers parciales dev6. La cohorte cerrada incumplió el criterio de fiabilidad. La superioridad continúa sin demostrar. La campaña v3, sus 42 celdas y sus puntajes permanecen cerrados.</p>
     <div className="software-lab-downloads">
       <a className="text-link" href="/resultados/software/candidato-rc3-dev2-verificacion.json">Verificación y consumo observado</a>
       <a className="text-link" href="/resultados/software/specorganon-candidate-0.2.0rc3.dev2.zip">Fuentes del candidato</a>
