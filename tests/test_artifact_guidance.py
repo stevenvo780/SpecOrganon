@@ -89,7 +89,7 @@ def test_new_request_adds_guidance_and_preserves_complete_authoritative_state(tm
     assert json.loads(request['documents']['reference-maintenance.json'])['scope'].startswith('Read-only advisory')
     assert (ctrl.case / 'organon.json').read_bytes() == before
     policy = _json(ctrl.root / 'controller.json')
-    assert policy['schema'] == 9 and policy['max_author_per_phase'] == 2
+    assert policy['schema'] == 10 and policy['max_author_per_phase'] == 2
     assert policy['max_role_calls'] == 40 and policy['max_phase_encoded_bytes'] == 6000
 
 

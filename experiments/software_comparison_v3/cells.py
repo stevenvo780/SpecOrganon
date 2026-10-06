@@ -16,6 +16,7 @@ import re
 import sys
 
 from specorganon import engine
+from specorganon.author_contract import author_manifest_contract
 from specorganon.docker_roles import DockerRoles, DockerRoleError
 from specorganon.report import case_report
 from specorganon.runner import describe_task
@@ -69,7 +70,9 @@ class BasicCell:
         self.transport = transport; self.method = method; self.task = task
         self.contract = contract; self.sdd = sdd_guide; self.fixture = fixture_mode
         self.rubric=rubric; self.mandate=mandate
-        policy = {'schema':3,'method':method,'task':task,'contract_sha256':digest(contract.encode()),
+        policy = {'schema':4,'method':method,'task':task,'contract_sha256':digest(contract.encode()),
+                  'author_manifest_contract_source_sha256':digest(_read(Path(__file__).parents[2]/'src/specorganon/author_contract.py',128000)),
+                  'author_manifest_parser_source_sha256':digest(_read(Path(__file__).parents[2]/'src/specorganon/runner.py',128000)),
                   'sdd_sha256':digest(sdd_guide.encode()),'protocol_sha256':protocol_sha256,
                   'rubric_sha256':digest(rubric.encode()),'mandate_sha256':digest(mandate.encode()),
                   'fixture_mode':fixture_mode}
@@ -175,6 +178,7 @@ class BasicCell:
         phase='build' if stage in {'program','tests','repair'} else stage
         docs['state.json']=canonical({'items':state['candidate_items']}).decode()
         docs['artifact-data-contract.json']=canonical(data_contract()).decode()
+        docs['author-manifest-contract.json']=canonical(author_manifest_contract(phase)).decode()
         docs['artifact-format-guidance.txt']=phase_guidance(phase)
         docs['phase-contract.json']=canonical(next(p.__dict__ for p in PHASES if p.id==phase)).decode()
         docs['existing-mandate.md']=self.mandate
@@ -182,6 +186,7 @@ class BasicCell:
         instructions=('Ablation: current '+phase+' candidate phase, no intermediate reviews/approval gates or acceptance/advance. '
             'Return schema=1, manifest={schema:1,steps:[puts only]}, files={relative_path:complete_text}, reason. '
             'Each put has op=put,id,kind,text,refs:[existing current IDs],data, optional expected_version/expected_deps. '
+            'Follow author-manifest-contract.json; steps must be nonempty even in build, IDs use its exact pattern. '
             'Use substantive artifact-format-guidance and data contract. Trace current prerequisites with real versions. '
             'No fabricated passed/receipt/test_job_ref or effects. 6items/6000double-encoded bytes per complete STORED phase '
             'including metadata/deps/versions; files total<=20000double-encoded bytes. resource-accounting.json is current costs. '
