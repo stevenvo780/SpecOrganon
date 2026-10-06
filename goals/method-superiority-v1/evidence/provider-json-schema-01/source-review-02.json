@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "job_id": "f76d6d984b544afdaf11adc8b924602b",
+  "status": "succeeded",
+  "provider": "codex",
+  "model": "codex/gpt-6.1-sol",
+  "account": "principal",
+  "machine": "Kratos",
+  "duration_s": 30.4,
+  "access": "text",
+  "review": {
+    "schema": 1,
+    "verdict": "reject",
+    "reason": "La proyección conserva el contrato local y no introduce reparaciones, aprobaciones automáticas ni cambios de cuenta visibles. Hay fallos de integridad y cierre en el diagnóstico. Las dependencias no suministradas no fueron revisadas; esta revisión estática no establece comportamiento del proveedor ni eficacia.",
+    "findings": [
+      {
+        "file": "scripts/probe_native_response_schema.py",
+        "line": 20,
+        "problem": "El registro se carga mediante _json(path) después de comprobar el hash de una lectura distinta. No queda garantizado que el plan utilizado corresponda a los bytes verificados si la ruta cambia entre ambas operaciones.",
+        "correction": "Leer el registro una sola vez, comprobar su digest y analizar estrictamente esos mismos bytes."
+      },
+      {
+        "file": "scripts/probe_native_response_schema.py",
+        "line": 46,
+        "problem": "La revalidación está fuera del bloque try. Si falla entre casos, termina la ejecución sin resultados terminales para los casos restantes ni informe final, contradiciendo el cierre declarado de las tres identidades. La revalidación final también puede impedir conservar el informe.",
+        "correction": "Registrar de forma duradera la interrupción y los casos pendientes como no ejecutados/inconclusos, y generar un informe terminal sin efectuar llamadas adicionales ni reintentos."
+      }
+    ],
+    "tests_executed": false
+  },
+  "scope": "Static source snapshot02 only; no tests/native efficacy"
+}

@@ -77,10 +77,10 @@ def _options(docker_ctx):
             'gemini_executable': docker_ctx['gemini_executable'], 'gemini_profile': docker_ctx['gemini_profile']}
 
 
-def test_transport_policy_is_persisted_with_schema3_and_effort(docker_cli_patched, tmp_path):
+def test_transport_policy_is_persisted_with_schema4_and_effort(docker_cli_patched, tmp_path):
     DockerRoles(tmp_path / "transport", **_options(docker_cli_patched))
     policy = _json(tmp_path / "transport" / "transport-policy.json")
-    assert policy["schema"] == 3
+    assert policy["schema"] == 4
     assert policy["codex_reasoning_effort"] == "low"
 
 
@@ -88,13 +88,13 @@ def test_transport_policy_accepts_explicit_effort_and_round_trips(docker_cli_pat
     DockerRoles(tmp_path / "transport", codex_reasoning_effort="high", **_options(docker_cli_patched))
     DockerRoles(tmp_path / "transport", codex_reasoning_effort="high", **_options(docker_cli_patched))
     policy = _json(tmp_path / "transport" / "transport-policy.json")
-    assert policy["codex_reasoning_effort"] == "high" and policy["schema"] == 3
+    assert policy["codex_reasoning_effort"] == "high" and policy["schema"] == 4
 
 
 def test_transport_policy_refuses_schema2_silent_resume(docker_cli_patched, tmp_path):
     root = tmp_path / "transport"
     policy_path = root / "transport-policy.json"
-    # Plant a schema=2 policy that mirrors the rest of the schema3 contract but
+    # Plant a schema=2 policy that mirrors the earlier transport contract but
     # lacks the new field. The transport must refuse to resume silently.
     fake = {"schema": 2, "images": {"native": NATIVE_IMAGE, "test": TEST_IMAGE},
             "routes": {"author": ("codex", "gpt-6.1-sol"), "review": ("gemini", "gemini-3.1-pro-high")},
@@ -104,7 +104,7 @@ def test_transport_policy_refuses_schema2_silent_resume(docker_cli_patched, tmp_
             "gemini_executable_sha256": "deadbeef" * 8, "seccomp_sha256": None}
     root.mkdir(parents=True, mode=0o700)
     _write(policy_path, fake)
-    with pytest.raises(DockerRoleError, match="schema3"):
+    with pytest.raises(DockerRoleError, match="schema4"):
         DockerRoles(root, **_options(docker_cli_patched))
 
 

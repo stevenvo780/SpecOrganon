@@ -1,0 +1,55 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 625B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/specorganon:method-superiority-dev3
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 195B done
+#3 DONE 0.0s
+
+#4 [1/5] FROM docker.io/library/specorganon:method-superiority-dev3@sha256:5367d61b07966388a174632fef1418edd491eff55730def6bdf917ae802e67f8
+#4 resolve docker.io/library/specorganon:method-superiority-dev3@sha256:5367d61b07966388a174632fef1418edd491eff55730def6bdf917ae802e67f8 0.0s done
+#4 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 207.03kB done
+#5 DONE 0.0s
+
+#6 [2/5] COPY dist/specorganon-0.2.0rc3.dev4-py3-none-any.whl /opt/candidate/
+#6 DONE 0.0s
+
+#7 [3/5] RUN uv pip install --offline --python /opt/specorganon/venv/bin/python --no-deps --reinstall-package specorganon /opt/candidate/specorganon-0.2.0rc3.dev4-py3-none-any.whl     && uv pip check --python /opt/specorganon/venv/bin/python
+#7 0.176 Using Python 3.12.3 environment at: /opt/specorganon/venv
+#7 0.191 Resolved 1 package in 8ms
+#7 0.206 Prepared 1 package in 15ms
+#7 0.208 Uninstalled 1 package in 1ms
+#7 0.227 Installed 1 package in 18ms
+#7 0.227  - specorganon==0.2.0rc3.dev3 (from file:///opt/candidate/specorganon-0.2.0rc3.dev3-py3-none-any.whl)
+#7 0.227  + specorganon==0.2.0rc3.dev4 (from file:///opt/candidate/specorganon-0.2.0rc3.dev4-py3-none-any.whl)
+#7 0.238 Using Python 3.12.3 environment at: /opt/specorganon/venv
+#7 0.239 Checked 34 packages in 0.81ms
+#7 0.248 All installed packages are compatible
+#7 DONE 0.3s
+
+#8 [4/5] COPY scripts/controller_native_role.py /opt/specorganon/scripts/controller_native_role.py
+#8 DONE 0.1s
+
+#9 [5/5] WORKDIR /runs
+#9 DONE 0.1s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 0.2s done
+#10 exporting manifest sha256:060691e9b0cedc196b6dd86b6f6bbdef36740bdd61767dcface6ae470c570d81 done
+#10 exporting config sha256:f244ed758e1d48e7c8e2acb7724b82db68b0ef4157b420672beaaf5bf9919b98 0.0s done
+#10 exporting attestation manifest sha256:1ebcf2da8c9ece30df97bc8395fd8e2f70d0c482013ed2f48d97f346b75b0b3d 0.0s done
+#10 exporting manifest list sha256:561d8a819141ed14c71b2d2e7c5872bfcb9c63ab542062d2d86f57814c615c36 done
+#10 naming to docker.io/library/specorganon:method-superiority-dev4 done
+#10 unpacking to docker.io/library/specorganon:method-superiority-dev4 0.1s done
+#10 naming to docker.io/library/specorganon-release:0.2.0rc3.dev4 done
+#10 unpacking to docker.io/library/specorganon-release:0.2.0rc3.dev4 done
+#10 DONE 0.3s

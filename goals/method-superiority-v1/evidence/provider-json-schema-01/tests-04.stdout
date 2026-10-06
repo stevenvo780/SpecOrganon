@@ -1,0 +1,61 @@
+........................................................................ [ 46%]
+.....................................................................FFF [ 92%]
+............                                                             [100%]
+=================================== FAILURES ===================================
+__________ test_transport_policy_is_persisted_with_schema3_and_effort __________
+
+docker_cli_patched = {'catalog': PosixPath('/tmp/pytest-of-stev/pytest-316/test_transport_policy_is_persi0/public-catalog.json'), 'source_r...0/synthetic-agy', 'gemini_profile': '/tmp/pytest-of-stev/pytest-316/test_transport_policy_is_persi0/synthetic-profile'}
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-316/test_transport_policy_is_persi0')
+
+    def test_transport_policy_is_persisted_with_schema3_and_effort(docker_cli_patched, tmp_path):
+        DockerRoles(tmp_path / "transport", **_options(docker_cli_patched))
+        policy = _json(tmp_path / "transport" / "transport-policy.json")
+>       assert policy["schema"] == 3
+E       assert 4 == 3
+
+tests/test_reasoning_policy.py:83: AssertionError
+________ test_transport_policy_accepts_explicit_effort_and_round_trips _________
+
+docker_cli_patched = {'catalog': PosixPath('/tmp/pytest-of-stev/pytest-316/test_transport_policy_accepts_0/public-catalog.json'), 'source_r...0/synthetic-agy', 'gemini_profile': '/tmp/pytest-of-stev/pytest-316/test_transport_policy_accepts_0/synthetic-profile'}
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-316/test_transport_policy_accepts_0')
+
+    def test_transport_policy_accepts_explicit_effort_and_round_trips(docker_cli_patched, tmp_path):
+        DockerRoles(tmp_path / "transport", codex_reasoning_effort="high", **_options(docker_cli_patched))
+        DockerRoles(tmp_path / "transport", codex_reasoning_effort="high", **_options(docker_cli_patched))
+        policy = _json(tmp_path / "transport" / "transport-policy.json")
+>       assert policy["codex_reasoning_effort"] == "high" and policy["schema"] == 3
+E       AssertionError: assert ('high' == 'high'
+E         
+E           high and 4 == 3)
+
+tests/test_reasoning_policy.py:91: AssertionError
+_____________ test_transport_policy_refuses_schema2_silent_resume ______________
+
+docker_cli_patched = {'catalog': PosixPath('/tmp/pytest-of-stev/pytest-316/test_transport_policy_refuses_0/public-catalog.json'), 'source_r...0/synthetic-agy', 'gemini_profile': '/tmp/pytest-of-stev/pytest-316/test_transport_policy_refuses_0/synthetic-profile'}
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-316/test_transport_policy_refuses_0')
+
+    def test_transport_policy_refuses_schema2_silent_resume(docker_cli_patched, tmp_path):
+        root = tmp_path / "transport"
+        policy_path = root / "transport-policy.json"
+        # Plant a schema=2 policy that mirrors the rest of the schema3 contract but
+        # lacks the new field. The transport must refuse to resume silently.
+        fake = {"schema": 2, "images": {"native": NATIVE_IMAGE, "test": TEST_IMAGE},
+                "routes": {"author": ("codex", "gpt-6.1-sol"), "review": ("gemini", "gemini-3.1-pro-high")},
+                "test_timeout_seconds": 60, "source_root": SOURCE_ROOT,
+                "public_catalog_sha256": "deadbeef" * 8, "codex_original_volume": "specorganon-lab_codex-home",
+                "gemini_original_profile": "/home/stev/.gemini",
+                "gemini_executable_sha256": "deadbeef" * 8, "seccomp_sha256": None}
+        root.mkdir(parents=True, mode=0o700)
+        _write(policy_path, fake)
+>       with pytest.raises(DockerRoleError, match="schema3"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'schema3'
+E         Actual message: 'transport schema4 required; previous schema cannot resume silently'
+
+tests/test_reasoning_policy.py:107: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_reasoning_policy.py::test_transport_policy_is_persisted_with_schema3_and_effort
+FAILED tests/test_reasoning_policy.py::test_transport_policy_accepts_explicit_effort_and_round_trips
+FAILED tests/test_reasoning_policy.py::test_transport_policy_refuses_schema2_silent_resume
+3 failed, 153 passed in 0.30s

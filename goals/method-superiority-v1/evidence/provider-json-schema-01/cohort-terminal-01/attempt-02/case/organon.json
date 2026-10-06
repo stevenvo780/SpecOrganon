@@ -1,0 +1,822 @@
+{
+  "events": [
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:50:59+00:00",
+      "hash": "2914f1a1ed122b5e6d53184249e1113881bdb772d28198efddbd2a2ed51fbcb0",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "need": "Consolidación exacta y validación íntegra del lote NDJSON antes de emitir resultados.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Delimitar la necesidad mediante los requisitos públicos de entrada, cálculo y salida.",
+            "Mantener separadas la conformidad técnica y cualquier evaluación futura de superioridad."
+          ]
+        },
+        "deps": {},
+        "id": "ledger_problem",
+        "kind": "problem",
+        "text": "Se necesita una CLI Python que consolide movimientos enteros por cuenta conforme al contrato público LedgerFold. La necesidad técnica es preservar saldos exactos y evitar salida parcial cuando cualquier petición del lote sea inválida. El encargo no aporta observaciones de fallos de un producto existente ni mediciones de beneficio.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:50:59+00:00",
+      "hash": "03d490c78a42af195da714385bb9bf239066266e67dc75a677c92bae0b1e5e0f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "affected_actor": "Persona o proceso que suministra movimientos por stdin y consume stdout, stderr y el código de salida.",
+          "delegated_actor": "Agente encargado del desarrollo técnico dentro del mandato.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Identificar al consumidor de la interfaz como afectado por exactitud y errores.",
+            "Limitar la atribución de decisiones a la delegación técnica documentada."
+          ]
+        },
+        "deps": {
+          "ledger_problem": 1
+        },
+        "id": "ledger_actor",
+        "kind": "actor",
+        "text": "El actor afectado es quien invoca la CLI y consume sus balances y errores. El operador encarga el desarrollo técnico; las decisiones técnicas están delegadas al agente dentro del mandato suministrado. No consta una población de usuarios observada ni una elección de algoritmo atribuible al operador.",
+        "version": 1
+      },
+      "prev_hash": "2914f1a1ed122b5e6d53184249e1113881bdb772d28198efddbd2a2ed51fbcb0",
+      "seq": 2
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:50:59+00:00",
+      "hash": "e2cc67f167574960191111b6720a7aa01c2c3e49b59e49bc35f9724d02e7eb19",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "limits": [
+            "Hasta 131072 bytes de stdin y 2000 movimientos por petición.",
+            "Cuentas ASCII con patrón [a-z][a-z0-9_]{0,31}; delta entero JSON, sin bool ni float, con valor absoluto máximo de 10^12 por movimiento.",
+            "Conservar cuentas con saldo cero y ordenar zero_accounts lexicográficamente.",
+            "Rechazar líneas vacías, JSON mal formado, constantes no finitas, claves duplicadas, campos extra y UTF-8 inválido."
+          ],
+          "observation_boundary": "Solo se dispone del encargo y del estado suministrados; no hay registros de ejecución ni mediciones comparativas.",
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Acotar el caso a conformidad y fiabilidad técnica de la interfaz pública.",
+            "Distinguir este encargo de una evaluación de superioridad o una campaña de campo.",
+            "Conservar las nueve fases y la trazabilidad exigidas por el contrato."
+          ]
+        },
+        "deps": {
+          "ledger_actor": 1,
+          "ledger_problem": 1
+        },
+        "id": "ledger_boundary",
+        "kind": "boundary",
+        "text": "El alcance es ledger_fold.py y su interfaz pública: NDJSON UTF-8 por stdin, consolidación entera y respuesta por petición. Incluye rechazo del lote completo ante entrada inválida, stdout vacío, stderr exacto y exit 2; para lotes válidos, exit 0 y stderr vacío. Se excluyen red, dependencias externas, archivos externos, beneficios de campo y superioridad frente a alternativas. Los ejemplos son especificación documental, sin ejecución observada.",
+        "version": 1
+      },
+      "prev_hash": "03d490c78a42af195da714385bb9bf239066266e67dc75a677c92bae0b1e5e0f",
+      "seq": 3
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T01:51:15+00:00",
+      "hash": "351b008562d0199b085b528d4557fa97ce4d4b090c3343a649fbd49b4a94f58d",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "La formulación de la fase frame delimita con precisión la necesidad técnica (consolidación entera por cuenta y validación atómica del lote NDJSON según el contrato LedgerFold), identifica debidamente a los actores afectados y la delegación técnica del mandato sin atribuir elecciones de diseño al operador, y acota de manera estricta la frontera de observación y exclusiones (sin red, archivos externos ni afirmaciones de beneficio de campo o superioridad). Las dependencias entre los artefactos son consistentes y satisfacen plenamente las reglas de salida y revisión de la fase. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-02/transport/host-journal/role-02-frame-review/receipt.json]",
+        "snapshot": "ea6565fd53a31d69a80ab99c179d2380276b94179574bcdb7fa3cbc61fd88f7b",
+        "verdict": "accept"
+      },
+      "prev_hash": "e2cc67f167574960191111b6720a7aa01c2c3e49b59e49bc35f9724d02e7eb19",
+      "seq": 4
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T01:51:15+00:00",
+      "hash": "e9e3f1afa08778bcb17ff004f196c9dbcee1a97022dc4a56308feb670c3bef95",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "ea6565fd53a31d69a80ab99c179d2380276b94179574bcdb7fa3cbc61fd88f7b"
+      },
+      "prev_hash": "351b008562d0199b085b528d4557fa97ce4d4b090c3343a649fbd49b4a94f58d",
+      "seq": 5
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:51:39+00:00",
+      "hash": "78c838cdf448b68c535774800e9e773beee055041406bf76c21377ccffdae235",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Separar exactitud aritmética de veracidad de los datos aportados.",
+            "Incluir el comportamiento de error en la definición de conformidad."
+          ]
+        },
+        "deps": {
+          "ledger_boundary": 1,
+          "ledger_problem": 1
+        },
+        "id": "ledger_exactness_concept",
+        "kind": "concept",
+        "text": "Fiabilidad contractual significa consolidar enteros exactamente y respetar la interfaz, incluida la ausencia de salida parcial ante errores. No equivale a exactitud de los movimientos respecto de hechos externos ni a utilidad de campo.",
+        "version": 1
+      },
+      "prev_hash": "e9e3f1afa08778bcb17ff004f196c9dbcee1a97022dc4a56308feb670c3bef95",
+      "seq": 6
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:51:40+00:00",
+      "hash": "40680d2001949e892a69034fda8b1d761ef7ab74af75854379e0ebc243a232bf",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Reconocer que los duplicados están permitidos expresamente.",
+            "Delimitar la suposición al procesamiento contractual, sin inferir autenticidad."
+          ]
+        },
+        "deps": {
+          "ledger_boundary": 1,
+          "ledger_exactness_concept": 1,
+          "ledger_problem": 1
+        },
+        "id": "ledger_input_assumption",
+        "kind": "assumption",
+        "text": "El cálculo trata cada movimiento válido como dato aportado, sin deduplicarlo ni verificar su origen. El contrato permite duplicados; suponer que representan errores alteraría los saldos exigidos. La validez estructural no demuestra autenticidad contable.",
+        "version": 1
+      },
+      "prev_hash": "78c838cdf448b68c535774800e9e773beee055041406bf76c21377ccffdae235",
+      "seq": 7
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:51:40+00:00",
+      "hash": "6d4076040eaf911f1970fa7096350158a8f7c1553d1fc4a1a3bcf0dc015cbcba",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Identificar la integridad del lote como valor normativo.",
+            "Explicitar el coste de diferir la salida hasta completar la validación."
+          ]
+        },
+        "deps": {
+          "ledger_actor": 1,
+          "ledger_boundary": 1,
+          "ledger_problem": 1
+        },
+        "id": "ledger_atomic_frame",
+        "kind": "frame_option",
+        "text": "Enmarcar la fiabilidad como integridad del lote: validar todas las peticiones antes de emitir. Prioriza que el consumidor no reciba resultados parciales de un lote inválido; exige posponer la salida. Su fundamento es la regla explícita del contrato.",
+        "version": 1
+      },
+      "prev_hash": "40680d2001949e892a69034fda8b1d761ef7ab74af75854379e0ebc243a232bf",
+      "seq": 8
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:51:40+00:00",
+      "hash": "064c54a6c3047f9b94185e979a9af9de814b19e4c7d0ebd40721190696e8dbf3",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Contraponer disponibilidad por petición e integridad del lote.",
+            "Identificar la incompatibilidad con stdout vacío ante cualquier petición inválida."
+          ]
+        },
+        "deps": {
+          "ledger_actor": 1,
+          "ledger_boundary": 1,
+          "ledger_problem": 1
+        },
+        "id": "ledger_incremental_frame",
+        "kind": "frame_option",
+        "text": "Enmarcar la fiabilidad como disponibilidad por petición: emitir cada resultado válido inmediatamente y conservarlo si una petición posterior falla. Prioriza obtener respuestas tempranas, pero admite salida parcial y transfiere al consumidor su interpretación. Es una alternativa conceptual incompatible con el contrato vigente.",
+        "version": 1
+      },
+      "prev_hash": "6d4076040eaf911f1970fa7096350158a8f7c1553d1fc4a1a3bcf0dc015cbcba",
+      "seq": 9
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:51:40+00:00",
+      "hash": "472019450e525f7624b293e8072b4ac3d90509a9bc6eddf19c42508ce9e45cfc",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Fundar la orientación normativa en el contrato y la delegación técnica.",
+            "Resolver la tensión entre respuestas tempranas e integridad conforme al encargo.",
+            "Mantener separadas esta orientación y cualquier afirmación empírica de éxito."
+          ]
+        },
+        "deps": {
+          "ledger_actor": 1,
+          "ledger_atomic_frame": 1,
+          "ledger_boundary": 1,
+          "ledger_exactness_concept": 1,
+          "ledger_incremental_frame": 1,
+          "ledger_input_assumption": 1,
+          "ledger_problem": 1
+        },
+        "id": "ledger_contract_norm",
+        "kind": "norm",
+        "text": "Dentro del mandato técnico, orientar el desarrollo por integridad del lote y exactitud contractual: conservar todos los movimientos válidos, incluidos duplicados y ceros, y emitir únicamente tras validar el lote completo. Esta orientación se funda en el encargo suministrado; no atribuye al operador una elección de algoritmo ni demuestra beneficios externos.",
+        "version": 1
+      },
+      "prev_hash": "064c54a6c3047f9b94185e979a9af9de814b19e4c7d0ebd40721190696e8dbf3",
+      "seq": 10
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-06T01:52:03+00:00",
+      "hash": "3063db35b6091670d8159d6bfeb32f68d69f7b0ecc1769795aa5f7b0ea66b74a",
+      "kind": "approval",
+      "payload": {
+        "id": "ledger_contract_norm",
+        "provenance": "local_declared",
+        "reason": "Existing local owner mandate; technical conformity judged separately by reviewer:gemini-isolated-review (/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-02/transport/host-journal/role-04-critique-approval/receipt.json): Se aprueba la norma ledger_contract_norm en plena conformidad con el mandato existente. La orientación técnica adoptada prioriza la integridad atómica del lote y la consolidación exacta según lo estipulado en contract.md, manteniéndose estrictamente dentro de la delegación técnica del agente y sin atribuir elecciones algorítmicas al operador ni afirmar beneficios de campo o superioridad empírica.",
+        "version": 1
+      },
+      "prev_hash": "472019450e525f7624b293e8072b4ac3d90509a9bc6eddf19c42508ce9e45cfc",
+      "seq": 11
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T01:52:21+00:00",
+      "hash": "68669e21930f81e4f712e842c3e731adb9d66c70afaff12b286c1818d1fd30ec",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "La fase critique cumple satisfactoriamente con los criterios de revisión y salida del contrato. Los artefactos examinan con rigor sustantivo las alternativas de diseño normativo: ledger_atomic_frame y ledger_incremental_frame ofrecen opciones genuinas y rivales respecto al manejo de lotes y disponibilidad temprana, explicitando sus implicaciones. El concepto ledger_exactness_concept y el supuesto ledger_input_assumption separan con nitidez las garantías aritméticas y de interfaz de cualquier afirmación de veracidad fáctica externa o beneficio de campo. Las dependencias están correctamente trazadas desde los antecedentes de frame, la norma ledger_contract_norm cuenta con la debida aprobación y no se detectan definiciones circulares ni conflictos normativos irresolubles. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-02/transport/host-journal/role-05-critique-review/receipt.json]",
+        "snapshot": "788456d86d247ba4dc01203b0e177f31223998e3cdca32b18ca82b0f98fc5eef",
+        "verdict": "accept"
+      },
+      "prev_hash": "3063db35b6091670d8159d6bfeb32f68d69f7b0ecc1769795aa5f7b0ea66b74a",
+      "seq": 12
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T01:52:21+00:00",
+      "hash": "1b38db95ecce12589fd29591ba6cb83666f9f7a3551b4f46b1e2937adb4aab88",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "critique",
+        "review_seq": 12,
+        "snapshot": "788456d86d247ba4dc01203b0e177f31223998e3cdca32b18ca82b0f98fc5eef"
+      },
+      "prev_hash": "68669e21930f81e4f712e842c3e731adb9d66c70afaff12b286c1818d1fd30ec",
+      "seq": 13
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:52:54+00:00",
+      "hash": "5d5a7287d7a04e7537fab295bf8e1de990ed4845704416001e5d304529a59555",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Derivar la pregunta de la exactitud aritmética y la integridad del lote exigidas."
+          ]
+        },
+        "deps": {
+          "ledger_contract_norm": 1,
+          "ledger_exactness_concept": 1,
+          "ledger_problem": 1
+        },
+        "id": "ledger_study_question",
+        "kind": "question",
+        "text": "¿Puede la CLI consolidar enteros exactamente y respetar la respuesta atómica del lote en los casos válidos, inválidos y de frontera definidos por el contrato?",
+        "version": 1
+      },
+      "prev_hash": "1b38db95ecce12589fd29591ba6cb83666f9f7a3551b4f46b1e2937adb4aab88",
+      "seq": 14
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:52:54+00:00",
+      "hash": "f7e677eea53cd95efd9e98e3cbd198c9f0c20cc954bc83e5aa7ff7014500e926",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "falsification": "Un caso con saldo incorrecto, rechazo incorrecto o salida parcial contradice la predicción.",
+          "prediction": "Cada caso del conjunto fijado coincidiría con su salida y estado de terminación contractuales.",
+          "steps": [
+            "Formular una predicción contrastable sin atribuirle resultados."
+          ]
+        },
+        "deps": {
+          "ledger_input_assumption": 1,
+          "ledger_study_question": 1
+        },
+        "id": "ledger_study_hypothesis",
+        "kind": "hypothesis",
+        "text": "La acumulación entera por cuenta, conservando duplicados y ceros, junto con la validación completa antes de emitir, permitiría satisfacer el contrato. Es una hipótesis técnica pendiente de medición.",
+        "version": 1
+      },
+      "prev_hash": "5d5a7287d7a04e7537fab295bf8e1de990ed4845704416001e5d304529a59555",
+      "seq": 15
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:52:54+00:00",
+      "hash": "09462d556d08b9decdeab5a40050f4782a388b34ed4178da4fd8c2cab6c25c6c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "bias_control": "Fijar casos y expectativas antes de conocer resultados; conservar discrepancias.",
+          "comparison": "Expectativas calculadas directamente desde contract.md, con sumas enteras explícitas; no comparación con otro producto.",
+          "coverage": [
+            "Entrada vacía, entries vacío, varias peticiones, duplicados, negativos, ceros, cuentas que cancelan y suma superior a 10^12.",
+            "Fronteras de cuenta, delta, 2000 entradas y 131072 bytes, con casos justo fuera del límite.",
+            "Líneas vacías, JSON mal formado, UTF-8 inválido, constantes no finitas, claves duplicadas en ambos niveles, campos extra, tipos incorrectos, bool y float.",
+            "Petición válida seguida de inválida: stdout vacío, stderr exacto y exit 2."
+          ],
+          "ethics_feasibility": "Datos sintéticos públicos sin cuentas reales; biblioteca estándar, stdin y ejecutor aislado según contrato.",
+          "method": "Para cada lote, registrar bytes de entrada, expectativa contractual, stdout, stderr y código de salida. Comparar objetos JSON sin depender del orden de claves, exigir newline por respuesta y comprobar errores byte a byte.",
+          "population": "Conjunto finito de casos públicos fijados antes de la ejecución; unidad: un lote completo de stdin.",
+          "steps": [
+            "Fijar población, comparación y cobertura.",
+            "Reservar la observación efectiva al ejecutor."
+          ],
+          "uncertainty": "El conjunto finito no demuestra conformidad para toda entrada ni beneficios externos. Documentar omisiones y errores posibles del oráculo; no inferir intervalos poblacionales."
+        },
+        "deps": {
+          "ledger_contract_norm": 1,
+          "ledger_problem": 1,
+          "ledger_study_hypothesis": 1,
+          "ledger_study_question": 1
+        },
+        "id": "ledger_study_protocol",
+        "kind": "protocol",
+        "text": "Contrastar posteriormente la interfaz contra expectativas derivadas del contrato. El conjunto debe fijarse antes de ejecutar; aquí no se aporta ejecución ni medición.",
+        "version": 1
+      },
+      "prev_hash": "f7e677eea53cd95efd9e98e3cbd198c9f0c20cc954bc83e5aa7ff7014500e926",
+      "seq": 16
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:52:54+00:00",
+      "hash": "e7c2f5e5a2ed4b9a891d3aebf4e72938861e313fe53d3aa32561f8493a28f6d7",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-06",
+          "date_basis": "Fecha del contexto suministrado; no se indica fecha de publicación.",
+          "locator": "contract.md: Entrada, Salida, Ejemplos y regla de lote inválido",
+          "origin": "published",
+          "source": "contract.md suministrado en REQUEST.documents",
+          "steps": [
+            "Usar las reglas y ejemplos como fundamento documental del indicador."
+          ]
+        },
+        "deps": {
+          "ledger_contract_norm": 1,
+          "ledger_problem": 1,
+          "ledger_study_protocol": 1
+        },
+        "id": "ledger_study_contract_evidence",
+        "kind": "evidence",
+        "text": "El contrato público suministrado define ejemplos de cancelación, lista vacía y suma superior al límite por movimiento, además del rechazo atómico. Es evidencia documental de expectativas, sin mediciones del producto.",
+        "version": 1
+      },
+      "prev_hash": "09462d556d08b9decdeab5a40050f4782a388b34ed4178da4fd8c2cab6c25c6c",
+      "seq": 17
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:52:54+00:00",
+      "hash": "7cfd8c09dd80995eb9474b2196cc82aa3b4c0c06ae966d83c490e8b046558dce",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "definition": "Número de lotes conformes dividido por número de lotes ejecutados del conjunto fijado. Un lote exige coincidencia de todas sus respuestas, newline, stderr y código de salida; en error exige stdout vacío.",
+          "metric": "contract_case_conformance",
+          "scope": "Solo el conjunto público preregistrado; denominador cero deja el indicador sin definir.",
+          "source": "Expectativas documentales de contract.md y futuros registros del ejecutor aislado.",
+          "steps": [
+            "Definir numerador, denominador y alcance antes de obtener resultados."
+          ],
+          "uncertainty": "Sin registros actuales no hay estimación; no extrapolar a uso de campo ni a superioridad.",
+          "unit": "proportion"
+        },
+        "deps": {
+          "ledger_contract_norm": 1,
+          "ledger_problem": 1,
+          "ledger_study_contract_evidence": 1,
+          "ledger_study_protocol": 1
+        },
+        "id": "ledger_study_indicator",
+        "kind": "indicator",
+        "text": "Proporción de lotes del conjunto fijado cuya salida y terminación coinciden íntegramente con el contrato. No hay valor observado; el indicador describe conformidad técnica limitada al conjunto.",
+        "version": 1
+      },
+      "prev_hash": "e7c2f5e5a2ed4b9a891d3aebf4e72938861e313fe53d3aa32561f8493a28f6d7",
+      "seq": 18
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T01:53:12+00:00",
+      "hash": "1a733ae06ab3756975e2a8692afb0f51230a7e4d09cb40bbe1aa601861530572",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "La fase study cumple rigurosamente con los criterios de salida y revisión establecidos en el contrato de fase. La pregunta (ledger_study_question) traza con coherencia la exactitud aritmética y el comportamiento atómico del lote frente al problema y la norma aprobada. La hipótesis (ledger_study_hypothesis) formula una predicción contrastable y criterios de falsación transparentes sin anticipar observaciones ni atribuirse ejecuciones previas. El protocolo (ledger_study_protocol) detalla de forma exhaustiva la población de prueba, la unidad de análisis por lote completo, el método de comparación directa contra las reglas de contract.md, los controles de sesgo y la ética/factibilidad con datos sintéticos, delimitando con rigor la incertidumbre. El indicador (ledger_study_indicator) establece con claridad la métrica de conformidad, unidad y alcance a partir del fundamento documental (ledger_study_contract_evidence), diferenciando netamente entre datos de especificación, supuestos e hipótesis pendientes de medición. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-02/transport/host-journal/role-07-study-review/receipt.json]",
+        "snapshot": "aa8122c8d60db8e29c4de062329ca003e453e68e02138d5249dda9ecb720a4ef",
+        "verdict": "accept"
+      },
+      "prev_hash": "7cfd8c09dd80995eb9474b2196cc82aa3b4c0c06ae966d83c490e8b046558dce",
+      "seq": 19
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T01:53:12+00:00",
+      "hash": "456dc154b2641050a7e2939db72dbf375a3a9e79075346ac3716a474538ea006",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "study",
+        "review_seq": 19,
+        "snapshot": "aa8122c8d60db8e29c4de062329ca003e453e68e02138d5249dda9ecb720a4ef"
+      },
+      "prev_hash": "1a733ae06ab3756975e2a8692afb0f51230a7e4d09cb40bbe1aa601861530572",
+      "seq": 20
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:53:26+00:00",
+      "hash": "09a3c0d290ba7c382417fd9a511308f9d112cbef31c5343e919ecd0ff8ebe13a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "basis": "La evidencia enlazada contiene ejemplos y la regla de rechazo atómico; el protocolo define la comparación por lote completo.",
+          "scope": "Expectativas documentales del contrato público LedgerFold; sin mediciones del producto.",
+          "sources": [
+            "contract.md suministrado en REQUEST.documents",
+            "measured-test-records.json suministrado: {}"
+          ],
+          "steps": [
+            "Relacionar cancelación, lista vacía y suma acumulada con sus obligaciones contractuales explícitas.",
+            "Relacionar el rechazo atómico con la comparación de stdout, stderr y código de salida por lote completo.",
+            "Separar las expectativas documentales de los resultados ausentes y mantener el indicador sin estimación."
+          ],
+          "uncertainty": "Los ejemplos no cubren todas las entradas ni constituyen ejecuciones. No hay datos para calcular la proporción de conformidad, contrastar empíricamente la hipótesis o inferir beneficios externos."
+        },
+        "deps": {
+          "ledger_problem": 1,
+          "ledger_study_contract_evidence": 1,
+          "ledger_study_hypothesis": 1,
+          "ledger_study_indicator": 1,
+          "ledger_study_protocol": 1
+        },
+        "id": "ledger_observe_inference",
+        "kind": "inference",
+        "text": "Los ejemplos documentales distinguen tres obligaciones: conservar cuentas cuyo saldo se cancela, producir una respuesta para entries vacío y permitir saldos acumulados superiores a 10^12 cuando cada movimiento respeta su límite. La regla de lote inválido exige además comprobar la ausencia de salida parcial. Estas expectativas fundamentan la comparación prevista en el protocolo, pero no demuestran que una implementación las satisfaga. Sin registros de ejecución, contract_case_conformance permanece sin valor observado y la hipótesis sigue sin contrastar.",
+        "version": 1
+      },
+      "prev_hash": "456dc154b2641050a7e2939db72dbf375a3a9e79075346ac3716a474538ea006",
+      "seq": 21
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T01:53:45+00:00",
+      "hash": "77290ed23bef5409c73f7efe17e868a5ab15d4a72027aa715e28f923802b5f95",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "observe",
+        "provenance": "local_declared",
+        "reason": "La fase observe satisface cabalmente los criterios del contrato de fase y el mandato. La evidencia documental aportada (ledger_study_contract_evidence) conserva fuente, fecha, origen publicado y localizador precisos basados en contract.md, distinguiendo con rigor las especificaciones y ejemplos contractuales de ejecuciones empíricas del producto. A su vez, la inferencia (ledger_observe_inference) enlaza fielmente dicha evidencia con el protocolo, indicador e hipótesis aprobados, articulando las obligaciones de integridad y atomicidad del lote sin extrapolar resultados ni inventar mediciones ausentes en measured-test-records.json. No se detectan contradicciones ni extralimitaciones. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-02/transport/host-journal/role-09-observe-review/receipt.json]",
+        "snapshot": "85d95be6d1a0186951d93bbeeae3b5becd5851c87808250d9e00adb74c7e2243",
+        "verdict": "accept"
+      },
+      "prev_hash": "09a3c0d290ba7c382417fd9a511308f9d112cbef31c5343e919ecd0ff8ebe13a",
+      "seq": 22
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T01:53:45+00:00",
+      "hash": "d3b7c040144c4070ca2be370465e0953b1b470f6c452aa19dd9e9a77e07161b5",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "observe",
+        "review_seq": 22,
+        "snapshot": "85d95be6d1a0186951d93bbeeae3b5becd5851c87808250d9e00adb74c7e2243"
+      },
+      "prev_hash": "77290ed23bef5409c73f7efe17e868a5ab15d4a72027aa715e28f923802b5f95",
+      "seq": 23
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:54:09+00:00",
+      "hash": "ebbd82b9985337761c147e42cb2352d1822e61cac210788298fc6f88863fc6f6",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "biases": "Los ejemplos favorables pueden ocultar errores de validación y salida parcial. La cobertura prevista y las expectativas también pueden contener omisiones o errores; no constituyen observaciones.",
+          "sources": [
+            "contract.md suministrado",
+            "measured-test-records.json suministrado: {}"
+          ],
+          "steps": [
+            "Separar obligaciones documentales, inferencia técnica y supuesto sobre los movimientos.",
+            "Contrastar la hipótesis con alternativas de emisión inmediata, deduplicación y límite agregado.",
+            "Acotar la conclusión a compatibilidad contractual sin atribuir ejecución."
+          ]
+        },
+        "deps": {
+          "ledger_observe_inference": 1,
+          "ledger_study_contract_evidence": 1,
+          "ledger_study_hypothesis": 1,
+          "ledger_study_protocol": 1
+        },
+        "id": "ledger_explain_synthesis",
+        "kind": "synthesis",
+        "text": "El hallazgo documental es que el contrato exige conservar duplicados y cuentas con saldo cero, permite sumas superiores al límite por movimiento y exige validar todo el lote antes de emitir. La inferencia vigente conecta esas obligaciones con la comparación por lote del protocolo. La hipótesis de acumulación entera y validación completa es compatible con tales obligaciones, pero sigue sin contraste empírico: los ejemplos especifican resultados esperados y measured-test-records.json está vacío. Se supone que cada movimiento estructuralmente válido debe procesarse tal como se aporta; eso no acredita autenticidad contable. Emitir inmediatamente puede coincidir con los ejemplos de peticiones válidas, pero incumpliría la atomicidad ante una petición posterior inválida. Deduplicar o limitar el saldo acumulado cambiaría la semántica contractual. Ninguna de estas consideraciones demuestra el comportamiento de una implementación.",
+        "version": 1
+      },
+      "prev_hash": "d3b7c040144c4070ca2be370465e0953b1b470f6c452aa19dd9e9a77e07161b5",
+      "seq": 24
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:54:09+00:00",
+      "hash": "fb55b852cb50bb89ce62ecd5a8e7eeb4f9d32be984e04491c88e076ac293d236",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "delivery-files.json suministrado: {}",
+            "measured-test-records.json suministrado: {}"
+          ],
+          "steps": [
+            "Vincular la incertidumbre con la ausencia de implementación y mediciones suministradas.",
+            "Identificar límites de cobertura y posibles errores de las expectativas.",
+            "Mantener la hipótesis sin contrastar y el indicador sin estimación."
+          ],
+          "stop_rule": "No concluir conformidad ni cuantificar efectos sin registros reales vinculados a la implementación y al conjunto evaluado."
+        },
+        "deps": {
+          "ledger_explain_synthesis": 1,
+          "ledger_study_indicator": 1,
+          "ledger_study_protocol": 1
+        },
+        "id": "ledger_explain_uncertainty",
+        "kind": "uncertainty",
+        "text": "La síntesis permite explicar las obligaciones, pero no establecer conformidad del producto. No se suministran archivos de entrega ni registros medidos; contract_case_conformance permanece sin valor observado. La incertidumbre comprende errores posibles de implementación, cobertura incompleta y errores del oráculo contractual. Incluso resultados conformes en un conjunto finito solo sustentarían ese conjunto, sin demostrar corrección universal, autenticidad de los movimientos, beneficio de campo o superioridad.",
+        "version": 1
+      },
+      "prev_hash": "ebbd82b9985337761c147e42cb2352d1822e61cac210788298fc6f88863fc6f6",
+      "seq": 25
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T01:54:25+00:00",
+      "hash": "80667a67998c173ba8ec1693548337295035bace1c49266e0b29ef77ce83bd94",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "explain",
+        "provenance": "local_declared",
+        "reason": "La fase explain cumple rigurosamente con los criterios de revisión y salida del contrato de fase y el mandato vigente. La síntesis (ledger_explain_synthesis) traza fielmente sus dependencias con las evidencias, inferencias, hipótesis y protocolo aprobados, distinguiendo con claridad los hallazgos documentales, los supuestos de procesamiento y los límites normativos, y evaluando rigurosamente alternativas explicativas (emisión inmediata, deduplicación y acotación agregada) junto con sus posibles sesgos. A su vez, la incertidumbre (ledger_explain_uncertainty) delimita con precisión el alcance epistémico ante la ausencia de archivos de entrega y ejecuciones medidas en measured-test-records.json, absteniéndose de atribuir conformidad, beneficios de campo o superioridad no demostrada. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-02/transport/host-journal/role-11-explain-review/receipt.json]",
+        "snapshot": "dca61decd730081480c587e65aaf957c6283076b361fb69f61559e9b2c08a0b9",
+        "verdict": "accept"
+      },
+      "prev_hash": "fb55b852cb50bb89ce62ecd5a8e7eeb4f9d32be984e04491c88e076ac293d236",
+      "seq": 26
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T01:54:25+00:00",
+      "hash": "d899ee093f35654c4e72f0b1afa10d9deb5c72dc17c554f560d1ac66efb93716",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "explain",
+        "review_seq": 26,
+        "snapshot": "dca61decd730081480c587e65aaf957c6283076b361fb69f61559e9b2c08a0b9"
+      },
+      "prev_hash": "80667a67998c173ba8ec1693548337295035bace1c49266e0b29ef77ce83bd94",
+      "seq": 27
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:54:58+00:00",
+      "hash": "bd1f72daee68ceb4669aa46ef75a4adc529fd6203069c25d4e7a132abed9392b",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Separar lectura acotada, validación y emisión.",
+            "Retener las respuestas hasta validar la última petición."
+          ]
+        },
+        "deps": {
+          "ledger_contract_norm": 1,
+          "ledger_explain_synthesis": 1
+        },
+        "id": "ledger_option_buffered",
+        "kind": "option",
+        "text": "CLI con lectura acotada a 131073 bytes para detectar exceso, decodificación UTF-8 estricta y validación por petición. Acumular enteros y conservar respuestas en memoria; emitir solo tras validar todo el lote. El consumidor espera hasta completar la validación; el desarrollador mantiene una sola ruta de cálculo. Coste previsto: memoria para entrada y respuestas, sin medición disponible.",
+        "version": 1
+      },
+      "prev_hash": "d899ee093f35654c4e72f0b1afa10d9deb5c72dc17c554f560d1ac66efb93716",
+      "seq": 28
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:54:58+00:00",
+      "hash": "978a5cd36644dd072ec3fa2ccd45dc9bb8d0d1c2db8f8b4f6dd93f9f29582968",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Conservar una única entrada inmutable sin archivos externos.",
+            "Completar la validación antes de calcular y emitir en la segunda pasada."
+          ]
+        },
+        "deps": {
+          "ledger_contract_norm": 1,
+          "ledger_explain_synthesis": 1
+        },
+        "id": "ledger_option_two_pass",
+        "kind": "option",
+        "text": "CLI con el mismo límite de lectura y UTF-8 estricto, conservando la entrada en memoria. Primera pasada: validar todas las peticiones sin emitir. Segunda pasada sobre esos mismos bytes: volver a interpretar y calcular las respuestas. El consumidor también espera la validación completa. El desarrollador debe compartir el validador entre pasadas; se repite procesamiento y se evita retener todas las respuestas.",
+        "version": 1
+      },
+      "prev_hash": "bd1f72daee68ceb4669aa46ef75a4adc529fd6203069c25d4e7a132abed9392b",
+      "seq": 29
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:54:58+00:00",
+      "hash": "9f457f81dc4f100c2475a35c0bb5f549a612e8b4c45d8272fee47036a3294178",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Delimitar el uso manual a lotes pequeños y comprobación documental.",
+            "Reconocer su insuficiencia como sustituto de la interfaz exigida."
+          ]
+        },
+        "deps": {
+          "ledger_contract_norm": 1,
+          "ledger_explain_synthesis": 1
+        },
+        "id": "ledger_option_manual",
+        "kind": "option",
+        "text": "Alternativa organizativa sin software nuevo: para lotes pequeños, una persona comprueba en papel estructura, límites y sumas, y otra contrasta el cálculo antes de comunicar balances. Es realizable como apoyo documental; exige trabajo humano por movimiento y desplaza carga al suministrador y al comprobador. No entrega la CLI ni garantiza validación byte a byte, por lo que no sustituye la entrega contractual.",
+        "version": 1
+      },
+      "prev_hash": "978a5cd36644dd072ec3fa2ccd45dc9bb8d0d1c2db8f8b4f6dd93f9f29582968",
+      "seq": 30
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:54:58+00:00",
+      "hash": "289848aa602ef792a30e5f64a85ee5e87fdabd790cf318bc8c73a3ef9fd8a34f",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "steps": [
+            "Comparar coste de memoria, procesamiento y trabajo humano.",
+            "Distinguir incompatibilidad contractual de dominancia empírica.",
+            "Identificar espera y carga desplazadas a cada actor."
+          ]
+        },
+        "deps": {
+          "ledger_explain_uncertainty": 1,
+          "ledger_option_buffered": 1,
+          "ledger_option_manual": 1,
+          "ledger_option_two_pass": 1
+        },
+        "id": "ledger_compare_options",
+        "kind": "comparison",
+        "text": "Las dos CLI preservan por diseño propuesto la validación previa a stdout y la aritmética entera. La primera retiene respuestas; la segunda repite interpretación y exige consistencia entre pasadas. Ambas trasladan al consumidor la espera del lote completo y al desarrollador la validación estricta. La alternativa manual evita desarrollo nuevo, pero traslada trabajo y errores de transcripción a personas y no satisface la entrega. Ninguna CLI queda dominada con la evidencia disponible: faltan mediciones de memoria, tiempo y conformidad. La emisión inmediata queda descartada por el contrato ante una petición posterior inválida, sin atribuir superioridad medida a las opciones restantes.",
+        "version": 1
+      },
+      "prev_hash": "9f457f81dc4f100c2475a35c0bb5f549a612e8b4c45d8272fee47036a3294178",
+      "seq": 31
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:54:58+00:00",
+      "hash": "81e0ad4033b30f87028ec6e3f9a189b1b602c55fb84192b12644d49a8e5d9ff5",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "steps": [
+            "Relacionar cada riesgo con una obligación contractual.",
+            "Mantener restricciones de recursos y de acceso en ambas CLI.",
+            "Excluir salida temprana y sustitución manual de la entrega."
+          ]
+        },
+        "deps": {
+          "ledger_contract_norm": 1,
+          "ledger_option_buffered": 1,
+          "ledger_option_manual": 1,
+          "ledger_option_two_pass": 1
+        },
+        "id": "ledger_compare_risk",
+        "kind": "risk",
+        "text": "Riesgos técnicos: aceptar bool como entero, duplicados de claves o constantes no finitas; deduplicar movimientos; limitar sumas; perder cuentas con saldo cero; emitir antes de terminar la validación. Restricciones para ambas CLI: biblioteca estándar, sin red ni archivos externos, lectura acotada y rechazo contractual exacto. En dos pasadas, usar el mismo validador y los mismos bytes; en la opción con respuestas retenidas, vigilar su representación en memoria. El método manual expone a transcripción y revisión incompleta, y debe limitarse a apoyo documental. Estas son previsiones de diseño, no fallos observados.",
+        "version": 1
+      },
+      "prev_hash": "289848aa602ef792a30e5f64a85ee5e87fdabd790cf318bc8c73a3ef9fd8a34f",
+      "seq": 32
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T01:55:19+00:00",
+      "hash": "8e523e396fe7b6bdfefbd34d2ee3f6917694d62ea710063401a679248167fb82",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "compare",
+        "provenance": "local_declared",
+        "reason": "La fase compare cumple rigurosamente con los requisitos del contrato de fase y el mandato vigente. Se formulan tres alternativas sustantivas (dos implementaciones CLI con estrategias diferenciadas de retención de respuestas y doble pasada, más una alternativa organizativa sin software para comprobación de lotes pequeños), cumpliendo con el mínimo requerido de opciones y la inclusión de alternativa sin desarrollo. La comparación (ledger_compare_options) traza adecuadamente sus dependencias con las opciones y la incertidumbre previa, analizando los costes de cómputo, memoria y trabajo humano, así como la carga y espera desplazada a cada actor, descartando la emisión incremental por incompatibilidad contractual pero absteniéndose con rigor de declarar superioridad empírica o dominancia entre las opciones conformes. El artefacto de riesgo (ledger_compare_risk) cubre de manera exhaustiva las restricciones de seguridad y los riesgos técnicos específicos de la interfaz (manejo de booleanos, claves duplicadas, constantes no finitas y preservación de cuentas con saldo cero) sin atribuir decisiones al operador ni fabricar evidencias de ejecución. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-02/transport/host-journal/role-13-compare-review/receipt.json]",
+        "snapshot": "212cb48f712ba853d4c7f5fc837664810d2db12913b8813dbfb9c3a630b02951",
+        "verdict": "accept"
+      },
+      "prev_hash": "81e0ad4033b30f87028ec6e3f9a189b1b602c55fb84192b12644d49a8e5d9ff5",
+      "seq": 33
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T01:55:19+00:00",
+      "hash": "e3b150a37173048072732e6c4e62224c90ceeb3aad9b806503b920a77e975ae5",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "compare",
+        "review_seq": 33,
+        "snapshot": "212cb48f712ba853d4c7f5fc837664810d2db12913b8813dbfb9c3a630b02951"
+      },
+      "prev_hash": "8e523e396fe7b6bdfefbd34d2ee3f6917694d62ea710063401a679248167fb82",
+      "seq": 34
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "f9e531b3-5937-4907-ad0f-1996ca500ec4",
+    "created_at": "2026-10-06T01:50:36+00:00",
+    "created_by": "human:owner",
+    "domain": "development",
+    "test_gate_policy": "local_report",
+    "title": "Native reliability attempt-02 ledgerfold"
+  },
+  "schema": 1
+}

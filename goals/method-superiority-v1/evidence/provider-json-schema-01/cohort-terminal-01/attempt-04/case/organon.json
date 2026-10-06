@@ -1,0 +1,1379 @@
+{
+  "events": [
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:57:33+00:00",
+      "hash": "5be08eae0643feed4e4b65836191901cc2f0f65f97fa160a3ba42e2771404e16",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "existing-mandate.md",
+            "contract.md"
+          ],
+          "steps": [
+            "Identificar al operador como solicitante y al agente como ejecutor técnico delegado según los documentos suministrados."
+          ]
+        },
+        "deps": {},
+        "id": "frame_actor",
+        "kind": "actor",
+        "text": "El operador es el solicitante del desarrollo público de RangeAudit para mejorar SpecOrganon. El agente tiene delegado construir y probar este proyecto pequeño dentro del mandato; no se atribuyen al operador decisiones de algoritmo ni beneficios de campo.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:57:33+00:00",
+      "hash": "3d226aa4907a6116354957def568f555b044f76039f3b89f3c8f57094f472f88",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "measured-test-records.json",
+            "delivery-files.json"
+          ],
+          "steps": [
+            "Delimitar la necesidad por el comportamiento exigido de entrada, normalización, salida y rechazo del lote."
+          ]
+        },
+        "deps": {
+          "frame_actor": 1
+        },
+        "id": "frame_problem",
+        "kind": "problem",
+        "text": "La necesidad técnica del solicitante es disponer de una CLI Python estándar que normalice intervalos enteros semiabiertos recibidos por NDJSON y entregue intervalos fusionados, cobertura exacta, extensión y huecos. El contrato exige rechazo atómico del lote inválido para evitar una salida parcial. Los documentos no aportan mediciones de daños existentes ni resultados de ejecución.",
+        "version": 1
+      },
+      "prev_hash": "5be08eae0643feed4e4b65836191901cc2f0f65f97fa160a3ba42e2771404e16",
+      "seq": 2
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:57:33+00:00",
+      "hash": "d2891f4cca906ab1cb1450ba1731e04608281f35c9e45a5fb3e46a53c17f3101",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Fijar la frontera en las entradas y salidas observables del contrato y separar este desarrollo de las evaluaciones futuras y las afirmaciones de campo."
+          ]
+        },
+        "deps": {
+          "frame_actor": 1,
+          "frame_problem": 1
+        },
+        "id": "frame_boundary",
+        "kind": "boundary",
+        "text": "El alcance es el desarrollo técnico público de range_audit.py, README y pruebas, con biblioteca estándar y entrada por stdin, sin red, ficheros externos ni modificación del entorno. La observación se limita al cumplimiento del contrato: objetos NDJSON con exactamente intervals, enteros JSON sin bool ni float, extremos de valor absoluto hasta 10^12, inicio menor que fin, hasta 2000 pares por petición y 131072 bytes por lote. Incluye UTF-8, claves duplicadas o extra, líneas vacías, JSON mal formado, entrada completamente vacía, fusión por solapamiento o adyacencia y rechazo atómico. Los ejemplos suministrados son controles públicos de contrato; no son mediciones ejecutadas ni resultados nativos. Quedan fuera los efectos de campo, uso comercial, superioridad, evaluación reservada y campañas cerradas.",
+        "version": 1
+      },
+      "prev_hash": "3d226aa4907a6116354957def568f555b044f76039f3b89f3c8f57094f472f88",
+      "seq": 3
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T01:57:51+00:00",
+      "hash": "b7b7be156e12ec2f8c31fdb40d07a8ba236a9806697b85e0af91a93cb66c171e",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "Los artefactos de la fase frame delimitan con rigor la necesidad técnica, los actores involucrados y la frontera de observación conforme al contrato y al mandato vigente. Se identifican con precisión las responsabilidades delegadas sin atribuir elecciones algorítmicas al operador ni declarar superioridad o beneficios de campo. La frontera establece de manera exhaustiva las restricciones de formato NDJSON, límites de tamaño, tipos de datos, rechazo atómico y exclusiones de entorno, respetando las dependencias requeridas y los límites de recursos. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/role-02-frame-review/receipt.json]",
+        "snapshot": "3b2cdef4e6e96ade262d9ac5c024e35ce4740fcab4262b0663dac9f8bc34fb6f",
+        "verdict": "accept"
+      },
+      "prev_hash": "d2891f4cca906ab1cb1450ba1731e04608281f35c9e45a5fb3e46a53c17f3101",
+      "seq": 4
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T01:57:51+00:00",
+      "hash": "d95e4e2088ddccd011c210c908e5db1e65c516cf394b87dcc029f33249c88ba9",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "3b2cdef4e6e96ade262d9ac5c024e35ce4740fcab4262b0663dac9f8bc34fb6f"
+      },
+      "prev_hash": "b7b7be156e12ec2f8c31fdb40d07a8ba236a9806697b85e0af91a93cb66c171e",
+      "seq": 5
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:58:17+00:00",
+      "hash": "25d805485887508944b8f629f85b05b13799fa169d77e3c57c839cd4d50eca17",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Distinguir exactitud del cálculo, atomicidad del lote y afirmaciones de impacto."
+          ]
+        },
+        "deps": {
+          "frame_boundary": 1,
+          "frame_problem": 1
+        },
+        "id": "critique_concept",
+        "kind": "concept",
+        "text": "Corrección contractual significa respetar conjuntamente la normalización exacta de intervalos y el comportamiento observable del lote. Una salida matemáticamente correcta para algunas líneas no satisface el contrato si otra línea inválida deja stdout parcial. Esta definición permite evaluar conformidad técnica, pero no demuestra mejora de SpecOrganon ni beneficios de campo.",
+        "version": 1
+      },
+      "prev_hash": "d95e4e2088ddccd011c210c908e5db1e65c516cf394b87dcc029f33249c88ba9",
+      "seq": 6
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:58:17+00:00",
+      "hash": "16dc85106f53e30d97645dbe13323c5dbed73543df8fff3782f301d3096c890a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Examinar el alcance del supuesto de conformidad y señalar la falta de soporte para generalizar a usos reales."
+          ]
+        },
+        "deps": {
+          "critique_concept": 1,
+          "frame_boundary": 1,
+          "frame_problem": 1
+        },
+        "id": "critique_assumption",
+        "kind": "assumption",
+        "text": "El desarrollo toma el contrato suministrado como especificación de referencia, sin suponer que sus ejemplos cubran todos los casos. Los ejemplos son controles públicos de contrato; no constituyen observaciones de ejecución. La adecuación del producto para usos reales queda sin demostrar porque no se aportan mediciones ni testimonios de uso.",
+        "version": 1
+      },
+      "prev_hash": "25d805485887508944b8f629f85b05b13799fa169d77e3c57c839cd4d50eca17",
+      "seq": 7
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:58:17+00:00",
+      "hash": "c0919b61254f23b6216e9041a29d0612631984efb08f814f489856e6edb99be2",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Explicitar la prioridad normativa de integridad y su tensión con la entrega temprana."
+          ]
+        },
+        "deps": {
+          "critique_concept": 1,
+          "frame_actor": 1,
+          "frame_boundary": 1,
+          "frame_problem": 1
+        },
+        "id": "critique_atomic",
+        "kind": "frame_option",
+        "text": "Marco de integridad del lote: dar prioridad a que cada invocación produzca todos sus resultados válidos o rechace el conjunto sin stdout. Su fundamento es la exigencia explícita del contrato. Obliga a posponer la emisión hasta completar la validación; sacrifica disponibilidad de resultados parciales. El límite de 131072 bytes delimita la entrada, sin acreditar rendimiento.",
+        "version": 1
+      },
+      "prev_hash": "16dc85106f53e30d97645dbe13323c5dbed73543df8fff3782f301d3096c890a",
+      "seq": 8
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:58:17+00:00",
+      "hash": "c4a866524a8cc5935a6c56f23c167be7f2869dbf70a822a919d9ca0fe524e2c6",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Contraponer utilidad parcial e integridad del lote y localizar la incompatibilidad contractual."
+          ]
+        },
+        "deps": {
+          "critique_concept": 1,
+          "frame_actor": 1,
+          "frame_boundary": 1,
+          "frame_problem": 1
+        },
+        "id": "critique_partial",
+        "kind": "frame_option",
+        "text": "Marco de aprovechamiento por petición: priorizar conservar y emitir resultados de líneas válidas aunque otra falle. Su fundamento normativo sería la utilidad de resultados parciales, sin evidencia aportada sobre preferencias de usuarios. Entra en conflicto con stdout vacío ante cualquier petición inválida. Adoptarlo requeriría cambiar el encargo; no es una alternativa conforme dentro del mandato vigente.",
+        "version": 1
+      },
+      "prev_hash": "c0919b61254f23b6216e9041a29d0612631984efb08f814f489856e6edb99be2",
+      "seq": 9
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:58:17+00:00",
+      "hash": "836afe0b7cd728382498762a5c8017d5c60c905fa613c7c15cf6203d3745825c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Resolver la orientación técnica conforme al mandato y mantener separadas la obligación contractual y las afirmaciones empíricas."
+          ]
+        },
+        "deps": {
+          "critique_assumption": 1,
+          "critique_atomic": 1,
+          "critique_partial": 1,
+          "frame_actor": 1,
+          "frame_boundary": 1,
+          "frame_problem": 1
+        },
+        "id": "critique_norm",
+        "kind": "norm",
+        "text": "Dentro de la delegación técnica, orientar RangeAudit por la integridad del lote: validar toda la entrada antes de emitir resultados y preservar enteros exactos y límites contractuales. El fundamento es el encargo del solicitante, no una preferencia algorítmica atribuida al operador. La alternativa parcial queda excluida por incompatibilidad con ese encargo. Esta norma limita las conclusiones a conformidad técnica y no establece superioridad ni efectos de campo.",
+        "version": 1
+      },
+      "prev_hash": "c4a866524a8cc5935a6c56f23c167be7f2869dbf70a822a919d9ca0fe524e2c6",
+      "seq": 10
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-06T01:58:35+00:00",
+      "hash": "775b6fdb8418c7bec12a9c72ff5910aafa936b9c27375e2c1154c29df502eae0",
+      "kind": "approval",
+      "payload": {
+        "id": "critique_norm",
+        "provenance": "local_declared",
+        "reason": "Existing local owner mandate; technical conformity judged separately by reviewer:gemini-isolated-review (/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/role-04-critique-approval/receipt.json): Se aprueba formalmente critique_norm en plena conformidad con el mandato vigente y el contrato técnico. La norma resuelve con rigor la orientación hacia la integridad del lote y el rechazo atómico de entradas inválidas, manteniendo explícitamente separadas las decisiones técnicas delegadas de cualquier preferencia algorítmica del operador, y absteniéndose con acierto de afirmar superioridad, mejoras no medidas de SpecOrganon o beneficios de campo.",
+        "version": 1
+      },
+      "prev_hash": "836afe0b7cd728382498762a5c8017d5c60c905fa613c7c15cf6203d3745825c",
+      "seq": 11
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T01:58:52+00:00",
+      "hash": "4b0d76d422b29099d78d8024da90b45a42997b2fdda356512d80d46858c035de",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "Los artefactos de la fase critique cumplen satisfactoriamente con el contrato de la fase y los principios metodológicos establecidos. Se formulan con claridad y rigor los conceptos, supuestos y opciones en conflicto (integridad atómica frente a procesamiento parcial), delimitando adecuadamente los juicios de valor de las afirmaciones fácticas. La norma adoptada cuenta con la aprobación requerida, mantiene la coherencia con el mandato delegado sin atribuir decisiones algorítmicas al operador ni postular superioridad empírica o beneficios de campo no demostrados, y respeta la red de dependencias y el alcance observable de la fase previa. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/role-05-critique-review/receipt.json]",
+        "snapshot": "15a541fe92acf9aaee94f2c04797530cfef1622de6ed900164559bb6bd22dd02",
+        "verdict": "accept"
+      },
+      "prev_hash": "775b6fdb8418c7bec12a9c72ff5910aafa936b9c27375e2c1154c29df502eae0",
+      "seq": 12
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T01:58:52+00:00",
+      "hash": "e2f9ee01eeb61f5436e797954e496da925acd5f5c322b4d0e80e0dfa99edd9fc",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "critique",
+        "review_seq": 12,
+        "snapshot": "15a541fe92acf9aaee94f2c04797530cfef1622de6ed900164559bb6bd22dd02"
+      },
+      "prev_hash": "4b0d76d422b29099d78d8024da90b45a42997b2fdda356512d80d46858c035de",
+      "seq": 13
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:59:24+00:00",
+      "hash": "26af9ea5cd18554fc57c36f0fa4982912911ce467f24517ec31f67c56936ef25",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Derivar la pregunta del problema y de la obligación de integridad del lote."
+          ]
+        },
+        "deps": {
+          "critique_concept": 1,
+          "critique_norm": 1,
+          "frame_problem": 1
+        },
+        "id": "study_question",
+        "kind": "question",
+        "text": "¿Cómo verificar la normalización exacta y el rechazo atómico de RangeAudit frente al contrato público, distinguiendo especificación de observación?",
+        "version": 1
+      },
+      "prev_hash": "e2f9ee01eeb61f5436e797954e496da925acd5f5c322b4d0e80e0dfa99edd9fc",
+      "seq": 14
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:59:24+00:00",
+      "hash": "72b7d4a0fd649f6b7b30eb51cbf26d804ce8b168d7b7548e38a51377f0bc862d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Formular una hipótesis refutable limitada a conformidad técnica."
+          ]
+        },
+        "deps": {
+          "critique_assumption": 1,
+          "study_question": 1
+        },
+        "id": "study_hypothesis",
+        "kind": "hypothesis",
+        "text": "Hipótesis técnica pendiente de contrastación: una implementación que valide el lote completo antes de emitir y normalice con enteros exactos puede satisfacer las obligaciones observables del contrato. Una discrepancia documentada refutaría la conformidad para el caso correspondiente; ausencia de discrepancias en casos finitos no demostraría corrección universal.",
+        "version": 1
+      },
+      "prev_hash": "26af9ea5cd18554fc57c36f0fa4982912911ce467f24517ec31f67c56936ef25",
+      "seq": 15
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:59:24+00:00",
+      "hash": "f18a152be99cf87c499867f42e0b4d535af123090cbd26b15e36f05713430232",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Comparar enteros y estructura JSON sin exigir orden de claves; exigir newline por respuesta. Para lotes inválidos comparar stdout vacío, stderr exacto y exit2; para válidos, stderr vacío y exit0.",
+          "method": "Antes de ejecutar, fijar entradas y expectativas contractuales. Cubrir ejemplos, lista y entrada vacías, orden y duplicados, solapamiento y adyacencia, negativos, límites y sus excesos, tipos inválidos, claves duplicadas o extra, UTF-8 inválido, líneas vacías y JSON mal formado. Incluir lotes con una petición válida seguida de otra inválida. Registrar entrada, versión, stdout, stderr y código de salida solo cuando exista ejecución real.",
+          "population": "Invocaciones de la implementación futura con lotes definidos por el contrato público; sin población de usuarios ni datos de campo.",
+          "sources": [
+            "contract.md",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Fijar población, comparación y límites de inferencia antes de disponer de resultados."
+          ],
+          "uncertainty": "Los casos finitos no prueban exhaustividad. Sin registros reales la conformidad queda sin demostrar. Evitar sesgo de selección fijando también casos adversos; mantener separados dato, expectativa e inferencia. No inferir rendimiento, superioridad ni efectos de campo."
+        },
+        "deps": {
+          "critique_norm": 1,
+          "frame_problem": 1,
+          "study_hypothesis": 1,
+          "study_question": 1
+        },
+        "id": "study_protocol",
+        "kind": "protocol",
+        "text": "Diseño de medición previo a resultados. Separar los controles públicos del contrato de las observaciones que eventualmente produzca el ejecutor. No hay ejecuciones aportadas.",
+        "version": 1
+      },
+      "prev_hash": "72b7d4a0fd649f6b7b30eb51cbf26d804ce8b168d7b7548e38a51377f0bc862d",
+      "seq": 16
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:59:24+00:00",
+      "hash": "431d0c192459f61acb96650936fbfd3ca452b82311049f6b302cbe921091d587",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-06",
+          "date_basis": "Fecha del contexto suministrado; fecha original del documento no indicada.",
+          "locator": "REQUEST.documents.contract.md",
+          "origin": "published",
+          "source": "contract.md suministrado en REQUEST.documents",
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Extraer las obligaciones documentales que fundamentan el indicador sin convertir ejemplos en mediciones."
+          ]
+        },
+        "deps": {
+          "frame_problem": 1,
+          "study_protocol": 1
+        },
+        "id": "study_contract_evidence",
+        "kind": "evidence",
+        "text": "Evidencia documental: el contrato suministrado exige normalización exacta, fusión por solapamiento o adyacencia y rechazo atómico. Sus cuatro ejemplos son controles públicos de contrato, no observaciones ejecutadas ni resultados nativos. La fecha identifica el contexto documental suministrado, no una publicación o medición.",
+        "version": 1
+      },
+      "prev_hash": "f18a152be99cf87c499867f42e0b4d535af123090cbd26b15e36f05713430232",
+      "seq": 17
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:59:24+00:00",
+      "hash": "53d94026e2fb75be33e428131c446dbe01d60edaf5714d219b22ee6af2f44944",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Conteo de invocaciones cuyo comportamiento difiera de la expectativa contractual fijada previamente.",
+          "metric": "invocaciones_con_discrepancia_contractual",
+          "scope": "Invocaciones realmente registradas bajo study_protocol, identificadas por versión y entrada.",
+          "source": "Registros reales del ejecutor cuando existan; expectativas fundamentadas en contract.md.",
+          "sources": [
+            "contract.md",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Definir unidad, regla de conteo y soporte documental sin declarar mediciones."
+          ],
+          "uncertainty": "Sin registros no hay valor; un conteo nulo en una muestra finita no acredita conformidad universal.",
+          "unit": "invocaciones"
+        },
+        "deps": {
+          "critique_norm": 1,
+          "frame_problem": 1,
+          "study_contract_evidence": 1,
+          "study_protocol": 1
+        },
+        "id": "study_indicator",
+        "kind": "indicator",
+        "text": "Prespecificar el número de invocaciones observadas con al menos una discrepancia contractual. Cada invocación cuenta una sola vez aunque falle varias obligaciones. El valor requiere registros reales y el total de invocaciones observadas; no se asigna cero ante ausencia de datos.",
+        "version": 1
+      },
+      "prev_hash": "431d0c192459f61acb96650936fbfd3ca452b82311049f6b302cbe921091d587",
+      "seq": 18
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T01:59:40+00:00",
+      "hash": "91ed415a333d959e96f23584e3721aca29ed2c028983c634daaea29fa6a6b62d",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "Los artefactos de la fase study cumplen rigurosamente con los requisitos del contrato de fase y los estándares metodológicos establecidos. La formulación de la pregunta de investigación (study_question) y la hipótesis refutable (study_hypothesis) delimita adecuadamente la conformidad técnica observable frente al contrato público sin proyectar conclusiones universales. El protocolo (study_protocol) y el indicador preespecificado (study_indicator), junto con el soporte documental registrado (study_contract_evidence), definen con precisión la población, el método de comparación, las unidades y la estructura de incertidumbre antes de cualquier resultado, distinguiendo taxativamente entre especificación documental, datos empíricos observados e inferencias. No se atribuyen decisiones ni preferencias al operador, ni se afirman beneficios de campo o ejecuciones anticipadas. La red de trazabilidad con las fases previas y la contabilidad de recursos se mantienen plenamente conformes. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/role-07-study-review/receipt.json]",
+        "snapshot": "4a1c1f3eacc9774b6efa28b39810858004c460cf3da5a75e581ab7426d6e5d80",
+        "verdict": "accept"
+      },
+      "prev_hash": "53d94026e2fb75be33e428131c446dbe01d60edaf5714d219b22ee6af2f44944",
+      "seq": 19
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T01:59:40+00:00",
+      "hash": "12fec476b78ed31cc51d0deb5a8525400e7186fb5ca89a514bb7f2c8df9e43de",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "study",
+        "review_seq": 19,
+        "snapshot": "4a1c1f3eacc9774b6efa28b39810858004c460cf3da5a75e581ab7426d6e5d80"
+      },
+      "prev_hash": "91ed415a333d959e96f23584e3721aca29ed2c028983c634daaea29fa6a6b62d",
+      "seq": 20
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T01:59:51+00:00",
+      "hash": "7ae60b9f3173af2b4b0d7830ac75f6db3e3a80e0995c887370bb0a5618ef2abf",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "measured-test-records.json",
+            "delivery-files.json"
+          ],
+          "steps": [
+            "Relacionar las obligaciones documentales de study_contract_evidence con la comparación definida en study_protocol.",
+            "Constatar que los mapas suministrados de registros y entrega están vacíos.",
+            "Mantener sin valor el indicador y limitar la inferencia a la insuficiencia de soporte empírico."
+          ],
+          "uncertainty": "La ausencia de registros no demuestra conformidad ni incumplimiento; tampoco equivale a cero discrepancias."
+        },
+        "deps": {
+          "frame_problem": 1,
+          "study_contract_evidence": 1,
+          "study_indicator": 1,
+          "study_protocol": 1
+        },
+        "id": "observe_contract_inference",
+        "kind": "inference",
+        "text": "La evidencia documental establece obligaciones de normalización exacta y rechazo atómico, pero no acredita el comportamiento de una implementación. Los ejemplos son controles públicos de contrato. measured-test-records.json y delivery-files.json están vacíos en los documentos suministrados; por tanto, no hay soporte para asignar un valor al indicador de discrepancias ni para concluir conformidad técnica. Esta queda sin demostrar según la incertidumbre registrada en el protocolo.",
+        "version": 1
+      },
+      "prev_hash": "12fec476b78ed31cc51d0deb5a8525400e7186fb5ca89a514bb7f2c8df9e43de",
+      "seq": 21
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T02:00:11+00:00",
+      "hash": "e273112386db30ab56a7533cb56567740ca9ace939f270eb64283e7675ddfd80",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "observe",
+        "provenance": "local_declared",
+        "reason": "Los artefactos evaluados de la fase observe cumplen con total rigor metodológico las exigencias del contrato de fase y el contrato de datos. La evidencia documental study_contract_evidence registra fielmente su origen publicado, fuente, fecha y localizador sin transformar indebidamente los ejemplos del pliego en observaciones de ejecución. Asimismo, observe_contract_inference realiza un enlace impecable con el protocolo y la evidencia previa, reconociendo con estricta prudencia científica que la ausencia de registros empíricos y ficheros de entrega impide cuantificar el indicador o afirmar conformidad técnica anticipada. La trazabilidad upstream está plenamente preservada, no se inventan resultados ni aprobaciones, y la contabilidad de recursos se mantiene holgadamente dentro de los límites. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/role-09-observe-review/receipt.json]",
+        "snapshot": "fcffa08ba739522494fbae00f1b398db85ba4a15b8fa73a416dcede7497305df",
+        "verdict": "accept"
+      },
+      "prev_hash": "7ae60b9f3173af2b4b0d7830ac75f6db3e3a80e0995c887370bb0a5618ef2abf",
+      "seq": 22
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T02:00:11+00:00",
+      "hash": "c3de4477c2fb87b4e2cc4f7f18b0166c95bc1f013613f0282234b5dcaa9ce2c5",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "observe",
+        "review_seq": 22,
+        "snapshot": "fcffa08ba739522494fbae00f1b398db85ba4a15b8fa73a416dcede7497305df"
+      },
+      "prev_hash": "e273112386db30ab56a7533cb56567740ca9ace939f270eb64283e7675ddfd80",
+      "seq": 23
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:00:31+00:00",
+      "hash": "2dd0f028e3c7e0456324553de506ccafe32803fc0c9eebe303ff02ec475aa3ab",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "delivery-files.json",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Separar las obligaciones documentales de las observaciones de ejecución.",
+            "Contrastar la hipótesis con la ausencia de registros suministrados.",
+            "Considerar explicaciones alternativas y limitar la conclusión al soporte disponible."
+          ]
+        },
+        "deps": {
+          "observe_contract_inference": 1,
+          "study_contract_evidence": 1,
+          "study_hypothesis": 1,
+          "study_protocol": 1
+        },
+        "id": "explain_synthesis",
+        "kind": "synthesis",
+        "text": "Hallazgos documentales: el contrato exige normalización exacta y rechazo atómico; sus ejemplos son controles públicos de contrato, no observaciones ejecutadas. Los mapas suministrados de entrega y registros están vacíos. Inferencia: no hay soporte para cuantificar discrepancias ni contrastar empíricamente la hipótesis técnica. Supuesto: el contrato es la referencia de conformidad, sin asumir que sus ejemplos sean exhaustivos. Validar antes de emitir es coherente con la obligación de atomicidad, pero esa coherencia no demuestra el comportamiento de una implementación. La ausencia de registros es compatible tanto con una implementación conforme como con una defectuosa, o con falta de implementación; los documentos no permiten distinguir esas alternativas. La conclusión se limita a especificación y falta de soporte empírico, sin afirmar rendimiento, superioridad ni efectos de campo.",
+        "version": 1
+      },
+      "prev_hash": "c3de4477c2fb87b4e2cc4f7f18b0166c95bc1f013613f0282234b5dcaa9ce2c5",
+      "seq": 24
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:00:31+00:00",
+      "hash": "366b247f2e7bccee9f36089ab9e0339a0a0ace3bdb36a455db232107a239230d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "delivery-files.json",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Trazar la incertidumbre a la síntesis y a los límites del protocolo.",
+            "Distinguir falta de medición, sesgo de selección y límites de generalización.",
+            "Mantener sin cuantificar el indicador y restringir las conclusiones al soporte documental."
+          ]
+        },
+        "deps": {
+          "explain_synthesis": 1,
+          "study_contract_evidence": 1,
+          "study_indicator": 1,
+          "study_protocol": 1
+        },
+        "id": "explain_uncertainty",
+        "kind": "uncertainty",
+        "text": "La síntesis no resuelve la conformidad de RangeAudit: no se suministran implementación ni registros de ejecución. El indicador permanece sin valor; ausencia de datos no equivale a cero discrepancias ni demuestra incumplimiento. Tampoco hay base para estimar precisión o intervalos numéricos. Los ejemplos pueden inducir sesgo de selección si se confunden con cobertura completa; el protocolo contempla casos adversos, pero su descripción no acredita ejecución. Incluso observaciones finitas futuras limitarían las conclusiones a las versiones y entradas registradas. La fecha de la evidencia identifica el contexto suministrado, no una medición. Detener cualquier conclusión que exceda estos documentos: la hipótesis continúa pendiente y no se derivan beneficios de campo, rendimiento ni superioridad.",
+        "version": 1
+      },
+      "prev_hash": "2dd0f028e3c7e0456324553de506ccafe32803fc0c9eebe303ff02ec475aa3ab",
+      "seq": 25
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T02:00:51+00:00",
+      "hash": "8d3ce81c0ad4f5abd1b1c94bc5ecfa89b9d96fdbc6376fb09ddc00ebfdac2382",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "explain",
+        "provenance": "local_declared",
+        "reason": "Los artefactos evaluados de la fase explain (explain_synthesis y explain_uncertainty) satisfacen plenamente las exigencias del contrato de fase y el contrato de datos. La síntesis distingue con precisión los hallazgos documentales, los supuestos de especificación y los límites epistémicos, explorando rigurosamente hipótesis explicativas alternativas ante la ausencia de implementación y registros empíricos, sin asumir indebidamente conformidad ni defecto. Por su parte, la incertidumbre traza de forma impecable las conclusiones a la síntesis y al protocolo, explicitando el riesgo de sesgo de selección en los ejemplos del pliego, manteniendo el indicador sin cuantificar para evitar inventar líneas base o precisión inexistentes, y delimitando estrictamente el alcance para prevenir afirmaciones de superioridad o beneficios de campo. Las dependencias y versiones de ancestros están perfectamente articuladas, no se declaran ejecuciones no realizadas y la contabilidad de recursos se mantiene holgadamente dentro de los límites. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/role-11-explain-review/receipt.json]",
+        "snapshot": "75ce587cbadcbe1d2e6769892524665487837c3611ab2c21932c5c737d8574ab",
+        "verdict": "accept"
+      },
+      "prev_hash": "366b247f2e7bccee9f36089ab9e0339a0a0ace3bdb36a455db232107a239230d",
+      "seq": 26
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T02:00:51+00:00",
+      "hash": "dd4df1d136ba36ad844bdef149688d15352b7add260430a61dff87d0f74f0d45",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "explain",
+        "review_seq": 26,
+        "snapshot": "75ce587cbadcbe1d2e6769892524665487837c3611ab2c21932c5c737d8574ab"
+      },
+      "prev_hash": "8d3ce81c0ad4f5abd1b1c94bc5ecfa89b9d96fdbc6376fb09ddc00ebfdac2382",
+      "seq": 27
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:01:23+00:00",
+      "hash": "5576985e63252d7cef7ef325f79188adb25a1afefff0d8826fababbfb9e02966",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Derivar una opción de implementación de la normalización y atomicidad exigidas.",
+            "Identificar carga de mantenimiento y riesgos sin atribuir resultados."
+          ]
+        },
+        "deps": {
+          "critique_norm": 1,
+          "explain_synthesis": 1,
+          "explain_uncertainty": 1
+        },
+        "id": "compare_cli",
+        "kind": "option",
+        "text": "Propuesta técnica: construir la CLI exigida, leer como máximo 131073 bytes para detectar exceso, validar el lote completo y normalizar cada petición ordenando pares y fusionando solapamiento o adyacencia con enteros exactos. Emitir solo tras validar todo. Para el agente supone implementar y mantener programa, documentación y pruebas; el solicitante recibiría la interfaz encargada si se acredita conformidad. Coste no medido. Riesgos: validación incompleta, stdout parcial y errores en extremos; no se afirma rendimiento ni superioridad.",
+        "version": 1
+      },
+      "prev_hash": "dd4df1d136ba36ad844bdef149688d15352b7add260430a61dff87d0f74f0d45",
+      "seq": 28
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:01:23+00:00",
+      "hash": "56b3d3e38c987cf3679853d53fd78199b7f2bf501eeb49a55e0bf67aac12b87d",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Definir una alternativa manual viable para controles públicos pequeños.",
+            "Delimitar sus costes humanos y su insuficiencia como entrega contractual."
+          ]
+        },
+        "deps": {
+          "critique_norm": 1,
+          "explain_synthesis": 1,
+          "explain_uncertainty": 1
+        },
+        "id": "compare_manual",
+        "kind": "option",
+        "text": "Alternativa organizativa sin software nuevo: para pequeños conjuntos públicos, comprobar manualmente pares, ordenar, unir intervalos y calcular cobertura, extensión y huecos; conservar entrada y cálculo en una ficha. Es practicable como comprobación documental acotada, pero no entrega una CLI ni sustituye el encargo. El agente asumiría trabajo repetido y riesgo de transcripción; el solicitante seguiría sin la interfaz requerida. No hay coste ni exactitud medidos. Ante lotes grandes, bytes inválidos o claves duplicadas, limitar su alcance y no declarar conformidad integral.",
+        "version": 1
+      },
+      "prev_hash": "5576985e63252d7cef7ef325f79188adb25a1afefff0d8826fababbfb9e02966",
+      "seq": 29
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:01:23+00:00",
+      "hash": "38fe1a4e16b8217422e679e5b5679321e270ce61995a9e6f83cacb547a019a35",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "delivery-files.json",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Contraponer efectos previstos por actor, costes y riesgos de ambas opciones.",
+            "Distinguir exclusión contractual de dominancia empírica y localizar trabajo desplazado."
+          ]
+        },
+        "deps": {
+          "compare_cli": 1,
+          "compare_manual": 1,
+          "critique_norm": 1,
+          "explain_synthesis": 1
+        },
+        "id": "compare_tradeoffs",
+        "kind": "comparison",
+        "text": "La CLI aborda la entrega contractual y concentra trabajo inicial y mantenimiento en el agente; la comprobación manual evita construir software para casos pequeños, pero desplaza trabajo repetido y transcripción al agente y deja al solicitante sin CLI. Ambos costes carecen de medición. La CLI puede contener defectos de validación o cálculo; el método manual puede omitir detalles de bytes, tipos y estructura. La alternativa manual queda excluida como sustituto por incompatibilidad de interfaz, no por inferioridad empírica demostrada; conserva utilidad documental acotada. No hay base para declarar dominancia en coste, exactitud o rendimiento.",
+        "version": 1
+      },
+      "prev_hash": "56b3d3e38c987cf3679853d53fd78199b7f2bf501eeb49a55e0bf67aac12b87d",
+      "seq": 30
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:01:23+00:00",
+      "hash": "29453d142cb88bb472ee59f4be33cf4fabb75db39fc914e67cb6df81ce6bfd46",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Relacionar riesgos de ambas opciones con restricciones contractuales.",
+            "Explicitar mitigaciones de diseño, perjuicios desplazados y límites de conclusión."
+          ]
+        },
+        "deps": {
+          "compare_cli": 1,
+          "compare_manual": 1,
+          "compare_tradeoffs": 1,
+          "critique_norm": 1,
+          "explain_uncertainty": 1
+        },
+        "id": "compare_risks",
+        "kind": "risk",
+        "text": "En la CLI, aceptar bool, float, claves duplicadas, exceso de bytes o líneas vacías violaría el contrato; emitir antes de validar desplazaría al solicitante la gestión de resultados parciales. Restringir el diseño a biblioteca estándar, stdin y límites explícitos, sin red, ficheros externos ni cambios de entorno. En la alternativa manual, la transcripción y cobertura limitada impiden tratar sus cálculos como prueba de la CLI. Los ejemplos siguen siendo controles públicos de contrato. Detener conclusiones de conformidad sin registros reales y cualquier sustitución que abandone atomicidad o límites.",
+        "version": 1
+      },
+      "prev_hash": "38fe1a4e16b8217422e679e5b5679321e270ce61995a9e6f83cacb547a019a35",
+      "seq": 31
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T02:01:49+00:00",
+      "hash": "60a5f0a43caf9789ec2b96f9ae3d9be798053068d66695aefc411672d66d7389",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "compare",
+        "provenance": "local_declared",
+        "reason": "Los cuatro artefactos evaluados de la fase compare (compare_cli, compare_manual, compare_tradeoffs y compare_risks) cumplen rigurosamente con los requisitos del contrato de fase, las directrices de datos y el mandato delegado. Se articulan dos opciones substantivamente diferenciadas que abarcan tanto la vía técnica como una alternativa organizativa sin software nuevo. La comparación evalúa con precisión los efectos diferenciados por actor, los costes no medidos y los riesgos de cada enfoque, distinguiendo de manera ejemplar la exclusión por incompatibilidad de interfaz de cualquier afirmación infundada de dominancia empírica o superioridad. Asimismo, el artefacto de riesgos incorpora exhaustivamente las restricciones de seguridad contractuales (límite de bytes, uso exclusivo de biblioteca estándar y stdin, rechazo atómico y ausencia de red o efectos externos) y señala los perjuicios desplazados sin inventar ejecuciones ni beneficios de campo. Todas las dependencias son coherentes con las versiones vigentes y la contabilidad de recursos se mantiene holgadamente dentro de los límites establecidos. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/role-13-compare-review/receipt.json]",
+        "snapshot": "343e6668c69b050624cce36713b5b613adc5e4151511ef674d20b18dfbd5d805",
+        "verdict": "accept"
+      },
+      "prev_hash": "29453d142cb88bb472ee59f4be33cf4fabb75db39fc914e67cb6df81ce6bfd46",
+      "seq": 32
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T02:01:49+00:00",
+      "hash": "dacaa4f72298325405fb7ec7cdebaf45492f196fb3342180ad1821668c05f9ac",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "compare",
+        "review_seq": 32,
+        "snapshot": "343e6668c69b050624cce36713b5b613adc5e4151511ef674d20b18dfbd5d805"
+      },
+      "prev_hash": "60a5f0a43caf9789ec2b96f9ae3d9be798053068d66695aefc411672d66d7389",
+      "seq": 33
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:02:26+00:00",
+      "hash": "6a6ed2ac2cef0ddbf88d67cb43055c3e6acd033f853824f4ab9510b86614fdd2",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md",
+            "existing-mandate.md"
+          ],
+          "steps": [
+            "Contraponer las opciones según la interfaz exigida y los riesgos documentados.",
+            "Seleccionar validación previa a emisión y fusión ordenada dentro del mandato técnico."
+          ]
+        },
+        "deps": {
+          "compare_cli": 1,
+          "compare_manual": 1,
+          "compare_risks": 1,
+          "compare_tradeoffs": 1,
+          "critique_norm": 1,
+          "frame_problem": 1,
+          "study_contract_evidence": 1
+        },
+        "id": "specify_decision",
+        "kind": "decision",
+        "text": "Elegir la CLI de compare_cli dentro de la delegación técnica: lectura acotada, validación íntegra del lote y normalización mediante ordenación y fusión con enteros exactos. compare_tradeoffs excluye la alternativa manual como entrega por incompatibilidad de interfaz; conserva su utilidad documental. La decisión sigue critique_norm y atiende compare_risks. No implica costes medidos, superioridad ni efectos de campo.",
+        "version": 1
+      },
+      "prev_hash": "dacaa4f72298325405fb7ec7cdebaf45492f196fb3342180ad1821668c05f9ac",
+      "seq": 34
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:02:27+00:00",
+      "hash": "bffb244421518c0bd6461508e58da379b03790520119c127eb8ce239b950247a",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "sources": [
+            "contract.md"
+          ],
+          "steps": [
+            "Derivar las obligaciones de entrada, cálculo, salida y entrega del contrato.",
+            "Conservar atomicidad, límites y secuencia de sellado como obligaciones verificables."
+          ]
+        },
+        "deps": {
+          "critique_norm": 1,
+          "frame_problem": 1,
+          "specify_decision": 1,
+          "study_contract_evidence": 1,
+          "study_protocol": 1
+        },
+        "id": "specify_requirement",
+        "kind": "requirement",
+        "text": "Entregar range_audit.py con biblioteca estándar, stdin y sin red, ficheros externos ni cambios de entorno. Admitir como máximo 131072 bytes UTF-8 de NDJSON; entrada completamente vacía significa cero peticiones. Cada línea de petición debe ser no vacía y contener un objeto con exactamente intervals, sin claves duplicadas. intervals será una lista de hasta 2000 pares de enteros JSON, excluyendo bool y float, con extremos de valor absoluto <=10^12 e inicio<fin; admitir duplicados y orden arbitrario. Rechazar JSON mal formado, UTF-8 inválido, líneas vacías, claves extra y cualquier infracción de estructura, tipos o límites. Validar todo antes de emitir. Para cada petición válida producir exactamente merged, covered, span y gaps: fusionar solapamiento y adyacencia en orden, sumar longitudes exactamente, usar span null para lista vacía y excluir huecos exteriores. Emitir una línea JSON UTF-8 con newline por petición, sin flotantes; orden de claves indiferente. Lote válido: exit0 y stderr vacío. Cualquier petición inválida: stdout vacío, stderr exactamente range-audit: invalid input seguido de newline y exit2. Entregar README con instalación, NDJSON, ejemplos, errores, límites y comando de pruebas, y test_range_audit.py. Sellar programa y README antes de escribir pruebas; su argv comenzará /opt/specorganon/venv/bin/python y usará /input/delivery/test_range_audit.py.",
+        "version": 1
+      },
+      "prev_hash": "6a6ed2ac2cef0ddbf88d67cb43055c3e6acd033f853824f4ab9510b86614fdd2",
+      "seq": 35
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:02:27+00:00",
+      "hash": "a2c8247198629fa2c9e49a1cd21984e3a50d977288baa30f256b96762d30b4bd",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "invocaciones_con_discrepancia_contractual",
+          "reject": "Una o más invocaciones realmente registradas difieren de las expectativas contractuales fijadas previamente.",
+          "scope": "Versión e invocaciones identificadas en registros reales bajo study_protocol.",
+          "sources": [
+            "contract.md",
+            "measured-test-records.json"
+          ],
+          "steps": [
+            "Vincular requisito e indicador con la misma métrica y unidad.",
+            "Prespecificar umbral, comparación y rechazo sin asignar un valor observado."
+          ],
+          "threshold": {
+            "operator": "<=",
+            "statistic": "estimate",
+            "value": 0
+          },
+          "unit": "invocaciones"
+        },
+        "deps": {
+          "critique_norm": 1,
+          "frame_problem": 1,
+          "specify_decision": 1,
+          "specify_requirement": 1,
+          "study_contract_evidence": 1,
+          "study_indicator": 1,
+          "study_protocol": 1
+        },
+        "id": "specify_criterion",
+        "kind": "criterion",
+        "text": "Fijar antes de resultados un umbral de cero invocaciones con discrepancia contractual en los casos registrados según study_protocol. Cada invocación cuenta una vez aunque presente varias discrepancias. La comparación cubrirá los cuatro ejemplos como controles públicos de contrato, entrada y lista vacías, orden, duplicados, solapamiento, adyacencia, negativos, límites y excesos, tipos y estructuras inválidos, claves duplicadas y extra, UTF-8 inválido, líneas vacías y JSON mal formado; incluirá una petición válida seguida de otra inválida para comprobar atomicidad. Comparar estructura y enteros exactos, newline, stdout, stderr y código de salida. Rechazar conformidad de la versión para un caso si su registro real muestra cualquier discrepancia. Sin registros, el criterio queda sin demostrar; cero discrepancias en casos finitos no acredita corrección universal. La documentación y el sellado requieren trazas adicionales de entrega.",
+        "version": 1
+      },
+      "prev_hash": "bffb244421518c0bd6461508e58da379b03790520119c127eb8ce239b950247a",
+      "seq": 36
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-06T02:02:50+00:00",
+      "hash": "604e25e1a9eacc00db2ce1f0834e133009e3b2912ddecb379691af50405562c5",
+      "kind": "approval",
+      "payload": {
+        "id": "specify_decision",
+        "provenance": "local_declared",
+        "reason": "Existing local owner mandate; technical conformity judged separately by reviewer:gemini-isolated-review (/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/role-15-specify-approval/receipt.json): Se aprueba la decisión specify_decision al verificar su estricta conformidad con el mandato delegado del operador. La decisión adopta la opción técnica de la CLI con lectura acotada, validación previa del lote completo y normalización ordenada mediante enteros exactos, sin atribuir preferencias algorítmicas al operador ni afirmar superioridad empírica, costes medidos o efectos de campo no acreditados. La exclusión de la alternativa manual se fundamenta correctamente en la incompatibilidad de interfaz contractual respetando su utilidad documental, y se mantienen íntegras las restricciones de biblioteca estándar, entrada exclusiva por stdin y ausencia de dependencias externas.",
+        "version": 1
+      },
+      "prev_hash": "a2c8247198629fa2c9e49a1cd21984e3a50d977288baa30f256b96762d30b4bd",
+      "seq": 37
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T02:03:08+00:00",
+      "hash": "0b835baba2a035cc30f2867facab6e4a7118a9532b3a1c6173d87f013890ded5",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "specify",
+        "provenance": "local_declared",
+        "reason": "Los tres artefactos de la fase specify (specify_decision, specify_requirement y specify_criterion) satisfacen con notable rigor y precisión técnica todas las condiciones exigidas por el contrato de fase, las directrices del contrato de datos y el mandato del operador. La decisión técnica se fundamenta coherentemente en las alternativas de compare y en la norma aprobada critique_norm, manteniendo la exclusión de la opción manual en términos estrictos de incompatibilidad de interfaz sin alegar superioridad infundada ni atribuir elecciones de diseño al operador. El requisito especifica de forma exhaustiva y verificable la totalidad de las restricciones contractuales (lectura acotada a 131072 bytes por stdin, validación atómica del lote completo, tipos enteros puros sin bool ni float, extremos con inicio < fin, tratamiento de lista y entrada vacías, salidas exactas merged/covered/span/gaps, y el protocolo de sellado previo de README y programa). A su vez, el criterio vincula rigurosamente el requisito con el indicador preestablecido compartiendo métrica y unidad, establece un umbral contrastable previo a cualquier ejecución y se abstiene de afirmar resultados o aprobaciones indebidas. Las dependencias son completas, no hay desfases de versiones y el consumo de recursos se mantiene estrictamente dentro de los límites. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/role-16-specify-review/receipt.json]",
+        "snapshot": "95d4799d66deee55f39a40bb39142738c7e04735ff599d7b4745b2e582d12d34",
+        "verdict": "accept"
+      },
+      "prev_hash": "604e25e1a9eacc00db2ce1f0834e133009e3b2912ddecb379691af50405562c5",
+      "seq": 38
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T02:03:08+00:00",
+      "hash": "7365a94a1f51c2ca3092520edc707ecf5b6406035c5d5c622c4a5f3ab180301c",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "specify",
+        "review_seq": 38,
+        "snapshot": "95d4799d66deee55f39a40bb39142738c7e04735ff599d7b4745b2e582d12d34"
+      },
+      "prev_hash": "0b835baba2a035cc30f2867facab6e4a7118a9532b3a1c6173d87f013890ded5",
+      "seq": 39
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:03:52+00:00",
+      "hash": "b4ed97289fd8f2905741c8ac69fac82b2a50ad7d4863ee3d585d0616ea501d0c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "delivery_tree_sha256": "32f7c64958a43b10eeb3fc0a2065c73c043c701b63bb0526dde55d0ee8690e60",
+          "files": [
+            "range_audit.py",
+            "README.md"
+          ],
+          "sources": [
+            "contract.md",
+            "build-stage.json"
+          ],
+          "steps": [
+            "Implementar validación de bytes, UTF-8, NDJSON, claves, estructuras, tipos y límites.",
+            "Implementar fusión por solapamiento o adyacencia y preparar toda la salida antes de emitir.",
+            "Documentar instalación, interfaz, ejemplos, límites, errores y comando de pruebas; reservar las pruebas para la etapa tests."
+          ]
+        },
+        "deps": {
+          "specify_decision": 1,
+          "specify_requirement": 1
+        },
+        "id": "build_implementation",
+        "kind": "implementation",
+        "text": "Implementación de RangeAudit y README para la etapa program. La lectura acotada y la validación completa preceden a la emisión; la normalización ordena y fusiona intervalos con enteros exactos. No se aportan ejecuciones ni resultados.",
+        "version": 1
+      },
+      "prev_hash": "7365a94a1f51c2ca3092520edc707ecf5b6406035c5d5c622c4a5f3ab180301c",
+      "seq": 40
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:05:04+00:00",
+      "hash": "6d0585a28f6bf82870fa71904340ca3261754b80b6179203c226514d73e3aff5",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "delivery_tree_sha256": "d090cf72276ca82d9ca45ad36bc891e9292d4e9c458fa7ed5b8c36cca1ee37ed",
+          "files": [
+            "range_audit.py",
+            "README.md",
+            "test_range_audit.py"
+          ],
+          "sources": [
+            "contract.md",
+            "build-stage.json",
+            "delivery-files.json"
+          ],
+          "steps": [
+            "Conservar los bytes del programa y README del checkpoint suministrado.",
+            "Añadir únicamente test_range_audit.py con expectativas contractuales explícitas."
+          ]
+        },
+        "deps": {
+          "specify_decision": 1,
+          "specify_requirement": 1
+        },
+        "id": "build_implementation",
+        "kind": "implementation",
+        "text": "Entrega de la etapa tests: conservar el programa y README sellados y añadir pruebas contractuales por subprocess. No se declara ejecución ni resultado.",
+        "version": 2
+      },
+      "prev_hash": "b4ed97289fd8f2905741c8ac69fac82b2a50ad7d4863ee3d585d0616ea501d0c",
+      "seq": 41
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:05:05+00:00",
+      "hash": "a946aeee96c5198e02792c0b24567bd5acdcb44fa2143629ebfed3658b4f07a0",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/opt/specorganon/venv/bin/python",
+            "/input/delivery/test_range_audit.py"
+          ],
+          "command": "/opt/specorganon/venv/bin/python /input/delivery/test_range_audit.py",
+          "sources": [
+            "contract.md",
+            "build-stage.json"
+          ],
+          "steps": [
+            "Invocar el programa por stdin y capturar stdout, stderr y código de salida.",
+            "Comparar respuestas con expectativas fijadas y un oráculo independiente de segmentos.",
+            "Comprobar límites y entradas inválidas tanto aisladas como dentro de lotes."
+          ]
+        },
+        "deps": {
+          "build_implementation": 2,
+          "specify_criterion": 1,
+          "specify_requirement": 1
+        },
+        "id": "build_test",
+        "kind": "test",
+        "text": "Borrador ejecutable de pruebas de la CLI: controles públicos del contrato, normalización, enteros exactos, límites, validación y rechazo atómico. Las expectativas no son observaciones de ejecución.",
+        "version": 1
+      },
+      "prev_hash": "6d0585a28f6bf82870fa71904340ca3261754b80b6179203c226514d73e3aff5",
+      "seq": 42
+    },
+    {
+      "actor": "executor:isolated-software-controller",
+      "at": "2026-10-06T02:05:12+00:00",
+      "hash": "faf4f878ec4767ac8edfe3826f62b14a39ec85293a4aaf631b6c48eb41b038e7",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "argv": [
+            "/opt/specorganon/venv/bin/python",
+            "/input/delivery/test_range_audit.py"
+          ],
+          "command": "/opt/specorganon/venv/bin/python /input/delivery/test_range_audit.py",
+          "delivery_tree_sha256": "d090cf72276ca82d9ca45ad36bc891e9292d4e9c458fa7ed5b8c36cca1ee37ed",
+          "passed": true,
+          "receipt": {
+            "argv": [
+              "/opt/specorganon/venv/bin/python",
+              "/input/delivery/test_range_audit.py"
+            ],
+            "exit_code": 0,
+            "result_sha256": "0a18058176d0b190b5afdbf46c69eeebc73bf9fba7fdd4d072370a6dc4c3bacf",
+            "stderr_sha256": "f5f224289b67029e64a7e0f2e6d89f7c7458a2fbcf27ab38ac81493c429bc1db",
+            "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "timed_out": false
+          },
+          "sources": [
+            "contract.md",
+            "build-stage.json"
+          ],
+          "steps": [
+            "Invocar el programa por stdin y capturar stdout, stderr y código de salida.",
+            "Comparar respuestas con expectativas fijadas y un oráculo independiente de segmentos.",
+            "Comprobar límites y entradas inválidas tanto aisladas como dentro de lotes."
+          ],
+          "test_job_ref": "/datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/test-57681f8a3189e050ead833e5/receipt.json"
+        },
+        "deps": {
+          "build_implementation": 2,
+          "specify_criterion": 1,
+          "specify_requirement": 1
+        },
+        "id": "build_test",
+        "kind": "test",
+        "text": "Borrador ejecutable de pruebas de la CLI: controles públicos del contrato, normalización, enteros exactos, límites, validación y rechazo atómico. Las expectativas no son observaciones de ejecución.",
+        "version": 2
+      },
+      "prev_hash": "a946aeee96c5198e02792c0b24567bd5acdcb44fa2143629ebfed3658b4f07a0",
+      "seq": 43
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T02:05:34+00:00",
+      "hash": "15020ae1e4cfd63a6f7adc0de4ae4eb3061c8fcba5e07da9d63405cc99c653cc",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "build",
+        "provenance": "local_declared",
+        "reason": "La fase build satisface plenamente las reglas de salida y el contrato técnico. La implementación build_implementation traza rigurosamente a specify_requirement y specify_decision, preservando los bytes sellados de range_audit.py y README.md. Por su parte, build_test enlaza debidamente con specify_criterion, specify_requirement y build_implementation versión 2, aportando una batería exhaustiva de pruebas unitarias que verifican la normalización, límites, rechazo atómico y controles públicos del contrato. Los registros del controlador aislado acreditan la ejecución íntegra y exitosa con código de salida 0 sin declarar superioridad ni efectos no demostrados. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/role-19-build-review/receipt.json]",
+        "snapshot": "bb13a6c158f1787b421e509387e7e3c28fe342cf34bc97f581197b5ee3f6e80c",
+        "verdict": "accept"
+      },
+      "prev_hash": "faf4f878ec4767ac8edfe3826f62b14a39ec85293a4aaf631b6c48eb41b038e7",
+      "seq": 44
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T02:05:34+00:00",
+      "hash": "35d1f89733ffdede1bdaab0cdfae56d543099730dba25fa9042ece14df5c32f1",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "build",
+        "review_seq": 44,
+        "snapshot": "bb13a6c158f1787b421e509387e7e3c28fe342cf34bc97f581197b5ee3f6e80c"
+      },
+      "prev_hash": "15020ae1e4cfd63a6f7adc0de4ae4eb3061c8fcba5e07da9d63405cc99c653cc",
+      "seq": 45
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:06:09+00:00",
+      "hash": "c8d8c69610af45101fb4f954c784674c0a2b76f510eaedfa9c4249dce4e16fc7",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-06",
+          "date_basis": "Fecha del contexto suministrado.",
+          "metric": "invocaciones_con_discrepancia_contractual",
+          "origin": "published",
+          "scope": "No hay población anterior medida identificada en los documentos.",
+          "source": "contract.md; state.json/items/specify_criterion; measured-test-records.json",
+          "steps": [
+            "Distinguir el umbral prerregistrado de una medición anterior.",
+            "Registrar la ausencia de línea base sin fabricar valores."
+          ],
+          "uncertainty": "Línea base empírica desconocida; no sustituir su ausencia por cero.",
+          "unit": "invocaciones",
+          "value": null
+        },
+        "deps": {
+          "specify_criterion": 1,
+          "study_indicator": 1
+        },
+        "id": "validate_baseline",
+        "kind": "baseline",
+        "text": "No se aporta una medición anterior de discrepancias ni una ejecución de la alternativa manual. El umbral contractual de cero es una expectativa, no una línea base observada.",
+        "version": 1
+      },
+      "prev_hash": "35d1f89733ffdede1bdaab0cdfae56d543099730dba25fa9042ece14df5c32f1",
+      "seq": 46
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:06:10+00:00",
+      "hash": "920ff702738bd46b5ef1074fee332b38ba3b04721d0fcb15ba5d847e2b9978cf",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "criterion_measurement": {
+            "metric": "invocaciones_con_discrepancia_contractual",
+            "total_invocations": null,
+            "unit": "invocaciones",
+            "value": null
+          },
+          "date": "2026-10-06",
+          "date_basis": "Fecha del contexto suministrado.",
+          "exit_code": 0,
+          "method": "Lectura del resumen de unittest y de las salidas y código registrados por el ejecutor suministrado; no ejecución del autor.",
+          "metric": "metodos_de_prueba_completados",
+          "origin": "technical",
+          "scope": "Suite test_range_audit.py vinculada a build_test actual y build_implementation actual.",
+          "source": "measured-test-records.json/build_test; state.json/items/build_test",
+          "steps": [
+            "Relacionar el registro suministrado con la implementación y prueba actuales.",
+            "Extraer únicamente el número de métodos, duración informada, salidas y código registrados.",
+            "Mantener separado ese resumen del conteo de invocaciones del criterio."
+          ],
+          "suite_reported_seconds": 2.777,
+          "uncertainty": "Procedencia declarada localmente, sin identidad ni firma autenticadas; el resumen agregado no mide exhaustividad ni efecto comparativo.",
+          "unit": "metodos",
+          "value": 6
+        },
+        "deps": {
+          "build_implementation": 2,
+          "build_test": 2,
+          "specify_criterion": 1,
+          "study_indicator": 1
+        },
+        "id": "validate_result",
+        "kind": "result",
+        "text": "El registro suministrado para la entrega actual informa exit_code=0 y stderr con «Ran 6 tests in 2.777s» y «OK»; stdout está vacío. Son seis métodos de prueba, no seis invocaciones de la CLI. Los ejemplos utilizados son controles públicos de contrato. El resumen no aporta un registro individual de cada invocación ni una medición de campo.",
+        "version": 1
+      },
+      "prev_hash": "c8d8c69610af45101fb4f954c784674c0a2b76f510eaedfa9c4249dce4e16fc7",
+      "seq": 47
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:06:10+00:00",
+      "hash": "6a57dea925eeedd5ae14b6c13128cba2a75c9118a5dc6dfd37d1eccf82177aa2",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": "Desconocidos: no se suministran mediciones de daños. compare_risks identifica riesgos contractuales, no daños observados.",
+          "cost": "Coste total desconocido. Los 2.777 segundos informados corresponden a la suite; no miden coste de desarrollo, uso ni rendimiento comparativo.",
+          "estimate": null,
+          "interval": null,
+          "metric": "invocaciones_con_discrepancia_contractual",
+          "steps": [
+            "Contrastar el alcance del resultado técnico con la métrica prerregistrada.",
+            "Separar evidencia técnica, simulación ausente y campo no observado.",
+            "Declarar incertidumbre, costes y daños sin estimaciones inventadas."
+          ],
+          "uncertainty": "Faltan línea base medida, registros individuales de invocaciones y soporte para un intervalo de efecto. La evidencia técnica agregada no sustituye esos datos.",
+          "unit": "invocaciones",
+          "verdict": "no_demostrado"
+        },
+        "deps": {
+          "compare_risks": 1,
+          "specify_criterion": 1,
+          "validate_baseline": 1,
+          "validate_result": 1
+        },
+        "id": "validate_assessment",
+        "kind": "assessment",
+        "text": "Veredicto: no_demostrado. El resumen técnico suministrado respalda una ejecución sin fallos informados de la suite actual, con alcance limitado a sus casos. No permite estimar un efecto frente a una línea base ni un intervalo numérico sustentado para la métrica del criterio. No hay resultados simulados ni observaciones de campo. Los costes y daños de uso permanecen desconocidos; no se deriva superioridad, eficacia de campo o corrección universal.",
+        "version": 1
+      },
+      "prev_hash": "920ff702738bd46b5ef1074fee332b38ba3b04721d0fcb15ba5d847e2b9978cf",
+      "seq": 48
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:06:53+00:00",
+      "hash": "8865dc15a57fea36a0dc60391958177e07c6c25f35e38155b20fe68dceedeaef",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-06",
+          "date_basis": "Fecha del contexto suministrado, no de una medición anterior.",
+          "metric": "invocaciones_con_discrepancia_contractual",
+          "origin": "technical",
+          "scope": "No se identifica una población anterior medida.",
+          "source": "contract.md; state.json/items/specify_criterion; measured-test-records.json",
+          "steps": [
+            "Distinguir el umbral prerregistrado de una línea base medida.",
+            "Clasificar el alcance como técnico y conservar el valor desconocido."
+          ],
+          "uncertainty": "Línea base desconocida; no sustituir su ausencia por cero.",
+          "unit": "invocaciones",
+          "value": null
+        },
+        "deps": {
+          "specify_criterion": 1,
+          "study_indicator": 1
+        },
+        "id": "validate_baseline",
+        "kind": "baseline",
+        "text": "Línea base técnica no medida: no se aporta un conteo anterior de discrepancias ni una ejecución de la alternativa manual. El umbral contractual de cero es una expectativa, no una observación.",
+        "version": 2
+      },
+      "prev_hash": "6a57dea925eeedd5ae14b6c13128cba2a75c9118a5dc6dfd37d1eccf82177aa2",
+      "seq": 49
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:06:54+00:00",
+      "hash": "fd5f529eb8ebdc4eb93253653d03ed28cf76da0a6edc7862232c49abfe467ad5",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "criterion_measurement": {
+            "metric": "invocaciones_con_discrepancia_contractual",
+            "total_invocations": null,
+            "unit": "invocaciones",
+            "value": null
+          },
+          "date": "2026-10-06",
+          "date_basis": "Fecha del contexto suministrado.",
+          "exit_code": 0,
+          "method": "Lectura del resumen y las salidas registrados por el ejecutor suministrado; sin ejecución del autor.",
+          "metric": "metodos_de_prueba_completados",
+          "origin": "technical",
+          "scope": "Suite test_range_audit.py de build_test versión 2 y build_implementation versión 2.",
+          "source": "measured-test-records.json/build_test; state.json/items/build_test",
+          "steps": [
+            "Reconsiderar el resultado frente a la línea base desconocida y el criterio vigente.",
+            "Conservar únicamente las observaciones agregadas suministradas.",
+            "Vincular la línea base corregida sin convertir métodos de prueba en invocaciones medidas."
+          ],
+          "suite_reported_seconds": 2.777,
+          "uncertainty": "Procedencia declarada localmente, sin identidad ni firma autenticadas. El resumen agregado no aporta registros individuales ni un efecto comparativo.",
+          "unit": "metodos",
+          "value": 6
+        },
+        "deps": {
+          "build_implementation": 2,
+          "build_test": 2,
+          "specify_criterion": 1,
+          "study_indicator": 1,
+          "validate_baseline": 2
+        },
+        "id": "validate_result",
+        "kind": "result",
+        "text": "El registro suministrado de la entrega actual informa exit_code=0, stdout vacío y el resumen «Ran 6 tests in 2.777s» con «OK». Son seis métodos de prueba, no seis invocaciones de la CLI. Los ejemplos son controles públicos de contrato. No se aporta una comparación medida con la línea base.",
+        "version": 2
+      },
+      "prev_hash": "8865dc15a57fea36a0dc60391958177e07c6c25f35e38155b20fe68dceedeaef",
+      "seq": 50
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-06T02:06:55+00:00",
+      "hash": "8842e1fbf0160d1163cbdac1f91c95b32b288909cfd0290d9f16feafc0ca8321",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "adverse_effects": "Desconocidos: compare_risks identifica riesgos contractuales, no daños observados.",
+          "claim_scope": "technical",
+          "cost": "Coste total desconocido. Los 2.777 segundos corresponden al resumen de la suite, no al coste de desarrollo o uso ni a rendimiento comparativo.",
+          "estimate": null,
+          "interval": null,
+          "metric": "invocaciones_con_discrepancia_contractual",
+          "steps": [
+            "Reconsiderar la evaluación con la línea base y el resultado corregidos.",
+            "Delimitar la afirmación técnica respecto del criterio prerregistrado.",
+            "Mantener desconocidos efecto, costes y daños sin extrapolar a campo."
+          ],
+          "uncertainty": "Sin línea base medida ni registros individuales, el resumen técnico no permite cuantificar un efecto o establecer corrección universal.",
+          "unit": "invocaciones",
+          "verdict": "no_demostrado"
+        },
+        "deps": {
+          "compare_risks": 1,
+          "specify_criterion": 1,
+          "validate_baseline": 2,
+          "validate_result": 2
+        },
+        "id": "validate_assessment",
+        "kind": "assessment",
+        "text": "Veredicto: no_demostrado para el efecto frente a una línea base. El resumen técnico describe una ejecución de la suite actual sin fallos informados, limitada a sus casos. Faltan mediciones anteriores y registros individuales para estimar la métrica del criterio y su intervalo. No se aportan resultados simulados ni observaciones de campo.",
+        "version": 2
+      },
+      "prev_hash": "fd5f529eb8ebdc4eb93253653d03ed28cf76da0a6edc7862232c49abfe467ad5",
+      "seq": 51
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-06T02:07:22+00:00",
+      "hash": "552ccc26839ba7e49e9e70a6b8a4f08c5fc5ae353ef95212edea66027561be66",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "validate",
+        "provenance": "local_declared",
+        "reason": "La fase de validación cumple plenamente el contrato y las reglas de salida. Los tres artefactos (validate_baseline, validate_result y validate_assessment en versión 2) trazan de forma rigurosa y coherente con sus dependencias previas (specify_criterion, study_indicator, build_implementation, build_test y compare_risks). La línea base técnica distingue con precisión el umbral normativo de la ausencia de observaciones previas medidas sin inventar ceros. El resultado refleja fielmente la evidencia técnica agregada suministrada por el controlador aislado (6 métodos de prueba ejecutados con éxito, código 0) sin extrapolar a invocaciones individuales. Finalmente, la evaluación dictamina fundadamente 'no_demostrado' para el efecto comparativo, delimitando el alcance a lo técnico, reconociendo la incertidumbre y declarando costes y efectos adversos como no observados sin alegar indebidamente superioridad empírica ni beneficios de campo. [role receipt: /datos/workspaces/personal/specorganon-validation/method-superiority-v1/native-reliability-01/attempt-04/transport/host-journal/role-22-validate-review/receipt.json]",
+        "snapshot": "ebb23b4908e62361dfd56445d788e317e0c1bd37cd5b91d88c9958438500f0f5",
+        "verdict": "accept"
+      },
+      "prev_hash": "8842e1fbf0160d1163cbdac1f91c95b32b288909cfd0290d9f16feafc0ca8321",
+      "seq": 52
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-06T02:07:23+00:00",
+      "hash": "f7f43106280875717c1d3d826221503359b43cbf902429c43bb4217c6979ac2e",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "validate",
+        "review_seq": 52,
+        "snapshot": "ebb23b4908e62361dfd56445d788e317e0c1bd37cd5b91d88c9958438500f0f5"
+      },
+      "prev_hash": "552ccc26839ba7e49e9e70a6b8a4f08c5fc5ae353ef95212edea66027561be66",
+      "seq": 53
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "138fa851-2503-4518-9238-bd2a29ab394a",
+    "created_at": "2026-10-06T01:57:13+00:00",
+    "created_by": "human:owner",
+    "domain": "development",
+    "test_gate_policy": "local_report",
+    "title": "Native reliability attempt-04 rangeaudit"
+  },
+  "schema": 1
+}

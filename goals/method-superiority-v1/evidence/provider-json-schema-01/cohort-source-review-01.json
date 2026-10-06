@@ -1,0 +1,46 @@
+{
+  "job_id": "17da0c5be01b4981809613671118ea8d",
+  "status": "succeeded",
+  "submitted_at": 1791255374.8954966,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "codex/gpt-6.1-sol",
+  "access": "text",
+  "codex_account": "principal",
+  "started_at": 1791255374.8987193,
+  "finished_at": 1791255400.2582386,
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "text",
+    "cwd": "/home/stev/.codex/worktrees/strong-comparators-v1/SpecOrganon",
+    "duration_s": 25.4,
+    "depth": 0
+  },
+  "review": {
+    "schema": 1,
+    "verdict": "reject",
+    "reason": "La lectura del registro utiliza los mismos bytes cuyo hash verifica; schema1 no puede adquirir admission_repair y schema2 exige opt-in, versión y cuotas declaradas. El controlador suministrado conserva los límites y carga los rechazos de admisión al presupuesto. Sin embargo, faltan garantías materiales de vinculación entre fuentes registradas y código/contenido utilizados. Tampoco se aporta el baseline congelado v1 para comprobar su preservación. Los resultados sintéticos y los pases comunicados no establecen eficacia; no he ejecutado pruebas.",
+    "findings": [
+      {
+        "file": "scripts/native_reliability.py",
+        "issue": "controller() vuelve a leer contrato y mandato sin verificar los bytes utilizados. La comprobación anterior de load_plan() y las posteriores no vinculan esos contenidos ya retenidos por el controlador: un cambio transitorio entre lecturas puede escapar.",
+        "fix": "Construir contrato y mandato con bound_source(), verificando y decodificando una única lectura de cada archivo antes de crear el controlador."
+      },
+      {
+        "file": "scripts/native_reliability.py",
+        "issue": "Los hashes se verifican bajo source_root, pero engine, Controller, DockerRoles y __version__ ya fueron importados. No se demuestra que esos módulos ejecutados correspondan a las fuentes registradas. La igualdad de versión y controller_limits contra constantes del driver no comprueba las cuotas efectivas del transporte, cuyo código tampoco aparece en el snapshot.",
+        "fix": "Vincular el origen y los bytes del código ejecutado con source_sha256, incluyendo el driver, y comprobar la política efectiva del controlador y transporte antes de cualquier dispatch. Aportar el transporte para revisar el límite de 6000 segundos."
+      },
+      {
+        "file": "scripts/native_reliability.py",
+        "issue": "El generador incluye register_native_cohort.py en source_sha256, pero load_plan() no lo exige en required. Por tanto, admite un registro schema2 sin el binding obligatorio del helper.",
+        "fix": "Exigir explícitamente el helper de registro en los bindings requeridos de schema2 antes de iniciar intentos."
+      }
+    ],
+    "tests_executed": false
+  }
+}

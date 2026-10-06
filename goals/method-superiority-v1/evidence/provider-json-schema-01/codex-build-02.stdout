@@ -1,0 +1,85 @@
+#1 [internal] load local bake definitions
+#1 reading from stdin 615B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.21kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node@sha256:25330af3531fb5e23318554a0aa911125b6e91b1b777edf7655501d207c067a2
+#3 DONE 0.0s
+
+#4 [internal] load metadata for docker.io/library/specorganon-release:0.2.0rc3.dev4
+#4 DONE 0.0s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 195B done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 DONE 0.0s
+
+#7 [node 1/1] FROM docker.io/library/node@sha256:25330af3531fb5e23318554a0aa911125b6e91b1b777edf7655501d207c067a2
+#7 resolve docker.io/library/node@sha256:25330af3531fb5e23318554a0aa911125b6e91b1b777edf7655501d207c067a2 0.0s done
+#7 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 3.96MB 0.0s done
+#6 DONE 0.0s
+
+#8 [stage-1  1/11] FROM docker.io/library/specorganon-release:0.2.0rc3.dev4@sha256:6d196a4a021b872e2ea7d799e1797834e23b570e635bd640095f4521cca04ce2
+#8 resolve docker.io/library/specorganon-release:0.2.0rc3.dev4@sha256:6d196a4a021b872e2ea7d799e1797834e23b570e635bd640095f4521cca04ce2 0.0s done
+#8 DONE 0.1s
+
+#9 [stage-1  2/11] COPY --from=node /usr/local/bin/node /usr/local/bin/node
+#9 DONE 0.1s
+
+#10 [stage-1  3/11] COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+#10 DONE 0.2s
+
+#11 [stage-1  4/11] RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm     && npm install -g "@openai/codex@0.160.0"     && npm cache clean --force     && usermod -l codex -d /home/codex -m ubuntu     && groupmod -n codex ubuntu     && mkdir -p /workspace /home/codex/.codex     && chown -R codex:codex /workspace /home/codex
+#11 3.795 
+#11 3.795 added 2 packages in 3s
+#11 3.798 npm notice
+#11 3.798 npm notice New major version of npm available! 10.9.9 -> 12.2.0
+#11 3.798 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#11 3.798 npm notice To update run: npm install -g npm@12.2.0
+#11 3.798 npm notice
+#11 3.893 npm warn using --force Recommended protections disabled.
+#11 DONE 4.1s
+
+#12 [stage-1  5/11] COPY scripts /opt/specorganon/scripts
+#12 DONE 0.0s
+
+#13 [stage-1  6/11] COPY workflows /opt/specorganon/workflows
+#13 DONE 0.0s
+
+#14 [stage-1  7/11] COPY docs /opt/specorganon/docs
+#14 DONE 0.0s
+
+#15 [stage-1  8/11] COPY .agents /opt/specorganon/.agents
+#15 DONE 0.0s
+
+#16 [stage-1  9/11] COPY docker/codex /opt/codex-lab
+#16 DONE 0.1s
+
+#17 [stage-1 10/11] RUN chmod -R a+rX /opt/specorganon /opt/codex-lab     && chmod +x /opt/codex-lab/entrypoint.sh
+#17 DONE 0.8s
+
+#18 [stage-1 11/11] WORKDIR /workspace
+#18 DONE 0.1s
+
+#19 exporting to image
+#19 exporting layers
+#19 exporting layers 5.3s done
+#19 exporting manifest sha256:3ca92099cf875f8a696b51951f9d8e7de3f06308a9ceb12274eda623e6777a11 done
+#19 exporting config sha256:13e2574163cd9d1329ab20fc877293635e8cafbcd45c054248e549fffa70ad73 done
+#19 exporting attestation manifest sha256:48105851950ff056d0d4f06a6dbfe0eedc10a472ec97fa15686f417dfa04572c done
+#19 exporting manifest list sha256:4e918f72d20e5dda3c5022ed5ce7c4140ab8e1457acd322d7e7f444a0d453586 done
+#19 naming to docker.io/library/specorganon-codex:0.2.0rc3.dev4 done
+#19 unpacking to docker.io/library/specorganon-codex:0.2.0rc3.dev4
+#19 unpacking to docker.io/library/specorganon-codex:0.2.0rc3.dev4 2.4s done
+#19 DONE 7.7s
+
+#20 resolving provenance for metadata file
+#20 DONE 0.0s
