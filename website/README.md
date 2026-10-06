@@ -162,3 +162,5 @@ La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wh
 ## Piloto dev7 terminal, informe final separado
 
 `#piloto-dev7` presenta cierre original08:56:26UTC:6/6failed exactrequestbudget,0/6gatecomplete,648/648checks públicos descriptivos (115/104/105 cada brazo),sinD/Gfinal/common_complete/F externo ni competencia/superioridad/ranking. Report01de2/6queda histórico inmutable. Nuevos1080originales22311295bytes+504anteriores,manifiesto1087.19rolesnativos13author6review+3ownmeasures,22controllercontainers exitedretained/nocleanup;wholeattemptsum1830.455sec,no ratioscomparativos.94descargas históricas intactas/no nueva release. Futurocodec/versionseparados,nopublicadosenestehito.
+
+El hito `#avance-dev8` publica ingeniería parcial de contexto lossless,156 pruebas seleccionadas y41 módulos instalados. Conserva dev7 terminal6/6 gates fallidos y94 descargas históricas; no acredita admisión, competencia,freeze completo ni superioridad. Fuentes y recibos se enlazan a main.

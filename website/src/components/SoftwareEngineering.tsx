@@ -1,3 +1,4 @@
+import RequestContentEngineering from './RequestContentEngineering';
 import data from '../software-engineering-02.json';
 import NativeCohortProgress from './NativeCohortProgress';
 import BoundedAdmission from './BoundedAdmission';
@@ -28,6 +29,7 @@ export default function SoftwareEngineering(){
     <StagedControls/>
     <AutonomousControl/>
     <NativePilotProgress/>
+    <RequestContentEngineering/>
     <Dev4Closure/>
     <h5 id="meta-mejor-metodo">Meta activa: demostrar que mejora la entrega</h5>
     <p>Codex tiene asignada la mejora y su validación. Para cerrar la meta, el candidato deberá satisfacer criterios fijados antes de las nuevas evaluaciones:</p>

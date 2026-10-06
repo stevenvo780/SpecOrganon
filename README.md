@@ -39,6 +39,8 @@ estadístico; no hay generaciones dev6 ni superioridad medida.
 
 **Último piloto público dev7, cerrado:** seis gates fallidos de seis por `exact canonical request exceeds budget`, sin reemplazos. Los programas pasaron648/648 comprobaciones públicas descriptivas; no acreditan D/Gfinal, paquete común, F reservado, competencia ni superioridad. [Informe final](goals/method-superiority-v1/evidence/neutral-native-pilot-dev7-final-01/summary.json), [originales y límites](goals/method-superiority-v1/evidence/neutral-native-pilot-dev7-final-01/README.md), [web actualizada](https://specorganon.stevenvallejo.com/#piloto-dev7). Report01parcial2/6 se conserva histórico; desarrollo futurocodec no cambia estas fuentes ni resultados.
 
+**Main actual, dev8 de ingeniería parcial:** contexto N/S lossless con referencias compartidas, preservando todo el historial, metadatos, capturas, criterios y localizadores. El recibo registra156 pruebas seleccionadas,41 módulos instalados byte iguales yCLI/MCP24; dos defectos de recursos rechazados por Codex fueron corregidos y aceptados en revisión acotada. Seis reconstrucciones offline y tres auditorías hipotéticas caben dentro de110000 bytes de request y128000 de prompt; nunca se despacharon como nuevos intentos. No hay admisión, freeze completo, calificación, competencia ni superioridad. Wheel e imágenes locales; último wheel público dev5. [Informe](goals/method-superiority-v1/evidence/request-content-dev8-01/engineering-receipt.json), [fuentes y límites](goals/method-superiority-v1/evidence/request-content-dev8-01/README.md), [hito web](https://specorganon.stevenvallejo.com/#avance-dev8). El resultado dev7 de seis gates fallidos permanece intacto.
+
 ## Clonar y empezar
 
 ```sh
