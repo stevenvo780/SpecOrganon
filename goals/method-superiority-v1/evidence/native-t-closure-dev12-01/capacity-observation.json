@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "captured_at": "2026-10-06T13:41:14.705Z",
+  "machine": "Kratos",
+  "scope": "Fresh observations; no native attempt admission; no secondary account selection",
+  "providers": {
+    "codex": {
+      "quota": "ordinary_window_exhausted",
+      "credits_available": true,
+      "local_poll": "deliberately disabled; UNKNOWN"
+    },
+    "gemini_default": {
+      "observed_at": "2026-10-06T13:40:57.000Z",
+      "age_seconds": 18,
+      "windows": [
+        {
+          "label": "5 horas",
+          "remainingPercent": 65
+        },
+        {
+          "label": "semanal",
+          "remainingPercent": 24
+        }
+      ]
+    }
+  },
+  "catalog": {
+    "server": "cloud-offload",
+    "routes": [
+      {
+        "model": "codex/gpt-6.1-sol",
+        "provider": "codex",
+        "cli": "codex",
+        "cli_path": "/home/stev/.local/bin/codex",
+        "native": "gpt-6.1-sol"
+      },
+      {
+        "model": "gemini/3.8-flash",
+        "provider": "gemini",
+        "cli": "agy",
+        "cli_path": "/home/stev/.local/bin/agy",
+        "native": "Gemini 3.8 Flash (Medium)"
+      }
+    ],
+    "muse_present": false
+  }
+}

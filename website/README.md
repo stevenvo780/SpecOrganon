@@ -165,12 +165,12 @@ La sección `#avance-dev3` publica las verificaciones de ingeniería 193/193, wh
 
 El hito `#avance-dev8` publica ingeniería parcial de contexto lossless,156 pruebas seleccionadas y41 módulos instalados. Conserva dev7 terminal6/6 gates fallidos y94 descargas históricas; no acredita admisión, competencia,freeze completo ni superioridad. Fuentes y recibos se enlazan a main.
 
-El corte actual añade ingeniería parcial de custodia T dev9 (#avance-dev9) y una foto original dev8 de tres posiciones (#piloto-dev8), fechada en su índice. Preserva las94 descargas históricas. No acredita adaptador T completo, admisión T, competencia ni superioridad.
+El corte histórico dev9 añade ingeniería parcial de custodia T (#avance-dev9) y una foto original dev8 de tres posiciones (#piloto-dev8), fechada en su índice. Preserva las94 descargas históricas. No acredita adaptador T completo, admisión T, competencia ni superioridad.
 
 El piloto dev8 terminó en seis posiciones:cuatro failed y dos review_ready,common_complete/F externo null. #piloto-dev8 muestra el cierre original; los cortes2/6 y3/6 se conservan históricos. La meta continúa activa.
 
 
-El avance prospectivo actual es **dev10, ingeniería parcial**: controlador común T,
+El corte histórico prospectivo dev10 es **ingeniería parcial**: controlador común T,
 custodia por transición y auditoría separada de las nueve revisiones. Hay 232
 pruebas sintéticas aprobadas y 45 módulos instalados idénticos en imágenes
 locales; los seguimientos de 45 y 19 controles se solapan. Continúan abiertos el
@@ -194,3 +194,7 @@ hallazgos nuevos F9–F11 pendientes, reproducciones todavía no ejecutadas. No 
 superioridad. Mantiene los originales dev8 y las 99 descargas anteriores.
 [Hito dev11](https://specorganon.stevenvallejo.com/#avance-dev11) y
 [fuentes main](https://github.com/stevenvo780/SpecOrganon/blob/main/goals/method-superiority-v1/evidence/whole-attempt-recovery-dev11-01/README.md).
+
+## Dev12: ingeniería parcial y entrada T prospectiva
+
+`#avance-dev12` publica593 controles seleccionados,17 Docker mecánicos con roles simulados y70 instalados; recuentos solapados sin nuevas generaciones.48 módulos exactos,CLI/MCP24/Codex0.160. La entrada T instalada mostró diez posiciones sin iniciar, exit2 incompleto y cero runtime. Dos rechazos originales, timeout600 y aceptación de partición Gemini16 se conservan; dos deltas Codex aceptadas no acreditan aceptación completa, admisión, freeze, calificación ni superioridad. Las107 descargas anteriores y once manifiestos permanecen intactos; diez descargas adicionales tienen manifiesto separado.

@@ -1,0 +1,265 @@
+........................................................................ [ 12%]
+........................................................................ [ 25%]
+........................................................................ [ 38%]
+........................................................................ [ 51%]
+......................................FF................................ [ 63%]
+........................................................................ [ 76%]
+........................................................................ [ 89%]
+............................................................             [100%]
+=================================== FAILURES ===================================
+___ test_F3_cleanup_only_confirms_observed_owned_terminal_lifecycle[created] ___
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f8f55e8eb70>
+job_id = 'author-01'
+
+    def reconcile(self, job_id):
+        try:
+>           with self._cleanup_controls(): return self._reconcile_observed(job_id)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+src/specorganon/docker_roles.py:534: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f8f55e8eb70>
+job_id = 'author-01'
+
+    def _reconcile_observed(self, job_id):
+        folder = self.root / 'jobs' / job_id; plan = _json(folder / 'launch.json'); value = self._inspect(plan)
+        if value is not None and plan.get('container_id') is not None and value['Id']!=plan['container_id']:
+            raise UncertainJob('owned name no longer identifies the recorded container; never kill replacement')
+        if value is None:
+            _write(folder / 'reconciliation.json', {'schema':1,'outcome':'handle_missing_uncertain',
+                'name':plan['name'],'native_restarted':False,'acceptance':False,'cleanup_confirmed':False})
+            raise PendingCleanupError('owned creation/container absent but execution stop is not confirmed')
+        if type(value['State']['Running']) is not bool:
+            raise PendingCleanupError('owned execution running state is not confirmed')
+        if value['State']['Running']:
+            self._control(['kill', value['Id']], allow_failure=True)
+            value = self._inspect(plan)
+            if (value is None or value['State']['Running'] is not False
+                    or any(value['State'].get(n) is not False for n in ('Dead', 'Restarting'))
+                    or value['State'].get('Status') not in ('exited','created')):
+                raise PendingCleanupError('owned container stop could not be confirmed after kill')
+            outcome = 'owned_container_killed_execution_uncertain'
+        elif (value['State'].get('Status') in ('exited','created')
+                and all(value['State'].get(n) is False for n in ('Dead', 'Restarting'))):
+            outcome = 'owned_container_stopped_execution_uncertain'
+        else:
+>           raise PendingCleanupError('owned container terminal lifecycle state is uncertain')
+E           specorganon.docker_roles.PendingCleanupError: owned container terminal lifecycle state is uncertain
+
+src/specorganon/docker_roles.py:560: PendingCleanupError
+
+The above exception was the direct cause of the following exception:
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f8f55e8eb70>
+job_id = 'author-01', role = 'author'
+request = {'schema': 1, 'role': 'author', 'role_instructions': 'Fixture', 'documents': {'author-response-format.json': '{"format":"files-v1","schema":1}'}}
+
+    def reconcile_pending(self,job_id,role,request):
+        """Stop only the exact owned pending container; never prepare or start."""
+        if type(job_id) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}',job_id) is None:
+            raise DockerRoleError('invalid pending reconciliation target')
+        folder=self.root/'jobs'/job_id
+        if not (folder/'launch.json').exists():
+            if (folder/'create-attempt.json').exists() or (self.store.root/job_id/'started.json').exists():
+                raise PendingCleanupError('owned creation/dispatch exists without launch; cleanup cannot be confirmed')
+            return False
+        if role=='test':request={'schema':1,'argv':request['argv'],'delivery_tree_sha256':digest(canonical(request['files']))}
+        try:
+            plan=_json(folder/'launch.json');self._validate_launch(folder,plan,job_id,role,request)
+            if not (folder/'create-attempt.json').exists():raise PendingCleanupError('pending launch lacks creation intent; cleanup cannot be confirmed')
+            if _json(folder/'create-attempt.json')!=self._creation_attempt(plan):
+                raise DockerRoleError('pending cleanup creation intent diverged')
+>           self.reconcile(job_id)
+
+src/specorganon/docker_roles.py:878: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f8f55e8eb70>
+job_id = 'author-01'
+
+    def reconcile(self, job_id):
+        try:
+            with self._cleanup_controls(): return self._reconcile_observed(job_id)
+        except (DockerRoleError,UncertainJob) as exc:
+>           raise PendingCleanupError('owned execution stop is not confirmed; retain its reservation') from exc
+E           specorganon.docker_roles.PendingCleanupError: owned execution stop is not confirmed; retain its reservation
+
+src/specorganon/docker_roles.py:536: PendingCleanupError
+
+The above exception was the direct cause of the following exception:
+
+closed = (<specorganon.docker_roles.DockerRoles object at 0x7f8f55e8eb70>, PosixPath('/tmp/pytest-of-stev/pytest-455/test_F3_cl...be.py":"print(1)"},"reason":"Synthetic content","schema":1},"schema":1,"usage_reported":{"tokens":1}}', 'stderr': b''})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8f5603a6d0>
+status = 'created'
+
+    @pytest.mark.parametrize('status',['missing','restarting','dead','created','exited'])
+    def test_F3_cleanup_only_confirms_observed_owned_terminal_lifecycle(closed,monkeypatch,status):
+        t,folder,request,_,_ = closed
+        monkeypatch.setattr(t,'reconcile',DockerRoles.reconcile.__get__(t,DockerRoles))
+        plan = _json(folder/'launch.json'); plan['container_id'] = None; _write(folder/'launch.json',plan)
+        record = None if status == 'missing' else {'Id':'b'*64,'State':{'Running':False,'Status':status}}
+        monkeypatch.setattr(t,'_inspect',lambda ignored:copy.deepcopy(record))
+        if status in ('created','exited'):
+>           assert t.reconcile_pending('author-01','author',request) is True
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_dev11_review_regressions.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f8f55e8eb70>
+job_id = 'author-01', role = 'author'
+request = {'schema': 1, 'role': 'author', 'role_instructions': 'Fixture', 'documents': {'author-response-format.json': '{"format":"files-v1","schema":1}'}}
+
+    def reconcile_pending(self,job_id,role,request):
+        """Stop only the exact owned pending container; never prepare or start."""
+        if type(job_id) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}',job_id) is None:
+            raise DockerRoleError('invalid pending reconciliation target')
+        folder=self.root/'jobs'/job_id
+        if not (folder/'launch.json').exists():
+            if (folder/'create-attempt.json').exists() or (self.store.root/job_id/'started.json').exists():
+                raise PendingCleanupError('owned creation/dispatch exists without launch; cleanup cannot be confirmed')
+            return False
+        if role=='test':request={'schema':1,'argv':request['argv'],'delivery_tree_sha256':digest(canonical(request['files']))}
+        try:
+            plan=_json(folder/'launch.json');self._validate_launch(folder,plan,job_id,role,request)
+            if not (folder/'create-attempt.json').exists():raise PendingCleanupError('pending launch lacks creation intent; cleanup cannot be confirmed')
+            if _json(folder/'create-attempt.json')!=self._creation_attempt(plan):
+                raise DockerRoleError('pending cleanup creation intent diverged')
+            self.reconcile(job_id)
+        except (ValueError,OSError) as exc:
+>           raise PendingCleanupError('owned pending execution cleanup is not confirmed; retain exact reservation') from exc
+E           specorganon.docker_roles.PendingCleanupError: owned pending execution cleanup is not confirmed; retain exact reservation
+
+src/specorganon/docker_roles.py:880: PendingCleanupError
+___ test_F3_cleanup_only_confirms_observed_owned_terminal_lifecycle[exited] ____
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f8f55e8f890>
+job_id = 'author-01'
+
+    def reconcile(self, job_id):
+        try:
+>           with self._cleanup_controls(): return self._reconcile_observed(job_id)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+src/specorganon/docker_roles.py:534: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f8f55e8f890>
+job_id = 'author-01'
+
+    def _reconcile_observed(self, job_id):
+        folder = self.root / 'jobs' / job_id; plan = _json(folder / 'launch.json'); value = self._inspect(plan)
+        if value is not None and plan.get('container_id') is not None and value['Id']!=plan['container_id']:
+            raise UncertainJob('owned name no longer identifies the recorded container; never kill replacement')
+        if value is None:
+            _write(folder / 'reconciliation.json', {'schema':1,'outcome':'handle_missing_uncertain',
+                'name':plan['name'],'native_restarted':False,'acceptance':False,'cleanup_confirmed':False})
+            raise PendingCleanupError('owned creation/container absent but execution stop is not confirmed')
+        if type(value['State']['Running']) is not bool:
+            raise PendingCleanupError('owned execution running state is not confirmed')
+        if value['State']['Running']:
+            self._control(['kill', value['Id']], allow_failure=True)
+            value = self._inspect(plan)
+            if (value is None or value['State']['Running'] is not False
+                    or any(value['State'].get(n) is not False for n in ('Dead', 'Restarting'))
+                    or value['State'].get('Status') not in ('exited','created')):
+                raise PendingCleanupError('owned container stop could not be confirmed after kill')
+            outcome = 'owned_container_killed_execution_uncertain'
+        elif (value['State'].get('Status') in ('exited','created')
+                and all(value['State'].get(n) is False for n in ('Dead', 'Restarting'))):
+            outcome = 'owned_container_stopped_execution_uncertain'
+        else:
+>           raise PendingCleanupError('owned container terminal lifecycle state is uncertain')
+E           specorganon.docker_roles.PendingCleanupError: owned container terminal lifecycle state is uncertain
+
+src/specorganon/docker_roles.py:560: PendingCleanupError
+
+The above exception was the direct cause of the following exception:
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f8f55e8f890>
+job_id = 'author-01', role = 'author'
+request = {'schema': 1, 'role': 'author', 'role_instructions': 'Fixture', 'documents': {'author-response-format.json': '{"format":"files-v1","schema":1}'}}
+
+    def reconcile_pending(self,job_id,role,request):
+        """Stop only the exact owned pending container; never prepare or start."""
+        if type(job_id) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}',job_id) is None:
+            raise DockerRoleError('invalid pending reconciliation target')
+        folder=self.root/'jobs'/job_id
+        if not (folder/'launch.json').exists():
+            if (folder/'create-attempt.json').exists() or (self.store.root/job_id/'started.json').exists():
+                raise PendingCleanupError('owned creation/dispatch exists without launch; cleanup cannot be confirmed')
+            return False
+        if role=='test':request={'schema':1,'argv':request['argv'],'delivery_tree_sha256':digest(canonical(request['files']))}
+        try:
+            plan=_json(folder/'launch.json');self._validate_launch(folder,plan,job_id,role,request)
+            if not (folder/'create-attempt.json').exists():raise PendingCleanupError('pending launch lacks creation intent; cleanup cannot be confirmed')
+            if _json(folder/'create-attempt.json')!=self._creation_attempt(plan):
+                raise DockerRoleError('pending cleanup creation intent diverged')
+>           self.reconcile(job_id)
+
+src/specorganon/docker_roles.py:878: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f8f55e8f890>
+job_id = 'author-01'
+
+    def reconcile(self, job_id):
+        try:
+            with self._cleanup_controls(): return self._reconcile_observed(job_id)
+        except (DockerRoleError,UncertainJob) as exc:
+>           raise PendingCleanupError('owned execution stop is not confirmed; retain its reservation') from exc
+E           specorganon.docker_roles.PendingCleanupError: owned execution stop is not confirmed; retain its reservation
+
+src/specorganon/docker_roles.py:536: PendingCleanupError
+
+The above exception was the direct cause of the following exception:
+
+closed = (<specorganon.docker_roles.DockerRoles object at 0x7f8f55e8f890>, PosixPath('/tmp/pytest-of-stev/pytest-455/test_F3_cl...be.py":"print(1)"},"reason":"Synthetic content","schema":1},"schema":1,"usage_reported":{"tokens":1}}', 'stderr': b''})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8f571eeac0>
+status = 'exited'
+
+    @pytest.mark.parametrize('status',['missing','restarting','dead','created','exited'])
+    def test_F3_cleanup_only_confirms_observed_owned_terminal_lifecycle(closed,monkeypatch,status):
+        t,folder,request,_,_ = closed
+        monkeypatch.setattr(t,'reconcile',DockerRoles.reconcile.__get__(t,DockerRoles))
+        plan = _json(folder/'launch.json'); plan['container_id'] = None; _write(folder/'launch.json',plan)
+        record = None if status == 'missing' else {'Id':'b'*64,'State':{'Running':False,'Status':status}}
+        monkeypatch.setattr(t,'_inspect',lambda ignored:copy.deepcopy(record))
+        if status in ('created','exited'):
+>           assert t.reconcile_pending('author-01','author',request) is True
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_dev11_review_regressions.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7f8f55e8f890>
+job_id = 'author-01', role = 'author'
+request = {'schema': 1, 'role': 'author', 'role_instructions': 'Fixture', 'documents': {'author-response-format.json': '{"format":"files-v1","schema":1}'}}
+
+    def reconcile_pending(self,job_id,role,request):
+        """Stop only the exact owned pending container; never prepare or start."""
+        if type(job_id) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}',job_id) is None:
+            raise DockerRoleError('invalid pending reconciliation target')
+        folder=self.root/'jobs'/job_id
+        if not (folder/'launch.json').exists():
+            if (folder/'create-attempt.json').exists() or (self.store.root/job_id/'started.json').exists():
+                raise PendingCleanupError('owned creation/dispatch exists without launch; cleanup cannot be confirmed')
+            return False
+        if role=='test':request={'schema':1,'argv':request['argv'],'delivery_tree_sha256':digest(canonical(request['files']))}
+        try:
+            plan=_json(folder/'launch.json');self._validate_launch(folder,plan,job_id,role,request)
+            if not (folder/'create-attempt.json').exists():raise PendingCleanupError('pending launch lacks creation intent; cleanup cannot be confirmed')
+            if _json(folder/'create-attempt.json')!=self._creation_attempt(plan):
+                raise DockerRoleError('pending cleanup creation intent diverged')
+            self.reconcile(job_id)
+        except (ValueError,OSError) as exc:
+>           raise PendingCleanupError('owned pending execution cleanup is not confirmed; retain exact reservation') from exc
+E           specorganon.docker_roles.PendingCleanupError: owned pending execution cleanup is not confirmed; retain exact reservation
+
+src/specorganon/docker_roles.py:880: PendingCleanupError
+=========================== short test summary info ============================
+FAILED tests/test_dev11_review_regressions.py::test_F3_cleanup_only_confirms_observed_owned_terminal_lifecycle[created]
+FAILED tests/test_dev11_review_regressions.py::test_F3_cleanup_only_confirms_observed_owned_terminal_lifecycle[exited]
+2 failed, 562 passed in 84.88s (0:01:24)

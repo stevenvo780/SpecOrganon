@@ -60,6 +60,29 @@ def cleanup(c):
             if plan['container_id']:t._cli(['rm','--force',plan['container_id']],allow_failure=True)
 
 
+def test_checked_test_buffers_survive_later_stream_change_and_next_read_rejects(tmp_path):
+    """Actual offline test process, synthetic content; no provider/profile mount."""
+    t = DockerRoles(tmp_path / 'checked-streams', **OPTIONS)
+    files = {'probe.py': 'import sys\nprint("original measured bytes")\nsys.exit(1)\n'}
+    argv = ['/opt/specorganon/venv/bin/python', '-I', '-S', '-B', '/input/delivery/probe.py']
+    try:
+        measured = t.measure('checked-streams', argv, files)
+        data = {'argv': argv, 'test_job_ref': measured['test_job_ref']}
+        verified, streams = t.read_test(data, files, require_passed=False)
+        assert verified == measured and verified['passed'] is False
+        assert streams['stdout'] == b'original measured bytes\n' and streams['stderr'] == b''
+        assert digest(streams['stdout']) == measured['stdout_sha256']
+        path = t.store.root / 'checked-streams/stdout.bin'
+        path.write_bytes(b'replacement bytes\n')
+        assert streams['stdout'] == b'original measured bytes\n'
+        with pytest.raises(ValueError): t.read_test(data, files, require_passed=False)
+    finally:
+        path = t.root / 'jobs/checked-streams/launch.json'
+        if path.exists():
+            handle = _json(path)['container_id']
+            if handle: t._cli(['rm', '--force', handle], allow_failure=True)
+
+
 @pytest.mark.parametrize('method',['N','S'])
 def test_real_test_with_synthetic_roles_never_claims_native_and_replay_never_reexecutes(tmp_path,method):
     c=make_actual_controller(tmp_path/'run',method)

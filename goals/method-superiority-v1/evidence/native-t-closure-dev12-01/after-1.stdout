@@ -1,0 +1,108 @@
+F.................................F...........................F......... [ 59%]
+.................................................                        [100%]
+=================================== FAILURES ===================================
+______ test_F9_first_terminal_reverifies_common_auditor_before_readiness _______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-452/test_F9_first_terminal_reverif0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff2a527ec40>
+
+    def test_F9_first_terminal_reverifies_common_auditor_before_readiness(tmp_path, monkeypatch):
+        ctrl, holders = make(tmp_path)
+        original = ctrl._terminal
+        def mutate_before_closure(status, **kwargs):
+            if kwargs.get('common_ready'):
+                path = holders[0].jobs / 'T-common-audit-0001/packet.json'
+                packet = _json(path)
+                packet['result']['reason'] = 'Replacement after the last audit check'
+                _write(path, packet)
+            return original(status, **kwargs)
+        monkeypatch.setattr(ctrl, '_terminal', mutate_before_closure)
+>       with pytest.raises(T.TCommonError, match='auditor receipt'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'auditor receipt'
+E         Actual message: 'first terminal auditor reservation changed'
+
+tests/test_dev12_terminal_custody.py:24: AssertionError
+_ test_closed_packet_links_actual_stream_and_all_private_records_without_execution _
+
+closed = (<specorganon.docker_roles.DockerRoles object at 0x7ff2a69bb460>, PosixPath('/tmp/pytest-of-stev/pytest-452/test_close...be.py":"print(1)"},"reason":"Synthetic content","schema":1},"schema":1,"usage_reported":{"tokens":1}}', 'stderr': b''})
+
+    def test_closed_packet_links_actual_stream_and_all_private_records_without_execution(closed):
+        t,_,request,packet,_=closed
+>       assert t.verify_role(packet,'author-01','author',request) is True
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_closed_native_role.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/docker_roles.py:614: in verify_role
+    return self._verify_role_record(packet,job_id,role,request,failed_body=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7ff2a69bb460>
+packet = {'schema': 1, 'provider': 'gemini', 'model': 'fixture-model', 'request_sha256': '8871a21ceed74ea2009dc4ec96fcc493f07583a6d07b54cc6a2d1cee7ba3936b', ...}
+job_id = 'author-01', role = 'author'
+request = {'schema': 1, 'role': 'author', 'role_instructions': 'Fixture', 'documents': {'author-response-format.json': '{"format":"files-v1","schema":1}'}}
+failed_body = False
+
+    def _verify_role_record(self,packet,job_id,role,request,*,failed_body):
+        expected_exit=2 if failed_body else 0
+        provenance='closed_native_invalid_response' if failed_body else 'native'
+        if type(packet) is not dict or packet.get('provenance') != provenance:
+            raise DockerRoleError('native role provenance required')
+        folder, plan, receipt, terminal, streams = self._closed_role_transport(job_id, role, request)
+        provider, model = self.routes[role]
+        path = self.store.root/job_id
+        if receipt['exit_code'] != expected_exit or receipt['timed_out'] or receipt['truncated_streams']:
+            raise DockerRoleError('closed role measured admission/receipt failed')
+        if canonical(terminal) != canonical({'id':plan['container_id'],'exit_code':expected_exit,'image_id':plan['image_id'],'oom_killed':False}):
+>           raise DockerRoleError('closed role terminal container diverged or failed')
+E           specorganon.docker_roles.DockerRoleError: closed role terminal container diverged or failed
+
+src/specorganon/docker_roles.py:682: DockerRoleError
+___________ test_successful_execution_cannot_be_converted_to_failure ___________
+
+closed = (<specorganon.docker_roles.DockerRoles object at 0x7ff2a61e67b0>, PosixPath('/tmp/pytest-of-stev/pytest-452/test_succe...be.py":"print(1)"},"reason":"Synthetic content","schema":1},"schema":1,"usage_reported":{"tokens":1}}', 'stderr': b''})
+
+    def test_successful_execution_cannot_be_converted_to_failure(closed):
+        t, _, request, packet, _ = closed
+        assert t.recover_execution_failure('author-01','author',request) is None
+>       assert t.recover_role('author-01','author',request) == packet
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_closed_execution_failure.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/docker_roles.py:897: in recover_role
+    self.verify_role(packet,job_id,role,request)
+src/specorganon/docker_roles.py:614: in verify_role
+    return self._verify_role_record(packet,job_id,role,request,failed_body=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.docker_roles.DockerRoles object at 0x7ff2a61e67b0>
+packet = {'invocation_metadata': {'executable_path': '/usr/local/bin/agy', 'executable_sha256': '1d84729dac24ac1ecc3cca6a6bd7b1...me/stev/.gemini/settings.json', ...}, 'model': 'fixture-model', 'native_exit_code': 0, 'native_reconnections': [], ...}
+job_id = 'author-01', role = 'author'
+request = {'schema': 1, 'role': 'author', 'role_instructions': 'Fixture', 'documents': {'author-response-format.json': '{"format":"files-v1","schema":1}'}}
+failed_body = False
+
+    def _verify_role_record(self,packet,job_id,role,request,*,failed_body):
+        expected_exit=2 if failed_body else 0
+        provenance='closed_native_invalid_response' if failed_body else 'native'
+        if type(packet) is not dict or packet.get('provenance') != provenance:
+            raise DockerRoleError('native role provenance required')
+        folder, plan, receipt, terminal, streams = self._closed_role_transport(job_id, role, request)
+        provider, model = self.routes[role]
+        path = self.store.root/job_id
+        if receipt['exit_code'] != expected_exit or receipt['timed_out'] or receipt['truncated_streams']:
+            raise DockerRoleError('closed role measured admission/receipt failed')
+        if canonical(terminal) != canonical({'id':plan['container_id'],'exit_code':expected_exit,'image_id':plan['image_id'],'oom_killed':False}):
+>           raise DockerRoleError('closed role terminal container diverged or failed')
+E           specorganon.docker_roles.DockerRoleError: closed role terminal container diverged or failed
+
+src/specorganon/docker_roles.py:682: DockerRoleError
+=========================== short test summary info ============================
+FAILED tests/test_dev12_terminal_custody.py::test_F9_first_terminal_reverifies_common_auditor_before_readiness
+FAILED tests/test_closed_native_role.py::test_closed_packet_links_actual_stream_and_all_private_records_without_execution
+FAILED tests/test_closed_execution_failure.py::test_successful_execution_cannot_be_converted_to_failure
+3 failed, 118 passed in 43.43s

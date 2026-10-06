@@ -246,10 +246,12 @@ def validate_public_result(r, a, result, measured, stderr):
 def transport_policy(r):
     """Derive prospective schema6 without inspecting images before attempt clock."""
     from .attempt_deadline import DEADLINE_POLICY
+    from .docker_roles import TERMINAL_CONTAINER_POLICY
     t = r['transport']; pins = r['source_sha256']
     native = {n: p for n, p in pins.items()
               if n == 'scripts/controller_native_role.py' or Path(n).parent == Path('src/specorganon')}
-    return {'schema': 6, 'whole_attempt_budget':dict(DEADLINE_POLICY), 'create_recovery': 'owned-never-started-after-create-deadline-v1',
+    return {'schema': 6, 'whole_attempt_budget':dict(DEADLINE_POLICY), 'terminal_container_policy': TERMINAL_CONTAINER_POLICY,
+            'create_recovery': 'owned-never-started-after-create-deadline-v1',
             'images': {'native': t['native_image'], 'test': t['test_image']},
             'routes': {target: [t[role]['provider'], t[role]['model']]
                        for target, role in [('author', 'author'), ('review', 'reviewer')]},
@@ -276,8 +278,21 @@ def transport(r, root, *, attempt_clock, attempt_initial_sha256):
 def controller(r, a, folder):
     task = r['tasks'][a['task']]
     implementation = AutonomousNeutralController if a['method'] == 'N' else NeutralController
+    contract = bound_source(r, task['contract']).decode()
+    if a['method'] == 'N':
+        # Keep all historical functional/document requirements byte-for-byte.
+        # Explicit precedence applies to generation AND the auditor's contract.
+        contract += ('\n\nN procedural override v2 — effective prospectively for N only. '
+            'The functional requirements and required delivery documents remain unchanged. '
+            'The neutral-autonomy-v2 protocol supersedes exclusively the legacy v1 staging rules above: '
+            'code may precede notes; program and battery may be authored together. '
+            'No mandatory pre-code notes or separate program-before-battery seal is imposed on N. '
+            'All required notes, criteria, README, tests and real evidence must still exist before common completion. '
+            'Criteria and battery are fixed before their first actual measurement; repairs retain them and the original budget. '
+            'Both generation and common audit apply this explicit precedence. '
+            'This override neither changes functional expectations nor applies to S or T.\n')
     return implementation(folder / 'controller', attempt_id=a['id'], method=a['method'],
-        contract=bound_source(r, task['contract']).decode(), mandate=bound_source(r, r['mandate']).decode(),
+        contract=contract, mandate=bound_source(r, r['mandate']).decode(),
         argv=['/opt/specorganon/venv/bin/python', '-I', '-B', '/input/delivery/' + task['test_file']],
         test_file=task['test_file'], transport_policy=transport_policy(r),
         transport_factory=lambda root,**budget: transport(r, root,**budget), fixture_mode=False)
@@ -333,12 +348,12 @@ def _public(r, a, folder, files, run):
                      'cleanup_confirmed': owned}
             immutable(observed, value)
             return value
-    t.verify_test({'argv': argv, 'test_job_ref': measured['test_job_ref']}, evaluated,
-                  require_passed=False, require_current=True)
+    measured, streams = t.read_test({'argv': argv, 'test_job_ref': measured['test_job_ref']}, evaluated,
+                                   require_passed=False, require_current=True)
     result = None; failure = None
     try:
-        result = strict_json_loads(_read(t.store.root / job / 'stdout.bin').decode())
-        validate_public_result(r, a, result, measured, _read(t.store.root / job / 'stderr.bin'))
+        result = strict_json_loads(streams['stdout'].decode())
+        validate_public_result(r, a, result, measured, streams['stderr'])
     except (ValueError, UnicodeError) as exc:
         failure = type(exc).__name__ + ': ' + str(exc)
     value = {'status': 'observed' if failure is None else 'failed',

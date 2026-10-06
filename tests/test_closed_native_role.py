@@ -84,8 +84,9 @@ def closed(tmp_path, monkeypatch):
     monkeypatch.setattr(subprocess,'Popen',synthetic_popen)
     result=t.store.execute('author-01',['/usr/bin/docker','start','--attach',plan['container_id']],request,
                            cwd=t.root,metadata=metadata,timeout_seconds=180)
-    _write(folder/'terminal-container.json',{'id':plan['container_id'],'exit_code':0,
-        'image_id':plan['image_id'],'oom_killed':False})
+    from specorganon.docker_roles import _terminal_container
+    _write(folder/'terminal-container.json', _terminal_container({'Id':plan['container_id'], 'Image':plan['image_id'],
+        'State':{'Status':'exited','Running':False,'Dead':False,'Restarting':False,'ExitCode':0,'OOMKilled':False}}, plan))
     packet={**actual,'actor':'agent:gemini-isolated-author',
         'receipt_ref':str(t.store.root/'author-01/receipt.json'),'provenance':'native'}
     def forbidden(*args,**kwargs):raise AssertionError('verification must not execute or reconcile')

@@ -110,9 +110,21 @@ class PublicFixture:
         (folder / 'stderr.bin').write_bytes(b'')
         self.measured = {'fixture': True, 'test_job_ref': str(folder / 'receipt.json'),
                          'exit_code': self.exit_code, 'timed_out': False, 'truncated_streams': []}
+        for n in ('stdout', 'stderr'):
+            raw = (folder / (n + '.bin')).read_bytes()
+            self.measured.update({n + '_sha256': digest(raw), n + '_bytes': len(raw)})
         return self.measured
 
     def verify_test(self, *a, **kw): return True
+
+    def read_test(self, *args, **kwargs):
+        # Explicit fixture returns captured original bytes, never Docker evidence.
+        self.verify_test(*args, **kwargs)
+        folder = Path(self.measured['test_job_ref']).parent
+        streams = {n: (folder / (n + '.bin')).read_bytes() for n in ('stdout', 'stderr')}
+        assert all(digest(raw) == self.measured[n + '_sha256'] and len(raw) == self.measured[n + '_bytes']
+                   for n, raw in streams.items())
+        return copy.deepcopy(self.measured), streams
 
 
 @pytest.mark.parametrize('mode', ['valid', 'failed', 'wrong_denominator', 'bool_count', 'duplicate',

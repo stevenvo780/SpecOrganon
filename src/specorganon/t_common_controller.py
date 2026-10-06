@@ -22,7 +22,7 @@ import shlex
 from . import engine
 from .common_evidence import read_snapshot, validate_bound_audit
 from .common_review import checklist, declaration
-from .docker_roles import DockerRoles, ClosedResponseContractError, ClosedNativeExecutionError, PendingCleanupError
+from .docker_roles import DockerRoles, ClosedResponseContractError, ClosedNativeExecutionError, PendingCleanupError, TERMINAL_CONTAINER_POLICY
 from .attempt_deadline import AttemptBudget, DEADLINE_POLICY
 from .ledger import strict_json_loads
 from .native_response_contract import render_prompt, native_stdin_payload
@@ -52,6 +52,7 @@ class TCommonController:
                 or not callable(transport_factory) or author_format not in ('manifest-v1', 'items-v1')):
             raise TCommonError('explicit versioned T attempt policy required')
         if not fixture_mode and (transport_policy.get('schema') != 6 or transport_policy.get('whole_attempt_budget') != DEADLINE_POLICY
+                or transport_policy.get('terminal_container_policy') != TERMINAL_CONTAINER_POLICY
                 or not transport_policy.get('registered_source_bindings_sha256')):
             raise TCommonError('native T requires a registered source-bound transport')
         self.root = _safe(root); self.factory = transport_factory
@@ -672,6 +673,28 @@ class TCommonController:
             record['audit_reservation_sha256'] = digest(_read(reservation))
             record['snapshot'] = _json(reservation)['snapshot']
             self._verify_audit_failure(_json(self.root / 'audit/failure-0001.json'), _json(reservation))
+        elif record['audit_result_sha256'] is not None:
+            reservation_path = self.root / 'audit/0001.json'
+            reservation_raw = _read(reservation_path)
+            if audit_reservation_sha256 is not None and digest(reservation_raw) != audit_reservation_sha256:
+                raise TCommonError('first terminal auditor reservation changed')
+            reservation = strict_json_loads(reservation_raw.decode())
+            record['audit_reservation_sha256'] = digest(reservation_raw)
+            result_raw = _read(self.root / 'audit/result-0001.json')
+            if digest(result_raw) != record['audit_result_sha256']:
+                raise TCommonError('first terminal auditor result changed')
+            packet = strict_json_loads(result_raw.decode())
+            if self.transport.verify_role(packet, reservation['job_id'], 'review', reservation['request']) is not True:
+                raise TCommonError('first terminal auditor receipt no longer verifies')
+            if snapshot is not None and snapshot != reservation['snapshot']:
+                raise TCommonError('first terminal audited snapshot binding changed')
+            snapshot = reservation['snapshot']; record['snapshot'] = snapshot
+            audited = read_snapshot(snapshot['path'], snapshot['manifest_sha256'])
+            if (not closed or audited['delivery'] != self.controller._files()
+                    or audited['documents'] != self._documents(closed[-1][2]['capture'])):
+                raise TCommonError('first terminal audited snapshot changed')
+        elif common_ready or method_ready:
+            raise TCommonError('first terminal readiness requires an original common auditor receipt')
         if canonical(self._capture(None, None)) != canonical(state):
             raise TCommonError('T state changed during original terminal closure')
         # Take the endpoint AFTER custody/gate/receipt verification and capture.

@@ -1,0 +1,24 @@
+{
+  "job_id": "68fe8f0a39d54f0bb35c24a092d360ff",
+  "status": "succeeded",
+  "submitted_at": 1791294428.1607847,
+  "owner_pid": 1347558,
+  "owner_start": "16526632",
+  "owner_instance": "1105132297a240fea6e46edd0ebacc19",
+  "model": "codex/gpt-6.1-sol",
+  "access": "write",
+  "codex_account": "principal",
+  "started_at": 1791294428.1621974,
+  "finished_at": 1791294943.4029987,
+  "text": "Implementados únicamente:\n\n- [t_native_entry.py](/home/stev/.codex/worktrees/native-t-closure-v1/SpecOrganon/src/specorganon/t_native_entry.py:68): lectura mediante openat/descriptores, captura y compilación de bytes fijados, validación wheel/RECORD/versión y rechazo de checkout, editable e importaciones previas.\n- [test_t_native_entry.py](/home/stev/.codex/worktrees/native-t-closure-v1/SpecOrganon/tests/test_t_native_entry.py:103): controles sintéticos de admisión, pyc obsoleto, inventarios, carreras de lectura, JSON y CLI.\n\nVerificación final:\n\n```bash\n.venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_t_native_entry.py\n```\n\n**76 passed in 2.51s**. Comprobación de espacios sin errores.\n\nLímite: los fixtures son sintéticos; no verifiqué una instalación wheel real ni ejecuté cualificación nativa. Sin commit ni cambios propios fuera de estos dos archivos; el registro en pyproject queda al principal.",
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "write",
+    "cwd": "/home/stev/.codex/worktrees/native-t-closure-v1/SpecOrganon",
+    "duration_s": 515.2,
+    "depth": 0
+  }
+}

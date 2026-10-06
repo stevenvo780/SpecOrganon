@@ -1,0 +1,214 @@
+{
+  "schema": 1,
+  "at_utc": "2026-10-06T14:45:56.999478+00:00",
+  "scope": "Distributed static engineering coverage with exact source carry-over and bounded corrected deltas; not complete-version acceptance",
+  "runtime_module_coverage": 48,
+  "carried_runtime_modules": 46,
+  "changed_runtime_modules": [
+    "src/specorganon/neutral_pilot.py",
+    "src/specorganon/software_controller.py"
+  ],
+  "original_verdicts": [
+    "reject",
+    "reject",
+    "accept_partition"
+  ],
+  "original_rejects_preserved": true,
+  "original_full_review_timeout_preserved": true,
+  "delta_reviews": [
+    {
+      "raw_file": "delta-0-original-review.json",
+      "raw_sha256": "178c9c125eb18a3d1469d3dc7d3fe2e9e0046fbeff3a2b0b7ef648c71709e9a0",
+      "job_id": "b59187dab5bc440bb6a299f891eee771",
+      "provider": "codex",
+      "account": "principal",
+      "duration_seconds": 249.4,
+      "verdict": {
+        "scope": {
+          "classification": "Revisi\u00f3n est\u00e1tica independiente de ingenier\u00eda del candidato: delta y cruces T_execution.",
+          "cwd": "/tmp/specorganon-dev12-final-cut2-review-20261006",
+          "source_commit": "2a0153a20fa1a519733671356eb2404270c1c5bd",
+          "manifest_sha256_before_after_match": true,
+          "pins_verified_before": 300,
+          "pins_verified_after": 300,
+          "pin_mismatches": [],
+          "Goal": false,
+          "F": null,
+          "common_complete": null
+        },
+        "verdict": "accept_delta",
+        "included_original_partition": {
+          "file": "ORIGINAL_PARTITION_0.json",
+          "partition": "T_execution",
+          "original_verdict": "reject",
+          "original_source_manifest_sha256": "953162dc1c291200411fc798369d362490c771e7540b423c75c24d65023d636f"
+        },
+        "source_manifest_sha256": "78183f4388fb0b37b9af580bdf4a82e886cb0e571bf17d3a1f17374e00f5773d",
+        "modules_read_completely": [
+          "src/specorganon/neutral_pilot.py",
+          "src/specorganon/software_controller.py",
+          "src/specorganon/neutral_autonomy.py",
+          "src/specorganon/neutral_controller.py",
+          "src/specorganon/t_native_entry.py",
+          "src/specorganon/t_native_pilot.py",
+          "src/specorganon/t_common_controller.py",
+          "src/specorganon/t_measurement_custody.py",
+          "src/specorganon/common_review.py",
+          "src/specorganon/common_evidence.py",
+          "src/specorganon/attempt_deadline.py",
+          "src/specorganon/free_control_policy.py",
+          "tests/test_dev11_review_regressions.py",
+          "tests/test_dev12_partition_regressions.py",
+          "tests/test_software_controller_resources.py",
+          "tests/test_t_common_controller.py"
+        ],
+        "cross_paths_examined": [
+          "TEX-01: neutral_pilot.controller, l\u00edneas 278\u2013298 \u2192 AutonomousNeutralController._request \u2192 NeutralController._request/_snapshot. Conserva \u00edntegros los tres contratos funcionales y documentales; a\u00f1ade precedencia expl\u00edcita exclusivamente procedural y prospectiva para N. Autor, feedback y auditor com\u00fan reciben ese contrato. S y t_native_pilot.controller conservan el contrato hist\u00f3rico.",
+          "CT-01: TCommonController._get_controller \u2192 Controller._request, l\u00edneas 341\u2013360 \u2192 DockerRoles.read_test/_closed_test_result. La solicitud consume metadata y buffers de la misma lectura verificada. Ausencia de read_test detiene la preparaci\u00f3n; no existe fallback a verify_test ni segunda lectura del recibo o streams para construir este contexto.",
+          "Reconstrucci\u00f3n: receipt contiene todos los campos no compartidos; receipt_shared_keys identifica \u00fanicamente valores con igualdad de bytes canonical; receipt_shared_source se\u00f1ala state.json/items/<id>/data dentro del estado completo suministrado. Uni\u00f3n de ambas partes reconstruye can\u00f3nicamente la metadata verificada; valores diferentes, incluidos tipos JSON distintos, permanecen expl\u00edcitos. Los buffers suministrados se cotejan nuevamente con sus hashes.",
+          "Controller._request/_limits/_prevalidate/step: instrucciones de respuesta separadas por rol; instrucciones y documento build-stage solo en build. Permanecen los l\u00edmites de 6 items y 6000 bytes por fase, 20000 bytes de entrega, 4000 bytes por stream y 110000 bytes por solicitud; exceso provoca rechazo sin recorte. Se conservan reservas, cobro de reparaciones y l\u00edmites originales de roles y medidas.",
+          "t_native_entry \u2192 t_native_pilot \u2192 TCommonController \u2192 Controller \u2192 transporte nativo: bootstrap de fuentes capturadas con inventarios, RECORD, hashes y tama\u00f1os; sin fallback de m\u00f3dulos. native_response_contract.render_prompt y controller_native_role conservan la declaraci\u00f3n por rol, validaci\u00f3n de respuesta y l\u00edmite de prompt de 128000 bytes.",
+          "TCommonController._snapshot/_audit_request/_audit/_terminal \u2192 t_common_snapshot/common_evidence/common_review: capturas completas reconstruibles, verificaci\u00f3n de streams y recibos, auditor separado, D/G independiente de H y compuerta de nueve fases. El terminal revalida el auditor y toma el endpoint temporal despu\u00e9s de verificar custodia.",
+          "AttemptBudget, neutral_controller y TCommonController: CLOCK_BOOTTIME, identidad host/boot y presupuesto original de 6000 segundos; recuperaci\u00f3n conserva reservas. T mantiene 80 comandos, 40 roles y dos medidas; N mantiene cinco autores y cuatro revisores. Cierre tard\u00edo o reloj desconocido retira readiness."
+        ],
+        "findings": [],
+        "limitations": [
+          "GOAL.md y goals/method-superiority-v1/GOAL.md le\u00eddos completos. Revisi\u00f3n exclusivamente de solo lectura, sin editar archivos, Docker, pytest, red, proveedores, subagentes ni autenticaci\u00f3n.",
+          "Delta completa comparada contra el snapshot original cuyo manifiesto coincide exactamente con el SHA hist\u00f3rico. Sus 299 pins tambi\u00e9n coinciden. Carry-over limitado a 294 fuentes con hash exacto original, incluidos 46 m\u00f3dulos runtime; no implica una nueva revisi\u00f3n completa de los 48 m\u00f3dulos.",
+          "Los cuatro tests del delta fueron le\u00eddos completos y las seis fuentes modificadas pasaron an\u00e1lisis sint\u00e1ctico AST sin importarlas ni ejecutarlas. No se ejecutaron reproducciones ni se verificaron cifras proporcionadas de tests o instalaci\u00f3n.",
+          "Los cuatro archivos ORIGINAL conservan exactamente sus hashes iniciales: permanecen dos reject y un accept_partition. Este accept_delta no reemplaza esos dict\u00e1menes hist\u00f3ricos.",
+          "El snapshot intermedio e8d942 contin\u00faa sin revisi\u00f3n ni admisi\u00f3n. La revisi\u00f3n completa 645a424d termin\u00f3 timeout600 sin texto y no constituye aceptaci\u00f3n.",
+          "El dictamen acepta \u00fanicamente la delta dentro del cruce asignado. No acredita aceptaci\u00f3n completa48, ensayo nativo, admisi\u00f3n, freeze, qualification, superioridad, beneficio de campo ni cumplimiento de ninguna meta.",
+          "La frontera examinada conf\u00eda en host y daemon; hashes y custodia de bytes no prueban verdad externa ni correcci\u00f3n sem\u00e1ntica de las afirmaciones del auditor."
+        ],
+        "original_reject_preserved": true
+      }
+    },
+    {
+      "raw_file": "delta-1-original-review.json",
+      "raw_sha256": "c16d007fdbabeeaa895d3b33aacc7d00280d22f8087721f899f60a06c430eb2b",
+      "job_id": "11f141f7d60046c1a3401982da7822a6",
+      "provider": "codex",
+      "account": "principal",
+      "duration_seconds": 296.3,
+      "verdict": {
+        "scope": {
+          "type": "Revisi\u00f3n est\u00e1tica independiente de ingenier\u00eda del candidato; solo lectura",
+          "cwd": "/tmp/specorganon-dev12-final-cut2-review-20261006",
+          "partition": "custody_transport",
+          "finding_reviewed": "CT-01",
+          "source_commit": "2a0153a20fa1a519733671356eb2404270c1c5bd",
+          "delta": "Dos m\u00f3dulos runtime y cuatro tests; delta completa contrastada con el snapshot original. Otros 294 pins id\u00e9nticos.",
+          "integrity_before": {
+            "pins": 300,
+            "matched": 300,
+            "mismatches": 0
+          },
+          "integrity_after": {
+            "pins": 300,
+            "matched": 300,
+            "mismatches": 0
+          },
+          "Goal": false,
+          "F": null,
+          "common_complete": null
+        },
+        "verdict": "accept_delta",
+        "included_original_partition": {
+          "file": "ORIGINAL_PARTITION_1.json",
+          "partition": "custody_transport",
+          "original_verdict": "reject",
+          "original_source_manifest_sha256": "953162dc1c291200411fc798369d362490c771e7540b423c75c24d65023d636f",
+          "original_file_sha256": "f1f151a5ec20efe6adbcd4f74cb48e84f9b590d6c21ec74baa195c64fa6f077b",
+          "CT-01": "Correcci\u00f3n aceptada exclusivamente como delta est\u00e1tica; el REJECT hist\u00f3rico permanece.",
+          "coverage_correction": "La revisi\u00f3n original enumer\u00f3 docker/codex/compose.yaml, que no existe. Esta revisi\u00f3n ley\u00f3 completo compose.yaml en la ra\u00edz, ambos Dockerfiles, config.toml y seccomp-codex.json. No se atribuye esa lectura a la revisi\u00f3n anterior."
+        },
+        "source_manifest_sha256": "78183f4388fb0b37b9af580bdf4a82e886cb0e571bf17d3a1f17374e00f5773d",
+        "modules_read_completely": [
+          "src/specorganon/neutral_pilot.py",
+          "src/specorganon/software_controller.py",
+          "src/specorganon/docker_roles.py",
+          "src/specorganon/request_content.py",
+          "src/specorganon/request_tree.py",
+          "src/specorganon/role_jobs.py",
+          "tests/test_dev11_review_regressions.py",
+          "tests/test_dev12_partition_regressions.py",
+          "tests/test_software_controller_resources.py",
+          "tests/test_t_common_controller.py",
+          "src/specorganon/attempt_deadline.py",
+          "src/specorganon/t_common_controller.py",
+          "src/specorganon/t_common_snapshot.py",
+          "src/specorganon/t_measurement_custody.py",
+          "src/specorganon/common_review.py",
+          "src/specorganon/native_response_contract.py",
+          "scripts/controller_native_role.py"
+        ],
+        "cross_paths_examined": [
+          {
+            "path": "DockerRoles.read_test \u2192 _closed_test_result",
+            "evidence": "docker_roles.py:913-961",
+            "result": "Devuelve metadata original verificada y los mismos buffers cuyo SHA y longitud comprueba. Valida admisi\u00f3n, lanzamiento, terminal, entrega original y reloj vinculado; no ejecuta Docker en esta lectura."
+          },
+          {
+            "path": "Controller._request \u2192 _test_streams",
+            "evidence": "software_controller.py:247-258,341-367",
+            "result": "Exige read_test callable y usa require_passed=false/require_current=false para conservar resultados originales, incluidos negativos o hist\u00f3ricos. Consume exclusivamente metadata y buffers devueltos; no relee receipt.json ni streams despu\u00e9s de esa verificaci\u00f3n. No tiene fallback a verify_test."
+          },
+          {
+            "path": "Metadata verificada \u2192 receipt_shared_keys/receipt_shared_source \u2192 state.json",
+            "evidence": "software_controller.py:318,352-360",
+            "result": "Solo comparte campos presentes en data con igualdad estricta de bytes canonical. Los campos distintos permanecen \u00edntegros en receipt. Receipt y campos compartidos forman una partici\u00f3n completa de measured; reconstruirlos desde el state.json completo conserva la metadata can\u00f3nica, incluidos tipos y valores. No apunta a next-task.json ni recorta para ajustar el presupuesto."
+          },
+          {
+            "path": "Solicitud \u2192 archivo de origen \u2192 despacho \u2192 verificaci\u00f3n nativa",
+            "evidence": "software_controller.py:730-754; docker_roles.py:269-335,618-699,783-861; scripts/controller_native_role.py:131-134,199-224",
+            "result": "La solicitud se reserva y archiva, se serializa en input/request.json y se vincula por digest al despacho. El puente consume ese documento; la verificaci\u00f3n posterior coteja solicitud, prompt transmitido, streams, paquete y contrato de respuesta."
+          },
+          {
+            "path": "Contextos comprimidos \u2192 decoder estricto \u2192 igualdad canonical",
+            "evidence": "request_content.py:316-515; request_tree.py:181-446; neutral_controller.py:74-87; t_common_controller.py:424-436,497-546",
+            "result": "Se conservan controles de estructura, tipos, referencias, l\u00edmites expandidos y digest ra\u00edz. La reconstrucci\u00f3n se compara can\u00f3nicamente; los errores se propagan. Elegir representaci\u00f3n completa cuando comprimir no reduce tama\u00f1o no evita validaci\u00f3n."
+          },
+          {
+            "path": "Hints y respuestas \u2192 l\u00edmites y compuerta de paquete",
+            "evidence": "software_controller.py:89-107,142-178,280-340,757-793",
+            "result": "Hints de etapas solo en build; instrucciones y contratos de autor/revisor separados. Permanecen l\u00edmites de roles, \u00edtems, archivos, streams y solicitudes, admisi\u00f3n previa a escrituras y nueve fases actuales aceptadas."
+          },
+          {
+            "path": "Entrega original/current \u2192 reservas \u2192 clocks/jobs/cleanup \u2192 F9/F10/H",
+            "evidence": "t_common_controller.py:232-290,411-422,637-773; docker_roles.py:71-95,532-563,863-881,949-959; attempt_deadline.py:15-64; common_review.py:42-51",
+            "result": "Conserva distinci\u00f3n entre evidencia original y entrega actual. F9 revalida al auditor con su reserva original antes del cierre; F10 exige lifecycle exited y Running/Dead/Restarting exactamente false. Cleanup incierto mantiene el bloqueo. CLOCK_BOOTTIME, identidad host/boot, presupuesto original, reservas y H separado de D/G permanecen."
+          },
+          {
+            "path": "neutral_pilot.controller y _public",
+            "evidence": "neutral_pilot.py:278-298,301-365",
+            "result": "La modificaci\u00f3n a\u00f1ade precedencia procedimental expl\u00edcita solo para N. _public permanece id\u00e9ntico al original y consume metadata/buffers de read_test con require_current=true. No se adjudica aqu\u00ed la partici\u00f3n TEX-01."
+          }
+        ],
+        "findings": [],
+        "limitations": [
+          "Ambos GOAL.md se leyeron completos. No se import\u00f3 ni ejecut\u00f3 el candidato, pytest, Docker, red, proveedores, subagentes o autenticaci\u00f3n; no se editaron archivos ni se ejecutaron reproducciones.",
+          "Los cuatro tests delta se inspeccionaron completos, incluido el intercambio de stdout despu\u00e9s de read_test. Sus fixtures sint\u00e9ticas y resultados declarados no equivalen a pruebas ejecutadas por esta revisi\u00f3n; las cifras suministradas de tests e instalaci\u00f3n siguen sin verificar.",
+          "La reconstrucci\u00f3n lossless acreditada est\u00e1ticamente corresponde a metadata y codecs JSON. La proyecci\u00f3n textual preexistente de streams usa errors='replace'; no se acredita reversibilidad de bytes no UTF-8.",
+          "La ausencia de segunda lectura corresponde a la preparaci\u00f3n de evidencia en _request. Otras rutas conservan relecturas con cotejo de hashes, incluido el exportador de snapshots.",
+          "El snapshot carece de .git: el commit se atribuye al manifiesto, sin validaci\u00f3n Git. Los hashes anteriores del delta coinciden con las fuentes originales y su manifiesto padre.",
+          "SHA del manifiesto y los 300 pins coinciden antes y despu\u00e9s. Los cuatro archivos ORIGINAL conservan sus hashes iniciales y los dos reject y un accept_partition hist\u00f3ricos.",
+          "e8d942 permanece sin revisi\u00f3n/admisi\u00f3n. El full review 645a424d conserva timeout600 sin texto; no constituye aceptaci\u00f3n.",
+          "accept_delta se limita a CT-01 y sus cruces examinados. No es aceptaci\u00f3n completa de 48 m\u00f3dulos, admisi\u00f3n, freeze, qualification, ensayo nativo, beneficio de campo ni cumplimiento de GOAL. La frontera de confianza sigue siendo host/daemon."
+        ],
+        "original_reject_preserved": true
+      }
+    }
+  ],
+  "unresolved_findings_identified_in_these_reviews": [],
+  "complete_source_acceptance": false,
+  "independent_complete_version_review": "pending; do not promote partial/delta acceptance",
+  "compose_coverage_correction": "Original partition B named nonexistent docker/codex/compose.yaml; actual root compose.yaml read in corrected delta",
+  "gemini_output_note": "One Gemini job; two identical fenced JSON blocks normalized; provider internal brain artifacts outside source snapshot are mentioned in raw output. Snapshot299 pins verified unchanged, not an assertion of zero provider-internal writes.",
+  "native_T_admission": false,
+  "development_qualification": false,
+  "complete_version_frozen": false,
+  "external_F": null,
+  "common_complete": null,
+  "goal_achieved": false
+}

@@ -1,9 +1,9 @@
-# Build experimental de fuentes dev11 y laboratorio Codex/MCP
+# Build experimental de fuentes dev12 y laboratorio Codex/MCP
 
 Desde la carpeta del paquete fuente extraído:
 
 ```sh
-docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev11 .
+docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev12 .
 docker compose build codex
 docker compose run --rm -T codex codex --version
 docker compose run --rm -T codex python /opt/codex-lab/smoke.py
@@ -52,7 +52,7 @@ docker compose run --rm -T codex python /opt/codex-lab/trial.py
 El driver usa siete herramientas MCP autorizadas para su caso técnico, sin pedir aceptación de las nueve fases. Conserva los eventos y rechaza una inferencia sin llamadas MCP verificadas. Consume cuota de la cuenta autenticada.
 
 El nombre Compose `specorganon-main-dev2` se mantiene para conservar los volúmenes
-existentes del laboratorio main; la etiqueta del build experimental es dev11. La cohorte histórica
+existentes del laboratorio main; la etiqueta del build experimental es dev12. La cohorte histórica
 sigue en su checkout, imagen y volumen registrados. Dev3 conserva un smoke del wheel
 instalado en Docker; su corrección opt-in no ha sido evaluada en una cohorte nativa
 nueva. [Recibos y límites](../../goals/method-superiority-v1/development/BOUNDED_ADMISSION.md).
@@ -84,7 +84,7 @@ Los límites request/prompt permanecen110000/128000bytes.
 [Diseño y límites de la corrección](../../goals/method-superiority-v1/development/REQUEST_CONTENT_V1.md).
 
 
-## Corte corriente dev11: ingeniería parcial
+## Corte histórico dev11: ingeniería parcial
 
 Los probes del corte corregido acreditan 46 módulos idénticos en las imágenes
 locales, CLI y MCP stdio de 24 herramientas, Codex 0.160.0, sin inferencias ni
@@ -97,6 +97,18 @@ de esta documentación de uso corregida después del build.
 [Informe y recibos](../../goals/method-superiority-v1/evidence/whole-attempt-recovery-dev11-01/README.md).
 
 Ejecuta los comandos iniciales desde la raíz del clon de main. La imagen release
-`specorganon-release:0.2.0rc3.dev11` debe construirse antes de `docker compose build codex`.
+`specorganon-release:0.2.0rc3.dev12` debe construirse antes de `docker compose build codex`.
 El nombre Compose `specorganon-main-dev2`, sus volúmenes, permisos y políticas
 se conservan. Las imágenes dev11 permanecen locales, sin registry ni wheel público.
+
+## Candidato prospectivo dev12
+
+Conserva la evidencia dev11 anterior. Añade guardas de cierre del auditor, ciclo de
+vida Docker y lectura del checker sobre los mismos bytes verificados, junto a una
+entrada instalada T de diez posiciones. El corte final verifica 48 módulos,
+CLI/MCP24 y Codex0.160.0: 593 pruebas seleccionadas, 17 controles Docker reales
+con roles simulados y 70 controles instalados (cuentas solapadas). El informe T
+instalado, en imagen y wheel del host, mantiene diez posiciones sin iniciar.
+Los rechazos originales y el timeout se conservan; no hay admisión nativa,
+calificación ni superioridad.
+[Informe y recibos dev12](../../goals/method-superiority-v1/evidence/native-t-closure-dev12-01/README.md).

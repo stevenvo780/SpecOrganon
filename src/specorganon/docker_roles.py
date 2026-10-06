@@ -65,6 +65,36 @@ class DockerControlDeadlineError(DockerRoleError):
         super().__init__('Docker control deadline exceeded: ' + operation)
 
 
+TERMINAL_CONTAINER_POLICY = 'strict-exited-lifecycle-v1'
+
+
+def _terminal_container(observed, plan):
+    """Only an exact stopped exited lifecycle can produce durable custody."""
+    state = observed.get('State') if type(observed) is dict else None
+    if (type(state) is not dict or state.get('Status') != 'exited'
+            or any(state.get(name) is not False for name in ('Running', 'Dead', 'Restarting'))
+            or observed.get('Id') != plan['container_id'] or observed.get('Image') != plan['image_id']
+            or type(state.get('ExitCode')) is not int or type(state.get('OOMKilled')) is not bool):
+        raise UncertainJob('terminal container lifecycle/identity is uncertain; no terminal promotion')
+    return {'schema': 1, 'policy': TERMINAL_CONTAINER_POLICY, 'id': observed['Id'],
+            'image_id': observed['Image'], 'exit_code': state['ExitCode'], 'oom_killed': state['OOMKilled'],
+            'status': state['Status'], 'running': False, 'dead': False, 'restarting': False}
+
+
+def _verify_terminal_container(terminal, plan):
+    if type(terminal) is not dict or set(terminal) != {
+            'schema', 'policy', 'id', 'image_id', 'exit_code', 'oom_killed', 'status', 'running', 'dead', 'restarting'}:
+        raise DockerRoleError('terminal container lacks versioned lifecycle custody')
+    if type(terminal['schema']) is not int or terminal['schema'] != 1 or terminal['policy'] != TERMINAL_CONTAINER_POLICY:
+        raise DockerRoleError('terminal container lifecycle policy differs')
+    observed = {'Id': terminal['id'], 'Image': terminal['image_id'], 'State': {
+        'ExitCode': terminal['exit_code'], 'OOMKilled': terminal['oom_killed'], 'Status': terminal['status'],
+        'Running': terminal['running'], 'Dead': terminal['dead'], 'Restarting': terminal['restarting']}}
+    if canonical(_terminal_container(observed, plan)) != canonical(terminal):
+        raise DockerRoleError('terminal container lifecycle custody differs')
+    return terminal
+
+
 class DockerRoles:
     _CODEX_REASONING_EFFORTS = ('low', 'medium', 'high', 'xhigh')
 
@@ -119,7 +149,8 @@ class DockerRoles:
                 raise DockerRoleError('transport input differs from registered source binding')
         self.native_sources = {name:digest(raw) for name,raw in sources.items()}
         self.launch_input_sha256 = {name:digest(raw) for name,raw in inputs.items()}
-        policy = {'schema': 6 if self.attempt_budget is not None else 5, 'create_recovery': 'owned-never-started-after-create-deadline-v1',
+        policy = {'schema': 6 if self.attempt_budget is not None else 5, 'terminal_container_policy': TERMINAL_CONTAINER_POLICY,
+                  'create_recovery': 'owned-never-started-after-create-deadline-v1',
                   'images': self.images, 'routes': self.routes, 'test_timeout_seconds': self.test_timeout,
                   'source_root': str(self.source), 'public_catalog_sha256': self.launch_input_sha256['public-models.json'],
                   'native_source_sha256': self.native_sources,
@@ -489,10 +520,9 @@ class DockerRoles:
             raise DockerRoleError('role/test input changed after dispatch')
         with self._cleanup_controls(): observed = self._inspect(plan)
         if observed is None: raise UncertainJob('terminal container handle disappeared; no outcome promotion')
-        if observed['State']['Running']:
+        if observed['State']['Running'] is True:
             self.reconcile(job_id); raise UncertainJob('owned container still live after attachment; no terminal promotion')
-        _write(folder / 'terminal-container.json', {'id': plan['container_id'], 'exit_code': observed['State']['ExitCode'],
-                                                  'image_id': observed['Image'], 'oom_killed': observed['State']['OOMKilled']})
+        _write(folder / 'terminal-container.json', _terminal_container(observed, plan))
         if (result['receipt']['exit_code'] != observed['State']['ExitCode']
                 and not result['receipt']['timed_out'] and not result['receipt']['truncated_streams']):
             raise DockerRoleError('attachment and container exit code diverged without bounded cancellation')
@@ -518,11 +548,13 @@ class DockerRoles:
         if value['State']['Running']:
             self._control(['kill', value['Id']], allow_failure=True)
             value = self._inspect(plan)
-            if (value is None or type(value['State']['Running']) is not bool or value['State']['Running']
+            if (value is None or value['State']['Running'] is not False
+                    or any(value['State'].get(n) is not False for n in ('Dead', 'Restarting'))
                     or value['State'].get('Status') not in ('exited','created')):
                 raise PendingCleanupError('owned container stop could not be confirmed after kill')
             outcome = 'owned_container_killed_execution_uncertain'
-        elif value['State'].get('Status') in ('exited','created'):
+        elif (value['State'].get('Status') in ('exited','created')
+                and all(value['State'].get(n) is False for n in ('Dead', 'Restarting'))):
             outcome = 'owned_container_stopped_execution_uncertain'
         else:
             raise PendingCleanupError('owned container terminal lifecycle state is uncertain')
@@ -630,11 +662,7 @@ class DockerRoles:
             if digest(raw) != receipt[name+'_sha256'] or len(raw) != receipt[name+'_bytes']:
                 raise DockerRoleError('closed role measured stream changed')
             streams[name] = raw
-        terminal=_json(folder/'terminal-container.json')
-        if (type(terminal) is not dict or set(terminal) != {'id','exit_code','image_id','oom_killed'}
-                or terminal['id'] != plan['container_id'] or terminal['image_id'] != plan['image_id']
-                or type(terminal['exit_code']) is not int or type(terminal['oom_killed']) is not bool):
-            raise DockerRoleError('closed role terminal container identity/outcome invalid')
+        terminal=_verify_terminal_container(_json(folder/'terminal-container.json'), plan)
         return folder, plan, receipt, terminal, streams
 
     def _verify_attempt_binding(self):
@@ -652,7 +680,7 @@ class DockerRoles:
         path = self.store.root/job_id
         if receipt['exit_code'] != expected_exit or receipt['timed_out'] or receipt['truncated_streams']:
             raise DockerRoleError('closed role measured admission/receipt failed')
-        if canonical(terminal) != canonical({'id':plan['container_id'],'exit_code':expected_exit,'image_id':plan['image_id'],'oom_killed':False}):
+        if terminal['exit_code'] != expected_exit or terminal['oom_killed'] is not False:
             raise DockerRoleError('closed role terminal container diverged or failed')
         if failed_body:
             if streams['stdout']!=b'':raise DockerRoleError('failed response bridge must not emit an accepted packet')
@@ -882,7 +910,12 @@ class DockerRoles:
         self._closed_test_result(data,files,require_passed=require_passed,require_current=require_current)
         return True
 
-    def _closed_test_result(self,data,files,*,require_passed=True,require_current=True):
+    def read_test(self, data, files, *, require_passed=True, require_current=True):
+        """Return original metadata and the exact buffers verified in one read."""
+        return self._closed_test_result(data, files, require_passed=require_passed,
+                                        require_current=require_current, with_streams=True)
+
+    def _closed_test_result(self,data,files,*,require_passed=True,require_current=True,with_streams=False):
         self._verify_attempt_binding()
         path=_safe(data['test_job_ref'])
         if path.parent.parent!=self.store.root or path.name!='receipt.json':
@@ -891,7 +924,7 @@ class DockerRoles:
         receipt=_json(path);self.store._validate_receipt(path.parent,job_id,receipt)
         admitted=_json(path.parent/'request.json');request=admitted['request']
         plan=_json(folder/'launch.json');self._validate_launch(folder,plan,job_id,'test',request)
-        terminal=_json(folder/'terminal-container.json')
+        terminal=_verify_terminal_container(_json(folder/'terminal-container.json'), plan)
         metadata={'role':'test','provider':None,'model':None,'image_id':plan['image_id'],
                   'container_id':plan['container_id'],'input_manifest':plan['input_manifest']}
         if (digest(canonical(admitted))!=receipt['request_sha256']
@@ -901,9 +934,7 @@ class DockerRoles:
                 or _read(folder/'input/request.json')!=canonical(request)
                 or self._inventory(folder/'input')!=plan['input_manifest']
                 or _json(folder/'create-attempt.json')!=self._creation_attempt(plan)
-                or type(terminal.get('exit_code')) is not int or terminal.get('oom_killed') is not False
-                or set(terminal)!={'id','exit_code','image_id','oom_killed'}
-                or terminal['id']!=plan['container_id'] or terminal['image_id']!=plan['image_id']):
+                or terminal['oom_killed'] is not False):
             raise DockerRoleError('test measured admission/launch/terminal diverged')
         original={str(p.relative_to(folder/'input/delivery')):_read(p).decode()
                   for p in sorted((folder/'input/delivery').rglob('*')) if p.is_file()}
@@ -921,8 +952,10 @@ class DockerRoles:
                 or data.get('delivery_tree_sha256',request['delivery_tree_sha256'])!=request['delivery_tree_sha256']
                 or request['argv']!=data['argv'] or (require_passed and expected['passed'] is not True)):
             raise DockerRoleError('test receipt/current delivery diverged or fabricated outcome')
+        streams = {}
         for name in ('stdout','stderr'):
             raw=_read(path.parent/(name+'.bin'))
             if digest(raw)!=receipt[name+'_sha256'] or len(raw)!=receipt[name+'_bytes']:
                 raise DockerRoleError('test measured stream changed')
-        return expected
+            streams[name] = raw
+        return (expected, streams) if with_streams else expected

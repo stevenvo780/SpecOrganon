@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "source_manifest_sha256": "953162dc1c291200411fc798369d362490c771e7540b423c75c24d65023d636f",
+  "snapshot_pins_verified": 299,
+  "all_terminal": true,
+  "aggregate": "reject: CT-01 high and TEX-01 medium",
+  "reviews": [
+    {
+      "job_id": "75951856b6af4cd68ce24bd6598d45db",
+      "status": "succeeded",
+      "raw_file": "partition-0-original-review.json",
+      "raw_sha256": "e21149951d57be489dfd336db6267e7c40a10ece5b41702bc04e57195a5ea9b1",
+      "parsed_verdict": {
+        "partition": "T_execution",
+        "verdict": "reject",
+        "source_manifest_sha256": "953162dc1c291200411fc798369d362490c771e7540b423c75c24d65023d636f",
+        "modules_reviewed": [
+          "src/specorganon/artifact_guidance.py",
+          "src/specorganon/author_contract.py",
+          "src/specorganon/common_evidence.py",
+          "src/specorganon/common_review.py",
+          "src/specorganon/free_control_policy.py",
+          "src/specorganon/neutral_author.py",
+          "src/specorganon/neutral_autonomy.py",
+          "src/specorganon/neutral_controller.py",
+          "src/specorganon/neutral_native_entry.py",
+          "src/specorganon/neutral_pilot.py",
+          "src/specorganon/software_controller.py",
+          "src/specorganon/t_common_controller.py",
+          "src/specorganon/t_common_snapshot.py",
+          "src/specorganon/t_measurement_custody.py",
+          "src/specorganon/t_native_entry.py",
+          "src/specorganon/t_native_pilot.py"
+        ],
+        "findings": [
+          {
+            "id": "TEX-01",
+            "severity": "medium",
+            "file": "src/specorganon/neutral_pilot.py",
+            "line": 282,
+            "reason": "El contexto prospectivo de N contiene reglas de proceso incompatibles. Los tres contratos p\u00fablicos suministrados \u00edntegramente exigen notas/criterios antes del programa y programa/README sellados antes de una bater\u00eda separada. El protocolo neutral-autonomy-v2 y neutral_autonomy.py permiten c\u00f3digo antes de notas y programa/bater\u00eda juntos. El controlador conserva ambas instrucciones en la solicitud, sin delimitar expl\u00edcitamente qu\u00e9 reglas procedimentales anteriores quedan sustituidas. Es una inconsistencia concreta del contexto entregado; no demuestra un fallo nativo observado.",
+            "reproduction": "Lectura est\u00e1tica: neutral_pilot.controller transmite bound_source(contract).decode() como contract; neutral_controller._request, l\u00ednea 349, lo incluye completo en contract.txt. AutonomousNeutralController._request conserva ese documento y a\u00f1ade las instrucciones opuestas en neutral_autonomy.py, l\u00edneas 91-103. Contrastar con las l\u00edneas 18 y 20 de range-audit-contract.md y los p\u00e1rrafos equivalentes de ledger-fold-contract.md y topo-plan-contract.md.",
+            "expected": "Un contexto prospectivo inequ\u00edvoco: conservar el contrato funcional y los documentos hist\u00f3ricos, pero delimitar expl\u00edcitamente la sustituci\u00f3n de las restricciones procedimentales v1 por el protocolo v2 para N, tanto en generaci\u00f3n como en auditor\u00eda.",
+            "executed": false
+          }
+        ],
+        "limitations": [
+          "SHA verificado al principio y al final; las 299 entradas de pins coinciden en ambas comprobaciones. No se modificaron archivos.",
+          "Se leyeron completos los 16 m\u00f3dulos asignados. Tambi\u00e9n se revisaron los dos scripts de registro, pyproject.toml, uv.lock, docker/codex/Dockerfile, GOAL, protocolos, mandatos y contratos p\u00fablicos.",
+          "Revisi\u00f3n exclusivamente est\u00e1tica: sin pytest, Docker, proveedores, autenticaci\u00f3n, red ni subagentes. El an\u00e1lisis AST de los 16 m\u00f3dulos no encontr\u00f3 errores sint\u00e1cticos; no se import\u00f3 ni ejecut\u00f3 el c\u00f3digo revisado.",
+          "Ruta T revisada: registro \u2192 bootstrap instalado \u2192 TCommonController \u2192 Controller \u2192 reserva y transporte \u2192 medici\u00f3n \u2192 captura \u2192 auditor\u00eda com\u00fan \u2192 terminal \u2192 checker p\u00fablico \u2192 sello \u2192 informe de lectura.",
+          "El bootstrap T exige identidad de wheel, RECORD con SHA/tama\u00f1o, inventarios installed/source/pins coincidentes y compilaci\u00f3n de bytes capturados, sin fallback de m\u00f3dulos. Esto verifica la implementaci\u00f3n del control, no una instalaci\u00f3n real en esta revisi\u00f3n.",
+          "La ruta T conserva diez posiciones intercaladas: RangeAudit 4, LedgerFold 3 y TopoPlan 3; mantiene 6000 segundos CLOCK_BOOTTIME, 80 comandos, 40 roles y dos mediciones. Criterios, ledger y bater\u00eda se capturan antes del executor; reparaci\u00f3n y recuperaci\u00f3n conservan reservas e identidad originales.",
+          "F9 revalida el recibo del auditor antes del primer terminal; F10 exige custodia strict-exited-lifecycle-v1 con Running/Dead/Restarting exactamente false; F11 entrega metadatos y buffers verificados en la misma lectura. Los controles pertinentes se inspeccionaron, sin ejecutarlos.",
+          "Readiness T requiere compuerta de nueve fases, D/G y H; fixture_mode impide native_ready. El cierre tard\u00edo o con reloj desconocido retira readiness. El informe conserva posiciones pendientes y verifica evidencia sellada sin renovar adjudicaci\u00f3n.",
+          "No se verificaron los resultados declarados de 564 pruebas, 17 controles Docker ni 70 controles instalados. La actualizaci\u00f3n F3 posterior al snapshot no se incorpor\u00f3 a esta revisi\u00f3n.",
+          "El rechazo se limita a esta partici\u00f3n por TEX-01. No constituye revisi\u00f3n completa, admisi\u00f3n, congelaci\u00f3n ni calificaci\u00f3n. El job645a424d02ee42dda5332c8971cbb692 permanece TERMINAL FAILED600 sin texto, sin reinterpretarlo como aprobado o rechazado.",
+          "No se acreditan generaciones nativas ni cumplimiento emp\u00edrico de GOAL. F externo y completitud com\u00fan permanecen null; goal_achieved permanece false."
+        ],
+        "cross_partition_risks": [
+          "Los cruces cr\u00edticos con engine, runner, workflow, ledger, role_jobs, docker_roles, attempt_deadline y transporte nativo fueron inspeccionados en las rutas utilizadas; sus m\u00f3dulos completos requieren las particiones responsables.",
+          "La preservaci\u00f3n de contenido en contextos comprimidos depende de request_content, request_tree y native_response_contract; esta partici\u00f3n verific\u00f3 sus conexiones y comprobaciones de reconstrucci\u00f3n, sin sustituir su revisi\u00f3n completa.",
+          "La frontera de confianza sigue siendo host/daemon y dependencias instaladas. Los hashes verifican custodia de bytes, no autentican al host ni prueban sustancia sem\u00e1ntica o verdad externa."
+        ]
+      },
+      "identical_json_blocks": 1,
+      "internal_provider_artifacts_in_raw": false
+    },
+    {
+      "job_id": "85af436974b941b9a3145d97f0bf22d2",
+      "status": "succeeded",
+      "raw_file": "partition-1-original-review.json",
+      "raw_sha256": "f1f151a5ec20efe6adbcd4f74cb48e84f9b590d6c21ec74baa195c64fa6f077b",
+      "parsed_verdict": {
+        "partition": "custody_transport",
+        "verdict": "reject",
+        "source_manifest_sha256": "953162dc1c291200411fc798369d362490c771e7540b423c75c24d65023d636f",
+        "modules_reviewed": [
+          "src/specorganon/anchor.py",
+          "src/specorganon/approval.py",
+          "src/specorganon/attempt_deadline.py",
+          "src/specorganon/docker_roles.py",
+          "src/specorganon/ledger.py",
+          "src/specorganon/lot_journal.py",
+          "src/specorganon/native_response_contract.py",
+          "src/specorganon/native_transcript.py",
+          "src/specorganon/request_content.py",
+          "src/specorganon/request_tree.py",
+          "src/specorganon/review_provenance.py",
+          "src/specorganon/role_jobs.py",
+          "src/specorganon/runner.py",
+          "src/specorganon/source_passages.py",
+          "src/specorganon/test_execution.py",
+          "src/specorganon/test_observation.py",
+          "scripts/controller_native_role.py",
+          "docker/release/Dockerfile",
+          "docker/codex/Dockerfile",
+          "docker/codex/config.toml",
+          "docker/codex/seccomp-codex.json",
+          "docker/codex/compose.yaml"
+        ],
+        "findings": [
+          {
+            "id": "CT-01",
+            "severity": "high",
+            "file": "src/specorganon/software_controller.py",
+            "line": 352,
+            "reason": "La ruta real de T conserva una separaci\u00f3n entre verificaci\u00f3n y consumo de evidencia. Controller._request verifica la medida mediante executor.verify_test en la l\u00ednea 348, descarta los buffers verificados y vuelve a leer receipt.json y los streams en la l\u00ednea 352. _test_streams lee stdout.bin y stderr.bin con hashes=None, por lo que no coteja los bytes incorporados a measured-test-records.json. TCommonController utiliza este Controller; step prepara y archiva esa solicitud y la entrega a transport.call. Las guardas de estado, entrega y presupuesto no vinculan esta segunda lectura a los hashes de la medida original. Es un incumplimiento est\u00e1tico del requisito de consumir exactamente la lectura verificada; no se afirma explotaci\u00f3n del host ni una falsa admisi\u00f3n final.",
+            "reproduction": "Procedimiento determinista, no ejecutado: partir de una medida cerrada v\u00e1lida y un estado T que la referencie. Instrumentar la lectura de stdout.bin para devolver los bytes originales A durante verify_test y otros bytes breves UTF-8 B durante _test_streams, manteniendo las dem\u00e1s lecturas. Invocar _request para el siguiente revisor. El flujo incorpora B al documento measured-test-records.json junto al recibo cuyo stdout_sha256 corresponde a A, sin comprobar esa divergencia. step utiliza ese documento en la solicitud enviada al rol.",
+            "expected": "Obtener metadata y buffers mediante executor.read_test con require_passed=False y require_current=False, y construir la solicitud exclusivamente con esos mismos valores verificados. No volver a leer el recibo ni los streams para producir la evidencia consumida por el rol.",
+            "executed": false
+          }
+        ],
+        "limitations": [
+          "GOAL y los protocolos pertinentes se leyeron antes de revisar las fuentes. Las 16 fuentes asignadas y los seis complementos se revisaron completos; las dependencias de cruce se revisaron en las rutas cr\u00edticas al prop\u00f3sito.",
+          "El SHA del manifiesto coincidi\u00f3 al principio y al final. Los 299 archivos fijados por el manifiesto coincidieron tambi\u00e9n en ambas comprobaciones.",
+          "Revisi\u00f3n exclusivamente est\u00e1tica y de solo lectura: sin modificaciones, Docker, red, modelos, autenticaci\u00f3n, subagentes, pytest ni ejecuci\u00f3n de la reproducci\u00f3n.",
+          "No se revisaron los 299 tests l\u00ednea por l\u00ednea ni fuentes hist\u00f3ricas. Las cifras suministradas de tests y los cambios posteriores al snapshot no constituyen evidencia verificada por esta revisi\u00f3n.",
+          "El job 645a424d02ee42dda5332c8971cbb692 conserva su resultado TERMINAL FAILED600sintexto; esta revisi\u00f3n no lo convierte en aprobado ni rechazado.",
+          "El rechazo corresponde a custody_transport. No constituye una revisi\u00f3n completa de los 48 m\u00f3dulos ni una adjudicaci\u00f3n de admisi\u00f3n, qualification, freeze o cumplimiento del GOAL."
+        ],
+        "cross_partition_risks": [
+          "CT-01 cruza docker_roles.read_test/verify_test, software_controller._request y el despacho de TCommonController. La correcci\u00f3n de F11 en neutral_pilot._public consume metadata y buffers de read_test, pero no cubre la preparaci\u00f3n de solicitudes posteriores de T. El hallazgo alto impide recomendar admisi\u00f3n mientras permanezca.",
+          "F9: TCommonController._terminal vuelve a comprobar el resultado y su hash y llama a verify_role con la reserva original del auditor antes del cierre temporal. No se identific\u00f3 un defecto adicional en ese cruce.",
+          "F10: strict-exited-lifecycle-v1 exige Status='exited', Running=False, Dead=False y Restarting=False con identidad exacta de contenedor e imagen, tipos estrictos y custodia terminal durable. La pol\u00edtica antigua no permite reanudaci\u00f3n. Una limpieza sin confirmaci\u00f3n conserva el bloqueo.",
+          "Deadline: la vinculaci\u00f3n original usa CLOCK_BOOTTIME, identidad de arranque y el presupuesto persistido; la recuperaci\u00f3n no reinicia el reloj. Los resultados negativos conservan su naturaleza y no se promocionan por recuperaci\u00f3n.",
+          "Tinstalledentry comprueba RECORD, m\u00f3dulos, fuentes y pins y compila los bytes comprobados sin recurrir a pyc. Tpilot mantiene las diez posiciones p\u00fablicas fijas y construye el informe desde evidencia sellada, sin renovar la adjudicaci\u00f3n mediante ejecuciones de roles.",
+          "La frontera examinada conf\u00eda en host y daemon. Los hashes vinculan contenido y detectan divergencias; no autentican una verdad externa del host. No se exigi\u00f3 attestaci\u00f3n adicional.",
+          "Las rutas revisadas mantienen external_F y common_complete nulos y goal_achieved falso; esta revisi\u00f3n no acredita generaciones nativas ni los umbrales posteriores de reservado, r\u00e9plica, ventaja, no inferioridad, CI95 o tiempo."
+        ]
+      },
+      "identical_json_blocks": 1,
+      "internal_provider_artifacts_in_raw": false
+    },
+    {
+      "job_id": "c15df0fad66245bea5c22ea2be38a4b2",
+      "status": "succeeded",
+      "raw_file": "partition-2-original-review.json",
+      "raw_sha256": "c7a86525684083ec6d7ff35a92b8b6e7b1864b34ccdcf495a9bf1ff7978563a1",
+      "parsed_verdict": {
+        "partition": "engine_interfaces_and_preserved_field",
+        "verdict": "accept_partition",
+        "source_manifest_sha256": "953162dc1c291200411fc798369d362490c771e7540b423c75c24d65023d636f",
+        "modules_reviewed": [
+          "src/specorganon/__init__.py",
+          "src/specorganon/cli.py",
+          "src/specorganon/engine.py",
+          "src/specorganon/field_adjusted_candidate.py",
+          "src/specorganon/field_attestation.py",
+          "src/specorganon/field_effect_analysis.py",
+          "src/specorganon/field_flows.py",
+          "src/specorganon/field_guardrails.py",
+          "src/specorganon/field_power_sensitivity.py",
+          "src/specorganon/field_source_content_audit.py",
+          "src/specorganon/field_source_digest_audit.py",
+          "src/specorganon/field_trial_design.py",
+          "src/specorganon/ratio_audit.py",
+          "src/specorganon/report.py",
+          "src/specorganon/server.py",
+          "src/specorganon/workflow.py"
+        ],
+        "findings": [],
+        "limitations": [
+          "La revisi\u00f3n cubre \u00fanica y exclusivamente los 16 m\u00f3dulos asignados a la partici\u00f3n engine_interfaces_and_preserved_field y sus interfaces cruzadas pertinentes (t_native_pilot y t_native_entry).",
+          "El veredicto accept_partition valida \u00fanicamente la integridad interna de esta partici\u00f3n y jam\u00e1s constituye admisi\u00f3n completa o calificaci\u00f3n global del candidato dev12 por s\u00ed sola.",
+          "Auditor\u00eda puramente est\u00e1tica y de solo lectura realizada sin ejecuci\u00f3n de contenedores Docker, sin llamadas de red a modelos ni emisi\u00f3n de comandos modificadores.",
+          "La frontera de confianza se limita al host y al daemon local; los hashes no autentican identidades externas ni la verdad f\u00edsica externa de fuentes no atestadas."
+        ],
+        "cross_partition_risks": [
+          "cli.py y server.py despachan operaciones hacia runner.py y lot_journal.py; cualquier discrepancia de signatura o retorno en esos m\u00f3dulos (partici\u00f3n complementaria) impactar\u00eda la superficie p\u00fablica expuesta.",
+          "engine.py depende directamente de ledger.py (gesti\u00f3n y ordenamiento estricto de eventos), approval.py (pol\u00edtica de verificaci\u00f3n de claves) y test_execution.py para validar la custodia de pruebas ejecutadas.",
+          "t_native_entry y t_native_pilot exigen un bootstrap exacto instalado mediante wheel sin fuentes editables ni dependencias c\u00edclicas; cualquier variaci\u00f3n en el inventario compilado o en los pines de digest transversal invalidar\u00e1 la entrada nativa.",
+          "La gobernanza del ciclo de vida estricto de contenedores (F10 strict-exited-lifecycle-v1) y la re-verificaci\u00f3n del auditor (F9) residen en m\u00f3dulos de infraestructura y ejecuci\u00f3n Docker en las otras particiones."
+        ]
+      },
+      "identical_json_blocks": 2,
+      "internal_provider_artifacts_in_raw": true
+    }
+  ],
+  "qualification": false,
+  "goal_achieved": false
+}

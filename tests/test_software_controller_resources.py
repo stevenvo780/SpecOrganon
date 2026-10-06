@@ -61,12 +61,20 @@ class Executor:
         self.calls.append(job_id); folder = self.root / ('test-' + str(len(self.calls))); folder.mkdir()
         raw = {'stdout': self.stdout, 'stderr': self.stderr}
         for name, data in raw.items(): (folder / (name + '.bin')).write_bytes(data)
-        _write(folder / 'receipt.json', {'synthetic': True, 'job_id': job_id})
-        return {'subject_argv': argv, 'delivery_tree_sha256': digest(canonical(files)),
+        measured = {'subject_argv': argv, 'delivery_tree_sha256': digest(canonical(files)),
                 'exit_code': self.exits[min(len(self.calls)-1, len(self.exits)-1)], 'timed_out': False,
                 'truncated_streams': [], 'test_job_ref': str(folder / 'receipt.json'),
                 'stdout_sha256': digest(raw['stdout']), 'stderr_sha256': digest(raw['stderr']), 'provenance': 'synthetic'}
+        _write(folder / 'receipt.json', measured)
+        return measured
     def verify_test(self, *args, **kwargs): return True
+
+    def read_test(self, data, files, **kwargs):
+        self.verify_test(data, files, **kwargs)
+        path = Path(data['test_job_ref']); measured = _json(path)
+        streams = {n: (path.parent / (n + '.bin')).read_bytes() for n in ('stdout', 'stderr')}
+        assert all(digest(raw) == measured[n + '_sha256'] for n, raw in streams.items())
+        return measured, streams  # Explicit synthetic executor, no native provenance.
 
 
 def test_program_then_tests_preserves_seal_and_defers_measurement(tmp_path):

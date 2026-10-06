@@ -5,7 +5,7 @@ export default function WholeAttemptEngineering(){
  const download='/resultados/software/avance-dev11/';
  const review=engineering.independent_static_review;
  return <section aria-labelledby="avance-dev11">
- <h5 id="avance-dev11">Dev11: recuperación de fallos cerrados y presupuesto completo</h5>
+ <h5 id="avance-dev11">Corte histórico dev11: recuperación de fallos cerrados y presupuesto completo</h5>
  <p><strong>0.2.0rc3.dev11 es ingeniería prospectiva parcial.</strong> El transporte conserva pruebas negativas de ejecución cerrada: salida no cero, timeout, truncamiento u OOM. La recuperación verifica identidad, entrada, fuentes, argv y streams originales sin preparar ni arrancar otra llamada. N/S/T conservan la misma reserva y sus contadores; un fallo no se convierte en respuesta aceptada, tokens o readiness.</p>
  <p>El presupuesto original de <strong>6000 segundos de CLOCK_BOOTTIME</strong> comienza antes de preparar el intento. Incluye suspensión y conserva el binding al reanudar: no renueva los 6000 segundos. Reserva 60 segundos para limpieza, exige preparación mínima de 90 y acota controles individuales a 15. La política exige impedir despacho y readiness ante un host/boot distinto, proceso dueño muerto o resultado incierto del SO/daemon; los pendientes de la revisión se conservan abajo. La limpieza acotada de seguridad no acredita cierre exitoso.</p>
  <p>La observación pública funcional tiene su intención y reloj anteriores a la fábrica real, con timeout como máximo 120 segundos; su tiempo integra el total del driver. No renueva el reloj de generación, no habilita readiness y no representa F reservado.</p>

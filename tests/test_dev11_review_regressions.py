@@ -59,7 +59,8 @@ def test_F3_cleanup_only_confirms_observed_owned_terminal_lifecycle(closed,monke
     t,folder,request,_,_ = closed
     monkeypatch.setattr(t,'reconcile',DockerRoles.reconcile.__get__(t,DockerRoles))
     plan = _json(folder/'launch.json'); plan['container_id'] = None; _write(folder/'launch.json',plan)
-    record = None if status == 'missing' else {'Id':'b'*64,'State':{'Running':False,'Status':status}}
+    record = None if status == 'missing' else {'Id':'b'*64,'State':{
+        'Running':False,'Status':status,'Dead':status == 'dead','Restarting':status == 'restarting'}}
     monkeypatch.setattr(t,'_inspect',lambda ignored:copy.deepcopy(record))
     if status in ('created','exited'):
         assert t.reconcile_pending('author-01','author',request) is True

@@ -1,0 +1,51 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_CT01_T_role_consumes_original_checked_measurement_buffers ________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-458/test_CT01_T_role_consumes_orig0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f24d55ed810>
+
+    def test_CT01_T_role_consumes_original_checked_measurement_buffers(tmp_path, monkeypatch):
+        ctrl = build_fixture(tmp_path)
+        ctrl.executor = Executor(tmp_path, stdout=b'original complete measured stdout')
+        program(ctrl); stage_tests(ctrl); ctrl.step()
+        name = 'read_test' if hasattr(ctrl.executor, 'read_test') else 'verify_test'
+        original = getattr(ctrl.executor, name)
+        def swap_after_check(*args, **kwargs):
+            checked = original(*args, **kwargs)
+            receipt = next((ctrl.executor.root / 'test-1').glob('receipt.json'))
+            receipt.with_name('stdout.bin').write_bytes(b'unverified replacement stdout')
+            return checked
+        monkeypatch.setattr(ctrl.executor, name, swap_after_check)
+        state = engine.get_state(ctrl.case)
+        request = ctrl._request(state, 'review', {'history': []})
+        measured = json.loads(request['documents']['measured-test-records.json'])
+>       assert measured['t1']['streams']['stdout']['text'] == 'original complete measured stdout'
+E       AssertionError: assert 'unverified r...cement stdout' == 'original com...asured stdout'
+E         
+E         - original complete measured stdout
+E         + unverified replacement stdout
+
+tests/test_dev12_partition_regressions.py:24: AssertionError
+_______ test_TEX01_N_context_explicitly_supersedes_only_legacy_procedure _______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-458/test_TEX01_N_context_explicitl0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f24d55ed5b0>
+
+    def test_TEX01_N_context_explicitly_supersedes_only_legacy_procedure(tmp_path, monkeypatch):
+        r = plan(tmp_path); captured = {}
+        monkeypatch.setattr(pilot, 'AutonomousNeutralController', lambda *args, **kwargs: captured.update(kwargs))
+        for a in pilot.ATTEMPTS:
+            if a['method'] != 'N': continue
+            pilot.controller(r, a, tmp_path)
+            contract = captured['contract']
+            original = pilot.bound_source(r, r['tasks'][a['task']]['contract']).decode()
+            assert original in contract
+>           assert 'N procedural override v2' in contract
+E           AssertionError: assert 'N procedural override v2' in '# RangeAudit: desarrollo técnico público\n\nConstruir una CLI Python estándar, range_audit.py, que normaliza interval...s límites. Ninguna fase del engine T se exige a N/S. Los ejemplos son expectativas públicas, no ejecuciones medidas.\n'
+
+tests/test_dev12_partition_regressions.py:36: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dev12_partition_regressions.py::test_CT01_T_role_consumes_original_checked_measurement_buffers
+FAILED tests/test_dev12_partition_regressions.py::test_TEX01_N_context_explicitly_supersedes_only_legacy_procedure
+2 failed in 0.61s

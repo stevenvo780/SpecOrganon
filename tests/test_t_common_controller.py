@@ -108,6 +108,14 @@ class JournalFixture:
         if require_passed and value['passed'] is not True: return False
         return data['argv'] == value['subject_argv']
 
+    def read_test(self, data, files, **kwargs):
+        assert self.verify_test(data, files, **kwargs) is True
+        path = Path(data['test_job_ref']); value = _json(path)
+        streams = {n: (path.parent / (n + '.bin')).read_bytes() for n in ('stdout', 'stderr')}
+        assert all(digest(raw) == value[n + '_sha256'] and len(raw) == value[n + '_bytes']
+                   for n, raw in streams.items())
+        return value, streams
+
     def reconcile_pending(self, *args):
         return True  # Explicit fixture has no live processes.
 
@@ -357,11 +365,18 @@ def test_late_terminal_closure_cannot_confer_readiness(tmp_path, monkeypatch):
         ctrl.step(); closed, _, _ = ctrl._commands()
         if closed[-1][2]['result']['action'] == 'complete': break
     else: pytest.fail('synthetic nine-phase controller did not complete')
+    # Prepare the original common audit before expiring only its terminal endpoint.
+    original = ctrl._terminal
+    monkeypatch.setattr(ctrl, '_terminal', lambda *args, **kwargs: None)
+    ctrl._audit(closed, True, None)
+    reservation = _json(ctrl.root / 'audit/0001.json')
+    monkeypatch.setattr(ctrl, '_terminal', original)
     old = M._clock; start = ctrl.initial['clock']
     def late():
         value = old(); value['boottime_ns'] = start['boottime_ns'] + 6001 * 10**9; return value
     monkeypatch.setattr(M, '_clock', late)
-    result = ctrl._terminal('review_ready', common_ready=True, method_ready=True, method_gate=True)
+    result = ctrl._terminal('review_ready', common_ready=True, method_ready=True, method_gate=True,
+        audit_reservation_sha256=digest((ctrl.root / 'audit/0001.json').read_bytes()), snapshot=reservation['snapshot'])
     assert result['status'] == 'failed' and result['whole_attempt_seconds'] == 6001
     assert not result['native_ready'] and not result['common_review_ready'] and not result['method_review_ready']
 

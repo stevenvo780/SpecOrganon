@@ -1,0 +1,230 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+______ test_F9_first_terminal_reverifies_common_auditor_before_readiness _______
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-451/test_F9_first_terminal_reverif0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4c6e245e00>
+
+    def test_F9_first_terminal_reverifies_common_auditor_before_readiness(tmp_path, monkeypatch):
+        ctrl, holders = make(tmp_path)
+        original = ctrl._terminal
+        def mutate_before_closure(status, **kwargs):
+            if kwargs.get('common_ready'):
+                path = holders[0].jobs / 'T-common-audit-0001/packet.json'
+                packet = _json(path)
+                packet['result']['reason'] = 'Replacement after the last audit check'
+                _write(path, packet)
+            return original(status, **kwargs)
+        monkeypatch.setattr(ctrl, '_terminal', mutate_before_closure)
+>       with pytest.raises(T.TCommonError, match='auditor receipt'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE TCommonError
+
+tests/test_dev12_terminal_custody.py:24: Failed
+_________ test_F10_normal_closure_refuses_uncertain_lifecycle[state0] __________
+
+closed = (<specorganon.docker_roles.DockerRoles object at 0x7f4c6e3c3230>, PosixPath('/tmp/pytest-of-stev/pytest-451/test_F10_n...be.py":"print(1)"},"reason":"Synthetic content","schema":1},"schema":1,"usage_reported":{"tokens":1}}', 'stderr': b''})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4c6e245ba0>
+state = {'Status': 'dead', 'Running': False, 'Dead': True, 'Restarting': False}
+
+    @pytest.mark.parametrize('state', [
+        {'Status': 'dead', 'Running': False, 'Dead': True, 'Restarting': False},
+        {'Status': 'restarting', 'Running': False, 'Dead': False, 'Restarting': True},
+        {'Status': 'created', 'Running': False, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': 0, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': 0, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': False, 'Restarting': 0},
+    ])
+    def test_F10_normal_closure_refuses_uncertain_lifecycle(closed, monkeypatch, state):
+        t, folder, request, packet, result = closed
+        launch = _json(folder / 'launch.json')
+        (folder / 'terminal-container.json').unlink()
+        monkeypatch.setattr(t, '_prepare', lambda *args: (folder, copy.deepcopy(launch)))
+        monkeypatch.setattr(t.store, 'execute', lambda *args, **kwargs: result)
+        observed = {'Id': launch['container_id'], 'Image': launch['image_id'],
+                    'State': {**state, 'ExitCode': 0, 'OOMKilled': False}}
+        monkeypatch.setattr(t, '_inspect', lambda *args: copy.deepcopy(observed))
+>       with pytest.raises(UncertainJob, match='lifecycle'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UncertainJob
+
+tests/test_dev12_terminal_custody.py:47: Failed
+_________ test_F10_normal_closure_refuses_uncertain_lifecycle[state1] __________
+
+closed = (<specorganon.docker_roles.DockerRoles object at 0x7f4c6e387390>, PosixPath('/tmp/pytest-of-stev/pytest-451/test_F10_n...be.py":"print(1)"},"reason":"Synthetic content","schema":1},"schema":1,"usage_reported":{"tokens":1}}', 'stderr': b''})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4c6f281010>
+state = {'Status': 'restarting', 'Running': False, 'Dead': False, 'Restarting': True}
+
+    @pytest.mark.parametrize('state', [
+        {'Status': 'dead', 'Running': False, 'Dead': True, 'Restarting': False},
+        {'Status': 'restarting', 'Running': False, 'Dead': False, 'Restarting': True},
+        {'Status': 'created', 'Running': False, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': 0, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': 0, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': False, 'Restarting': 0},
+    ])
+    def test_F10_normal_closure_refuses_uncertain_lifecycle(closed, monkeypatch, state):
+        t, folder, request, packet, result = closed
+        launch = _json(folder / 'launch.json')
+        (folder / 'terminal-container.json').unlink()
+        monkeypatch.setattr(t, '_prepare', lambda *args: (folder, copy.deepcopy(launch)))
+        monkeypatch.setattr(t.store, 'execute', lambda *args, **kwargs: result)
+        observed = {'Id': launch['container_id'], 'Image': launch['image_id'],
+                    'State': {**state, 'ExitCode': 0, 'OOMKilled': False}}
+        monkeypatch.setattr(t, '_inspect', lambda *args: copy.deepcopy(observed))
+>       with pytest.raises(UncertainJob, match='lifecycle'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UncertainJob
+
+tests/test_dev12_terminal_custody.py:47: Failed
+_________ test_F10_normal_closure_refuses_uncertain_lifecycle[state2] __________
+
+closed = (<specorganon.docker_roles.DockerRoles object at 0x7f4c6e386350>, PosixPath('/tmp/pytest-of-stev/pytest-451/test_F10_n...be.py":"print(1)"},"reason":"Synthetic content","schema":1},"schema":1,"usage_reported":{"tokens":1}}', 'stderr': b''})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4c6e3a7130>
+state = {'Status': 'created', 'Running': False, 'Dead': False, 'Restarting': False}
+
+    @pytest.mark.parametrize('state', [
+        {'Status': 'dead', 'Running': False, 'Dead': True, 'Restarting': False},
+        {'Status': 'restarting', 'Running': False, 'Dead': False, 'Restarting': True},
+        {'Status': 'created', 'Running': False, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': 0, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': 0, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': False, 'Restarting': 0},
+    ])
+    def test_F10_normal_closure_refuses_uncertain_lifecycle(closed, monkeypatch, state):
+        t, folder, request, packet, result = closed
+        launch = _json(folder / 'launch.json')
+        (folder / 'terminal-container.json').unlink()
+        monkeypatch.setattr(t, '_prepare', lambda *args: (folder, copy.deepcopy(launch)))
+        monkeypatch.setattr(t.store, 'execute', lambda *args, **kwargs: result)
+        observed = {'Id': launch['container_id'], 'Image': launch['image_id'],
+                    'State': {**state, 'ExitCode': 0, 'OOMKilled': False}}
+        monkeypatch.setattr(t, '_inspect', lambda *args: copy.deepcopy(observed))
+>       with pytest.raises(UncertainJob, match='lifecycle'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UncertainJob
+
+tests/test_dev12_terminal_custody.py:47: Failed
+_________ test_F10_normal_closure_refuses_uncertain_lifecycle[state3] __________
+
+closed = (<specorganon.docker_roles.DockerRoles object at 0x7f4c6e247100>, PosixPath('/tmp/pytest-of-stev/pytest-451/test_F10_n...be.py":"print(1)"},"reason":"Synthetic content","schema":1},"schema":1,"usage_reported":{"tokens":1}}', 'stderr': b''})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4c6e3a7350>
+state = {'Status': 'exited', 'Running': 0, 'Dead': False, 'Restarting': False}
+
+    @pytest.mark.parametrize('state', [
+        {'Status': 'dead', 'Running': False, 'Dead': True, 'Restarting': False},
+        {'Status': 'restarting', 'Running': False, 'Dead': False, 'Restarting': True},
+        {'Status': 'created', 'Running': False, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': 0, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': 0, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': False, 'Restarting': 0},
+    ])
+    def test_F10_normal_closure_refuses_uncertain_lifecycle(closed, monkeypatch, state):
+        t, folder, request, packet, result = closed
+        launch = _json(folder / 'launch.json')
+        (folder / 'terminal-container.json').unlink()
+        monkeypatch.setattr(t, '_prepare', lambda *args: (folder, copy.deepcopy(launch)))
+        monkeypatch.setattr(t.store, 'execute', lambda *args, **kwargs: result)
+        observed = {'Id': launch['container_id'], 'Image': launch['image_id'],
+                    'State': {**state, 'ExitCode': 0, 'OOMKilled': False}}
+        monkeypatch.setattr(t, '_inspect', lambda *args: copy.deepcopy(observed))
+>       with pytest.raises(UncertainJob, match='lifecycle'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UncertainJob
+
+tests/test_dev12_terminal_custody.py:47: Failed
+_________ test_F10_normal_closure_refuses_uncertain_lifecycle[state4] __________
+
+closed = (<specorganon.docker_roles.DockerRoles object at 0x7f4c6e247950>, PosixPath('/tmp/pytest-of-stev/pytest-451/test_F10_n...be.py":"print(1)"},"reason":"Synthetic content","schema":1},"schema":1,"usage_reported":{"tokens":1}}', 'stderr': b''})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4c6de50e50>
+state = {'Status': 'exited', 'Running': False, 'Dead': 0, 'Restarting': False}
+
+    @pytest.mark.parametrize('state', [
+        {'Status': 'dead', 'Running': False, 'Dead': True, 'Restarting': False},
+        {'Status': 'restarting', 'Running': False, 'Dead': False, 'Restarting': True},
+        {'Status': 'created', 'Running': False, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': 0, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': 0, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': False, 'Restarting': 0},
+    ])
+    def test_F10_normal_closure_refuses_uncertain_lifecycle(closed, monkeypatch, state):
+        t, folder, request, packet, result = closed
+        launch = _json(folder / 'launch.json')
+        (folder / 'terminal-container.json').unlink()
+        monkeypatch.setattr(t, '_prepare', lambda *args: (folder, copy.deepcopy(launch)))
+        monkeypatch.setattr(t.store, 'execute', lambda *args, **kwargs: result)
+        observed = {'Id': launch['container_id'], 'Image': launch['image_id'],
+                    'State': {**state, 'ExitCode': 0, 'OOMKilled': False}}
+        monkeypatch.setattr(t, '_inspect', lambda *args: copy.deepcopy(observed))
+>       with pytest.raises(UncertainJob, match='lifecycle'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UncertainJob
+
+tests/test_dev12_terminal_custody.py:47: Failed
+_________ test_F10_normal_closure_refuses_uncertain_lifecycle[state5] __________
+
+closed = (<specorganon.docker_roles.DockerRoles object at 0x7f4c6f281130>, PosixPath('/tmp/pytest-of-stev/pytest-451/test_F10_n...be.py":"print(1)"},"reason":"Synthetic content","schema":1},"schema":1,"usage_reported":{"tokens":1}}', 'stderr': b''})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4c6e3fbc50>
+state = {'Status': 'exited', 'Running': False, 'Dead': False, 'Restarting': 0}
+
+    @pytest.mark.parametrize('state', [
+        {'Status': 'dead', 'Running': False, 'Dead': True, 'Restarting': False},
+        {'Status': 'restarting', 'Running': False, 'Dead': False, 'Restarting': True},
+        {'Status': 'created', 'Running': False, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': 0, 'Dead': False, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': 0, 'Restarting': False},
+        {'Status': 'exited', 'Running': False, 'Dead': False, 'Restarting': 0},
+    ])
+    def test_F10_normal_closure_refuses_uncertain_lifecycle(closed, monkeypatch, state):
+        t, folder, request, packet, result = closed
+        launch = _json(folder / 'launch.json')
+        (folder / 'terminal-container.json').unlink()
+        monkeypatch.setattr(t, '_prepare', lambda *args: (folder, copy.deepcopy(launch)))
+        monkeypatch.setattr(t.store, 'execute', lambda *args, **kwargs: result)
+        observed = {'Id': launch['container_id'], 'Image': launch['image_id'],
+                    'State': {**state, 'ExitCode': 0, 'OOMKilled': False}}
+        monkeypatch.setattr(t, '_inspect', lambda *args: copy.deepcopy(observed))
+>       with pytest.raises(UncertainJob, match='lifecycle'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UncertainJob
+
+tests/test_dev12_terminal_custody.py:47: Failed
+____________ test_F11_public_score_consumes_exact_verified_buffers _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-451/test_F11_public_score_consumes0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4c6e35ed50>
+
+    def test_F11_public_score_consumes_exact_verified_buffers(tmp_path, monkeypatch):
+        r = plan(tmp_path); a = pilot.ATTEMPTS[0]; count = pilot.CASE_COUNTS[a['task']]
+        cases = list(pilot.case_index(r, a['task']).items())[:2]
+        failed = [{'name': name, 'passed': False, 'exit_code': 1, 'input_sha256': pin,
+                   'stdout_sha256': 'a' * 64, 'stderr_sha256': 'b' * 64} for name, pin in cases]
+        result = {**pilot.CHECKER_IDENTITY[a['task']], 'cases': count, 'passed': count - 2,
+                  'failed': failed, 'observations_sha256': 'c' * 64}
+        forged = {**result, 'passed': count - 1, 'failed': failed[:1]}
+        folder = tmp_path / 'attempt'; folder.mkdir(mode=0o700)
+        t = PublicFixture(folder / 'public-check', result, exit_code=1)
+        name = 'read_test' if hasattr(t, 'read_test') else 'verify_test'
+        original = getattr(t, name)
+        def mutate_after_verification(*args, **kwargs):
+            checked = original(*args, **kwargs)
+            (t.store.root / 'independent-public-check/stdout.bin').write_bytes(canonical(forged))
+            return checked
+        monkeypatch.setattr(t, name, mutate_after_verification)
+        monkeypatch.setattr(pilot, 'transport', lambda *args, **kwargs: t)
+        value = pilot._public(r, a, folder, {'program.py': '# Synthetic only'}, True)
+        assert value['status'] == 'observed'
+>       assert value['score'] == (count - 2) / count
+E       assert 0.991304347826087 == ((115 - 2) / 115)
+
+tests/test_dev12_terminal_custody.py:72: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dev12_terminal_custody.py::test_F9_first_terminal_reverifies_common_auditor_before_readiness
+FAILED tests/test_dev12_terminal_custody.py::test_F10_normal_closure_refuses_uncertain_lifecycle[state0]
+FAILED tests/test_dev12_terminal_custody.py::test_F10_normal_closure_refuses_uncertain_lifecycle[state1]
+FAILED tests/test_dev12_terminal_custody.py::test_F10_normal_closure_refuses_uncertain_lifecycle[state2]
+FAILED tests/test_dev12_terminal_custody.py::test_F10_normal_closure_refuses_uncertain_lifecycle[state3]
+FAILED tests/test_dev12_terminal_custody.py::test_F10_normal_closure_refuses_uncertain_lifecycle[state4]
+FAILED tests/test_dev12_terminal_custody.py::test_F10_normal_closure_refuses_uncertain_lifecycle[state5]
+FAILED tests/test_dev12_terminal_custody.py::test_F11_public_score_consumes_exact_verified_buffers
+8 failed in 4.45s

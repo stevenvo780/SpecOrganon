@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "original_volume": "specorganon-lab_codex-home",
+  "existing_volume": true,
+  "native_model_calls": 0,
+  "credential_copy": false,
+  "account_identity": "unknown; original authorized volume, no account swap",
+  "quota": "unknown; not inferred from desktop",
+  "scope": "Local login-status readiness observation only; no API validity, native admission or generation",
+  "argv": [
+    "docker",
+    "run",
+    "--rm",
+    "--network=none",
+    "--read-only",
+    "--tmpfs",
+    "/tmp:rw,mode=1777",
+    "--mount",
+    "type=volume,src=specorganon-lab_codex-home,dst=/home/codex/.codex,readonly",
+    "--entrypoint",
+    "codex",
+    "specorganon-codex:0.2.0rc3.dev12",
+    "login",
+    "status"
+  ],
+  "exit_code": 0,
+  "login_status_reports_logged_in": true,
+  "output_sha256": "72118305a60fa509ac4bfac8a406509a6022f2584a36f7adf9f7bed08891a71d",
+  "raw_output_exported": false
+}

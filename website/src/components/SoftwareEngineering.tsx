@@ -1,3 +1,4 @@
+import NativeTEngineering from './NativeTEngineering';
 import WholeAttemptEngineering from './WholeAttemptEngineering';
 import TCommonEngineering from './TCommonEngineering';
 import TCustodyEngineering from './TCustodyEngineering';
@@ -38,6 +39,7 @@ export default function SoftwareEngineering(){
     <TCustodyEngineering/>
     <TCommonEngineering/>
     <WholeAttemptEngineering/>
+    <NativeTEngineering/>
     <Dev4Closure/>
     <h5 id="meta-mejor-metodo">Meta activa: demostrar que mejora la entrega</h5>
     <p>Codex tiene asignada la mejora y su validación. Para cerrar la meta, el candidato deberá satisfacer criterios fijados antes de las nuevas evaluaciones:</p>
