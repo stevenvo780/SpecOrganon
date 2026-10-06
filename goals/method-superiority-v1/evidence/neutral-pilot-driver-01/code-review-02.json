@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "job_id": "8de54d3a425c4b0a9ea2b2e0bd7aa75b",
+  "status": "succeeded",
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "read",
+    "cwd": "/home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon",
+    "duration_s": 185.1,
+    "depth": 0
+  },
+  "review": {
+    "verdict": "reject",
+    "findings": [
+      {
+        "id": "R04",
+        "severity": "high",
+        "file": "src/specorganon/neutral_pilot.py:284-285",
+        "problem": "Bloqueante de integridad vecino: el checker corre dentro de la entrega con Python -B, sin aislamiento de imports. Ambos checkers importan subprocess; una entrega con subprocess.py puede emitir un JSON válido y terminar con exit 0 antes de evaluar casos. Identidad exacta, checkerSHA y recibos auténticos no detectan esa sustitución.",
+        "fix": "Ejecutar el checker con imports aislados de la entrega, por ejemplo Python -I -B. Fixture concreta, no ejecutada: extender ControllerFixture para attempt-03 con files={'ledger_fold.py':'print(\"synthetic invalid output\")\\n','subprocess.py':'import json\\nprint(json.dumps(dict(classification=\"independent public development checks; not reserved or blinded\", task=\"ledgerfold\", cases=104, passed=104, failed=[], observations_sha256=\"a\"*64)))\\nraise SystemExit(0)\\n'}. Usar el transporte Docker real como en las fixtures existentes. Debe rechazar o medir los fallos reales; nunca aceptar score=1. Cerrar el checker, prohibir otro measure y comprobar recuperación."
+      }
+    ],
+    "corrected_findings": [
+      {
+        "id": "R01",
+        "evidence": "outcome incorpora el inventario antes de publicarse; immutable compara la reconstrucción completa y _closed exige igualdad del inventario. Las fixtures unitarias cubren add/modify; la fixture Docker usa checker cerrado y prohíbe otro measure."
+      },
+      {
+        "id": "R02",
+        "evidence": "load_plan exige tarea/contrato/checker/args/denominador exactos. case-index liga metadata a checkerSHA; el parser exige classification y task/oracle exactos y de tipo string."
+      },
+      {
+        "id": "R03",
+        "evidence": "failed exige schema normal/exceptional, passed=false, nombres únicos pertenecientes al índice e inputSHA correspondiente. Valida tipos de código y hashes de streams; exige código global coherente, stderr vacío y ausencia de timeout/truncamiento."
+      }
+    ],
+    "pending_scope": [
+      "Dictamen limitado a ingeniería parcial y vecinos autorizados; R04 bloquea su aceptación.",
+      "F reservado independiente sigue pendiente. observations_sha256 es declarado: no se reconstruyen todos los records desde ese digest.",
+      "F06 sigue explícitamente pendiente: autonomía de N y asimetría de revisión/reparación de S. No se aprueba admisión nativa, competencia, superioridad ni metagoal.",
+      "El índice contiene 115/104/105 casos con nombres únicos. Su generador compila los checkers públicos confiables e invoca únicamente sus corpus; no se ejecutó ni regeneró en esta revisión.",
+      "Se leyeron los trece archivos y los cuatro artefactos indicados. Los 17 SHA permanecieron iguales al inicio/final; los trece de fuentes coinciden con source-review-02.json.",
+      "tests-03.stdout y docker-02.stdout registran 142 y 3 pruebas aprobadas: evidencia previa leída, no pruebas ejecutadas por esta revisión.",
+      "Sin modificaciones, tests, Docker, modelos ni delegación. No se accedió a secretos ni perfiles. Cuota del volumen original: UNKNOWN."
+    ],
+    "tests_executed": false
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "job_id": "10860bdc95e942cb962624f78dd407b2",
+  "status": "succeeded",
+  "meta": {
+    "codex_account": "principal",
+    "codex_home": "/home/stev/.codex",
+    "provider": "codex",
+    "model": "codex/gpt-6.1-sol",
+    "access": "read",
+    "cwd": "/home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon",
+    "duration_s": 111.1,
+    "depth": 0
+  },
+  "review": {
+    "verdict": "accept",
+    "findings": [],
+    "corrected_findings": [
+      {
+        "id": "R04",
+        "file": "src/specorganon/neutral_pilot.py:285",
+        "evidence": "El evaluator usa -I -S -B. DockerRoles liga argv a create_argv, comprueba Config.Cmd/Entrypoint antes del dispatch y verifica lanzamiento, recibo, imagen, entrega, estado terminal y hashes de streams al recuperar. La fixture Docker R04 exige programa roto con subprocess.py falso => 0/104, exit1 y recuperación idéntica con measure prohibido."
+      },
+      {
+        "id": "R04-parsing",
+        "file": "src/specorganon/neutral_pilot.py:235",
+        "evidence": "JSONDecodeError coincide con la excepción real emitida por check_cohort_public.py al parsear stdout inválido. Conserva passed=false, identidad e inputSHA; exige exit1 global. La fixture de schema conserva 103/104 y R04 exige 0/104: el error no se convierte en éxito."
+      },
+      {
+        "id": "R01",
+        "file": "src/specorganon/neutral_pilot.py:406",
+        "evidence": "outcome incorpora el inventario previo a publicarse. immutable exige reconstrucción idéntica y _closed compara inventario y sello. Se conservan fixtures de adición/modificación y recuperación sin nueva medida."
+      },
+      {
+        "id": "R02",
+        "file": "src/specorganon/neutral_pilot.py:91",
+        "evidence": "Se mantienen tarea, contrato, checker, argumentos y denominador exactos; case-index liga checkerSHA e identidad. El resultado exige classification y task/oracle exactos."
+      },
+      {
+        "id": "R03",
+        "file": "src/specorganon/neutral_pilot.py:209",
+        "evidence": "Se mantienen schemas de fallo, passed=false, nombres únicos registrados, inputSHA, tipos y hashes de streams, coherencia de conteos/exit, stderr vacío y rechazo de timeout/truncamiento."
+      }
+    ],
+    "scope_limits": [
+      "Aceptación exclusiva de la corrección acotada de ingeniería; sin bloqueantes nuevos que requieran fixture adicional.",
+      "Los trece SHA al inicio y al final coinciden exactamente con source-review-03.json. Los cuatro artefactos también permanecieron idénticos.",
+      "docker-05.stdout registra 4 passed y tests-05.stdout 143 passed. Son evidencias previas agregadas; esta revisión no ejecutó pruebas ni inspeccionó recibos de esas ejecuciones.",
+      "Cadena verificada estáticamente dentro de las trece fuentes; sin validación runtime plena ni auditoría nueva de dependencias externas a esa lista.",
+      "F06 sigue pendiente: autonomía de N y asimetría de revisión/reparación de S. No se aprueba admisión nativa, competencia, superioridad ni frozen candidate.",
+      "observations_sha256 sigue declarado por el checker; no se reconstruyen todos los registros desde ese digest. Host, daemon e intérprete permanecen como frontera confiable.",
+      "Sin modificaciones, ejecución de Docker, llamadas a modelos ni delegación. Cuota native originalvolume: UNKNOWN."
+    ],
+    "tests_executed": false
+  }
+}

@@ -1,0 +1,30 @@
+...F                                                                     [100%]
+=================================== FAILURES ===================================
+_______ test_R04_authored_subprocess_shadow_cannot_fake_checker_success ________
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-383/test_R04_authored_subprocess_s0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f1655a08830>
+
+    def test_R04_authored_subprocess_shadow_cannot_fake_checker_success(tmp_path, monkeypatch):
+        r = registration(tmp_path); folder = tmp_path / 'attempt'; folder.mkdir(mode=0o700)
+        result = {'classification': 'independent public development checks; not reserved or blinded',
+                  'task': 'ledgerfold', 'cases': 104, 'passed': 104, 'failed': [], 'observations_sha256': 'a' * 64}
+        # This module would print a forged valid summary during the checker's import.
+        shadow = 'print(' + repr(__import__('json').dumps(result)) + ')\nraise SystemExit(0)\n'
+        files = {'ledger_fold.py': 'print("synthetic invalid output")\n', 'subprocess.py': shadow}
+        built = []; original = pilot.transport
+        def capture(r, path):
+            t = original(r, path); built.append(t); return t
+        monkeypatch.setattr(pilot, 'transport', capture)
+        try:
+            value = pilot._public(r, pilot.ATTEMPTS[2], folder, files, True)
+>           assert value['status'] == 'observed' and value['score'] == 0
+E           AssertionError: assert ('failed' == 'observed'
+E             
+E             - observed
+E             + failed)
+
+tests/test_neutral_pilot_docker.py:107: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_neutral_pilot_docker.py::test_R04_authored_subprocess_shadow_cannot_fake_checker_success
+1 failed, 3 passed in 8.55s
