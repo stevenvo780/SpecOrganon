@@ -224,6 +224,16 @@ def test_maximum_full_validate_context_keeps_all_items_files_and_test_streams(tm
     # remain subject to the independent final 110000-byte admission guard.
     request=ctrl._request(state,'review',progress)
     assert len(canonical(request))<=110000
+    author_request=ctrl._request(state,'author',progress)
+    assert len(canonical(author_request))<=110000
+    assert author_request['documents']['state.json']==canonical(state).decode()
+    previous_format=ctrl.author_format
+    try:
+        ctrl.author_format='items-v1'
+        typed_request=ctrl._request(state,'author',progress)
+        assert len(canonical(typed_request))<=110000
+        assert typed_request['documents']['state.json']==canonical(state).decode()
+    finally:ctrl.author_format=previous_format
     assert request['documents']['state.json']==canonical(state).decode()
     assert json.loads(request['documents']['delivery-files.json'])==files
     streams=json.loads(request['documents']['measured-test-records.json'])['t1']['streams']

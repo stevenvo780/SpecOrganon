@@ -1,0 +1,18 @@
+from pathlib import Path
+import subprocess,json,time,hashlib,datetime
+base=Path(__file__).parent;root=Path('/home/stev/.codex/worktrees/autonomous-release/SpecOrganon');receipts=[]
+commands=[('compose-config',['docker','compose','config','--format','json']),('codex-version',['docker','compose','run','--rm','-T','codex','codex','--version']),('MCP-list',['docker','compose','run','--rm','-T','codex','codex','mcp','list','--json']),('stdio-smoke',['docker','compose','run','--rm','-T','codex','python','/opt/codex-lab/smoke.py']),('installed-origin',['docker','compose','run','--rm','-T','codex','python','-c','import specorganon, pathlib, hashlib, json; w=next(pathlib.Path("/opt/specorganon/dist").glob("*.whl")); print(json.dumps({"version":specorganon.__version__,"module":specorganon.__file__,"wheel_sha256":hashlib.sha256(w.read_bytes()).hexdigest(),"authenticated":pathlib.Path("/home/codex/.codex/auth.json").exists(),"extractor_sha256":hashlib.sha256(pathlib.Path("/usr/bin/pdftotext").read_bytes()).hexdigest()}))'])]
+for name,args in commands:
+ start=time.time();p=subprocess.run(args,cwd=root,capture_output=True,timeout=150);(base/(name+'.stdout')).write_bytes(p.stdout);(base/(name+'.stderr')).write_bytes(p.stderr)
+ r={'name':name,'argv':args,'cwd':str(root),'exit_code':p.returncode,'timed_out':False,'duration_seconds':time.time()-start,'stdout_sha256':hashlib.sha256(p.stdout).hexdigest(),'stderr_sha256':hashlib.sha256(p.stderr).hexdigest()};receipts.append(r)
+ (base/'checks-receipt.json').write_text(json.dumps({'schema':1,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'checks':receipts,'scope':'fresh unauthenticated separate laboratory; actual stdio/CLI; no native model dispatch'},indent=2)+'\n');print(json.dumps({k:r[k] for k in ['name','exit_code','duration_seconds']}),flush=True)
+ if p.returncode:raise SystemExit(p.returncode)
+config=json.loads((base/'compose-config.stdout').read_text());assert config['name']=='specorganon-autonomous-rc2';assert config['services']['codex']['cap_drop']==['ALL']
+assert (base/'codex-version.stdout').read_text().strip()=='codex-cli 0.160.0'
+servers=json.loads((base/'MCP-list.stdout').read_text());assert len(servers)==1 and servers[0]['name']=='specorganon' and servers[0]['enabled']
+smoke=json.loads((base/'stdio-smoke.stdout').read_text());assert smoke['passed'] and smoke['tools_discovered']==24
+origin=json.loads((base/'installed-origin.stdout').read_text());assert origin['version']=='0.2.0rc2' and 'site-packages' in origin['module'] and origin['authenticated'] is False
+assert origin['wheel_sha256']=='343bf555a92f911209bef98786a9241b3a3feb3282fca88407147cbd64cafd31'
+assert origin['extractor_sha256']=='0fb98ea179e19154a90202608c164f2a319b79f16576fa6534b2d601033565e7'
+summary={'schema':1,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'passed':True,'version':origin['version'],'codex_version':'0.160.0','Node_base':'node@sha256:25330af3531fb5e23318554a0aa911125b6e91b1b777edf7655501d207c067a2','new_compose_project':config['name'],'specorganon_image':subprocess.check_output(['docker','image','inspect','specorganon-release:0.2.0rc2','--format','{{.Id}}'],text=True).strip(),'codex_image':subprocess.check_output(['docker','image','inspect','specorganon-codex:0.2.0rc2','--format','{{.Id}}'],text=True).strip(),'wheel_sha256':origin['wheel_sha256'],'smoke':smoke,'MCP_enabled':True,'authenticated':False,'native_model_calls':0,'historical_and_live_profiles_mounted':False,'active_cohort_image_changed':False,'fixtures_only':True,'goal_completed':False}
+(base/'result.json').write_text(json.dumps(summary,indent=2)+'\n');print(json.dumps(summary),flush=True)

@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "observed_at": "2026-10-05T13:58:39.833780+00:00",
+  "images": {
+    "native": {
+      "image_id": "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae",
+      "image_user": "codex",
+      "uid": 1000,
+      "argv": [
+        "/usr/bin/docker",
+        "run",
+        "--rm",
+        "--read-only",
+        "--network",
+        "none",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--entrypoint",
+        "/usr/bin/id",
+        "sha256:aa4eae810628bd2b78bd48ed3059c284a497bdc7c92d81daacdfe906a3bae3ae"
+      ],
+      "exit_code": 0,
+      "stdout": "uid=1000(codex) gid=1000(codex) groups=1000(codex)\n",
+      "stderr": "",
+      "stdout_sha256": "f06b90fad1bfaf5ca6aab0463fa25f9cd39cced3934468181d48b09b1d654b22",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "test": {
+      "image_id": "sha256:98723123de528a5f0201a1c341fe044f88d885345b2e1bedd6a89574c4796d92",
+      "image_user": "ubuntu",
+      "uid": 1000,
+      "argv": [
+        "/usr/bin/docker",
+        "run",
+        "--rm",
+        "--read-only",
+        "--network",
+        "none",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--entrypoint",
+        "/usr/bin/id",
+        "sha256:98723123de528a5f0201a1c341fe044f88d885345b2e1bedd6a89574c4796d92"
+      ],
+      "exit_code": 0,
+      "stdout": "uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),4(adm),20(dialout),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev)\n",
+      "stderr": "",
+      "stdout_sha256": "96eefb4e73eb5415e7ac20fb3fd6b62897387811b7c9c8a3c4edc72b74b4bf4b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "profiles_mounted": false,
+  "native_provider_calls": 0,
+  "scope": "actual default image user observation; original provider roles need network/profile mounts separately"
+}

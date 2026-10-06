@@ -1,0 +1,133 @@
+{
+  "events": [
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-05T14:58:03+00:00",
+      "hash": "d5ed1d1d0fe29a95c13d0e60ad82d810541a446721206e8cc69af73e8e0ef404",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "affected_actor": "Operador delegado que solicita la entrega técnica verificable.",
+          "need": "Conciliación determinista e íntegra de eventos bajo el contrato LotLedger v1.",
+          "observation_status": "Necesidad contractual; no daño de campo medido.",
+          "sources": [
+            "existing-mandate.md",
+            "contract.md: Propósito y alcance; Procesamiento y duplicados",
+            "protocol.md: Sustancia de fases y evidencia anterior a medir"
+          ]
+        },
+        "deps": {},
+        "id": "p1",
+        "kind": "problem",
+        "text": "La necesidad delegada es conciliar eventos de existencias por lote y ubicación antes de importar datos, detectando doble aplicación, conflicto de identidad y saldo insuficiente. Una repetición idéntica debe ser idempotente; un evento inválido o un id con contenido distinto debe invalidar toda la entrada sin resultados parciales. Estos son riesgos técnicos definidos por el contrato, no incidentes de campo observados. La formulación se limita a verificar una CLI local frente a entradas de prueba; no presupone demanda humana, pérdidas evitadas ni superioridad sobre otra herramienta.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-05T14:58:03+00:00",
+      "hash": "1d979036c4e0d9d360813f7af9d0b14f2bdeae174b376336197b6dc4262fe61c",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "actor": "human:owner",
+          "delegated_actor": "Codex, autor técnico dentro del mandato suministrado.",
+          "identity_trust": "local_declared",
+          "role": "Operador delegante y destinatario de la entrega técnica.",
+          "sources": [
+            "existing-mandate.md",
+            "protocol.md: Mandato, roles y separación",
+            "state.json: project; approval_identity_authenticated"
+          ]
+        },
+        "deps": {
+          "p1": 1
+        },
+        "id": "a1",
+        "kind": "actor",
+        "text": "El actor afectado y delegante es el operador identificado declarativamente como human:owner en el contexto local. Su interés documentado es recibir software autónomo reproducible y verificable dentro del mandato. Codex actúa como autor técnico delegado: elegir contrato o arquitectura dentro del alcance no implica que el operador los haya elegido personalmente. El revisor separado y el controlador tienen funciones de revisión y registro; este artefacto no autentica identidades, registra aprobación ni atribuye necesidades a usuarios o comunidades no documentados.",
+        "version": 1
+      },
+      "prev_hash": "d5ed1d1d0fe29a95c13d0e60ad82d810541a446721206e8cc69af73e8e0ef404",
+      "seq": 2
+    },
+    {
+      "actor": "agent:codex-isolated-author",
+      "at": "2026-10-05T14:58:03+00:00",
+      "hash": "d975ab3c742b6deefe9c3153fdd4918d362f981fe42cda22ef36bfec18ea6bb2",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "excluded_claims": [
+            "Beneficio de campo",
+            "Comparación causal",
+            "Baseline de conformidad completa inventada",
+            "Elección personal del operador",
+            "Aprobación o aceptación de fase"
+          ],
+          "observation_limit": "Entradas sintéticas y comportamiento contractual; sin extrapolación a población humana.",
+          "scope": "Conciliación técnica local conforme al contrato prospectivo LotLedger v1.",
+          "sources": [
+            "contract.md: Interfaz y entrada; Procesamiento y duplicados; Salida exacta y recursos",
+            "existing-mandate.md",
+            "protocol.md: Sustancia de fases y evidencia anterior a medir; Congelación y límites",
+            "public-evidence.md",
+            "public-sqlite-observations.json: scope; observations.population",
+            "measured-test-records.json"
+          ]
+        },
+        "deps": {
+          "a1": 1,
+          "p1": 1
+        },
+        "id": "b1",
+        "kind": "boundary",
+        "text": "El caso es exclusivamente lotledger-delivery-v1: una CLI Python 3.12 de biblioteca estándar que recibe JSONL por stdin y concilia existencias por pares exactos (lot, site), sin datos de personas, red ni efectos externos. La observación pertinente será el comportamiento técnico de la entrega ante entradas contractuales, sus errores y documentación. Las seis assertions SQL públicas sólo describen primitivas SQLite sobre fixtures sintéticos; no miden LotLedger ni constituyen su baseline. Se excluyen utilidad humana, eficacia alimentaria, reducción de pérdidas, seguridad universal y superioridad metodológica. Como formulaciones rivales, la reparación silenciosa privilegiaría importar datos incompletos y la gestión de inventario de campo exigiría evidencia de usuarios y operaciones reales; ambas exceden este contrato, que exige rechazo íntegro e idempotencia. La elección entre implementaciones, incluida SQLite con una capa contractual, queda para compare. No hay resultados de ejecución de la entrega ni conformidad completa demostrada en este snapshot. Una sola identidad conserva su resultado aunque falle, sin ampliar límites ni ajustar reservados tras observar respuestas.",
+        "version": 1
+      },
+      "prev_hash": "1d979036c4e0d9d360813f7af9d0b14f2bdeae174b376336197b6dc4262fe61c",
+      "seq": 3
+    },
+    {
+      "actor": "reviewer:gemini-isolated-review",
+      "at": "2026-10-05T14:59:32+00:00",
+      "hash": "036ed05119469f077352a067fdde4258e7222211b44e8dbb4a63e2b5d5d42976",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "La fase frame satisface íntegramente el contrato de fase y los criterios de aceptación para el snapshot vigente de lotledger-delivery-v1. El artefacto p1 delimita la necesidad técnica estricta de conciliación determinista e íntegra de eventos JSONL (identificando doble aplicación, colisión de identidad con contenido divergente y saldo insuficiente bajo política de invalidación total e idempotencia), distinguiendo explícitamente esta necesidad contractual de daños de campo o demandas humanas no medidas. El artefacto a1 identifica con precisión al operador delegante human:owner dentro de la política declarativa local y documenta la delegación técnica a Codex sin atribuir elecciones de diseño personales al operador ni autenticar identidades externas. El artefacto b1 establece con rigor el alcance exclusivo a la CLI y entradas sintéticas de prueba, excluyendo beneficios de campo, superioridad metodológica, eficacia alimentaria y baselines de conformidad inventadas a partir de las primitivas SQLite observadas. Asimismo, evalúa formulaciones rivales pertinentes (reparación silenciosa y gestión de inventario de campo) fundamentando su exclusión por incompatibilidad con el contrato. La cadena de dependencias (p1 -> a1 -> b1) es coherente, sin elementos obsoletos ni afirmaciones de ejecución o aprobación indebida. [role receipt: /datos/workspaces/personal/specorganon-validation/autonomous-software-v1/lotledger-delivery-v1/transport/host-journal/role-02-frame-review/receipt.json]",
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b",
+        "verdict": "accept"
+      },
+      "prev_hash": "d975ab3c742b6deefe9c3153fdd4918d362f981fe42cda22ef36bfec18ea6bb2",
+      "seq": 4
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-05T14:59:32+00:00",
+      "hash": "852ad209c73a1de168238d435e9e34fd02b5ce34c81601bdd8fcc1bfb4e4ca4d",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "0aef89862b04a3409c22a6a8497df78d9d099fb58f4051c9d2a3d10b0e9cc99b"
+      },
+      "prev_hash": "036ed05119469f077352a067fdde4258e7222211b44e8dbb4a63e2b5d5d42976",
+      "seq": 5
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "fa2230c7-2b12-424c-8ad5-01587c91d237",
+    "created_at": "2026-10-05T14:56:55+00:00",
+    "created_by": "human:owner",
+    "domain": "development",
+    "test_gate_policy": "local_report",
+    "title": "LotLedger v1 prospective engineering delivery"
+  },
+  "schema": 1
+}

@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "job_id": "7104015fcb964a8dab758903394930a9",
+  "status": "succeeded",
+  "provider": "gemini",
+  "model": "gemini/3.8-flash",
+  "native_model": "Gemini 3.8 Flash (Medium)",
+  "submitted_at": 1791215136.5602043,
+  "finished_at": 1791215156.5484326,
+  "duration_seconds": 20,
+  "scope": "sequence design with required preregistration conditions; not matrix/source acceptance",
+  "review": {
+    "schema": 1,
+    "verdict": "accept",
+    "sequence_ready_as_design": true,
+    "registration_ready": false,
+    "findings": [
+      {
+        "issue": "Sesgo de selección por designación o sustitución de celda hito",
+        "required_change": "Pre-registrar de forma inmutable la regla de candidatura del hito de 9 fases (primera celda T de seed 731 como candidata primaria prefijada) sin reasignación post-hoc selectiva ni filtrado condicionado a observar éxito."
+      },
+      {
+        "issue": "Dual-rol inicial de validación ingenieril (hito 9 fases) y punto muestral comparativo (campaña 42)",
+        "required_change": "Declarar explícitamente en el protocolo el doble rol de la primera celda T, garantizando que su generación no reciba presupuesto privilegiado, recetas reservadas ni feedback adicional respecto al resto de la matriz balanceada."
+      },
+      {
+        "issue": "Contingencia de prerrequisito insatisfecho y denominador 42 incompleto para evaluación comparativa",
+        "required_change": "Formalizar la regla pre-registrada de que si 0 celdas T superan las 9 fases reales, las 42 ejecuciones se preservan y reportan como terminales pero clasificadas como not_evaluated_by_prerequisite, cerrando la campaña con alcance incompleto, GOAL pendiente y sin reintentos automáticos."
+      },
+      {
+        "issue": "Inadmisibilidad de éxito metodológico o atribución de eficacia sin hito 9 fases real",
+        "required_change": "Prohibir la atribución de éxito del método o inferencia de eficacia en campo a partir de controles sintéticos, hashes o métricas CLI; la comparación funcional permanece retenida hasta la existencia verificable de 9 fases aceptadas con trazas, tests independientes y recibos."
+      }
+    ],
+    "reason": "La propuesta preserva el orden balanceado de 42 celdas bajo seed 731, elimina el sesgo de 'retry-until-victory' al exigir la finalización terminal de todas las celdas sin reinicios ni feedback intermedio, y desacopla la generación de la evaluación funcional condicionada al hito de 9 fases reales.",
+    "tests_executed": false
+  }
+}

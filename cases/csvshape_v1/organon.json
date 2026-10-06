@@ -1,0 +1,441 @@
+{
+  "events": [
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:11:38+00:00",
+      "hash": "75e21c13d434b038225e94596b5de700c18f038610a3ca62d75f72db1284d43d",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {},
+        "id": "actor-operator",
+        "kind": "actor",
+        "text": "Operador del sistema y ejecutor técnico delegado (Codex/SpecOrganon) que autoriza y supervisa la validación de software en entorno local controlado sin intervención personal en las decisiones técnicas específicas.",
+        "version": 1
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:11:38+00:00",
+      "hash": "5867509a9638f88f3e515730c8063b7d54dd7acaca3117a30efe8516ab138c11",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "actor-operator": 1
+        },
+        "id": "problem-preimport",
+        "kind": "problem",
+        "text": "Necesidad operativa de inspeccionar rigurosamente la estructura de tablas CSV antes de la importación para rechazar entradas malformadas o inconsistentes y resumir conteos de vacíos y distintos por columna sin mutaciones silenciosas.",
+        "version": 1
+      },
+      "prev_hash": "75e21c13d434b038225e94596b5de700c18f038610a3ca62d75f72db1284d43d",
+      "seq": 2
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:11:38+00:00",
+      "hash": "88df6fd23070ad0c8fead81d9ad67a17bb1dcea8d71d2f54a52de341bfb41c0c",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem-preimport": 1
+        },
+        "id": "boundary-csvshape",
+        "kind": "boundary",
+        "text": "Alcance estrictamente técnico y local: ejecución CLI de csvshape.py en Python 3.12 stdlib sobre stdin con límites explícitos (<=65536 bytes UTF-8, 1-32 columnas, 0-1000 filas, dialecto excel con delimiter explícito). Se excluyen expresamente la inferencia de tipos semánticos, reparación automática de datos malformados, evaluación de dialectos no configurados y afirmaciones de demanda o utilidad comercial en producción.",
+        "version": 1
+      },
+      "prev_hash": "5867509a9638f88f3e515730c8063b7d54dd7acaca3117a30efe8516ab138c11",
+      "seq": 3
+    },
+    {
+      "actor": "reviewer:codex-isolated-review",
+      "at": "2026-10-05T11:11:50+00:00",
+      "hash": "57db98b51a84c89051532fa89cce5ccbfef2f7cc58eab91bcaa0fae51b12100d",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "frame",
+        "provenance": "local_declared",
+        "reason": "El snapshot vigente de frame delimita una necesidad concreta de inspección estructural preimportación, identifica al operador y al ejecutor técnico delegado, y mantiene trazas actor-operator v1 → problem-preimport v1 → boundary-csvshape v1. La frontera local excluye reparación silenciosa, inferencia semántica, dialectos no configurados y afirmaciones de demanda o utilidad comercial. La selección técnica se entiende dentro del mandato delegado, sin atribuir al operador una elección personal de CSVShape. Las formulaciones rivales sustantivas corresponden a critique. Esta aceptación se limita al snapshot suministrado; no acredita funcionamiento, superioridad ni beneficio de campo. [role receipt: /datos/workspaces/personal/specorganon-validation/autonomous-software-v1/csvshape-delivery-v1/transport/host-journal/role-02-frame-review/receipt.json]",
+        "snapshot": "f7b825b56dd4b422564b2f4d382a65361bd34456ae2d0c7864e829be1387bb82",
+        "verdict": "accept"
+      },
+      "prev_hash": "88df6fd23070ad0c8fead81d9ad67a17bb1dcea8d71d2f54a52de341bfb41c0c",
+      "seq": 4
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-05T11:11:50+00:00",
+      "hash": "d094c531c5f01a95cf344e4b915a58e74655dbf8b839c45324773baede89d756",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "frame",
+        "review_seq": 4,
+        "snapshot": "f7b825b56dd4b422564b2f4d382a65361bd34456ae2d0c7864e829be1387bb82"
+      },
+      "prev_hash": "57db98b51a84c89051532fa89cce5ccbfef2f7cc58eab91bcaa0fae51b12100d",
+      "seq": 5
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:12:06+00:00",
+      "hash": "9cfc26dac6afb8c5f6bfeb35e39d2d1956d9df8d2d3fbd961a2bd2fa2d6e054a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem-preimport": 1
+        },
+        "id": "concept-structural-inspection",
+        "kind": "concept",
+        "text": "Inspección estructural: proceso determinista de verificación de sintaxis, dimensionalidad y conteo de vacíos y distintos en tablas CSV antes de la importación, sin alterar el contenido ni realizar inferencia de tipos.",
+        "version": 1
+      },
+      "prev_hash": "d094c531c5f01a95cf344e4b915a58e74655dbf8b839c45324773baede89d756",
+      "seq": 6
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:12:06+00:00",
+      "hash": "138ecb851542e2bc866adfcb2b508b6da12ca6180c27f2d76e836972a0442112",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "boundary-csvshape": 1,
+          "problem-preimport": 1
+        },
+        "id": "assumption-strict-failure",
+        "kind": "assumption",
+        "text": "Se asume como hipótesis de trabajo que el fallo rápido y estricto ante inconsistencias estructurales o violaciones de límites es preferible a la corrección heurística o la admisión parcial en flujos de datos automatizados.",
+        "version": 1
+      },
+      "prev_hash": "9cfc26dac6afb8c5f6bfeb35e39d2d1956d9df8d2d3fbd961a2bd2fa2d6e054a",
+      "seq": 7
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:12:06+00:00",
+      "hash": "8c391566217745cff2a6a0719e6dba193ad74139d8545d8f12b4d9487b55898a",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem-preimport": 1
+        },
+        "id": "frame-strict-validation",
+        "kind": "frame_option",
+        "text": "Enfoque de validación estricta y determinista: verificar límites de tamaño, unicidad de columnas y consistencia dimensional fila a fila, abortando con código de error ante cualquier violación estructural sin modificar los datos de entrada.",
+        "version": 1
+      },
+      "prev_hash": "138ecb851542e2bc866adfcb2b508b6da12ca6180c27f2d76e836972a0442112",
+      "seq": 8
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:12:06+00:00",
+      "hash": "0dde3854db267b1afbf73ff1f5980566cb98aaab692913a818b5888b913dd1f3",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem-preimport": 1
+        },
+        "id": "frame-permissive-recovery",
+        "kind": "frame_option",
+        "text": "Enfoque permisivo de tolerancia a fallos: aceptar filas con dimensiones discordantes o caracteres no conformes mediante heurísticas de ajuste automático o sustitución por valores por defecto para asegurar la ingesta continua.",
+        "version": 1
+      },
+      "prev_hash": "8c391566217745cff2a6a0719e6dba193ad74139d8545d8f12b4d9487b55898a",
+      "seq": 9
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:12:06+00:00",
+      "hash": "08c0c877c5d999acdf40c6ad8ebb58aac7c3baa71f55e96d9bb5c9e4c6e74429",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "actor-operator": 1,
+          "problem-preimport": 1
+        },
+        "id": "norm-structural-integrity",
+        "kind": "norm",
+        "text": "Priorizar la verificación determinista y la preservación exacta de la estructura de datos sobre la tolerancia silenciosa o la reparación automática, garantizando que todo fallo estructural sea reportado inequívocamente al operador.",
+        "version": 1
+      },
+      "prev_hash": "0dde3854db267b1afbf73ff1f5980566cb98aaab692913a818b5888b913dd1f3",
+      "seq": 10
+    },
+    {
+      "actor": "human:owner",
+      "at": "2026-10-05T11:12:21+00:00",
+      "hash": "0d507e5c31fb1f0220991a97ee2ad448da371ccd3656152e3857c168949c7047",
+      "kind": "approval",
+      "payload": {
+        "id": "norm-structural-integrity",
+        "provenance": "local_declared",
+        "reason": "Existing local owner mandate; technical conformity judged separately by reviewer:codex-isolated-review (/datos/workspaces/personal/specorganon-validation/autonomous-software-v1/csvshape-delivery-v1/transport/host-journal/role-04-critique-approval/receipt.json): La norma norm-structural-integrity v1, trazada a actor-operator v1 y problem-preimport v1, es conforme al mandato delegado: prioriza inspección determinista, preservación de datos y errores explícitos frente a reparación silenciosa. Su alcance queda limitado por boundary-csvshape v1 y el contrato; no garantiza detectar defectos semánticos ni todos los dialectos. Los encuadres rivales distinguen validación estricta y recuperación permisiva; la preferencia es normativa, no una superioridad medida. Esta conformidad se limita al objetivo de aprobación del snapshot suministrado, sin atribuir elección personal al operador, autenticar identidad ni aceptar o avanzar la fase critique.",
+        "version": 1
+      },
+      "prev_hash": "08c0c877c5d999acdf40c6ad8ebb58aac7c3baa71f55e96d9bb5c9e4c6e74429",
+      "seq": 11
+    },
+    {
+      "actor": "reviewer:codex-isolated-review",
+      "at": "2026-10-05T11:12:35+00:00",
+      "hash": "90081f1043def97597da9577b83d6a77f150450f533b6f5752cff95679caa658",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "critique",
+        "provenance": "local_declared",
+        "reason": "El snapshot de critique presenta un concepto operativo y un supuesto discutible, trazados a problem-preimport v1 y boundary-csvshape v1. Los encuadres frame-strict-validation v1 y frame-permissive-recovery v1 son sustantivamente distintos: priorizan preservación y rechazo explícito frente a continuidad de ingesta mediante ajustes. norm-structural-integrity v1 traza actor-operator v1 y problem-preimport v1 y consta aprobada localmente bajo el mandato delegado. La preferencia estricta es normativa, no superioridad observada; su garantía se interpreta dentro del contrato y boundary-csvshape v1, sin abarcar defectos semánticos ni dialectos no configurados. La aceptación se limita a este snapshot, sin autenticar al propietario, atribuirle una elección personal ni acreditar funcionamiento o beneficio de campo. [role receipt: /datos/workspaces/personal/specorganon-validation/autonomous-software-v1/csvshape-delivery-v1/transport/host-journal/role-05-critique-review/receipt.json]",
+        "snapshot": "bdd5783bda7591a0ca5787daf8fcc032bcd230b807a2f918596fbd77e86b3b14",
+        "verdict": "accept"
+      },
+      "prev_hash": "0d507e5c31fb1f0220991a97ee2ad448da371ccd3656152e3857c168949c7047",
+      "seq": 12
+    },
+    {
+      "actor": "agent:software-controller",
+      "at": "2026-10-05T11:12:35+00:00",
+      "hash": "a7f11d98a83e16e364a3793d2904e84c9e936a2ce628fb4200ea06e9501d23b7",
+      "kind": "phase_advance",
+      "payload": {
+        "phase": "critique",
+        "review_seq": 12,
+        "snapshot": "bdd5783bda7591a0ca5787daf8fcc032bcd230b807a2f918596fbd77e86b3b14"
+      },
+      "prev_hash": "90081f1043def97597da9577b83d6a77f150450f533b6f5752cff95679caa658",
+      "seq": 13
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:12:59+00:00",
+      "hash": "d94fff9e361714cb2c73e86741b11e759813de5f06acac9ceba7d2b4d0166e5c",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "problem-preimport": 1
+        },
+        "id": "question-conformance",
+        "kind": "question",
+        "text": "¿Es posible implementar csvshape.py en Python 3.12 estándar cumpliendo estrictamente las restricciones de formato, dimensionalidad y límites del contrato sin mutar datos ni requerir dependencias externas?",
+        "version": 1
+      },
+      "prev_hash": "a7f11d98a83e16e364a3793d2904e84c9e936a2ce628fb4200ea06e9501d23b7",
+      "seq": 14
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:12:59+00:00",
+      "hash": "5b27904f16eebe46a861905d19ed5b9471d30442705eac1914d9cc5d32ef1b86",
+      "kind": "item_put",
+      "payload": {
+        "data": {},
+        "deps": {
+          "question-conformance": 1
+        },
+        "id": "hypothesis-conformance",
+        "kind": "hypothesis",
+        "text": "Una implementación de csvshape.py basada en el parser estándar csv.reader con dialecto excel y modo estricto puede validar deterministamente la integridad estructural y satisfacer el 100% de las comprobaciones contractuales locales sin inferir tipos ni tolerar filas inconsistentes.",
+        "version": 1
+      },
+      "prev_hash": "d94fff9e361714cb2c73e86741b11e759813de5f06acac9ceba7d2b4d0166e5c",
+      "seq": 15
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:12:59+00:00",
+      "hash": "00e18486b22d6ba69e5393be442dcf34a1e15ac839b635a11d42c241bdde50aa",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Comparación unívoca de las salidas y códigos observados contra las especificaciones exactas del contrato propuesto y el preflight determinista del parser.",
+          "method": "Ejecución CLI automatizada en contenedor aislado con Python 3.12 stdlib (2 CPU, 1 GiB, sin red ni perfiles), midiendo códigos de retorno y flujos de salida con timeout de 3 segundos.",
+          "population": "Casos de prueba sintéticos locales que cubren entradas válidas (incluyendo los ejemplos públicos del contrato), límites dimensionales y de tamaño, y entradas malformadas o inconsistentes.",
+          "uncertainty": "La evaluación sobre un conjunto finito de pruebas locales no garantiza la ausencia de defectos ante todos los posibles dialectos o fuentes arbitrarias, ni demuestra utilidad en producción."
+        },
+        "deps": {
+          "hypothesis-conformance": 1,
+          "question-conformance": 1
+        },
+        "id": "protocol-verification",
+        "kind": "protocol",
+        "text": "Protocolo de evaluación técnica: ejecutar csvshape.py sobre entradas de prueba por stdin en un entorno aislado sin red, registrando y verificando deterministamente códigos de salida, objetos JSON de resumen en stdout y mensajes de error en stderr según los límites del contrato.",
+        "version": 1
+      },
+      "prev_hash": "5b27904f16eebe46a861905d19ed5b9471d30442705eac1914d9cc5d32ef1b86",
+      "seq": 16
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:12:59+00:00",
+      "hash": "80f56ed7cfb27fa821fc09bbb71f2bc765a897569e7c813c94928174caa16656",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "date": "2026-10-05",
+          "locator": "csv.reader, Dialect.strict",
+          "origin": "published",
+          "source": "https://docs.python.org/3.12/library/csv.html"
+        },
+        "deps": {
+          "protocol-verification": 1
+        },
+        "id": "evidence-doc-csv",
+        "kind": "evidence",
+        "text": "La documentación oficial de Python 3.12 establece que csv.reader devuelve campos como cadenas de texto sin conversión implícita y que el parámetro strict=True eleva excepciones ante sintaxis inválida, sustentando la viabilidad de la inspección determinista requerida por el contrato.",
+        "version": 1
+      },
+      "prev_hash": "00e18486b22d6ba69e5393be442dcf34a1e15ac839b635a11d42c241bdde50aa",
+      "seq": 17
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:12:59+00:00",
+      "hash": "051f299d895ecb23cf9e236071468ff8a1cc7c5b3c1c9a0f11e23cbd0d6db927",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "metric": "checks_passed_percent",
+          "unit": "percent"
+        },
+        "deps": {
+          "evidence-doc-csv": 1,
+          "norm-structural-integrity": 1,
+          "problem-preimport": 1
+        },
+        "id": "indicator-checks-passed",
+        "kind": "indicator",
+        "text": "Porcentaje de comprobaciones contractuales superadas en ejecuciones de prueba deterministas locales (aplicable a los criterios F, D y M sin agregación compensatoria).",
+        "version": 1
+      },
+      "prev_hash": "80f56ed7cfb27fa821fc09bbb71f2bc765a897569e7c813c94928174caa16656",
+      "seq": 18
+    },
+    {
+      "actor": "reviewer:codex-isolated-review",
+      "at": "2026-10-05T11:13:23+00:00",
+      "hash": "7e7cca7c887648ca3cab36e38aca3950aa02d61c3b943ab2ae834728780baf69",
+      "kind": "phase_review",
+      "payload": {
+        "independent": true,
+        "phase": "study",
+        "provenance": "local_declared",
+        "reason": "El snapshot study contiene una pregunta falsable y trazas vigentes hacia problem-preimport v1 y la norma aprobada, pero no fundamenta el indicador con la observación pública requerida ni operacionaliza separadamente F, D y M. La preparación formal de la puerta no basta para satisfacer el contrato. No se ejecutaron pruebas. [role receipt: /datos/workspaces/personal/specorganon-validation/autonomous-software-v1/csvshape-delivery-v1/transport/host-journal/role-07-study-review/receipt.json]",
+        "snapshot": "8a1da4585c30aeb82467e045f9fa860cc54874636ac555e5abbe7228ace71ae7",
+        "verdict": "reject"
+      },
+      "prev_hash": "051f299d895ecb23cf9e236071468ff8a1cc7c5b3c1c9a0f11e23cbd0d6db927",
+      "seq": 19
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:13:50+00:00",
+      "hash": "77fdc1664320cf7d15de9a743e58c36126411b7e69d38b9973a1338a5fb180e6",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "comparison": "Comparación estricta sin agregación compensatoria: F frente a especificación contractual local; D frente a checklist 8/8 del README; M frente a 9/9 fases aceptadas y trazas completas. La observación del parser es contexto ajeno.",
+          "method": "F por ejecución CLI en contenedor aislado (Python 3.12, 2 CPU, 1 GiB, timeout 3s, sin red); D por comprobación del checklist 8/8 del README; M por verificación de 9 fases revisadas, trazabilidad y recibos.",
+          "population": "Poblaciones independientes: F abarca casos sintéticos locales y ejemplos del contrato; D abarca 8 secciones del README; M abarca 9 fases de proceso. Los 6 probes del parser constituyen población previa externa.",
+          "uncertainty": "Pruebas locales no prueban ausencia de fallos en todos los dialectos ni beneficio de campo. D y M quedan no_demostrado en validate si no cuentan con medición propia pertinente en esa fase."
+        },
+        "deps": {
+          "hypothesis-conformance": 1,
+          "question-conformance": 1
+        },
+        "id": "protocol-verification",
+        "kind": "protocol",
+        "text": "Protocolo de verificación técnica que desglosa la evaluación en tres poblaciones no compensables: conformidad contractual F (suite CLI y pruebas locales), documentación D (checklist 8/8) y metodología M (9 fases y trazabilidad). Fija colección determinista en contenedor aislado, comparación estricta y delimitación de incertidumbre, distinguiendo la observación del parser como contexto externo.",
+        "version": 2
+      },
+      "prev_hash": "7e7cca7c887648ca3cab36e38aca3950aa02d61c3b943ab2ae834728780baf69",
+      "seq": 20
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:13:50+00:00",
+      "hash": "022eaa1ed9e8c4cda25d4e07287026479f5af26b13b4baeca87a6202d4042718",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "collection_method": "scripts/csvshape_parser_preflight.py ejecutado en contenedor Docker aislado con Python 3.12.3 stdlib sin red ni perfiles",
+          "date": "2026-10-05T10:57:22.450121+00:00",
+          "locator": "parser-observation.json",
+          "origin": "observed",
+          "source": "scripts/csvshape_parser_preflight.py"
+        },
+        "deps": {
+          "protocol-verification": 2
+        },
+        "id": "evidence-parser-probes",
+        "kind": "evidence",
+        "text": "Observación determinista previa de 6 probes públicos de csv.reader en Python 3.12.3 (6/6 superados, 100% checks_passed_percent) que verifica coma citada, newline citado, comilla escapada, modo strict ante comillas sin cierre, CRLF y strings sin casts. Acredita la capacidad del parser estándar como contexto de viabilidad, sin constituir medición de CSVShape ni de las restricciones añadidas.",
+        "version": 1
+      },
+      "prev_hash": "77fdc1664320cf7d15de9a743e58c36126411b7e69d38b9973a1338a5fb180e6",
+      "seq": 21
+    },
+    {
+      "actor": "agent:gemini-isolated-author",
+      "at": "2026-10-05T11:13:50+00:00",
+      "hash": "3e148730835b8fe29574e7a1799b52af916bc8f0b0cab7ab6c7b6606be2555f6",
+      "kind": "item_put",
+      "payload": {
+        "data": {
+          "criteria_breakdown": {
+            "D": {
+              "denominator": "8 comprobaciones del checklist documental del README",
+              "metric": "checks_passed_percent",
+              "unit": "percent"
+            },
+            "F": {
+              "denominator": "total de comprobaciones contractuales de la suite propia",
+              "metric": "checks_passed_percent",
+              "unit": "percent"
+            },
+            "M": {
+              "denominator": "9 fases revisadas con trazabilidad y recibos",
+              "metric": "checks_passed_percent",
+              "unit": "percent"
+            }
+          },
+          "metric": "checks_passed_percent",
+          "unit": "percent"
+        },
+        "deps": {
+          "evidence-doc-csv": 1,
+          "evidence-parser-probes": 1,
+          "norm-structural-integrity": 1,
+          "problem-preimport": 1
+        },
+        "id": "indicator-checks-passed",
+        "kind": "indicator",
+        "text": "Porcentaje de comprobaciones superadas (checks_passed_percent) sobre el denominador de cada criterio independiente (F: pruebas contractuales de la suite propia; D: checklist 8/8 del README; M: 9 fases revisadas con trazas y recibos), sin promedios ni agregación compensatoria. Fundamentado en la documentación stdlib y en los 6 probes observados del parser (100%), aclarando que D y M permanecen no_demostrado en validate sin medición propia.",
+        "version": 2
+      },
+      "prev_hash": "022eaa1ed9e8c4cda25d4e07287026479f5af26b13b4baeca87a6202d4042718",
+      "seq": 22
+    }
+  ],
+  "project": {
+    "approval_policy": "local",
+    "case_id": "a052ede2-6a2d-49c2-9533-c804f15735c9",
+    "created_at": "2026-10-05T11:10:35+00:00",
+    "created_by": "human:owner",
+    "domain": "development",
+    "test_gate_policy": "local_report",
+    "title": "CSVShape v1 prospective engineering delivery"
+  },
+  "schema": 1
+}

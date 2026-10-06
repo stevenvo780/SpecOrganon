@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "specorganon"
+version = "0.2.0rc1"
+description = "Method and toolkit for evidence-linked problem solving"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["cryptography>=41,<51", "mcp==2.2.0"]
+
+[project.scripts]
+organon = "specorganon.cli:main"
+organon-mcp = "specorganon.server:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10"]
+
+[tool.ruff]
+# Trial outputs are immutable evidence; audit and execute them without rewriting their bytes.
+extend-exclude = [
+  "experiments/development/energy_pilot/runs",
+  "experiments/development/local_cli_2026-09-26",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/specorganon"]

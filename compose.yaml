@@ -1,0 +1,24 @@
+name: specorganon-autonomous-rc2
+services:
+  codex:
+    image: specorganon-codex:0.2.0rc2
+    build:
+      context: .
+      dockerfile: docker/codex/Dockerfile
+    init: true
+    stdin_open: true
+    tty: true
+    environment:
+      TERM: xterm-256color
+    volumes:
+      - workspace:/workspace
+      - codex-home:/home/codex/.codex
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:./docker/codex/seccomp-codex.json
+      - apparmor:unconfined
+volumes:
+  workspace:
+  codex-home:

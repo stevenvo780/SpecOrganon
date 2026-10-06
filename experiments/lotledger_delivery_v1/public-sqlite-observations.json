@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "at": "2026-10-05T12:22:01.737429+00:00",
+  "origin": "observed",
+  "source": "public_sqlite_observations.py, actual credential-free Docker execution",
+  "scope": "SQLite primitive semantics only; not full LotLedger JSONL contract or field efficacy",
+  "image": "sha256:98723123de528a5f0201a1c341fe044f88d885345b2e1bedd6a89574c4796d92",
+  "exit_code": 0,
+  "network": "none",
+  "mount": "one script read-only",
+  "input_type": "synthetic primitive fixtures",
+  "native_model_calls": 0,
+  "source_sha256": "8b8e3621fa5637590766ed18e32903f1cc3cd40ebad6ccbde46f444809af619f",
+  "stdout_sha256": "181e8174bcc68ded37ac3596696add42d90e2513a9fa12292b9bf620b7229aff",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "observations": {
+    "method": "Fresh in-memory SQLite connections, SQL statements shown in this script; compare actual queries/errors with prespecified fixture expectations",
+    "metric_key": "sqlite_primitives_verified",
+    "observations": [
+      {
+        "actual": {
+          "rejected": true,
+          "rows": 1
+        },
+        "expected": {
+          "rejected": true,
+          "rows": 1
+        },
+        "id": "primary-key-duplicate",
+        "passed": true
+      },
+      {
+        "actual": {
+          "in_transaction": true,
+          "rejected": true,
+          "rows": 1
+        },
+        "expected": {
+          "in_transaction": true,
+          "rejected": true,
+          "rows": 1
+        },
+        "id": "abort-retains-prior-statement",
+        "passed": true
+      },
+      {
+        "actual": {
+          "in_transaction": false,
+          "rows": 0
+        },
+        "expected": {
+          "in_transaction": false,
+          "rows": 0
+        },
+        "id": "explicit-rollback-whole-transaction",
+        "passed": true
+      },
+      {
+        "actual": {
+          "quantity": 7,
+          "rejected": true
+        },
+        "expected": {
+          "quantity": 7,
+          "rejected": true
+        },
+        "id": "check-rejects-negative",
+        "passed": true
+      },
+      {
+        "actual": {
+          "affected": 1,
+          "stocks": [
+            [
+              "fixture-A",
+              4
+            ],
+            [
+              "fixture-B",
+              4
+            ]
+          ],
+          "total": 8
+        },
+        "expected": {
+          "affected": 1,
+          "stocks": [
+            [
+              "fixture-A",
+              4
+            ],
+            [
+              "fixture-B",
+              4
+            ]
+          ],
+          "total": 8
+        },
+        "id": "guarded-transfer-conservation",
+        "passed": true
+      },
+      {
+        "actual": {
+          "affected": 0,
+          "stocks": [
+            [
+              "fixture-A",
+              2
+            ],
+            [
+              "fixture-B",
+              1
+            ]
+          ]
+        },
+        "expected": {
+          "affected": 0,
+          "stocks": [
+            [
+              "fixture-A",
+              2
+            ],
+            [
+              "fixture-B",
+              1
+            ]
+          ]
+        },
+        "id": "insufficient-source-preserves-state",
+        "passed": true
+      }
+    ],
+    "population": "six explicitly listed SQLite primitive assertions on synthetic inputs",
+    "python": "3.12.3",
+    "schema": 1,
+    "scope": "SQLite primitive semantics only; not full LotLedger JSONL contract or field efficacy",
+    "sqlite": "3.45.1",
+    "unit": "cases",
+    "value": 6
+  },
+  "LotLedger_contract_implemented": false,
+  "baseline_full_contract_conformance": false,
+  "field_efficacy_demonstrated": false
+}

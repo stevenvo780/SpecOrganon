@@ -47,8 +47,6 @@ def strict(raw):
 def response_json(text):
     if type(text) is not str or not text.strip(): raise NativeRoleError("empty role response")
     text = text.strip()
-    if text.startswith("```json\n") and text.endswith("\n```"): text = text[8:-4]
-    elif text.startswith("```\n") and text.endswith("\n```"): text = text[4:-4]
     value = strict(text)
     if type(value) is not dict: raise NativeRoleError("role response must be one JSON object")
     return value
@@ -178,7 +176,16 @@ def render_prompt(raw):
     return request, prompt
 
 
-def validate_result(value, role):
+def author_format_from_request(request):
+    raw = request['documents'].get('author-response-format.json')
+    if raw is None: return 'manifest-v1'
+    declared = strict(raw)
+    if request['role'] != 'author' or declared != {'schema': 1, 'format': 'items-v1'} or type(declared['schema']) is not int:
+        raise NativeRoleError('invalid declared author response format')
+    return 'items-v1'
+
+
+def validate_result(value, role, *, author_format='manifest-v1'):
     if type(value) is not dict or type(value.get("schema")) is not int or value.get("schema") != 1:
         raise NativeRoleError("invalid role result schema")
     if role == "review":
@@ -188,6 +195,12 @@ def validate_result(value, role):
                 or any(type(f) is not dict or not f for f in value["findings"])):
             raise NativeRoleError("invalid review result contract")
     elif role == "author":
+        if author_format == 'items-v1':
+            from specorganon.author_contract import typed_author_manifest
+            try: typed_author_manifest(value)
+            except ValueError as exc: raise NativeRoleError('invalid typed author content contract') from exc
+            return value
+        if author_format != 'manifest-v1': raise NativeRoleError('unsupported author response format')
         if (set(value) != {"schema", "manifest", "files", "reason"}
                 or type(value["manifest"]) is not dict or type(value["files"]) is not dict
                 or type(value["reason"]) is not str or not value["reason"].strip()
@@ -316,6 +329,7 @@ def main(argv=None):
     options.output_dir.mkdir(parents=True, exist_ok=True)
     raw = read_request(options.request)
     request, prompt = render_prompt(raw)
+    requested_author_format = author_format_from_request(request)
     executable = "/usr/local/bin/codex" if options.provider == "codex" else "/usr/local/bin/agy"
     metadata = execution_identity(options.provider, executable)
     catalog_metadata = {}; catalog_path = None
@@ -382,7 +396,7 @@ def main(argv=None):
     if catalog_path is not None and (digest(_read(catalog_path)) != catalog_metadata["runtime_model_catalog_sha256"]
             or digest(_read(options.model_catalog)) != catalog_metadata["public_model_catalog_sha256"]):
         raise NativeRoleError("model catalog changed during execution")
-    validate_result(response, request["role"])
+    validate_result(response, request["role"], author_format=requested_author_format)
     print(json.dumps({"schema": 1, "provider": options.provider, "model": options.model,
                       "request_sha256": digest(raw), "invocation_metadata": metadata,
                       "native_exit_code": receipt["exit_code"], "usage_reported": usage,

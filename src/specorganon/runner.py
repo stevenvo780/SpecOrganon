@@ -44,6 +44,9 @@ DATA_LIMIT = 560
 BLOCKER_LIMIT = 24
 REF_LIMIT = 12
 PHASE_INDEX = {phase.id: index for index, phase in enumerate(PHASES)}
+MANIFEST_FIELDS = frozenset({'schema', 'name', 'description', 'steps'})
+PUT_REQUIRED_FIELDS = frozenset({'op', 'id', 'kind', 'text', 'refs', 'data'})
+PUT_OPTIONAL_FIELDS = frozenset({'expected_version', 'expected_deps'})
 
 
 class ManifestError(engine.MethodError):
@@ -284,7 +287,7 @@ def _manifest_steps(manifest: dict[str, Any]) -> list[dict[str, Any]]:
             or manifest["schema"] != 1
             or not isinstance(manifest.get("steps"), list)):
         raise ManifestError("manifest needs schema 1 and a steps array")
-    if set(manifest) - {"schema", "name", "description", "steps"}:
+    if set(manifest) - MANIFEST_FIELDS:
         raise ManifestError("unknown manifest fields")
     if "name" in manifest and (not isinstance(manifest["name"], str) or not manifest["name"].strip()):
         raise ManifestError("manifest name must be a nonempty string")
@@ -295,8 +298,8 @@ def _manifest_steps(manifest: dict[str, Any]) -> list[dict[str, Any]]:
             raise ManifestError(f"step {index} must be an object")
         op = step.get("op")
         if op == "put":
-            required = {"op", "id", "kind", "text", "refs", "data"}
-            if required - set(step) or set(step) - required - {"expected_version", "expected_deps"}:
+            required = PUT_REQUIRED_FIELDS
+            if required - set(step) or set(step) - required - PUT_OPTIONAL_FIELDS:
                 raise ManifestError(f"step {index} has missing or unknown put fields")
             if not isinstance(step["id"], str) or not engine.ITEM_ID.fullmatch(step["id"]):
                 raise ManifestError(f"step {index} has invalid item id")
