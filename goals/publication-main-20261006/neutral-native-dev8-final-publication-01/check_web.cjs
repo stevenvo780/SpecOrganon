@@ -25,7 +25,7 @@ await pilot.screenshot({path:path.join(base,label+'-pilot-'+viewport+'.png')});
 const custody=page.locator('section[aria-labelledby="avance-dev9"]');const ctext=await custody.innerText();
 for(const v of ['0.2.0rc3.dev9','194 pruebas seleccionadas y 46 subtests','18 controles sintéticos','42 módulos idénticos','MCP real de 24 herramientas','Sin','sin admisión T'])if(v!=='Sin'&&!ctext.includes(v))throw Error('Missing dev9 '+v);
 const livecut=page.locator('section[aria-labelledby="piloto-dev8"]');const ltext=await livecut.innerText();
-for(const v of ['Seis posiciones originales cerradas de seis','648/648','131246 bytes frente al límite128000','common_complete y F externo son null en los seis','propuesta offline no implementada','1171 archivos RAW','1180 entradas','BATTERY_ADDITION.md'])if(!ltext.includes(v))throw Error('Missing dev8cut '+v);
+for(const v of ['6/6 posiciones originales cerradas','648/648','131246 bytes frente al límite 128000','common_complete y F externo son null en los seis','propuesta offline no implementada','1171 archivos RAW','1180 entradas','BATTERY_ADDITION.md'])if(!ltext.includes(v))throw Error('Missing dev8cut '+v);
 if(await livecut.locator('tbody tr').count()!==6)throw Error('Wrong partial row count');
 const states=await livecut.locator('tbody tr td:nth-child(4)').allTextContents();if(JSON.stringify(states)!==JSON.stringify(['failed','failed','review_ready','failed','review_ready','failed']))throw Error('Wrong partial states');
 await custody.screenshot({path:path.join(base,label+'-dev9-'+viewport+'.png')});await livecut.screenshot({path:path.join(base,label+'-dev8-cut-'+viewport+'.png')});
