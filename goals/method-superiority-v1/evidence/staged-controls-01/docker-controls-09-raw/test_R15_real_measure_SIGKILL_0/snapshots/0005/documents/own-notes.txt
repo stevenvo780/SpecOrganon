@@ -1,0 +1,1 @@
+Original criterion: result() returns seven; alternatives and task links are fixture prose.

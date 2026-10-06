@@ -1,0 +1,117 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/stev/.codex/worktrees/strong-controls-v1/SpecOrganon
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collected 643 items
+
+tests/test_common_evidence.py ............................               [  4%]
+tests/test_common_review.py ..................................           [  9%]
+tests/test_neutral_author.py ...........................                 [ 13%]
+tests/test_neutral_controller.py .......F......                          [ 16%]
+tests/test_closed_native_role.py ......................                  [ 19%]
+tests/test_native_invocation_consistency.py ......                       [ 20%]
+tests/test_neutral_snapshot_guards.py ..........                         [ 21%]
+tests/test_staged_review_regressions.py ................................ [ 26%]
+.....................                                                    [ 30%]
+tests/test_neutral_docker_controls.py sssssssssssss                      [ 32%]
+tests/test_docker_create_recovery.py ................................    [ 37%]
+tests/test_docker_roles.py sss                                           [ 37%]
+tests/test_native_source_custody.py ..........                           [ 39%]
+tests/test_native_response_contract.py ................................. [ 44%]
+....................                                                     [ 47%]
+tests/test_controller_native_role.py ................................... [ 52%]
+.........................                                                [ 56%]
+tests/test_native_reconnection.py ................                       [ 59%]
+tests/test_controller_recovery.py ......                                 [ 60%]
+tests/test_native_reliability.py .........................               [ 64%]
+tests/test_native_reliability_versioned.py .................             [ 66%]
+tests/test_role_jobs.py .....................                            [ 69%]
+tests/test_bounded_author_admission.py ............                      [ 71%]
+tests/test_provider_schema_diagnostics.py .....                          [ 72%]
+tests/test_typed_author_content.py ...................                   [ 75%]
+tests/test_author_contract.py ..........                                 [ 77%]
+tests/test_software_controller.py ................                       [ 79%]
+tests/test_software_controller_resources.py ......................       [ 83%]
+tests/test_reasoning_policy.py ...............                           [ 85%]
+tests/test_resource_accounting.py ....                                   [ 86%]
+tests/test_text_only_judgment.py .......                                 [ 87%]
+tests/test_local_interfaces.py ......                                    [ 88%]
+tests/test_interfaces.py ................                                [ 90%]
+tests/test_local_workflow.py .........................................   [ 96%]
+tests/test_runner.py ..............                                      [ 99%]
+tests/test_runner_manifest_schema.py ......                              [100%]
+
+=================================== FAILURES ===================================
+_ test_interruption_without_closed_transport_result_closes_uncertain_no_new_job _
+
+self = <test_neutral_controller.FixtureTransport object at 0x7f6b48fa7a70>
+job = 'neutral-0001-plan', role = 'author'
+request = {'documents': {'action.txt': 'author', 'author-response-format.json': '{"format":"files-v1","schema":1}', 'contract.tx...inking tasks. If repairing a reviewed plan, preserve original criteria and address the supplied defects.', 'schema': 1}
+
+    def call(self,job,role,request):
+        folder=self.store.root/job;folder.mkdir(exist_ok=True,mode=0o700)
+        resultpath=folder/'fixture-packet.json'
+        if resultpath.exists():return _json(resultpath)
+>       if (folder/'started.json').exists():raise UncertainJob('fixture started without closed result; never replay')
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       specorganon.role_jobs.UncertainJob: fixture started without closed result; never replay
+
+tests/test_neutral_controller.py:32: UncertainJob
+
+During handling of the above exception, another exception occurred:
+
+self = <specorganon.neutral_controller.NeutralController object at 0x7f6b48fa75c0>
+transport = <test_neutral_controller.FixtureTransport object at 0x7f6b48fa7a70>
+pending = {'counts': {'build_authors': 0, 'roles': 1, 'stages': {'plan': 1}, 'test_runs': 0}, 'halt': None, 'job_id': 'neutral-0001-plan', 'previous_sha256': '6f2596994ff37c1733631c8d9b382de13dfa4cbb1b105d16f07494281110b1df', ...}
+
+    def _cleanup_pending(self,transport,pending):
+        try:
+            confirmed=transport.reconcile_pending(pending['job_id'],
+                'test' if pending['stage']=='measure' else pending['request']['role'],pending['request'])
+            if self._has_pending_launch(pending) and confirmed is not True:
+>               raise PendingCleanupError('existing creation/dispatch cleanup not confirmed')
+E               specorganon.docker_roles.PendingCleanupError: existing creation/dispatch cleanup not confirmed
+
+src/specorganon/neutral_controller.py:490: PendingCleanupError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-stev/pytest-373/test_interruption_without_clos0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6b48ba2060>
+
+    def test_interruption_without_closed_transport_result_closes_uncertain_no_new_job(tmp_path,monkeypatch):
+        c=controller(tmp_path/'run');t=c._get_transport();original=t.call
+        def crash(job,role,request):
+            folder=t.store.root/job;folder.mkdir();_write(folder/'started.json',{'fixture':True})
+            raise KeyboardInterrupt('fixture interruption before transport closure')
+        monkeypatch.setattr(t,'call',crash)
+        with pytest.raises(KeyboardInterrupt):c.step()
+        monkeypatch.setattr(t,'call',original)
+>       report=c.step();assert report['status']=='failed' and report['counts']['roles']==1
+               ^^^^^^^^
+
+tests/test_neutral_controller.py:172: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/specorganon/neutral_controller.py:539: in step
+    self._cleanup_pending(self.transport,pending)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <specorganon.neutral_controller.NeutralController object at 0x7f6b48fa75c0>
+transport = <test_neutral_controller.FixtureTransport object at 0x7f6b48fa7a70>
+pending = {'counts': {'build_authors': 0, 'roles': 1, 'stages': {'plan': 1}, 'test_runs': 0}, 'halt': None, 'job_id': 'neutral-0001-plan', 'previous_sha256': '6f2596994ff37c1733631c8d9b382de13dfa4cbb1b105d16f07494281110b1df', ...}
+
+    def _cleanup_pending(self,transport,pending):
+        try:
+            confirmed=transport.reconcile_pending(pending['job_id'],
+                'test' if pending['stage']=='measure' else pending['request']['role'],pending['request'])
+            if self._has_pending_launch(pending) and confirmed is not True:
+                raise PendingCleanupError('existing creation/dispatch cleanup not confirmed')
+        except (ValueError,OSError) as exc:
+>           raise PendingCleanupError('pending cleanup not confirmed; retain exact reservation') from exc
+E           specorganon.docker_roles.PendingCleanupError: pending cleanup not confirmed; retain exact reservation
+
+src/specorganon/neutral_controller.py:492: PendingCleanupError
+=========================== short test summary info ============================
+FAILED tests/test_neutral_controller.py::test_interruption_without_closed_transport_result_closes_uncertain_no_new_job
+================== 1 failed, 626 passed, 16 skipped in 36.06s ==================

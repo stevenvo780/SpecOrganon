@@ -1,0 +1,11 @@
+#!/opt/specorganon/.venv/bin/python
+import json,sys
+sys.stdin.buffer.read()
+text=json.dumps({"schema":1,"files":{},"documents":{},"reason":"Closed empty body fixture"})
+c="synthetic-native-stream"
+for event in [
+ {"event":"init","conversation_id":c,"init":{}},
+ {"event":"step_update","step_update":{"conversation_id":c,"step_index":0,"state":"DONE","step_type":"user_input"}},
+ {"event":"step_update","step_update":{"conversation_id":c,"step_index":1,"state":"DONE","step_type":"agent_response","text_delta":text}},
+ {"event":"result","result":{"conversation_id":c,"status":"SUCCESS","num_turns":1,"response":text,"usage":{"fixture":True}}}]:
+ print(json.dumps(event))
