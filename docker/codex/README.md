@@ -1,9 +1,9 @@
-# Build experimental de fuentes dev8 y laboratorio Codex/MCP
+# Build experimental de fuentes dev9 y laboratorio Codex/MCP
 
 Desde la carpeta del paquete fuente extraído:
 
 ```sh
-docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev8 .
+docker build -f docker/release/Dockerfile -t specorganon-release:0.2.0rc3.dev9 .
 docker compose build codex
 docker compose run --rm -T codex codex --version
 docker compose run --rm -T codex python /opt/codex-lab/smoke.py

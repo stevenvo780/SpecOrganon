@@ -25,7 +25,8 @@ def critique_controller(tmp_path):
 
 
 def judgment(verdict, approval=False):
-    result = {'schema': 1, 'verdict': verdict, 'reason': 'Synthetic control judgment', 'findings': []}
+    result = {'schema': 1, 'verdict': verdict, 'reason': 'Synthetic control judgment',
+              'findings': [], 'tests_executed': False}
     if approval:
         result.update(mandate_conformity=True, approval_targets=['n1'])
     return result

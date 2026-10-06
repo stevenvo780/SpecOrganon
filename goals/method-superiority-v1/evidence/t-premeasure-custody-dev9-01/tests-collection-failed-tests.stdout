@@ -1,0 +1,27 @@
+
+==================================== ERRORS ====================================
+_________ ERROR collecting tests/test_prospective_software_repairs.py __________
+ImportError while importing test module '/home/stev/.codex/worktrees/t-common-audit-v1/SpecOrganon/tests/test_prospective_software_repairs.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/stev/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_prospective_software_repairs.py:10: in <module>
+    from experiments.software_comparison_v1.reserved import docker_evaluator as D
+E   ModuleNotFoundError: No module named 'experiments'
+_________________ ERROR collecting tests/test_common_review.py _________________
+ImportError while importing test module '/home/stev/.codex/worktrees/t-common-audit-v1/SpecOrganon/tests/test_common_review.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/stev/.local/share/uv/python/cpython-3.13.14-linux-x86_64-gnu/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_common_review.py:7: in <module>
+    from scripts.controller_native_role import NativeRoleError, render_prompt, validate_result
+E   ModuleNotFoundError: No module named 'scripts'
+=========================== short test summary info ============================
+ERROR tests/test_prospective_software_repairs.py
+ERROR tests/test_common_review.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+2 errors in 0.36s
