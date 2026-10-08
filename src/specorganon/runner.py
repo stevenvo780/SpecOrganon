@@ -414,6 +414,32 @@ def run_manifest(path: str | Path, manifest: dict[str, Any], actor: str) -> dict
         return _apply_manifest(path, steps, actor)
 
 
+def _json_equal(left: Any, right: Any) -> bool:
+    pending = [(left, right)]
+    while pending:
+        left, right = pending.pop()
+        if isinstance(left, bool) or isinstance(right, bool):
+            if not isinstance(left, bool) or not isinstance(right, bool) or left != right:
+                return False
+        elif isinstance(left, (int, float)) or isinstance(right, (int, float)):
+            if not isinstance(left, (int, float)) or not isinstance(right, (int, float)) or left != right:
+                return False
+        elif isinstance(left, dict) or isinstance(right, dict):
+            if not isinstance(left, dict) or not isinstance(right, dict) or left.keys() != right.keys():
+                return False
+            pending.extend((value, right[key]) for key, value in left.items())
+        elif isinstance(left, list) or isinstance(right, list):
+            if not isinstance(left, list) or not isinstance(right, list) or len(left) != len(right):
+                return False
+            pending.extend(zip(left, right))
+        elif isinstance(left, str) or isinstance(right, str):
+            if not isinstance(left, str) or not isinstance(right, str) or left != right:
+                return False
+        elif left is not None or right is not None:
+            return False
+    return True
+
+
 def _apply_manifest(path: str | Path, steps: list[dict[str, Any]], actor: str) -> dict[str, Any]:
     state = engine.get_state(path)
     approval_policy = state["project"]["approval_policy"]
@@ -439,9 +465,9 @@ def _apply_manifest(path: str | Path, steps: list[dict[str, Any]], actor: str) -
             if expected_deps != ref_versions:
                 raise ManifestError(f"step {index} expected reference versions {expected_deps}, found {ref_versions}")
             if item is not None and item["version"] == expected + 1:
-                if (item["kind"], item["text"], item["deps"], item["data"]) != (
-                    step["kind"], step["text"].strip(), expected_deps, step["data"]
-                ):
+                if ((item["kind"], item["text"], item["deps"]) != (
+                    step["kind"], step["text"].strip(), expected_deps
+                ) or not _json_equal(item["data"], step["data"])):
                     raise ManifestError(f"step {index} diverges from item {step['id']} version {item['version']}")
                 skipped += 1
                 continue
